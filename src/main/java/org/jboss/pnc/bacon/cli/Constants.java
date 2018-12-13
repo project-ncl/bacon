@@ -17,20 +17,13 @@
  */
 package org.jboss.pnc.bacon.cli;
 
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-
-import static org.jboss.pnc.bacon.cli.Constants.NO_VALUE;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 12/13/18
  */
-@Command(name = "da", mixinStandardHelpOptions = true)
-public class Da {
-    @Command(name = "lookup", mixinStandardHelpOptions = true, description = "lookup available productized artifact version for an artifact")
-    public void lookup(@Parameters(defaultValue = NO_VALUE, description = "groupId:artifactId:version of the artifact to lookup", type = String.class) String gav) {
-        throw new TodoException();
-    }
+public class Constants {
+    private Constants(){}
+
+    public static final String NO_VALUE = "a default value isn't provided";
 }
