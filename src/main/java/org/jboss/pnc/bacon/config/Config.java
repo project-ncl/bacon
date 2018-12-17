@@ -38,6 +38,7 @@ import java.util.function.Supplier;
  */
 @Data
 public class Config {
+    private String keycloakUrl;
     private PncConfig pnc;
     private DaConfig da;
     private IndyConfig indy;

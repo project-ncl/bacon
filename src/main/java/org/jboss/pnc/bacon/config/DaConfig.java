@@ -29,5 +29,4 @@ public class DaConfig {
     private String url;
     private String clientId;
     private String realm;
-    private String keycloakUrl;
 }
