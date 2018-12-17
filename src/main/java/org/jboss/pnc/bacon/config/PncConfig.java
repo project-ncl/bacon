@@ -15,15 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.bacon.cli;
+package org.jboss.pnc.bacon.config;
+
+import lombok.Data;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
- * Date: 12/13/18
+ * Date: 12/17/18
  */
-public class TodoException extends RuntimeException {
-    public TodoException() {
-        super("the method is not implemented yet");
-    }
+@Data
+public class PncConfig {
+    private String url;
+    private String grantType;
+    private String clientId;
+    private String realm;
+    private String username;
+    private String password;
+    private String keycloakUrl;
 }

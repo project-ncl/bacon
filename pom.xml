@@ -38,6 +38,16 @@
       <artifactId>picocli</artifactId>
       <version>3.8.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.23</version>
+    </dependency>
 
     <!--tests-->
     <dependency>
