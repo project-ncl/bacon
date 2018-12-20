@@ -15,9 +15,11 @@ public class Build {
     }
 
     // main entry point of the build process
-    public void execute(Input input) {
+    public String execute(Input input) {
         System.out.println("Execute build for group: " + input.getBuildGroup());
-        System.out.println(buildDependency.doSomething(input.getConfigLocation()));
+        final String doSomethingResult = buildDependency.doSomething(input.getConfigLocation());
+        System.out.println(doSomethingResult);
+        return doSomethingResult;
     }
 
     // main input that the build step needs
