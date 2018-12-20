@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2018 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -20,8 +20,10 @@ package org.jboss.pnc.bacon;
 import org.jboss.pnc.bacon.cli.Da;
 import org.jboss.pnc.bacon.cli.Pig;
 import org.jboss.pnc.bacon.cli.Pnc;
+import org.jboss.pnc.bacon.config.Config;
 import picocli.CommandLine;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -34,13 +36,28 @@ import java.util.List;
         subcommands = {Pig.class, Pnc.class, Da.class}
 )
 public class App {
+    private App() {
+    }
 
     public static void main(String[] args) {
+        initializeConfig();
         CommandLine commandLine = new CommandLine(App.class);
         List<CommandLine> parsed = commandLine.parse(args);
         CommandLine command = deepestCommand(parsed);
 
         new CommandLine.RunLast().handleParseResult(command.getParseResult());
+    }
+
+    private static void initializeConfig() {
+        String configLocation = System.getProperty("config", "config.yaml");
+        try {
+            Config.initialize(configLocation);
+        } catch (IOException e) {
+            System.err.println("Configuration file not found. " +
+                    "Please create a config file and either name it 'config.yaml' and put it in the working directory" +
+                    " or specify it with -Dconfig");
+            System.exit(1);
+        }
     }
 
     private static CommandLine deepestCommand(List<CommandLine> parsed) {
