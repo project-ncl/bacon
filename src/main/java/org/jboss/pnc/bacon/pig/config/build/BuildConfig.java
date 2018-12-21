@@ -20,12 +20,13 @@ package org.jboss.pnc.bacon.pig.config.build;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.prod.generator.pnc.PncBuildConfig;
+import org.jboss.pnc.dto.BuildConfiguration;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -83,20 +84,30 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public boolean isTheSameAs(PncBuildConfig old) {
+    public boolean isTheSameAs(BuildConfiguration old) {
         return old != null
                 && StringUtils.equals(name, old.getName())
-                && StringUtils.equals(project, old.getProject())
+                && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
                 && StringUtils.equals(scmRevision, old.getScmRevision())
-                && Objects.equals(environmentId, old.getEnvironmentId())
-                && customPmeParameters.equals(old.getCustomPmeParameters())
+                && Objects.equals(environmentId, old.getEnvironment().getId())
+                && customPmeParameters.equals(customPmeParameters(old))
                 && urlsEqual(old);
     }
 
-    private boolean urlsEqual(PncBuildConfig old) {
-        return StringUtils.equals(externalScmUrl, old.getExternalScmUrl()) ||
-                StringUtils.equals(scmUrl, old.getScmUrl());
+    private static Set<String> customPmeParameters(BuildConfiguration pncConfig) {
+        Set<String> customPmeParameters = new TreeSet<>();
+        String pmeParams = (String) pncConfig.getGenericParameters().get("CUSTOM_PME_PARAMETERS");
+        if (pmeParams != null) {
+            String[] splitParams = pmeParams.trim().split("\\s+");
+            customPmeParameters.addAll(Arrays.asList(splitParams));
+        }
+        return customPmeParameters;
+    }
+
+    private boolean urlsEqual(BuildConfiguration old) {
+        return StringUtils.equals(externalScmUrl, old.getRepository().getExternalUrl()) ||
+                StringUtils.equals(scmUrl, old.getRepository().getInternalUrl());
     }
 
     @JsonIgnore
@@ -122,14 +133,14 @@ public class BuildConfig {
         );
     }
 
-    public String toUpdateParams(Integer projectId, PncBuildConfig oldVersion, Integer versionId) {
+    public String toUpdateParams(Integer projectId, BuildConfiguration oldVersion, Integer versionId) {
         // TODO: updating versionId?
         return " --scm-revision " + getScmRevision() +
                 " --build-script \"" + getBuildScript() + "\"" + " --generic-parameters " +
                 getGenericParameters() +
                 paramIfChanged(" --name ", name, oldVersion.getName()) +
                 paramIfChanged(" --project ", project, oldVersion.getProject(), projectId) +
-                paramIfChanged(" --environment ", environmentId, oldVersion.getEnvironmentId());
+                paramIfChanged(" --environment ", environmentId, oldVersion.getEnvironment().getId());
     }
 
     private <T, V> String paramIfChanged(String param, V newValue, V oldValue, T mappedValue) {

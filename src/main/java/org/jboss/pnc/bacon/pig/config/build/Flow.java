@@ -18,10 +18,8 @@
 package org.jboss.pnc.bacon.pig.config.build;
 
 import lombok.Data;
-import org.jboss.prod.generator.sources.SourcesGenerationData;
 
 /**
- *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 11/28/17

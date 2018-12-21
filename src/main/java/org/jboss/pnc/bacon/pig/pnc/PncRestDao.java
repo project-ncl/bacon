@@ -49,7 +49,7 @@ import java.util.Optional;
  * Date: 12/5/18
  */
 public class PncRestDao {
-    // TODO replace endpoint usage with Matej's client usage
+    // TODO replace endpoint usage with Matej's client
     private BuildConfigurationEndpoint configEndpoint;
     private GroupConfigurationEndpoint configGroupEndpoint;
 
