@@ -17,8 +17,11 @@
  */
 package org.jboss.pnc.bacon.cli;
 
+import org.jboss.pnc.bacon.pig.Build;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import static org.jboss.pnc.bacon.CDILauncher.getEntrypointProvider;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -45,9 +48,10 @@ public class Pig {
                     description = "location of the configuration file") String configLocation,
             @Option(
                     names = {"-b", "--build-group"},
-                    defaultValue = Constants.NO_VALUE,
                     description = "id of the group to build. Exactly one of {config, build-group} has to be provided") Integer buildGroupId) {
-        throw new TodoException();
+
+
+        getEntrypointProvider(Build.class).execute(new Build.Input(configLocation, buildGroupId));
     }
 
     @Command(name = "repo", mixinStandardHelpOptions = true)
