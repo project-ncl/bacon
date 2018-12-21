@@ -17,8 +17,13 @@
  */
 package org.jboss.pnc.bacon.cli;
 
+import org.jboss.pnc.bacon.App;
+import org.jboss.pnc.bacon.pig.Build;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.util.concurrent.Callable;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -26,7 +31,8 @@ import picocli.CommandLine.Option;
  * Date: 12/13/18
  */
 @Command(name = "pig", mixinStandardHelpOptions = true)
-public class Pig {
+public class Pig extends SubCommandHelper {
+
     @Command(name = "configure", mixinStandardHelpOptions = true)
     public void configure(
             @Option(names = {"-c", "--config"},

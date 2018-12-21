@@ -17,20 +17,28 @@
  */
 package org.jboss.pnc.bacon.cli;
 
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
+import org.jboss.pnc.bacon.App;
+import picocli.CommandLine;
 
-import static org.jboss.pnc.bacon.cli.Constants.NO_VALUE;
+import java.util.concurrent.Callable;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/13/18
+ * Class to provide default behaviour when the sub-command is called without any options
+ *
  */
-@Command(name = "da", mixinStandardHelpOptions = true)
-public class Da extends SubCommandHelper {
-    @Command(name = "lookup", mixinStandardHelpOptions = true, description = "lookup available productized artifact version for an artifact")
-    public void lookup(@Parameters(defaultValue = NO_VALUE, description = "groupId:artifactId:version of the artifact to lookup", type = String.class) String gav) {
-        throw new TodoException();
+public class SubCommandHelper implements Runnable {
+
+    @CommandLine.Spec
+    private CommandLine.Model.CommandSpec spec;
+
+    /**
+     * Print the usage message when  the sub-command is called with no options
+     *
+     * @return null
+     */
+    @Override
+    public void run() {
+        spec.commandLine().usage(System.err);
     }
+
 }
