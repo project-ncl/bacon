@@ -26,16 +26,22 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
+import org.jboss.pnc.bacon.pig.config.build.Product;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.GroupConfiguration;
+import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductRef;
+import org.jboss.pnc.dto.ProductVersion;
+import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.rest.api.endpoints.BuildConfigurationEndpoint;
 import org.jboss.pnc.rest.api.endpoints.GroupConfigurationEndpoint;
-import org.jboss.prod.generator.pnc.PncBuildConfig;
-import org.jboss.prod.generator.pnc.model.PncMilestone;
-import org.jboss.prod.generator.pnc.model.PncProduct;
-import org.jboss.prod.generator.pnc.model.PncProductVersion;
-import org.jboss.prod.generator.pnc.model.PncProject;
+import org.jboss.pnc.rest.api.endpoints.ProductEndpoint;
+import org.jboss.pnc.rest.api.endpoints.ProductMilestoneEndpoint;
+import org.jboss.pnc.rest.api.endpoints.ProductVersionEndpoint;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +55,14 @@ import java.util.Optional;
  * Date: 12/5/18
  */
 public class PncRestDao {
+    private static final LocalDateTime START_DATE = LocalDateTime.now();
+    private static final LocalDateTime END_DATE = LocalDateTime.now().plusDays(1);
     // TODO replace endpoint usage with Matej's client
     private BuildConfigurationEndpoint configEndpoint;
     private GroupConfigurationEndpoint configGroupEndpoint;
+    private ProductEndpoint productEndpoint;
+    private ProductVersionEndpoint versionEndpoint;
+    private ProductMilestoneEndpoint milestoneEndpoint;
 
 
     public Optional<BuildConfiguration> getBuildConfig(Integer id) { // 120
@@ -65,25 +76,11 @@ public class PncRestDao {
 
     @SuppressWarnings("rawtypes")
     public void markMilestoneCurrent(Integer versionId, Integer milestoneId) {
-        String versionUrl = productVersion(versionId);
-        Map versionAsMap = getProductVersionAsMap(versionId);
-        //noinspection unchecked
-        versionAsMap.put("currentProductMilestoneId", milestoneId);
-
-        HttpPut put = new HttpPut(versionUrl);
-        HttpEntity entity = EntityBuilder.create()
-                .setText(client.toJson(versionAsMap))
-                .build();
-        put.setEntity(entity);
-        client.executeAuthenticatedRequest(put);
+        // todo
     }
 
     protected Map<?, ?> getProductVersionAsMap(Integer versionId) {
-        String versionUrl = productVersion(versionId);
-        HttpGet get = new HttpGet(versionUrl);
-        HttpEntity responseEntity = client.executeRequest(get).getEntity();
-
-        return client.unwrap(responseEntity, Map.class);
+        // todo
     }
 
     public Optional<Integer> getMilestoneIdForVersionAndName(Integer versionId, String milestoneName) {
@@ -97,20 +94,24 @@ public class PncRestDao {
                 : Optional.empty();
     }
 
-    public PncMilestone createMilestone(PncMilestone milestone) {
-        String json = client.toJson(milestone);
-        HttpPost post = new HttpPost(urls.milestones());
-        HttpEntity entity = EntityBuilder.create().setText(json).build();
-        post.setEntity(entity);
-        HttpResponse response = client.executeAuthenticatedRequest(post);
-        return client.unwrap(response.getEntity(), PncMilestone.class);
+    public ProductMilestone createMilestone(Integer versionId, String milestoneName, String issueTrackerUrl) {
+        ProductMilestone milestone = ProductMilestone.builder()
+                .productVersion(ProductVersionRef.refBuilder().id(versionId).build())
+                .version(milestoneName)
+                .issueTrackerUrl(issueTrackerUrl)
+                .startingDate(Instant.from(START_DATE)) // TODO: is it proper?
+                .endDate(Instant.from(END_DATE))
+                .build();
+        return milestoneEndpoint.createNew(milestone).getContent();
     }
 
-    public Optional<PncProduct> getProductByName(String name) {
+    public Optional<org.jboss.pnc.dto.Product> getProductByName(String name) {
+        //todo
         return getOptionalMatch(urls.products(), "name==" + name, PncProduct.class);
     }
 
-    public Optional<PncProductVersion> getProductVersion(int productId, String majorMinor) {
+    public Optional<ProductVersion> getProductVersion(int productId, String majorMinor) {
+        // todo
         return getOptionalMatch(urls.versionsForProduct(productId), "version==" + majorMinor, PncProductVersion.class);
     }
 
@@ -138,15 +139,31 @@ public class PncRestDao {
         return new BasicNameValuePair(key, value);
     }
 
-    /**
-     * @deprecated for test usage only
-     */
-    @Deprecated
-    PncRestClient getClient() {
-        return client;
-    }
-
     public Optional<SCMRepository> getRepositoryConfigurationForBuildConfigByScmUri(String shortScmURIPath) {
         return null;  // TODO: Customise this generated block
+    }
+
+    public org.jboss.pnc.dto.Product createProduct(Product product) {
+        org.jboss.pnc.dto.Product pncProduct = org.jboss.pnc.dto.Product.builder()
+                .abbreviation(product.getAbbreviation())
+                .name(product.getName())
+                .build();
+        return productEndpoint.createNew(pncProduct).getContent();
+    }
+
+    public ProductVersion createProductVersion(Integer productId, String version) {
+        ProductVersion productVersion = ProductVersion.builder()
+                .version(version)
+                .productId(ProductRef.refBuilder().id(productId).build())
+                .build();
+        return versionEndpoint.createNewProductVersion(productVersion).getContent();
+    }
+
+    public GroupConfiguration createBuildConfigGroup(Integer versionId, String groupName) {
+        GroupConfiguration groupConfig = GroupConfiguration.builder()
+                .name(groupName)
+                .productVersion(ProductVersionRef.refBuilder().id(versionId).build())
+                .build();
+        return configGroupEndpoint.createNew(groupConfig).getContent();
     }
 }

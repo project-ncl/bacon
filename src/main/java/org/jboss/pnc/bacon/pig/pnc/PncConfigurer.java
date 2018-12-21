@@ -2,7 +2,9 @@ package org.jboss.pnc.bacon.pig.pnc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.jboss.pnc.bacon.pig.config.build.Config;
+import org.jboss.pnc.bacon.pig.config.build.Product;
 import org.jboss.pnc.bacon.utils.CollectionUtils;
+import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.SCMRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,13 +48,13 @@ public class PncConfigurer {
     public PncImportResult performImport() {
         productId = getOrGenerateProduct();
         versionId = getOrGenerateVersion(productId);
-        milestoneId = PncConfigurator.getOrGenerateMilestone(
+        milestoneId = getOrGenerateMilestone(
                 versionId,
                 config.getMajorMinor(),
                 pncMilestoneString(),
                 config.getProduct().getIssueTrackerUrl()
         );
-        PncConfigurator.markMilestoneCurrent(versionId, milestoneId);
+        dao.markMilestoneCurrent(versionId, milestoneId);
         buildGroupId = getOrGenerateBuildGroup();
 
         configs = getAddOrUpdateBuildConfigs();
@@ -62,6 +64,11 @@ public class PncConfigurer {
         log.debug("Adding builds to group");
         addBuildConfigIdsToGroup();
         return new PncImportResult(milestoneId, buildGroupId, versionId, configs);
+    }
+
+    private int getOrGenerateMilestone(int versionId, String majorMinor, String pncMilestoneString, String issueTrackerUrl) {
+        dao.createMilestone(versionId, majorMinor, pncMilestoneString)
+        
     }
 
     private void setUpBuildDependencies() {
@@ -314,18 +321,11 @@ public class PncConfigurer {
         return product -> product.get("name").equals(productName);
     }
 
-    private Integer getOrGenerate(String listCommand,
-                                  Predicate<Map<String, ?>> existenceCheck,
-                                  Supplier<Integer> generator) {
-        return get(listCommand, existenceCheck)
-                .orElseGet(generator);
-    }
-
 
     public PncImportResult readCurrentPncEntities() {
         productId = getProduct();
         versionId = getVersion();
-        Optional<Integer> maybeMilestone = getExistingMilestone(versionId, config.getMajorMinor(), pncMilestoneString());
+        Optional<Integer> maybeMilestone = dao.getMilestoneIdForVersionAndName(versionId, pncMilestoneString());
         milestoneId = maybeMilestone
                 .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // mstodo
 
@@ -337,25 +337,19 @@ public class PncConfigurer {
         return new PncImportResult(milestoneId, buildGroupId, versionId, configs);
     }
 
-    // mstodo restify the following:
     private Integer generateProduct() {
         Product product = config.getProduct();
-        String command =
-                format("create-product \"%s\" \"%s\"", product.getName(), product.getAbbreviation());
-        return PncDao.invokeAndGetResultId(command);
+        return dao.createProduct(product).getId();
     }
 
     private Integer generateVersion(Integer productId) {
         String version = config.getMajorMinor();
-
-        String command = format("create-product-version %d \"%s\"", productId, version);
-        return PncDao.invokeAndGetResultId(command);
+        return dao.createProductVersion(productId, version).getId();
     }
 
     private Integer generateBuildGroup(Integer versionId) {
         String group = config.getGroup();
-        String command = format("create-build-configuration-set -pvi %d \"%s\"", versionId, group);
-        return PncDao.invokeAndGetResultId(command);
+        return dao.createBuildConfigGroup(versionId, group).getId();
     }
 
     private List<BuildConfigData> getBuildConfigs() {
@@ -370,14 +364,15 @@ public class PncConfigurer {
     }
 
     private int getVersion() {
-        Optional<PncProductVersion> maybeVersion = dao.getProductVersion(productId, config.getMajorMinor());
-        return maybeVersion.map(PncProductVersion::getId)
+
+        Optional<ProductVersion> maybeVersion = dao.getProductVersion(productId, config.getMajorMinor());
+        return maybeVersion.map(ProductVersion::getId)
                 .orElseThrow(() -> new RuntimeException("Unable to find version " + config.getMajorMinor() + " for product " + productId));
     }
 
     private Integer getProduct() {
-        Optional<PncProduct> maybeProduct = dao.getProductByName(config.getProduct().getName());
-        return maybeProduct.map(PncProduct::getId)
+        Optional<org.jboss.pnc.dto.Product> maybeProduct = dao.getProductByName(config.getProduct().getName());
+        return maybeProduct.map(org.jboss.pnc.dto.Product::getId)
                 .orElseThrow(() -> new RuntimeException("Unable to find product called " + config.getProduct().getName()));
     }
 
