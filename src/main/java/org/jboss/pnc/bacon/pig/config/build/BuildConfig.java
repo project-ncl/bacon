@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.SCMRepository;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -214,5 +215,13 @@ public class BuildConfig {
                 versionId,
                 getGenericParameters()
         );
+    }
+
+    public SCMRepository getScmRepository() {
+        return SCMRepository.builder()
+                .externalUrl(externalScmUrl)
+                .internalUrl(scmUrl)
+                .preBuildSyncEnabled(scmUrl != null) // TODO: switch to true. Should be done separately to make sure the users won't miss the change
+                .build();
     }
 }

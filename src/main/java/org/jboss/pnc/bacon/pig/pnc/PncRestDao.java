@@ -33,6 +33,7 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductRef;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.Project;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.rest.api.endpoints.BuildConfigurationEndpoint;
 import org.jboss.pnc.rest.api.endpoints.GroupConfigurationEndpoint;
@@ -46,6 +47,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * for playing with the api to discover the options use: http://orch.cloud.pnc.engineering.redhat.com/pnc-web/apidocs/
@@ -83,7 +85,7 @@ public class PncRestDao {
         // todo
     }
 
-    public Optional<Integer> getMilestoneIdForVersionAndName(Integer versionId, String milestoneName) {
+    public Optional<ProductMilestone> getMilestoneIdForVersionAndName(Integer versionId, String milestoneName) {
         List<Map> result = client.getFromAllPages(
                 milestonesForVersion(versionId),
                 Map.class,
@@ -115,7 +117,7 @@ public class PncRestDao {
         return getOptionalMatch(urls.versionsForProduct(productId), "version==" + majorMinor, PncProductVersion.class);
     }
 
-    public Optional<PncProject> getProjectByName(String name) {
+    public Optional<Project> getProjectByName(String name) {
         return getOptionalMatch(urls.projects(), "name==" + name, PncProject.class);
     }
 
@@ -165,5 +167,9 @@ public class PncRestDao {
                 .productVersion(ProductVersionRef.refBuilder().id(versionId).build())
                 .build();
         return configGroupEndpoint.createNew(groupConfig).getContent();
+    }
+
+    public Optional<BuildConfiguration> getBuildConfigByName(String name) {
+        return null;  // TODO: Customise this generated block
     }
 }

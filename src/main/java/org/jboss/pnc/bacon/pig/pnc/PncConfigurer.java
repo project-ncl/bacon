@@ -1,10 +1,14 @@
 package org.jboss.pnc.bacon.pig.pnc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.jboss.pnc.bacon.pig.config.build.BuildConfig;
 import org.jboss.pnc.bacon.pig.config.build.Config;
 import org.jboss.pnc.bacon.pig.config.build.Product;
 import org.jboss.pnc.bacon.utils.CollectionUtils;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
+import org.jboss.pnc.dto.Project;
 import org.jboss.pnc.dto.SCMRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -53,7 +56,7 @@ public class PncConfigurer {
                 config.getMajorMinor(),
                 pncMilestoneString(),
                 config.getProduct().getIssueTrackerUrl()
-        );
+        ).getId();
         dao.markMilestoneCurrent(versionId, milestoneId);
         buildGroupId = getOrGenerateBuildGroup();
 
@@ -66,9 +69,11 @@ public class PncConfigurer {
         return new PncImportResult(milestoneId, buildGroupId, versionId, configs);
     }
 
-    private int getOrGenerateMilestone(int versionId, String majorMinor, String pncMilestoneString, String issueTrackerUrl) {
-        dao.createMilestone(versionId, majorMinor, pncMilestoneString)
-        
+    private ProductMilestone getOrGenerateMilestone(int versionId, String majorMinor, String pncMilestoneString, String issueTrackerUrl) {
+        Optional<ProductMilestone> maybeMilestone = dao.getMilestoneIdForVersionAndName(versionId, pncMilestoneString);
+        return maybeMilestone.orElseGet(
+                () -> dao.createMilestone(versionId, majorMinor, pncMilestoneString)
+        );
     }
 
     private void setUpBuildDependencies() {
@@ -83,7 +88,7 @@ public class PncConfigurer {
                         .stream()
                         .map(this::getConfigIdByName)
                         .collect(Collectors.toSet());
-        Set<Integer> currentDependencies = dao.listBuildConfigDependencies(id);
+        Set<Integer> currentDependencies = config.getOldConfig().getDependencyIds();
 //        Set<Integer> currentDependencies = PncDao.invokeAndGetResultIds("list-dependencies -i " + id, 4);
 
         Set<Integer> superfluous = CollectionUtils.subtractSet(currentDependencies, dependencies);
@@ -123,18 +128,18 @@ public class PncConfigurer {
 
     private List<BuildConfigData> getAddOrUpdateBuildConfigs() {
         log.info("Adding/updating build configurations");
-        List<PncBuildConfig> currentConfigs = getCurrentBuildConfigs(buildGroupId);
+        List<BuildConfiguration> currentConfigs = getCurrentBuildConfigs(buildGroupId);
         dropConfigsFromInvalidVersion(currentConfigs, config.getBuilds(), versionId);
         return updateOrCreate(currentConfigs, config.getBuilds());
     }
 
     private List<BuildConfigData> updateOrCreate(
-            List<PncBuildConfig> currentConfigs,
+            List<BuildConfiguration> currentConfigs,
             List<BuildConfig> builds) {
         List<BuildConfigData> buildList = new ArrayList<>();
         for (BuildConfig bc : builds) {
             BuildConfigData data = new BuildConfigData(bc);
-            for (PncBuildConfig config : currentConfigs) {
+            for (BuildConfiguration config : currentConfigs) {
                 if (config.getName().equals(bc.getName())) {
                     data.setOldConfig(config);
                     if (data.shouldBeUpdated()) {
@@ -144,21 +149,21 @@ public class PncConfigurer {
             }
             //Check if build exists already (globally)
             //True = Add to BCS and update BC (maybe ask?)
-            PncBuildConfig matchedBuildConfig = dao.getBuildConfigurationByName(bc.getName());
-            if (matchedBuildConfig != null) {
+            Optional<BuildConfiguration> matchedBuildConfig = dao.getBuildConfigByName(bc.getName());
+
+            if (matchedBuildConfig.isPresent()) {
                 log.debug("Found matching build config for {}", bc.getName());
-                data.setOldConfig(matchedBuildConfig);
+                data.setOldConfig(matchedBuildConfig.get());
                 if (data.shouldBeUpdated()) {
                     updateBuildConfig(data);
                 }
-                data.setModified(true);
             } else {
                 //False = Create new project/BC
                 Integer configId = createBuildConfig(data.getNewConfig());
                 data.setId(configId);
-                data.setModified(true);
                 log.debug("Didn't find matching build config for {}", bc.getName());
             }
+            data.setModified(true);      // TODO: it looks cumbersome that each data is marked as modified
             buildList.add(data);
         }
         return buildList;
@@ -174,6 +179,12 @@ public class PncConfigurer {
         }
 
         return dao.createBuildConfiguration(projectId, buildConfig); // todo: this looks weird, probably can be simplified with the new rest api
+    }
+
+    private Integer getOrGenerateProject(String projectName) {
+        return dao.getProjectByName(projectName)
+                .map(Project::getId)
+                .orElseGet(() -> generateProject(projectName));
     }
 
 //    private Integer createBuildConfigFromExternalUrl(Integer projectId, BuildConfig buildConfig) {
@@ -213,9 +224,7 @@ public class PncConfigurer {
 
     private Integer updateBuildConfig(BuildConfigData data) {
         Integer configId = data.getId();
-        Integer projectId = dao.getProjectByName(data.getProject())
-                .map(PncProject::getId)
-                .orElseGet(() -> generateProject(data.getProject()));
+        Integer projectId = getOrGenerateProject(data.getProject());
 
         // mstodo
         String updateParams = data.getNewConfig().toUpdateParams(projectId, data.getOldConfig(), versionId);
@@ -236,12 +245,12 @@ public class PncConfigurer {
         return PncDao.invokeAndGetResultId(command);
     }
 
-    private List<PncBuildConfig> dropConfigsFromInvalidVersion(
-            List<PncBuildConfig> currentConfigs,
+    private List<BuildConfiguration> dropConfigsFromInvalidVersion(
+            List<BuildConfiguration> currentConfigs,
             List<BuildConfig> newConfigs,
             int versionId) {
         Map<String, BuildConfig> newConfigsByName = BuildConfig.mapByName(newConfigs);
-        List<PncBuildConfig> configsToDrop = currentConfigs.stream()
+        List<BuildConfiguration> configsToDrop = currentConfigs.stream()
                 .filter(config -> shouldBeDropped(config, versionId, newConfigsByName))
                 .collect(Collectors.toList());
         if (!configsToDrop.isEmpty()) {
@@ -252,7 +261,7 @@ public class PncConfigurer {
         return configsToDrop;
     }
 
-    private boolean shouldBeDropped(PncBuildConfig oldConfig,
+    private boolean shouldBeDropped(BuildConfiguration oldConfig,
                                     int versionId,
                                     Map<String, BuildConfig> newConfigsByName) {
         String name = oldConfig.getName();
@@ -265,10 +274,10 @@ public class PncConfigurer {
     }
 
 
-    private List<PncBuildConfig> getCurrentBuildConfigs(int buildGroupId) {
+    private List<BuildConfiguration> getCurrentBuildConfigs(int buildGroupId) {
         String command = format("list-build-configurations-for-set -i %d", buildGroupId);
         List<String> output = PncDao.invoke(command, 4);
-        return PncCliParser.parseList(output, new TypeReference<List<PncBuildConfig>>() {
+        return PncCliParser.parseList(output, new TypeReference<List<BuildConfiguration>>() {
         });
     }
 
@@ -353,7 +362,7 @@ public class PncConfigurer {
     }
 
     private List<BuildConfigData> getBuildConfigs() {
-        List<PncBuildConfig> configs = getCurrentBuildConfigs(buildGroupId);
+        List<BuildConfiguration> configs = getCurrentBuildConfigs(buildGroupId);
 
         return configs.stream()
                 .map(config -> {

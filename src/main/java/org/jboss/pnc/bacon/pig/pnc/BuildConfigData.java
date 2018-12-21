@@ -20,7 +20,8 @@ package org.jboss.pnc.bacon.pig.pnc;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Delegate;
-import org.jboss.prod.generator.config.build.BuildConfig;
+import org.jboss.pnc.bacon.pig.config.build.BuildConfig;
+import org.jboss.pnc.dto.BuildConfiguration;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -33,7 +34,7 @@ public class BuildConfigData {
     private final BuildConfig newConfig;
     @Setter
     private Integer id;
-    private PncBuildConfig oldConfig;
+    private BuildConfiguration oldConfig;
     @Setter
     private boolean modified = false;
 
@@ -45,7 +46,7 @@ public class BuildConfigData {
         return !newConfig.isTheSameAs(oldConfig);
     }
 
-    public void setOldConfig(PncBuildConfig currentConfig) {
+    public void setOldConfig(BuildConfiguration currentConfig) {
         oldConfig = currentConfig;
         id = oldConfig.getId();
     }
