@@ -1,3 +1,5 @@
 .idea
 *.iml
 target
+
+/src/main/java/org/jboss/pnc/bacon/cli/Constants.java
