@@ -26,7 +26,8 @@ class BuildWithMockTest {
     @ApplicationScoped
     @Produces
     BuildDependency produceBuildDependency() {
-        return when(mock(BuildDependency.class).doSomething(anyString())).thenReturn("dummy").getMock();
+        return when(mock(BuildDependency.class).doSomething(anyString())).thenReturn("dummy")
+                .getMock();
     }
 
     @Test

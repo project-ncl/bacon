@@ -134,6 +134,23 @@
           <version>2.22.1</version>
       </plugin>
 
+      <plugin>
+          <groupId>net.revelc.code</groupId>
+          <artifactId>formatter-maven-plugin</artifactId>
+          <version>0.5.2</version>
+          <configuration>
+              <configFile>./eclipse-codeStyle.xml</configFile>
+          </configuration>
+          <executions>
+              <execution>
+                  <id>java-format</id>
+                  <goals>
+                      <goal>format</goal>
+                  </goals>
+              </execution>
+          </executions>
+      </plugin>
+
       <!-- used to speed up weld initialization -->
       <plugin>
           <groupId>org.jboss.jandex</groupId>

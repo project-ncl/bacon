@@ -26,5 +26,6 @@ import lombok.Data;
  */
 @Data
 public class IndyConfig {
+
     private String url;
 }

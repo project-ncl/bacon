@@ -25,7 +25,9 @@ public class Build {
     // main input that the build step needs
     // should be populated by the command line config and whatever other configuration is applicable
     public static class Input {
+
         private final String configLocation;
+
         private final Integer buildGroup;
 
         public Input(String configLocation, Integer buildGroup) {

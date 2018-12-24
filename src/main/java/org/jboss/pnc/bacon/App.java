@@ -31,11 +31,10 @@ import java.util.List;
  * <br>
  * Date: 12/13/18
  */
-@CommandLine.Command(name = "java -jar bacon.jar",
-        mixinStandardHelpOptions = true,
-        subcommands = {Pig.class, Pnc.class, Da.class}
-)
+@CommandLine.Command(name = "java -jar bacon.jar", mixinStandardHelpOptions = true, subcommands = {
+        Pig.class, Pnc.class, Da.class })
 public class App {
+
     private App() {
     }
 
@@ -53,9 +52,10 @@ public class App {
         try {
             Config.initialize(configLocation);
         } catch (IOException e) {
-            System.err.println("Configuration file not found. " +
-                    "Please create a config file and either name it 'config.yaml' and put it in the working directory" +
-                    " or specify it with -Dconfig");
+            System.err
+                    .println("Configuration file not found. "
+                            + "Please create a config file and either name it 'config.yaml' and put it in the working directory"
+                            + " or specify it with -Dconfig");
             System.exit(1);
         }
     }

@@ -23,7 +23,9 @@ package org.jboss.pnc.bacon.cli;
  * Date: 12/13/18
  */
 public class Constants {
-    private Constants(){}
+
+    private Constants() {
+    }
 
     public static final String NO_VALUE = "a default value isn't provided";
 }

@@ -29,8 +29,12 @@ import static org.jboss.pnc.bacon.cli.Constants.NO_VALUE;
  */
 @Command(name = "da", mixinStandardHelpOptions = true)
 public class Da {
-    @Command(name = "lookup", mixinStandardHelpOptions = true, description = "lookup available productized artifact version for an artifact")
-    public void lookup(@Parameters(defaultValue = NO_VALUE, description = "groupId:artifactId:version of the artifact to lookup", type = String.class) String gav) {
+
+    @Command(name = "lookup", mixinStandardHelpOptions = true,
+            description = "lookup available productized artifact version for an artifact")
+    public void lookup(@Parameters(defaultValue = NO_VALUE,
+            description = "groupId:artifactId:version of the artifact to lookup",
+            type = String.class) String gav) {
         throw new TodoException();
     }
 }

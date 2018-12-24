@@ -26,10 +26,16 @@ import lombok.Data;
  */
 @Data
 public class PncConfig {
+
     private String url;
+
     private String grantType;
+
     private String clientId;
+
     private String realm;
+
     private String username;
+
     private String password;
 }

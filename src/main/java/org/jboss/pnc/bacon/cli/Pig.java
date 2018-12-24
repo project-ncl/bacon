@@ -30,26 +30,21 @@ import static org.jboss.pnc.bacon.CDILauncher.getEntrypointProvider;
  */
 @Command(name = "pig", mixinStandardHelpOptions = true)
 public class Pig {
+
     @Command(name = "configure", mixinStandardHelpOptions = true)
-    public void configure(
-            @Option(names = {"-c", "--config"},
-                    defaultValue = "build-config.yaml",
-                    description = "location of the configuration file")
-                    String configLocation) {
+    public void configure(@Option(names = { "-c", "--config" }, defaultValue = "build-config.yaml",
+            description = "location of the configuration file") String configLocation) {
         System.out.println("configLocation: " + configLocation);
         throw new TodoException();
     }
 
     @Command(name = "build", mixinStandardHelpOptions = true)
     public void build(
-            @Option(
-                    names = {"-c", "--config"},
-                    defaultValue = "build-config.yaml",
+            @Option(names = { "-c", "--config" }, defaultValue = "build-config.yaml",
                     description = "location of the configuration file") String configLocation,
             @Option(
-                    names = {"-b", "--build-group"},
+                    names = { "-b", "--build-group" },
                     description = "id of the group to build. Exactly one of {config, build-group} has to be provided") Integer buildGroupId) {
-
 
         getEntrypointProvider(Build.class).execute(new Build.Input(configLocation, buildGroupId));
     }

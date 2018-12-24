@@ -9,9 +9,10 @@ import org.jboss.weld.environment.se.WeldContainer;
  */
 public final class CDILauncher {
 
-    private CDILauncher() {}
+    private CDILauncher() {
+    }
 
-    public static <T>  T getEntrypointProvider(Class<T> entrypoint) {
+    public static <T> T getEntrypointProvider(Class<T> entrypoint) {
         final Weld weld = new Weld();
         final WeldContainer container = weld.initialize();
         return container.select(entrypoint).get();
