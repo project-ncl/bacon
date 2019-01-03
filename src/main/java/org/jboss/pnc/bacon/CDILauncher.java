@@ -9,12 +9,12 @@ import org.jboss.weld.environment.se.WeldContainer;
  */
 public final class CDILauncher {
 
+    private static final Weld weld = new Weld();
+    private static final WeldContainer container = weld.initialize();
+
     private CDILauncher() {}
 
     public static <T>  T getEntrypointProvider(Class<T> entrypoint) {
-        final Weld weld = new Weld();
-        final WeldContainer container = weld.initialize();
         return container.select(entrypoint).get();
     }
-
 }
