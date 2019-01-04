@@ -171,6 +171,56 @@
               </execution>
           </executions>
       </plugin>
+      <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>2.2.0</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>revision</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <!--
+                If you'd like to tell the plugin where your .git directory is,
+                use this setting, otherwise we'll perform a search trying to
+                figure out the right directory. It's better to add it explicite IMHO.
+              -->
+              <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+
+              <!-- false is default here, it prints some more information during the build -->
+              <verbose>true</verbose>
+          </configuration>
+      </plugin>
+      <plugin>
+          <groupId>com.google.code.maven-replacer-plugin</groupId>
+          <artifactId>maven-replacer-plugin</artifactId>
+          <version>1.4.0</version>
+          <executions>
+              <execution>
+                  <phase>process-sources</phase>
+                  <goals>
+                      <goal>replace</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <file>src/main/templates/org/jboss/pnc/bacon/cli/Constants.java</file>
+              <outputFile>src/main/java/org/jboss/pnc/bacon/cli/Constants.java</outputFile>
+              <replacements>
+                  <replacement>
+                      <token>@version.bacon@</token>
+                      <value>${project.version}</value>
+                  </replacement>
+                  <replacement>
+                      <token>@commit.id.abbrev@</token>
+                      <value>${git.commit.id.abbrev}</value>
+                  </replacement>
+              </replacements>
+          </configuration>
+      </plugin>
     </plugins>
   </build>
 
