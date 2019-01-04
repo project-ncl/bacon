@@ -17,6 +17,19 @@
  */
 package org.jboss.pnc.bacon.cli;
 
+import org.jboss.pnc.bacon.cli.pnc.BrewPush;
+import org.jboss.pnc.bacon.cli.pnc.Build;
+import org.jboss.pnc.bacon.cli.pnc.BuildConfiguration;
+import org.jboss.pnc.bacon.cli.pnc.Environment;
+import org.jboss.pnc.bacon.cli.pnc.GenerateTools;
+import org.jboss.pnc.bacon.cli.pnc.GroupBuild;
+import org.jboss.pnc.bacon.cli.pnc.GroupBuildConfiguration;
+import org.jboss.pnc.bacon.cli.pnc.Product;
+import org.jboss.pnc.bacon.cli.pnc.ProductMilestone;
+import org.jboss.pnc.bacon.cli.pnc.ProductRelease;
+import org.jboss.pnc.bacon.cli.pnc.ProductVersion;
+import org.jboss.pnc.bacon.cli.pnc.Project;
+import org.jboss.pnc.bacon.cli.pnc.Repository;
 import picocli.CommandLine;
 
 /**
@@ -24,6 +37,22 @@ import picocli.CommandLine;
  * <br>
  * Date: 12/13/18
  */
-@CommandLine.Command(name = "pnc", mixinStandardHelpOptions = true)
+@CommandLine.Command(name = "pnc", mixinStandardHelpOptions = true,
+        description = "PNC sub-command",
+        subcommands = {
+                BrewPush.class,
+                Build.class,
+                BuildConfiguration.class,
+                Environment.class,
+                GenerateTools.class,
+                GroupBuild.class,
+                GroupBuildConfiguration.class,
+                Product.class,
+                ProductMilestone.class,
+                ProductRelease.class,
+                ProductVersion.class,
+                Project.class,
+                Repository.class
+})
 public class Pnc {
 }
