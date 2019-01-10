@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon;
 
+import org.jboss.pnc.bacon.cli.Constants;
 import org.jboss.pnc.bacon.cli.Da;
 import org.jboss.pnc.bacon.cli.Pig;
 import org.jboss.pnc.bacon.cli.Pnc;
@@ -33,6 +34,7 @@ import java.util.List;
  */
 @CommandLine.Command(name = "java -jar bacon.jar",
         mixinStandardHelpOptions = true,
+        version = Constants.VERSION + " (" + Constants.COMMIT_ID_SHA + ")",
         subcommands = {Pig.class, Pnc.class, Da.class}
 )
 public class App {
