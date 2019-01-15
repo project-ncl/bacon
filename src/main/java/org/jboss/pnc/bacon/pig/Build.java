@@ -1,15 +1,11 @@
 package org.jboss.pnc.bacon.pig;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.Objects;
 
-@ApplicationScoped
 public class Build {
 
     private final BuildDependency buildDependency;
 
-    @Inject
     public Build(BuildDependency buildDependency) {
         this.buildDependency = buildDependency;
     }
