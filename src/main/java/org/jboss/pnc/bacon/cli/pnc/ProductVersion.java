@@ -1,7 +1,8 @@
 package org.jboss.pnc.bacon.cli.pnc;
 
+import org.jboss.pnc.bacon.cli.SubCommandHelper;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "product-version", mixinStandardHelpOptions = true)
-public class ProductVersion {
+public class ProductVersion extends SubCommandHelper {
 }

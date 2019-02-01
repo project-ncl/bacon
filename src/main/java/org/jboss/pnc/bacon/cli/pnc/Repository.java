@@ -1,9 +1,10 @@
 package org.jboss.pnc.bacon.cli.pnc;
 
+import org.jboss.pnc.bacon.cli.SubCommandHelper;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "repository", mixinStandardHelpOptions = true)
-public class Repository {
+public class Repository extends SubCommandHelper {
 
     @CommandLine.Command(name = "create", mixinStandardHelpOptions = true)
     public void create() {

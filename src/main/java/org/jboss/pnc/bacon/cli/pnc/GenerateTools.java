@@ -1,10 +1,11 @@
 package org.jboss.pnc.bacon.cli.pnc;
 
+import org.jboss.pnc.bacon.cli.SubCommandHelper;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "generate", mixinStandardHelpOptions = true,
                      description = "Further tools to generate artifacts")
-public class GenerateTools {
+public class GenerateTools extends SubCommandHelper {
 
     @CommandLine.Command(name = "repo-list", mixinStandardHelpOptions = true)
     public void generateRepositoryList() {

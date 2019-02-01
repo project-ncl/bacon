@@ -1,9 +1,10 @@
 package org.jboss.pnc.bacon.cli.pnc;
 
+import org.jboss.pnc.bacon.cli.SubCommandHelper;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "product", mixinStandardHelpOptions = true)
-public class Product {
+public class Product extends SubCommandHelper {
 
     @CommandLine.Command(name = "create", mixinStandardHelpOptions = true)
     public void create() {
