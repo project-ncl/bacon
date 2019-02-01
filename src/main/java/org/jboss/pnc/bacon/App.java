@@ -17,10 +17,12 @@
  */
 package org.jboss.pnc.bacon;
 
+import lombok.Getter;
 import org.jboss.pnc.bacon.cli.Constants;
 import org.jboss.pnc.bacon.cli.Da;
 import org.jboss.pnc.bacon.cli.Pig;
 import org.jboss.pnc.bacon.cli.Pnc;
+import org.jboss.pnc.bacon.cli.SubCommandHelper;
 import org.jboss.pnc.bacon.config.Config;
 import picocli.CommandLine;
 
@@ -37,18 +39,36 @@ import java.util.List;
         version = Constants.VERSION + " (" + Constants.COMMIT_ID_SHA + ")",
         subcommands = {Pig.class, Pnc.class, Da.class}
 )
-public class App {
-    private App() {
+public class App extends SubCommandHelper {
+
+    @Getter
+    private CommandLine rootCommandLine;
+
+    @Getter
+    private CommandLine latestCommandLine;
+
+    public App(String[] args) {
+
+        rootCommandLine = new CommandLine(this);
+
+        List<CommandLine> parsed = rootCommandLine.parse(args);
+        latestCommandLine = deepestCommand(parsed);
+    }
+
+    /**
+     * Parse the arguments and execute the last subcommand
+     */
+    public void execute() {
+        new CommandLine.RunLast().handleParseResult(latestCommandLine.getParseResult());
     }
 
     public static void main(String[] args) {
-        initializeConfig();
-        CommandLine commandLine = new CommandLine(App.class);
-        List<CommandLine> parsed = commandLine.parse(args);
-        CommandLine command = deepestCommand(parsed);
 
-        new CommandLine.RunLast().handleParseResult(command.getParseResult());
+        initializeConfig();
+        App app = new App(args);
+        app.execute();
     }
+
 
     private static void initializeConfig() {
         String configLocation = System.getProperty("config", "config.yaml");

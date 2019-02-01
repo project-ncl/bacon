@@ -54,5 +54,5 @@ import picocli.CommandLine;
                 Project.class,
                 Repository.class
 })
-public class Pnc {
+public class Pnc extends SubCommandHelper {
 }

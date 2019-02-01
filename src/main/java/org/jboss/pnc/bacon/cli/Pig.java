@@ -26,7 +26,8 @@ import picocli.CommandLine.Option;
  * Date: 12/13/18
  */
 @Command(name = "pig", mixinStandardHelpOptions = true)
-public class Pig {
+public class Pig extends SubCommandHelper {
+
     @Command(name = "configure", mixinStandardHelpOptions = true)
     public void configure(
             @Option(names = {"-c", "--config"},
