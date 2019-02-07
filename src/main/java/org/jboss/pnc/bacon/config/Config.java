@@ -42,6 +42,8 @@ public class Config {
     private PncConfig pnc;
     private DaConfig da;
     private IndyConfig indy;
+    private KeycloakConfig keycloak;
+
     private Map<String, Map<String, ?>> addOns;
 
     private static Config instance;
