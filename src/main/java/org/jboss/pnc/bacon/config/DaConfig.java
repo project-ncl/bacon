@@ -27,6 +27,4 @@ import lombok.Data;
 @Data
 public class DaConfig {
     private String url;
-    private String clientId;
-    private String realm;
 }
