@@ -2,4 +2,4 @@
 *.iml
 target
 
-/src/main/java/org/jboss/pnc/bacon/cli/Constants.java
+/common/src/main/java/org/jboss/pnc/bacon/common/Constants.java
