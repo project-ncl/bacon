@@ -19,6 +19,10 @@ import java.util.Date;
 @Slf4j
 public class DirectKeycloakClientImpl implements KeycloakClient {
 
+    static {
+        setupUnirest();
+    }
+
     private static void setupUnirest() {
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
@@ -41,10 +45,6 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
                 }
             }
         });
-    }
-
-    public DirectKeycloakClientImpl() {
-        setupUnirest();
     }
 
     /**
