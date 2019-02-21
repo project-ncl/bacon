@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig;
 
+import org.jboss.pnc.bacon.common.exception.TodoException;
 import org.jboss.pnc.bacon.pig.data.Data;
 
 /**
@@ -11,25 +12,26 @@ import org.jboss.pnc.bacon.pig.data.Data;
  */
 public class PigFacade {
     public Data configure() {
-
+        throw new TodoException();
     }
 
     public Data build() {
-
+        throw new TodoException();
     }
-    public Data build(Data data) {
 
+    public Data build(Data data) {
+        throw new TodoException();
     }
 
     public Data generateRepository() {
-
+        throw new TodoException();
     }
-    
-    public Data generateRepository(Data data) {
 
+    public Data generateRepository(Data data) {
+        throw new TodoException();
     }
 
     public Data generateLicenses(Data data) {
-
+        throw new TodoException();
     }
 }

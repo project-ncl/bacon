@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig;
 
 import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.exception.TodoException;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -92,14 +93,4 @@ public class Pig extends SubCommandHelper {
         throw new TodoException();
     }
 
-    /**
-     * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
-     * <br>
-     * Date: 12/13/18
-     */
-    public static class TodoException extends RuntimeException {
-        public TodoException() {
-            super("the method is not implemented yet");
-        }
-    }
 }
