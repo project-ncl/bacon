@@ -17,19 +17,15 @@
  */
 package org.jboss.pnc.bacon.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.Data;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.function.Supplier;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -37,6 +33,7 @@ import java.util.function.Supplier;
  * Date: 12/14/18
  */
 @Data
+@Slf4j
 public class Config {
     private String keycloakUrl;
     private PncConfig pnc;
@@ -53,10 +50,27 @@ public class Config {
     }
 
     public static void initialize(String configLocation) throws IOException {
-        Yaml yaml = new Yaml(new Constructor(Config.class));
 
-        try (InputStream in = new FileInputStream(configLocation)) {
-            instance = yaml.load(in);
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        File configFile = new File(configLocation);
+
+        if (!configFile.exists()) {
+
+            log.error("Config file: '{}' does not exist", configLocation);
+            throw new IOException("Config file " + configLocation + " does not exist!");
+
+        } else if (configFile.length() == 0) {
+
+            log.warn("Config file: {} has no content", configLocation);
+            instance = new Config();
+
+        } else {
+
+            instance = mapper.readValue(new File(configLocation), Config.class);
+
         }
     }
 }
