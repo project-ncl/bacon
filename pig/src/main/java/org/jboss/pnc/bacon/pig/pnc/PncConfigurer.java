@@ -1,10 +1,11 @@
 package org.jboss.pnc.bacon.pig.pnc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.jboss.pnc.bacon.common.exception.TodoException;
 import org.jboss.pnc.bacon.pig.config.build.BuildConfig;
 import org.jboss.pnc.bacon.pig.config.build.Config;
 import org.jboss.pnc.bacon.pig.config.build.Product;
-import org.jboss.pnc.bacon.utils.CollectionUtils;
+import org.jboss.pnc.bacon.pig.utils.CollectionUtils;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
@@ -89,7 +90,6 @@ public class PncConfigurer {
                         .map(this::getConfigIdByName)
                         .collect(Collectors.toSet());
         Set<Integer> currentDependencies = config.getOldConfig().getDependencyIds();
-//        Set<Integer> currentDependencies = PncDao.invokeAndGetResultIds("list-dependencies -i " + id, 4);
 
         Set<Integer> superfluous = CollectionUtils.subtractSet(currentDependencies, dependencies);
         if (!superfluous.isEmpty()) {
@@ -172,13 +172,14 @@ public class PncConfigurer {
     private Integer createBuildConfig(BuildConfig buildConfig) {
         Integer projectId = getOrGenerateProject(buildConfig.getProject());
 
+        BuildConfiguration result;
         if (repositoryConfigExists(buildConfig) || buildConfig.getScmUrl() != null) {
             SCMRepository repo = getOrGenerateRepository(buildConfig);
-//            String createParams = buildConfig.toCreateParams(projectId, repoId, versionId);
-            return dao.createBuildConfiguration(projectId, repo, buildConfig.toPncBuildConfig());
+            result = dao.createBuildConfiguration(buildConfig.toPncBuildConfig(projectId, Optional.of(repo.getId())));
+        } else {
+            result = dao.createBuildConfiguration(buildConfig.toPncBuildConfig(projectId, Optional.empty()));
         }
-
-        return dao.createBuildConfiguration(projectId, buildConfig); // todo: this looks weird, probably can be simplified with the new rest api
+        return result.getId();
     }
 
     private Integer getOrGenerateProject(String projectName) {
@@ -229,8 +230,9 @@ public class PncConfigurer {
         // mstodo
         String updateParams = data.getNewConfig().toUpdateParams(projectId, data.getOldConfig(), versionId);
         log.info("Updating build configuration {}", data.getName());
-        PncDao.invoke(format("update-build-configuration %d %s", configId, updateParams));
-        return configId;
+        throw new TodoException();
+//        PncDao.invoke(format("update-build-configuration %d %s", configId, updateParams));
+//        return configId;
     }
 
 //    private Integer getOrGenerateProject(String projectName) {
@@ -241,8 +243,9 @@ public class PncConfigurer {
 //    }
 
     private Integer generateProject(String projectName) {
-        String command = format("create-project \"%s\"", projectName);
-        return PncDao.invokeAndGetResultId(command);
+//        String command = format("create-project \"%s\"", projectName);
+//        return PncDao.invokeAndGetResultId(command);
+        throw new TodoException();
     }
 
     private List<BuildConfiguration> dropConfigsFromInvalidVersion(
@@ -264,21 +267,23 @@ public class PncConfigurer {
     private boolean shouldBeDropped(BuildConfiguration oldConfig,
                                     int versionId,
                                     Map<String, BuildConfig> newConfigsByName) {
-        String name = oldConfig.getName();
-        BuildConfig newConfig = newConfigsByName.get(name);
-        boolean configMismatch = oldConfig.getVersionId() == null || oldConfig.getVersionId() != versionId;
-        if (configMismatch) {
-            log.warn("Product version in the old config is different than the one in the new config for config {}", name);
-        }
-        return configMismatch || newConfig == null || !oldConfig.isUpgradableTo(newConfig);
+//        String name = oldConfig.getName();
+//        BuildConfig newConfig = newConfigsByName.get(name);
+//        boolean configMismatch = oldConfig.getVersionId() == null || oldConfig.getVersionId() != versionId;
+//        if (configMismatch) {
+//            log.warn("Product version in the old config is different than the one in the new config for config {}", name);
+//        }
+//        return configMismatch || newConfig == null || !oldConfig.isUpgradableTo(newConfig);
+        throw new TodoException();
     }
 
 
     private List<BuildConfiguration> getCurrentBuildConfigs(int buildGroupId) {
-        String command = format("list-build-configurations-for-set -i %d", buildGroupId);
-        List<String> output = PncDao.invoke(command, 4);
-        return PncCliParser.parseList(output, new TypeReference<List<BuildConfiguration>>() {
-        });
+//        String command = format("list-build-configurations-for-set -i %d", buildGroupId);
+//        List<String> output = PncDao.invoke(command, 4);
+//        return PncCliParser.parseList(output, new TypeReference<List<BuildConfiguration>>() {
+//        });
+        throw new TodoException();
     }
 
     private int getOrGenerateBuildGroup() {
@@ -287,25 +292,27 @@ public class PncConfigurer {
     }
 
     private Optional<Integer> getBuildGroup() {
-        Optional<Integer> buildConfigSetId;
-        try {
-            buildConfigSetId = Optional.of(
-                    PncDao.invokeAndGetResultId(format("get-build-configuration-set --name \"%s\"", config.getGroup()), 4)
-            );
-        } catch (OSCommandException e) {
-            log.info(format("Product build group does not exist: {}, we'll create one", config.getGroup(), e));
-            buildConfigSetId = Optional.empty();
-        }
-        return buildConfigSetId;
+//        Optional<Integer> buildConfigSetId;
+//        try {
+//            buildConfigSetId = Optional.of(
+//                    PncDao.invokeAndGetResultId(format("get-build-configuration-set --name \"%s\"", config.getGroup()), 4)
+//            );
+//        } catch (OSCommandException e) {
+//            log.info(format("Product build group does not exist: {}, we'll create one", config.getGroup(), e));
+//            buildConfigSetId = Optional.empty();
+//        }
+//        return buildConfigSetId;
+        throw new TodoException();
     }
 
     private int getOrGenerateVersion(int productId) {
-        String command = versionsForProduct(productId);
-        return getOrGenerate(
-                command,
-                versionByMajorMinor(),
-                () -> generateVersion(productId)
-        );
+//        String command = versionsForProduct(productId);
+//        return getOrGenerate(
+//                command,
+//                versionByMajorMinor(),
+//                () -> generateVersion(productId)
+//        );
+        throw new TodoException();
     }
 
     private String versionsForProduct(int productId) {
@@ -318,11 +325,12 @@ public class PncConfigurer {
     }
 
     private int getOrGenerateProduct() {
-        return getOrGenerate(
-                LIST_PRODUCTS,
-                productByName(),
-                this::generateProduct
-        );
+//        return getOrGenerate(
+//                LIST_PRODUCTS,
+//                productByName(),
+//                this::generateProduct
+//        );
+        throw new TodoException();
     }
 
     private Predicate<Map<String, ?>> productByName() {
@@ -332,18 +340,19 @@ public class PncConfigurer {
 
 
     public PncImportResult readCurrentPncEntities() {
-        productId = getProduct();
-        versionId = getVersion();
-        Optional<Integer> maybeMilestone = dao.getMilestoneIdForVersionAndName(versionId, pncMilestoneString());
-        milestoneId = maybeMilestone
-                .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // mstodo
-
-        buildGroupId = getBuildGroup()
-                .orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
-
-        configs = getBuildConfigs();
-
-        return new PncImportResult(milestoneId, buildGroupId, versionId, configs);
+//        productId = getProduct();
+//        versionId = getVersion();
+//        Optional<Integer> maybeMilestone = dao.getMilestoneIdForVersionAndName(versionId, pncMilestoneString());
+//        milestoneId = maybeMilestone
+//                .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // mstodo
+//
+//        buildGroupId = getBuildGroup()
+//                .orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
+//
+//        configs = getBuildConfigs();
+//
+//        return new PncImportResult(milestoneId, buildGroupId, versionId, configs);
+        throw new TodoException();
     }
 
     private Integer generateProduct() {

@@ -42,6 +42,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <picocli.version>3.8.2</picocli.version>
+        <pnc.version>2.0.0-SNAPSHOT</pnc.version>
     </properties>
 
     <dependencyManagement>
@@ -87,7 +88,7 @@
             <dependency>
                 <groupId>org.jboss.pnc</groupId>
                 <artifactId>rest-api</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
+                <version>${pnc.version}</version>
             </dependency>
 
             <dependency>
@@ -164,6 +165,13 @@
                 <version>2.9.8</version>
             </dependency>
 
+            <!-- utilities -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.8.1</version>
+            </dependency>
+            
             <!--tests-->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>

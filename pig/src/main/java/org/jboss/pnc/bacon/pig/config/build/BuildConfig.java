@@ -21,19 +21,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.Environment;
+import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.enums.BuildType;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -80,7 +76,7 @@ public class BuildConfig {
                 .collect(toMap(BuildConfig::getName, identity()));
     }
 
-    public void sanitizebuildScript(){
+    public void sanitizebuildScript() {
         buildScript = buildScript.trim();
     }
 
@@ -112,13 +108,9 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public String getGenericParameters() {
+    public Map<String, String> getGenericParameters() {
         String dependencyExclusions = String.join(" ", customPmeParameters);
-        if (dependencyExclusions.isEmpty()) {
-            return "\"{'CUSTOM_PME_PARAMATERS':''}\"";
-        } else {
-            return String.format("\"{'CUSTOM_PME_PARAMETERS':'%s'}\"", dependencyExclusions);
-        }
+        return Collections.singletonMap("CUSTOM_PME_PARAMATERS", dependencyExclusions);
     }
 
     public String toCreateParams(Integer projectId, Integer repoId, Integer versionId) {
@@ -156,11 +148,9 @@ public class BuildConfig {
     }
 
     //Work around for NCL-3670
-    public String getShortScmURIPath()
-    {
+    public String getShortScmURIPath() {
         String scmUrl = getScmUrl() != null ? getScmUrl() : getExternalScmUrl();
-        try
-        {
+        try {
             URI scmUri = new URI(scmUrl);
             return scmUri.getPath();
         } catch (URISyntaxException e) {
@@ -221,7 +211,30 @@ public class BuildConfig {
         return SCMRepository.builder()
                 .externalUrl(externalScmUrl)
                 .internalUrl(scmUrl)
-                .preBuildSyncEnabled(scmUrl != null) // TODO: switch to true. Should be done separately to make sure the users won't miss the change
+                .preBuildSyncEnabled(true) // TODO: switch to true. Should be done separately to make sure the users won't miss the change
                 .build();
+    }
+
+    public BuildConfiguration toPncBuildConfig(Integer projectId, Optional<Integer> repoId) {
+        BuildConfiguration.Builder project = BuildConfiguration.builder()
+                .buildType(BuildType.MVN) // TODO: a way to customize it
+                .buildScript(buildScript)
+                .description(description)
+                .environment(Environment.builder().id(environmentId).build()) // TODO: should be switched to EnvironmentRef
+                .genericParameters(getGenericParameters())
+                .name(name)
+                .project(ProjectRef.refBuilder().id(projectId).build())
+                .scmRevision(scmRevision);
+        if (repoId.isPresent()) {
+            project.repository(SCMRepository.builder().id(repoId.get()).build());
+        } else {
+            project.repository(
+                    SCMRepository.builder()
+                            .externalUrl(externalScmUrl)
+                            .internalUrl(scmUrl)
+                            .preBuildSyncEnabled(true) // todo: make it configurable
+                            .build());
+        }
+        return project.build();
     }
 }
