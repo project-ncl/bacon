@@ -100,11 +100,6 @@
                 <artifactId>lombok</artifactId>
                 <version>1.18.4</version>
             </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.23</version>
-            </dependency>
 
             <!-- log -->
             <dependency>
@@ -161,6 +156,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
+                <version>2.9.8</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>2.9.8</version>
             </dependency>
 
