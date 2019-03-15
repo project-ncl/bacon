@@ -17,29 +17,39 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "repository", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "repository",
+        description = "Repository",
+        groupCommands = {
+                Repository.Create.class,
+                Repository.Get.class,
+                Repository.List.class,
+                Repository.Update.class,
+                Repository.Delete.class
+        })
 public class Repository extends SubCommandHelper {
 
-    @CommandLine.Command(name = "create", mixinStandardHelpOptions = true)
-    public void create() {
+    @CommandDefinition(name = "create", description = "Create a repository")
+    public class Create extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "get", mixinStandardHelpOptions = true)
-    public void get() {
+    @CommandDefinition(name = "get", description = "Get a repository")
+    public class Get extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "list", mixinStandardHelpOptions = true)
-    public void list() {
+    @CommandDefinition(name = "list", description = "List repositories")
+    public class List extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "update", mixinStandardHelpOptions = true)
-    public void update() {
+    @CommandDefinition(name = "update", description = "Update a repository")
+    public class Update extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "delete", mixinStandardHelpOptions = true)
-    public void delete() {
+    @CommandDefinition(name = "delete", description = "Delete a repository")
+    public class Delete extends SubCommandHelper {
     }
 }

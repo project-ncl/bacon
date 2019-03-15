@@ -17,30 +17,39 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "project", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "project",
+        description = "Project",
+        groupCommands = {
+                Project.Create.class,
+                Project.Get.class,
+                Project.List.class,
+                Project.Update.class,
+                Project.Delete.class
+        })
 public class Project extends SubCommandHelper {
 
-    @CommandLine.Command(name = "create", mixinStandardHelpOptions = true)
-    public void create() {
+    @CommandDefinition(name = "create", description = "Create a project")
+    public class Create extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "get", mixinStandardHelpOptions = true)
-    public void get() {
+    @CommandDefinition(name = "get", description = "Get a project")
+    public class Get extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "list", mixinStandardHelpOptions = true)
-    public void list() {
+    @CommandDefinition(name = "list", description = "List projects")
+    public class List extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "update", mixinStandardHelpOptions = true)
-    public void update() {
+    @CommandDefinition(name = "update", description = "Update a project")
+    public class Update extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "delete", mixinStandardHelpOptions = true)
-    public void delete() {
+    @CommandDefinition(name = "delete", description = "Delete a project")
+    public class Delete extends SubCommandHelper {
     }
-
 }

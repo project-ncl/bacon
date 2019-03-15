@@ -17,58 +17,66 @@
  */
 package org.jboss.pnc.bacon.cli;
 
-import lombok.Getter;
+import org.aesh.command.AeshCommandRuntimeBuilder;
+import org.aesh.command.CommandRuntime;
+import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.impl.registry.AeshCommandRegistryBuilder;
+import org.aesh.command.registry.CommandRegistry;
 import org.jboss.bacon.da.Da;
-import org.jboss.pnc.bacon.common.Constants;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
-import picocli.CommandLine;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 12/13/18
  */
-@CommandLine.Command(name = "java -jar bacon.jar",
-        mixinStandardHelpOptions = true,
-        version = Constants.VERSION + " (" + Constants.COMMIT_ID_SHA + ")",
-        subcommands = {Pig.class, Pnc.class, Da.class}
-)
+
+
+@GroupCommandDefinition(
+        name = "bacon.jar",
+        description = "Bacon CLI",
+        groupCommands = {Pnc.class, Da.class, Pig.class})
 public class App extends SubCommandHelper {
 
-    @Getter
-    private CommandLine rootCommandLine;
+    public void run(String[] args) throws Exception {
 
-    @Getter
-    private CommandLine latestCommandLine;
+        CommandRegistry registry = AeshCommandRegistryBuilder.builder()
+                .command(this.getClass())
+                .create();
 
-    public App(String[] args) {
+       CommandRuntime runtime = AeshCommandRuntimeBuilder
+                .builder()
+                .commandRegistry(registry)
+                .build();
 
-        rootCommandLine = new CommandLine(this);
-
-        List<CommandLine> parsed = rootCommandLine.parse(args);
-        latestCommandLine = deepestCommand(parsed);
+        runtime.executeCommand(buildCLIOutput(args));
     }
 
-    /**
-     * Parse the arguments and execute the last subcommand
-     */
-    public void execute() {
-        new CommandLine.RunLast().handleParseResult(latestCommandLine.getParseResult());
+    private String buildCLIOutput(String[] args) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("bacon.jar ");
+
+        for (String opt : args) {
+            builder.append(opt);
+            builder.append(" ");
+        }
+
+        return builder.toString();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         initializeConfig();
-        App app = new App(args);
-        app.execute();
-    }
 
+        App app = new App();
+        app.run(args);
+    }
 
     private static void initializeConfig() {
         String configLocation = System.getProperty("config", "config.yaml");
@@ -80,9 +88,5 @@ public class App extends SubCommandHelper {
                     " or specify it with -Dconfig");
             System.exit(1);
         }
-    }
-
-    private static CommandLine deepestCommand(List<CommandLine> parsed) {
-        return parsed.get(parsed.size() - 1);
     }
 }

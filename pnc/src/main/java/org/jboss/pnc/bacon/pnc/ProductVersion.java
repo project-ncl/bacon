@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "product-version", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(name = "product-version", description = "Product Version", groupCommands = {})
 public class ProductVersion extends SubCommandHelper {
 }

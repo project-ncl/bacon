@@ -17,29 +17,40 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "build-config", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "brew-config",
+        description = "brew-config",
+        groupCommands = {
+                BuildConfiguration.Create.class,
+                BuildConfiguration.Get.class,
+                BuildConfiguration.List.class,
+                BuildConfiguration.Update.class,
+                BuildConfiguration.Delete.class
+        })
 public class BuildConfiguration extends SubCommandHelper {
 
-    @CommandLine.Command(name = "create", mixinStandardHelpOptions = true)
-    public void create() {
+    @CommandDefinition(name = "create", description = "Create a build configuration")
+    public class Create extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "get", mixinStandardHelpOptions = true)
-    public void get() {
+    @CommandDefinition(name = "get", description = "Get build configurations")
+    public class Get extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "list", mixinStandardHelpOptions = true)
-    public void list() {
+    @CommandDefinition(name = "list", description = "List build configurations")
+    public class List extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "update", mixinStandardHelpOptions = true)
-    public void update() {
+    @CommandDefinition(name = "update", description = "Update a build configuration")
+    public class Update extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "delete", mixinStandardHelpOptions = true)
-    public void delete() {
+    @CommandDefinition(name = "delete", description = "Delete a build configuration")
+    public class Delete extends SubCommandHelper {
     }
+
 }

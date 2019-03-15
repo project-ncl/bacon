@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "product-milestone", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(name = "product-milestone", description = "Product Milestones", groupCommands = {})
 public class ProductMilestone extends SubCommandHelper {
 }

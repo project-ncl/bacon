@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "brew-push", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(name = "brew-push", description = "brew-push", groupCommands = {})
 public class BrewPush extends SubCommandHelper {
 }

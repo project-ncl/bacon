@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "group-build-config", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(name = "group-build-configuration", description = "Group build configuration", groupCommands = {})
 public class GroupBuildConfiguration extends SubCommandHelper {
 }

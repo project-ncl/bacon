@@ -17,11 +17,10 @@
  */
 package org.jboss.bacon.da;
 
-import org.jboss.pnc.bacon.common.Constants;
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.option.Argument;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import org.jboss.pnc.bacon.common.exception.TodoException;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
 
 
 /**
@@ -29,10 +28,16 @@ import picocli.CommandLine.Parameters;
  * <br>
  * Date: 12/13/18
  */
-@Command(name = "da", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "da",
+        description = "Dependency Analysis related commands",
+        groupCommands = {Da.Lookup.class})
 public class Da extends SubCommandHelper {
-    @Command(name = "lookup", mixinStandardHelpOptions = true, description = "lookup available productized artifact version for an artifact")
-    public void lookup(@Parameters(defaultValue = Constants.NO_VALUE, description = "groupId:artifactId:version of the artifact to lookup", type = String.class) String gav) {
-        throw new TodoException();
+
+    @CommandDefinition(name = "lookup", description = "lookup available productized artifact version for an artifact")
+    public class Lookup extends SubCommandHelper {
+
+        @Argument(required = true, description = "groupId:artifactId:version of the artifact to lookup")
+        private String gav = "";
     }
 }

@@ -17,26 +17,31 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "generate", mixinStandardHelpOptions = true,
-                     description = "Further tools to generate artifacts")
+@GroupCommandDefinition(
+        name = "generate",
+        description = "Further tools to generate artifacts",
+        groupCommands = {
+                GenerateTools.RepoList.class,
+                GenerateTools.GenerateSourcesZip.class,
+                GenerateTools.MakeMead.class
+        })
 public class GenerateTools extends SubCommandHelper {
 
-    @CommandLine.Command(name = "repo-list", mixinStandardHelpOptions = true)
-    public void generateRepositoryList() {
+    @CommandDefinition(name = "repo-list", description = "Generate a repo-list")
+    public class RepoList extends SubCommandHelper {
         // TODO: should this exist given PIG might implement it also?
     }
 
-    @CommandLine.Command(name = "sources-zip", mixinStandardHelpOptions = true)
-    public void generateSourcesZip() {
+    @CommandDefinition(name = "sources-zip", description = "Generate a sources zip")
+    public class GenerateSourcesZip extends SubCommandHelper {
         // TODO: should this exist given PIG might implement it also?
     }
 
-    @CommandLine.Command(name = "make-mead", mixinStandardHelpOptions = true)
-    public void makeMead() {
-
+    @CommandDefinition(name = "make-mead", description = "make-mead")
+    public class MakeMead extends SubCommandHelper {
     }
-
 }
