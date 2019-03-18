@@ -17,17 +17,18 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 12/13/18
  */
-@CommandLine.Command(name = "pnc", mixinStandardHelpOptions = true,
+@GroupCommandDefinition(
+        name = "pnc",
         description = "PNC sub-command",
-        subcommands = {
+        groupCommands = {
                 BrewPush.class,
                 Build.class,
                 BuildConfiguration.class,

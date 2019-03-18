@@ -13,8 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
+            <groupId>org.aesh</groupId>
+            <artifactId>aesh</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

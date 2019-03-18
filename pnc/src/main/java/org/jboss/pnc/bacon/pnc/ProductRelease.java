@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "product-release", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(name = "product-release", description = "Product Release", groupCommands = {})
 public class ProductRelease extends SubCommandHelper {
 }

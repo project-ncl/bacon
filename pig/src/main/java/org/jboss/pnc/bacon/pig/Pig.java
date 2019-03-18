@@ -17,89 +17,205 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
+import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+import org.jboss.pnc.bacon.common.exception.TodoException;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 12/13/18
  */
-@Command(name = "pig", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "pig",
+        description = "PfG tool",
+        groupCommands = {
+                Pig.Configure.class,
+                Pig.Build.class,
+                Pig.GenerateRepository.class,
+                Pig.GenerateLicenses.class,
+                Pig.GenerateJavadocs.class,
+                Pig.GenerateSources.class,
+                Pig.GenerateSharedContentAnalysis.class,
+                Pig.GenerateDocuments.class,
+                Pig.GenerateScripts.class,
+                Pig.TriggerAddOns.class
+        })
 public class Pig extends SubCommandHelper {
 
-    @Command(name = "configure", mixinStandardHelpOptions = true)
-    public void configure(
-            @Option(names = {"-c", "--config"},
-                    defaultValue = "build-config.yaml",
-                    description = "location of the configuration file")
-                    String configLocation) {
-        System.out.println("configLocation: " + configLocation);
-        throw new TodoException();
+    @CommandDefinition(name = "configure", description = "Configure")
+    public class Configure extends SubCommandHelper {
+
+        @Option(shortName = 'c',
+                overrideRequired = true,
+                defaultValue = "build-config.yaml",
+                description = "location of configuration file")
+        private String config;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                System.out.println("configLocation: " + config);
+                throw new TodoException();
+
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "build", mixinStandardHelpOptions = true)
-    public void build(
-            @Option(
-                    names = {"-c", "--config"},
-                    defaultValue = "build-config.yaml",
-                    description = "location of the configuration file") String configLocation,
-            @Option(
-                    names = {"-b", "--build-group"},
-                    description = "id of the group to build. Exactly one of {config, build-group} has to be provided") Integer buildGroupId) {
+    @CommandDefinition(name = "build", description = "Build")
+    public class Build extends SubCommandHelper {
 
+        @Option(shortName = 'c',
+                overrideRequired = true,
+                defaultValue = "build-config.yaml",
+                description = "location of configuration file")
+        private String config;
 
+        @Option(shortName = 'b',
+                overrideRequired = true,
+                description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
+        private Integer buildGroupId;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                System.out.println("configLocation: " + config);
+                throw new TodoException();
+
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "repo", mixinStandardHelpOptions = true)
-    public void generateRepository() {
-        throw new TodoException();
+    @CommandDefinition(name = "repo", description = "GenerateRepository")
+    public class GenerateRepository extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "licenses", mixinStandardHelpOptions = true)
-    public void generateLicenses() {
-        throw new TodoException();
+    @CommandDefinition(name = "licenses", description = "GenerateLicenses")
+    public class GenerateLicenses extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "javadocs", mixinStandardHelpOptions = true)
-    public void generateJavadoc() {
-        throw new TodoException();
+    @CommandDefinition(name = "javadocs", description = "GenerateJavadocs")
+    public class GenerateJavadocs extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "sources", mixinStandardHelpOptions = true)
-    public void generateSources() {
-        throw new TodoException();
+    @CommandDefinition(name = "sources", description = "GenerateSources")
+    public class GenerateSources extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "shared-content", mixinStandardHelpOptions = true)
-    public void generateSharedContentAnalysis() {
-        throw new TodoException();
+    @CommandDefinition(name = "shared-content", description = "GenerateSharedContentAnalysis")
+    public class GenerateSharedContentAnalysis extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "docs", mixinStandardHelpOptions = true)
-    public void generateDocuments() {
-        throw new TodoException();
+    @CommandDefinition(name = "docs", description = "GenerateDocuments")
+    public class GenerateDocuments extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "addons", mixinStandardHelpOptions = true)
-    public void triggerAddOns() {
-        throw new TodoException();
+    @CommandDefinition(name = "scripts", description = "GenerateScripts")
+    public class GenerateScripts extends SubCommandHelper {
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
+        }
     }
 
-    @Command(name = "scripts", mixinStandardHelpOptions = true)
-    public void generateScripts() {
-        throw new TodoException();
-    }
+    @CommandDefinition(name = "addons", description = "Addons")
+    public class TriggerAddOns extends SubCommandHelper {
 
-    /**
-     * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
-     * <br>
-     * Date: 12/13/18
-     */
-    public static class TodoException extends RuntimeException {
-        public TodoException() {
-            super("the method is not implemented yet");
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            CommandResult result = super.execute(commandInvocation);
+
+            if (result == CommandResult.FAILURE) {
+                throw new TodoException();
+            }
+            return CommandResult.SUCCESS;
         }
     }
 }

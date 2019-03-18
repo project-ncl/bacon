@@ -21,8 +21,8 @@
             <artifactId>common</artifactId>
         </dependency>
         <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
+            <groupId>org.aesh</groupId>
+            <artifactId>aesh</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -17,25 +17,38 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "product", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "product",
+        description = "Product",
+        groupCommands = {
+                Product.Create.class,
+                Product.Get.class,
+                Product.List.class,
+                Product.Update.class
+        })
 public class Product extends SubCommandHelper {
 
-    @CommandLine.Command(name = "create", mixinStandardHelpOptions = true)
-    public void create() {
+
+    @CommandDefinition(name = "create", description = "Create a product")
+    public class Create extends SubCommandHelper {
+
     }
 
-    @CommandLine.Command(name = "get", mixinStandardHelpOptions = true)
-    public void get() {
+    @CommandDefinition(name = "get", description = "Get products")
+    public class Get extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "list", mixinStandardHelpOptions = true)
-    public void list() {
+    @CommandDefinition(name = "list", description = "List products")
+    public class List extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "update", mixinStandardHelpOptions = true)
-    public void update() {
+    @CommandDefinition(name = "update", description = "Update a product")
+    public class Update extends SubCommandHelper {
     }
+
+
 }

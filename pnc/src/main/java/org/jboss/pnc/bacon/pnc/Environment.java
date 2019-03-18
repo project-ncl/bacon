@@ -17,20 +17,25 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.SubCommandHelper;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "environment", mixinStandardHelpOptions = true)
+@GroupCommandDefinition(
+        name = "environment",
+        description = "environment",
+        groupCommands = {
+                Environment.Get.class,
+                Environment.List.class
+        })
 public class Environment extends SubCommandHelper {
 
-    @CommandLine.Command(name = "get", mixinStandardHelpOptions = true)
-    public void get() {
-
+    @CommandDefinition(name = "get", description = "Get environments")
+    public class Get extends SubCommandHelper {
     }
 
-    @CommandLine.Command(name = "list", mixinStandardHelpOptions = true)
-    public void list() {
-
+    @CommandDefinition(name = "list", description = "List environments")
+    public class List extends SubCommandHelper {
     }
 
 }
