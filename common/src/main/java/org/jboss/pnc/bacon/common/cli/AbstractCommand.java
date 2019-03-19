@@ -15,9 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.bacon.common;
+package org.jboss.pnc.bacon.common.cli;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -25,8 +26,24 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
+import org.jboss.pnc.bacon.common.Constants;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.RemoteResourceException;
 
-public class SubCommandHelper implements Command {
+/**
+ * Abstract command that implements Command
+ *
+ * Provides a default implementation of 'execute' to print the help usage if the '-h' option is used.
+ *
+ * Also provides 'executeHelper', which accepts a lambda to print the help usate if the '-h' option is provided, or
+ * run the lambda otherwise
+ */
+@Slf4j
+public class AbstractCommand implements Command {
+
+    public interface SubCommandExecuteInterface {
+        void call() throws RemoteResourceException, ClientException;
+    }
 
     @Option(shortName = 'h', overrideRequired = true, hasValue = false, description = "print help")
     private boolean help = false;
@@ -90,7 +107,19 @@ public class SubCommandHelper implements Command {
      */
     @Override
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        return executePrivate(commandInvocation);
+    }
 
+    /**
+     * executePrivate is present so that executeHelper can reference to this implementation instead of the
+     * overridden execute method in a sub-class
+     *
+     * @param commandInvocation
+     * @return
+     * @throws CommandException
+     * @throws InterruptedException
+     */
+    private CommandResult executePrivate(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
         boolean helpNoFinalCommandPrinted = false;
         boolean helpOrVersionPrinted = printHelpOrVersionIfPresent(commandInvocation);
 
@@ -103,5 +132,24 @@ public class SubCommandHelper implements Command {
         } else {
             return CommandResult.FAILURE;
         }
+    }
+
+    public CommandResult executeHelper(CommandInvocation commandInvocation, SubCommandExecuteInterface callback)
+            throws CommandException, InterruptedException {
+
+        CommandResult result = executePrivate(commandInvocation);
+
+        if (result == CommandResult.SUCCESS) {
+            // user used the -h option
+            return CommandResult.SUCCESS;
+        }
+
+        try {
+            callback.call();
+        } catch (Exception e) {
+            log.error("Something wrong happened", e);
+            return CommandResult.FAILURE;
+        }
+        return CommandResult.SUCCESS;
     }
 }

@@ -23,7 +23,7 @@ import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.exception.TodoException;
 
 /**
@@ -46,10 +46,10 @@ import org.jboss.pnc.bacon.common.exception.TodoException;
                 Pig.GenerateScripts.class,
                 Pig.TriggerAddOns.class
         })
-public class Pig extends SubCommandHelper {
+public class Pig extends AbstractCommand {
 
     @CommandDefinition(name = "configure", description = "Configure")
-    public class Configure extends SubCommandHelper {
+    public class Configure extends AbstractCommand {
 
         @Option(shortName = 'c',
                 overrideRequired = true,
@@ -72,7 +72,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "build", description = "Build")
-    public class Build extends SubCommandHelper {
+    public class Build extends AbstractCommand {
 
         @Option(shortName = 'c',
                 overrideRequired = true,
@@ -100,7 +100,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "repo", description = "GenerateRepository")
-    public class GenerateRepository extends SubCommandHelper {
+    public class GenerateRepository extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -115,7 +115,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "licenses", description = "GenerateLicenses")
-    public class GenerateLicenses extends SubCommandHelper {
+    public class GenerateLicenses extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -130,7 +130,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "javadocs", description = "GenerateJavadocs")
-    public class GenerateJavadocs extends SubCommandHelper {
+    public class GenerateJavadocs extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -145,7 +145,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "sources", description = "GenerateSources")
-    public class GenerateSources extends SubCommandHelper {
+    public class GenerateSources extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -160,7 +160,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "shared-content", description = "GenerateSharedContentAnalysis")
-    public class GenerateSharedContentAnalysis extends SubCommandHelper {
+    public class GenerateSharedContentAnalysis extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -175,7 +175,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "docs", description = "GenerateDocuments")
-    public class GenerateDocuments extends SubCommandHelper {
+    public class GenerateDocuments extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -190,7 +190,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "scripts", description = "GenerateScripts")
-    public class GenerateScripts extends SubCommandHelper {
+    public class GenerateScripts extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -205,7 +205,7 @@ public class Pig extends SubCommandHelper {
     }
 
     @CommandDefinition(name = "addons", description = "Addons")
-    public class TriggerAddOns extends SubCommandHelper {
+    public class TriggerAddOns extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {

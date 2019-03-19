@@ -29,9 +29,11 @@
     ******************************************************************************
 -->
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <withJansi>true</withJansi>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>[%highlight(%-5level)] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -39,8 +41,10 @@
     <logger name="org.jboss.weld" level="WARN"/>
 
     <logger name="org.jboss.logging" level="INFO"/>
+    <logger name="org.jboss.pnc.client" level="WARN"/>
+    <logger name="org.jboss.resteasy" level="WARN"/>
 
     <root level="debug">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDERR"/>
     </root>
 </configuration>

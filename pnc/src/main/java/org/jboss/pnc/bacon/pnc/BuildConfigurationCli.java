@@ -19,38 +19,38 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
 @GroupCommandDefinition(
         name = "brew-config",
         description = "brew-config",
         groupCommands = {
-                BuildConfiguration.Create.class,
-                BuildConfiguration.Get.class,
-                BuildConfiguration.List.class,
-                BuildConfiguration.Update.class,
-                BuildConfiguration.Delete.class
+                BuildConfigurationCli.Create.class,
+                BuildConfigurationCli.Get.class,
+                BuildConfigurationCli.List.class,
+                BuildConfigurationCli.Update.class,
+                BuildConfigurationCli.Delete.class
         })
-public class BuildConfiguration extends SubCommandHelper {
+public class BuildConfigurationCli extends AbstractCommand {
 
     @CommandDefinition(name = "create", description = "Create a build configuration")
-    public class Create extends SubCommandHelper {
+    public class Create extends AbstractCommand {
     }
 
     @CommandDefinition(name = "get", description = "Get build configurations")
-    public class Get extends SubCommandHelper {
+    public class Get extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list", description = "List build configurations")
-    public class List extends SubCommandHelper {
+    public class List extends AbstractCommand {
     }
 
     @CommandDefinition(name = "update", description = "Update a build configuration")
-    public class Update extends SubCommandHelper {
+    public class Update extends AbstractCommand {
     }
 
     @CommandDefinition(name = "delete", description = "Delete a build configuration")
-    public class Delete extends SubCommandHelper {
+    public class Delete extends AbstractCommand {
     }
 
 }

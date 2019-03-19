@@ -18,7 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -29,19 +29,20 @@ import org.jboss.pnc.bacon.common.SubCommandHelper;
         name = "pnc",
         description = "PNC sub-command",
         groupCommands = {
-                BrewPush.class,
-                Build.class,
-                BuildConfiguration.class,
-                Environment.class,
-                GenerateTools.class,
-                GroupBuild.class,
-                GroupBuildConfiguration.class,
-                Product.class,
-                ProductMilestone.class,
-                ProductRelease.class,
-                ProductVersion.class,
-                Project.class,
-                Repository.class
+                ArtifactCli.class,
+                BrewPushCli.class,
+                BuildCli.class,
+                BuildConfigurationCli.class,
+                EnvironmentCli.class,
+                GenerateToolsCli.class,
+                GroupBuildCli.class,
+                GroupBuildConfigurationCli.class,
+                ProductCli.class,
+                ProductMilestoneCli.class,
+                ProductReleaseCli.class,
+                ProductVersionCli.class,
+                ProjectCli.class,
+                RepositoryCli.class
         })
-public class Pnc extends SubCommandHelper {
+public class Pnc extends AbstractCommand {
 }

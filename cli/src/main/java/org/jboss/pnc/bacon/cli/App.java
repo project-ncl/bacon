@@ -17,13 +17,14 @@
  */
 package org.jboss.pnc.bacon.cli;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.AeshCommandRuntimeBuilder;
 import org.aesh.command.CommandRuntime;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.impl.registry.AeshCommandRegistryBuilder;
 import org.aesh.command.registry.CommandRegistry;
 import org.jboss.bacon.da.Da;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
@@ -37,11 +38,12 @@ import java.io.IOException;
  */
 
 
+@Slf4j
 @GroupCommandDefinition(
         name = "bacon.jar",
         description = "Bacon CLI",
         groupCommands = {Pnc.class, Da.class, Pig.class})
-public class App extends SubCommandHelper {
+public class App extends AbstractCommand {
 
     public void run(String[] args) throws Exception {
 
@@ -54,7 +56,20 @@ public class App extends SubCommandHelper {
                 .commandRegistry(registry)
                 .build();
 
-        runtime.executeCommand(buildCLIOutput(args));
+
+       try {
+           runtime.executeCommand(buildCLIOutput(args));
+       } catch (RuntimeException ex) {
+           log.error(ex.getMessage());
+
+           // if stacktrace not thrown from aesh
+           if (!ex.getCause().getClass().getCanonicalName().contains("aesh")) {
+               log.error("Stacktrace", ex);
+           }
+
+           // signal that an error has occurred
+           System.exit(1);
+       }
     }
 
     private String buildCLIOutput(String[] args) {
