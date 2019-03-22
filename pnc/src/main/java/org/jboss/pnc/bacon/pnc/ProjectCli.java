@@ -19,37 +19,37 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
 @GroupCommandDefinition(
         name = "project",
         description = "Project",
         groupCommands = {
-                Project.Create.class,
-                Project.Get.class,
-                Project.List.class,
-                Project.Update.class,
-                Project.Delete.class
+                ProjectCli.Create.class,
+                ProjectCli.Get.class,
+                ProjectCli.List.class,
+                ProjectCli.Update.class,
+                ProjectCli.Delete.class
         })
-public class Project extends SubCommandHelper {
+public class ProjectCli extends AbstractCommand {
 
     @CommandDefinition(name = "create", description = "Create a project")
-    public class Create extends SubCommandHelper {
+    public class Create extends AbstractCommand {
     }
 
     @CommandDefinition(name = "get", description = "Get a project")
-    public class Get extends SubCommandHelper {
+    public class Get extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list", description = "List projects")
-    public class List extends SubCommandHelper {
+    public class List extends AbstractCommand {
     }
 
     @CommandDefinition(name = "update", description = "Update a project")
-    public class Update extends SubCommandHelper {
+    public class Update extends AbstractCommand {
     }
 
     @CommandDefinition(name = "delete", description = "Delete a project")
-    public class Delete extends SubCommandHelper {
+    public class Delete extends AbstractCommand {
     }
 }

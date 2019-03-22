@@ -18,8 +18,8 @@
 package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
-@GroupCommandDefinition(name = "product-release", description = "Product Release", groupCommands = {})
-public class ProductRelease extends SubCommandHelper {
+@GroupCommandDefinition(name = "group-build-configuration", description = "Group build configuration", groupCommands = {})
+public class GroupBuildConfigurationCli extends AbstractCommand {
 }

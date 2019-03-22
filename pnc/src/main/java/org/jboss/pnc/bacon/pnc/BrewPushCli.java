@@ -17,25 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
-@GroupCommandDefinition(
-        name = "environment",
-        description = "environment",
-        groupCommands = {
-                Environment.Get.class,
-                Environment.List.class
-        })
-public class Environment extends SubCommandHelper {
-
-    @CommandDefinition(name = "get", description = "Get environments")
-    public class Get extends SubCommandHelper {
-    }
-
-    @CommandDefinition(name = "list", description = "List environments")
-    public class List extends SubCommandHelper {
-    }
-
+@GroupCommandDefinition(name = "brew-push", description = "brew-push", groupCommands = {})
+public class BrewPushCli extends AbstractCommand {
 }

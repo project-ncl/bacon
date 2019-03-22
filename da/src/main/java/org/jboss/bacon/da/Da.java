@@ -20,7 +20,7 @@ package org.jboss.bacon.da;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.option.Argument;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
 
 /**
@@ -32,10 +32,10 @@ import org.jboss.pnc.bacon.common.SubCommandHelper;
         name = "da",
         description = "Dependency Analysis related commands",
         groupCommands = {Da.Lookup.class})
-public class Da extends SubCommandHelper {
+public class Da extends AbstractCommand {
 
     @CommandDefinition(name = "lookup", description = "lookup available productized artifact version for an artifact")
-    public class Lookup extends SubCommandHelper {
+    public class Lookup extends AbstractCommand {
 
         @Argument(required = true, description = "groupId:artifactId:version of the artifact to lookup")
         private String gav = "";

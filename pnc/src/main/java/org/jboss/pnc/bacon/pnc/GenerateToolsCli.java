@@ -19,29 +19,29 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.SubCommandHelper;
+import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 
 @GroupCommandDefinition(
         name = "generate",
         description = "Further tools to generate artifacts",
         groupCommands = {
-                GenerateTools.RepoList.class,
-                GenerateTools.GenerateSourcesZip.class,
-                GenerateTools.MakeMead.class
+                GenerateToolsCli.RepoList.class,
+                GenerateToolsCli.GenerateSourcesZip.class,
+                GenerateToolsCli.MakeMead.class
         })
-public class GenerateTools extends SubCommandHelper {
+public class GenerateToolsCli extends AbstractCommand {
 
     @CommandDefinition(name = "repo-list", description = "Generate a repo-list")
-    public class RepoList extends SubCommandHelper {
+    public class RepoList extends AbstractCommand {
         // TODO: should this exist given PIG might implement it also?
     }
 
     @CommandDefinition(name = "sources-zip", description = "Generate a sources zip")
-    public class GenerateSourcesZip extends SubCommandHelper {
+    public class GenerateSourcesZip extends AbstractCommand {
         // TODO: should this exist given PIG might implement it also?
     }
 
     @CommandDefinition(name = "make-mead", description = "make-mead")
-    public class MakeMead extends SubCommandHelper {
+    public class MakeMead extends AbstractCommand {
     }
 }
