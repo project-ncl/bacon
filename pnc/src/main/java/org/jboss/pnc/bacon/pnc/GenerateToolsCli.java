@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pnc;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 
 @GroupCommandDefinition(
         name = "generate",
@@ -32,16 +33,16 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 public class GenerateToolsCli extends AbstractCommand {
 
     @CommandDefinition(name = "repo-list", description = "Generate a repo-list")
-    public class RepoList extends AbstractCommand {
+    public class RepoList extends AbstractNotImplementedCommand {
         // TODO: should this exist given PIG might implement it also?
     }
 
     @CommandDefinition(name = "sources-zip", description = "Generate a sources zip")
-    public class GenerateSourcesZip extends AbstractCommand {
+    public class GenerateSourcesZip extends AbstractNotImplementedCommand {
         // TODO: should this exist given PIG might implement it also?
     }
 
     @CommandDefinition(name = "make-mead", description = "make-mead")
-    public class MakeMead extends AbstractCommand {
+    public class MakeMead extends AbstractNotImplementedCommand {
     }
 }

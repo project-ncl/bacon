@@ -22,6 +22,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductClient;
@@ -46,7 +47,7 @@ public class ProductCli extends AbstractCommand {
 
 
     @CommandDefinition(name = "create", description = "Create a product")
-    public class Create extends AbstractCommand {
+    public class Create extends AbstractNotImplementedCommand {
 
     }
 
@@ -70,7 +71,7 @@ public class ProductCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "update", description = "Update a product")
-    public class Update extends AbstractCommand {
+    public class Update extends AbstractNotImplementedCommand {
     }
 
 

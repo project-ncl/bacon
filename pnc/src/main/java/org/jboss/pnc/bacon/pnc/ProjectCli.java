@@ -19,7 +19,20 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.option.Argument;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.ProjectClient;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.Project;
+
+import java.util.Optional;
 
 @GroupCommandDefinition(
         name = "project",
@@ -28,28 +41,58 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
                 ProjectCli.Create.class,
                 ProjectCli.Get.class,
                 ProjectCli.List.class,
+                ProjectCli.ListBuildConfigurations.class,
+                ProjectCli.ListBuilds.class,
                 ProjectCli.Update.class,
                 ProjectCli.Delete.class
         })
 public class ProjectCli extends AbstractCommand {
 
+    private ProjectClient client = new ProjectClient(PncClientHelper.getPncConfiguration());
+
     @CommandDefinition(name = "create", description = "Create a project")
-    public class Create extends AbstractCommand {
+    public class Create extends AbstractNotImplementedCommand {
     }
 
     @CommandDefinition(name = "get", description = "Get a project")
-    public class Get extends AbstractCommand {
+    public class Get extends AbstractGetSpecificCommand<Project> {
+
+        @Override
+        public Project getSpecific(int id) throws ClientException {
+            return client.getSpecific(id);
+        }
     }
 
     @CommandDefinition(name = "list", description = "List projects")
-    public class List extends AbstractCommand {
+    public class List extends AbstractListCommand<Project> {
+
+        @Override
+        public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
+            return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "get-build-configurations", description = "List build configurations for a project")
+    public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
+
+        @Argument(required = true, description = "Project id")
+        private int id;
+
+        @Override
+        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            return client.getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "get-builds", description = "List builds for a project")
+    public class ListBuilds extends AbstractNotImplementedCommand {
     }
 
     @CommandDefinition(name = "update", description = "Update a project")
-    public class Update extends AbstractCommand {
+    public class Update extends AbstractNotImplementedCommand {
     }
 
     @CommandDefinition(name = "delete", description = "Delete a project")
-    public class Delete extends AbstractCommand {
+    public class Delete extends AbstractNotImplementedCommand {
     }
 }
