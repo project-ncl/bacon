@@ -20,6 +20,16 @@ package org.jboss.pnc.bacon.pnc;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.EnvironmentClient;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.Environment;
+
+import java.util.Optional;
 
 @GroupCommandDefinition(
         name = "environment",
@@ -30,12 +40,24 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
         })
 public class EnvironmentCli extends AbstractCommand {
 
-    @CommandDefinition(name = "get", description = "Get environments")
-    public class Get extends AbstractCommand {
+    private EnvironmentClient environmentClient = new EnvironmentClient(PncClientHelper.getPncConfiguration());
+
+    @CommandDefinition(name = "get", description = "Get environment")
+    public class Get extends AbstractGetSpecificCommand<Environment> {
+
+        @Override
+        public Environment getSpecific(int id) throws ClientException {
+            return environmentClient.getSpecific(id);
+        }
     }
 
     @CommandDefinition(name = "list", description = "List environments")
-    public class List extends AbstractCommand {
+    public class List extends AbstractListCommand<Environment> {
+
+        @Override
+        public RemoteCollection<Environment> getAll(String sort, String query) throws RemoteResourceException {
+            return environmentClient.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
     }
 
 }
