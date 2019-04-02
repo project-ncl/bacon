@@ -41,7 +41,7 @@ import java.util.Map;
  */
 @GroupCommandDefinition(
         name = "pig",
-        description = "PfG tool",
+        description = "PiG tool",
         groupCommands = {
                 Pig.Configure.class,
                 Pig.Build.class,
