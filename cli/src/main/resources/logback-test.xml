@@ -26,6 +26,9 @@
 
         -Dlogback.configurationFile=/path/to/config.xml
 
+    It is named logback-test.xml so that it has higher priority compared to the
+    logback.xml included in dependency jars
+
     ******************************************************************************
 -->
 <configuration>
@@ -43,6 +46,20 @@
     <logger name="org.jboss.logging" level="INFO"/>
     <logger name="org.jboss.pnc.client" level="WARN"/>
     <logger name="org.jboss.resteasy" level="WARN"/>
+    <logger name="org.apache.http" level="WARN"/>
+
+    <!-- from koji-build-finder -->
+    <logger name="com.redhat.red.build.koji" level="WARN"/>
+    <logger name="org.apache.commons.beanutils" level="WARN"/>
+    <logger name="org.apache.commons.vfs2" level="WARN"/>
+    <!-- Set to OFF due to <https://issues.apache.org/jira/browse/VFS-634> -->
+    <logger name="org.apache.commons.vfs2.impl" level="OFF"/>
+    <logger name="org.apache.http" level="WARN"/>
+    <logger name="org.apache.kerby" level="WARN"/>
+    <logger name="org.commonjava.util.jhttpc" level="WARN"/>
+    <logger name="org.commonjava.rwx" level="WARN"/>
+    <logger name="org.infinispan" level="WARN"/>
+    <!-- from koji-build-finder -->
 
     <root level="debug">
         <appender-ref ref="STDERR"/>
