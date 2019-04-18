@@ -34,5 +34,9 @@
             <artifactId>resteasy-jackson2-provider</artifactId>
             <version>3.6.3.Final</version>
         </dependency>
-    </dependencies>
+        <dependency>
+           <groupId>com.fasterxml.jackson.datatype</groupId>
+           <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+   </dependencies>
 </project>

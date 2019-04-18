@@ -164,6 +164,11 @@
                 <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>2.9.8</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>2.9.8</version>
+            </dependency>
 
             <!-- resteasy -->
             <dependency>
