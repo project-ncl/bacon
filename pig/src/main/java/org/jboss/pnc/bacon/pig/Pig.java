@@ -26,12 +26,10 @@ import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pig.impl.MisconfigurationException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
-import org.jboss.pnc.bacon.pig.impl.PigFacade;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**

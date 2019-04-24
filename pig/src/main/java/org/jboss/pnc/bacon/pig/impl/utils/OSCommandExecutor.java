@@ -50,10 +50,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 public class OSCommandExecutor {
     private static final Logger log = LoggerFactory.getLogger(OSCommandExecutor.class);
 
-    public static List<String> runCommand(String s) {
-        return runCommandIn(s, null);
-    }
-
+    // TODO replace with maven api call (so that there's no need to have maven installed)
     public static List<String> runCommandIn(String command, Path directory) {
         return executor(command)
                 .directory(directory)

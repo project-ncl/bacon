@@ -99,6 +99,10 @@ public class GAV {
         return gav;
     }
 
+    public static GAV fromDaGav(org.jboss.bacon.da.rest.model.GAV gav) {
+        return new GAV(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), null);
+    }
+
     public String toGav() {
         return String.format("%s:%s:%s", groupId, artifactId, version);
     }

@@ -17,123 +17,61 @@
  */
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.OSCommandExecutor;
+import org.jboss.bacon.da.rest.api.ListingsApi;
+import org.jboss.bacon.da.rest.api.ReportsApi;
+import org.jboss.bacon.da.rest.model.LookupGAVsRequest;
+import org.jboss.bacon.da.rest.model.LookupReport;
+import org.jboss.bacon.da.rest.model.ProductWithGav;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.DaConfig;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
- *         Date: 6/2/17
+ * <br>
+ * Date: 6/2/17
  */
 public class DADao {
     private static final Logger log = LoggerFactory.getLogger(DADao.class);
 
-    private static final String DA_CLI_PY = "da-cli.py";
+    private final ReportsApi reportsClient;
+    private final ListingsApi listingsClient;
 
-    private static final String DA_CLI_CMD = getDACLICommand();
+    public DADao(DaConfig daConfig) {
+        reportsClient = new ResteasyClientBuilder().build()
+                .target(daConfig.getUrl())
+                .proxy(ReportsApi.class);
 
-    private static String runCommandReturningSingleLine(String command) {
-        List<String> result = OSCommandExecutor.runCommand(command);
-
-        if (result.size() != 1) {
-            throw new IllegalStateException("Failed to run command: " + command + ", result: " + result);
-        }
-
-        return result.get(0);
+        listingsClient = new ResteasyClientBuilder().build()
+                .target(daConfig.getUrl())
+                .proxy(ListingsApi.class);
     }
 
-    private static String getCygwinHome() {
-        String command = "cmd /c \"reg QUERY HKLM\\Software\\Cygwin\\setup /v rootdir /t REG_SZ | findstr REG_SZ | for /f \\\"tokens=3*\\\" %f in ('more') do @echo %f\"";
-        String cygwinHome = runCommandReturningSingleLine(command);
-
-        if (cygwinHome.startsWith("ERROR: ")) {
-            throw new IllegalStateException("Unable to find Cygwin installation");
-        }
-
-        cygwinHome = StringUtils.stripEnd(cygwinHome, " ");
-        cygwinHome = FilenameUtils.separatorsToUnix(cygwinHome);
-
-        Path cygwinHomePath = Paths.get(cygwinHome);
-
-        if (!Files.isDirectory(cygwinHomePath, new LinkOption[] {})) {
-            throw new IllegalStateException("Unable to find Cygwin installation");
-        }
-
-        return cygwinHomePath.toString();
-    }
-
-    private static String findInWindowsPath(String cygwinHome, String executable) {
-        String command = "where " + executable;
-        String result = runCommandReturningSingleLine(command);
-
-        return result;
-    }
-
-    private static Path convertToWindowsPath(String cygwinHome, String unixPath) {
-        String command = cygwinHome + "/bin/cygpath --mixed \"" + (unixPath.startsWith("/") ? unixPath : findInWindowsPath(cygwinHome, unixPath)) + "\"";
-        String result = runCommandReturningSingleLine(command);
-        Path convertedPath = Paths.get(result);
-
-        return convertedPath;
-    }
-
-    private static String getDACLICommand() {
-        if (!SystemUtils.IS_OS_WINDOWS) {
-            return DA_CLI_PY;
-        }
-
-        String cygwinHome = getCygwinHome();
-        Path pythonPath = convertToWindowsPath(cygwinHome, "/usr/bin/python3");
-
-        if (!Files.isRegularFile(pythonPath) || !Files.isExecutable(pythonPath)) {
-            throw new IllegalStateException("Path is not an executable file: " + pythonPath);
-        }
-
-        Path scriptPath = convertToWindowsPath(cygwinHome, DA_CLI_PY);
-
-        if (!Files.isRegularFile(scriptPath)) {
-            throw new IllegalStateException("Path is not a file: " + scriptPath);
-        }
-
-        String command = pythonPath + " " + scriptPath;
-
-        return command;
-    }
 
     public void fillDaData(CommunityDependency dependency) {
         log.debug("Starting analysis for: {}", dependency);
-        List<String> result =
-                OSCommandExecutor.runCommand(DA_CLI_CMD + " lookup " + dependency.toGav());
-        result = result.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
-        if (result.size() != 1) {
-            log.error("Invalid number of result lines ({}) for lookup for {}", result.size(), dependency.toGav());
-            log.error("Output: {}", StringUtils.join(result, '\n'));
-            throw new IllegalStateException("Failed to fill DA data. See log for more details");
-        }
-        String[] splitResult = result.get(0).split("\\s+");
-        String proposed = splitResult[1];
-        // ignored for now
-        //String state = splitResult[2];
-        String available = splitResult.length > 3 ? splitResult[3].trim() : null;
+        LookupGAVsRequest lookupRequest = new LookupGAVsRequest();
+        lookupRequest.setGavs(Collections.singletonList(dependency.toDaGav()));
 
-        if (!"None".equals(proposed)) {
+        List<LookupReport> lookupReports = reportsClient.lookupGav(lookupRequest);
+        LookupReport lookupReport = getSingle(lookupReports);
+        String bestMatchVersion = lookupReport.getBestMatchVersion();
+        String availableVersions = String.join(",", lookupReport.getAvailableVersions());
+
+        if (StringUtils.isNotBlank(bestMatchVersion)) {
             dependency.setState(DependencyState.MATCH_FOUND);
-            dependency.setRecommendation(proposed);
-            dependency.setAvailableVersions(available);
-        } else if (StringUtils.isNotEmpty(available)) {
+            dependency.setRecommendation(bestMatchVersion);
+            dependency.setAvailableVersions(availableVersions);
+        } else if (StringUtils.isNotBlank(availableVersions)) {
             dependency.setState(DependencyState.REVERSION_POSSIBLE);
-            dependency.setAvailableVersions(available);
+            dependency.setAvailableVersions(availableVersions);
         } else {
             dependency.setState(DependencyState.NO_MATCH);
             dependency.setAvailableVersions("None");
@@ -141,32 +79,27 @@ public class DADao {
         log.debug("Done for: {}", dependency);
     }
 
+    private LookupReport getSingle(List<LookupReport> lookupReports) {
+        if (lookupReports.size() != 1) {
+            throw new RuntimeException("Expected exactly one report, got: " + lookupReports.size());
+        }
+        return lookupReports.get(0);
+    }
+
     public List<DAListArtifact> getWhitelist() {
-        List<String> listAsStrings = OSCommandExecutor.runCommand(DA_CLI_CMD + " list white");
-        return listAsStrings.stream()
+        List<ProductWithGav> allWhiteArtifacts = listingsClient.getAllWhiteArtifacts();
+
+        return allWhiteArtifacts.stream()
                 .map(DAListArtifact::new)
                 .collect(Collectors.toList());
     }
 
-    public DADao() {
-        verifyDaCli();
-    }
+    private static DADao instance;
 
-    private void verifyDaCli() {
-        OSCommandExecutor.CommandExecutor executor =
-                OSCommandExecutor.executor(DA_CLI_CMD + " lookup junit:junit:4.12").exec();
-        int status = executor.getStatus();
-        if (status != 0) {
-            log.error("{} is not configured properly or network/VPN is not functional. Exiting", DA_CLI_CMD);
-            log.error("Test lookup failed with:");
-            log.error(executor.joinedOutput());
-            throw new IllegalStateException("DA test query failed");
+    public static synchronized DADao getInstance() {
+        if (instance == null) {
+            instance = new DADao(Config.instance().getDa());
         }
-    }
-
-    private static final DADao instance = new DADao();
-
-    public static DADao getInstance() {
         return instance;
     }
 }

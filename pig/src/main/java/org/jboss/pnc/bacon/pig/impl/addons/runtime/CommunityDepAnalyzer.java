@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class CommunityDepAnalyzer {
     private static final Logger log = LoggerFactory.getLogger(CommunityDepAnalyzer.class);
 
-    private final DADao daDao = DADao.getInstance();
+    private final DADao daDao;
 
     private final List<CommunityDependency> dependencies;
     private final List<String> downloadedForSwarm;
@@ -43,6 +43,7 @@ public class CommunityDepAnalyzer {
 
     public CommunityDepAnalyzer(List<String> dependencyLines,
                                 List<String> swarmLog) {
+        daDao = DADao.getInstance();
         downloadedForSwarm =
                 swarmLog.stream()
                         .filter(line -> line.startsWith("Downloaded"))

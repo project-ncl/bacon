@@ -37,7 +37,7 @@ import java.util.Map;
 import static java.lang.System.getProperty;
 
 /**
- * mstodo: consider saving the latest reached state to not repeat the steps already performed
+ * TODO: consider saving the latest reached state to not repeat the steps already performed
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
