@@ -24,6 +24,13 @@
             <groupId>org.aesh</groupId>
             <artifactId>aesh</artifactId>
         </dependency>
+        <dependency> <!-- TODO remove? -->
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <scope>provided</scope>
+            <version>1.5.3</version>
+        </dependency>
+
     </dependencies>
 
 

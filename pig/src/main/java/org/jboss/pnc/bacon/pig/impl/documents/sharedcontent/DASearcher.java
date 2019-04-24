@@ -38,9 +38,10 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 public class DASearcher {
     private Multimap<GAV, DAListArtifact> whitelisted;
-    private DADao da = DADao.getInstance();
+    private DADao da;
 
     public DASearcher() {
+        da = DADao.getInstance();
         List<DAListArtifact> whitelist = da.getWhitelist();
         whitelisted = Multimaps.index(whitelist, DAListArtifact::getGav);
     }
