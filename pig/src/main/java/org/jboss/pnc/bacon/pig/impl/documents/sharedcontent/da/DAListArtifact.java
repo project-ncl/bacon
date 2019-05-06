@@ -20,7 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import lombok.Getter;
 import lombok.experimental.Delegate;
-import org.jboss.bacon.da.rest.model.ProductWithGav;
+import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 /**
@@ -36,10 +36,10 @@ public class DAListArtifact {
     private String productVersion;
     private String state;
 
-    public DAListArtifact(ProductWithGav daGavWithProduct) {
+    public DAListArtifact(RestProductGAV daGavWithProduct) {
         gav = GAV.fromDaGav(daGavWithProduct.getGav());
         productName = daGavWithProduct.getName();
         productVersion = daGavWithProduct.getVersion();
-        state = daGavWithProduct.getSupportStatus().value();
+        state = daGavWithProduct.getSupportStatus().name();
     }
 }

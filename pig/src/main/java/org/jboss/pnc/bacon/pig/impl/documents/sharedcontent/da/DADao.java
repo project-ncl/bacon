@@ -20,15 +20,16 @@ package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.bacon.da.rest.api.ListingsApi;
 import org.jboss.bacon.da.rest.api.ReportsApi;
-import org.jboss.bacon.da.rest.model.LookupGAVsRequest;
-import org.jboss.bacon.da.rest.model.LookupReport;
-import org.jboss.bacon.da.rest.model.ProductWithGav;
+import org.jboss.da.listings.model.rest.RestProductGAV;
+import org.jboss.da.reports.model.request.LookupGAVsRequest;
+import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,9 +58,9 @@ public class DADao {
 
     public void fillDaData(CommunityDependency dependency) {
         log.debug("Starting analysis for: {}", dependency);
-        LookupGAVsRequest lookupRequest = new LookupGAVsRequest();
-        lookupRequest.setGavs(Collections.singletonList(dependency.toDaGav()));
-
+        LookupGAVsRequest lookupRequest = new LookupGAVsRequest(
+                Collections.singletonList(dependency.toDaGav())
+        );
         List<LookupReport> lookupReports = reportsClient.lookupGav(lookupRequest);
         LookupReport lookupReport = getSingle(lookupReports);
         String bestMatchVersion = lookupReport.getBestMatchVersion();
@@ -87,7 +88,7 @@ public class DADao {
     }
 
     public List<DAListArtifact> getWhitelist() {
-        List<ProductWithGav> allWhiteArtifacts = listingsClient.getAllWhiteArtifacts();
+        Collection<RestProductGAV> allWhiteArtifacts = listingsClient.getAllWhiteArtifacts();
 
         return allWhiteArtifacts.stream()
                 .map(DAListArtifact::new)

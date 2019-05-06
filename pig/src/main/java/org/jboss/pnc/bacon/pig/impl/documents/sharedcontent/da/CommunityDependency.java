@@ -76,10 +76,11 @@ public class CommunityDependency {
                 getGroupId(), getArtifactId(), getVersion(), state, recommendation, availableVersions, usedForSwarm);
     }
 
-    public org.jboss.bacon.da.rest.model.GAV toDaGav() {
-        return new org.jboss.bacon.da.rest.model.GAV()
-                .artifactId(getArtifactId())
-                .groupId(getGroupId())
-                .version(getVersion());
+    public org.jboss.da.model.rest.GAV toDaGav() {
+        return new org.jboss.da.model.rest.GAV(
+                getGroupId(),
+                getArtifactId(),
+                getVersion()
+        );
     }
 }
