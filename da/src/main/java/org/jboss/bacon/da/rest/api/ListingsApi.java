@@ -1,15 +1,14 @@
 package org.jboss.bacon.da.rest.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.jboss.bacon.da.rest.model.Artifact;
-import org.jboss.bacon.da.rest.model.Contains;
-import org.jboss.bacon.da.rest.model.ErrorMessage;
-import org.jboss.bacon.da.rest.model.ProductArtifact;
-import org.jboss.bacon.da.rest.model.ProductWithGav;
-import org.jboss.bacon.da.rest.model.Success;
+import org.jboss.da.listings.model.ProductSupportStatus;
+import org.jboss.da.listings.model.rest.ContainsResponse;
+import org.jboss.da.listings.model.rest.RestArtifact;
+import org.jboss.da.listings.model.rest.RestProduct;
+import org.jboss.da.listings.model.rest.RestProductArtifact;
+import org.jboss.da.listings.model.rest.RestProductGAV;
+import org.jboss.da.listings.model.rest.RestProductInput;
+import org.jboss.da.listings.model.rest.SuccessResponse;
+import org.jboss.da.listings.model.rest.WLFill;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -21,10 +20,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.Collection;
 import java.util.List;
 
 @Path("/listings")
-@Api(description = "the listings API")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2019-04-24T11:30:42.593645+02:00[Europe/Warsaw]")
 public interface ListingsApi {
 
@@ -32,196 +31,108 @@ public interface ListingsApi {
     @Path("/blacklist/gav")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Add an artifact to the blacklist", notes = "", response = Success.class, tags = {"blacklist",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class)
-    })
-    Response addBlackArtifact(@Valid Artifact artifact);
+    SuccessResponse addBlackArtifact(@Valid RestArtifact artifact);
 
     @POST
     @Path("/whitelist/product")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Add a product to the whitelist", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class),
-            @ApiResponse(code = 400, message = "Name and version parameters are required", response = ErrorMessage.class)
-    })
-    Response addProduct(@Valid ProductWithGav product);
+    SuccessResponse addProduct(RestProductInput product);
 
     @POST
     @Path("/whitelist/gav")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Add an artifact to the whitelist", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class),
-            @ApiResponse(code = 409, message = "Can't add artifact to whitelist, artifact is blacklisted", response = ErrorMessage.class)
-    })
-    Response addWhiteArtifact(@Valid ProductArtifact productArtifact);
+    SuccessResponse addWhiteArtifact(RestProductArtifact productArtifact);
 
     @GET
     @Path("/whitelist/artifacts/product")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all artifacts of product from the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    Response artifactsOfProduct(@QueryParam("name") String name, @QueryParam("version") String version);
+    List<RestProductGAV> artifactsOfProduct(@QueryParam("name") String name, @QueryParam("version") String version);
 
     @PUT
     @Path("/whitelist/product")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Change support status of product in whitelist", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class),
-            @ApiResponse(code = 400, message = "All parameters are required", response = ErrorMessage.class),
-            @ApiResponse(code = 404, message = "Product not found", response = ErrorMessage.class)
-    })
-    Response changeProductStatus(@Valid ProductWithGav product);
+    SuccessResponse changeProductStatus(RestProductInput product);
 
     @POST
     @Path("/whitelist/fill/gav")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Fill artifacts from given maven pom gav", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class)
-    })
-    Response fillFromGAVBom(@Valid ProductArtifact productArtifact);
+    SuccessResponse fillFromGAVBom(RestProductArtifact productArtifact);
 
     @POST
     @Path("/whitelist/fill/scm")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Fill artifacts from given git pom", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class)
-    })
-    Response fillFromGitBom(@Valid ProductArtifact productArtifact);
+    SuccessResponse fillFromGitBom(@Valid WLFill wlFill);
 
     @GET
     @Path("/blacklist")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all artifacts in the blacklist", notes = "", response = Artifact.class, responseContainer = "List", tags = {"blacklist",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Artifact.class, responseContainer = "List")
-    })
-    Response getAllBlackArtifacts();
+    Collection<RestArtifact> getAllBlackArtifacts();
 
     @GET
     @Path("/whitelist")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all artifacts in the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    List<ProductWithGav> getAllWhiteArtifacts();
+    Collection<RestProductGAV> getAllWhiteArtifacts();
 
     @GET
     @Path("/blacklist/ga")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get artifacts in the blacklist with given groupid and artifactid", notes = "", response = Artifact.class, responseContainer = "List", tags = {"blacklist",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Artifact.class, responseContainer = "List")
-    })
-    Response getBlackArtifacts(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid);
+    Collection<RestArtifact> getBlackArtifacts(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid);
 
     @GET
     @Path("/whitelist/product")
-    @Produces({"application/json"})
-    @ApiOperation(value = "Get product from the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    Response getProduct(@QueryParam("id") Long id, @QueryParam("name") String name, @QueryParam("version") String version, @QueryParam("supportStatus") String supportStatus);
+    Collection<RestProduct> getProduct(@QueryParam("id") Long id, @QueryParam("name") String name, @QueryParam("version") String version, @QueryParam("supportStatus") ProductSupportStatus supportStatus);
 
     @GET
     @Path("/whitelist/products")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all products from the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    Response getProducts();
+    Collection<RestProduct> getProducts();
 
     @GET
     @Path("/blacklist/gav")
     @Produces({"application/json"})
-    @ApiOperation(value = "Check if an artifact is in the blacklist", notes = "", response = Contains.class, tags = {"blacklist",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Contains.class),
-            @ApiResponse(code = 400, message = "All parameters are required", response = ErrorMessage.class),
-            @ApiResponse(code = 404, message = "Artifact is not in the blacklist", response = Contains.class)
-    })
-    Response isBlackArtifactPresent(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid, @QueryParam("version") String version);
+    ContainsResponse isBlackArtifactPresent(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid, @QueryParam("version") String version);
 
     @GET
     @Path("/whitelist/artifacts/gastatus")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all artifacts with specified GA and status from the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    Response productsWithArtifactGAAndStatus(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid, @QueryParam("status") String status);
+    List<RestProductGAV> productsWithArtifactGAAndStatus(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid, @QueryParam("status") ProductSupportStatus status);
 
     @GET
     @Path("/whitelist/artifacts/gav")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all artifacts with specified GAV from the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    Response productsWithArtifactGAV(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid, @QueryParam("version") String version) ;
+    List<RestProductGAV> productsWithArtifactGAV(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid, @QueryParam("version") String version) ;
 
     @GET
     @Path("/whitelist/artifacts/status")
     @Produces({"application/json"})
-    @ApiOperation(value = "Get all artifacts with specified status from the whitelist", notes = "", response = ProductWithGav.class, responseContainer = "List", tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = ProductWithGav.class, responseContainer = "List")
-    })
-    Response productsWithArtifactStatus(@QueryParam("status") String status) ;
+    List<RestProductGAV> productsWithArtifactStatus(@QueryParam("status") String status) ;
 
     @DELETE
     @Path("/blacklist/gav")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Remove an artifact from the blacklist", notes = "", response = Success.class, tags = {"blacklist",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class)
-    })
-    Response removeBlackArtifact(@Valid Artifact artifact) ;
+    SuccessResponse removeBlackArtifact(@Valid RestArtifact artifact) ;
 
     @DELETE
     @Path("/whitelist/product")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Remove a product from the whitelist", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class),
-            @ApiResponse(code = 404, message = "Product not found", response = ErrorMessage.class)
-    })
-    Response removeProduct(@Valid ProductWithGav product) ;
+    Response removeProduct(RestProductInput product) ;
 
     @DELETE
     @Path("/whitelist/gav")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Remove an artifact from the whitelist", notes = "", response = Success.class, tags = {"listings",})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class)
-    })
-    Response removeWhiteArtifact(@Valid Artifact artifact) ;
+    SuccessResponse removeWhiteArtifact(RestArtifact artifact) ;
 
     @DELETE
     @Path("/whitelist/gavproduct")
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @ApiOperation(value = "Remove an artifact from the product", notes = "", response = Success.class, tags = {"listings"})
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = Success.class)
-    })
-    Response removeWhiteArtifactFromProduct(@Valid ProductArtifact productArtifact);
+    SuccessResponse removeWhiteArtifactFromProduct(RestProductArtifact productArtifact);
 }

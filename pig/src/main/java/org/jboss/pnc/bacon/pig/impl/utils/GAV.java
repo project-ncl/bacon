@@ -22,6 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.io.FilenameUtils;
+import org.jboss.da.listings.model.rest.RestArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -99,7 +100,7 @@ public class GAV {
         return gav;
     }
 
-    public static GAV fromDaGav(org.jboss.bacon.da.rest.model.GAV gav) {
+    public static GAV fromDaGav(RestArtifact gav) {
         return new GAV(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), null);
     }
 
