@@ -18,11 +18,11 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.bacon.da.rest.api.ListingsApi;
-import org.jboss.bacon.da.rest.api.ReportsApi;
+import org.jboss.bacon.da.rest.ListingsApi;
+import org.jboss.bacon.da.rest.LookupReportDto;
+import org.jboss.bacon.da.rest.ReportsApi;
 import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.da.reports.model.request.LookupGAVsRequest;
-import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -46,7 +46,8 @@ public class DADao {
     private final ListingsApi listingsClient;
 
     public DADao(DaConfig daConfig) {
-        reportsClient = new ResteasyClientBuilder().build()
+        reportsClient = new ResteasyClientBuilder()
+                .build()
                 .target(daConfig.getUrl())
                 .proxy(ReportsApi.class);
 
@@ -61,8 +62,8 @@ public class DADao {
         LookupGAVsRequest lookupRequest = new LookupGAVsRequest(
                 Collections.singletonList(dependency.toDaGav())
         );
-        List<LookupReport> lookupReports = reportsClient.lookupGav(lookupRequest);
-        LookupReport lookupReport = getSingle(lookupReports);
+        List<LookupReportDto> lookupReports = reportsClient.lookupGav(lookupRequest);
+        LookupReportDto lookupReport = getSingle(lookupReports);
         String bestMatchVersion = lookupReport.getBestMatchVersion();
         String availableVersions = String.join(",", lookupReport.getAvailableVersions());
 
@@ -80,7 +81,7 @@ public class DADao {
         log.debug("Done for: {}", dependency);
     }
 
-    private LookupReport getSingle(List<LookupReport> lookupReports) {
+    private LookupReportDto getSingle(List<LookupReportDto> lookupReports) {
         if (lookupReports.size() != 1) {
             throw new RuntimeException("Expected exactly one report, got: " + lookupReports.size());
         }
@@ -103,4 +104,5 @@ public class DADao {
         }
         return instance;
     }
+
 }
