@@ -17,9 +17,57 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.BuildClient;
 
-@GroupCommandDefinition(name = "build", description = "build", groupCommands = {})
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+@GroupCommandDefinition(name = "build", description = "build", groupCommands = {
+        BuildCli.DownloadSources.class
+})
 public class BuildCli extends AbstractCommand {
+
+
+    private BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration());
+
+    @CommandDefinition(name = "download-sources", description = "Download SCM sources used for the build")
+    public class DownloadSources extends AbstractCommand {
+
+        @Argument(required = true, description = "Id of build")
+        private int id;
+
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                String filename = id + "-sources.tar.gz";
+
+                Response response = client.getInternalScmArchiveLink(id);
+
+                InputStream in = (InputStream) response.getEntity();
+
+                Path path = Paths.get(filename);
+
+                try {
+                    Files.copy(in, path);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+    }
 }
