@@ -17,17 +17,25 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.ProductMilestoneClient;
+import org.jboss.pnc.client.ProductVersionClient;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductMilestoneRef;
+import org.jboss.pnc.dto.ProductVersion;
+import org.jboss.pnc.dto.ProductVersionRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
-import static org.jboss.pnc.bacon.pig.impl.pnc.PncCliParser.parse;
-import static org.jboss.pnc.bacon.pig.impl.pnc.PncCliParser.parseList;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -36,50 +44,68 @@ import static org.jboss.pnc.bacon.pig.impl.pnc.PncCliParser.parseList;
  */
 public class PncConfigurator {
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("uuuu-MM-dd");
-
     private static final Logger log = LoggerFactory.getLogger(PncConfigurator.class);
 
-    private static final String START_DATE = LocalDateTime.now().format(DATE_FORMAT);
-    private static final String END_DATE = LocalDateTime.now().plusDays(1).format(DATE_FORMAT);
+    private static final Instant START_DATE = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC);
+    private static final Instant END_DATE = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
-    public static Integer getOrGenerateMilestone(Integer versionId,
-                                                 String version,
-                                                 String milestone,
-                                                 String issueTrackerUrl) {
-        log.info("Generating milestone for versionId {} and milestone {} in PNC", versionId, milestone);
-        Optional<Integer> maybeMilestoneId = getExistingMilestone(versionId, version, milestone);
-        return maybeMilestoneId.orElseGet(() -> createMilestone(versionId, milestone, issueTrackerUrl));
+    private final ProductMilestoneClient milestoneClient;
+    private final ProductVersionClient versionClient;
+
+    public PncConfigurator() {
+        // TODO: pull out creating all the clients to one factory?
+        milestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration());
+        versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
     }
 
-    public static void markMilestoneCurrent(Integer versionId, Integer milestoneId) {
-        log.info("Making the milestone current");
-        String command = String.format("update-product-version %s -cm %d", versionId, milestoneId);
-        PncDao.invoke(command);
+    public ProductMilestone getOrGenerateMilestone(ProductVersionRef version,
+                                                   String milestone,
+                                                   String issueTrackerUrl) {
+        log.info("Generating milestone for versionId {} and milestone {} in PNC", version, milestone);
+
+        return getExistingMilestone(version, milestone)
+              .orElseGet(() -> createMilestone(version, milestone, issueTrackerUrl));
+    }
+
+    public void markMilestoneCurrent(ProductVersionRef version, ProductMilestoneRef milestone) {
+        ProductVersion updated = ProductVersion.builder()
+              .version(version.getVersion())
+              .currentProductMilestone(milestone)
+              .build();
+        try {
+            versionClient.update(version.getId(), updated);
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to set milestone current");
+        }
     }
 
 
-    public static Optional<Integer> getExistingMilestone(Integer versionId, String version, String milestone) {
-        String command = String.format("list-milestones -q productVersion.id==%s", versionId);
-        List<String> strings = PncDao.invoke(command, 4);
-        List<Map<String, ?>> milestones = parseList(strings);
-        return milestones.stream()
-                .filter(
-                        m -> (version + '.' + milestone).equals(m.get("version"))
-                )
-                .map(m -> Integer.valueOf(m.get("id").toString()))
-                .findAny();
+    public Optional<ProductMilestone> getExistingMilestone(ProductVersionRef version, String milestone) {
+        String milestoneName = version.getVersion() + '.' + milestone;
+        RemoteCollection<ProductMilestone> milestones =
+              null;
+        try {
+            milestones = versionClient.getMilestones(version.getId(), Optional.empty(), Optional.of("version==" + milestoneName));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Error getting milestone for milestoneName: " + milestoneName, e);
+        }
+
+        return toStream(milestones).findAny();
     }
 
-    private static Integer createMilestone(Integer versionId, String milestone, String issueTrackerUrl) {
-        String command = String.format("create-milestone %s %s %s %s %s",
-                versionId, milestone, START_DATE, END_DATE,
-                issueTrackerUrl
-        );
-        Map<String, ?> milestoneData = parse(PncDao.invoke(command));
-        return Integer.valueOf(milestoneData.get("id").toString());
-    }
+    private ProductMilestone createMilestone(ProductVersionRef version, String milestoneName, String issueTrackerUrl) {
+        ProductMilestone milestone = ProductMilestone.builder()
+              .productVersion(version)
+              .issueTrackerUrl(issueTrackerUrl)
+              .startingDate(START_DATE)
+              .endDate(END_DATE)
+              .version(milestoneName) // todo not sure if it's what should be here
+              .build();
 
-    private PncConfigurator() {
+        try {
+            return milestoneClient.createNew(milestone);
+        } catch (ClientException e) {
+            throw new RuntimeException("Error creating milestone " + milestoneName, e);
+        }
     }
 }

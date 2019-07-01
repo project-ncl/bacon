@@ -18,15 +18,18 @@
 
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import static org.jboss.pnc.bacon.pig.impl.pnc.PncCliParser.parse;
-import static org.jboss.pnc.bacon.pig.impl.pnc.PncCliParser.parseList;
+import static java.util.Optional.of;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -34,78 +37,45 @@ import static org.jboss.pnc.bacon.pig.impl.pnc.PncCliParser.parseList;
  * Date: 6/3/17
  */
 public class BuildInfoCollector {
-    private static final Logger log = LoggerFactory.getLogger(BuildInfoCollector.class);
+    private final BuildClient buildClient;
 
-//    public static Map<String, BuildData> retrieveBuildDataByConfigName() {
-//        List<String> buildConfigIds = getBuildConfigIds();
-//        log.info("Will fetch build records for build configs: {}", buildConfigIds);
-//
-//        Map<String, BuildData> buildsByName = buildConfigIds.parallelStream()
-//                .map(this::getBuildDataForConfigId)
-//                .collect(Collectors.toMap(BuildData::getName, Function.identity()));
-//        buildsByName.values().forEach(BuildInfoCollector::addBuiltArtifacts);
-//        return buildsByName;
-//    }
-
-    public static PncBuild getBuildData(Integer buildId) {
-        return getBuildData(buildId, false);
-    }
-
-    public static PncBuild getBuildData(Integer buildId, boolean full) {
-        String command = String.format("get-build-record %d", buildId);
-        List<String> recordAsString = PncDao.invoke(command, 4);
-        Map<String, ?> buildRecord = parse(recordAsString);
-        PncBuild result = new PncBuild(buildRecord);
-        if (full) {
-            addBuiltArtifacts(result);
-            addBuildLog(result);
+    public void addDependencies(PncBuild bd) {
+        List<Artifact> artifacts = null;
+        try {
+            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId()));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
         }
-        return result;
+
+        bd.setDependencyArtifacts(artifacts);
     }
 
-    public static void addBuildLog(PncBuild bd) {
-        String command = String.format("get-log-for-record %d", bd.getId());
-        bd.setBuildLog(
-                PncDao.invoke(command, 4)
-        );
-    }
+    public PncBuild getLatestBuild(Integer configId) {
+        try {
+            Iterator<Build> buildIterator =
+                  // todo: the chance that this is okay is small ;)
+                  buildClient.getAll(null, null,
+                        of("=desc=id"), of("status==SUCCESS;build_configuration_id==" + configId)
+                  ).iterator();
 
-    public static void addBuiltArtifacts(PncBuild bd) {
-        String command = String.format("list-built-artifacts %d -p 10000", bd.getId());
-        bd.setBuiltArtifacts(
-                parseList(PncDao.invoke(command, 4))
-        );
-    }
-
-    public static void addDependencies(PncBuild bd) {
-        int pageIndex = 0;
-
-        List<Map<String, ?>> artifactsAsMaps = new ArrayList<>();
-        while (true) {
-            String command = String.format("list-dependency-artifacts %d -p 50 --page-index %d", bd.getId(), pageIndex++);
-            List<String> output = PncDao.invoke(command, 4);
-
-            if (output.isEmpty()) {
-                break;
-            } else {
-                artifactsAsMaps.addAll(parseList(output));
+            if (!buildIterator.hasNext()) {
+                throw new NoSuccessfulBuildException(configId);
             }
+
+            Build build = buildIterator.next();
+
+            PncBuild result = new PncBuild(build);
+
+            buildClient.getBuildLogs(build.getId()).ifPresent(result::setBuildLog);
+            result.setBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
+
+            return result;
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to get latest successful build for " + configId, e);
         }
-
-        bd.setDependencyArtifacts(artifactsAsMaps);
     }
 
-    public static PncBuild getLatestBuild(Integer configId) {
-        String command = String.format("list-records-for-build-configuration -i %d --sort '=desc=id' --page-size 1 -q 'status==SUCCESS'", configId);
-        return PncDao.invokeAndParseList(command, 4)
-                .stream()
-                .map(PncBuild::new)
-                .peek(BuildInfoCollector::addBuiltArtifacts)
-                .peek(BuildInfoCollector::addBuildLog)
-                .findAny()
-                .orElseThrow(() -> new NoSuccessfulBuildException(configId));
-    }
-
-    private BuildInfoCollector() {
+    public BuildInfoCollector() {
+        buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
     }
 }

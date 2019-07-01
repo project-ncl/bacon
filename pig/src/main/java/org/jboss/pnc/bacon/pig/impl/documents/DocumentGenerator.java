@@ -19,7 +19,7 @@ package org.jboss.pnc.bacon.pig.impl.documents;
 
 import org.jboss.pnc.bacon.pig.impl.config.Config;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.SharedContentReportGenerator;
-import org.jboss.pnc.bacon.pig.impl.pnc.Artifact;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
@@ -98,7 +98,7 @@ public class DocumentGenerator {
         return builds.values().stream()
                 .map(PncBuild::getBuiltArtifacts)
                 .flatMap(List::stream)
-                .map(Artifact::toGAV)
+                .map(ArtifactWrapper::toGAV)
                 .collect(Collectors.toSet());
     }
 }

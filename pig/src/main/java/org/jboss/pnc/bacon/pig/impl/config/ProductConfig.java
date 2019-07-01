@@ -25,7 +25,7 @@ import lombok.Data;
  * Date: 11/28/17
  */
 @Data
-public class Product {
+public class ProductConfig {
     private String name;
     private String abbreviation;
     private String stage;

@@ -19,6 +19,9 @@ package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.jboss.pnc.dto.GroupConfigurationRef;
+import org.jboss.pnc.dto.ProductMilestoneRef;
+import org.jboss.pnc.dto.ProductVersionRef;
 
 import java.util.List;
 
@@ -30,8 +33,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ImportResult {
-    private Integer milestoneId;
-    private Integer buildGroupId;
-    private Integer versionId;
+    private ProductMilestoneRef milestone;
+    private GroupConfigurationRef buildGroup;
+    private ProductVersionRef version;
     private List<BuildConfigData> buildConfigs;
 }

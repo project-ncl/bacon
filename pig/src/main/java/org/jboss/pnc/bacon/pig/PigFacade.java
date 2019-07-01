@@ -29,7 +29,6 @@ import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuilder;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncDao;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncEntitiesImporter;
 import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
 import org.jboss.pnc.bacon.pig.impl.repo.RepoManager;
@@ -37,6 +36,13 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.script.ScriptGenerator;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.dto.BuildPushResult;
+import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.enums.BuildPushStatus;
+import org.jboss.pnc.enums.RebuildMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +80,7 @@ public class PigFacade {
 
     public static Map<String, PncBuild> build(boolean tempBuild,
                                               boolean tempBuildTS,
-                                              String rebuildMode) {
+                                              RebuildMode rebuildMode) {
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -84,7 +90,7 @@ public class PigFacade {
             log.info("Temprorary build");
         }
 
-        new PncBuilder().buildAndWait(importResult.getBuildGroupId(),
+        new PncBuilder().buildAndWait(importResult.getBuildGroup(),
                 tempBuild,
                 tempBuildTS,
                 rebuildMode);
@@ -103,7 +109,7 @@ public class PigFacade {
             String repoZipPath,
             boolean tempBuild,
             boolean tempBuildTS,
-            String rebuildMode) {
+            RebuildMode rebuildMode) {
 
         PigContext context = context();
 
@@ -195,11 +201,11 @@ public class PigFacade {
         ScriptGenerator scriptGenerator = new ScriptGenerator(context().getConfig(),
                 context().getDeliverables());
         scriptGenerator.generateReleaseScripts(
-                context().getPncImportResult().getMilestoneId(),
+                context().getPncImportResult().getMilestone(),
                 context().getRepositoryData().getRepositoryPath(),
                 Paths.get(context().getTargetPath()),
                 Paths.get(context().getReleasePath()),
-                getBrewTag(context().getPncImportResult().getVersionId()),
+                getBrewTag(context().getPncImportResult().getVersion()),
                 getBuildIdsToPush(context().getBuilds()));
     }
 
@@ -241,28 +247,27 @@ public class PigFacade {
         return PigContext.get();
     }
 
-    private static String getBrewTag(Integer versionId) {
-        String command = String.format("get-product-version %d", versionId);
-        Map<String, ?> result = PncDao.invokeAndParse(command, 4);
-
-        @SuppressWarnings("unchecked")
-        Map<String, ?> versionAttributes = (Map<String, ?>) result.get("attributes");
-
-        return (String) versionAttributes.get("BREW_TAG_PREFIX");
+    private static String getBrewTag(ProductVersionRef version) {
+        return version.getAttributes().get("BREW_TAG_PREFIX");
     }
 
     private static List<Integer> getBuildIdsToPush(Map<String, PncBuild> builds) {
         return builds.values()
                 .stream()
-                .map(PncBuild::getId)
                 .filter(PigFacade::notPushedToBrew)
+                .map(PncBuild::getId)
                 .collect(Collectors.toList());
     }
 
-    private static boolean notPushedToBrew(Integer buildId) {
-        String command = String.format("brew-push status %d", buildId);
-        Map<String, ?> result = PncDao.invokeAndParse(command);
-        return !"SUCCESS".equals(result.get("status"));
+    private static boolean notPushedToBrew(PncBuild build) {
+        BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration()); // todo factory or sth
+        BuildPushResult pushResult = null;
+        try {
+            pushResult = buildClient.getPushResult(build.getId());
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
+        }
+        return pushResult != null && pushResult.getStatus() == BuildPushStatus.SUCCESS;
     }
 
     private static RepositoryData parseRepository(File repositoryZipPath) {
@@ -289,21 +294,6 @@ public class PigFacade {
                 .forEach(AddOn::trigger);
     }
 
-//    private static void verifyZipContents() throws IOException {
-    // Ensure all zip archives have a directory within it
-//        TODO bring back?
-//        Files.list(Paths.get(releasePath)).filter(p -> p.toString().endsWith("zip")).forEach(p -> {
-//            log.info("verifying archive: {}", p);
-    // E.g. for rhoar-wildfly-swarm-7.0.0.ER5-src.zip it is "src"
-//            String zipSuffix = p.toString().substring(p.toString().lastIndexOf(version) + version.length(), p.toString().lastIndexOf(".zip"));
-//            String topLevelDir = config.getOutputPrefixes().getReleaseFile() + zipVersion + zipSuffix;
-//            String command = String.format("/bin/bash %s/verify-archive.sh %s %s", Paths.get(JarUtils.getJarLocation(SwarmBuilder.class)), p.toAbsolutePath(),
-//                    topLevelDir);
-//            List<String> output = OSCommandExecutor.executor(command).redirectErrorStream(true).failOnInvalidStatusCode().exec().getOut();
-//            log.debug("top leve directory check output:\n{}", output);
-//        });
-//    }
-
     public static RepositoryData generateRepo(boolean removeGeneratedM2Dups) {
         PigContext context = context();
         RepoManager repoManager = new RepoManager(context.getConfig(),
@@ -316,10 +306,11 @@ public class PigFacade {
     }
 
     private static Map<String, PncBuild> getBuilds(ImportResult importResult) {
+        BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
         return importResult.getBuildConfigs()
                 .parallelStream()
                 .map(BuildConfigData::getId)
-                .map(BuildInfoCollector::getLatestBuild)
+                .map(buildInfoCollector::getLatestBuild)
                 .collect(Collectors.toMap(PncBuild::getName, Function.identity()));
     }
 

@@ -23,7 +23,7 @@ import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
 import org.jboss.pnc.bacon.pig.impl.config.Config;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
-import org.jboss.pnc.bacon.pig.impl.pnc.Artifact;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
@@ -47,6 +47,7 @@ import java.util.Properties;
 public class RepoManager extends DeliverableManager<RepoGenerationData, RepositoryData> {
     private static final Logger log = LoggerFactory.getLogger(RepoManager.class);
 
+    private final BuildInfoCollector buildInfoCollector;
     @Getter
     private final RepoGenerationData generationData;
     private File targetRepoContentsDir;
@@ -63,6 +64,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         generationData = config.getFlow().getRepositoryGeneration();
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
         this.configurationDirectory = configurationDirectory;
+        buildInfoCollector = new BuildInfoCollector();
     }
 
     public RepositoryData prepare() {
@@ -84,8 +86,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private RepositoryData packAllBuiltAndDependencies() {
         PncBuild build = getBuild(generationData.getSourceBuild());
 
-        BuildInfoCollector.addDependencies(build);
-        List<Artifact> artifactsToPack = build.getBuiltArtifacts();
+        buildInfoCollector.addDependencies(build);
+        List<ArtifactWrapper> artifactsToPack = build.getBuiltArtifacts();
         artifactsToPack.addAll(build.getDependencyArtifacts());
 
         artifactsToPack.removeIf(artifact -> !artifact.getGapv().contains("redhat-") && !artifact.getGapv().contains("eap-runtime-artifacts"));
@@ -158,7 +160,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         ExternalArtifactDownloader.downloadExternalArtifact(gav, targetRepoContentsDir.toPath());
     }
 
-    private void downloadArtifact(Artifact artifact) {
+    private void downloadArtifact(ArtifactWrapper artifact) {
         Path versionPath = targetRepoContentsDir.toPath().resolve(artifact.toGAV().toVersionPath());
         versionPath.toFile().mkdirs();
         artifact.downloadToDirectory(versionPath);

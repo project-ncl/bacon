@@ -39,6 +39,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * TODO: replace with programmatic maven api to remove OSCommandExecutor?
+ * TODO: CON: would mean that users have to stick to the same maven version
+ *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 7/25/17
