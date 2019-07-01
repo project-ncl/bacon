@@ -20,15 +20,19 @@ package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.enums.BuildStatus;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Optional.of;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
 import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
 
 /**
@@ -38,6 +42,7 @@ import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
  */
 public class BuildInfoCollector {
     private final BuildClient buildClient;
+    private final BuildConfigurationClient buildConfigClient;
 
     public void addDependencies(PncBuild bd) {
         List<Artifact> artifacts = null;
@@ -52,11 +57,14 @@ public class BuildInfoCollector {
 
     public PncBuild getLatestBuild(Integer configId) {
         try {
-            Iterator<Build> buildIterator =
-                  // todo: the chance that this is okay is small ;)
-                  buildClient.getAll(null, null,
-                        of("=desc=id"), of("status==SUCCESS;build_configuration_id==" + configId)
-                  ).iterator();
+            BuildsFilterParameters filter = new BuildsFilterParameters();
+            filter.setLatest(true);
+            Iterator<Build> buildIterator = buildConfigClient.getBuilds(
+                  configId,
+                  filter,
+                  of("=desc=id"),
+                  query("status==", BuildStatus.SUCCESS)
+            ).iterator();
 
             if (!buildIterator.hasNext()) {
                 throw new NoSuccessfulBuildException(configId);
@@ -77,5 +85,6 @@ public class BuildInfoCollector {
 
     public BuildInfoCollector() {
         buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
+        buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
     }
 }
