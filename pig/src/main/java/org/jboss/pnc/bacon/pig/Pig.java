@@ -29,6 +29,7 @@ import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.enums.RebuildMode;
 
 import java.util.Map;
 
@@ -126,7 +127,7 @@ public class Pig extends AbstractCommand {
                 overrideRequired = true,
                 defaultValue = REBUILD_MODE_DEFAULT,
                 description = REBUILD_MODE_DESC)
-        private String rebuildMode;
+        private RebuildMode rebuildMode;
 
         @Option(name = "skipRepo",
                 overrideRequired = true,
@@ -241,7 +242,7 @@ public class Pig extends AbstractCommand {
                 overrideRequired = true,
                 defaultValue = REBUILD_MODE_DEFAULT,
                 description = REBUILD_MODE_DESC)
-        private String rebuildMode;
+        private RebuildMode rebuildMode;
 
         @Override
         public Map<String, PncBuild> doExecute() {

@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
-    private @NotBlank Product product;
+    private @NotBlank ProductConfig product;
     private @NotBlank String version;
     private @NotBlank String milestone;
     private @NotBlank String group;

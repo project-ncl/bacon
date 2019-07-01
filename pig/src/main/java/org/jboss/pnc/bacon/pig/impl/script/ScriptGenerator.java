@@ -23,6 +23,7 @@ import org.jboss.pnc.bacon.pig.impl.config.Config;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.dto.ProductMilestoneRef;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -45,13 +46,13 @@ public class ScriptGenerator {
         this.deliverables = deliverables;
     }
 
-    public void generateReleaseScripts(Integer milestoneId,
+    public void generateReleaseScripts(ProductMilestoneRef milestone,
                                        Path repoZipLocation,
                                        Path targetDir,
                                        Path releaseDir,
                                        String brewTag,
                                        List<Integer> buildIdsToPush) {
-        ReleaseScriptData dataRoot = getReleaseScriptData(milestoneId, repoZipLocation, targetDir, releaseDir, brewTag, buildIdsToPush);
+        ReleaseScriptData dataRoot = getReleaseScriptData(milestone, repoZipLocation, targetDir, releaseDir, brewTag, buildIdsToPush);
         generateCloseMilestoneScript(targetDir, dataRoot);
         generateUploadToCandidatesScript(targetDir, dataRoot);
     }
@@ -73,7 +74,7 @@ public class ScriptGenerator {
         generator.generateFileFromResource(dataRoot, "release.sh", releaseScriptLocation);
     }
 
-    private ReleaseScriptData getReleaseScriptData(Integer milestoneId,
+    private ReleaseScriptData getReleaseScriptData(ProductMilestoneRef milestone,
                                                    Path repoZipLocation,
                                                    Path targetDir,
                                                    Path releaseDir,
@@ -84,7 +85,7 @@ public class ScriptGenerator {
         String nvrListPath = releaseDir.resolve(nvrListName).toAbsolutePath().toString();
         String productWithVersion = config.getProduct().prefix() + "-" + config.getVersion() + "." + config.getMilestone();
 
-        return new ReleaseScriptData(milestoneId,
+        return new ReleaseScriptData(milestone.getId(),
                 nvrScriptLocation,
                 repoZipLocation.toAbsolutePath().toString(),
                 nvrListPath,

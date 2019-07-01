@@ -21,17 +21,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuildConfig;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.SCMRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -44,6 +50,10 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
  */
 @Data
 public class BuildConfig {
+    public static final String BUILD_FORCE = "BUILD_FORCE";
+
+    private static final Logger log = LoggerFactory.getLogger(BuildConfig.class);
+
     private String name;
     private String project;
     private String buildScript;
@@ -85,75 +95,49 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public boolean isTheSameAs(PncBuildConfig old) {
+    public boolean isTheSameAs(BuildConfiguration old) {
         return old != null
                 && StringUtils.equals(name, old.getName())
-                && StringUtils.equals(project, old.getProject())
+                && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
                 && StringUtils.equals(scmRevision, old.getScmRevision())
-                && environmentId.equals(old.getEnvironmentId())
-                && customPmeParameters.equals(old.getCustomPmeParameters())
-                && urlsEqual(old)
+                && environmentId.equals(old.getEnvironment().getId())
+                && customPmeParameters.equals(getPmeParameters(old))
+                && urlsEqual(old.getRepository())
                 && !isBranchModified(old);
     }
 
-    private synchronized boolean isBranchModified(PncBuildConfig oldVersion) {
+    private Set<String> getPmeParameters(BuildConfiguration old) {
+        String parametersAsString = old.getGenericParameters().get("CUSTOM_PME_PARAMETERS");
+        return Arrays.stream(parametersAsString.split(","))
+              .collect(Collectors.toSet());
+    }
+
+    private synchronized boolean isBranchModified(BuildConfiguration oldVersion) {
         if (branchModified == null) {
-            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(), oldVersion.getScmUrl(), getScmRevision());
+            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(), oldVersion.getRepository().getInternalUrl(), getScmRevision());
         }
         return branchModified;
     }
 
-    private boolean urlsEqual(PncBuildConfig old) {
-        return StringUtils.equals(externalScmUrl, old.getExternalScmUrl()) ||
-                StringUtils.equals(scmUrl, old.getScmUrl());
+    private boolean urlsEqual(SCMRepository repo) {
+        return StringUtils.equals(externalScmUrl, repo.getExternalUrl()) ||
+                StringUtils.equals(scmUrl, repo.getInternalUrl());
     }
 
     @JsonIgnore
-    public String getGenericParameters(PncBuildConfig oldConfig, boolean forceRebuild) {
-        String oldForceValue = oldConfig == null ? "" : oldConfig.getBuildForceParameter();
+    public Map<String, String> getGenericParameters(BuildConfiguration oldConfig, boolean forceRebuild) {
+        Map<String, String> result = new HashMap<>();
+
+        String oldForceValue = oldConfig == null ? "" : oldConfig.getGenericParameters().getOrDefault(BUILD_FORCE, "");
         String forceValue = forceRebuild ? randomAlphabetic(5) : oldForceValue;
-        String forceParameter = ", '" + PncBuildConfig.BUILD_FORCE + "': '" + forceValue + "'";
+
         String dependencyExclusions = String.join(" ", customPmeParameters);
-        if (dependencyExclusions.isEmpty()) {
-            return "\"{'CUSTOM_PME_PARAMATERS':''" + forceParameter + "}\"";
-        } else {
-            return String.format("\"{'CUSTOM_PME_PARAMETERS':'%s'" + forceParameter + "}\"", dependencyExclusions);
-        }
-    }
 
-    public String toCreateParams(Integer projectId, Integer repoId, Integer versionId) {
-        return String.format("\"%s\" %s %s %s %s \"%s\" --product-version-id %d --generic-parameters %s",
-                name,
-                projectId,
-                environmentId,
-                repoId,
-                scmRevision,
-                buildScript,
-                versionId,
-                getGenericParameters(null, false)
-        );
-    }
+        result.put("CUSTOM_PME_PARAMATERS", dependencyExclusions);
+        result.put(BUILD_FORCE, forceValue);
 
-    public String toUpdateParams(Integer projectId, PncBuildConfig oldVersion) {
-        // TODO: updating versionId?
-        return " --scm-revision " + getScmRevision() +
-                " --build-script \"" + getBuildScript() + "\"" + " --generic-parameters " +
-                getGenericParameters(oldVersion, isBranchModified(oldVersion)) +
-                paramIfChanged(" --name ", name, oldVersion.getName()) +
-                paramIfChanged(" --project ", project, oldVersion.getProject(), projectId) +
-                paramIfChanged(" --environment ", environmentId, oldVersion.getEnvironmentId());
-    }
-
-    private <T, V> String paramIfChanged(String param, V newValue, V oldValue, T mappedValue) {
-        if (!newValue.equals(oldValue)) {
-            return param + mappedValue;
-        }
-        return "";
-    }
-
-    private <V> String paramIfChanged(String param, V newValue, V oldValue) {
-        return paramIfChanged(param, newValue, oldValue, newValue);
+        return result;
     }
 
     //Work around for NCL-3670
@@ -172,17 +156,16 @@ public class BuildConfig {
         // TODO!
     }
 
-    public boolean matchesRepository(Map<String, ?> repositoryAsMap) {
-        String currentInternalUrl = (String) repositoryAsMap.get("internal_url");
+    public boolean matchesRepository(SCMRepository repository) {
+        String currentInternalUrl = repository.getInternalUrl();
 
         // currentInternalUrl cannot be null, if the url from the config is not null, they have to be the same
         if (scmUrl != null) {
             return areSameRepoUrls(scmUrl, currentInternalUrl);
         }
 
-        String currentExternalUrl = (String) repositoryAsMap.get("external_url");
         // if the internal scm url is not provided in the config, check if external scm urls are the same
-        return externalScmUrl != null && areSameRepoUrls(currentExternalUrl, externalScmUrl);
+        return externalScmUrl != null && areSameRepoUrls(repository.getExternalUrl(), externalScmUrl);
     }
 
     private boolean areSameRepoUrls(String scmUrl1, String scmUrl2) {
@@ -203,16 +186,12 @@ public class BuildConfig {
         return url;
     }
 
-    public String toCreateParamsForExternalScm(Integer projectId, int versionId) {
-        return String.format("%s %s \"%s\" %d %d \"%s\" -pvi %d --generic-parameters %s",
-                externalScmUrl,
-                scmRevision,
-                name,
-                projectId,
-                environmentId,
-                buildScript,
-                versionId,
-                getGenericParameters(null, false)
-        );
+    public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
+       String oldInternalUrl = oldConfig.getRepository().getInternalUrl();
+       if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
+            log.error("Scm url for {} changed from {} to {}. Please update it via UI", name, oldInternalUrl, scmUrl);
+            return false;
+        }
+        return true;
     }
 }

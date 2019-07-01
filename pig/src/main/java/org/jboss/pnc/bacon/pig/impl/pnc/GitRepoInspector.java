@@ -48,6 +48,8 @@ public class GitRepoInspector {
 
     private static final Logger log = LoggerFactory.getLogger(GitRepoInspector.class);
 
+    private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
+
     public static boolean isModifiedBranch(Integer configId,
                                            String internalUrl,
                                            String refSpec) {
@@ -59,7 +61,6 @@ public class GitRepoInspector {
 
             String tagName = getLatestBuiltRevision(configId);
             Set<String> baseCommitPosibilities = getBaseCommitPossibilities(git, tagName);
-            log.info("tag name: " + tagName + ", baseCommit: " + baseCommitPosibilities + ", latestCommit: " + latestCommit);  // mstodo remove
 
             return !baseCommitPosibilities.contains(latestCommit);
         } catch (NoSuccessfulBuildException e) {
@@ -133,8 +134,8 @@ public class GitRepoInspector {
     }
 
     private static String getLatestBuiltRevision(Integer configId) {
-        PncBuild latestBuild = BuildInfoCollector.getLatestBuild(configId);
-        return latestBuild.getScmRevision();
+        PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId);
+        return latestBuild.getBuildConfigurationRevision().getScmRevision();
     }
 
     private static URIish toAnonymous(String internalUrl) throws MalformedURLException {

@@ -17,16 +17,37 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.Config;
-import org.jboss.pnc.bacon.pig.impl.config.Product;
+import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
 import org.jboss.pnc.bacon.pig.impl.utils.CollectionUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.OSCommandException;
-import org.jboss.pnc.bacon.pig.impl.utils.OSCommandExecutor;
+import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.BuildConfigurationClient;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.GroupConfigurationClient;
+import org.jboss.pnc.client.ProductClient;
+import org.jboss.pnc.client.ProductVersionClient;
+import org.jboss.pnc.client.ProjectClient;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.client.SCMRepositoryClient;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.BuildConfigurationRef;
+import org.jboss.pnc.dto.Environment;
+import org.jboss.pnc.dto.GroupConfiguration;
+import org.jboss.pnc.dto.Product;
+import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductRef;
+import org.jboss.pnc.dto.ProductVersion;
+import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.Project;
+import org.jboss.pnc.dto.ProjectRef;
+import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
+import org.jboss.pnc.dto.response.RepositoryCreationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +56,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
-import static org.jboss.pnc.bacon.pig.impl.pnc.PncConfigurator.getExistingMilestone;
-import static org.jboss.pnc.bacon.pig.impl.pnc.PncDao.invokeAndParseListRetryingWithTimeout;
+import static java.util.Optional.empty;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.findByNameQuery;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.maybeSingle;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -50,26 +71,42 @@ import static org.jboss.pnc.bacon.pig.impl.pnc.PncDao.invokeAndParseListRetrying
  */
 public class PncEntitiesImporter {
     private static final Logger log = LoggerFactory.getLogger(PncEntitiesImporter.class);
-    public static final String LIST_PRODUCTS = "list-products";
 
-    private int productId;
-    private int versionId;
-    private int milestoneId;
-    private int buildGroupId;
+    private final BuildConfigurationClient buildConfigClient;
+    private final GroupConfigurationClient groupConfigClient;
+    private final ProductClient productClient;
+    private final ProjectClient projectClient;
+    private final SCMRepositoryClient repoClient;
+    private final ProductVersionClient versionClient;
+
+    private ProductRef product;
+    private ProductVersionRef version;
+    private ProductMilestone milestone;
+    private GroupConfiguration buildGroup;
     private List<BuildConfigData> configs;
     private Config config = PigContext.get().getConfig();
 
+    private PncConfigurator pncConfigurator = new PncConfigurator();
+
+    public PncEntitiesImporter() {
+        buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
+        groupConfigClient = new GroupConfigurationClient(PncClientHelper.getPncConfiguration());
+        productClient = new ProductClient(PncClientHelper.getPncConfiguration());
+        projectClient = new ProjectClient(PncClientHelper.getPncConfiguration());
+        repoClient = new SCMRepositoryClient(PncClientHelper.getPncConfiguration());
+        versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+    }
+
     public ImportResult performImport() {
-        productId = getOrGenerateProduct();
-        versionId = getOrGenerateVersion(productId);
-        milestoneId = PncConfigurator.getOrGenerateMilestone(
-                versionId,
-                config.getMajorMinor(),
-                pncMilestoneString(),
-                config.getProduct().getIssueTrackerUrl()
+        product = getOrGenerateProduct();
+        version = getOrGenerateVersion();
+        milestone = pncConfigurator.getOrGenerateMilestone(
+              version,
+              pncMilestoneString(),
+              config.getProduct().getIssueTrackerUrl()
         );
-        PncConfigurator.markMilestoneCurrent(versionId, milestoneId);
-        buildGroupId = getOrGenerateBuildGroup();
+        pncConfigurator.markMilestoneCurrent(version, milestone);
+        buildGroup = getOrGenerateBuildGroup();
 
         configs = getAddOrUpdateBuildConfigs();
         log.debug("Setting up build dependencies");
@@ -77,7 +114,7 @@ public class PncEntitiesImporter {
 
         log.debug("Adding builds to group");
         addBuildConfigIdsToGroup();
-        return new ImportResult(milestoneId, buildGroupId, versionId, configs);
+        return new ImportResult(milestone, buildGroup, version, configs);
     }
 
     private void setUpBuildDependencies() {
@@ -87,26 +124,28 @@ public class PncEntitiesImporter {
     private void setUpBuildDependencies(BuildConfigData config) {
         Integer id = config.getId();
 
+        // todo : store build configuration refs in BuildConfigData and use it instead of ids here
         Set<Integer> dependencies =
-                config.getDependencies()
-                        .stream()
-                        .map(this::getConfigIdByName)
-                        .collect(Collectors.toSet());
-        Set<Integer> currentDependencies = PncDao.invokeAndGetResultIds("list-dependencies -i " + id, 4);
+              config.getDependencies()
+                    .stream()
+                    .map(this::configByName)
+                    .collect(Collectors.toSet());
+        Set<Integer> currentDependencies = getCurrentDependencies(id);
 
         Set<Integer> superfluous = CollectionUtils.subtractSet(currentDependencies, dependencies);
         if (!superfluous.isEmpty()) {
             superfluous.forEach(
-                    dependencyId -> PncDao.invoke(format("remove-dependency -i %d --dependency-id %d", id, dependencyId))
+                  dependencyId -> removeDependency(id, dependencyId)
             );
         }
 
-        Set<Integer> missing = CollectionUtils.subtractSet(dependencies, currentDependencies);
+        Set<Integer> missing =
+              CollectionUtils.subtractSet(dependencies, currentDependencies);
         if (!missing.isEmpty()) {
-            missing.forEach(
-                    dependencyId ->
-                            PncDao.invoke(format("add-dependency -i %d --dependency-id %d", id, dependencyId))
-            );
+            missing.stream()
+                  .map(this::getBuildConfig)
+                  .forEach(dependency -> addDependency(id, dependency)
+                  );
         }
 
         if (!superfluous.isEmpty() || !missing.isEmpty()) {
@@ -114,76 +153,137 @@ public class PncEntitiesImporter {
         }
     }
 
-    private Integer getConfigIdByName(String name) {
+    private void addDependency(Integer configId, BuildConfiguration dependency) {
+        try {
+            buildConfigClient.addDependency(configId, dependency);
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to add dependency " + dependency.getId() + " to " + configId, e);
+        }
+    }
+
+    private void removeDependency(Integer buildConfigId, Integer dependencyId) {
+        try {
+            buildConfigClient.removeDependency(buildConfigId, dependencyId);
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to remove dependency" + dependencyId + " from config" + buildConfigId, e);
+        }
+    }
+
+    private Set<Integer> getCurrentDependencies(Integer buildConfigId) {
+        try {
+            return toStream(buildConfigClient.getDependencies(buildConfigId))
+                  .map(BuildConfigurationRef::getId)
+                  .collect(Collectors.toSet());
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get dependencies for build config " + buildConfigId, e);
+        }
+    }
+
+    private Integer configByName(String name) {
         Optional<BuildConfigData> maybeConfig = configs.stream()
-                .filter(c -> c.getName().equals(name))
-                .findAny();
+              .filter(c -> c.getName().equals(name))
+              .findAny();
         return maybeConfig
-                .orElseThrow(() -> new RuntimeException("Build config name " + name + " used to reference a dependency but no such build config defined"))
-                .getId();
+              .orElseThrow(() -> new RuntimeException("Build config name " + name + " used to reference a dependency but no such build config defined"))
+              .getId();
     }
 
 
     private void addBuildConfigIdsToGroup() {
         String configIdsAsString =
-                configs.stream()
-                        .map(BuildConfigData::getId)
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(" "));
-        PncDao.invoke(
-                format("update-build-configuration-set %d --build-configuration-ids %s", buildGroupId, configIdsAsString)
-        );
+              configs.stream()
+                    .map(BuildConfigData::getId)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(" "));
+        Set<Integer> existing = getExistingGroupConstituents();
+
+        Set<Integer> target = configs.stream().map(BuildConfigData::getId).collect(Collectors.toSet());
+
+        CollectionUtils.subtractSet(existing, target)
+              .forEach(this::removeConfigurationFromGroup);
+
+        CollectionUtils.subtractSet(target, existing)
+              .forEach(this::addConfigurationToGroup);
+    }
+
+    private Set<Integer> getExistingGroupConstituents() {
+        try {
+            return toStream(groupConfigClient.getConfigurations(buildGroup.getId()))
+                  .map(BuildConfiguration::getId)
+                  .collect(Collectors.toSet());
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get configs from the group", e);
+        }
+    }
+
+    private void removeConfigurationFromGroup(Integer superfluousId) {
+        try {
+            groupConfigClient.removeConfiguration(buildGroup.getId(), superfluousId);
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to remove config " + superfluousId + " from the group", e);
+        }
+    }
+
+    private void addConfigurationToGroup(Integer newConfigId) {
+        try {
+            groupConfigClient.addConfiguration(buildGroup.getId(), getBuildConfig(newConfigId));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to add config " + newConfigId + " to the group", e);
+        }
     }
 
     private List<BuildConfigData> getAddOrUpdateBuildConfigs() {
         log.info("Adding/updating build configurations");
-        List<PncBuildConfig> currentConfigs = getCurrentBuildConfigs(buildGroupId);
-        dropConfigsFromInvalidVersion(currentConfigs, config.getBuilds(), versionId);
+        List<BuildConfiguration> currentConfigs = getCurrentBuildConfigs();
+        dropConfigsFromInvalidVersion(currentConfigs, config.getBuilds());
         return updateOrCreate(currentConfigs, config.getBuilds());
     }
 
-    private PncBuildConfig getBuildConfig(String name) {
-        List<String> output = PncDao.invoke(format("get-build-configuration -n %s", name), 4);
-        return PncCliParser.parse(output, new TypeReference<PncBuildConfig>(){});
+    private Optional<BuildConfiguration> getBuildConfig(String name) {
+        try {
+            return maybeSingle(buildConfigClient.getAll(empty(), findByNameQuery(name)));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get build configuration " + name, e);
+        }
+    }
+
+    private BuildConfiguration getBuildConfig(Integer id) {
+        try {
+            return buildConfigClient.getSpecific(id);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to get build configuration " + id, e);
+        }
     }
 
     private List<BuildConfigData> updateOrCreate(
-            List<PncBuildConfig> currentConfigs,
-            List<BuildConfig> builds) {
+          List<BuildConfiguration> currentConfigs,
+          List<BuildConfig> builds) {
         List<BuildConfigData> buildList = new ArrayList<>();
-        for(BuildConfig bc : builds)
-        {
+        for (BuildConfig bc : builds) {
             BuildConfigData data = new BuildConfigData(bc);
-            for(PncBuildConfig config: currentConfigs)
-            {
-                if(config.getName().equals(bc.getName()))
-                {
+            for (BuildConfiguration config : currentConfigs) {
+                if (config.getName().equals(bc.getName())) {
                     data.setOldConfig(config);
-                    if(data.shouldBeUpdated()) {
+                    if (data.shouldBeUpdated()) {
                         updateBuildConfig(data);
                     }
                 }
             }
             //Check if build exists already (globally)
             //True = Add to BCS and update BC (maybe ask?)
-            PncBuildConfig matchedBuildConfig = null;
-            try {
-                matchedBuildConfig = getBuildConfig(bc.getName());
-            } catch (OSCommandException e) {
-                log.debug("No matching build config found in the BCS");
-            }
-            if (matchedBuildConfig != null) {
+            Optional<BuildConfiguration> matchedBuildConfig = getBuildConfig(bc.getName());
+            if (matchedBuildConfig.isPresent()) {
                 log.debug("Found matching build config for {}", bc.getName());
-                data.setOldConfig(matchedBuildConfig);
-                if(data.shouldBeUpdated()) {
+                data.setOldConfig(matchedBuildConfig.get());
+                if (data.shouldBeUpdated()) {
                     updateBuildConfig(data);
                 }
                 data.setModified(true);
-            }
-            else {
+            } else {
+                log.debug("No matching build config found in the BCS");
                 //False = Create new project/BC
-                Integer configId = createBuildConfig(data.getNewConfig());
-                data.setId(configId);
+                BuildConfiguration createdConfig = createBuildConfig(data.getNewConfig());
+                data.setId(createdConfig.getId());
                 data.setModified(true);
                 log.debug("Didn't find matching build config for {}", bc.getName());
             }
@@ -192,246 +292,252 @@ public class PncEntitiesImporter {
         return buildList;
     }
 
-    private Integer createBuildConfig(BuildConfig buildConfig) {
-        Integer projectId = getOrGenerateProject(buildConfig.getProject());
-
-        if (repositoryConfigExists(buildConfig) || buildConfig.getScmUrl() != null) {
-            Integer repoId = getOrGenerateRepository(buildConfig);
-            String createParams = buildConfig.toCreateParams(projectId, repoId, versionId);
-            return PncDao.invokeAndGetResultId(format("create-build-configuration %s", createParams));
+    private BuildConfiguration createBuildConfig(BuildConfig buildConfig) {
+        BuildConfiguration config = generatePncBuildConfig(buildConfig);
+        try {
+            return buildConfigClient.createNew(config);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to create build configuration " + config, e);
         }
-
-        return createBuildConfigFromExternalUrl(projectId, buildConfig);
     }
 
-    private Integer createBuildConfigFromExternalUrl(Integer projectId, BuildConfig buildConfig) {
-        String createParams = buildConfig.toCreateParamsForExternalScm(projectId, versionId);
-        // TODO: simplify when NCL-3866 is fixed
-        String command = String.format("pnc create-build-configuration-process %s", createParams);
-        List<String> output = OSCommandExecutor.executor(command)
-                .redirectErrorStream(false)
-                .exec()
-                .getOut();
-        log.debug("configuration creation output: {}", StringUtils.join(output, "\n"));
-        log.debug("Due to NCL-3866, there's no way to tell if it succeeded, will wait for the configuration to be created");
-        return SleepUtils.waitFor(
-                () -> PncDao.invokeAndGetResultId("get-build-configuration -n " + buildConfig.getName(), 4),
-                10,
-                10 * 60,
-                true,
-                String.format("Timed out while waiting for build configuration %s to be created", buildConfig.getName())
-        );
+    private BuildConfiguration generatePncBuildConfig(BuildConfig buildConfig) {
+        ProjectRef project = getOrGenerateProject(buildConfig.getProject());
 
+        SCMRepository repository = getOrGenerateRepository(buildConfig);
+
+        Environment environment = Environment.builder()
+              .id(buildConfig.getEnvironmentId())
+              .build();
+        return BuildConfiguration.builder()
+              .productVersion(version)
+              .genericParameters(buildConfig.getGenericParameters(null, false))
+              .name(buildConfig.getName())
+              .project(project)
+              .environment(environment)
+              .repository(repository)
+              .scmRevision(buildConfig.getScmRevision())
+              .buildScript(buildConfig.getBuildScript())
+              .build();
     }
 
-    private boolean repositoryConfigExists(BuildConfig buildConfig) {
-        return invokeAndParseListRetryingWithTimeout(
-                "search-repository-configuration " + buildConfig.getShortScmURIPath(),
-                60,
-                4
-        ).stream().anyMatch(buildConfig::matchesRepository);
-
+    private SCMRepository getOrGenerateRepository(BuildConfig buildConfig) {
+        Optional<SCMRepository> existingRepository = getExistingRepository(buildConfig);
+        return existingRepository.orElseGet(() -> createRepository(buildConfig));
     }
 
-
-    private Integer getOrGenerateRepository(BuildConfig buildConfig) {
-        return getOrGenerate(
-                "search-repository-configuration " + buildConfig.getShortScmURIPath(),
-                buildConfig::matchesRepository,
-                () -> createRepository(buildConfig)
-        );
-    }
-
-    private Integer createRepository(BuildConfig buildConfig) {
-        // TODO validate that only one repo url is provided
-        String command;
-        if (buildConfig.getScmUrl() != null) {
-            command = "create-repository-configuration --no-sync " + buildConfig.getScmUrl();
-        } else if (buildConfig.getExternalScmUrl() != null) {
-            throw new RuntimeException("create-repository-configuration should not be used for external scm urls!");
-        } else {
-            throw new RuntimeException("No scm url provided for config " + buildConfig);
+    private Optional<SCMRepository> getExistingRepository(BuildConfig buildConfig) {
+        String searchTerm = buildConfig.getShortScmURIPath();
+        try {
+            return toStream(repoClient.getAll(null, searchTerm))
+                  .filter(buildConfig::matchesRepository)
+                  .findAny();
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to search for repository by " + searchTerm, e);
         }
-        return PncDao.invokeAndGetResultId(command);
     }
 
-    private Integer updateBuildConfig(BuildConfigData data) {
+    private SCMRepository createRepository(BuildConfig buildConfig) {
+        String scmUrl = buildConfig.getScmUrl() == null
+              ? buildConfig.getExternalScmUrl()
+              : buildConfig.getScmUrl();
+        CreateAndSyncSCMRequest createRepoRequest =
+              CreateAndSyncSCMRequest.builder()
+                    .preBuildSyncEnabled(true)
+                    .scmUrl(scmUrl)
+                    .build();
+        try {
+            // todo: does it work with the external urls?
+            RepositoryCreationResponse response = repoClient.createNew(createRepoRequest);
+            SCMRepository repository = response.getRepository();
+            if (repository != null) {
+                return repository;
+            } else {
+                // a task to create repo has been triggered, let's wait for a while in a hope it will be created:
+                return SleepUtils.waitFor(
+                      () -> getExistingRepository(buildConfig).orElse(null),
+                      5,//s
+                      5 * 60,//s
+                      false,
+                      "Timed out waiting for repository to be created"
+                );
+            }
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to trigger repository creation for " + scmUrl, e);
+        }
+    }
+
+    private BuildConfiguration updateBuildConfig(BuildConfigData data) {
         Integer configId = data.getId();
-        Integer projectId = getOrGenerateProject(data.getProject());
-        String updateParams = data.getNewConfig().toUpdateParams(projectId, data.getOldConfig());
-        log.info("Updating build configuration {}", data.getName());
-        PncDao.invoke(format("update-build-configuration %d %s", configId, updateParams));
-        return configId;
+
+        BuildConfiguration buildConfiguration = generatePncBuildConfig(data.getNewConfig());
+
+        try {
+            buildConfigClient.update(configId, buildConfiguration);
+            return buildConfigClient.getSpecific(configId);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to update build configuration " + configId, e);
+        }
     }
 
-    private Integer getOrGenerateProject(String projectName) {
-        return getOrGenerate("list-projects -q name==" + projectName,
-                any -> true,
-                () -> generateProject(projectName)
-        );
+    private Project getOrGenerateProject(String projectName) {
+        RemoteCollection<Project> query = null;
+        try {
+            query = projectClient.getAll(empty(), findByNameQuery(projectName));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to search for project " + projectName, e);
+        }
+        return maybeSingle(query).orElseGet(() -> generateProject(projectName));
     }
 
-    private Integer generateProject(String projectName) {
-        String command = format("create-project \"%s\"", projectName);
-        return PncDao.invokeAndGetResultId(command);
+    private Project generateProject(String projectName) {
+        Project project = Project.builder()
+              .name(projectName)
+              .build();
+        try {
+            return projectClient.createNew(project);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to create project " + projectName, e);
+        }
     }
 
-    private List<PncBuildConfig> dropConfigsFromInvalidVersion(
-            List<PncBuildConfig> currentConfigs,
-            List<BuildConfig> newConfigs,
-            int versionId) {
+    private List<BuildConfiguration> dropConfigsFromInvalidVersion(
+          List<BuildConfiguration> currentConfigs,
+          List<BuildConfig> newConfigs) {
         Map<String, BuildConfig> newConfigsByName = BuildConfig.mapByName(newConfigs);
-        List<PncBuildConfig> configsToDrop = currentConfigs.stream()
-                .filter(config -> shouldBeDropped(config, versionId, newConfigsByName))
-                .collect(Collectors.toList());
+        List<BuildConfiguration> configsToDrop = currentConfigs.stream()
+              .filter(config -> shouldBeDropped(config, newConfigsByName))
+              .collect(Collectors.toList());
         if (!configsToDrop.isEmpty()) {
             throw new RuntimeException("The following configurations should be dropped or updated " +
-                    "in an unsupported fashion, please drop or update them via PNC UI: " + configsToDrop +
-                    ". Look above for the cause");
+                  "in an unsupported fashion, please drop or update them via PNC UI: " + configsToDrop +
+                  ". Look above for the cause");
         }
         return configsToDrop;
     }
 
-    private boolean shouldBeDropped(PncBuildConfig oldConfig,
-                                    int versionId,
+    private boolean shouldBeDropped(BuildConfiguration oldConfig,
                                     Map<String, BuildConfig> newConfigsByName) {
         String name = oldConfig.getName();
         BuildConfig newConfig = newConfigsByName.get(name);
-        boolean configMismatch = oldConfig.getVersionId() == null || oldConfig.getVersionId() != versionId;
+        ProductVersionRef productVersion = oldConfig.getProductVersion();
+        boolean configMismatch = productVersion == null || !productVersion.getId().equals(version.getId());
         if (configMismatch) {
             log.warn("Product version in the old config is different than the one in the new config for config {}", name);
         }
-        return configMismatch || newConfig == null || !oldConfig.isUpgradableTo(newConfig);
+        return configMismatch || newConfig == null || !newConfig.isUpgradableFrom(oldConfig);
     }
 
 
-    private List<PncBuildConfig> getCurrentBuildConfigs(int buildGroupId) {
-        String command = format("list-build-configurations-for-set -i %d", buildGroupId);
-        List<String> output = PncDao.invoke(command, 4);
-        return PncCliParser.parseList(output, new TypeReference<List<PncBuildConfig>>() {
-        });
-    }
-
-    private int getOrGenerateBuildGroup() {
-        Optional<Integer> buildConfigSetId = getBuildGroup();
-        return buildConfigSetId.orElseGet(() -> generateBuildGroup(versionId));
-    }
-
-    private Optional<Integer> getBuildGroup() {
-        Optional<Integer> buildConfigSetId;
+    private List<BuildConfiguration> getCurrentBuildConfigs() {
         try {
-            buildConfigSetId = Optional.of(
-                    PncDao.invokeAndGetResultId(format("get-build-configuration-set --name \"%s\"", config.getGroup()), 4)
-            );
-        } catch (OSCommandException e) {
-            log.info(format("Product build group does not exist: {}, we'll create one", config.getGroup(), e));
-            buildConfigSetId = Optional.empty();
+            return PncClientUtils.toList(groupConfigClient.getConfigurations(buildGroup.getId()));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get configurations for config group: " + buildGroup.getId());
         }
-        return buildConfigSetId;
     }
 
-    private int getOrGenerateVersion(int productId) {
-        String command = versionsForProduct(productId);
-        return getOrGenerate(
-                command,
-                versionByMajorMinor(),
-                () -> generateVersion(productId)
-        );
+    private GroupConfiguration getOrGenerateBuildGroup() {
+        Optional<GroupConfiguration> buildConfigSetId = getBuildGroup();
+        return buildConfigSetId.orElseGet(() -> generateBuildGroup(version));
     }
 
-    private String versionsForProduct(int productId) {
-        return format("list-versions-for-product -i %d", productId);
+    private Optional<GroupConfiguration> getBuildGroup() {
+        try {
+            return toStream(groupConfigClient.getAll(empty(), Optional.of("name==" + config.getGroup())))
+                  .findAny();
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to check if build group exists");
+        }
     }
 
-    private Predicate<Map<String, ?>> versionByMajorMinor() {
-        String version = config.getMajorMinor();
-        return entry -> entry.get("version").equals(version);
+    private ProductVersion getOrGenerateVersion() {
+        return getVersion().orElseGet(this::generateVersion);
     }
 
-    private int getOrGenerateProduct() {
-        return getOrGenerate(
-                LIST_PRODUCTS,
-                productByName(),
-                this::generateProduct
-        );
+    private Product getOrGenerateProduct() {
+        return getProduct().orElseGet(this::generateProduct);
     }
 
-    private Predicate<Map<String, ?>> productByName() {
+    private Optional<Product> getProduct() {
         String productName = config.getProduct().getName();
-        return product -> product.get("name").equals(productName);
+        try {
+            return maybeSingle(productClient.getAll(empty(), findByNameQuery(productName)));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get product data", e);
+        }
     }
 
-    private Optional<Integer> get(String listCommand, Predicate<Map<String, ?>> existenceCheck) {
-        List<Map<String, ?>> items = invokeAndParseListRetryingWithTimeout(listCommand, 60, 4);
-
-        return items.stream()
-                .filter(existenceCheck)
-                .findAny()
-                .map(m -> (Integer) m.get("id"));
+    private ProductVersion generateVersion() {
+        ProductVersion productVersion = ProductVersion.builder()
+              .product(product)
+              .version(config.getMajorMinor())
+              .build();
+        try {
+            return versionClient.createNewProductVersion(productVersion);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to create the product version", e);
+        }
     }
 
-    private Integer getOrGenerate(String listCommand,
-                                  Predicate<Map<String, ?>> existenceCheck,
-                                  Supplier<Integer> generator) {
-        return get(listCommand, existenceCheck)
-                .orElseGet(generator);
-    }
-
-    private Integer generateVersion(Integer productId) {
-        String version = config.getMajorMinor();
-        String command = format("create-product-version %d \"%s\"", productId, version);
-        return PncDao.invokeAndGetResultId(command);
-    }
-
-    private Integer generateProduct() {
-        Product product = config.getProduct();
-        String command =
-                format("create-product \"%s\" \"%s\"", product.getName(), product.getAbbreviation());
-        return PncDao.invokeAndGetResultId(command);
+    private Product generateProduct() {
+        ProductConfig productConfig = config.getProduct();
+        Product product = Product.builder()
+              .name(productConfig.getName())
+              .abbreviation(productConfig.getAbbreviation())
+              .build();
+        try {
+            return productClient.createNew(product);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to create the product", e);
+        }
     }
 
 
-    private Integer generateBuildGroup(Integer versionId) {
-        String group = config.getGroup();
-        String command = format("create-build-configuration-set -pvi %d \"%s\"", versionId, group);
-        return PncDao.invokeAndGetResultId(command);
+    private GroupConfiguration generateBuildGroup(ProductVersionRef version) {
+        GroupConfiguration group = GroupConfiguration.builder()
+              .productVersion(version)
+              .name(config.getGroup())
+              .build();
+        try {
+            return groupConfigClient.createNew(group);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to create group config: " + config.getGroup());
+        }
     }
 
     public ImportResult readCurrentPncEntities() {
-        productId = getProduct();
-        versionId = getVersion();
-        Optional<Integer> maybeMilestone = getExistingMilestone(versionId, config.getMajorMinor(), pncMilestoneString());
-        milestoneId = maybeMilestone
-                .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // TODO
+        product = getProduct().orElseThrow(() -> new RuntimeException("Unable to product " + config.getProduct().getName()));
+        version = getVersion().orElseThrow(() -> new RuntimeException("Unable to find version " + config.getMajorMinor() + " for product " + product));
+        milestone = pncConfigurator.getExistingMilestone(version, pncMilestoneString())
+              .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // TODO
 
-        buildGroupId = getBuildGroup()
-                .orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
+        buildGroup = getBuildGroup()
+              .orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
 
         configs = getBuildConfigs();
 
-        return new ImportResult(milestoneId, buildGroupId, versionId, configs);
+        return new ImportResult(milestone, buildGroup, version, configs);
     }
 
     private List<BuildConfigData> getBuildConfigs() {
-        List<PncBuildConfig> configs = getCurrentBuildConfigs(buildGroupId);
+        List<BuildConfiguration> configs = getCurrentBuildConfigs();
 
         return configs.stream()
-                .map(config -> {
-                    BuildConfigData result = new BuildConfigData(null);
-                    result.setOldConfig(config);
-                    return result;
-                }).collect(Collectors.toList());
+              .map(config -> {
+                  BuildConfigData result = new BuildConfigData(null);
+                  result.setOldConfig(config);
+                  return result;
+              }).collect(Collectors.toList());
     }
 
-    private int getVersion() {
-        return get(versionsForProduct(productId), versionByMajorMinor())
-                .orElseThrow(() -> new RuntimeException("Unable to find version " + config.getMajorMinor() + " for product " + productId));
-    }
-
-    private Integer getProduct() {
-        Optional<Integer> maybeProductId = get(LIST_PRODUCTS, productByName());
-        return maybeProductId
-                .orElseThrow(() -> new RuntimeException("Unable to find product called " + config.getProduct().getName()));
+    private Optional<ProductVersion> getVersion() {
+        try {
+            Optional<String> byName = query("version==", config.getMajorMinor());
+            return maybeSingle(productClient.getProductVersions(product.getId(), empty(), byName));
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to query for version", e);
+        }
     }
 
     private String pncMilestoneString() {

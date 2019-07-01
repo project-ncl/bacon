@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.javadoc;
 
 import lombok.Getter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.commonjava.maven.ext.cli.Cli;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -27,7 +28,7 @@ import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
-import org.jboss.pnc.bacon.pig.impl.pnc.Artifact;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
@@ -59,6 +60,10 @@ import java.util.stream.Stream;
 public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> {
     private static final Logger log = LoggerFactory.getLogger(JavadocManager.class);
 
+    private static final String project_gid = "org.jboss.prod";
+    private static final String project_aid = "pfg-javadoc-dep-profile-injection";
+    private static final String project_version = "1.0.0";
+
     @Getter
     private final JavadocGenerationData generationData;
 
@@ -76,7 +81,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                           Deliverables deliverables,
                           Map<String, PncBuild> builds) {
         super(config, releasePath, deliverables, builds);
-        this.generationData = config.getFlow().getJavadocGeneration();
+        generationData = config.getFlow().getJavadocGeneration();
     }
 
     public void prepare() {
@@ -116,64 +121,65 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private boolean checkRequired() {
         boolean ret = true;
         if (generationData.getSourceArtifact() == null ||
-                generationData.getSourceArtifact().isEmpty()) {
+              generationData.getSourceArtifact().isEmpty()) {
             ret = false;
             log.error("Invalid Javadoc generation yaml - 'sourceArtifact' required");
         }
         if (generationData.getGenerationProject() == null ||
-                generationData.getGenerationProject().isEmpty()) {
+              generationData.getGenerationProject().isEmpty()) {
             log.error("Invalid Javadoc generation yaml - 'generationProject' required");
             ret = false;
         }
         return ret;
     }
+
     private void init() {
-        this.temporaryDestination = FileUtils.mkTempDir("javadoc");
-        this.settingsXml = ResourceUtils
-                .extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-                .getAbsolutePath();
+        temporaryDestination = FileUtils.mkTempDir("javadoc");
+        settingsXml = ResourceUtils
+              .extractToTmpFile("/indy-settings.xml", "settings", ".xml")
+              .getAbsolutePath();
 
-        this.localRepo = new File(temporaryDestination
-                + File.separator
-                + "localRepo");
-        this.localRepo.mkdir();
-        this.topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());
-        this.archiveFile = getTargetZipPath().toFile();
+        localRepo = new File(temporaryDestination
+              + File.separator
+              + "localRepo");
+        localRepo.mkdir();
+        topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());
+        archiveFile = getTargetZipPath().toFile();
 
-        this.generationProject = generationData.getGenerationProject();
-        this.sourceBuilds = generationData.getSourceBuilds();
-        if (this.sourceBuilds == null || this.sourceBuilds.isEmpty()) {
-            this.sourceBuilds = builds.values()
-                    .stream()
-                    .map(PncBuild::getName)
-                    .collect(Collectors.toList());
+        generationProject = generationData.getGenerationProject();
+        sourceBuilds = generationData.getSourceBuilds();
+        if (sourceBuilds == null || sourceBuilds.isEmpty()) {
+            sourceBuilds = builds.values()
+                  .stream()
+                  .map(PncBuild::getName)
+                  .collect(Collectors.toList());
         }
-        this.scmRevision = generationData.getScmRevision();
+        scmRevision = generationData.getScmRevision();
     }
 
-    private Collection <GAV> findSourceBuilds() {
-        Collection <GAV> srcBuilds = builds.values()
-                .stream()
-                .filter(build->this.sourceBuilds.contains(build.getName()))
-                .map(PncBuild::getBuiltArtifacts)
-                .flatMap(Collection::stream)
-                .map(Artifact::toGAV)
-                .filter(g->g.getClassifier() != null && g.getClassifier().equals("sources"))
-                .collect(Collectors.toList());
+    private Collection<GAV> findSourceBuilds() {
+        Collection<GAV> srcBuilds = builds.values()
+              .stream()
+              .filter(build -> sourceBuilds.contains(build.getName()))
+              .map(PncBuild::getBuiltArtifacts)
+              .flatMap(Collection::stream)
+              .map(ArtifactWrapper::toGAV)
+              .filter(g -> g.getClassifier() != null && g.getClassifier().equals("sources"))
+              .collect(Collectors.toList());
         return srcBuilds;
     }
 
     private boolean cloneProject() {
         Git git = null;
         try {
-            log.debug("Cloning " + this.generationProject + " into " + topLevelDirectory);
+            log.debug("Cloning " + generationProject + " into " + topLevelDirectory);
             git = Git.cloneRepository()
-                    .setURI(this.generationProject)
-                    .setDirectory(topLevelDirectory)
-                    .call();
-            if (this.scmRevision != null && !this.scmRevision.isEmpty()) {
-                log.debug("Checkout version " + this.scmRevision);
-                git.checkout().setName(this.scmRevision).call();
+                  .setURI(generationProject)
+                  .setDirectory(topLevelDirectory)
+                  .call();
+            if (scmRevision != null && !scmRevision.isEmpty()) {
+                log.debug("Checkout version " + scmRevision);
+                git.checkout().setName(scmRevision).call();
             }
         } catch (GitAPIException e) {
             log.error("Exception occurred while cloning repo - {}", e.getMessage());
@@ -186,7 +192,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         Dependency dep;
         PncBuild build = getBuild(generationData.getImportBom());
         if (build != null) {
-            List<Artifact> artifacts = build.getBuiltArtifacts();
+            List<ArtifactWrapper> artifacts = build.getBuiltArtifacts();
             if (artifacts != null && !artifacts.isEmpty()) {
                 GAV tmp = artifacts.get(0).toGAV();
                 //Get the first artifact and create the dep on the pom
@@ -208,7 +214,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         return true;
     }
 
-    private void addSourceBuildsDeps(Profile profile, Collection <GAV> srcBuilds) {
+    private void addSourceBuildsDeps(Profile profile, Collection<GAV> srcBuilds) {
         Dependency dep;
         for (GAV sb : srcBuilds) {
             dep = new Dependency();
@@ -221,26 +227,22 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         }
     }
 
-    final String project_gid = "org.jboss.prod";
-    final String project_aid = "pfg-javadoc-dep-profile-injection";
-    final String project_version = "1.0.0";
-
     private boolean writeProject(Project project) {
         try {
             File dir = new File(localRepo.getPath() +
-                    File.separator +
-                    project_gid.replace('.', File.separatorChar) +
-                    File.separator + project_aid +
-                    File.separator + project_version);
-            if(!dir.exists()){
+                  File.separator +
+                  project_gid.replace('.', File.separatorChar) +
+                  File.separator + project_aid +
+                  File.separator + project_version);
+            if (!dir.exists()) {
                 if (!dir.mkdirs()) {
                     log.error("Error while creating directory {}", dir);
                     return false;
                 }
             }
             File file = new File(dir.getPath() +
-                    File.separator +
-                    project_aid + "-" + project_version + ".pom");
+                  File.separator +
+                  project_aid + "-" + project_version + ".pom");
             JAXBContext jaxbContext = JAXBContext.newInstance(Project.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
@@ -249,7 +251,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
             jaxbMarshaller.marshal(project, file);
         } catch (JAXBException e) {
-            log.error("Error while creating profile pom" , e);
+            log.error("Error while creating profile pom", e);
             return false;
         }
         return true;
@@ -258,13 +260,14 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     /**
      * Use PME to insert the profile into the cloned project and run with any
      * extra custom PME parameters in the yaml config
+     *
      * @return
      */
     private boolean runPME() {
         PrintStream stdout = System.out;
         PrintStream outStream = null;
         String filePath = temporaryDestination.getPath() +
-                File.separator + "pme-execution.log";
+              File.separator + "pme-execution.log";
         try {
             outStream = new PrintStream(new File(filePath));
         } catch (Exception e) {
@@ -273,12 +276,12 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         }
         log.debug("Running PME to insert the dependencies into the project (see log {})", outStream);
         StringBuilder cmd = new StringBuilder("-f " + topLevelDirectory.getPath() + File.separator + "pom.xml" +
-                " -DprofileInjection=" + project_gid + ":" + project_aid + ":" + project_version +
-                " -s " + settingsXml +
-                " -Dmaven.repo.local=" + this.localRepo +
-                " -t");
-        if (this.generationData.getCustomPmeParameters() != null &&
-                !this.generationData.getCustomPmeParameters().isEmpty()) {
+              " -DprofileInjection=" + project_gid + ":" + project_aid + ":" + project_version +
+              " -s " + settingsXml +
+              " -Dmaven.repo.local=" + localRepo +
+              " -t");
+        if (generationData.getCustomPmeParameters() != null &&
+              !generationData.getCustomPmeParameters().isEmpty()) {
             for (String customPME : generationData.getCustomPmeParameters()) {
                 cmd.append(" " + customPME);
             }
@@ -296,10 +299,11 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     /**
      * Create and deploy a profile with the dependencies from the GAV list
      * add the importBom if specifies
+     *
      * @param srcBuilds
      * @return
      */
-    private boolean manipulateProject(Collection <GAV> srcBuilds) {
+    private boolean manipulateProject(Collection<GAV> srcBuilds) {
         Project project = new Project();
         project.setVersion(project_version);
         project.setArtifactId(project_aid);
@@ -331,13 +335,13 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         }
         //Add to the basic command the specific's needed to do the build locally
         File mavenRun = new File(temporaryDestination.getPath() + File.separator + "mvn-execution.log");
-        command = command + " -Dmaven.repo.local=" + this.localRepo +
-                " -s " + settingsXml +
-                " -Ppfg-redhat-javadoc";
+        command = command + " -Dmaven.repo.local=" + localRepo +
+              " -s " + settingsXml +
+              " -Ppfg-redhat-javadoc";
         log.debug("Running Javadoc project (see log {}) with [{}]", mavenRun, command);
         ProcessBuilder builder = new ProcessBuilder(command.split("\\s+"))
-                .directory(topLevelDirectory)
-                .redirectOutput(mavenRun);
+              .directory(topLevelDirectory)
+              .redirectOutput(mavenRun);
         try {
             process = builder.start();
             process.waitFor();
@@ -360,7 +364,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         log.info("Generating Javadoc in {}", topLevelDirectory);
         //Lookup the builds listed and that have a -sources artifact, if
         //non provided then all builds in the build-config.yaml will be included
-        Collection <GAV> srcBuilds = findSourceBuilds();
+        Collection<GAV> srcBuilds = findSourceBuilds();
         if (srcBuilds != null) {
             //Clone the generation project
             if (cloneProject()) {
@@ -371,9 +375,9 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                         //Archive the generated source artifact to the release archive name
                         Pattern pattern = Pattern.compile(generationData.getSourceArtifact(), Pattern.CASE_INSENSITIVE);
                         List<File> files = (List<File>) org.apache.commons.io.FileUtils.listFiles(
-                                this.temporaryDestination,
-                                org.apache.commons.io.filefilter.TrueFileFilter.INSTANCE,
-                                org.apache.commons.io.filefilter.TrueFileFilter.INSTANCE);
+                              temporaryDestination,
+                              TrueFileFilter.INSTANCE,
+                              TrueFileFilter.INSTANCE);
                         List<File> found = new ArrayList<>();
                         for (File file : files) {
                             if (pattern.matcher(file.getName()).matches()) {
@@ -381,11 +385,11 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                             }
                         }
 
-                        if(found.size() == 0) {
+                        if (found.size() == 0) {
                             log.error("No generated files with pattern [{}] found", generationData.getSourceArtifact());
                             return;
                         }
-                        if(found.size() > 1) {
+                        if (found.size() > 1) {
                             log.error("More than 1 match for generated artifact found");
                             for (File file : found) {
                                 log.error("  - {}", file.getName());

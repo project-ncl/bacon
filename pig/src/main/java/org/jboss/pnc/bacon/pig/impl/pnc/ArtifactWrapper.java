@@ -21,13 +21,13 @@ package org.jboss.pnc.bacon.pig.impl.pnc;
 import lombok.Getter;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.dto.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Map;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -35,17 +35,17 @@ import java.util.Map;
  *         Date: 6/13/17
  */
 @Getter
-public class Artifact {
-    private final Logger log = LoggerFactory.getLogger(Artifact.class);
+public class ArtifactWrapper {
+    private final Logger log = LoggerFactory.getLogger(ArtifactWrapper.class);
 
     private final String gapv;
     private final String fileName;
     private final String downloadUrl;
 
-    public Artifact(Map<String, ?> map) {
-        fileName = (String) map.get("filename");
-        downloadUrl = (String) map.get("public_url");
-        gapv = (String) map.get("identifier");
+    public ArtifactWrapper(Artifact artifact) {
+        fileName = artifact.getFilename();
+        downloadUrl = artifact.getPublicUrl();
+        gapv = artifact.getIdentifier();
     }
 
     public GAV toGAV() {

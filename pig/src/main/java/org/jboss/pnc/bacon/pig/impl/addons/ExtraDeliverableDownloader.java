@@ -18,7 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.addons;
 
 import org.jboss.pnc.bacon.pig.impl.config.Config;
-import org.jboss.pnc.bacon.pig.impl.pnc.Artifact;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
 import java.nio.file.Path;
@@ -47,6 +47,7 @@ public class ExtraDeliverableDownloader extends AddOn {
 
     @Override
     public void trigger() {
+        //noinspection unchecked
         getConfig().forEach(
                 (key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts)
         );
@@ -60,7 +61,7 @@ public class ExtraDeliverableDownloader extends AddOn {
     }
 
     private void downloadArtifact(PncBuild build, String pattern, String suffix) {
-        Artifact artifact = build.findArtifactByFileName(pattern);
+        ArtifactWrapper artifact = build.findArtifactByFileName(pattern);
         Path releaseDir = Paths.get(releasePath);
         Path targetFile = releaseDir.resolve(constructFileName(suffix));
         artifact.downloadTo(targetFile.toFile());
