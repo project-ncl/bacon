@@ -43,7 +43,7 @@ public class PncClientUtils {
         return query(name, "name==%s");
     }
 
-    public static Optional<String> query(String format, String... values) {
+    public static Optional<String> query(String format, Object... values) {
         return Optional.of(String.format(format, values));
     }
 
