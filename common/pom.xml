@@ -34,8 +34,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.pnc</groupId>
-            <artifactId>rest-api</artifactId>
-            <classifier>java-client</classifier>
+            <artifactId>rest-client</artifactId>
         </dependency>
     </dependencies>
 
