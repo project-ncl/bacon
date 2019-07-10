@@ -42,7 +42,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <aesh.version>2.2</aesh.version>
-        <resteasy.version>3.6.2.Final</resteasy.version>
     </properties>
 
     <dependencyManagement>
@@ -87,9 +86,8 @@
             <!-- pnc client -->
             <dependency>
                 <groupId>org.jboss.pnc</groupId>
-                <artifactId>rest-api</artifactId>
+                <artifactId>rest-client</artifactId>
                 <version>2.0.0-SNAPSHOT</version>
-                <classifier>java-client</classifier>
             </dependency>
             <dependency>
                 <groupId>org.aesh</groupId>
@@ -100,6 +98,12 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.4</version>
+            </dependency>
+            <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxrs</artifactId>
+                <version>3.6.1.SP5</version>
             </dependency>
 
             <!-- log -->
@@ -168,18 +172,6 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>2.9.8</version>
-            </dependency>
-
-            <!-- resteasy -->
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-client</artifactId>
-                <version>${resteasy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jaxrs</artifactId>
-                <version>${resteasy.version}</version>
             </dependency>
 
             <!--tests-->
