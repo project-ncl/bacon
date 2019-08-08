@@ -103,19 +103,19 @@ public class BuildConfig {
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && environmentId.equals(old.getEnvironment().getId())
                 && customPmeParameters.equals(getPmeParameters(old))
-                && urlsEqual(old.getRepository())
+                && urlsEqual(old.getScmRepository())
                 && !isBranchModified(old);
     }
 
     private Set<String> getPmeParameters(BuildConfiguration old) {
-        String parametersAsString = old.getGenericParameters().get("CUSTOM_PME_PARAMETERS");
+        String parametersAsString = old.getParameters().get("CUSTOM_PME_PARAMETERS");
         return Arrays.stream(parametersAsString.split(","))
               .collect(Collectors.toSet());
     }
 
     private synchronized boolean isBranchModified(BuildConfiguration oldVersion) {
         if (branchModified == null) {
-            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(), oldVersion.getRepository().getInternalUrl(), getScmRevision());
+            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(), oldVersion.getScmRepository().getInternalUrl(), getScmRevision());
         }
         return branchModified;
     }
@@ -129,7 +129,7 @@ public class BuildConfig {
     public Map<String, String> getGenericParameters(BuildConfiguration oldConfig, boolean forceRebuild) {
         Map<String, String> result = new HashMap<>();
 
-        String oldForceValue = oldConfig == null ? "" : oldConfig.getGenericParameters().getOrDefault(BUILD_FORCE, "");
+        String oldForceValue = oldConfig == null ? "" : oldConfig.getParameters().getOrDefault(BUILD_FORCE, "");
         String forceValue = forceRebuild ? randomAlphabetic(5) : oldForceValue;
 
         String dependencyExclusions = String.join(" ", customPmeParameters);
@@ -187,7 +187,7 @@ public class BuildConfig {
     }
 
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
-       String oldInternalUrl = oldConfig.getRepository().getInternalUrl();
+       String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
        if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
             log.error("Scm url for {} changed from {} to {}. Please update it via UI", name, oldInternalUrl, scmUrl);
             return false;

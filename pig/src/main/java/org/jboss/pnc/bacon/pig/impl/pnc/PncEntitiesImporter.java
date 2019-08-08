@@ -311,11 +311,11 @@ public class PncEntitiesImporter {
               .build();
         return BuildConfiguration.builder()
               .productVersion(version)
-              .genericParameters(buildConfig.getGenericParameters(null, false))
+              .parameters(buildConfig.getGenericParameters(null, false))
               .name(buildConfig.getName())
               .project(project)
               .environment(environment)
-              .repository(repository)
+              .scmRepository(repository)
               .scmRevision(buildConfig.getScmRevision())
               .buildScript(buildConfig.getBuildScript())
               .build();
