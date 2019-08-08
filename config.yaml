@@ -1,2 +1,38 @@
+# ##############################################################################
+#
+# Config for bacon
+#
+# All urls are the base paths only.
+#
+#     e.g USE http://example.co
+#
+#                 as opposed to:
+#
+#             http://example.com/path
+#
+# ##############################################################################
+
+# ******************************************************************************
+# PNC details
+#
+# ******************************************************************************
 pnc:
     url: ""
+
+# ******************************************************************************
+# Authentication information
+#
+# Uncomment this section if you want to create / update / delete
+# ******************************************************************************
+
+# keycloak:
+#     url: ""
+#     realm: ""
+#     username: ""
+#
+#     # if regular user
+#     clientId: ""
+#     password: ""
+#
+#     # if service account
+#     clientSecret: ""

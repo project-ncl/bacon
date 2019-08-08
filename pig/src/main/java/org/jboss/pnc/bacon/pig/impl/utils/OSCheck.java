@@ -27,7 +27,7 @@ public class OSCheck {
      */
     public enum OSType {
         Windows, MacOS, Linux, Other
-    };
+    }
 
     // cached result of OS detection
     protected static OSType detectedOS;

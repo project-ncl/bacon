@@ -42,7 +42,7 @@ import org.jboss.pnc.client.RemoteResourceException;
 public class AbstractCommand implements Command {
 
     public interface SubCommandExecuteInterface {
-        void call() throws RemoteResourceException, ClientException;
+        void call() throws ClientException;
     }
 
     @Option(shortName = 'h', overrideRequired = true, hasValue = false, description = "print help")
@@ -119,7 +119,7 @@ public class AbstractCommand implements Command {
      * @throws CommandException
      * @throws InterruptedException
      */
-    private CommandResult executePrivate(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+    private CommandResult executePrivate(CommandInvocation commandInvocation) {
         boolean helpNoFinalCommandPrinted = false;
         boolean helpOrVersionPrinted = printHelpOrVersionIfPresent(commandInvocation);
 
