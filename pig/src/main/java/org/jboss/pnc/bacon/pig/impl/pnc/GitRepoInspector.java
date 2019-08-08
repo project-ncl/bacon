@@ -135,7 +135,7 @@ public class GitRepoInspector {
 
     private static String getLatestBuiltRevision(Integer configId) {
         PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId);
-        return latestBuild.getBuildConfigurationRevision().getScmRevision();
+        return latestBuild.getBuildConfigRevision().getScmRevision();
     }
 
     private static URIish toAnonymous(String internalUrl) throws MalformedURLException {

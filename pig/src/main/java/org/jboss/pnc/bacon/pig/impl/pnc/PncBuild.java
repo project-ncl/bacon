@@ -109,11 +109,11 @@ public class PncBuild {
     }
 
     public String getScmRevision() {
-        return getBuildConfigurationRevision().getScmRevision();
+        return getBuildConfigRevision().getScmRevision();
     }
 
     public String getName() {
-        return getBuildConfigurationRevision().getName();
+        return getBuildConfigRevision().getName();
     }
 
     private List<ArtifactWrapper> findArtifactsMatching(Predicate<ArtifactWrapper> query) {
