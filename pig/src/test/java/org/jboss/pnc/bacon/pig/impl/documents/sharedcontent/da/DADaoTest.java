@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.testcommon.RemoteTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <br>
  * Date: 24/04/2019
  */
+@RemoteTest
 class DADaoTest {
 
     private static DADao daDao;

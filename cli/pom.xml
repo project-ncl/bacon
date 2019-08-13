@@ -37,6 +37,29 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--
+                      If you'd like to tell the plugin where your .git directory is,
+                      use this setting, otherwise we'll perform a search trying to
+                      figure out the right directory. It's better to add it explicite IMHO.
+                    -->
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+
+                    <!-- false is default here, it prints some more information during the build -->
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.1</version>
@@ -53,6 +76,16 @@
                                 <manifest>
                                     <mainClass>org.jboss.pnc.bacon.cli.App</mainClass>
                                 </manifest>
+                                <manifestSections>
+                                    <manifestSection>
+                                        <name>Versions</name>
+                                        <manifestEntries>
+                                            <Implementation-Version>${project.version}</Implementation-Version>
+                                            <Implementation-SCM-Revision>${git.commit.id.abbrev}</Implementation-SCM-Revision>
+                                            <Implementation-SCM-Branch>${git.branch}</Implementation-SCM-Branch>
+                                        </manifestEntries>
+                                    </manifestSection>
+                                </manifestSections>
                             </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>

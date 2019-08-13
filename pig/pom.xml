@@ -11,6 +11,10 @@
 
     <artifactId>pig</artifactId>
 
+    <properties>
+        <excludeTestTags>remote-test</excludeTestTags>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jboss.pnc.bacon</groupId>
@@ -27,6 +31,10 @@
         <dependency>
             <groupId>org.jboss.pnc.bacon</groupId>
             <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.pnc.bacon</groupId>
+          <artifactId>test-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.aesh</groupId>
@@ -108,4 +116,22 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>${excludeTestTags}</excludedGroups>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>remote-test</id>
+            <properties>
+                <excludeTestTags></excludeTestTags>
+            </properties>
+        </profile>
+    </profiles>
 </project>

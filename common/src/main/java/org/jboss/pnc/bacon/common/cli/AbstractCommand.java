@@ -26,7 +26,6 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
-import org.jboss.pnc.bacon.common.Constants;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteResourceException;
 
@@ -51,10 +50,6 @@ public class AbstractCommand implements Command {
     @Option(shortName = 'V', overrideRequired = true, hasValue = false, description = "print version")
     private boolean version = false;
 
-
-    private static final String VERSION_OUTPUT = Constants.VERSION + " (" + Constants.COMMIT_ID_SHA + ")";
-
-
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {
 
         Shell shell = commandInvocation.getShell();
@@ -67,7 +62,8 @@ public class AbstractCommand implements Command {
         }
 
         if (version) {
-            shell.writeln(VERSION_OUTPUT);
+            VersionInfo versionInfo = VersionInfo.instance();
+            shell.writeln(versionInfo.getVersion() + " (" + versionInfo.getRevision() + ")");
             activated = true;
         }
 
