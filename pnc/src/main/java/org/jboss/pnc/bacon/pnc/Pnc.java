@@ -32,17 +32,17 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
                 ArtifactCli.class,
                 BrewPushCli.class,
                 BuildCli.class,
-                BuildConfigurationCli.class,
+                BuildConfigCli.class,
                 EnvironmentCli.class,
                 GenerateToolsCli.class,
                 GroupBuildCli.class,
-                GroupBuildConfigurationCli.class,
+                GroupConfigCli.class,
                 ProductCli.class,
                 ProductMilestoneCli.class,
                 ProductReleaseCli.class,
                 ProductVersionCli.class,
                 ProjectCli.class,
-                RepositoryCli.class
+                ScmRepositoryCli.class
         })
 public class Pnc extends AbstractCommand {
 }
