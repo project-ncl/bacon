@@ -19,67 +19,61 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.client.SCMRepositoryClient;
-import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.dto.BuildConfiguration;
 
 import java.util.Optional;
 
 @GroupCommandDefinition(
-        name = "repository",
-        description = "Repository",
+        name = "build-config",
+        description = "build-config",
         groupCommands = {
-                RepositoryCli.Create.class,
-                RepositoryCli.Get.class,
-                RepositoryCli.List.class,
-                RepositoryCli.Update.class,
-                RepositoryCli.Delete.class
+                BuildConfigCli.Create.class,
+                BuildConfigCli.Get.class,
+                BuildConfigCli.List.class,
+                BuildConfigCli.Update.class,
+                BuildConfigCli.Delete.class
         })
-public class RepositoryCli extends AbstractCommand {
+public class BuildConfigCli extends AbstractCommand {
 
-    private SCMRepositoryClient client = new SCMRepositoryClient(PncClientHelper.getPncConfiguration());
+    private BuildConfigurationClient client = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
 
-    @CommandDefinition(name = "create", description = "Create a repository")
+    @CommandDefinition(name = "create", description = "Create a build configuration")
     public class Create extends AbstractNotImplementedCommand {
     }
 
-    @CommandDefinition(name = "get", description = "Get a repository")
-    public class Get extends AbstractGetSpecificCommand<SCMRepository> {
+    @CommandDefinition(name = "get", description = "Get build configuration")
+    public class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
 
         @Override
-        public SCMRepository getSpecific(int id) throws ClientException {
+        public BuildConfiguration getSpecific(int id) throws ClientException {
             return client.getSpecific(id);
         }
     }
 
-    @CommandDefinition(name = "list", description = "List repositories")
-    public class List extends AbstractListCommand<SCMRepository> {
-
-        @Option(description = "Exact URL to search")
-        private String matchUrl;
-
-        @Option(description = "Part of the URL to search")
-        private String searchUrl;
+    @CommandDefinition(name = "list", description = "List build configurations")
+    public class List extends AbstractListCommand<BuildConfiguration> {
 
         @Override
-        public RemoteCollection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
-            return client.getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
+        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a repository")
+    @CommandDefinition(name = "update", description = "Update a build configuration")
     public class Update extends AbstractNotImplementedCommand {
     }
 
-    @CommandDefinition(name = "delete", description = "Delete a repository")
+    @CommandDefinition(name = "delete", description = "Delete a build configuration")
     public class Delete extends AbstractNotImplementedCommand {
     }
+
 }
