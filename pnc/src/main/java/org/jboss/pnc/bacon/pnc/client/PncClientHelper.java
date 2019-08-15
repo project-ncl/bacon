@@ -18,7 +18,13 @@
 package org.jboss.pnc.bacon.pnc.client;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.auth.DirectKeycloakClientImpl;
+import org.jboss.pnc.bacon.auth.KeycloakClientException;
+import org.jboss.pnc.bacon.auth.model.Credential;
+import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
+import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.KeycloakConfig;
 import org.jboss.pnc.client.Configuration;
 
 import java.net.URI;
@@ -40,37 +46,81 @@ public class PncClientHelper {
     public static void setup() {
 
         Config config = Config.instance();
-        String url = config.getPnc().getUrl();
 
-        if (url == null || url.isEmpty()) {
-            fail("PNC Url is not specified in the config file!");
+
+        KeycloakConfig keycloakConfig = config.getKeycloak();
+        String bearerToken = "";
+
+        if (keycloakConfig != null) {
+            keycloakConfig.validate();
+            bearerToken = getBearerToken(keycloakConfig);
         }
+
+        config.getPnc().validate();
+        String url = config.getPnc().getUrl();
 
         try {
             URI uri = new URI(url);
 
-            failIfNull(uri.getScheme(), "You need to specify the protocol of the PNC URL in the config file");
-            failIfNull(uri.getHost(), "You need to specify the host of the PNC URL in the config file");
-
             configuration = Configuration.builder()
                     .protocol(uri.getScheme())
                     .host(uri.getHost())
+                    .bearerToken(bearerToken)
                     .pageSize(50)
                     .build();
 
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            Fail.fail(e.getMessage());
         }
     }
 
-    private static void fail(String reason) {
-        failIfNull(null, reason);
+    private static String getBearerToken(KeycloakConfig keycloakConfig) {
+
+        log.debug("Authenticating to keycloak");
+
+        try {
+
+            KeycloakClient client = new DirectKeycloakClientImpl();
+
+            Credential credential;
+
+            if (keycloakConfig.isServiceAccount()) {
+                credential = client.getCredential(
+                        keycloakConfig.getUrl(),
+                        keycloakConfig.getRealm(),
+                        keycloakConfig.getUsername(),
+                        keycloakConfig.getClientSecret());
+            } else {
+                credential = client.getCredential(
+                        keycloakConfig.getUrl(),
+                        keycloakConfig.getRealm(),
+                        keycloakConfig.getClientId(),
+                        keycloakConfig.getUsername(),
+                        keycloakConfig.getPassword());
+            }
+
+            return credential.getAccessToken();
+
+        } catch (KeycloakClientException e) {
+
+            log.error("Keycloak authentication failed!");
+            Fail.fail(e.getMessage());
+
+            return null;
+        }
     }
 
-    private static void failIfNull(Object object, String reason) {
-        if (object == null) {
-            log.error(reason);
-            System.exit(1);
+    /**
+     * WARNING: Stops the application if the bearer token is not set
+     */
+    public static void authRequired() {
+
+        String reason = "Aborted! Please specify credentials in the config file before retrying";
+
+        Fail.failIfNull(getPncConfiguration().getBearerToken(), reason);
+
+        if (getPncConfiguration().getBearerToken().isEmpty()) {
+            Fail.fail(reason);
         }
     }
 }

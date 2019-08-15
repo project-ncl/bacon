@@ -25,6 +25,11 @@ import lombok.Data;
  * Date: 12/17/18
  */
 @Data
-public class PncConfig {
+public class PncConfig implements Validate {
+
     private String url;
+
+    public void validate() {
+        Validate.validateUrl(url, "PNC");
+    }
 }
