@@ -48,14 +48,22 @@ import java.util.Optional;
         })
 public class ProductVersionCli extends AbstractCommand {
 
-    private static ProductVersionClient client = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+    private static ProductVersionClient clientCache;
+
+    private static ProductVersionClient getClient() {
+
+        if (clientCache == null) {
+            clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "get", description = "Get product version")
     public class Get extends AbstractGetSpecificCommand<ProductVersion> {
 
         @Override
         public ProductVersion getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -70,7 +78,7 @@ public class ProductVersionCli extends AbstractCommand {
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query)
                 throws RemoteResourceException {
 
-            return client.getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -84,7 +92,7 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return client.getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -99,7 +107,7 @@ public class ProductVersionCli extends AbstractCommand {
         public RemoteCollection<org.jboss.pnc.dto.ProductMilestone> getAll(String sort, String query)
                 throws RemoteResourceException {
 
-            return client.getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -114,7 +122,7 @@ public class ProductVersionCli extends AbstractCommand {
         public RemoteCollection<ProductRelease> getAll(String sort, String query)
                 throws RemoteResourceException {
 
-            return client.getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 }

@@ -48,7 +48,14 @@ import java.util.Optional;
         })
 public class ProductMilestoneCli extends AbstractCommand {
 
-    private static ProductMilestoneClient client = new ProductMilestoneClient(PncClientHelper.getPncConfiguration());
+    private static ProductMilestoneClient clientCache;
+
+    private static ProductMilestoneClient getClient() {
+        if (clientCache == null) {
+            clientCache = new ProductMilestoneClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "cancel-milestone-close", description = "Cancel milestone close")
     public class CancelMilestoneClose extends AbstractCommand {
@@ -59,7 +66,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
-            return super.executeHelper(commandInvocation, () -> client.cancelMilestoneClose(id));
+            return super.executeHelper(commandInvocation, () -> getClient().cancelMilestoneClose(id));
         }
     }
 
@@ -68,7 +75,7 @@ public class ProductMilestoneCli extends AbstractCommand {
 
         @Override
         public ProductMilestone getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -81,7 +88,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
             // TODO: figure out what to do with BuildsFilter
-            return client.getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
+            return getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
         }
     }
 

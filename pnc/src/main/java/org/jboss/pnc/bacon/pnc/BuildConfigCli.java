@@ -44,7 +44,14 @@ import java.util.Optional;
         })
 public class BuildConfigCli extends AbstractCommand {
 
-    private BuildConfigurationClient client = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
+    private static BuildConfigurationClient clientCache;
+
+    private static BuildConfigurationClient getClient() {
+        if (clientCache == null) {
+            clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "create", description = "Create a build configuration")
     public class Create extends AbstractNotImplementedCommand {
@@ -55,7 +62,7 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public BuildConfiguration getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -64,7 +71,7 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

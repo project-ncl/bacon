@@ -43,8 +43,14 @@ import java.util.Optional;
         })
 public class ProductCli extends AbstractCommand {
 
-    private static ProductClient client = new ProductClient(PncClientHelper.getPncConfiguration());
+    private static ProductClient clientCache;
 
+    private static ProductClient getClient() {
+        if (clientCache == null) {
+            clientCache = new ProductClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "create", description = "Create a product")
     public class Create extends AbstractNotImplementedCommand {
@@ -56,7 +62,7 @@ public class ProductCli extends AbstractCommand {
 
         @Override
         public Product getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -66,13 +72,11 @@ public class ProductCli extends AbstractCommand {
         @Override
         public RemoteCollection<Product> getAll(String sort, String query) throws RemoteResourceException {
 
-            return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
     @CommandDefinition(name = "update", description = "Update a product")
     public class Update extends AbstractNotImplementedCommand {
     }
-
-
 }

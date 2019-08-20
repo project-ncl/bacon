@@ -48,7 +48,14 @@ import java.util.Optional;
         })
 public class ProjectCli extends AbstractCommand {
 
-    private ProjectClient client = new ProjectClient(PncClientHelper.getPncConfiguration());
+    private static ProjectClient clientCache;
+
+    private static ProjectClient getClient() {
+        if (clientCache == null) {
+            clientCache = new ProjectClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "create", description = "Create a project")
     public class Create extends AbstractNotImplementedCommand {
@@ -59,7 +66,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public Project getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -68,7 +75,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
-            return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -80,7 +87,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return client.getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

@@ -39,15 +39,21 @@ import org.jboss.pnc.enums.SupportLevel;
         })
 public class ProductReleaseCli extends AbstractCommand {
 
-    private static ProductReleaseClient client = new ProductReleaseClient(PncClientHelper.getPncConfiguration());
+    private static ProductReleaseClient clientCache;
 
+    private static ProductReleaseClient getClient() {
+        if (clientCache == null) {
+           clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "get", description = "Get product release")
     public class Get extends AbstractGetSpecificCommand<ProductRelease> {
 
         @Override
         public ProductRelease getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -59,7 +65,7 @@ public class ProductReleaseCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 // TODO: YAML or JSON format?
-                for (SupportLevel supportLevel : client.getAllSupportLevel()) {
+                for (SupportLevel supportLevel : getClient().getAllSupportLevel()) {
                     System.out.println(supportLevel);
                 }
             });

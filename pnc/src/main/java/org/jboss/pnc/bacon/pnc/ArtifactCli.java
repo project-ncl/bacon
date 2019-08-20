@@ -24,14 +24,21 @@ import org.jboss.pnc.dto.Artifact;
         })
 public class ArtifactCli extends AbstractCommand {
 
-    private static ArtifactClient client = new ArtifactClient(PncClientHelper.getPncConfiguration());
+    private static ArtifactClient clientCache;
+
+    private static ArtifactClient getClient() {
+        if (clientCache == null) {
+            clientCache = new ArtifactClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "get", description = "Get artifact")
     public class Get extends AbstractGetSpecificCommand<Artifact> {
 
         @Override
         public Artifact getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -56,7 +63,7 @@ public class ArtifactCli extends AbstractCommand {
                 if (md5 == null && sha1 == null && sha256 == null) {
                     log.error("You need to use at least one hash option!");
                 } else {
-                    for (Artifact artifact : client.getAll(sha256, md5, sha1)) {
+                    for (Artifact artifact : getClient().getAll(sha256, md5, sha1)) {
                         // TODO: print in yaml or json
                         System.out.println(artifact);
                     }

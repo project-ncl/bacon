@@ -40,14 +40,21 @@ import java.util.Optional;
         })
 public class EnvironmentCli extends AbstractCommand {
 
-    private EnvironmentClient environmentClient = new EnvironmentClient(PncClientHelper.getPncConfiguration());
+    private static EnvironmentClient clientCache;
+
+    private static EnvironmentClient getClient() {
+        if (clientCache == null) {
+            clientCache = new EnvironmentClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "get", description = "Get environment")
     public class Get extends AbstractGetSpecificCommand<Environment> {
 
         @Override
         public Environment getSpecific(int id) throws ClientException {
-            return environmentClient.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -56,7 +63,7 @@ public class EnvironmentCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Environment> getAll(String sort, String query) throws RemoteResourceException {
-            return environmentClient.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

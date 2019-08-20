@@ -25,11 +25,8 @@ import org.aesh.command.impl.registry.AeshCommandRegistryBuilder;
 import org.aesh.command.registry.CommandRegistry;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
-import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
-
-import java.io.IOException;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
@@ -56,7 +53,6 @@ public class App extends AbstractCommand {
                 .commandRegistry(registry)
                 .build();
 
-
        try {
            runtime.executeCommand(buildCLIOutput(args));
        } catch (RuntimeException ex) {
@@ -72,7 +68,7 @@ public class App extends AbstractCommand {
        }
     }
 
-    private String buildCLIOutput(String[] args) {
+    private static String buildCLIOutput(String[] args) {
         StringBuilder builder = new StringBuilder();
 
         builder.append("bacon.jar ");
@@ -87,21 +83,7 @@ public class App extends AbstractCommand {
 
     public static void main(String[] args) throws Exception {
 
-        initializeConfig();
-
         App app = new App();
         app.run(args);
-    }
-
-    private static void initializeConfig() {
-        String configLocation = System.getProperty("config", "config.yaml");
-        try {
-            Config.initialize(configLocation);
-        } catch (IOException e) {
-            System.err.println("Configuration file not found. " +
-                    "Please create a config file and either name it 'config.yaml' and put it in the working directory" +
-                    " or specify it with -Dconfig");
-            System.exit(1);
-        }
     }
 }
