@@ -46,6 +46,19 @@ public class Config {
     private static Config instance;
 
     public static Config instance() {
+
+        if (instance == null) {
+
+            String configLocation = System.getProperty("config", "config.yaml");
+
+            try {
+                Config.initialize(configLocation);
+            } catch (IOException e) {
+                System.err.println("Configuration file not found. " +
+                        "Please create a config file and either name it 'config.yaml' and put it in the working directory" +
+                        " or specify it with -Dconfig");
+            }
+        }
         return instance;
     }
 

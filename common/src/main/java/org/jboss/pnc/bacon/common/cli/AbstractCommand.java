@@ -27,7 +27,6 @@ import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
 import org.jboss.pnc.client.ClientException;
-import org.jboss.pnc.client.RemoteResourceException;
 
 /**
  * Abstract command that implements Command

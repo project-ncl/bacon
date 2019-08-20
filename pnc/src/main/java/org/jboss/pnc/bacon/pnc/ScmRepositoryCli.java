@@ -45,7 +45,14 @@ import java.util.Optional;
         })
 public class ScmRepositoryCli extends AbstractCommand {
 
-    private SCMRepositoryClient client = new SCMRepositoryClient(PncClientHelper.getPncConfiguration());
+    private static SCMRepositoryClient clientCache;
+
+    private static SCMRepositoryClient getClient() {
+        if (clientCache == null) {
+            clientCache = new SCMRepositoryClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "create", description = "Create a repository")
     public class Create extends AbstractNotImplementedCommand {
@@ -56,7 +63,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public SCMRepository getSpecific(int id) throws ClientException {
-            return client.getSpecific(id);
+            return getClient().getSpecific(id);
         }
     }
 
@@ -71,7 +78,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
-            return client.getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return getClient().getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

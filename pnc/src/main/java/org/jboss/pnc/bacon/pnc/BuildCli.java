@@ -40,7 +40,14 @@ import java.nio.file.Paths;
 public class BuildCli extends AbstractCommand {
 
 
-    private BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration());
+    private static BuildClient clientCache;
+
+    private static BuildClient getClient() {
+        if (clientCache == null) {
+            clientCache = new BuildClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
 
     @CommandDefinition(name = "download-sources", description = "Download SCM sources used for the build")
     public class DownloadSources extends AbstractCommand {
@@ -56,7 +63,7 @@ public class BuildCli extends AbstractCommand {
 
                 String filename = id + "-sources.tar.gz";
 
-                Response response = client.getInternalScmArchiveLink(id);
+                Response response = getClient().getInternalScmArchiveLink(id);
 
                 InputStream in = (InputStream) response.getEntity();
 
