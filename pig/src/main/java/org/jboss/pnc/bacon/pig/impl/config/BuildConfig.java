@@ -61,7 +61,7 @@ public class BuildConfig {
     private String externalScmUrl;
     private String scmRevision;
     private String description;
-    private Integer environmentId;
+    private String environmentId;
     private List<String> dependencies = new ArrayList<>();
     private Set<String> customPmeParameters = new TreeSet<>();
     private Boolean branchModified;

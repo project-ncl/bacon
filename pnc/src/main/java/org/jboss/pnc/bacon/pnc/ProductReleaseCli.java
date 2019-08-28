@@ -52,7 +52,7 @@ public class ProductReleaseCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<ProductRelease> {
 
         @Override
-        public ProductRelease getSpecific(int id) throws ClientException {
+        public ProductRelease getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }

@@ -53,7 +53,7 @@ public class BuildCli extends AbstractCommand {
     public class DownloadSources extends AbstractCommand {
 
         @Argument(required = true, description = "Id of build")
-        private int id;
+        private String id;
 
 
         @Override

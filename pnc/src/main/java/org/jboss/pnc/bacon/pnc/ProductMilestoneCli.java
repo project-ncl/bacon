@@ -61,7 +61,7 @@ public class ProductMilestoneCli extends AbstractCommand {
     public class CancelMilestoneClose extends AbstractCommand {
 
         @Argument(required = true, description = "Milestone id")
-        private int id;
+        private String id;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -74,7 +74,7 @@ public class ProductMilestoneCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<ProductMilestone> {
 
         @Override
-        public ProductMilestone getSpecific(int id) throws ClientException {
+        public ProductMilestone getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }
@@ -83,7 +83,7 @@ public class ProductMilestoneCli extends AbstractCommand {
     public class PerformedBuilds extends AbstractListCommand<Build> {
 
         @Argument(required = true, description = "Milestone id")
-        private int id;
+        private String id;
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {

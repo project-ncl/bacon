@@ -62,7 +62,7 @@ public class ScmRepositoryCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<SCMRepository> {
 
         @Override
-        public SCMRepository getSpecific(int id) throws ClientException {
+        public SCMRepository getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }

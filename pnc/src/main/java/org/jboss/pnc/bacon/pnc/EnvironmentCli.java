@@ -53,7 +53,7 @@ public class EnvironmentCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<Environment> {
 
         @Override
-        public Environment getSpecific(int id) throws ClientException {
+        public Environment getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }

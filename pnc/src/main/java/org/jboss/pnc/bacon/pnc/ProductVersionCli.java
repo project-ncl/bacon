@@ -62,7 +62,7 @@ public class ProductVersionCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<ProductVersion> {
 
         @Override
-        public ProductVersion getSpecific(int id) throws ClientException {
+        public ProductVersion getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }
@@ -72,7 +72,7 @@ public class ProductVersionCli extends AbstractCommand {
     public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Product version id")
-        private int id;
+        private String id;
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query)
@@ -87,7 +87,7 @@ public class ProductVersionCli extends AbstractCommand {
     public class ListGroupConfigurations extends AbstractListCommand<GroupConfiguration> {
 
         @Argument(required = true, description = "Product version id")
-        private int id;
+        private String id;
 
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
@@ -101,7 +101,7 @@ public class ProductVersionCli extends AbstractCommand {
     public class ListMilestones extends AbstractListCommand<ProductMilestone> {
 
         @Argument(required = true, description = "Product version id")
-        private int id;
+        private String id;
 
         @Override
         public RemoteCollection<org.jboss.pnc.dto.ProductMilestone> getAll(String sort, String query)
@@ -116,7 +116,7 @@ public class ProductVersionCli extends AbstractCommand {
     public class ListReleases extends AbstractListCommand<ProductRelease> {
 
         @Argument(required = true, description = "Product version id")
-        private int id;
+        private String id;
 
         @Override
         public RemoteCollection<ProductRelease> getAll(String sort, String query)

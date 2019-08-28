@@ -50,7 +50,7 @@ public class GitRepoInspector {
 
     private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
 
-    public static boolean isModifiedBranch(Integer configId,
+    public static boolean isModifiedBranch(String configId,
                                            String internalUrl,
                                            String refSpec) {
 
@@ -133,7 +133,7 @@ public class GitRepoInspector {
         return result;
     }
 
-    private static String getLatestBuiltRevision(Integer configId) {
+    private static String getLatestBuiltRevision(String configId) {
         PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId);
         return latestBuild.getBuildConfigRevision().getScmRevision();
     }
