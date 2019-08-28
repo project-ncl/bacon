@@ -61,7 +61,7 @@ public class BuildConfigCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
 
         @Override
-        public BuildConfiguration getSpecific(int id) throws ClientException {
+        public BuildConfiguration getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }

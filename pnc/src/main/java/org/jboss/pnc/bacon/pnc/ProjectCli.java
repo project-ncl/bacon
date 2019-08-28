@@ -65,7 +65,7 @@ public class ProjectCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<Project> {
 
         @Override
-        public Project getSpecific(int id) throws ClientException {
+        public Project getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }
@@ -83,7 +83,7 @@ public class ProjectCli extends AbstractCommand {
     public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Project id")
-        private int id;
+        private String id;
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {

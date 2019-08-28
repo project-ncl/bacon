@@ -51,7 +51,7 @@ public class ScriptGenerator {
                                        Path targetDir,
                                        Path releaseDir,
                                        String brewTag,
-                                       List<Integer> buildIdsToPush) {
+                                       List<String> buildIdsToPush) {
         ReleaseScriptData dataRoot = getReleaseScriptData(milestone, repoZipLocation, targetDir, releaseDir, brewTag, buildIdsToPush);
         generateCloseMilestoneScript(targetDir, dataRoot);
         generateUploadToCandidatesScript(targetDir, dataRoot);
@@ -79,7 +79,7 @@ public class ScriptGenerator {
                                                    Path targetDir,
                                                    Path releaseDir,
                                                    String brewTag,
-                                                   List<Integer> buildIdsToPush) {
+                                                   List<String> buildIdsToPush) {
         String nvrListName = deliverables.getNvrListName();
         String nvrScriptLocation = extractNvrListScript(targetDir.toFile());
         String nvrListPath = releaseDir.resolve(nvrListName).toAbsolutePath().toString();
@@ -103,12 +103,12 @@ public class ScriptGenerator {
     @Data
     @AllArgsConstructor
     public static class ReleaseScriptData {
-        private Integer milestoneId;
+        private String milestoneId;
         private String nvrListScriptLocation;
         private String repoZipLocation;
         private String targetPath;
         private String productWithVersion;
         private String brewTag;
-        private List<Integer> buildsToPush;
+        private List<String> buildsToPush;
     }
 }

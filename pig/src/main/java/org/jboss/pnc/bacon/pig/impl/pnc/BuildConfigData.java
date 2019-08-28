@@ -33,7 +33,7 @@ public class BuildConfigData {
     @Delegate
     private final BuildConfig newConfig;
     @Setter
-    private Integer id;
+    private String id;
     private BuildConfiguration oldConfig;
     @Setter
     private boolean modified = false;

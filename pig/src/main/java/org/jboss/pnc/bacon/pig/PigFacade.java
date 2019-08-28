@@ -87,7 +87,7 @@ public class PigFacade {
         }
 
         if (tempBuild) {
-            log.info("Temprorary build");
+            log.info("Temporary build");
         }
 
         new PncBuilder().buildAndWait(importResult.getBuildGroup(),
@@ -251,7 +251,7 @@ public class PigFacade {
         return version.getAttributes().get("BREW_TAG_PREFIX");
     }
 
-    private static List<Integer> getBuildIdsToPush(Map<String, PncBuild> builds) {
+    private static List<String> getBuildIdsToPush(Map<String, PncBuild> builds) {
         return builds.values()
                 .stream()
                 .filter(PigFacade::notPushedToBrew)

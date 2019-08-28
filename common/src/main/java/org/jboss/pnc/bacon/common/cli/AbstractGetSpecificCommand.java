@@ -33,7 +33,7 @@ import org.jboss.pnc.client.ClientException;
 public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
 
     @Argument(required = true, description = "Id of item")
-    private int id;
+    private String id;
 
     @Override
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -42,5 +42,5 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
     }
 
 
-    public abstract T getSpecific(int id) throws ClientException;
+    public abstract T getSpecific(String id) throws ClientException;
 }

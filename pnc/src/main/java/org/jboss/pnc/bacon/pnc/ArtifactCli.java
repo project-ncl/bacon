@@ -37,7 +37,7 @@ public class ArtifactCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<Artifact> {
 
         @Override
-        public Artifact getSpecific(int id) throws ClientException {
+        public Artifact getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }

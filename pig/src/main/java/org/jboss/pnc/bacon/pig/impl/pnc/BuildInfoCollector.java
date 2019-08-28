@@ -55,7 +55,7 @@ public class BuildInfoCollector {
         bd.setDependencyArtifacts(artifacts);
     }
 
-    public PncBuild getLatestBuild(Integer configId) {
+    public PncBuild getLatestBuild(String configId) {
         try {
             BuildsFilterParameters filter = new BuildsFilterParameters();
             filter.setLatest(true);

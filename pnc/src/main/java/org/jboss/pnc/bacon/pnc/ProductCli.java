@@ -61,7 +61,7 @@ public class ProductCli extends AbstractCommand {
     public class Get extends AbstractGetSpecificCommand<Product> {
 
         @Override
-        public Product getSpecific(int id) throws ClientException {
+        public Product getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
         }
     }

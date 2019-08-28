@@ -122,28 +122,28 @@ public class PncEntitiesImporter {
     }
 
     private void setUpBuildDependencies(BuildConfigData config) {
-        Integer id = config.getId();
+        String id = config.getId();
 
         // todo : store build configuration refs in BuildConfigData and use it instead of ids here
-        Set<Integer> dependencies =
+        Set<String> dependencies =
               config.getDependencies()
                     .stream()
                     .map(this::configByName)
                     .collect(Collectors.toSet());
-        Set<Integer> currentDependencies = getCurrentDependencies(id);
+        Set<String> currentDependencies = getCurrentDependencies(id);
 
-        Set<Integer> superfluous = CollectionUtils.subtractSet(currentDependencies, dependencies);
+        Set<String> superfluous = CollectionUtils.subtractSet(currentDependencies, dependencies);
         if (!superfluous.isEmpty()) {
             superfluous.forEach(
                   dependencyId -> removeDependency(id, dependencyId)
             );
         }
 
-        Set<Integer> missing =
+        Set<String> missing =
               CollectionUtils.subtractSet(dependencies, currentDependencies);
         if (!missing.isEmpty()) {
             missing.stream()
-                  .map(this::getBuildConfig)
+                  .map(this::getBuildConfigFromId)
                   .forEach(dependency -> addDependency(id, dependency)
                   );
         }
@@ -153,7 +153,7 @@ public class PncEntitiesImporter {
         }
     }
 
-    private void addDependency(Integer configId, BuildConfiguration dependency) {
+    private void addDependency(String configId, BuildConfiguration dependency) {
         try {
             buildConfigClient.addDependency(configId, dependency);
         } catch (RemoteResourceException e) {
@@ -161,7 +161,7 @@ public class PncEntitiesImporter {
         }
     }
 
-    private void removeDependency(Integer buildConfigId, Integer dependencyId) {
+    private void removeDependency(String buildConfigId, String dependencyId) {
         try {
             buildConfigClient.removeDependency(buildConfigId, dependencyId);
         } catch (RemoteResourceException e) {
@@ -169,7 +169,7 @@ public class PncEntitiesImporter {
         }
     }
 
-    private Set<Integer> getCurrentDependencies(Integer buildConfigId) {
+    private Set<String> getCurrentDependencies(String buildConfigId) {
         try {
             return toStream(buildConfigClient.getDependencies(buildConfigId))
                   .map(BuildConfigurationRef::getId)
@@ -179,7 +179,7 @@ public class PncEntitiesImporter {
         }
     }
 
-    private Integer configByName(String name) {
+    private String configByName(String name) {
         Optional<BuildConfigData> maybeConfig = configs.stream()
               .filter(c -> c.getName().equals(name))
               .findAny();
@@ -195,9 +195,9 @@ public class PncEntitiesImporter {
                     .map(BuildConfigData::getId)
                     .map(String::valueOf)
                     .collect(Collectors.joining(" "));
-        Set<Integer> existing = getExistingGroupConstituents();
+        Set<String> existing = getExistingGroupConstituents();
 
-        Set<Integer> target = configs.stream().map(BuildConfigData::getId).collect(Collectors.toSet());
+        Set<String> target = configs.stream().map(BuildConfigData::getId).collect(Collectors.toSet());
 
         CollectionUtils.subtractSet(existing, target)
               .forEach(this::removeConfigurationFromGroup);
@@ -206,7 +206,7 @@ public class PncEntitiesImporter {
               .forEach(this::addConfigurationToGroup);
     }
 
-    private Set<Integer> getExistingGroupConstituents() {
+    private Set<String> getExistingGroupConstituents() {
         try {
             return toStream(groupConfigClient.getConfigurations(buildGroup.getId()))
                   .map(BuildConfiguration::getId)
@@ -216,7 +216,7 @@ public class PncEntitiesImporter {
         }
     }
 
-    private void removeConfigurationFromGroup(Integer superfluousId) {
+    private void removeConfigurationFromGroup(String superfluousId) {
         try {
             groupConfigClient.removeConfiguration(buildGroup.getId(), superfluousId);
         } catch (RemoteResourceException e) {
@@ -224,9 +224,9 @@ public class PncEntitiesImporter {
         }
     }
 
-    private void addConfigurationToGroup(Integer newConfigId) {
+    private void addConfigurationToGroup(String newConfigId) {
         try {
-            groupConfigClient.addConfiguration(buildGroup.getId(), getBuildConfig(newConfigId));
+            groupConfigClient.addConfiguration(buildGroup.getId(), getBuildConfigFromId(newConfigId));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to add config " + newConfigId + " to the group", e);
         }
@@ -239,7 +239,7 @@ public class PncEntitiesImporter {
         return updateOrCreate(currentConfigs, config.getBuilds());
     }
 
-    private Optional<BuildConfiguration> getBuildConfig(String name) {
+    private Optional<BuildConfiguration> getBuildConfigFromName(String name) {
         try {
             return maybeSingle(buildConfigClient.getAll(empty(), findByNameQuery(name)));
         } catch (RemoteResourceException e) {
@@ -247,7 +247,7 @@ public class PncEntitiesImporter {
         }
     }
 
-    private BuildConfiguration getBuildConfig(Integer id) {
+    private BuildConfiguration getBuildConfigFromId(String id) {
         try {
             return buildConfigClient.getSpecific(id);
         } catch (ClientException e) {
@@ -271,7 +271,7 @@ public class PncEntitiesImporter {
             }
             //Check if build exists already (globally)
             //True = Add to BCS and update BC (maybe ask?)
-            Optional<BuildConfiguration> matchedBuildConfig = getBuildConfig(bc.getName());
+            Optional<BuildConfiguration> matchedBuildConfig = getBuildConfigFromName(bc.getName());
             if (matchedBuildConfig.isPresent()) {
                 log.debug("Found matching build config for {}", bc.getName());
                 data.setOldConfig(matchedBuildConfig.get());
@@ -368,7 +368,7 @@ public class PncEntitiesImporter {
     }
 
     private BuildConfiguration updateBuildConfig(BuildConfigData data) {
-        Integer configId = data.getId();
+        String configId = data.getId();
 
         BuildConfiguration buildConfiguration = generatePncBuildConfig(data.getNewConfig());
 
