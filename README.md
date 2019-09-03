@@ -9,4 +9,20 @@ Compile:
 Run:
   java -jar cli/target/bacon.jar 
 
+# Authentication
 
+To authenticate to PNC Authentication servers, add this to your `config.yaml`:
+
+```yaml
+keycloak:
+    url: "http://keycloak.com"
+    realm: ""
+    username: ""
+
+    # if regular user
+    clientId: ""
+    password: ""
+
+    # if service account
+    # clientSecret: ""
+```
