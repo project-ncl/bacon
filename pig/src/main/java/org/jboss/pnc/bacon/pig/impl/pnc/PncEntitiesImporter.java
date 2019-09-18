@@ -474,7 +474,7 @@ public class PncEntitiesImporter {
               .version(config.getMajorMinor())
               .build();
         try {
-            return versionClient.createNewProductVersion(productVersion);
+            return versionClient.createNew(productVersion);
         } catch (ClientException e) {
             throw new RuntimeException("Failed to create the product version", e);
         }
