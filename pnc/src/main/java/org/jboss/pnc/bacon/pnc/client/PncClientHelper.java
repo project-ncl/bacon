@@ -54,6 +54,10 @@ public class PncClientHelper {
         if (keycloakConfig != null) {
             keycloakConfig.validate();
             bearerToken = getBearerToken(keycloakConfig);
+
+            if (bearerToken == null || bearerToken.isEmpty()) {
+                Fail.fail("Credentials don't seem to be valid");
+            }
         }
 
         config.getPnc().validate();
@@ -74,6 +78,12 @@ public class PncClientHelper {
         }
     }
 
+    /**
+     * Return null if it couldn't get the authentication token. This generally means that
+     * the credentials are not valid
+     * @param keycloakConfig
+     * @return
+     */
     private static String getBearerToken(KeycloakConfig keycloakConfig) {
 
         log.debug("Authenticating to keycloak");
