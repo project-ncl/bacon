@@ -19,18 +19,21 @@ package org.jboss.pnc.bacon.pig.impl.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.security.KeyManagementException;
@@ -53,6 +56,8 @@ public class FileDownloadUtils {
 
     private static final int READ_TIMEOUT = 900000;
 
+    private static final int MAX_RETRIES = 5;
+
     private static final RequestConfig requestConfig;
 
     private static final Supplier<CloseableHttpClient> safeHttpClient;
@@ -69,6 +74,20 @@ public class FileDownloadUtils {
             try {
                 return HttpClients
                         .custom()
+                        .setRetryHandler(new HttpRequestRetryHandler() {
+                            @Override
+                            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                                if (executionCount > MAX_RETRIES) {
+                                    log.warn("Maximum tries reached for client http pool");
+                                    return false;
+                                 }
+                                 if (exception instanceof org.apache.http.NoHttpResponseException) {
+                                     log.warn("No response from server on {} call ", executionCount);
+                                     return true;
+                                 }
+                                 return false;
+                            }
+                        })
                         .setDefaultRequestConfig(requestConfig)
                         .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
                         .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
