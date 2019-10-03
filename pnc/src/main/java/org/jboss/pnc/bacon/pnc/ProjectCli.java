@@ -18,17 +18,22 @@
 package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProjectClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Project;
 
@@ -44,7 +49,6 @@ import java.util.Optional;
                 ProjectCli.ListBuildConfigurations.class,
                 ProjectCli.ListBuilds.class,
                 ProjectCli.Update.class,
-                ProjectCli.Delete.class
         })
 public class ProjectCli extends AbstractCommand {
 
@@ -58,7 +62,32 @@ public class ProjectCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "create", description = "Create a project")
-    public class Create extends AbstractNotImplementedCommand {
+    public class Create extends AbstractCommand {
+
+        @Argument(required = true, description = "Name of project")
+        private String name;
+        @Option(name = "description", description = "Description of project", defaultValue = "")
+        private String description;
+        @Option(name = "project-url", description = "Project-URL of project", defaultValue = "")
+        private String projectUrl;
+        @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project", defaultValue = "")
+        private String issueTrackerUrl;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                Project project = Project.builder()
+                        .name(name)
+                        .description(description)
+                        .projectUrl(projectUrl)
+                        .issueTrackerUrl(issueTrackerUrl)
+                        .build();
+
+                System.out.println(getClient().createNew(project));
+            });
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get a project")
@@ -92,14 +121,47 @@ public class ProjectCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "get-builds", description = "List builds for a project")
-    public class ListBuilds extends AbstractNotImplementedCommand {
+    public class ListBuilds extends AbstractListCommand<Build> {
+
+        @Argument(required = true, description = "Project id")
+        private String id;
+
+        @Override
+        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
+            return getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
     }
 
     @CommandDefinition(name = "update", description = "Update a project")
-    public class Update extends AbstractNotImplementedCommand {
-    }
+    public class Update extends AbstractCommand {
 
-    @CommandDefinition(name = "delete", description = "Delete a project")
-    public class Delete extends AbstractNotImplementedCommand {
+        @Argument(required = true, description = "Project id")
+        private String id;
+
+        @Option(name = "name", description = "Name of project")
+        private String name;
+        @Option(name = "description", description = "Description of project")
+        private String description;
+        @Option(name = "project-url", description = "Project-URL of project")
+        private String projectUrl;
+        @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project")
+        private String issueTrackerUrl;
+
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+                return super.executeHelper(commandInvocation, () -> {
+                    Project project = getClient().getSpecific(id);
+                    Project.Builder updated = project.toBuilder();
+
+                    ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
+                    ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
+                    ObjectHelper.executeIfNotNull(projectUrl, () -> updated.projectUrl(projectUrl));
+                    ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
+
+                    getClient().update(id, updated.build());
+                });
+        }
     }
 }
