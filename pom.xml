@@ -294,6 +294,7 @@
                                         <regexIgnored>[{]</regexIgnored>
                                     </regexIgnored>
                                 </requireManagedDeps>
+                                <banDuplicatePomDependencyVersions/>
                             </rules>
                         </configuration>
                     </execution>
