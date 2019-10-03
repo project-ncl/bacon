@@ -43,22 +43,18 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>2.0.1.Final</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.1.1.201809181055-r</version>
         </dependency>
         <dependency>
             <groupId>me.snowdrop</groupId>
             <artifactId>licenses-generator</artifactId>
-            <version>1.0.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -73,22 +69,18 @@
         <dependency>
             <groupId>com.redhat.red.build</groupId>
             <artifactId>koji-build-finder</artifactId>
-            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.10.4</version>
         </dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
-            <version>2.3.23</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -97,7 +89,6 @@
         <dependency>
             <groupId>org.commonjava.maven.ext</groupId>
             <artifactId>pom-manipulation-cli</artifactId>
-            <version>3.3</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
