@@ -74,8 +74,16 @@ public class App extends AbstractCommand {
         builder.append("bacon.jar ");
 
         for (String opt : args) {
-            builder.append(opt);
-            builder.append(" ");
+            // if opt contains spaces, that means it was grouped inside quotation marks
+            // we have to pass the same quotation marks to bacon (it's removed in the args array)
+            if (opt.contains(" ")) {
+                builder.append("\"");
+                builder.append(opt);
+                builder.append("\" ");
+            } else {
+                builder.append(opt);
+                builder.append(" ");
+            }
         }
 
         return builder.toString();
