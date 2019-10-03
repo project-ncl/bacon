@@ -23,7 +23,6 @@
         <dependency>
             <groupId>org.jboss.da</groupId>
             <artifactId>reports-model</artifactId>
-            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.aesh</groupId>

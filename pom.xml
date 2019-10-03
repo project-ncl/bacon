@@ -90,6 +90,13 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- da -->
+            <dependency>
+                <groupId>org.jboss.da</groupId>
+                <artifactId>reports-model</artifactId>
+                <version>1.5.0</version>
+            </dependency>
+
             <!-- pnc client -->
             <dependency>
                 <groupId>org.jboss.pnc</groupId>
@@ -181,6 +188,53 @@
                 <version>2.9.8</version>
             </dependency>
 
+            <!-- pig and others -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.8.1</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>2.0.1.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit</artifactId>
+                <version>5.1.1.201809181055-r</version>
+            </dependency>
+            <dependency>
+                <groupId>me.snowdrop</groupId>
+                <artifactId>licenses-generator</artifactId>
+                <version>1.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.red.build</groupId>
+                <artifactId>koji-build-finder</artifactId>
+                <version>1.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>1.10.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.23</version>
+            </dependency>
+            <dependency>
+                <groupId>org.commonjava.maven.ext</groupId>
+                <artifactId>pom-manipulation-cli</artifactId>
+                <version>3.3</version>
+            </dependency>
+
             <!--tests-->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -210,6 +264,43 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.commonjava.maven.enforcer</groupId>
+                        <artifactId>enforce-managed-deps-rule</artifactId>
+                        <version>1.2</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+
+                    <execution>
+                        <id>no-managed-deps</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <rules>
+                                <requireManagedDeps
+                                    implementation="org.commonjava.maven.enforcer.rule.EnforceManagedDepsRule">
+                                    <checkProfiles>true</checkProfiles>
+                                    <failOnViolation>true</failOnViolation>
+                                    <regexIgnored>
+                                        <regexIgnored>[{]</regexIgnored>
+                                    </regexIgnored>
+                                </requireManagedDeps>
+                            </rules>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <!-- Use the latest version of surefire that correctly picks up JUnit 5 tests -->
