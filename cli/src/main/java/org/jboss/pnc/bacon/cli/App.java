@@ -22,6 +22,7 @@ import org.aesh.command.AeshCommandRuntimeBuilder;
 import org.aesh.command.CommandRuntime;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.impl.registry.AeshCommandRegistryBuilder;
+import org.aesh.command.parser.RequiredOptionException;
 import org.aesh.command.registry.CommandRegistry;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
@@ -55,6 +56,9 @@ public class App extends AbstractCommand {
 
        try {
            runtime.executeCommand(buildCLIOutput(args));
+       } catch (RequiredOptionException ex) {
+           log.error("Missing argument/option: {}", ex.getMessage());
+           System.exit(1);
        } catch (RuntimeException ex) {
            log.error(ex.getMessage());
 
