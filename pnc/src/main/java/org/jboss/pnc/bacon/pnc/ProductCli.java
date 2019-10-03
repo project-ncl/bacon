@@ -18,11 +18,16 @@
 package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductClient;
@@ -53,8 +58,44 @@ public class ProductCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "create", description = "Create a product")
-    public class Create extends AbstractNotImplementedCommand {
+    public class Create extends AbstractCommand {
 
+
+        @Argument(required = true, description = "Name of product")
+        private String name;
+
+        @Option(required = true, name = "abbreviation", description = "Abbreviation of product")
+        private String abbreviation;
+
+        @Option(name = "description", description = "Description of product", defaultValue = "")
+        private String description;
+
+        @Option(name = "product-code",
+                description = "The official Product code to be used in URLs and filenames etc e.g. eap",
+                defaultValue = "")
+        private String productCode;
+
+        @Option(name = "system-code",
+                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap",
+                defaultValue = "")
+        private String systemCode;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                Product product = Product.builder()
+                        .name(name)
+                        .abbreviation(abbreviation)
+                        .description(description)
+                        .productCode(productCode)
+                        .pgmSystemName(systemCode)
+                        .build();
+
+                System.out.println(getClient().createNew(product));
+            });
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get product")
@@ -77,6 +118,44 @@ public class ProductCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "update", description = "Update a product")
-    public class Update extends AbstractNotImplementedCommand {
+    public class Update extends AbstractCommand {
+
+        @Argument(required = true, description = "Product Id")
+        private String id;
+
+        @Option(name = "name", description = "Name of product")
+        private String name;
+
+        @Option(name = "abbreviation", description = "Abbreviation of product")
+        private String abbreviation;
+
+        @Option(name = "description", description = "Description of product", defaultValue = "")
+        private String description;
+
+        @Option(name = "product-code",
+                description = "The official Product code to be used in URLs and filenames etc e.g. eap")
+        private String productCode;
+
+        @Option(name = "system-code",
+                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap")
+        private String systemCode;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                Product product = getClient().getSpecific(id);
+                Product.Builder updated = product.toBuilder();
+
+                ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
+                ObjectHelper.executeIfNotNull(abbreviation, () -> updated.abbreviation(abbreviation));
+                ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
+                ObjectHelper.executeIfNotNull(productCode, () -> updated.productCode(productCode));
+                ObjectHelper.executeIfNotNull(systemCode, () -> updated.pgmSystemName(systemCode));
+
+                getClient().update(id, updated.build());
+            });
+        }
     }
 }
