@@ -17,9 +17,16 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.Fail;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -31,6 +38,7 @@ import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductRef;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.dto.ProductVersion;
 
@@ -40,12 +48,15 @@ import java.util.Optional;
         name = "product-version",
         description = "Product Version",
         groupCommands = {
+                ProductVersionCli.Create.class,
                 ProductVersionCli.Get.class,
+                ProductVersionCli.Update.class,
                 ProductVersionCli.ListBuildConfigurations.class,
                 ProductVersionCli.ListGroupConfigurations.class,
                 ProductVersionCli.ListMilestones.class,
                 ProductVersionCli.ListReleases.class
         })
+@Slf4j
 public class ProductVersionCli extends AbstractCommand {
 
     private static ProductVersionClient clientCache;
@@ -56,6 +67,37 @@ public class ProductVersionCli extends AbstractCommand {
             clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration());
         }
         return clientCache;
+    }
+
+    @CommandDefinition(name = "create",
+            description = "Create a product version")
+    public class Create extends AbstractCommand {
+
+        @Argument(required = true, description = "Version of product version")
+        private String productVersion;
+        @Option(required = true, name = "product-id", description = "Product ID of product version")
+        private String productId;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                if (!validateProductVersion(productVersion)) {
+                    Fail.fail("Version specified '" + productVersion + "' is not valid! " +
+                            "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
+                }
+
+                ProductRef productRef = ProductRef.refBuilder().id(productId).build();
+
+                ProductVersion productVersion = ProductVersion.builder()
+                        .product(productRef)
+                        .version(this.productVersion)
+                        .build();
+
+                System.out.println(getClient().createNew(productVersion));
+            });
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get product version")
@@ -124,5 +166,55 @@ public class ProductVersionCli extends AbstractCommand {
 
             return getClient().getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
+    }
+
+    @CommandDefinition(name = "update",
+            description = "Update a particular product version")
+    public class Update extends AbstractCommand {
+
+        @Argument(required = true, description = "Product Version ID to update")
+        private String id;
+        @Option(name = "product-version", description = "Version of product version")
+        private String productVersion;
+
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                ProductVersion pV = getClient().getSpecific(id);
+                ProductVersion.Builder updated = pV.toBuilder();
+                ObjectHelper.executeIfNotNull(productVersion, () -> {
+
+                    if (!validateProductVersion(productVersion)) {
+                        Fail.fail("Version specified '" + productVersion + "' is not valid! " +
+                                "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
+                    }
+
+                    updated.version(productVersion);
+                });
+                getClient().update(id, updated.build());
+            });
+        }
+    }
+
+    /**
+     * A valid version is one that contains 2 numeric parts seperated by a dot
+     * @param version
+     * @return
+     */
+    public static boolean validateProductVersion(String version) {
+
+        String[] items = version.split("\\.");
+
+        if (items.length != 2) {
+            return false;
+        } else {
+            for (String item : items) {
+                if (!item.matches("\\d+")) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
