@@ -29,11 +29,16 @@ import org.jboss.pnc.client.Configuration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 
 @Slf4j
 public class PncClientHelper {
 
     private static Configuration configuration;
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     public static Configuration getPncConfiguration() {
 
@@ -132,5 +137,24 @@ public class PncClientHelper {
         if (getPncConfiguration().getBearerToken().isEmpty()) {
             Fail.fail(reason);
         }
+    }
+
+    /**
+     * Format must be: <yyyy>-<mm>-<dd>
+     * @param date
+     */
+    public static Instant parseDateFormat(String date) {
+
+        try {
+            Date ret = sdf.parse(date);
+            return ret.toInstant();
+        } catch (ParseException e) {
+            Fail.fail("Date is not in valid format");
+            return null;
+        }
+    }
+
+    public static String getTodayDayInYYYYMMDDFormat() {
+        return sdf.format(new Date());
     }
 }
