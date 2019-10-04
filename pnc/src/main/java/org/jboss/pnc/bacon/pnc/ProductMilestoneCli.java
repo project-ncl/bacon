@@ -110,7 +110,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .productVersion(productVersionRef)
                         .issueTrackerUrl(issueTrackerUrl)
                         .startingDate(startDateInstant)
-                        .endDate(endDateInstant)
+                        .plannedEndDate(endDateInstant)
                         .build();
 
                 System.out.println(getClient().createNew(milestone));
@@ -164,7 +164,7 @@ public class ProductMilestoneCli extends AbstractCommand {
 
                 ObjectHelper.executeIfNotNull(endDate, () -> {
                     Instant endDateInstant = parseDateFormat(endDate);
-                    updated.endDate(endDateInstant);
+                    updated.plannedEndDate(endDateInstant);
                 });
 
                 getClient().update(productMilestoneId, updated.build());

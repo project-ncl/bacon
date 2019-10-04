@@ -34,7 +34,6 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
                 BuildCli.class,
                 BuildConfigCli.class,
                 EnvironmentCli.class,
-                GenerateToolsCli.class,
                 GroupBuildCli.class,
                 GroupConfigCli.class,
                 ProductCli.class,
