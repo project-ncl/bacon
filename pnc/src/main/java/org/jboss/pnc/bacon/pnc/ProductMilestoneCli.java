@@ -41,11 +41,10 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
+
+import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
 
 @Slf4j
 @GroupCommandDefinition(
@@ -61,7 +60,6 @@ import java.util.Optional;
 public class ProductMilestoneCli extends AbstractCommand {
 
     private static ProductMilestoneClient clientCache;
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private static ProductMilestoneClient getClient() {
         if (clientCache == null) {
@@ -97,7 +95,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                 }
 
                 if (startDate == null) {
-                    startDate = sdf.format(new Date());
+                    startDate = PncClientHelper.getTodayDayInYYYYMMDDFormat();
                 }
 
                 Instant startDateInstant = parseDateFormat(startDate);
@@ -206,7 +204,6 @@ public class ProductMilestoneCli extends AbstractCommand {
             return getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
         }
     }
-
     /**
      * Product Milestone version format is: <d>.<d>.<d>.<word>
      * The first 2 digits must match the digit for the product version
@@ -232,20 +229,5 @@ public class ProductMilestoneCli extends AbstractCommand {
         }
 
         return items[2].matches("\\d+");
-    }
-
-    /**
-     * Format must be: <yyyy>-<mm>-<dd>
-     * @param date
-     */
-    public static Instant parseDateFormat(String date) {
-
-        try {
-            Date ret = sdf.parse(date);
-            return ret.toInstant();
-        } catch (ParseException e) {
-            Fail.fail("Date is not in valid format");
-            return null;
-        }
     }
 }
