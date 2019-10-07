@@ -35,6 +35,7 @@ import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -53,6 +54,7 @@ import java.util.Optional;
                 BuildConfigCli.Create.class,
                 BuildConfigCli.Get.class,
                 BuildConfigCli.List.class,
+                BuildConfigCli.ListBuilds.class,
                 BuildConfigCli.Update.class,
         })
 @Slf4j
@@ -60,7 +62,7 @@ public class BuildConfigCli extends AbstractCommand {
 
     private static BuildConfigurationClient clientCache;
 
-    private static BuildConfigurationClient getClient() {
+    public static BuildConfigurationClient getClient() {
         if (clientCache == null) {
             clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
         }
@@ -177,6 +179,18 @@ public class BuildConfigCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "list-builds", description = "List builds of build configurations")
+    public class ListBuilds extends AbstractListCommand<Build> {
+
+        @Argument(required = true, description = "Build config id")
+        private String buildConfigId;
+
+        @Override
+        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
+            return getClient().getBuilds(buildConfigId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
