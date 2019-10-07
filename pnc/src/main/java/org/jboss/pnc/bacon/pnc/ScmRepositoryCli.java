@@ -18,18 +18,23 @@
 package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.client.SCMRepositoryClient;
+import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 
 import java.util.Optional;
 
@@ -37,11 +42,10 @@ import java.util.Optional;
         name = "scm-repository",
         description = "Scm repository",
         groupCommands = {
-                ScmRepositoryCli.Create.class,
+                ScmRepositoryCli.CreateAndSync.class,
                 ScmRepositoryCli.Get.class,
                 ScmRepositoryCli.List.class,
-                ScmRepositoryCli.Update.class,
-                ScmRepositoryCli.Delete.class
+                ScmRepositoryCli.ListBuildConfigs.class,
         })
 public class ScmRepositoryCli extends AbstractCommand {
 
@@ -54,8 +58,27 @@ public class ScmRepositoryCli extends AbstractCommand {
         return clientCache;
     }
 
-    @CommandDefinition(name = "create", description = "Create a repository")
-    public class Create extends AbstractNotImplementedCommand {
+    @CommandDefinition(name = "create-and-sync", description = "Create a repository")
+    public class CreateAndSync extends AbstractCommand {
+
+        @Argument(required = true, description = "SCM URL")
+        private String scmUrl;
+
+        @Option(name = "pre-build-sync", description = "Pre-build-sync feature: Default: true", defaultValue = "true")
+        private String preBuildSync;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+                CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
+                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync))
+                        .scmUrl(scmUrl)
+                        .build();
+
+                System.out.println(getClient().createNew(createAndSyncSCMRequest));
+            });
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get a repository")
@@ -82,11 +105,15 @@ public class ScmRepositoryCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a repository")
-    public class Update extends AbstractNotImplementedCommand {
-    }
+    @CommandDefinition(name = "list-build-configs", description = "List build configs that use a particular SCM repository")
+    public class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
 
-    @CommandDefinition(name = "delete", description = "Delete a repository")
-    public class Delete extends AbstractNotImplementedCommand {
+        @Argument(description = "SCM Repository ID")
+        private String scmRepositoryId;
+
+        @Override
+        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            return getClient().getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
     }
 }
