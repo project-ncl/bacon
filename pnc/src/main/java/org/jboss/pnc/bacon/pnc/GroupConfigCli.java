@@ -17,9 +17,140 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.GroupConfigurationClient;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.BuildConfigurationRef;
+import org.jboss.pnc.dto.GroupConfiguration;
+import org.jboss.pnc.dto.ProductVersionRef;
 
-@GroupCommandDefinition(name = "group-config", description = "Group configuration", groupCommands = {})
+import java.util.LinkedList;
+import java.util.Optional;
+
+@GroupCommandDefinition(name = "group-config", description = "Group configuration", groupCommands = {
+        GroupConfigCli.Create.class,
+        GroupConfigCli.Update.class,
+        GroupConfigCli.List.class,
+        GroupConfigCli.Get.class,
+})
 public class GroupConfigCli extends AbstractCommand {
+
+    private static GroupConfigurationClient clientCache;
+
+    private static GroupConfigurationClient getClient() {
+        if (clientCache == null) {
+            clientCache = new GroupConfigurationClient(PncClientHelper.getPncConfiguration());
+        }
+        return clientCache;
+    }
+
+    @CommandDefinition(name = "create", description = "Create a group configuration")
+    public class Create extends AbstractCommand {
+
+        @Argument(required = true, description = "Name of group configuration")
+        private String groupConfigName;
+
+        @Option(name = "product-version-id", description = "Product Version ID")
+        private String productVersionId;
+
+        @Option(name = "build-configuration-ids", description = "Build configuration ids in Group Config. Comma separated")
+        private String buildConfigurationIds;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder()
+                        .name(groupConfigName);
+
+                ObjectHelper.executeIfNotNull(productVersionId,
+                        () -> groupConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+
+                ObjectHelper.executeIfNotNull(buildConfigurationIds,
+                        () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
+
+                System.out.println(getClient().createNew(groupConfigurationBuilder.build()));
+            });
+        }
+    }
+
+    @CommandDefinition(name = "update", description = "Update a group configuration")
+    public class Update extends AbstractCommand {
+
+        @Argument(required = true, description = "Group Configuration ID")
+        private String groupConfigId;
+
+        @Option(name = "name", description = "Name of group configuration")
+        private String groupConfigName;
+
+        @Option(name = "product-version-id", description = "Product Version ID")
+        private String productVersionId;
+
+        @Option(name = "build-configuration-ids", description = "Build configuration ids in Group Config. Comma separated")
+        private String buildConfigurationIds;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                GroupConfiguration groupConfiguration = getClient().getSpecific(groupConfigId);
+                GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
+
+                ObjectHelper.executeIfNotNull(groupConfigName, () -> updated.name(groupConfigName));
+                ObjectHelper.executeIfNotNull(productVersionId,
+                        () -> updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+
+                ObjectHelper.executeIfNotNull(buildConfigurationIds,
+                        () -> updated.buildConfigs(addBuildConfigs(buildConfigurationIds)));
+
+                getClient().update(groupConfigId, updated.build());
+            });
+        }
+    }
+
+    @CommandDefinition(name = "get", description = "Get group configuration")
+    public class Get extends AbstractGetSpecificCommand<GroupConfiguration> {
+
+        @Override
+        public GroupConfiguration getSpecific(String id) throws ClientException {
+            return getClient().getSpecific(id);
+        }
+    }
+
+    @CommandDefinition(name = "list", description = "List group configurations")
+    public class List extends AbstractListCommand<GroupConfiguration> {
+
+        @Override
+        public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    private static java.util.List<BuildConfigurationRef> addBuildConfigs(String buildConfigurationIds) {
+
+       java.util.List<BuildConfigurationRef> buildConfigurationRefList = new LinkedList<>();
+
+        for (String id : buildConfigurationIds.split(",")) {
+
+            id = id.trim();
+            buildConfigurationRefList.add(BuildConfigurationRef.refBuilder().id(id).build());
+        }
+
+        return buildConfigurationRefList;
+    }
 }

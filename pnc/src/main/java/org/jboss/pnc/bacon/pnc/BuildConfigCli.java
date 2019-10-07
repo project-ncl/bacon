@@ -17,19 +17,33 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.Fail;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.common.cli.AbstractNotImplementedCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.Environment;
+import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.ProjectRef;
+import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.enums.BuildType;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @GroupCommandDefinition(
@@ -40,8 +54,8 @@ import java.util.Optional;
                 BuildConfigCli.Get.class,
                 BuildConfigCli.List.class,
                 BuildConfigCli.Update.class,
-                BuildConfigCli.Delete.class
         })
+@Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
     private static BuildConfigurationClient clientCache;
@@ -54,7 +68,98 @@ public class BuildConfigCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "create", description = "Create a build configuration")
-    public class Create extends AbstractNotImplementedCommand {
+    public class Create extends AbstractCommand {
+
+        @Argument(required = true, description = "Name of build config")
+        private String buildConfigName;
+
+        @Option(name = "description", description = "Description of build config")
+        private String description;
+        @Option(required = true, name = "environment-id", description = "Environment ID of build config")
+        private String environmentId;
+        @Option(required = true, name = "project-id", description = "Project ID of build config")
+        private String projectId;
+        @Option(required = true, name = "build-script", description = "Build Script to build project")
+        private String buildScript;
+        @Option(required = true, name = "scm-repository-id", description = "SCM Repository ID to use")
+        private String scmRepositoryId;
+        @Option(required = true, name = "scm-revision", description = "SCM Revision")
+        private String scmRevision;
+        @Option(name = "generic-parameters", description = "Generic parameters. Format: KEY=VALUE,KEY=VALUE")
+        private String genericParameters;
+        @Option(name = "product-version-id", description = "Product Version ID")
+        private String productVersionId;
+        @Option(name = "build-type", description = "Build Type. Options are: MVN,GRADLE. Default: MVN", defaultValue = "MVN")
+        private String buildType;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder()
+                        .name(buildConfigName)
+                        .description(description)
+                        .environment(Environment.builder().id(environmentId).build())
+                        .project((ProjectRef.refBuilder().id(projectId).build()))
+                        .buildScript(buildScript)
+                        .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
+                        .scmRevision(scmRevision)
+                        .buildType(BuildType.valueOf(buildType))
+                        .parameters(processGenericParameters(genericParameters));
+
+                ObjectHelper.executeIfNotNull(productVersionId,
+                        () -> buildConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+
+                System.out.println(getClient().createNew(buildConfigurationBuilder.build()));
+            });
+        }
+    }
+
+    @CommandDefinition(name = "update", description = "Update a build configuration")
+    public class Update extends AbstractCommand {
+
+        @Argument(required = true, description = "Build config ID")
+        private String buildConfigId;
+
+        @Option(description = "Build config name")
+        private String buildConfigName;
+
+        @Option(name = "description", description = "Description of build config")
+        private String description;
+        @Option(name = "environment-id", description = "Environment ID of build config")
+        private String environmentId;
+        @Option(name = "build-script", description = "Build Script to build project")
+        private String buildScript;
+        @Option(required = true, name = "scm-repository-id", description = "SCM Repository ID to use")
+        private String scmRepositoryId;
+        @Option(required = true, name = "scm-revision", description = "SCM Revision")
+        private String scmRevision;
+        @Option(name = "generic-parameters", description = "Generic parameters. Format: KEY=VALUE,KEY=VALUE")
+        private String genericParameters;
+        @Option(name = "build-type", description = "Build Type. Options are: Maven,Gradle. Default: Maven")
+        private String buildType;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                BuildConfiguration buildConfiguration = getClient().getSpecific(buildConfigId);
+                BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
+
+                ObjectHelper.executeIfNotNull(buildConfigName, () -> updated.name(buildConfigName));
+                ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
+                ObjectHelper.executeIfNotNull(environmentId, () -> updated.environment(Environment.builder().id(environmentId).build()));
+                ObjectHelper.executeIfNotNull(buildScript, () -> updated.buildScript(buildScript));
+                ObjectHelper.executeIfNotNull(scmRepositoryId, () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
+                ObjectHelper.executeIfNotNull(scmRevision, () -> updated.scmRevision(scmRevision));
+                ObjectHelper.executeIfNotNull(genericParameters, () -> updated.parameters(processGenericParameters(genericParameters)));
+                ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
+
+                getClient().update(buildConfigId, updated.build());
+            });
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get build configuration")
@@ -75,12 +180,30 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a build configuration")
-    public class Update extends AbstractNotImplementedCommand {
-    }
+    private static Map<String, String> processGenericParameters(String genericParameters) {
 
-    @CommandDefinition(name = "delete", description = "Delete a build configuration")
-    public class Delete extends AbstractNotImplementedCommand {
-    }
+        if (genericParameters == null) {
+            return null;
+        } else {
 
+            Map<String, String> params = new LinkedHashMap<>();
+
+            for (String keyValue : genericParameters.split(",")) {
+
+                keyValue = keyValue.trim();
+
+                if (keyValue.contains("=")) {
+                    String[] keyValueResult = keyValue.split("=");
+                    if (keyValueResult.length == 2) {
+                        log.debug("Adding parameter with key: '{}' and value: '{}'", keyValueResult[0], keyValueResult[1]);
+                        params.put(keyValueResult[0], keyValueResult[1]);
+                    } else {
+                        log.error("Generic parameter format is in the form: KEY1=VALUE1,KEY2=VALUE2");
+                        Fail.fail("Invalid format in the generic parameters: " + genericParameters);
+                    }
+                }
+            }
+            return params;
+        }
+    }
 }
