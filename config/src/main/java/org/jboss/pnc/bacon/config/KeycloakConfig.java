@@ -59,7 +59,6 @@ public class KeycloakConfig implements Validate {
         } else {
             log.debug("clientSecret is not specified in the config file! Assuming this is a regular user");
             Fail.failIfNull(clientId, "You need to specify the client id for your regular account in the config file");
-            Fail.failIfNull(password, "You need to specify the password for your regular account in the config file");
         }
 
     }

@@ -12,11 +12,10 @@ public interface KeycloakClient {
      * @param realm
      * @param client
      * @param username
-     * @param password
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredential(String keycloakBaseUrl, String realm, String client, String username, String password) throws KeycloakClientException;
+    Credential getCredential(String keycloakBaseUrl, String realm, String client, String username) throws KeycloakClientException;
 
     /**
      * Authenticate based on service account and service account secret
@@ -28,7 +27,7 @@ public interface KeycloakClient {
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredential(String keycloakBaseUrl, String realm, String serviceAccountUsername, String secret) throws KeycloakClientException;
+    Credential getCredentialServiceAccount(String keycloakBaseUrl, String realm, String serviceAccountUsername, String secret) throws KeycloakClientException;
 
 
     default String keycloakEndpoint(String keycloakBaseUrl, String realm) {

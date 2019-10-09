@@ -110,8 +110,7 @@ public class PncClientHelper {
                         keycloakConfig.getUrl(),
                         keycloakConfig.getRealm(),
                         keycloakConfig.getClientId(),
-                        keycloakConfig.getUsername(),
-                        keycloakConfig.getPassword());
+                        keycloakConfig.getUsername());
             }
 
             return credential.getAccessToken();
