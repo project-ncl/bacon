@@ -108,10 +108,6 @@ public class PncBuild {
         artifact.downloadTo(downloadedZip);
     }
 
-    public String getScmRevision() {
-        return getBuildConfigRevision().getScmRevision();
-    }
-
     public String getName() {
         return getBuildConfigRevision().getName();
     }
