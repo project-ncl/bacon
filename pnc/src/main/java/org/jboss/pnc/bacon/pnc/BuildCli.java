@@ -74,8 +74,6 @@ public class BuildCli extends AbstractCommand {
 
         @Option(name = "rebuild-mode")
         private String rebuildMode;
-        @Option(name = "force-rebuild", description = "Default: false", defaultValue = "false")
-        private String forceRebuild;
         @Option(name = "keep-pod-on-failure", description = "Default: false", defaultValue = "false")
         private String keepPodOnFailure;
         @Option(name = "timestamp-alignment", description = "Default: false", defaultValue = "false")
@@ -88,7 +86,6 @@ public class BuildCli extends AbstractCommand {
 
             BuildParameters buildParams = new BuildParameters();
             buildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
-            buildParams.setForceRebuild(Boolean.parseBoolean(forceRebuild));
             buildParams.setKeepPodOnFailure(Boolean.parseBoolean(keepPodOnFailure));
             buildParams.setTimestampAlignment(Boolean.parseBoolean(timestampAlignment));
             buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
