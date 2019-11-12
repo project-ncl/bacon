@@ -57,12 +57,11 @@ public class BrewPushCli extends AbstractCommand {
                 BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration());
 
                 BuildPushRequest request = BuildPushRequest.builder()
-                        .buildId(id)
                         .tagPrefix(tagPrefix)
                         .reimport(Boolean.valueOf(reimport))
                         .build();
 
-                System.out.println(client.push(request));
+                System.out.println(client.push(id, request));
             });
         }
     }
