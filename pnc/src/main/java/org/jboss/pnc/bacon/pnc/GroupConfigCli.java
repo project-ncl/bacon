@@ -53,7 +53,14 @@ public class GroupConfigCli extends AbstractCommand {
 
     private static GroupConfigurationClient getClient() {
         if (clientCache == null) {
-            clientCache = new GroupConfigurationClient(PncClientHelper.getPncConfiguration());
+            clientCache = new GroupConfigurationClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static GroupConfigurationClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new GroupConfigurationClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -84,7 +91,7 @@ public class GroupConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                System.out.println(getClient().createNew(groupConfigurationBuilder.build()));
+                System.out.println(getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
             });
         }
     }
@@ -119,7 +126,7 @@ public class GroupConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> updated.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                getClient().update(groupConfigId, updated.build());
+                getClientAuthenticated().update(groupConfigId, updated.build());
             });
         }
     }

@@ -52,7 +52,14 @@ public class ProductCli extends AbstractCommand {
 
     private static ProductClient getClient() {
         if (clientCache == null) {
-            clientCache = new ProductClient(PncClientHelper.getPncConfiguration());
+            clientCache = new ProductClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static ProductClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new ProductClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -93,7 +100,7 @@ public class ProductCli extends AbstractCommand {
                         .pgmSystemName(systemCode)
                         .build();
 
-                System.out.println(getClient().createNew(product));
+                System.out.println(getClientAuthenticated().createNew(product));
             });
         }
     }
@@ -154,7 +161,7 @@ public class ProductCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productCode, () -> updated.productCode(productCode));
                 ObjectHelper.executeIfNotNull(systemCode, () -> updated.pgmSystemName(systemCode));
 
-                getClient().update(id, updated.build());
+                getClientAuthenticated().update(id, updated.build());
             });
         }
     }

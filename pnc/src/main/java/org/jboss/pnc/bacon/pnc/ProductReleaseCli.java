@@ -51,7 +51,14 @@ public class ProductReleaseCli extends AbstractCommand {
 
     private static ProductReleaseClient getClient() {
         if (clientCache == null) {
-           clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration());
+           clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static ProductReleaseClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -88,7 +95,7 @@ public class ProductReleaseCli extends AbstractCommand {
                 }
 
                 // we have to specify the product version, otherwise PNC is not happy. Why though???
-                ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration());
+                ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
                 ProductMilestone productMilestone = productMilestoneClient.getSpecific(productMilestoneId);
 
                 ProductRelease productRelease = ProductRelease.builder()
@@ -101,7 +108,7 @@ public class ProductReleaseCli extends AbstractCommand {
                         .issueTrackerUrl(issueTrackerUrl)
                         .build();
 
-                System.out.println(getClient().createNew(productRelease));
+                System.out.println(getClientAuthenticated().createNew(productRelease));
             });
         }
     }
@@ -150,7 +157,7 @@ public class ProductReleaseCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(downloadUrl, () -> updated.downloadUrl(downloadUrl));
                 ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
-                getClient().update(productReleaseId, updated.build());
+                getClientAuthenticated().update(productReleaseId, updated.build());
             });
         }
     }
@@ -180,7 +187,7 @@ public class ProductReleaseCli extends AbstractCommand {
     }
 
     private static boolean validateReleaseVersion(String productMilestoneId, String productVersion) throws ClientException {
-        ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration());
+        ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
         ProductMilestone productMilestone = productMilestoneClient.getSpecific(productMilestoneId);
 
         return ProductMilestoneCli.validateProductMilestoneVersion(productMilestone.getProductVersion().getId(), productVersion);

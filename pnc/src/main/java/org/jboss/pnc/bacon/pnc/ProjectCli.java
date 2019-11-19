@@ -56,7 +56,14 @@ public class ProjectCli extends AbstractCommand {
 
     private static ProjectClient getClient() {
         if (clientCache == null) {
-            clientCache = new ProjectClient(PncClientHelper.getPncConfiguration());
+            clientCache = new ProjectClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static ProjectClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new ProjectClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -85,7 +92,7 @@ public class ProjectCli extends AbstractCommand {
                         .issueTrackerUrl(issueTrackerUrl)
                         .build();
 
-                System.out.println(getClient().createNew(project));
+                System.out.println(getClientAuthenticated().createNew(project));
             });
         }
     }
@@ -160,7 +167,7 @@ public class ProjectCli extends AbstractCommand {
                     ObjectHelper.executeIfNotNull(projectUrl, () -> updated.projectUrl(projectUrl));
                     ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
-                    getClient().update(id, updated.build());
+                    getClientAuthenticated().update(id, updated.build());
                 });
         }
     }

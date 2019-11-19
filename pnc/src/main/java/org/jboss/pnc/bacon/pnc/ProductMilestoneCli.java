@@ -63,7 +63,14 @@ public class ProductMilestoneCli extends AbstractCommand {
 
     private static ProductMilestoneClient getClient() {
         if (clientCache == null) {
-            clientCache = new ProductMilestoneClient(PncClientHelper.getPncConfiguration());
+            clientCache = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static ProductMilestoneClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -111,7 +118,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .plannedEndDate(endDateInstant)
                         .build();
 
-                System.out.println(getClient().createNew(milestone));
+                System.out.println(getClientAuthenticated().createNew(milestone));
             });
         }
     }
@@ -165,7 +172,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                     updated.plannedEndDate(endDateInstant);
                 });
 
-                getClient().update(productMilestoneId, updated.build());
+                getClientAuthenticated().update(productMilestoneId, updated.build());
             });
         }
     }
@@ -179,7 +186,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
-            return super.executeHelper(commandInvocation, () -> getClient().cancelMilestoneClose(id));
+            return super.executeHelper(commandInvocation, () -> getClientAuthenticated().cancelMilestoneClose(id));
         }
     }
 
@@ -213,7 +220,7 @@ public class ProductMilestoneCli extends AbstractCommand {
      */
     public static boolean validateProductMilestoneVersion(String productVersionId, String milestoneVersion) throws ClientException {
 
-        ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+        ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration(false));
         ProductVersion productVersionDTO = productVersionClient.getSpecific(productVersionId);
 
         String productVersion = productVersionDTO.getVersion();

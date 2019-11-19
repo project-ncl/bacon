@@ -64,7 +64,14 @@ public class BuildConfigCli extends AbstractCommand {
 
     public static BuildConfigurationClient getClient() {
         if (clientCache == null) {
-            clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
+            clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    public static BuildConfigurationClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -113,7 +120,7 @@ public class BuildConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productVersionId,
                         () -> buildConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                System.out.println(getClient().createNew(buildConfigurationBuilder.build()));
+                System.out.println(getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
             });
         }
 
@@ -170,7 +177,7 @@ public class BuildConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(genericParameters, () -> updated.parameters(processGenericParameters(genericParameters)));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
 
-                getClient().update(buildConfigId, updated.build());
+                getClientAuthenticated().update(buildConfigId, updated.build());
             });
         }
     }

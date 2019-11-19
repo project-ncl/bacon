@@ -44,7 +44,7 @@ public class EnvironmentCli extends AbstractCommand {
 
     private static EnvironmentClient getClient() {
         if (clientCache == null) {
-            clientCache = new EnvironmentClient(PncClientHelper.getPncConfiguration());
+            clientCache = new EnvironmentClient(PncClientHelper.getPncConfiguration(false));
         }
         return clientCache;
     }

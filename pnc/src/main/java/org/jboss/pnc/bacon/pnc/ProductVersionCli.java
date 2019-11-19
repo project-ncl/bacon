@@ -64,7 +64,15 @@ public class ProductVersionCli extends AbstractCommand {
     private static ProductVersionClient getClient() {
 
         if (clientCache == null) {
-            clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+            clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static ProductVersionClient getClientAuthenticated() {
+
+        if (clientCache == null) {
+            clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -95,7 +103,7 @@ public class ProductVersionCli extends AbstractCommand {
                         .version(this.productVersion)
                         .build();
 
-                System.out.println(getClient().createNew(productVersion));
+                System.out.println(getClientAuthenticated().createNew(productVersion));
             });
         }
     }
@@ -192,7 +200,7 @@ public class ProductVersionCli extends AbstractCommand {
 
                     updated.version(productVersion);
                 });
-                getClient().update(id, updated.build());
+                getClientAuthenticated().update(id, updated.build());
             });
         }
     }
