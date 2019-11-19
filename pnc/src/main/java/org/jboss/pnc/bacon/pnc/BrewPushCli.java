@@ -64,6 +64,11 @@ public class BrewPushCli extends AbstractCommand {
                 System.out.println(client.push(id, request));
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ java -jar bacon.jar brew-push build 8 --tag-prefix=\"1.0-pnc\" --reimport=false";
+        }
     }
 
     @CommandDefinition(name = "group-build", description = "Push group build to Brew")
@@ -87,6 +92,11 @@ public class BrewPushCli extends AbstractCommand {
 
                 client.brewPush(id, request);
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ java -jar bacon.jar brew-push group-build 8 --tag-prefix=\"1.0-pnc\"";
         }
     }
 
