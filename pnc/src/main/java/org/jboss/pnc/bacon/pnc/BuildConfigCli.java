@@ -116,6 +116,17 @@ public class BuildConfigCli extends AbstractCommand {
                 System.out.println(getClient().createNew(buildConfigurationBuilder.build()));
             });
         }
+
+        @Override
+        public String exampleText() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("$ java -jar bacon.jar pnc build-config create \\ \n")
+                    .append("\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n")
+                    .append("\t--scm-repository-id 176 --scm-revision master \\ \n")
+                    .append("\t--generic-parameters \"TEST=TRUE,CUSTOM_PME_PARAMETERS=-Dignore=true\" \\ \n")
+                    .append("\t--build-type MVN buildconfigname");
+            return builder.toString();
+        }
     }
 
     @CommandDefinition(name = "update", description = "Update a build configuration")

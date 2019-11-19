@@ -57,6 +57,11 @@ public class AbstractCommand implements Command {
 
         if (help) {
             shell.writeln(commandInvocation.getHelpInfo());
+            String exampleText = exampleText();
+            if (exampleText != null) {
+                shell.writeln("Examples:\n");
+                shell.writeln(exampleText);
+            }
             activated = true;
         }
 
@@ -146,5 +151,23 @@ public class AbstractCommand implements Command {
             return CommandResult.FAILURE;
         }
         return CommandResult.SUCCESS;
+    }
+
+    /**
+     * Override this method if you'd like to provide examples for a command
+     * The text will be printed after the help text is printed.
+     *
+     * Layout is:
+     *
+     * <help text>
+     *
+     *
+     * Example:
+     *
+     * <exampleText stuff>
+     * @return
+     */
+    public String exampleText() {
+        return null;
     }
 }
