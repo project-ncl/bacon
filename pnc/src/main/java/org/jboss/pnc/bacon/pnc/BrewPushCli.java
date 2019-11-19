@@ -54,7 +54,7 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration());
+                BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(true));
 
                 BuildPushRequest request = BuildPushRequest.builder()
                         .tagPrefix(tagPrefix)
@@ -84,7 +84,7 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                GroupBuildClient client = new GroupBuildClient(PncClientHelper.getPncConfiguration());
+                GroupBuildClient client = new GroupBuildClient(PncClientHelper.getPncConfiguration(true));
 
                 GroupBuildPushRequest request = GroupBuildPushRequest.builder()
                         .tagPrefix(tagPrefix)
@@ -111,7 +111,7 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration());
+                BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false));
                 System.out.println(client.getPushResult(id));
             });
         }

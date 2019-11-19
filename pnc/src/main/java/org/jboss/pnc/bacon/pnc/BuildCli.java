@@ -61,7 +61,14 @@ public class BuildCli extends AbstractCommand {
 
     private static BuildClient getClient() {
         if (clientCache == null) {
-            clientCache = new BuildClient(PncClientHelper.getPncConfiguration());
+            clientCache = new BuildClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static BuildClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new BuildClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -91,7 +98,7 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
 
             return super.executeHelper(commandInvocation, () -> {
-                System.out.println(BuildConfigCli.getClient().trigger(buildConfigId, buildParams));
+                System.out.println(BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams));
             });
         }
     }
@@ -106,7 +113,7 @@ public class BuildCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                getClient().cancel(buildId);
+                getClientAuthenticated().cancel(buildId);
             });
         }
     }

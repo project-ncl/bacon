@@ -48,7 +48,14 @@ public class GroupBuildCli extends AbstractCommand {
 
     private static GroupBuildClient getClient() {
         if (clientCache == null) {
-            clientCache = new GroupBuildClient(PncClientHelper.getPncConfiguration());
+            clientCache = new GroupBuildClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static GroupBuildClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new GroupBuildClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -63,7 +70,7 @@ public class GroupBuildCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                getClient().cancel(groupBuildId);
+                getClientAuthenticated().cancel(groupBuildId);
             });
         }
     }

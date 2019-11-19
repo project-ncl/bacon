@@ -40,15 +40,19 @@ public class PncClientHelper {
     private static Configuration configuration;
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static Configuration getPncConfiguration() {
+    public static Configuration getPncConfiguration(boolean authenticationNeeded) {
 
         if (configuration == null) {
-            setup();
+            setup(authenticationNeeded);
         }
         return configuration;
     }
 
-    public static void setup() {
+    public static Configuration getPncConfiguration() {
+        return getPncConfiguration(true);
+    }
+
+    public static void setup(boolean authenticationNeeded) {
 
         Config config = Config.instance();
 
@@ -56,7 +60,7 @@ public class PncClientHelper {
         KeycloakConfig keycloakConfig = config.getKeycloak();
         String bearerToken = "";
 
-        if (keycloakConfig != null) {
+        if (authenticationNeeded && keycloakConfig != null) {
             keycloakConfig.validate();
             bearerToken = getBearerToken(keycloakConfig);
 
@@ -121,20 +125,6 @@ public class PncClientHelper {
             Fail.fail(e.getMessage());
 
             return null;
-        }
-    }
-
-    /**
-     * WARNING: Stops the application if the bearer token is not set
-     */
-    public static void authRequired() {
-
-        String reason = "Aborted! Please specify credentials in the config file before retrying";
-
-        Fail.failIfNull(getPncConfiguration().getBearerToken(), reason);
-
-        if (getPncConfiguration().getBearerToken().isEmpty()) {
-            Fail.fail(reason);
         }
     }
 

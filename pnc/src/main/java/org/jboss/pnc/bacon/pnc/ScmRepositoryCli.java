@@ -53,7 +53,14 @@ public class ScmRepositoryCli extends AbstractCommand {
 
     private static SCMRepositoryClient getClient() {
         if (clientCache == null) {
-            clientCache = new SCMRepositoryClient(PncClientHelper.getPncConfiguration());
+            clientCache = new SCMRepositoryClient(PncClientHelper.getPncConfiguration(false));
+        }
+        return clientCache;
+    }
+
+    private static SCMRepositoryClient getClientAuthenticated() {
+        if (clientCache == null) {
+            clientCache = new SCMRepositoryClient(PncClientHelper.getPncConfiguration(true));
         }
         return clientCache;
     }
@@ -76,7 +83,7 @@ public class ScmRepositoryCli extends AbstractCommand {
                         .scmUrl(scmUrl)
                         .build();
 
-                System.out.println(getClient().createNew(createAndSyncSCMRequest));
+                System.out.println(getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });
         }
     }

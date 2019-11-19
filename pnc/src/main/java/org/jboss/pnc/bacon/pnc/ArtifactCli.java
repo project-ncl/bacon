@@ -28,7 +28,7 @@ public class ArtifactCli extends AbstractCommand {
 
     private static ArtifactClient getClient() {
         if (clientCache == null) {
-            clientCache = new ArtifactClient(PncClientHelper.getPncConfiguration());
+            clientCache = new ArtifactClient(PncClientHelper.getPncConfiguration(false));
         }
         return clientCache;
     }
