@@ -44,7 +44,8 @@ class DADaoTest {
         if (StringUtils.isBlank(configLocation)) {
             fail("configLocation system property pointing to a config yaml has to be defined to run " + DADaoTest.class);
         }
-        Config.initialize(configLocation);
+        Config.configure(configLocation);
+        Config.initialize();
 
         daDao = DADao.getInstance();
     }
