@@ -35,6 +35,9 @@ import java.util.Map;
 @Data
 @Slf4j
 public class Config {
+
+    private static String configLocation;
+
     private String keycloakUrl;
     private PncConfig pnc;
     private DaConfig da;
@@ -45,45 +48,33 @@ public class Config {
 
     private static Config instance;
 
-    public static Config instance() {
-
+    public static Config instance() throws RuntimeException {
         if (instance == null) {
-
-            String configLocation = System.getProperty("config", "config.yaml");
-
             try {
-                Config.initialize(configLocation);
+                initialize();
             } catch (IOException e) {
-                System.err.println("Configuration file not found. " +
-                        "Please create a config file and either name it 'config.yaml' and put it in the working directory" +
-                        " or specify it with -Dconfig");
+                throw new RuntimeException(e);
             }
         }
         return instance;
     }
 
-    public static void initialize(String configLocation) throws IOException {
+    public static void configure(String configLocation) throws IOException {
+        Config.configLocation = configLocation;
+    }
 
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+    public static void initialize() throws IOException {
         File configFile = new File(configLocation);
-
         if (!configFile.exists()) {
-
-            log.error("Config file: '{}' does not exist", configLocation);
+            log.error("Config file: '{}' does not exist. Please create a config file and either name it 'config.yaml' and put it in the working directory or specify it with -Dconfig", configLocation);
             throw new IOException("Config file " + configLocation + " does not exist!");
-
         } else if (configFile.length() == 0) {
-
             log.warn("Config file: {} has no content", configLocation);
             instance = new Config();
-
         } else {
-
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             instance = mapper.readValue(new File(configLocation), Config.class);
-
         }
     }
 }

@@ -41,7 +41,6 @@ public class PncClientHelper {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     public static Configuration getPncConfiguration(boolean authenticationNeeded) {
-
         if (configuration == null) {
             setup(authenticationNeeded);
         }
@@ -53,9 +52,12 @@ public class PncClientHelper {
     }
 
     public static void setup(boolean authenticationNeeded) {
-
-        Config config = Config.instance();
-
+        Config config = null;
+        try {
+            config = Config.instance();
+        } catch (Exception e) {
+            Fail.fail(e.getMessage());
+        }
 
         KeycloakConfig keycloakConfig = config.getKeycloak();
         String bearerToken = "";
