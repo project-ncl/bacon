@@ -37,6 +37,7 @@ import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -141,14 +142,14 @@ public class GroupConfigCli extends AbstractCommand {
         }
     }
 
-    private static java.util.List<BuildConfigurationRef> addBuildConfigs(String buildConfigurationIds) {
+    private static java.util.Map<String, BuildConfigurationRef> addBuildConfigs(String buildConfigurationIds) {
 
-       java.util.List<BuildConfigurationRef> buildConfigurationRefList = new LinkedList<>();
+       java.util.Map<String, BuildConfigurationRef> buildConfigurationRefList = new HashMap<>();
 
         for (String id : buildConfigurationIds.split(",")) {
 
             id = id.trim();
-            buildConfigurationRefList.add(BuildConfigurationRef.refBuilder().id(id).build());
+            buildConfigurationRefList.put(id, BuildConfigurationRef.refBuilder().id(id).build());
         }
 
         return buildConfigurationRefList;
