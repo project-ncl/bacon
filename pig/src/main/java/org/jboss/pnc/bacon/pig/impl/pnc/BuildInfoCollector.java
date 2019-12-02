@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
@@ -28,6 +29,8 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,7 +77,16 @@ public class BuildInfoCollector {
 
             PncBuild result = new PncBuild(build);
 
-            buildClient.getBuildLogs(build.getId()).ifPresent(result::setBuildLog);
+            buildClient.getBuildLogs(build.getId()).ifPresent(stream ->
+            {
+                String text = null;
+                try {
+                    text = IOUtils.toString(stream, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                result.setBuildLog(text);
+            });
             result.setBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
 
             return result;
