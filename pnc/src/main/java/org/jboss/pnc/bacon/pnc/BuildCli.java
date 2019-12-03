@@ -24,9 +24,12 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.aesh.command.shell.Shell;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
@@ -38,8 +41,11 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
 
 import javax.ws.rs.core.Response;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,6 +58,7 @@ import java.util.Optional;
         BuildCli.ListBuildArtifacts.class,
         BuildCli.ListDependencies.class,
         BuildCli.Get.class,
+        BuildCli.GetLog.class,
         BuildCli.DownloadSources.class
 })
 public class BuildCli extends AbstractCommand {
@@ -157,6 +164,52 @@ public class BuildCli extends AbstractCommand {
         @Override
         public Build getSpecific(String id) throws ClientException {
             return getClient().getSpecific(id);
+        }
+    }
+
+    @CommandDefinition(name = "get-log", description = "Get build log.")
+    public class GetLog extends AbstractCommand {
+        @Argument(required = true, description = "Build id.")
+        private String buildId;
+
+        @Option(name = "follow", description = "Follow the live log.")
+        private boolean follow;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+            return super.executeHelper(commandInvocation, () -> printLog(commandInvocation.getShell()));
+        }
+
+        private void printLog(Shell shell) throws ClientException {
+            try {
+                Optional<InputStream> buildLogs;
+                try {
+                    buildLogs = getClient().getBuildLogs(buildId);
+                } catch (Exception e) {
+                    e.printStackTrace(); //TODO, client should return Optional.empty not throw the exception (NCL-5348)
+                    buildLogs = Optional.empty();
+                }
+                //is there a stored record
+                if (buildLogs.isPresent()) {
+                    try (
+                        InputStream inputStream = buildLogs.get();
+                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                        BufferedReader reader = new BufferedReader(inputStreamReader);
+                    ) {
+                        reader.lines().forEach(l -> shell.writeln(l));
+                    } catch (IOException e) {
+                        throw new ClientException("Cannot read log stream.", e);
+                    }
+                } else {
+                    //print live log
+                    String bifrostBase = Config.instance().getPnc().getBifrostBaseurl();
+                    URI bifrostUri = URI.create(bifrostBase);
+                    BifrostClient logProcessor = new BifrostClient(bifrostUri);
+                    logProcessor.writeLog(buildId, follow, line -> shell.writeln(line));
+                }
+            } catch (RemoteResourceException | IOException e) {
+                throw new ClientException("Cannot read remote resource.", e);
+            }
         }
     }
 

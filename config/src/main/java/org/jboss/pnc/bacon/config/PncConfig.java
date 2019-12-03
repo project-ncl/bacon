@@ -29,7 +29,10 @@ public class PncConfig implements Validate {
 
     private String url;
 
+    private String bifrostBaseurl;
+
     public void validate() {
         Validate.validateUrl(url, "PNC");
+        Validate.validateUrl(bifrostBaseurl, "Bifrost");
     }
 }
