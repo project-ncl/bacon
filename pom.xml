@@ -42,7 +42,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <aesh.version>2.4</aesh.version>
+        <aesh.version>2.5</aesh.version>
     </properties>
 
     <dependencyManagement>
