@@ -28,8 +28,13 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.of;
 import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
@@ -74,14 +79,28 @@ public class BuildInfoCollector {
 
             PncBuild result = new PncBuild(build);
 
-            buildClient.getBuildLogs(build.getId()).ifPresent(result::setBuildLog);
+            Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(build.getId());
+            if (maybeBuildLogs.isPresent()) {
+                InputStream inputStream = maybeBuildLogs.get();
+                String log = readLog(inputStream);
+                result.setBuildLog(log);
+            }
             result.setBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
-
             return result;
-        } catch (ClientException e) {
+        } catch (ClientException | IOException e) {
             throw new RuntimeException("Failed to get latest successful build for " + configId, e);
         }
     }
+
+        private String readLog(InputStream inputStream) throws IOException {
+            StringBuilder logBuilder = new StringBuilder();
+            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                 BufferedReader reader = new BufferedReader(inputStreamReader);
+            ) {
+                reader.lines().forEach(l -> logBuilder.append(l));
+                return reader.toString();
+            }
+        }
 
     public BuildInfoCollector() {
         buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
