@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -61,6 +62,7 @@ import java.util.Optional;
         BuildCli.GetLog.class,
         BuildCli.DownloadSources.class
 })
+@Slf4j
 public class BuildCli extends AbstractCommand {
 
 

@@ -26,6 +26,8 @@ import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.KeycloakConfig;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.client.GenericSettingClient;
+import org.jboss.pnc.client.RemoteResourceException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -83,6 +85,18 @@ public class PncClientHelper {
                     .bearerToken(bearerToken)
                     .pageSize(50)
                     .build();
+
+            GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
+            try {
+                String banner = genericSettingClient.getAnnouncementBanner().getBanner();
+                if (banner != null && !banner.isEmpty()) {
+                    log.warn("***********************");
+                    log.warn("Announcement: {}", banner);
+                    log.warn("***********************");
+                }
+            } catch (RemoteResourceException e) {
+                log.error(e.getMessage());
+            }
 
         } catch (URISyntaxException e) {
             Fail.fail(e.getMessage());
