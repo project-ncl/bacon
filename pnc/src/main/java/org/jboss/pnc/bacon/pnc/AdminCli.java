@@ -19,30 +19,14 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.pnc.admin.AnnouncementBannerCli;
+import org.jboss.pnc.bacon.pnc.admin.MaintenanceModeCli;
 
-/**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/13/18
- */
 @GroupCommandDefinition(
-        name = "pnc",
-        description = "PNC sub-command",
+        name = "admin",
+        description = "Admin related tasks",
         groupCommands = {
-                AdminCli.class,
-                ArtifactCli.class,
-                BrewPushCli.class,
-                BuildCli.class,
-                BuildConfigCli.class,
-                EnvironmentCli.class,
-                GroupBuildCli.class,
-                GroupConfigCli.class,
-                ProductCli.class,
-                ProductMilestoneCli.class,
-                ProductReleaseCli.class,
-                ProductVersionCli.class,
-                ProjectCli.class,
-                ScmRepositoryCli.class
+                AnnouncementBannerCli.class,
+                MaintenanceModeCli.class
         })
-public class Pnc extends AbstractCommand {
-}
+public class AdminCli extends AbstractCommand {}
