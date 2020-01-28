@@ -1,4 +1,4 @@
-name: Java CI
+name: Java CI Code Formatter Check
 
 on: [pull_request]
 
