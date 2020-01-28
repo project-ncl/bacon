@@ -31,11 +31,8 @@ import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.dto.requests.BuildPushRequest;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
 
-@GroupCommandDefinition(name = "brew-push", description = "brew-push", groupCommands = {
-        BrewPushCli.Build.class,
-        BrewPushCli.GroupBuild.class,
-        BrewPushCli.Status.class,
-})
+@GroupCommandDefinition(name = "brew-push", description = "brew-push", groupCommands = { BrewPushCli.Build.class,
+        BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
 public class BrewPushCli extends AbstractCommand {
 
     @CommandDefinition(name = "build", description = "Push build to Brew")
@@ -56,9 +53,7 @@ public class BrewPushCli extends AbstractCommand {
 
                 BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(true));
 
-                BuildPushRequest request = BuildPushRequest.builder()
-                        .tagPrefix(tagPrefix)
-                        .reimport(Boolean.valueOf(reimport))
+                BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(Boolean.valueOf(reimport))
                         .build();
 
                 System.out.println(client.push(id, request));
@@ -86,9 +81,7 @@ public class BrewPushCli extends AbstractCommand {
 
                 GroupBuildClient client = new GroupBuildClient(PncClientHelper.getPncConfiguration(true));
 
-                GroupBuildPushRequest request = GroupBuildPushRequest.builder()
-                        .tagPrefix(tagPrefix)
-                        .build();
+                GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
 
                 client.brewPush(id, request);
             });

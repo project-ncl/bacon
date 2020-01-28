@@ -36,22 +36,16 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.enums.SupportLevel;
 
-@GroupCommandDefinition(
-        name = "product-release",
-        description = "Product Release",
-        groupCommands = {
-                ProductReleaseCli.Create.class,
-                ProductReleaseCli.Update.class,
-                ProductReleaseCli.Get.class,
-                ProductReleaseCli.ListSupportLevel.class
-        })
+@GroupCommandDefinition(name = "product-release", description = "Product Release", groupCommands = {
+        ProductReleaseCli.Create.class, ProductReleaseCli.Update.class, ProductReleaseCli.Get.class,
+        ProductReleaseCli.ListSupportLevel.class })
 public class ProductReleaseCli extends AbstractCommand {
 
     private static ProductReleaseClient clientCache;
 
     private static ProductReleaseClient getClient() {
         if (clientCache == null) {
-           clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration(false));
+            clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration(false));
         }
         return clientCache;
     }
@@ -73,8 +67,7 @@ public class ProductReleaseCli extends AbstractCommand {
         private String releaseDate;
         @Option(required = true, name = "milestone-id", description = "Product Milestone ID from which release is based")
         private String productMilestoneId;
-        @Option(required = true, name = "support-level",
-                description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
+        @Option(required = true, name = "support-level", description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
         @Option(name = "download-url", description = "Internal or public location to download the product distribution artifacts")
         private String downloadUrl;
@@ -95,18 +88,14 @@ public class ProductReleaseCli extends AbstractCommand {
                 }
 
                 // we have to specify the product version, otherwise PNC is not happy. Why though???
-                ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
+                ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(
+                        PncClientHelper.getPncConfiguration(false));
                 ProductMilestone productMilestone = productMilestoneClient.getSpecific(productMilestoneId);
 
-                ProductRelease productRelease = ProductRelease.builder()
-                        .version(productReleaseVersion)
-                        .releaseDate(PncClientHelper.parseDateFormat(releaseDate))
-                        .productMilestone(productMilestone)
-                        .productVersion(productMilestone.getProductVersion())
-                        .supportLevel(SupportLevel.valueOf(supportLevel))
-                        .downloadUrl(downloadUrl)
-                        .issueTrackerUrl(issueTrackerUrl)
-                        .build();
+                ProductRelease productRelease = ProductRelease.builder().version(productReleaseVersion)
+                        .releaseDate(PncClientHelper.parseDateFormat(releaseDate)).productMilestone(productMilestone)
+                        .productVersion(productMilestone.getProductVersion()).supportLevel(SupportLevel.valueOf(supportLevel))
+                        .downloadUrl(downloadUrl).issueTrackerUrl(issueTrackerUrl).build();
 
                 System.out.println(getClientAuthenticated().createNew(productRelease));
             });
@@ -123,8 +112,7 @@ public class ProductReleaseCli extends AbstractCommand {
         private String productReleaseVersion;
         @Option(name = "release-date", description = "Release date, default is today. Format: <yyyy>-<mm>-<dd>")
         private String releaseDate;
-        @Option(name = "support-level",
-                description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
+        @Option(name = "support-level", description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
         @Option(name = "download-url", description = "Internal or public location to download the product distribution artifacts")
         private String downloadUrl;
@@ -152,7 +140,8 @@ public class ProductReleaseCli extends AbstractCommand {
                     }
                 });
 
-                ObjectHelper.executeIfNotNull(releaseDate, () -> updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate)));
+                ObjectHelper.executeIfNotNull(releaseDate,
+                        () -> updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate)));
                 ObjectHelper.executeIfNotNull(supportLevel, () -> updated.supportLevel(SupportLevel.valueOf(supportLevel)));
                 ObjectHelper.executeIfNotNull(downloadUrl, () -> updated.downloadUrl(downloadUrl));
                 ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
@@ -190,6 +179,7 @@ public class ProductReleaseCli extends AbstractCommand {
         ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
         ProductMilestone productMilestone = productMilestoneClient.getSpecific(productMilestoneId);
 
-        return ProductMilestoneCli.validateProductMilestoneVersion(productMilestone.getProductVersion().getId(), productVersion);
+        return ProductMilestoneCli.validateProductMilestoneVersion(productMilestone.getProductVersion().getId(),
+                productVersion);
     }
 }

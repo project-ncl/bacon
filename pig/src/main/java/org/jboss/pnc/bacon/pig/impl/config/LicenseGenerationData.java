@@ -18,9 +18,8 @@
 package org.jboss.pnc.bacon.pig.impl.config;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 5/25/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 5/25/18
  */
 public class LicenseGenerationData extends GenerationData<LicenseGenerationStrategy> {
 }

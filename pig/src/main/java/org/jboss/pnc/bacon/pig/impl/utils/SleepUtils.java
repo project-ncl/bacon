@@ -24,8 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.function.Supplier;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/7/17
  */
 public class SleepUtils {
@@ -51,6 +50,7 @@ public class SleepUtils {
 
     /**
      * Wait until the <code>condition</code> returns a non null value or time out is reached
+     * 
      * @param condition the condition to evaluate
      * @param checkInterval [seconds] amount of time to wait before attempts
      * @param timeout [seconds] timeout
@@ -61,11 +61,8 @@ public class SleepUtils {
      *
      * @throws RuntimeException if the timeout is reached
      */
-    public static <T> T waitFor(Supplier<T> condition,
-                               int checkInterval,
-                               long timeout,
-                               boolean ignoreException,
-                               String timeoutMessage) {
+    public static <T> T waitFor(Supplier<T> condition, int checkInterval, long timeout, boolean ignoreException,
+            String timeoutMessage) {
         int startTime = (int) System.currentTimeMillis() / 1000;
         T value = tryGet(condition, ignoreException);
         if (value != null) {
@@ -77,7 +74,7 @@ public class SleepUtils {
             if (value != null) {
                 return value;
             }
-            int currentTime = (int) System.currentTimeMillis()/1000;
+            int currentTime = (int) System.currentTimeMillis() / 1000;
             if (currentTime - startTime > timeout) {
                 throw new RuntimeException(timeoutMessage);
             }

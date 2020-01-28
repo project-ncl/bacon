@@ -34,9 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 8/24/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 8/24/17
  */
 public class LicenseGenerator {
     private static final Logger log = LoggerFactory.getLogger(LicenseGenerator.class);
@@ -53,37 +52,24 @@ public class LicenseGenerator {
         log.debug("Generated zip archive {}", archiveFile);
     }
 
-    private static void generateLicenses(Collection<GAV> gavs,
-                                         File temporaryDestination) {
+    private static void generateLicenses(Collection<GAV> gavs, File temporaryDestination) {
         try {
             LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties());
 
-            generator.generateLicensesForGavs(
-                    gavsToLicenseGeneratorGavs(gavs),
-                    temporaryDestination.getAbsolutePath()
-            );
+            generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), temporaryDestination.getAbsolutePath());
         } catch (LicensesGeneratorException e) {
             throw new RuntimeException("Failed to generate licenses", e);
         }
     }
 
     private static List<Gav> gavsToLicenseGeneratorGavs(Collection<GAV> gavs) {
-        return gavs.stream()
-                .map(gav -> new Gav(
-                        gav.getGroupId(),
-                        gav.getArtifactId(),
-                        gav.getVersion(),
-                        gav.getPackaging()
-                ))
+        return gavs.stream().map(gav -> new Gav(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getPackaging()))
                 .collect(Collectors.toList());
     }
 
     private static GeneratorProperties prepareGeneratorProperties() {
-        File propertiesFile = ResourceUtils.extractToTmpFile(
-                "/license-generator.properties",
-                "license-generator",
-                ".properties"
-        );
+        File propertiesFile = ResourceUtils.extractToTmpFile("/license-generator.properties", "license-generator",
+                ".properties");
         return new GeneratorProperties(propertiesFile.getAbsolutePath());
     }
 }

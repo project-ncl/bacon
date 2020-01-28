@@ -36,9 +36,8 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/3/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/3/17
  */
 @Getter
 @ToString(exclude = "buildLog")
@@ -60,15 +59,11 @@ public class PncBuild {
     }
 
     public void setBuiltArtifacts(List<Artifact> artifacts) {
-        builtArtifacts = artifacts.stream()
-              .map(ArtifactWrapper::new)
-              .collect(Collectors.toList());
+        builtArtifacts = artifacts.stream().map(ArtifactWrapper::new).collect(Collectors.toList());
     }
 
     public void setBuildLog(String log) {
-        buildLog = log == null
-              ? Collections.emptyList()
-              : asList(log.split("\\r?\\n"));
+        buildLog = log == null ? Collections.emptyList() : asList(log.split("\\r?\\n"));
     }
 
     public void setDependencyArtifacts(List<Artifact> artifacts) {
@@ -78,9 +73,7 @@ public class PncBuild {
     public ArtifactWrapper findArtifact(String regex) {
         List<ArtifactWrapper> matches = findArtifactsMatching(a -> a.getGapv().matches(regex));
         if (matches.size() != 1) {
-            throw new RuntimeException(
-                  "Expecting exactly one artifact matching " + regex + ", found " + matches.size()
-            );
+            throw new RuntimeException("Expecting exactly one artifact matching " + regex + ", found " + matches.size());
         }
         return matches.get(0);
     }
@@ -88,9 +81,7 @@ public class PncBuild {
     public ArtifactWrapper findArtifactByFileName(String regex) {
         List<ArtifactWrapper> matches = findArtifactsMatching(a -> a.getFileName().matches(regex));
         if (matches.size() != 1) {
-            throw new RuntimeException(
-                  "Expecting exactly one artifact matching " + regex + ", found " + matches.size()
-            );
+            throw new RuntimeException("Expecting exactly one artifact matching " + regex + ", found " + matches.size());
         }
         return matches.get(0);
     }
@@ -100,8 +91,8 @@ public class PncBuild {
         List<ArtifactWrapper> artifacts = findArtifactsMatching(query);
 
         if (artifacts.size() != 1) {
-            throw new RuntimeException("Unexpected number of artifacts to download found.\n" +
-                  "Expecting one artifact matching " + pattern + " in build " + build.getId() + " , found: " + artifacts);
+            throw new RuntimeException("Unexpected number of artifacts to download found.\n"
+                    + "Expecting one artifact matching " + pattern + " in build " + build.getId() + " , found: " + artifacts);
         }
 
         ArtifactWrapper artifact = artifacts.get(0);
@@ -113,9 +104,6 @@ public class PncBuild {
     }
 
     private List<ArtifactWrapper> findArtifactsMatching(Predicate<ArtifactWrapper> query) {
-        return getBuiltArtifacts()
-              .stream()
-              .filter(query)
-              .collect(Collectors.toList());
+        return getBuiltArtifacts().stream().filter(query).collect(Collectors.toList());
     }
 }

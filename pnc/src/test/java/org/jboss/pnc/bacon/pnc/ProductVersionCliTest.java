@@ -14,7 +14,6 @@ class ProductVersionCliTest {
         assertThat(ProductVersionCli.validateProductVersion("1.1232")).isTrue();
         assertThat(ProductVersionCli.validateProductVersion("1000.1232")).isTrue();
 
-
         assertThat(ProductVersionCli.validateProductVersion("abc")).isFalse();
         assertThat(ProductVersionCli.validateProductVersion("1.2.3")).isFalse();
         assertThat(ProductVersionCli.validateProductVersion("42")).isFalse();

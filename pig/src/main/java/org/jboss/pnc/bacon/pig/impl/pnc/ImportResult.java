@@ -26,9 +26,8 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import java.util.List;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/4/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/4/17
  */
 @Data
 @AllArgsConstructor

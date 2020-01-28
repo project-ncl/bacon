@@ -29,10 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
 public class MRRCSearcher {
@@ -57,7 +55,7 @@ public class MRRCSearcher {
         requestBuilder = requestBuilder.setConnectTimeout(30_000);
         requestBuilder = requestBuilder.setConnectionRequestTimeout(30_000);
         try (CloseableHttpClient client = HttpClientBuilder.create().build();
-             CloseableHttpResponse response = client.execute(request)) {
+                CloseableHttpResponse response = client.execute(request)) {
             int statusCode = response.getStatusLine().getStatusCode();
             return statusCode == 200;
         } catch (IOException e) {

@@ -40,9 +40,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/23/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/23/17
  */
 public class RepoManager extends DeliverableManager<RepoGenerationData, RepositoryData> {
     private static final Logger log = LoggerFactory.getLogger(RepoManager.class);
@@ -54,12 +53,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private final boolean removeGeneratedM2Dups;
     private final Path configurationDirectory;
 
-    public RepoManager(Config config,
-                       String releasePath,
-                       Deliverables deliverables,
-                       Map<String, PncBuild> builds,
-                       Path configurationDirectory,
-                       boolean removeGeneratedM2Dups) {
+    public RepoManager(Config config, String releasePath, Deliverables deliverables, Map<String, PncBuild> builds,
+            Path configurationDirectory, boolean removeGeneratedM2Dups) {
         super(config, releasePath, deliverables, builds);
         generationData = config.getFlow().getRepositoryGeneration();
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
@@ -90,14 +85,13 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         List<ArtifactWrapper> artifactsToPack = build.getBuiltArtifacts();
         artifactsToPack.addAll(build.getDependencyArtifacts());
 
-        artifactsToPack.removeIf(artifact -> !artifact.getGapv().contains("redhat-") && !artifact.getGapv().contains("eap-runtime-artifacts"));
+        artifactsToPack.removeIf(
+                artifact -> !artifact.getGapv().contains("redhat-") && !artifact.getGapv().contains("eap-runtime-artifacts"));
 
         File sourceDir = new File(workDir, "maven-repository");
         sourceDir.mkdirs();
 
-        artifactsToPack.forEach(
-                a -> ExternalArtifactDownloader.downloadExternalArtifact(a.toGAV(), sourceDir.toPath())
-        );
+        artifactsToPack.forEach(a -> ExternalArtifactDownloader.downloadExternalArtifact(a.toGAV(), sourceDir.toPath()));
         return repackage(sourceDir);
     }
 
@@ -140,19 +134,12 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
     private void addAdditionalArtifacts() {
         List<AdditionalArtifactsFromBuild> artifactList = generationData.getAdditionalArtifacts();
-        artifactList.forEach(
-                artifacts -> {
-                    PncBuild build = getBuild(artifacts.getFrom());
-                    artifacts.getDownload()
-                            .forEach(
-                                    regex -> downloadArtifact(build.findArtifact(regex))
-                            );
-                }
-        );
+        artifactList.forEach(artifacts -> {
+            PncBuild build = getBuild(artifacts.getFrom());
+            artifacts.getDownload().forEach(regex -> downloadArtifact(build.findArtifact(regex)));
+        });
 
-        generationData.getExternalAdditionalArtifacts()
-                .stream()
-                .map(GAV::fromColonSeparatedGAPV)
+        generationData.getExternalAdditionalArtifacts().stream().map(GAV::fromColonSeparatedGAPV)
                 .forEach(this::downloadExternalArtifact);
     }
 
@@ -205,15 +192,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         Properties properties = new Properties();
         properties.put("PRODUCT_NAME", config.getProduct().getName());
 
-        ResourceUtils.copyResourceWithFiltering("/repository-example-settings.xml",
-                "example-settings.xml",
-                m2Repo,
-                properties,
+        ResourceUtils.copyResourceWithFiltering("/repository-example-settings.xml", "example-settings.xml", m2Repo, properties,
                 configurationDirectory);
-        ResourceUtils.copyResourceWithFiltering("/repository-README.md",
-                "README.md",
-                m2Repo,
-                properties,
+        ResourceUtils.copyResourceWithFiltering("/repository-README.md", "README.md", m2Repo, properties,
                 configurationDirectory);
     }
 }

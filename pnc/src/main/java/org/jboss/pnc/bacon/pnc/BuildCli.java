@@ -52,19 +52,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "build", description = "build", groupCommands = {
-        BuildCli.Start.class,
-        BuildCli.Cancel.class,
-        BuildCli.List.class,
-        BuildCli.ListBuildArtifacts.class,
-        BuildCli.ListDependencies.class,
-        BuildCli.Get.class,
-        BuildCli.GetLog.class,
-        BuildCli.DownloadSources.class
-})
+@GroupCommandDefinition(name = "build", description = "build", groupCommands = { BuildCli.Start.class, BuildCli.Cancel.class,
+        BuildCli.List.class, BuildCli.ListBuildArtifacts.class, BuildCli.ListDependencies.class, BuildCli.Get.class,
+        BuildCli.GetLog.class, BuildCli.DownloadSources.class })
 @Slf4j
 public class BuildCli extends AbstractCommand {
-
 
     private static BuildClient clientCache;
 
@@ -188,22 +180,20 @@ public class BuildCli extends AbstractCommand {
                 try {
                     buildLogs = getClient().getBuildLogs(buildId);
                 } catch (Exception e) {
-                    e.printStackTrace(); //TODO, client should return Optional.empty not throw the exception (NCL-5348)
+                    e.printStackTrace(); // TODO, client should return Optional.empty not throw the exception (NCL-5348)
                     buildLogs = Optional.empty();
                 }
-                //is there a stored record
+                // is there a stored record
                 if (buildLogs.isPresent()) {
-                    try (
-                        InputStream inputStream = buildLogs.get();
-                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                        BufferedReader reader = new BufferedReader(inputStreamReader);
-                    ) {
+                    try (InputStream inputStream = buildLogs.get();
+                            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                            BufferedReader reader = new BufferedReader(inputStreamReader);) {
                         reader.lines().forEach(l -> shell.writeln(l));
                     } catch (IOException e) {
                         throw new ClientException("Cannot read log stream.", e);
                     }
                 } else {
-                    //print live log
+                    // print live log
                     String bifrostBase = Config.instance().getPnc().getBifrostBaseurl();
                     URI bifrostUri = URI.create(bifrostBase);
                     BifrostClient logProcessor = new BifrostClient(bifrostUri);
@@ -220,7 +210,6 @@ public class BuildCli extends AbstractCommand {
 
         @Argument(required = true, description = "Id of build")
         private String id;
-
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {

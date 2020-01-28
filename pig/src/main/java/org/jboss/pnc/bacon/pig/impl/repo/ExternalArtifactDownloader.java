@@ -25,9 +25,8 @@ import java.net.URI;
 import java.nio.file.Path;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 5/10/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 5/10/18
  */
 public class ExternalArtifactDownloader {
 
@@ -37,8 +36,7 @@ public class ExternalArtifactDownloader {
     private static final String TEMPORARY_ARTIFACTS_URL;
     private static final String ARTIFACTS_URL;
 
-    static
-    {
+    static {
         String indyRepoUrl = System.getenv("INDY_REPO_URL");
         if (indyRepoUrl == null) {
             indyRepoUrl = "http://indy.psi.redhat.com/";
@@ -61,7 +59,6 @@ public class ExternalArtifactDownloader {
         URI downloadUrl = URI.create(String.format("%s/%s", indyUrl, gav.toUri()));
 
         FileDownloadUtils.downloadTo(downloadUrl, targetPath);
-
 
         return targetPath;
     }

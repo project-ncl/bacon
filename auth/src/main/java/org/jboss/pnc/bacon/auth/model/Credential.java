@@ -51,5 +51,6 @@ public class Credential {
     }
 
     @JsonPOJOBuilder(withPrefix = "")
-    public static class Builder {}
+    public static class Builder {
+    }
 }

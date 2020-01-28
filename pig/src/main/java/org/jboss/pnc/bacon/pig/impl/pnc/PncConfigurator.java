@@ -38,9 +38,8 @@ import java.util.Optional;
 import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/14/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/14/17
  */
 public class PncConfigurator {
 
@@ -58,20 +57,15 @@ public class PncConfigurator {
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
     }
 
-    public ProductMilestone getOrGenerateMilestone(ProductVersionRef version,
-                                                   String milestone,
-                                                   String issueTrackerUrl) {
+    public ProductMilestone getOrGenerateMilestone(ProductVersionRef version, String milestone, String issueTrackerUrl) {
         log.info("Generating milestone for versionId {} and milestone {} in PNC", version, milestone);
 
-        return getExistingMilestone(version, milestone)
-              .orElseGet(() -> createMilestone(version, milestone, issueTrackerUrl));
+        return getExistingMilestone(version, milestone).orElseGet(() -> createMilestone(version, milestone, issueTrackerUrl));
     }
 
     public void markMilestoneCurrent(ProductVersionRef version, ProductMilestoneRef milestone) {
-        ProductVersion updated = ProductVersion.builder()
-              .version(version.getVersion())
-              .currentProductMilestone(milestone)
-              .build();
+        ProductVersion updated = ProductVersion.builder().version(version.getVersion()).currentProductMilestone(milestone)
+                .build();
         try {
             versionClient.update(version.getId(), updated);
         } catch (RemoteResourceException e) {
@@ -79,13 +73,12 @@ public class PncConfigurator {
         }
     }
 
-
     public Optional<ProductMilestone> getExistingMilestone(ProductVersionRef version, String milestone) {
         String milestoneName = version.getVersion() + '.' + milestone;
-        RemoteCollection<ProductMilestone> milestones =
-              null;
+        RemoteCollection<ProductMilestone> milestones = null;
         try {
-            milestones = versionClient.getMilestones(version.getId(), Optional.empty(), Optional.of("version==" + milestoneName));
+            milestones = versionClient.getMilestones(version.getId(), Optional.empty(),
+                    Optional.of("version==" + milestoneName));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Error getting milestone for milestoneName: " + milestoneName, e);
         }
@@ -94,13 +87,9 @@ public class PncConfigurator {
     }
 
     private ProductMilestone createMilestone(ProductVersionRef version, String milestoneName, String issueTrackerUrl) {
-        ProductMilestone milestone = ProductMilestone.builder()
-              .productVersion(version)
-              .issueTrackerUrl(issueTrackerUrl)
-              .startingDate(START_DATE)
-              .endDate(END_DATE)
-              .version(milestoneName) // todo not sure if it's what should be here
-              .build();
+        ProductMilestone milestone = ProductMilestone.builder().productVersion(version).issueTrackerUrl(issueTrackerUrl)
+                .startingDate(START_DATE).endDate(END_DATE).version(milestoneName) // todo not sure if it's what should be here
+                .build();
 
         try {
             return milestoneClient.createNew(milestone);

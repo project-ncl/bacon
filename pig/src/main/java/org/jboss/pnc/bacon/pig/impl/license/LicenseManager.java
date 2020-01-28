@@ -35,9 +35,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/5/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/5/17
  */
 public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> {
     private static final Logger log = LoggerFactory.getLogger(LicenseGenerator.class);
@@ -46,11 +45,8 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
     @Getter
     private final GenerationData<LicenseGenerationStrategy> generationData;
 
-    public LicenseManager(Config config,
-                          String releasePath,
-                          Deliverables deliverables,
-                          Map<String, PncBuild> builds,
-                          RepositoryData repositoryData) {
+    public LicenseManager(Config config, String releasePath, Deliverables deliverables, Map<String, PncBuild> builds,
+            RepositoryData repositoryData) {
         super(config, releasePath, deliverables, builds);
         this.repositoryData = repositoryData;
         generationData = config.getFlow().getLicensesGeneration();
@@ -89,8 +85,7 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private void generate() {
         log.info("Generating licenses");
-        LicenseGenerator.generateLicenses(repositoryData.getGavs(),
-                getTargetZipPath().toFile(),
+        LicenseGenerator.generateLicenses(repositoryData.getGavs(), getTargetZipPath().toFile(),
                 getTargetTopLevelDirectoryName());
     }
 }

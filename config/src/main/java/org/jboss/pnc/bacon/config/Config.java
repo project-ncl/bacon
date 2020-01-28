@@ -28,9 +28,8 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/14/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/14/18
  */
 @Data
 @Slf4j
@@ -66,7 +65,9 @@ public class Config {
     public static void initialize() throws IOException {
         File configFile = new File(configLocation);
         if (!configFile.exists()) {
-            log.error("Config file: '{}' does not exist. Please create a config file and either name it 'config.yaml' and put it in the working directory or specify it with -Dconfig", configLocation);
+            log.error(
+                    "Config file: '{}' does not exist. Please create a config file and either name it 'config.yaml' and put it in the working directory or specify it with -Dconfig",
+                    configLocation);
             throw new IOException("Config file " + configLocation + " does not exist!");
         } else if (configFile.length() == 0) {
             log.warn("Config file: {} has no content", configLocation);

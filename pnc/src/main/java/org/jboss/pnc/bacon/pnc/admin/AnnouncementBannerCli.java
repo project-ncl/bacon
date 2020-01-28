@@ -27,14 +27,9 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.GenericSettingClient;
 
-@GroupCommandDefinition(
-        name = "announcement-banner",
-        description = "Announcement banner related tasks",
-        groupCommands = {
-                AnnouncementBannerCli.SetAnnouncementBanner.class,
-                AnnouncementBannerCli.UnsetAnnouncementBanner.class,
-                AnnouncementBannerCli.GetAnnouncementBanner.class
-        })
+@GroupCommandDefinition(name = "announcement-banner", description = "Announcement banner related tasks", groupCommands = {
+        AnnouncementBannerCli.SetAnnouncementBanner.class, AnnouncementBannerCli.UnsetAnnouncementBanner.class,
+        AnnouncementBannerCli.GetAnnouncementBanner.class })
 public class AnnouncementBannerCli extends AbstractCommand {
 
     private static GenericSettingClient clientCache;

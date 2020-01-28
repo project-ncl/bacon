@@ -29,9 +29,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 8/23/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 8/23/17
  */
 public class LoggerUtils {
     // TODO this appears to be broken!
@@ -39,8 +38,7 @@ public class LoggerUtils {
         if (verbose) {
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
             Logger logger = lc.getLoggerList().iterator().next();
-            List<Filter<ILoggingEvent>> filters = logger.getAppender("STDOUT")
-                    .getCopyOfAttachedFiltersList();
+            List<Filter<ILoggingEvent>> filters = logger.getAppender("STDOUT").getCopyOfAttachedFiltersList();
             filters.stream().filter(LevelFilter.class::isInstance)
                     .forEach(filter -> ((LevelFilter) filter).setLevel(Level.DEBUG));
             System.out.println("Enabled debug logging");

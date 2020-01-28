@@ -28,62 +28,53 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author Paul Gallagher, pgallagh@redhat.com
- * <br>
- * Date: 2018-11-20
+ * @author Paul Gallagher, pgallagh@redhat.com <br>
+ *         Date: 2018-11-20
  *
- * If you run your builds with 'dependency:tree' then you can use
- * this addon to give you the list of compile scope dependencies
- * that are not redhat builds
+ *         If you run your builds with 'dependency:tree' then you can use this addon to give you the list of compile scope
+ *         dependencies that are not redhat builds
  */
 public class NotYetAlignedFromDependencyTree extends AddOn {
 
-  private static final Logger log = LoggerFactory.getLogger(NotYetAlignedFromDependencyTree.class);
+    private static final Logger log = LoggerFactory.getLogger(NotYetAlignedFromDependencyTree.class);
 
-  public NotYetAlignedFromDependencyTree(Config config,
-      Map<String, PncBuild> builds,
-      String releasePath,
-      String extrasPath) {
-    super(config, builds, releasePath, extrasPath);
-  }
-
-  @Override
-  protected String getName() {
-    return "notYetAlignedFromDependencyTree";
-  }
-
-  @Override
-  public void trigger() {
-    String filename = extrasPath + "DependencyTreeMissingAlignment.txt";
-    PrintWriter file = null;
-    log.info("Running NotYetAlignedFromDependencyTree - report is {}", filename);
-    try {
-      file = new PrintWriter(filename);
-      for (PncBuild build : builds.values()) {
-        //Make a unique list so we don't get multiples from
-        //sub-module's dependency tree list
-        List<String> bcLog = build.getBuildLog()
-                .stream()
-                .distinct()
-                .collect(Collectors.toList());
-        file.println("-------- [" + build.getId() + "] " + build.getName() + " --------");
-        for (String bcLine : bcLog) {
-          if (bcLine.startsWith("[INFO] +") &&
-                  (bcLine.endsWith(":runtime") || bcLine.endsWith(":compile")) &&
-                  !bcLine.contains("redhat-")) {
-            file.println(bcLine);
-          }
-        }
-	file.println();
-      }
-    } catch (FileNotFoundException e) {
-      log.error("Error while creating NotYetAlignedFromDependencyTree report", e);
-      return;
-    } finally {
-      if ( file != null) {
-        file.flush();
-        file.close();
-      }
+    public NotYetAlignedFromDependencyTree(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
+        super(config, builds, releasePath, extrasPath);
     }
-  }
+
+    @Override
+    protected String getName() {
+        return "notYetAlignedFromDependencyTree";
+    }
+
+    @Override
+    public void trigger() {
+        String filename = extrasPath + "DependencyTreeMissingAlignment.txt";
+        PrintWriter file = null;
+        log.info("Running NotYetAlignedFromDependencyTree - report is {}", filename);
+        try {
+            file = new PrintWriter(filename);
+            for (PncBuild build : builds.values()) {
+                // Make a unique list so we don't get multiples from
+                // sub-module's dependency tree list
+                List<String> bcLog = build.getBuildLog().stream().distinct().collect(Collectors.toList());
+                file.println("-------- [" + build.getId() + "] " + build.getName() + " --------");
+                for (String bcLine : bcLog) {
+                    if (bcLine.startsWith("[INFO] +") && (bcLine.endsWith(":runtime") || bcLine.endsWith(":compile"))
+                            && !bcLine.contains("redhat-")) {
+                        file.println(bcLine);
+                    }
+                }
+                file.println();
+            }
+        } catch (FileNotFoundException e) {
+            log.error("Error while creating NotYetAlignedFromDependencyTree report", e);
+            return;
+        } finally {
+            if (file != null) {
+                file.flush();
+                file.close();
+            }
+        }
+    }
 }

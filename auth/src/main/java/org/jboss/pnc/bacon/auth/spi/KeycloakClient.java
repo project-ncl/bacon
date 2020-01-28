@@ -15,7 +15,8 @@ public interface KeycloakClient {
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredential(String keycloakBaseUrl, String realm, String client, String username) throws KeycloakClientException;
+    Credential getCredential(String keycloakBaseUrl, String realm, String client, String username)
+            throws KeycloakClientException;
 
     /**
      * Authenticate based on service account and service account secret
@@ -27,8 +28,8 @@ public interface KeycloakClient {
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredentialServiceAccount(String keycloakBaseUrl, String realm, String serviceAccountUsername, String secret) throws KeycloakClientException;
-
+    Credential getCredentialServiceAccount(String keycloakBaseUrl, String realm, String serviceAccountUsername, String secret)
+            throws KeycloakClientException;
 
     default String keycloakEndpoint(String keycloakBaseUrl, String realm) {
 
@@ -40,10 +41,7 @@ public interface KeycloakClient {
 
         StringBuilder builder = new StringBuilder();
 
-        builder.append(keycloakUrl)
-                .append("auth/realms/")
-                .append(realm)
-                .append("/protocol/openid-connect/token");
+        builder.append(keycloakUrl).append("auth/realms/").append(realm).append("/protocol/openid-connect/token");
 
         return builder.toString();
     }

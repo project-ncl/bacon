@@ -31,13 +31,8 @@ import org.jboss.pnc.dto.Environment;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(
-        name = "environment",
-        description = "environment",
-        groupCommands = {
-                EnvironmentCli.Get.class,
-                EnvironmentCli.List.class
-        })
+@GroupCommandDefinition(name = "environment", description = "environment", groupCommands = { EnvironmentCli.Get.class,
+        EnvironmentCli.List.class })
 public class EnvironmentCli extends AbstractCommand {
 
     private static EnvironmentClient clientCache;

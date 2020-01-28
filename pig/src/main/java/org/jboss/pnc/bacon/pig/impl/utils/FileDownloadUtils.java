@@ -42,9 +42,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.function.Supplier;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 4/16/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 4/16/18
  */
 public class FileDownloadUtils {
     private FileDownloadUtils() {
@@ -64,34 +63,27 @@ public class FileDownloadUtils {
     private static final Supplier<CloseableHttpClient> unsafeHttpClient;
 
     static {
-        requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-                .setConnectTimeout(CONNECTION_TIMEOUT)
-                .setSocketTimeout(READ_TIMEOUT)
-                .build();
-        safeHttpClient = () -> HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig).build();
+        requestConfig = RequestConfig.copy(RequestConfig.DEFAULT).setConnectTimeout(CONNECTION_TIMEOUT)
+                .setSocketTimeout(READ_TIMEOUT).build();
+        safeHttpClient = () -> HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
         unsafeHttpClient = () -> {
             try {
-                return HttpClients
-                        .custom()
-                        .setRetryHandler(new HttpRequestRetryHandler() {
-                            @Override
-                            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-                                if (executionCount > MAX_RETRIES) {
-                                    log.warn("Maximum tries reached for client http pool");
-                                    return false;
-                                 }
-                                 if (exception instanceof org.apache.http.NoHttpResponseException) {
-                                     log.warn("No response from server on {} call ", executionCount);
-                                     return true;
-                                 }
-                                 return false;
-                            }
-                        })
-                        .setDefaultRequestConfig(requestConfig)
+                return HttpClients.custom().setRetryHandler(new HttpRequestRetryHandler() {
+                    @Override
+                    public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                        if (executionCount > MAX_RETRIES) {
+                            log.warn("Maximum tries reached for client http pool");
+                            return false;
+                        }
+                        if (exception instanceof org.apache.http.NoHttpResponseException) {
+                            log.warn("No response from server on {} call ", executionCount);
+                            return true;
+                        }
+                        return false;
+                    }
+                }).setDefaultRequestConfig(requestConfig)
                         .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
-                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                        .build();
+                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
             } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
                 throw new RuntimeException("Failed to initialize unsafe http client for file downloads", e);
             }
@@ -115,7 +107,8 @@ public class FileDownloadUtils {
         log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
-    private static void downloadWithClient(Supplier<CloseableHttpClient> httpClientSupplier, URI downloadUrl, File targetPath) throws Exception {
+    private static void downloadWithClient(Supplier<CloseableHttpClient> httpClientSupplier, URI downloadUrl, File targetPath)
+            throws Exception {
         try (CloseableHttpClient httpClient = httpClientSupplier.get()) {
             HttpResponse response = httpClient.execute(new HttpGet(downloadUrl));
 
@@ -124,7 +117,7 @@ public class FileDownloadUtils {
                 throw new Exception("Invalid status code for download");
             }
             try (InputStream input = response.getEntity().getContent();
-                 FileOutputStream output = new FileOutputStream(targetPath)) {
+                    FileOutputStream output = new FileOutputStream(targetPath)) {
                 IOUtils.copy(input, output);
             }
         }

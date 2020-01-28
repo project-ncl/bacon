@@ -24,9 +24,8 @@ import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.dto.BuildConfiguration;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/2/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/2/17
  */
 @Getter
 public class BuildConfigData {

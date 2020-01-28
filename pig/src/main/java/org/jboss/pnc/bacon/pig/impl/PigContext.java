@@ -39,9 +39,8 @@ import static java.lang.System.getProperty;
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 4/1/19
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 4/1/19
  */
 @Data
 public class PigContext {
@@ -63,8 +62,8 @@ public class PigContext {
     public void setConfig(Config config) {
         this.config = config;
         if (deliverables == null) {
-            String prefix = String.format("%s-%s.%s", config.getOutputPrefixes().getReleaseFile(),
-                    config.getVersion(), config.getMilestone());
+            String prefix = String.format("%s-%s.%s", config.getOutputPrefixes().getReleaseFile(), config.getVersion(),
+                    config.getMilestone());
 
             deliverables = new Deliverables();
 
@@ -99,8 +98,7 @@ public class PigContext {
 
     public void storeContext() {
         try (OutputStream output = new FileOutputStream(contextLocation)) {
-            jsonMapper.writerFor(PigContext.class)
-                    .writeValue(output, this);
+            jsonMapper.writerFor(PigContext.class).writeValue(output, this);
         } catch (IOException e) {
             throw new RuntimeException("failed to store PigContext", e);
         }
@@ -118,7 +116,6 @@ public class PigContext {
             throw new MisconfigurationException("The provided config file: " + config + " does not exist");
         }
     }
-
 
     /*
      * STATICS

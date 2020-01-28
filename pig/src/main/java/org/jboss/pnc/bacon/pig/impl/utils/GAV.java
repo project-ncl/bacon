@@ -31,17 +31,16 @@ import java.util.Comparator;
 import java.util.Map;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/19/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/19/17
  */
 @Getter
-@EqualsAndHashCode(exclude = {"packaging", "classifier", "scope"})
+@EqualsAndHashCode(exclude = { "packaging", "classifier", "scope" })
 @ToString
 public class GAV {
     private static final Logger log = LoggerFactory.getLogger(GAV.class);
 
-    public static final Comparator<GAV> gapvcComparator =  Comparator.comparing(GAV::toGapvc);
+    public static final Comparator<GAV> gapvcComparator = Comparator.comparing(GAV::toGapvc);
 
     private final String packaging;
     private final String groupId;
@@ -117,14 +116,11 @@ public class GAV {
     }
 
     public String toVersionPath() {
-        return String.format("%s/%s/%s",
-                groupId.replace('.', '/'), artifactId, version);
+        return String.format("%s/%s/%s", groupId.replace('.', '/'), artifactId, version);
     }
 
     public String toUri() {
-        return String.format("%s/%s",
-                toVersionPath(),
-                toFileName());
+        return String.format("%s/%s", toVersionPath(), toFileName());
     }
 
     public String toFileName() {
@@ -136,7 +132,7 @@ public class GAV {
     }
 
     public String toPNCIdentifier() {
-        String result =  String.format("%s:%s:%s:%s", groupId, artifactId, packaging, version);
+        String result = String.format("%s:%s:%s:%s", groupId, artifactId, packaging, version);
         if (classifier != null) {
             result += ":";
             result += classifier;
@@ -155,7 +151,7 @@ public class GAV {
             case 4:
                 return new GAV(split[0], split[1], split[3], split[2]);
             case 5:
-                return new GAV(split[0], split[1], split[3], split[2] , split[4]);
+                return new GAV(split[0], split[1], split[3], split[2], split[4]);
             default:
                 throw new RuntimeException("Error parsing gav: " + colonSeparatedGav
                         + ". Expected groupId:artifactId:packaging:classifier:version or groupId:artifactId:packaging:version");
@@ -164,18 +160,16 @@ public class GAV {
     }
 
     public String asBomXmlDependency() {
-        //don't include BOM artifacts
+        // don't include BOM artifacts
         if ("import".equals(scope)) {
             return "";
         }
 
-        return String.format("      <dependency>\n" +
-                "         <groupId>%s</groupId>\n" +
-                "         <artifactId>%s</artifactId>\n" +
-                "         <type>%s</type>\n" +
-                (scope != null ? "         <scope>" + scope + "</scope>\n" : "") +
-                (classifier != null ? "         <classifier>" + classifier + "</classifier>\n" : "") +
-                "      </dependency>", groupId, artifactId, packaging);
+        return String.format("      <dependency>\n" + "         <groupId>%s</groupId>\n"
+                + "         <artifactId>%s</artifactId>\n" + "         <type>%s</type>\n"
+                + (scope != null ? "         <scope>" + scope + "</scope>\n" : "")
+                + (classifier != null ? "         <classifier>" + classifier + "</classifier>\n" : "") + "      </dependency>",
+                groupId, artifactId, packaging);
     }
 
     public static GAV fromFileName(String absolutePath, String repoRootName) {

@@ -31,15 +31,14 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
 @Data
 public class SharedContentReportRow {
     @Delegate
     private final GAV gav;
-//    private String classifier; TODO?
+    // private String classifier; TODO?
 
     private String productName;
     private String productVersion;
@@ -60,7 +59,7 @@ public class SharedContentReportRow {
     /**
      * for test usage only!
      *
-     * @param  gav no description
+     * @param gav no description
      */
     @Deprecated
     protected SharedContentReportRow(GAV gav) {
@@ -68,8 +67,8 @@ public class SharedContentReportRow {
     }
 
     /**
-     * Appends g:a:p:v;productName;productVersion;isReleased;buildUrl;buildAuthor;comma,separated,tags
-     * to the given buffer (string builder)
+     * Appends g:a:p:v;productName;productVersion;isReleased;buildUrl;buildAuthor;comma,separated,tags to the given buffer
+     * (string builder)
      *
      * @param builder output
      */
@@ -80,20 +79,15 @@ public class SharedContentReportRow {
         builder.append(released).append(";");
         builder.append(buildId).append(";");
         builder.append(buildAuthor).append(";");
-        String candidateTags =
-                buildTags != null
-                        ? buildTags.stream()
-                        .filter(t -> t.contains("-candidate"))
-                        .collect(Collectors.joining(","))
-                        : "";
+        String candidateTags = buildTags != null
+                ? buildTags.stream().filter(t -> t.contains("-candidate")).collect(Collectors.joining(","))
+                : "";
         builder.append(candidateTags).append(";");
         builder.append(StringUtils.join(buildTags, ",")).append("\n");
     }
 
     private String toComparableString() {
-        return defaultIfNull(productName, "") + "|"
-                + defaultIfNull(productVersion, "") + "|"
-                + toGav();
+        return defaultIfNull(productName, "") + "|" + defaultIfNull(productVersion, "") + "|" + toGav();
     }
 
     public static int byProductAndGav(SharedContentReportRow row1, SharedContentReportRow row2) {

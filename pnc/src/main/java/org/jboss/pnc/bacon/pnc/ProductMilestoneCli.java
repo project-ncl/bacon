@@ -47,16 +47,9 @@ import java.util.Optional;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
 
 @Slf4j
-@GroupCommandDefinition(
-        name = "product-milestone",
-        description = "Product Milestones",
-        groupCommands = {
-                ProductMilestoneCli.Create.class,
-                ProductMilestoneCli.Update.class,
-                ProductMilestoneCli.CancelMilestoneClose.class,
-                ProductMilestoneCli.Get.class,
-                ProductMilestoneCli.PerformedBuilds.class
-        })
+@GroupCommandDefinition(name = "product-milestone", description = "Product Milestones", groupCommands = {
+        ProductMilestoneCli.Create.class, ProductMilestoneCli.Update.class, ProductMilestoneCli.CancelMilestoneClose.class,
+        ProductMilestoneCli.Get.class, ProductMilestoneCli.PerformedBuilds.class })
 public class ProductMilestoneCli extends AbstractCommand {
 
     private static ProductMilestoneClient clientCache;
@@ -84,12 +77,9 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String productVersionId;
         @Option(required = true, name = "issue-tracker-url", description = "Issue Tracker URL")
         private String issueTrackerUrl;
-        @Option(name = "starting-date",
-                description = "Starting date, default is today: Format: <yyyy>-<mm>-<dd>")
+        @Option(name = "starting-date", description = "Starting date, default is today: Format: <yyyy>-<mm>-<dd>")
         private String startDate;
-        @Option(required = true,
-                name = "end-date",
-                description = "End date: Format: <yyyy>-<mm>-<dd>")
+        @Option(required = true, name = "end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
 
         @Override
@@ -110,13 +100,9 @@ public class ProductMilestoneCli extends AbstractCommand {
 
                 ProductVersionRef productVersionRef = ProductVersionRef.refBuilder().id(productVersionId).build();
 
-                ProductMilestone milestone = ProductMilestone.builder()
-                        .version(productMilestoneVersion)
-                        .productVersion(productVersionRef)
-                        .issueTrackerUrl(issueTrackerUrl)
-                        .startingDate(startDateInstant)
-                        .plannedEndDate(endDateInstant)
-                        .build();
+                ProductMilestone milestone = ProductMilestone.builder().version(productMilestoneVersion)
+                        .productVersion(productVersionRef).issueTrackerUrl(issueTrackerUrl).startingDate(startDateInstant)
+                        .plannedEndDate(endDateInstant).build();
 
                 System.out.println(getClientAuthenticated().createNew(milestone));
             });
@@ -150,7 +136,8 @@ public class ProductMilestoneCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productMilestoneVersion, () -> {
 
                     try {
-                        if (validateProductMilestoneVersion(productMilestone.getProductVersion().getId(), productMilestoneVersion)) {
+                        if (validateProductMilestoneVersion(productMilestone.getProductVersion().getId(),
+                                productMilestoneVersion)) {
                             updated.version(productMilestoneVersion);
                         } else {
                             Fail.fail("The version does not fit the proper format");
@@ -211,14 +198,16 @@ public class ProductMilestoneCli extends AbstractCommand {
             return getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
         }
     }
+
     /**
-     * Product Milestone version format is: <d>.<d>.<d>.<word>
-     * The first 2 digits must match the digit for the product version
+     * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product version
+     * 
      * @param productVersionId
      * @param milestoneVersion
      * @return
      */
-    public static boolean validateProductMilestoneVersion(String productVersionId, String milestoneVersion) throws ClientException {
+    public static boolean validateProductMilestoneVersion(String productVersionId, String milestoneVersion)
+            throws ClientException {
 
         ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration(false));
         ProductVersion productVersionDTO = productVersionClient.getSpecific(productVersionId);

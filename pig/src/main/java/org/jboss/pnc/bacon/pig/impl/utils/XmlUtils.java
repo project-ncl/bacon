@@ -52,16 +52,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/11/17
  */
 public class XmlUtils {
     private static final Logger log = LoggerFactory.getLogger(XmlUtils.class);
 
     /*
-    * TODO: WARNING! Some of the code here is COPIED from wildfly-swarm-repository. Move it out to a separate location!
-    * */
+     * TODO: WARNING! Some of the code here is COPIED from wildfly-swarm-repository. Move it out to a separate location!
+     */
     public static XmlToString extract(File xmlFile, String xpathLocator) {
         try {
             NodeList nodeList = extractNodes(xmlFile, xpathLocator);
@@ -71,7 +70,8 @@ public class XmlUtils {
         }
     }
 
-    private static NodeList extractNodes(File xmlFile, String xpathLocator) throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
+    private static NodeList extractNodes(File xmlFile, String xpathLocator)
+            throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(xmlFile);
@@ -105,8 +105,8 @@ public class XmlUtils {
         List<Element> children = getChildrenWithTagName(parent, tagName);
         int length = children.size();
         if (children.size() > 1) {
-            throw new IllegalStateException("Too many elements with name '" + tagName + "'  in " +
-                    describe(parent) + ". Expected at most 1, got " + length);
+            throw new IllegalStateException("Too many elements with name '" + tagName + "'  in " + describe(parent)
+                    + ". Expected at most 1, got " + length);
         }
 
         if (length == 0) {
@@ -123,14 +123,12 @@ public class XmlUtils {
         return value.trim();
     }
 
-
     public static List<Element> getChildrenWithTagName(Element parent, String tagName) {
         List<Element> elements = new ArrayList<>();
         NodeList descendants = parent.getElementsByTagName(tagName);
         for (int i = 0; i < descendants.getLength(); i++) {
             Node item = descendants.item(i);
-            if (item.getParentNode().isSameNode(parent)
-                    && item instanceof Element) {
+            if (item.getParentNode().isSameNode(parent) && item instanceof Element) {
                 elements.add((Element) item);
             }
         }
@@ -177,9 +175,7 @@ public class XmlUtils {
 
     public static Map<String, String> getProperties(File file) {
         Map<String, String> result = new HashMap<>();
-        listNodes(file, "/project/properties/*")
-                .stream().filter(n -> n instanceof Element)
-                .map(n -> (Element) n)
+        listNodes(file, "/project/properties/*").stream().filter(n -> n instanceof Element).map(n -> (Element) n)
                 .forEach(e -> result.put(e.getTagName(), e.getTextContent().trim()));
         return result;
     }

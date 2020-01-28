@@ -24,16 +24,14 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/5/17
  */
 public class RepoBuildLogProcessor {
     private static final String START_TAG = "swarm_repository_listing_begin";
     private static final String END_TAG = "swarm_repository_listing_end";
 
-    public static List<String> getList(String header,
-                                       List<String> buildLog) {
+    public static List<String> getList(String header, List<String> buildLog) {
         Iterator<String> logIterator = buildLog.iterator();
         while (logIterator.hasNext()) {
             if (header.equals(logIterator.next())) {
@@ -44,8 +42,8 @@ public class RepoBuildLogProcessor {
             if (START_TAG.equals(logIterator.next()) && logIterator.hasNext()) {
                 return takeUntilTheEnd(logIterator);
             } else {
-                throw new IllegalArgumentException("Malformed repo log listing for header: " + header +
-                        " in the log: " + join(buildLog, "\n"));
+                throw new IllegalArgumentException(
+                        "Malformed repo log listing for header: " + header + " in the log: " + join(buildLog, "\n"));
             }
         } else {
             throw new IllegalArgumentException("Unable to find " + header + " in the log: " + join(buildLog, "\n"));

@@ -43,11 +43,9 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparingInt;
 
-
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 1/18/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 1/18/18
  */
 public class RepositoryUtils {
     public static final Logger log = LoggerFactory.getLogger(RepositoryUtils.class);
@@ -55,19 +53,15 @@ public class RepositoryUtils {
     public static void addCheckSums(File mavenRepositoryDirectory) {
         log.debug("Generating missing checksums");
         try {
-            Files.walk(mavenRepositoryDirectory.toPath())
-                    .filter(p -> p.toFile().isFile())
-                    .filter(RepositoryUtils::isNotCheckSumFile)
-                    .forEach(RepositoryUtils::addCheckSums);
+            Files.walk(mavenRepositoryDirectory.toPath()).filter(p -> p.toFile().isFile())
+                    .filter(RepositoryUtils::isNotCheckSumFile).forEach(RepositoryUtils::addCheckSums);
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Unable to generate checksums for " + mavenRepositoryDirectory.getAbsolutePath(), e);
+            throw new RuntimeException("Unable to generate checksums for " + mavenRepositoryDirectory.getAbsolutePath(), e);
         }
     }
 
     private static boolean isNotCheckSumFile(Path path) {
-        return Stream.of(RepoDescriptor.CHECKSUM_EXTENSIONS)
-                .noneMatch(ext -> path.toString().endsWith(ext));
+        return Stream.of(RepoDescriptor.CHECKSUM_EXTENSIONS).noneMatch(ext -> path.toString().endsWith(ext));
     }
 
     protected static void addCheckSums(Path filePath) {
@@ -88,14 +82,14 @@ public class RepositoryUtils {
 
             try (FileInputStream data = new FileInputStream(file)) {
                 switch (checksumType) {
-                case "md5sum":
-                    checksum = DigestUtils.md5Hex(data);
-                    break;
-                case "sha1sum":
-                    checksum = DigestUtils.sha1Hex(data);
-                    break;
-                default:
-                    throw new IOException("Unknown checksum type: " + checksumType);
+                    case "md5sum":
+                        checksum = DigestUtils.md5Hex(data);
+                        break;
+                    case "sha1sum":
+                        checksum = DigestUtils.sha1Hex(data);
+                        break;
+                    default:
+                        throw new IOException("Unknown checksum type: " + checksumType);
                 }
             }
 
@@ -121,11 +115,9 @@ public class RepositoryUtils {
         return !absolutePath.contains("redhat-") && !absolutePath.contains("eap-runtime-artifacts");
     }
 
-
     private static void removeMatchingCondition(File element, Function<File, Boolean> condition) {
         if (element.isDirectory()) {
-            Stream.of(element.listFiles())
-                    .forEach(file -> removeMatchingCondition(file, condition));
+            Stream.of(element.listFiles()).forEach(file -> removeMatchingCondition(file, condition));
             if (element.listFiles().length == 0) {
                 element.delete();
             }
@@ -142,44 +134,39 @@ public class RepositoryUtils {
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
 
                 final File[] children = dir.toFile().listFiles();
-                if(null == children) {
+                if (null == children) {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
 
-                final List<File> redHatFiles =
-                    Stream.of(children).filter(f -> !isCommunity(f)).collect(Collectors.toList());
+                final List<File> redHatFiles = Stream.of(children).filter(f -> !isCommunity(f)).collect(Collectors.toList());
 
-                if(redHatFiles.isEmpty()) {
+                if (redHatFiles.isEmpty()) {
                     // continue since we are at an intermediate directory
                     return FileVisitResult.CONTINUE;
                 }
 
-                redHatFiles
-                    .stream()
-                    .map(f -> new AbstractMap.SimpleEntry<>(f, RedHatArtifactVersion.fromVersion(f.getName())))
-                    // split by unique upstream version
-                    .collect(Collectors.groupingBy(e -> e.getValue().getUpstreamVersion()))
-                    // for each unique upstream version, delete the directories corresponding
-                    // to redhat version less than the highest version
-                    .forEach((upstreamVersion, matchingRHArtifactVersions) -> {
-                      matchingRHArtifactVersions.sort(
-                          comparingInt(e -> e.getValue().getRedhatBuildNumber())
-                      );
-                      Collections.reverse(matchingRHArtifactVersions);
+                redHatFiles.stream().map(f -> new AbstractMap.SimpleEntry<>(f, RedHatArtifactVersion.fromVersion(f.getName())))
+                        // split by unique upstream version
+                        .collect(Collectors.groupingBy(e -> e.getValue().getUpstreamVersion()))
+                        // for each unique upstream version, delete the directories corresponding
+                        // to redhat version less than the highest version
+                        .forEach((upstreamVersion, matchingRHArtifactVersions) -> {
+                            matchingRHArtifactVersions.sort(comparingInt(e -> e.getValue().getRedhatBuildNumber()));
+                            Collections.reverse(matchingRHArtifactVersions);
 
-                      matchingRHArtifactVersions.stream().skip(1).forEach(e -> {
-                        final File directoryToBeDeleted = e.getKey();
+                            matchingRHArtifactVersions.stream().skip(1).forEach(e -> {
+                                final File directoryToBeDeleted = e.getKey();
 
-                        log.info("Deleting redhat artifact " + directoryToBeDeleted.getAbsolutePath()
-                            + " which is redundant since a newer redhat version exists");
+                                log.info("Deleting redhat artifact " + directoryToBeDeleted.getAbsolutePath()
+                                        + " which is redundant since a newer redhat version exists");
 
-                        try {
-                          FileUtils.deleteDirectory(directoryToBeDeleted);
-                        } catch (IOException e1) {
-                          throw new RuntimeException(e1);
-                        }
-                      });
-                    });
+                                try {
+                                    FileUtils.deleteDirectory(directoryToBeDeleted);
+                                } catch (IOException e1) {
+                                    throw new RuntimeException(e1);
+                                }
+                            });
+                        });
 
                 return FileVisitResult.SKIP_SUBTREE;
             }
@@ -191,7 +178,7 @@ public class RepositoryUtils {
         private final int redhatBuildNumber;
 
         private static final String REGEX = "(.*)[\\.|-]redhat-(\\d+)";
-        private static final Pattern  PATTERN = Pattern.compile(REGEX);
+        private static final Pattern PATTERN = Pattern.compile(REGEX);
 
         private RedHatArtifactVersion(String upstreamVersion, int redhatBuildNumber) {
             this.upstreamVersion = upstreamVersion;
@@ -200,40 +187,38 @@ public class RepositoryUtils {
 
         public static RedHatArtifactVersion fromVersion(String version) {
             final Matcher matcher = PATTERN.matcher(version);
-            if(matcher.matches()) {
+            if (matcher.matches()) {
                 return new RedHatArtifactVersion(matcher.group(1), Integer.parseInt(matcher.group(2)));
-            }
-            else {
-                throw new IllegalStateException("Invalid use of '" + RedHatArtifactVersion.class.getName() +
-                    "#fromVersion' for " + version +
-                    ". Can only be used on redhat artifact versions");
+            } else {
+                throw new IllegalStateException("Invalid use of '" + RedHatArtifactVersion.class.getName()
+                        + "#fromVersion' for " + version + ". Can only be used on redhat artifact versions");
             }
         }
 
         public String getUpstreamVersion() {
-          return upstreamVersion;
+            return upstreamVersion;
         }
 
         public int getRedhatBuildNumber() {
-          return redhatBuildNumber;
+            return redhatBuildNumber;
         }
 
         @Override
         public boolean equals(Object o) {
-          if (this == o) {
-            return true;
-          }
-          if (o == null || getClass() != o.getClass()) {
-            return false;
-          }
-          RedHatArtifactVersion that = (RedHatArtifactVersion) o;
-          return Objects.equals(upstreamVersion, that.upstreamVersion) &&
-              Objects.equals(redhatBuildNumber, that.redhatBuildNumber);
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            RedHatArtifactVersion that = (RedHatArtifactVersion) o;
+            return Objects.equals(upstreamVersion, that.upstreamVersion)
+                    && Objects.equals(redhatBuildNumber, that.redhatBuildNumber);
         }
 
         @Override
         public int hashCode() {
-          return Objects.hash(upstreamVersion, redhatBuildNumber);
+            return Objects.hash(upstreamVersion, redhatBuildNumber);
         }
     }
 

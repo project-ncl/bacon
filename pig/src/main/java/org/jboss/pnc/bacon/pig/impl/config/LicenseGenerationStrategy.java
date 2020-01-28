@@ -18,12 +18,9 @@
 package org.jboss.pnc.bacon.pig.impl.config;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 5/23/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 5/23/18
  */
 public enum LicenseGenerationStrategy {
-    GENERATE,
-    IGNORE,
-    DOWNLOAD
+    GENERATE, IGNORE, DOWNLOAD
 }

@@ -37,92 +37,84 @@ import static java.util.Collections.emptyList;
 import static org.jboss.pnc.bacon.pig.impl.utils.XmlUtils.listNodes;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 7/7/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 7/7/17
  */
 public class BomVerifierAddon extends AddOn {
 
-  private static final Logger log = LoggerFactory.getLogger(BomVerifierAddon.class);
+    private static final Logger log = LoggerFactory.getLogger(BomVerifierAddon.class);
 
-  private final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
-  private List<GAV> unreleasedWhitelist;
+    private final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
+    private List<GAV> unreleasedWhitelist;
 
-  public BomVerifierAddon(Config config,
-      Map<String, PncBuild> builds,
-      String releasePath,
-      String extrasPath) {
-    super(config, builds, releasePath, extrasPath);
-  }
-
-  @Override
-  protected String getName() {
-    return "bomVerifier";
-  }
-
-  @Override
-  public void trigger() {
-    unreleasedWhitelist = readUnreleasedWhitelist();
-    List<GAV> unallowedUnreleasedGavs = getUnallowedUnreleasedGavs();
-    if (unallowedUnreleasedGavs.size() > 0) {
-      throw new RuntimeException("Unreleased artifacts referenced from BOM found:\n" + StringUtils.join(unallowedUnreleasedGavs, "\n"));
+    public BomVerifierAddon(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
+        super(config, builds, releasePath, extrasPath);
     }
-  }
 
-  private List<GAV> readUnreleasedWhitelist() {
-    List<String> allowUnreleasedList = getListFromConfig();
-    return allowUnreleasedList.stream().map(line -> {
-      String[] gav = line.split(":");
-      return new GAV(gav[0], gav[1], gav[2], null);
-    }).collect(Collectors.toList());
-  }
-
-  private List<String> getListFromConfig() {
-    try {
-      Map<String, ?> config = getConfig();
-      if (config != null) {
-        List<String> result = (List<String>) config.get("allowUnreleased");
-        return result == null ? emptyList() : result;
-      }
-      return emptyList();
-    } catch (Exception e) {
-      log.error("While reading allowUnreleased, got the following exception: ", e);
-      throw new IllegalArgumentException(
-          "Unable to read the 'allowUnreleased' from bomVerifier addon configuration. Make sure the field contains a list of strings (or is an empty list)",
-          e);
+    @Override
+    protected String getName() {
+        return "bomVerifier";
     }
-  }
 
+    @Override
+    public void trigger() {
+        unreleasedWhitelist = readUnreleasedWhitelist();
+        List<GAV> unallowedUnreleasedGavs = getUnallowedUnreleasedGavs();
+        if (unallowedUnreleasedGavs.size() > 0) {
+            throw new RuntimeException(
+                    "Unreleased artifacts referenced from BOM found:\n" + StringUtils.join(unallowedUnreleasedGavs, "\n"));
+        }
+    }
 
-  public List<GAV> getUnallowedUnreleasedGavs() {
-    return getDependencyGavs()
-        .filter(this::internallyBuilt)
-        .filter(this::unreleased)
-        .filter(this::notWhitelisted)
-        .collect(Collectors.toList());
-  }
+    private List<GAV> readUnreleasedWhitelist() {
+        List<String> allowUnreleasedList = getListFromConfig();
+        return allowUnreleasedList.stream().map(line -> {
+            String[] gav = line.split(":");
+            return new GAV(gav[0], gav[1], gav[2], null);
+        }).collect(Collectors.toList());
+    }
 
-  private boolean notWhitelisted(GAV gav) {
-    return !unreleasedWhitelist.contains(gav);
-  }
+    private List<String> getListFromConfig() {
+        try {
+            Map<String, ?> config = getConfig();
+            if (config != null) {
+                List<String> result = (List<String>) config.get("allowUnreleased");
+                return result == null ? emptyList() : result;
+            }
+            return emptyList();
+        } catch (Exception e) {
+            log.error("While reading allowUnreleased, got the following exception: ", e);
+            throw new IllegalArgumentException(
+                    "Unable to read the 'allowUnreleased' from bomVerifier addon configuration. Make sure the field contains a list of strings (or is an empty list)",
+                    e);
+        }
+    }
 
-  private boolean internallyBuilt(GAV gav) {
-    return gav.getVersion().contains("redhat");
-  }
+    public List<GAV> getUnallowedUnreleasedGavs() {
+        return getDependencyGavs().filter(this::internallyBuilt).filter(this::unreleased).filter(this::notWhitelisted)
+                .collect(Collectors.toList());
+    }
 
-  private boolean unreleased(GAV gav) {
-    return !Boolean.TRUE.equals(mrrcSearcher.isReleased(gav));
-  }
+    private boolean notWhitelisted(GAV gav) {
+        return !unreleasedWhitelist.contains(gav);
+    }
 
-  protected Stream<GAV> getDependencyGavs() {
-    PncBuild build = builds.get(config.getFlow().getRepositoryGeneration().getSourceBuild());
-    File bom = new File("bom");
+    private boolean internallyBuilt(GAV gav) {
+        return gav.getVersion().contains("redhat");
+    }
 
-    build.findArtifactByFileName(config.getFlow().getRepositoryGeneration().getSourceArtifact()).downloadTo(bom);
+    private boolean unreleased(GAV gav) {
+        return !Boolean.TRUE.equals(mrrcSearcher.isReleased(gav));
+    }
 
-    List<Node> nodeList = listNodes(bom, "//dependencies/dependency");
-    Map<String, String> properties = XmlUtils.getProperties(bom);
-    return nodeList.stream()
-        .map(node -> GAV.fromXml((Element) node, properties));
-  }
+    protected Stream<GAV> getDependencyGavs() {
+        PncBuild build = builds.get(config.getFlow().getRepositoryGeneration().getSourceBuild());
+        File bom = new File("bom");
+
+        build.findArtifactByFileName(config.getFlow().getRepositoryGeneration().getSourceArtifact()).downloadTo(bom);
+
+        List<Node> nodeList = listNodes(bom, "//dependencies/dependency");
+        Map<String, String> properties = XmlUtils.getProperties(bom);
+        return nodeList.stream().map(node -> GAV.fromXml((Element) node, properties));
+    }
 }

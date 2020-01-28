@@ -30,9 +30,8 @@ import java.util.regex.Pattern;
 /**
  * TODO: resurrect it
  * 
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 3/5/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 3/5/18
  */
 public class MilestoneNumberFinder {
     public static String getFirstUnused(String url, String version, String milestoneBase) {
@@ -40,9 +39,8 @@ public class MilestoneNumberFinder {
             return milestoneBase;
         }
         if (url == null) {
-            throw new RuntimeException("Invalid configuration. " +
-                    "Milestone is configured to be updated incrementally" +
-                    " but release storage area url (--releaseStorageUrl) is not provided");
+            throw new RuntimeException("Invalid configuration. " + "Milestone is configured to be updated incrementally"
+                    + " but release storage area url (--releaseStorageUrl) is not provided");
         }
         String milestonePrefix = milestoneBase.replaceAll("\\*", "");
 
@@ -57,7 +55,7 @@ public class MilestoneNumberFinder {
 
     private static List<Integer> findUsedNumbers(String version, String milestonePrefix, String indexFile) {
         List<Integer> resultList = new ArrayList<>();
-        String prefix = version  + "." + milestonePrefix;
+        String prefix = version + "." + milestonePrefix;
 
         String escapedPrefix = prefix.replaceAll("\\.", "\\\\.");
         Pattern pattern = Pattern.compile(escapedPrefix + "\\d+");

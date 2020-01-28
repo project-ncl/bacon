@@ -26,8 +26,8 @@ public class CacheFile {
     private static com.fasterxml.jackson.databind.ObjectMapper mapper;
 
     static {
-      mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-      mapper.registerModule(new JavaTimeModule());
+        mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
     }
 
     public static void writeCredentialToCacheFile(String keycloakUrl, String realm, String username, Credential credential) {

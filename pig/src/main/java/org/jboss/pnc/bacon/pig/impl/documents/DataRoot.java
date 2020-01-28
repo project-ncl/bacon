@@ -27,8 +27,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import java.util.Collection;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/5/17
  */
 @Data

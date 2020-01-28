@@ -30,8 +30,7 @@ public class BifrostClient {
     }
 
     public void writeLog(String id, boolean follow, Consumer<String> onLine) throws IOException {
-        String query = "direction=ASC"
-                + "&matchFilters=mdc.processContext.keyword:build-" + id
+        String query = "direction=ASC" + "&matchFilters=mdc.processContext.keyword:build-" + id
                 + "&prefixFilters=loggerName.keyword:org.jboss.pnc._userlog_";
 
         if (follow) {
@@ -46,10 +45,8 @@ public class BifrostClient {
         HttpGet httpGet = new HttpGet(logsUrl);
 
         HttpResponse response = client.execute(httpGet);
-        try (
-                InputStream inputStream = response.getEntity().getContent();
-                BufferedReader is = new BufferedReader(new InputStreamReader(inputStream));
-        ) {
+        try (InputStream inputStream = response.getEntity().getContent();
+                BufferedReader is = new BufferedReader(new InputStreamReader(inputStream));) {
             is.lines().forEach(line -> onLine.accept(line));
         }
     }

@@ -41,9 +41,8 @@ import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
 import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/3/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/3/17
  */
 public class BuildInfoCollector {
     private final BuildClient buildClient;
@@ -64,12 +63,8 @@ public class BuildInfoCollector {
         try {
             BuildsFilterParameters filter = new BuildsFilterParameters();
             filter.setLatest(true);
-            Iterator<Build> buildIterator = buildConfigClient.getBuilds(
-                  configId,
-                  filter,
-                  of("=desc=id"),
-                  query("status==", BuildStatus.SUCCESS)
-            ).iterator();
+            Iterator<Build> buildIterator = buildConfigClient
+                    .getBuilds(configId, filter, of("=desc=id"), query("status==", BuildStatus.SUCCESS)).iterator();
 
             if (!buildIterator.hasNext()) {
                 throw new NoSuccessfulBuildException(configId);
@@ -92,15 +87,14 @@ public class BuildInfoCollector {
         }
     }
 
-        private String readLog(InputStream inputStream) throws IOException {
-            StringBuilder logBuilder = new StringBuilder();
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                 BufferedReader reader = new BufferedReader(inputStreamReader);
-            ) {
-                reader.lines().forEach(l -> logBuilder.append(l));
-                return reader.toString();
-            }
+    private String readLog(InputStream inputStream) throws IOException {
+        StringBuilder logBuilder = new StringBuilder();
+        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader reader = new BufferedReader(inputStreamReader);) {
+            reader.lines().forEach(l -> logBuilder.append(l));
+            return reader.toString();
         }
+    }
 
     public BuildInfoCollector() {
         buildClient = new BuildClient(PncClientHelper.getPncConfiguration());

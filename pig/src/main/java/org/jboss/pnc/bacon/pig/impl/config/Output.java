@@ -21,9 +21,8 @@ import lombok.Data;
 
 /**
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/28/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/28/17
  */
 @Data
 public class Output {

@@ -40,9 +40,8 @@ import java.util.Set;
 /**
  * TODO: drop it once https://projects.engineering.redhat.com/browse/NCL-1322 is implemented
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 3/4/19
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 3/4/19
  */
 public class GitRepoInspector {
 
@@ -50,11 +49,10 @@ public class GitRepoInspector {
 
     private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
 
-    public static boolean isModifiedBranch(String configId,
-                                           String internalUrl,
-                                           String refSpec) {
+    public static boolean isModifiedBranch(String configId, String internalUrl, String refSpec) {
 
-        log.info("Trying to check if branch '" + refSpec + "' in '" + internalUrl + "' has been modified, compared to latest build of build config '" + configId + "'");
+        log.info("Trying to check if branch '" + refSpec + "' in '" + internalUrl
+                + "' has been modified, compared to latest build of build config '" + configId + "'");
         File tempDir = FileUtils.mkTempDir("git");
         try (Git git = cloneRepo(internalUrl, tempDir)) {
             String latestCommit = headRevision(git, refSpec);
@@ -83,14 +81,9 @@ public class GitRepoInspector {
         config.setBoolean("http", null, "sslVerify", false);
         config.save();
 
-        git.remoteAdd()
-                .setName("prod")
-                .setUri(toAnonymous(internalUrl))
-                .call();
+        git.remoteAdd().setName("prod").setUri(toAnonymous(internalUrl)).call();
 
-        git.fetch().setRemote("prod")
-                .setTagOpt(TagOpt.FETCH_TAGS)
-                .call();
+        git.fetch().setRemote("prod").setTagOpt(TagOpt.FETCH_TAGS).call();
         return git;
     }
 
@@ -108,23 +101,17 @@ public class GitRepoInspector {
     }
 
     /**
-     * TODO: smarter check is required, here if a repour tag is on an "upstream" commit
-     * TODO: we may miss modifications (because we return here the tag commit and its parent)
+     * TODO: smarter check is required, here if a repour tag is on an "upstream" commit TODO: we may miss modifications (because
+     * we return here the tag commit and its parent)
      */
     private static Set<String> getBaseCommitPossibilities(Git git, String tagName) throws GitAPIException, IOException {
         Set<String> result = new HashSet<>();
 
-        Ref ref = git.getRepository()
-                .findRef(tagName);
+        Ref ref = git.getRepository().findRef(tagName);
 
-        ObjectId id = ref.getPeeledObjectId() != null
-                ? ref.getPeeledObjectId()
-                : ref.getObjectId();
+        ObjectId id = ref.getPeeledObjectId() != null ? ref.getPeeledObjectId() : ref.getObjectId();
 
-        Iterator<RevCommit> log = git.log()
-                .add(id)
-                .call()
-                .iterator();
+        Iterator<RevCommit> log = git.log().add(id).call().iterator();
 
         result.add(log.next().getName());
         if (log.hasNext()) {
@@ -141,8 +128,7 @@ public class GitRepoInspector {
     private static URIish toAnonymous(String internalUrl) throws MalformedURLException {
         String uriAsString;
         if (internalUrl.startsWith("git+ssh")) {
-            uriAsString = internalUrl.replace("git+ssh", "https")
-                    .replace(".redhat.com/", ".redhat.com/gerrit/");
+            uriAsString = internalUrl.replace("git+ssh", "https").replace(".redhat.com/", ".redhat.com/gerrit/");
         } else {
             uriAsString = internalUrl;
         }

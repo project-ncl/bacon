@@ -7,17 +7,17 @@ import java.net.URISyntaxException;
 
 public interface Validate {
 
-   /**
-    * WARNING: If validation fails, the method may stop the application
-    */
-   void validate();
+    /**
+     * WARNING: If validation fails, the method may stop the application
+     */
+    void validate();
 
     /**
      * WARNING: If validation fails, the method will stop the application
      *
      * Checks if url is null or empty and has the proper format
      */
-   static void validateUrl(String url, String kind) {
+    static void validateUrl(String url, String kind) {
 
         if (url == null || url.isEmpty()) {
             Fail.fail(kind + " Url is not specified in the config file!");
@@ -32,5 +32,5 @@ public interface Validate {
         } catch (URISyntaxException e) {
             Fail.fail("Could not parse the " + kind + " Url at all! " + e.getMessage());
         }
-   }
+    }
 }

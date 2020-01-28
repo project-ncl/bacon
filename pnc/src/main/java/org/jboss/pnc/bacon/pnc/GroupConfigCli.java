@@ -42,11 +42,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 
 @GroupCommandDefinition(name = "group-config", description = "Group configuration", groupCommands = {
-        GroupConfigCli.Create.class,
-        GroupConfigCli.Update.class,
-        GroupConfigCli.List.class,
-        GroupConfigCli.Get.class,
-})
+        GroupConfigCli.Create.class, GroupConfigCli.Update.class, GroupConfigCli.List.class, GroupConfigCli.Get.class, })
 public class GroupConfigCli extends AbstractCommand {
 
     private static GroupConfigurationClient clientCache;
@@ -82,11 +78,10 @@ public class GroupConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder()
-                        .name(groupConfigName);
+                GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder().name(groupConfigName);
 
-                ObjectHelper.executeIfNotNull(productVersionId,
-                        () -> groupConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+                ObjectHelper.executeIfNotNull(productVersionId, () -> groupConfigurationBuilder
+                        .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
@@ -151,7 +146,7 @@ public class GroupConfigCli extends AbstractCommand {
 
     private static java.util.Map<String, BuildConfigurationRef> addBuildConfigs(String buildConfigurationIds) {
 
-       java.util.Map<String, BuildConfigurationRef> buildConfigurationRefList = new HashMap<>();
+        java.util.Map<String, BuildConfigurationRef> buildConfigurationRefList = new HashMap<>();
 
         for (String id : buildConfigurationIds.split(",")) {
 

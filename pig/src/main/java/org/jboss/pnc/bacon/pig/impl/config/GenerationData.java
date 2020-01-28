@@ -20,9 +20,8 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import lombok.Data;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 1/17/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 1/17/18
  */
 @Data
 public abstract class GenerationData<GenerationStrategyType> {

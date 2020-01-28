@@ -18,9 +18,8 @@
 package org.jboss.pnc.bacon.pig.impl;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 4/2/19
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 4/2/19
  */
 public class MisconfigurationException extends RuntimeException {
 

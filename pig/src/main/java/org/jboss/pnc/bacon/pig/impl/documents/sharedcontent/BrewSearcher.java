@@ -48,10 +48,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * TODO: 1. move out methods that manipulated on SharedContentReportRow
- * TODO: 2. move to a dedicated package
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * TODO: 1. move out methods that manipulated on SharedContentReportRow TODO: 2. move to a dedicated package
+ * 
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
 public class BrewSearcher {
@@ -68,7 +67,8 @@ public class BrewSearcher {
             final String json = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             return getKojiBuildFinderConfigFromJson(json);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(), e);
+            throw new IllegalStateException("Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(),
+                    e);
         }
     }
 
@@ -117,21 +117,19 @@ public class BrewSearcher {
     public static void fillBrewData(SharedContentReportRow row) {
         log.debug("Asking for {}\n", row.toGapv());
         List<KojiBuild> builds = getBuilds(row);
-        builds.forEach(
-                build -> {
-                    int buildId = build.getBuildInfo().getId();
-                    log.debug("Got build id {} for artifact {}", buildId, row.toGapv());
+        builds.forEach(build -> {
+            int buildId = build.getBuildInfo().getId();
+            log.debug("Got build id {} for artifact {}", buildId, row.toGapv());
 
-                    if (row.getBuildId() != null) {
-                        row.setBuildId(row.getBuildId() + ", " + buildId);
-                    } else {
-                        row.setBuildId(String.valueOf(buildId));
-                    }
+            if (row.getBuildId() != null) {
+                row.setBuildId(row.getBuildId() + ", " + buildId);
+            } else {
+                row.setBuildId(String.valueOf(buildId));
+            }
 
-                    fillBuiltBy(row, build);
-                    fillTags(row, build);
-                }
-        );
+            fillBuiltBy(row, build);
+            fillTags(row, build);
+        });
     }
 
     private static List<KojiBuild> getBuilds(SharedContentReportRow row) {
@@ -166,16 +164,17 @@ public class BrewSearcher {
             session.close();
         }
 
-        List<KojiArchiveInfo> archiveInfos = buildList.stream().map(KojiBuild::getProjectSourcesTgz).filter(Objects::nonNull).collect(Collectors.toList());
+        List<KojiArchiveInfo> archiveInfos = buildList.stream().map(KojiBuild::getProjectSourcesTgz).filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         try {
             session = new KojiClientSession(config.getKojiHubURL());
             session.enrichArchiveTypeInfo(archiveInfos);
-       } catch (KojiClientException e) {
+        } catch (KojiClientException e) {
             throw new IllegalStateException("Failed to enrich Koji builds", e);
-       } finally {
-           session.close();
-       }
+        } finally {
+            session.close();
+        }
 
         List<KojiBuild> ret = buildList.stream().skip(1).collect(Collectors.toList());
 

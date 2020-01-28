@@ -79,12 +79,8 @@ public class PncClientHelper {
         try {
             URI uri = new URI(url);
 
-            configuration = Configuration.builder()
-                    .protocol(uri.getScheme())
-                    .host(uri.getHost())
-                    .bearerToken(bearerToken)
-                    .pageSize(50)
-                    .build();
+            configuration = Configuration.builder().protocol(uri.getScheme()).host(uri.getHost()).bearerToken(bearerToken)
+                    .pageSize(50).build();
 
             GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
             try {
@@ -104,8 +100,8 @@ public class PncClientHelper {
     }
 
     /**
-     * Return null if it couldn't get the authentication token. This generally means that
-     * the credentials are not valid
+     * Return null if it couldn't get the authentication token. This generally means that the credentials are not valid
+     * 
      * @param keycloakConfig
      * @return
      */
@@ -120,17 +116,11 @@ public class PncClientHelper {
             Credential credential;
 
             if (keycloakConfig.isServiceAccount()) {
-                credential = client.getCredential(
-                        keycloakConfig.getUrl(),
-                        keycloakConfig.getRealm(),
-                        keycloakConfig.getUsername(),
-                        keycloakConfig.getClientSecret());
+                credential = client.getCredential(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
+                        keycloakConfig.getUsername(), keycloakConfig.getClientSecret());
             } else {
-                credential = client.getCredential(
-                        keycloakConfig.getUrl(),
-                        keycloakConfig.getRealm(),
-                        keycloakConfig.getClientId(),
-                        keycloakConfig.getUsername());
+                credential = client.getCredential(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
+                        keycloakConfig.getClientId(), keycloakConfig.getUsername());
             }
 
             return credential.getAccessToken();
@@ -145,7 +135,9 @@ public class PncClientHelper {
     }
 
     /**
-     * Format must be: <yyyy>-<mm>-<dd>
+     * Format must be: <yyyy>-<mm>-
+     * <dd>
+     * 
      * @param date
      */
     public static Instant parseDateFormat(String date) {

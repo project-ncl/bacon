@@ -32,64 +32,61 @@ import org.slf4j.LoggerFactory;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/14/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/14/17
  */
 public class PncBuilder {
-   private static final Logger log = LoggerFactory.getLogger(PncBuilder.class);
-   private final GroupBuildClient groupBuildClient;
-   private final GroupConfigurationClient groupConfigClient;
+    private static final Logger log = LoggerFactory.getLogger(PncBuilder.class);
+    private final GroupBuildClient groupBuildClient;
+    private final GroupConfigurationClient groupConfigClient;
 
-   public PncBuilder() {
-      groupBuildClient = new GroupBuildClient(getPncConfiguration());
-      groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
-   }
+    public PncBuilder() {
+        groupBuildClient = new GroupBuildClient(getPncConfiguration());
+        groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
+    }
 
-   public void buildAndWait(GroupConfigurationRef group, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
-      GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode);
-      waitForSuccessfulFinish(groupBuild.getId());
-   }
+    public void buildAndWait(GroupConfigurationRef group, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+        GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode);
+        waitForSuccessfulFinish(groupBuild.getId());
+    }
 
-   private GroupBuild run(GroupConfigurationRef group, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
-      log.info("Performing builds of build group {} in PNC", group.getId());
-      GroupBuildParameters buildParams = new GroupBuildParameters();
-      buildParams.setRebuildMode(rebuildMode);
-      buildParams.setTemporaryBuild(tempBuild);
-      buildParams.setTimestampAlignment(tempBuildTS);
-      GroupBuildRequest request = GroupBuildRequest.builder()
-            .build();
+    private GroupBuild run(GroupConfigurationRef group, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+        log.info("Performing builds of build group {} in PNC", group.getId());
+        GroupBuildParameters buildParams = new GroupBuildParameters();
+        buildParams.setRebuildMode(rebuildMode);
+        buildParams.setTemporaryBuild(tempBuild);
+        buildParams.setTimestampAlignment(tempBuildTS);
+        GroupBuildRequest request = GroupBuildRequest.builder().build();
 
-      try {
-         return groupConfigClient.trigger(group.getId(), buildParams, request);
-      } catch (ClientException e) {
-         throw new RuntimeException("Failed to trigger build group " + group.getId(), e);
-      }
-   }
+        try {
+            return groupConfigClient.trigger(group.getId(), buildParams, request);
+        } catch (ClientException e) {
+            throw new RuntimeException("Failed to trigger build group " + group.getId(), e);
+        }
+    }
 
-   private void waitForSuccessfulFinish(String groupBuildId) {
-      log.info("waiting for finish of group build {}", groupBuildId);
-      SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30);
-      log.info("group build finished successfully");
-   }
+    private void waitForSuccessfulFinish(String groupBuildId) {
+        log.info("waiting for finish of group build {}", groupBuildId);
+        SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30);
+        log.info("group build finished successfully");
+    }
 
-   private Boolean isSuccessfullyFinished(String groupBuildId) {
-      try {
-         GroupBuild groupBuild = groupBuildClient.getSpecific(groupBuildId);
-         switch (groupBuild.getStatus()) {
-            case BUILDING:
-               return false;
-            case REJECTED: // PNC has already built the project
-            case SUCCESS:
-               return true;
-            default:
-               throw new RuntimeException("Build group failed " + groupBuild);
-         }
-      } catch (ClientException e) {
-         log.warn("Failed to check if build is finished for " + groupBuildId +
-               ", assuming it is not finished", e);
-         return false;
-      }
-   }
+    private Boolean isSuccessfullyFinished(String groupBuildId) {
+        try {
+            GroupBuild groupBuild = groupBuildClient.getSpecific(groupBuildId);
+            switch (groupBuild.getStatus()) {
+                case BUILDING:
+                    return false;
+                case REJECTED: // PNC has already built the project
+                case SUCCESS:
+                    return true;
+                default:
+                    throw new RuntimeException("Build group failed " + groupBuild);
+            }
+        } catch (ClientException e) {
+            log.warn("Failed to check if build is finished for " + groupBuildId + ", assuming it is not finished", e);
+            return false;
+        }
+    }
 
 }

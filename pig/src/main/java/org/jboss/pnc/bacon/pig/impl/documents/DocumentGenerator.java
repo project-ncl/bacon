@@ -36,9 +36,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/23/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/23/17
  */
 public class DocumentGenerator {
     private static final Logger log = LoggerFactory.getLogger(DocumentGenerator.class);
@@ -48,57 +47,35 @@ public class DocumentGenerator {
     private final Config config;
     private final Deliverables deliverables;
 
-    public DocumentGenerator(Config config,
-                             String releasePath,
-                             String extrasPath,
-                             Deliverables deliverables) {
+    public DocumentGenerator(Config config, String releasePath, String extrasPath, Deliverables deliverables) {
         this.releasePath = releasePath;
         this.extrasPath = extrasPath;
         this.config = config;
         this.deliverables = deliverables;
     }
 
-    public void generateDocuments(Map<String, PncBuild> builds,
-                                  RepositoryData repo) {
-        String repositoryContents =
-                repo.getGavs().stream().map(GAV::toGav).collect(Collectors.joining("\n"));
-        String duplicates = repo.getGavs().stream()
-                .collect(Collectors.groupingBy(GAV::getGa))
-                .values()
-                .stream()
-                .filter(listForGa -> listForGa.size() > 1)
-                .flatMap(Collection::stream)
-                .map(GAV::toGav)
-                .sorted()
+    public void generateDocuments(Map<String, PncBuild> builds, RepositoryData repo) {
+        String repositoryContents = repo.getGavs().stream().map(GAV::toGav).collect(Collectors.joining("\n"));
+        String duplicates = repo.getGavs().stream().collect(Collectors.groupingBy(GAV::getGa)).values().stream()
+                .filter(listForGa -> listForGa.size() > 1).flatMap(Collection::stream).map(GAV::toGav).sorted()
                 .collect(Collectors.joining("\n"));
 
-        DataRoot templateData = new DataRoot(
-                config,
-                deliverables,
-                duplicates,
-                repositoryContents,
-                builds.values());
+        DataRoot templateData = new DataRoot(config, deliverables, duplicates, repositoryContents, builds.values());
 
         FileGenerator generator = new FileGenerator(Optional.empty());
         log.debug("Generating documents with data: {}", templateData);
         generator.generateFiles(releasePath, extrasPath, templateData);
     }
 
-
-    public void generateSharedContentReport(RepositoryData repoData,
-                                            Map<String, PncBuild> builds) throws IOException {
-        SharedContentReportGenerator sharedContentReportGenerator =
-                new SharedContentReportGenerator(repoData.getFiles(), getAllBuiltArtifacts(builds));
+    public void generateSharedContentReport(RepositoryData repoData, Map<String, PncBuild> builds) throws IOException {
+        SharedContentReportGenerator sharedContentReportGenerator = new SharedContentReportGenerator(repoData.getFiles(),
+                getAllBuiltArtifacts(builds));
         File reportFile = new File(extrasPath, deliverables.getSharedContentReport());
         sharedContentReportGenerator.generateReport(reportFile);
     }
 
-
     private static Set<GAV> getAllBuiltArtifacts(Map<String, PncBuild> builds) {
-        return builds.values().stream()
-                .map(PncBuild::getBuiltArtifacts)
-                .flatMap(List::stream)
-                .map(ArtifactWrapper::toGAV)
+        return builds.values().stream().map(PncBuild::getBuiltArtifacts).flatMap(List::stream).map(ArtifactWrapper::toGAV)
                 .collect(Collectors.toSet());
     }
 }

@@ -31,7 +31,6 @@ public class ParentPomDownloader {
 
     public static final Logger log = LoggerFactory.getLogger(ParentPomDownloader.class);
 
-
     private ParentPomDownloader() {
     }
 
@@ -52,50 +51,40 @@ public class ParentPomDownloader {
 
         File execDir = FileUtils.mkTempDir("parent-pom-retrieval");
 
-        pomArtifacts.stream()
-                .filter(Pom::hasParent)
-                .forEach(p -> processPoms(repoPath, p));
+        pomArtifacts.stream().filter(Pom::hasParent).forEach(p -> processPoms(repoPath, p));
 
-        String settingsXml = ResourceUtils
-                .extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-                .getAbsolutePath();
-        toDownload.parallelStream().forEach(
-                gav -> {
-                    log.debug("Downloading: {}", gav.toString());
-                    // Call Maven to download dependency
+        String settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
+        toDownload.parallelStream().forEach(gav -> {
+            log.debug("Downloading: {}", gav.toString());
+            // Call Maven to download dependency
 
-                    ProcessBuilder builder = new ProcessBuilder("mvn",
-                            "-B",
-                            "org.apache.maven.plugins:maven-dependency-plugin:3.0.1:get",
-                            "-Dartifact=" + gav.toString(),
-                            "-Dmaven.repo.local=" + repoPath.toAbsolutePath().toString(),
-                            "-s",
-                            settingsXml);
+            ProcessBuilder builder = new ProcessBuilder("mvn", "-B",
+                    "org.apache.maven.plugins:maven-dependency-plugin:3.0.1:get", "-Dartifact=" + gav.toString(),
+                    "-Dmaven.repo.local=" + repoPath.toAbsolutePath().toString(), "-s", settingsXml);
 
-                    builder.directory(execDir)
-                            .inheritIO();
+            builder.directory(execDir).inheritIO();
 
-                    Process process = null;
-                    try {
-                        process = builder.start();
-                    } catch (IOException e) {
-                        log.error("Unable to download gav {}", gav.toString(), e);
-                        System.out.println(14);
+            Process process = null;
+            try {
+                process = builder.start();
+            } catch (IOException e) {
+                log.error("Unable to download gav {}", gav.toString(), e);
+                System.out.println(14);
+            }
+
+            while (process.isAlive()) {
+                try {
+                    Thread.sleep(1000);
+                    if (process.exitValue() == 0) {
+                        break;
                     }
-
-                    while (process.isAlive()) {
-                        try {
-                            Thread.sleep(1000);
-                            if (process.exitValue() == 0) {
-                                break;
-                            }
-                        } catch (IllegalThreadStateException e) {
-                            // ignore as process not exited
-                        } catch (InterruptedException e) {
-                            break;
-                        }
-                    }
+                } catch (IllegalThreadStateException e) {
+                    // ignore as process not exited
+                } catch (InterruptedException e) {
+                    break;
                 }
+            }
+        }
 
         );
     }
@@ -121,10 +110,7 @@ public class ParentPomDownloader {
     }
 
     private Set<Pom> retrievePoms(Path repoPath) throws IOException {
-        return Files.walk(repoPath)
-                .filter(Files::isRegularFile)
-                .filter(ParentPomDownloader::isPom)
-                .map(Pom::new)
+        return Files.walk(repoPath).filter(Files::isRegularFile).filter(ParentPomDownloader::isPom).map(Pom::new)
                 .collect(Collectors.toSet());
     }
 
@@ -142,8 +128,7 @@ public class ParentPomDownloader {
         try {
             Document pomDoc = pom.parse();
 
-            return new PomGAV(parentGroupIdExpression().evaluate(pomDoc),
-                    parentArtifactIdExpression().evaluate(pomDoc),
+            return new PomGAV(parentGroupIdExpression().evaluate(pomDoc), parentArtifactIdExpression().evaluate(pomDoc),
                     parentVersionExpression().evaluate(pomDoc));
         } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
             throw new RuntimeException(e);

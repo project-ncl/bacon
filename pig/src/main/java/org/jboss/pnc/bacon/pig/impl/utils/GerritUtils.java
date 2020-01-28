@@ -20,20 +20,19 @@ package org.jboss.pnc.bacon.pig.impl.utils;
 import java.net.URI;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 8/31/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 8/31/18
  */
 public class GerritUtils {
 
-    private GerritUtils(){
+    private GerritUtils() {
     }
 
     public static final String GERRIT = "gerrit";
 
     public static URI gerritSnapshotDownloadUrl(String scmUrl, String scmRevision) {
-        String uriString = String.format("https://%s/gitweb?p=%s;a=snapshot;h=%s;sf=tgz",
-                gerritUrl(scmUrl), repository(scmUrl), scmRevision);
+        String uriString = String.format("https://%s/gitweb?p=%s;a=snapshot;h=%s;sf=tgz", gerritUrl(scmUrl), repository(scmUrl),
+                scmRevision);
         return URI.create(uriString);
     }
 

@@ -22,11 +22,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.admin.AnnouncementBannerCli;
 import org.jboss.pnc.bacon.pnc.admin.MaintenanceModeCli;
 
-@GroupCommandDefinition(
-        name = "admin",
-        description = "Admin related tasks",
-        groupCommands = {
-                AnnouncementBannerCli.class,
-                MaintenanceModeCli.class
-        })
-public class AdminCli extends AbstractCommand {}
+@GroupCommandDefinition(name = "admin", description = "Admin related tasks", groupCommands = { AnnouncementBannerCli.class,
+        MaintenanceModeCli.class })
+public class AdminCli extends AbstractCommand {
+}

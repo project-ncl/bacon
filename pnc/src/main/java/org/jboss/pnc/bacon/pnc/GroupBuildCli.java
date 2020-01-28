@@ -36,12 +36,8 @@ import org.jboss.pnc.dto.GroupBuild;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "group-build", description = "Group builds", groupCommands = {
-        GroupBuildCli.Cancel.class,
-        GroupBuildCli.List.class,
-        GroupBuildCli.ListBuilds.class,
-        GroupBuildCli.Get.class
-})
+@GroupCommandDefinition(name = "group-build", description = "Group builds", groupCommands = { GroupBuildCli.Cancel.class,
+        GroupBuildCli.List.class, GroupBuildCli.ListBuilds.class, GroupBuildCli.Get.class })
 public class GroupBuildCli extends AbstractCommand {
 
     private static GroupBuildClient clientCache;

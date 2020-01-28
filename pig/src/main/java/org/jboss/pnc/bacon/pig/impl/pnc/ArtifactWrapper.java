@@ -30,8 +30,7 @@ import java.net.URI;
 import java.nio.file.Path;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/13/17
  */
 @Getter

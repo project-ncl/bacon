@@ -26,9 +26,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 28/06/2019
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 28/06/2019
  */
 public class PncClientUtils {
     public static <T> List<T> toList(RemoteCollection<T> collection) {

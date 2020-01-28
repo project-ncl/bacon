@@ -48,9 +48,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/28/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/28/17
  */
 @Data
 public class Config {
@@ -63,8 +62,7 @@ public class Config {
     private BuildConfig defaultBuildParameters = new BuildConfig();
     private @NotEmpty List<BuildConfig> builds = new ArrayList<>();
     private @NotBlank Output outputPrefixes;
-    private @NotNull
-    Flow flow;
+    private @NotNull Flow flow;
     private String majorMinor;
     private String micro;
     private Map<String, Map<String, ?>> addons = new HashMap<>();
@@ -101,52 +99,42 @@ public class Config {
 
         uniqueNames.forEach(configNames::remove);
 
-        configNames.forEach(
-                duplicateName -> errors.add("More than one configuration is named '" + duplicateName + "'")
-        );
+        configNames.forEach(duplicateName -> errors.add("More than one configuration is named '" + duplicateName + "'"));
     }
 
     private static List<String> getAllMatches(String text, String regex) {
         List<String> matches = new ArrayList<>();
         Matcher m = Pattern.compile(regex).matcher(text);
-        while(m.find()) {
+        while (m.find()) {
             matches.add(m.group());
         }
         return matches;
     }
 
-    private static HashMap <String, String> readVariablesFromFile(String contents) {
-       HashMap <String, String> variables = new HashMap<>();
-       //Look for the variable defs i.e. #!myVariable=1.0.0
-       List<String> matches = getAllMatches(contents, "#![a-zA-Z0-9_-]*=.*");
-       for (String temp : matches) {
-           String[] nameValue = temp.split("=", 2);
-           //remove the !# of the name
-           variables.put(nameValue[0].substring(2),nameValue[1]);
-       }
-       return variables;
+    private static HashMap<String, String> readVariablesFromFile(String contents) {
+        HashMap<String, String> variables = new HashMap<>();
+        // Look for the variable defs i.e. #!myVariable=1.0.0
+        List<String> matches = getAllMatches(contents, "#![a-zA-Z0-9_-]*=.*");
+        for (String temp : matches) {
+            String[] nameValue = temp.split("=", 2);
+            // remove the !# of the name
+            variables.put(nameValue[0].substring(2), nameValue[1]);
+        }
+        return variables;
     }
 
-    private static Map <String, String> convertbuildVarsOverridesStringToMap(String buildVarsOverrides) {
-        return Arrays
-                .stream(buildVarsOverrides.split(","))
-                .map(String::trim)
-                .filter(s -> s.contains("="))
-                .map(s -> s.split("="))
-                .filter(a -> a.length == 2)
-                .collect(toMap(
-                    (a) -> a[0].trim(),
-                    (a) -> a[1].trim()
-                ));
+    private static Map<String, String> convertbuildVarsOverridesStringToMap(String buildVarsOverrides) {
+        return Arrays.stream(buildVarsOverrides.split(",")).map(String::trim).filter(s -> s.contains("="))
+                .map(s -> s.split("=")).filter(a -> a.length == 2).collect(toMap((a) -> a[0].trim(), (a) -> a[1].trim()));
     }
 
     private static Map<String, String> readVariables(String contents, String buildVarsOverrides) {
-       Map <String, String> variablesFromFile = readVariablesFromFile(contents);
-       Map <String, String> variableOverrides = convertbuildVarsOverridesStringToMap(buildVarsOverrides);
+        Map<String, String> variablesFromFile = readVariablesFromFile(contents);
+        Map<String, String> variableOverrides = convertbuildVarsOverridesStringToMap(buildVarsOverrides);
 
-       Map<String, String> result = new HashMap<>(variablesFromFile);
-       variableOverrides.forEach((k, v) -> result.merge(k, v, (v1, v2) -> v2));
-       return result;
+        Map<String, String> result = new HashMap<>(variablesFromFile);
+        variableOverrides.forEach((k, v) -> result.merge(k, v, (v1, v2) -> v2));
+        return result;
     }
 
     public static InputStream preProcess(InputStream buildConfig, String buildVarsOverrides) {
@@ -160,36 +148,37 @@ public class Config {
             contents = s.next();
         }
 
-       Map <String, String> variables = readVariables(contents, buildVarsOverrides);
-       Integer passes = 0;
-       // We also have to take into account variable used inside variables, just keep going over until
-       // they have all expanded, maxTries will be hit if one is left over after that many
-       List<String> matches;
+        Map<String, String> variables = readVariables(contents, buildVarsOverrides);
+        Integer passes = 0;
+        // We also have to take into account variable used inside variables, just keep going over until
+        // they have all expanded, maxTries will be hit if one is left over after that many
+        List<String> matches;
 
-       while (!(matches = getAllMatches(contents, "\\{\\{.*}}")).isEmpty()) {
-           passes++;
+        while (!(matches = getAllMatches(contents, "\\{\\{.*}}")).isEmpty()) {
+            passes++;
 
-           for (Map.Entry<String, String> entry : variables.entrySet()) {
-               String name = "\\{\\{" + entry.getKey() + "}}";
-               String value = entry.getValue();
-               contents = contents.replaceAll(name, value);
-           }
+            for (Map.Entry<String, String> entry : variables.entrySet()) {
+                String name = "\\{\\{" + entry.getKey() + "}}";
+                String value = entry.getValue();
+                contents = contents.replaceAll(name, value);
+            }
 
-           if (passes > maxTries) {
-               StringBuilder leftOvers = new StringBuilder();
-               Set<String> setString = new HashSet<>(matches);
+            if (passes > maxTries) {
+                StringBuilder leftOvers = new StringBuilder();
+                Set<String> setString = new HashSet<>(matches);
 
-               for (String temp : setString) {
-                   leftOvers.append(temp).append(" ");
-               }
+                for (String temp : setString) {
+                    leftOvers.append(temp).append(" ");
+                }
 
-               throw new RuntimeException("No variable definition for [" + leftOvers.substring(0,leftOvers.length()-1) + "]");
-           }
-       }
+                throw new RuntimeException(
+                        "No variable definition for [" + leftOvers.substring(0, leftOvers.length() - 1) + "]");
+            }
+        }
 
-       InputStream stream = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+        InputStream stream = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
 
-       return stream;
+        return stream;
     }
 
     public static Config load(File buildConfigFile, String buildVarsOverrides) {
