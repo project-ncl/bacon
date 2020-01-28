@@ -19,12 +19,9 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/2/17
  */
 public enum DependencyState {
-    MATCH_FOUND,
-    REVERSION_POSSIBLE,
-    NO_MATCH
+    MATCH_FOUND, REVERSION_POSSIBLE, NO_MATCH
 }

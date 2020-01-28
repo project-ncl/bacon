@@ -22,9 +22,8 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 2/5/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 2/5/18
  */
 @Data
 public class AdditionalArtifactsFromBuild {

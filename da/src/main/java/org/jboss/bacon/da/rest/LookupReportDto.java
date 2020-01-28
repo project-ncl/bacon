@@ -23,9 +23,8 @@ import org.jboss.da.listings.model.rest.RestProductInput;
 import java.util.List;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 09/05/2019
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 09/05/2019
  */
 @Data
 public class LookupReportDto {

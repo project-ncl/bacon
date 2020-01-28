@@ -47,16 +47,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@GroupCommandDefinition(
-        name = "build-config",
-        description = "build-config",
-        groupCommands = {
-                BuildConfigCli.Create.class,
-                BuildConfigCli.Get.class,
-                BuildConfigCli.List.class,
-                BuildConfigCli.ListBuilds.class,
-                BuildConfigCli.Update.class,
-        })
+@GroupCommandDefinition(name = "build-config", description = "build-config", groupCommands = { BuildConfigCli.Create.class,
+        BuildConfigCli.Get.class, BuildConfigCli.List.class, BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class, })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
@@ -106,19 +98,14 @@ public class BuildConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder()
-                        .name(buildConfigName)
-                        .description(description)
-                        .environment(Environment.builder().id(environmentId).build())
-                        .project((ProjectRef.refBuilder().id(projectId).build()))
-                        .buildScript(buildScript)
-                        .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
-                        .scmRevision(scmRevision)
-                        .buildType(BuildType.valueOf(buildType))
-                        .parameters(processGenericParameters(genericParameters));
+                BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder().name(buildConfigName)
+                        .description(description).environment(Environment.builder().id(environmentId).build())
+                        .project((ProjectRef.refBuilder().id(projectId).build())).buildScript(buildScript)
+                        .scmRepository(SCMRepository.builder().id(scmRepositoryId).build()).scmRevision(scmRevision)
+                        .buildType(BuildType.valueOf(buildType)).parameters(processGenericParameters(genericParameters));
 
-                ObjectHelper.executeIfNotNull(productVersionId,
-                        () -> buildConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+                ObjectHelper.executeIfNotNull(productVersionId, () -> buildConfigurationBuilder
+                        .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
                 System.out.println(getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
             });
@@ -170,11 +157,14 @@ public class BuildConfigCli extends AbstractCommand {
 
                 ObjectHelper.executeIfNotNull(buildConfigName, () -> updated.name(buildConfigName));
                 ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
-                ObjectHelper.executeIfNotNull(environmentId, () -> updated.environment(Environment.builder().id(environmentId).build()));
+                ObjectHelper.executeIfNotNull(environmentId,
+                        () -> updated.environment(Environment.builder().id(environmentId).build()));
                 ObjectHelper.executeIfNotNull(buildScript, () -> updated.buildScript(buildScript));
-                ObjectHelper.executeIfNotNull(scmRepositoryId, () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
+                ObjectHelper.executeIfNotNull(scmRepositoryId,
+                        () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
                 ObjectHelper.executeIfNotNull(scmRevision, () -> updated.scmRevision(scmRevision));
-                ObjectHelper.executeIfNotNull(genericParameters, () -> updated.parameters(processGenericParameters(genericParameters)));
+                ObjectHelper.executeIfNotNull(genericParameters,
+                        () -> updated.parameters(processGenericParameters(genericParameters)));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
 
                 getClientAuthenticated().update(buildConfigId, updated.build());

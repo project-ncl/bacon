@@ -43,21 +43,15 @@ import static org.apache.commons.lang3.StringUtils.join;
 /**
  * todo: clean up + possibly move out to a separate lib
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/2/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/2/17
  */
 public class OSCommandExecutor {
     private static final Logger log = LoggerFactory.getLogger(OSCommandExecutor.class);
 
     // TODO replace with maven api call (so that there's no need to have maven installed)
     public static List<String> runCommandIn(String command, Path directory) {
-        return executor(command)
-                .directory(directory)
-                .redirectErrorStream(true)
-                .failOnInvalidStatusCode()
-                .exec()
-                .getOut();
+        return executor(command).directory(directory).redirectErrorStream(true).failOnInvalidStatusCode().exec().getOut();
     }
 
     public static CommandExecutor executor(String command) {
@@ -68,7 +62,7 @@ public class OSCommandExecutor {
     public static class CommandExecutor {
         private final String command;
         private Path directory;
-        //        private final ProcessBuilder builder;
+        // private final ProcessBuilder builder;
         private boolean failOnStatusCode = false;
         private boolean printOutputInOneLine = false;
         private int status = -1;
@@ -125,8 +119,7 @@ public class OSCommandExecutor {
 
         public CommandExecutor exec() {
             String command = prepareCommand(this.command);
-            log.debug("will execute {}, execution directory {}",
-                    command,
+            log.debug("will execute {}, execution directory {}", command,
                     directory != null ? directory.toAbsolutePath().toString() : null);
             ProcessBuilder builder = new ProcessBuilder(unescape(splitCommand(command)));
             try {
@@ -163,14 +156,15 @@ public class OSCommandExecutor {
 
                 } while ((timedOut || status != 0) && attempts > 0);
                 if (failOnStatusCode && status != 0) {
-                    log.error("Failed to execute command {}. Status code: {}. Process output: {}", builder.command(), status, joinedOutput());
-                    throw new OSCommandException("Failed to execute command " + builder.command() +
-                            ". Status code: " + status + " Process output: " + joinedOutput());
+                    log.error("Failed to execute command {}. Status code: {}. Process output: {}", builder.command(), status,
+                            joinedOutput());
+                    throw new OSCommandException("Failed to execute command " + builder.command() + ". Status code: " + status
+                            + " Process output: " + joinedOutput());
                 }
             } catch (IOException | InterruptedException | ExecutionException e) {
                 log.error("Failed to execute command {}. Process output: {}", builder.command(), joinedOutput(), e);
-                throw new OSCommandException("Failed to execute command " + builder.command() +
-                        ". Process output: " + joinedOutput(), e);
+                throw new OSCommandException(
+                        "Failed to execute command " + builder.command() + ". Process output: " + joinedOutput(), e);
             }
             return this;
         }
@@ -184,27 +178,25 @@ public class OSCommandExecutor {
         }
 
         private CompletableFuture<Boolean> waitFor(Process process) {
-            return CompletableFuture.<Boolean>supplyAsync(
-                    () -> {
-                        try {
-                            if (timeout != null) {
-                                boolean finishedOnTime = process.waitFor(timeout, TimeUnit.SECONDS);
-                                if (!finishedOnTime) {
-                                    log.debug("Process timed out, destroying");
-                                    process.destroyForcibly();
-                                    log.debug("Destroyed");
-                                    return true;
-                                }
-                            } else {
-                                process.waitFor();
-                            }
-                            return false;
-                        } catch (InterruptedException e) {
-                            log.error("Failed to wait for process {}", command, e);
+            return CompletableFuture.<Boolean> supplyAsync(() -> {
+                try {
+                    if (timeout != null) {
+                        boolean finishedOnTime = process.waitFor(timeout, TimeUnit.SECONDS);
+                        if (!finishedOnTime) {
+                            log.debug("Process timed out, destroying");
+                            process.destroyForcibly();
+                            log.debug("Destroyed");
                             return true;
                         }
+                    } else {
+                        process.waitFor();
                     }
-            );
+                    return false;
+                } catch (InterruptedException e) {
+                    log.error("Failed to wait for process {}", command, e);
+                    return true;
+                }
+            });
         }
 
         private void outputToFile() throws IOException {
@@ -236,7 +228,7 @@ public class OSCommandExecutor {
 
         private static void consumeInputStream(InputStream inputStream, Consumer<String> consumer) throws IOException {
             try (InputStreamReader streamReader = new InputStreamReader(inputStream);
-                 BufferedReader reader = new BufferedReader(streamReader)) {
+                    BufferedReader reader = new BufferedReader(streamReader)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     consumer.accept(line);

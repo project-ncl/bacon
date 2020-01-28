@@ -6,25 +6,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Paul Gallagher, pgallagh@redhat
- * <br>
- * Date: 12/10/2018
+ * @author Paul Gallagher, pgallagh@redhat <br>
+ *         Date: 12/10/2018
  */
-public class Profile{
-    List <Dependency> dependencies = new ArrayList<>();
+public class Profile {
+    List<Dependency> dependencies = new ArrayList<>();
     DependencyManagement dependencyManagement = new DependencyManagement();
     String id;
 
     @XmlElementWrapper
-    @XmlElement(name="dependency")
-    public List <Dependency> getDependencies() {return dependencies;}
+    @XmlElement(name = "dependency")
+    public List<Dependency> getDependencies() {
+        return dependencies;
+    }
 
-    public void addDependency(Dependency dep) {dependencies.add(dep);}
+    public void addDependency(Dependency dep) {
+        dependencies.add(dep);
+    }
 
-    public String getId() {return id;}
+    public String getId() {
+        return id;
+    }
+
     @XmlElement
-    public void setId(String id) {this.id = id;}
+    public void setId(String id) {
+        this.id = id;
+    }
 
     @XmlElement
-    public DependencyManagement getDependencyManagement() {return dependencyManagement;}
+    public DependencyManagement getDependencyManagement() {
+        return dependencyManagement;
+    }
 }

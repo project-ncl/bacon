@@ -23,9 +23,8 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import java.util.Map;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/11/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/11/17
  */
 public abstract class AddOn {
     protected final Config config;
@@ -33,10 +32,7 @@ public abstract class AddOn {
     protected final String releasePath;
     protected final String extrasPath;
 
-    protected AddOn(Config config,
-                    Map<String, PncBuild> builds,
-                    String releasePath,
-                    String extrasPath) {
+    protected AddOn(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
         this.config = config;
         this.builds = builds;
         this.releasePath = releasePath;

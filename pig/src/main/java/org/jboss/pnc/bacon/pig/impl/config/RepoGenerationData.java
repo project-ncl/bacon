@@ -23,9 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 1/17/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 1/17/18
  */
 @Data
 public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
@@ -33,7 +32,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
 
     /**
      * list of groupId:artifactId:packaging:version with <strong>exact</strong> version
-      */
+     */
     private List<String> externalAdditionalArtifacts = new ArrayList<>();
     private String bomGroupId;
     private String bomArtifactId;

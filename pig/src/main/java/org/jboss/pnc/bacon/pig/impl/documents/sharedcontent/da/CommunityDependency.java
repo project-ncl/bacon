@@ -29,8 +29,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
  */
 @Getter
@@ -44,7 +43,7 @@ public class CommunityDependency {
     private DependencyState state;
     private List<String> usedForSwarm;
 
-    /*org/ow2/asm/asm-all/5.0.4/asm-all-5.0.4.jar*/
+    /* org/ow2/asm/asm-all/5.0.4/asm-all-5.0.4.jar */
     public CommunityDependency(String logLine) {
         logLine = logLine.trim();
         gav = new GAV(logLine);
@@ -55,9 +54,7 @@ public class CommunityDependency {
     }
 
     public String toPathSubstring() {
-        return String.format("%s/%s/",
-                getGroupId().replace('.', '/'),
-                getArtifactId());
+        return String.format("%s/%s/", getGroupId().replace('.', '/'), getArtifactId());
     }
 
     public void appendToCsv(FileWriter writer) {
@@ -72,15 +69,11 @@ public class CommunityDependency {
      * @return g:a:v; state; recommendation; availableVersions; usedForSwarm
      */
     private String toCsvLine() {
-        return String.format("%s:%s:%s; %s; %s; %s; %s",
-                getGroupId(), getArtifactId(), getVersion(), state, recommendation, availableVersions, usedForSwarm);
+        return String.format("%s:%s:%s; %s; %s; %s; %s", getGroupId(), getArtifactId(), getVersion(), state, recommendation,
+                availableVersions, usedForSwarm);
     }
 
     public org.jboss.da.model.rest.GAV toDaGav() {
-        return new org.jboss.da.model.rest.GAV(
-                getGroupId(),
-                getArtifactId(),
-                getVersion()
-        );
+        return new org.jboss.da.model.rest.GAV(getGroupId(), getArtifactId(), getVersion());
     }
 }

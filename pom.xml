@@ -40,6 +40,7 @@
     </modules>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <aesh.version>2.6</aesh.version>
@@ -299,6 +300,22 @@
                         </configuration>
                     </execution>
 
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.11.0</version>
+                <configuration>
+                    <configFile>../eclipse-codeStyle.xml</configFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>java-format</id>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

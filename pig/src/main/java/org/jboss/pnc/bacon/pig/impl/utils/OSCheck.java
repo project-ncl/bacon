@@ -33,8 +33,7 @@ public class OSCheck {
     protected static OSType detectedOS;
 
     /**
-     * detect the operating system from the os.name System property and cache
-     * the result
+     * detect the operating system from the os.name System property and cache the result
      *
      * @return the operating system detected
      */

@@ -6,16 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Paul Gallagher, pgallagh@redhat
- * <br>
- * Date: 12/10/2018
+ * @author Paul Gallagher, pgallagh@redhat <br>
+ *         Date: 12/10/2018
  */
-public class DependencyManagement{
+public class DependencyManagement {
     List<Dependency> dependencies = new ArrayList<>();
 
     @XmlElementWrapper
-    @XmlElement(name="dependency")
-    public List <Dependency> getDependencies() {return dependencies;}
+    @XmlElement(name = "dependency")
+    public List<Dependency> getDependencies() {
+        return dependencies;
+    }
 
-    public void addDependency(Dependency dependency) { dependencies.add(dependency);}
+    public void addDependency(Dependency dependency) {
+        dependencies.add(dependency);
+    }
 }

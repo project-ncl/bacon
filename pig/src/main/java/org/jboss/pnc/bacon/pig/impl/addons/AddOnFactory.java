@@ -28,18 +28,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/11/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/11/17
  */
 public class AddOnFactory {
 
-    private AddOnFactory() {}
+    private AddOnFactory() {
+    }
 
-    public static List<AddOn> listAddOns(Config config,
-                                         Map<String, PncBuild> builds,
-                                         String releasePath,
-                                         String extrasPath) {
+    public static List<AddOn> listAddOns(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
         ArrayList<AddOn> resultList = new ArrayList<>();
 
         resultList.add(new RuntimeDependenciesAnalyzer(config, builds, releasePath, extrasPath));

@@ -36,7 +36,7 @@ public class VersionInfo {
                 log.warn("Incomplete manifest file, missing revision property.");
             }
             version = attributes.getValue("Implementation-Version");
-            if (version== null) {
+            if (version == null) {
                 log.warn("Incomplete manifest file, missing version.");
             }
         } catch (IOException e) {

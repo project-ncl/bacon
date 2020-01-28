@@ -27,14 +27,9 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.GenericSettingClient;
 
-@GroupCommandDefinition(
-        name = "maintenance-mode",
-        description = "Maintenance mode related tasks",
-        groupCommands = {
-                MaintenanceModeCli.ActivateMaintenanceMode.class,
-                MaintenanceModeCli.DeactivateMaintenanceMode.class,
-                MaintenanceModeCli.StatusMaintenanceMode.class
-        })
+@GroupCommandDefinition(name = "maintenance-mode", description = "Maintenance mode related tasks", groupCommands = {
+        MaintenanceModeCli.ActivateMaintenanceMode.class, MaintenanceModeCli.DeactivateMaintenanceMode.class,
+        MaintenanceModeCli.StatusMaintenanceMode.class })
 public class MaintenanceModeCli extends AbstractCommand {
 
     private static GenericSettingClient clientCache;
@@ -68,14 +63,14 @@ public class MaintenanceModeCli extends AbstractCommand {
         }
     }
 
-
     @CommandDefinition(name = "deactivate", description = "Deactivate maintenance mode and accept new builds")
     public class DeactivateMaintenanceMode extends AbstractCommand {
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().deactivateMaintenanceMode();;
+                getClientAuthenticated().deactivateMaintenanceMode();
+                ;
 
             });
         }

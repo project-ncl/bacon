@@ -29,5 +29,5 @@ public interface ProductsApi {
 
     @GET
     @Path("/diff")
-    ProductDiff getProduct1(@QueryParam("leftProduct")    Long leftProduct, @QueryParam("rightProduct")    Long rightProduct);
+    ProductDiff getProduct1(@QueryParam("leftProduct") Long leftProduct, @QueryParam("rightProduct") Long rightProduct);
 }

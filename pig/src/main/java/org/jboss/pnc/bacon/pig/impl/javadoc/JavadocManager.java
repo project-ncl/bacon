@@ -53,9 +53,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/5/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/5/17
  */
 public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> {
     private static final Logger log = LoggerFactory.getLogger(JavadocManager.class);
@@ -76,10 +75,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private File archiveFile;
     private String scmRevision;
 
-    public JavadocManager(Config config,
-                          String releasePath,
-                          Deliverables deliverables,
-                          Map<String, PncBuild> builds) {
+    public JavadocManager(Config config, String releasePath, Deliverables deliverables, Map<String, PncBuild> builds) {
         super(config, releasePath, deliverables, builds);
         generationData = config.getFlow().getJavadocGeneration();
     }
@@ -120,13 +116,11 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private boolean checkRequired() {
         boolean ret = true;
-        if (generationData.getSourceArtifact() == null ||
-              generationData.getSourceArtifact().isEmpty()) {
+        if (generationData.getSourceArtifact() == null || generationData.getSourceArtifact().isEmpty()) {
             ret = false;
             log.error("Invalid Javadoc generation yaml - 'sourceArtifact' required");
         }
-        if (generationData.getGenerationProject() == null ||
-              generationData.getGenerationProject().isEmpty()) {
+        if (generationData.getGenerationProject() == null || generationData.getGenerationProject().isEmpty()) {
             log.error("Invalid Javadoc generation yaml - 'generationProject' required");
             ret = false;
         }
@@ -135,13 +129,9 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private void init() {
         temporaryDestination = FileUtils.mkTempDir("javadoc");
-        settingsXml = ResourceUtils
-              .extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-              .getAbsolutePath();
+        settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
 
-        localRepo = new File(temporaryDestination
-              + File.separator
-              + "localRepo");
+        localRepo = new File(temporaryDestination + File.separator + "localRepo");
         localRepo.mkdir();
         topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());
         archiveFile = getTargetZipPath().toFile();
@@ -149,23 +139,15 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         generationProject = generationData.getGenerationProject();
         sourceBuilds = generationData.getSourceBuilds();
         if (sourceBuilds == null || sourceBuilds.isEmpty()) {
-            sourceBuilds = builds.values()
-                  .stream()
-                  .map(PncBuild::getName)
-                  .collect(Collectors.toList());
+            sourceBuilds = builds.values().stream().map(PncBuild::getName).collect(Collectors.toList());
         }
         scmRevision = generationData.getScmRevision();
     }
 
     private Collection<GAV> findSourceBuilds() {
-        Collection<GAV> srcBuilds = builds.values()
-              .stream()
-              .filter(build -> sourceBuilds.contains(build.getName()))
-              .map(PncBuild::getBuiltArtifacts)
-              .flatMap(Collection::stream)
-              .map(ArtifactWrapper::toGAV)
-              .filter(g -> g.getClassifier() != null && g.getClassifier().equals("sources"))
-              .collect(Collectors.toList());
+        Collection<GAV> srcBuilds = builds.values().stream().filter(build -> sourceBuilds.contains(build.getName()))
+                .map(PncBuild::getBuiltArtifacts).flatMap(Collection::stream).map(ArtifactWrapper::toGAV)
+                .filter(g -> g.getClassifier() != null && g.getClassifier().equals("sources")).collect(Collectors.toList());
         return srcBuilds;
     }
 
@@ -173,10 +155,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         Git git = null;
         try {
             log.debug("Cloning " + generationProject + " into " + topLevelDirectory);
-            git = Git.cloneRepository()
-                  .setURI(generationProject)
-                  .setDirectory(topLevelDirectory)
-                  .call();
+            git = Git.cloneRepository().setURI(generationProject).setDirectory(topLevelDirectory).call();
             if (scmRevision != null && !scmRevision.isEmpty()) {
                 log.debug("Checkout version " + scmRevision);
                 git.checkout().setName(scmRevision).call();
@@ -195,7 +174,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             List<ArtifactWrapper> artifacts = build.getBuiltArtifacts();
             if (artifacts != null && !artifacts.isEmpty()) {
                 GAV tmp = artifacts.get(0).toGAV();
-                //Get the first artifact and create the dep on the pom
+                // Get the first artifact and create the dep on the pom
                 dep = new Dependency();
                 dep.setArtifactId(tmp.getArtifactId());
                 dep.setGroupId(tmp.getGroupId());
@@ -229,20 +208,15 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private boolean writeProject(Project project) {
         try {
-            File dir = new File(localRepo.getPath() +
-                  File.separator +
-                  project_gid.replace('.', File.separatorChar) +
-                  File.separator + project_aid +
-                  File.separator + project_version);
+            File dir = new File(localRepo.getPath() + File.separator + project_gid.replace('.', File.separatorChar)
+                    + File.separator + project_aid + File.separator + project_version);
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
                     log.error("Error while creating directory {}", dir);
                     return false;
                 }
             }
-            File file = new File(dir.getPath() +
-                  File.separator +
-                  project_aid + "-" + project_version + ".pom");
+            File file = new File(dir.getPath() + File.separator + project_aid + "-" + project_version + ".pom");
             JAXBContext jaxbContext = JAXBContext.newInstance(Project.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
@@ -258,16 +232,14 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     /**
-     * Use PME to insert the profile into the cloned project and run with any
-     * extra custom PME parameters in the yaml config
+     * Use PME to insert the profile into the cloned project and run with any extra custom PME parameters in the yaml config
      *
      * @return
      */
     private boolean runPME() {
         PrintStream stdout = System.out;
         PrintStream outStream = null;
-        String filePath = temporaryDestination.getPath() +
-              File.separator + "pme-execution.log";
+        String filePath = temporaryDestination.getPath() + File.separator + "pme-execution.log";
         try {
             outStream = new PrintStream(new File(filePath));
         } catch (Exception e) {
@@ -275,13 +247,10 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             return false;
         }
         log.debug("Running PME to insert the dependencies into the project (see log {})", outStream);
-        StringBuilder cmd = new StringBuilder("-f " + topLevelDirectory.getPath() + File.separator + "pom.xml" +
-              " -DprofileInjection=" + project_gid + ":" + project_aid + ":" + project_version +
-              " -s " + settingsXml +
-              " -Dmaven.repo.local=" + localRepo +
-              " -t");
-        if (generationData.getCustomPmeParameters() != null &&
-              !generationData.getCustomPmeParameters().isEmpty()) {
+        StringBuilder cmd = new StringBuilder("-f " + topLevelDirectory.getPath() + File.separator + "pom.xml"
+                + " -DprofileInjection=" + project_gid + ":" + project_aid + ":" + project_version + " -s " + settingsXml
+                + " -Dmaven.repo.local=" + localRepo + " -t");
+        if (generationData.getCustomPmeParameters() != null && !generationData.getCustomPmeParameters().isEmpty()) {
             for (String customPME : generationData.getCustomPmeParameters()) {
                 cmd.append(" " + customPME);
             }
@@ -297,8 +266,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     /**
-     * Create and deploy a profile with the dependencies from the GAV list
-     * add the importBom if specifies
+     * Create and deploy a profile with the dependencies from the GAV list add the importBom if specifies
      *
      * @param srcBuilds
      * @return
@@ -330,18 +298,15 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         String command = generationData.getBuildScript();
         Process process = null;
         if (command == null && command.isEmpty()) {
-            //Use a default mvn command on project
+            // Use a default mvn command on project
             command = "mvn package -B";
         }
-        //Add to the basic command the specific's needed to do the build locally
+        // Add to the basic command the specific's needed to do the build locally
         File mavenRun = new File(temporaryDestination.getPath() + File.separator + "mvn-execution.log");
-        command = command + " -Dmaven.repo.local=" + localRepo +
-              " -s " + settingsXml +
-              " -Ppfg-redhat-javadoc";
+        command = command + " -Dmaven.repo.local=" + localRepo + " -s " + settingsXml + " -Ppfg-redhat-javadoc";
         log.debug("Running Javadoc project (see log {}) with [{}]", mavenRun, command);
-        ProcessBuilder builder = new ProcessBuilder(command.split("\\s+"))
-              .directory(topLevelDirectory)
-              .redirectOutput(mavenRun);
+        ProcessBuilder builder = new ProcessBuilder(command.split("\\s+")).directory(topLevelDirectory)
+                .redirectOutput(mavenRun);
         try {
             process = builder.start();
             process.waitFor();
@@ -362,22 +327,20 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private void generate() {
         init();
         log.info("Generating Javadoc in {}", topLevelDirectory);
-        //Lookup the builds listed and that have a -sources artifact, if
-        //non provided then all builds in the build-config.yaml will be included
+        // Lookup the builds listed and that have a -sources artifact, if
+        // non provided then all builds in the build-config.yaml will be included
         Collection<GAV> srcBuilds = findSourceBuilds();
         if (srcBuilds != null) {
-            //Clone the generation project
+            // Clone the generation project
             if (cloneProject()) {
-                //Add the source dependencies from the list gathered above
+                // Add the source dependencies from the list gathered above
                 if (manipulateProject(srcBuilds)) {
-                    //Run the maven project to actually generate the javadoc zip
+                    // Run the maven project to actually generate the javadoc zip
                     if (executeMavenBuild()) {
-                        //Archive the generated source artifact to the release archive name
+                        // Archive the generated source artifact to the release archive name
                         Pattern pattern = Pattern.compile(generationData.getSourceArtifact(), Pattern.CASE_INSENSITIVE);
-                        List<File> files = (List<File>) org.apache.commons.io.FileUtils.listFiles(
-                              temporaryDestination,
-                              TrueFileFilter.INSTANCE,
-                              TrueFileFilter.INSTANCE);
+                        List<File> files = (List<File>) org.apache.commons.io.FileUtils.listFiles(temporaryDestination,
+                                TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
                         List<File> found = new ArrayList<>();
                         for (File file : files) {
                             if (pattern.matcher(file.getName()).matches()) {

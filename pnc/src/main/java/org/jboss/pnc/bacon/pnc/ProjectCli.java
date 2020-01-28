@@ -39,17 +39,9 @@ import org.jboss.pnc.dto.Project;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(
-        name = "project",
-        description = "Project",
-        groupCommands = {
-                ProjectCli.Create.class,
-                ProjectCli.Get.class,
-                ProjectCli.List.class,
-                ProjectCli.ListBuildConfigurations.class,
-                ProjectCli.ListBuilds.class,
-                ProjectCli.Update.class,
-        })
+@GroupCommandDefinition(name = "project", description = "Project", groupCommands = { ProjectCli.Create.class,
+        ProjectCli.Get.class, ProjectCli.List.class, ProjectCli.ListBuildConfigurations.class, ProjectCli.ListBuilds.class,
+        ProjectCli.Update.class, })
 public class ProjectCli extends AbstractCommand {
 
     private static ProjectClient clientCache;
@@ -85,12 +77,8 @@ public class ProjectCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Project project = Project.builder()
-                        .name(name)
-                        .description(description)
-                        .projectUrl(projectUrl)
-                        .issueTrackerUrl(issueTrackerUrl)
-                        .build();
+                Project project = Project.builder().name(name).description(description).projectUrl(projectUrl)
+                        .issueTrackerUrl(issueTrackerUrl).build();
 
                 System.out.println(getClientAuthenticated().createNew(project));
             });
@@ -154,21 +142,20 @@ public class ProjectCli extends AbstractCommand {
         @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project")
         private String issueTrackerUrl;
 
-
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
-                return super.executeHelper(commandInvocation, () -> {
-                    Project project = getClient().getSpecific(id);
-                    Project.Builder updated = project.toBuilder();
+            return super.executeHelper(commandInvocation, () -> {
+                Project project = getClient().getSpecific(id);
+                Project.Builder updated = project.toBuilder();
 
-                    ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
-                    ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
-                    ObjectHelper.executeIfNotNull(projectUrl, () -> updated.projectUrl(projectUrl));
-                    ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
+                ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
+                ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
+                ObjectHelper.executeIfNotNull(projectUrl, () -> updated.projectUrl(projectUrl));
+                ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
-                    getClientAuthenticated().update(id, updated.build());
-                });
+                getClientAuthenticated().update(id, updated.build());
+            });
         }
     }
 }

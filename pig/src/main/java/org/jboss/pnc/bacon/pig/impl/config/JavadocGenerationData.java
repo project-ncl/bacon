@@ -25,9 +25,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 5/25/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 5/25/18
  */
 @Data
 public class JavadocGenerationData extends GenerationData<JavadocGenerationStrategy> {

@@ -22,14 +22,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/7/17
  */
 public class CollectionUtils {
-//    public static List<String> skipFirstInList(List<String> output, Integer number) {
-//        return output.subList(number, output.size());
-//    }
+    // public static List<String> skipFirstInList(List<String> output, Integer number) {
+    // return output.subList(number, output.size());
+    // }
 
     public static <T> Set<T> subtractSet(Set<T> minuend, Set<T> subtrahend) {
         Set<T> resultSet = new HashSet<>(minuend);

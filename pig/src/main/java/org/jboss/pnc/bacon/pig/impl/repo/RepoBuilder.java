@@ -39,12 +39,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * TODO: replace with programmatic maven api to remove OSCommandExecutor?
- * TODO: CON: would mean that users have to stick to the same maven version
+ * TODO: replace with programmatic maven api to remove OSCommandExecutor? TODO: CON: would mean that users have to stick to the
+ * same maven version
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 7/25/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 7/25/17
  */
 public class RepoBuilder {
     private static final Logger log = LoggerFactory.getLogger(RepoBuilder.class);
@@ -56,56 +55,42 @@ public class RepoBuilder {
     String topLevelDirectoryName;
     Path configurationDirectory;
 
-
-    public RepoBuilder(Config config,
-                       Path configurationDirectory,
-                       boolean removeGeneratedM2Dups) {
+    public RepoBuilder(Config config, Path configurationDirectory, boolean removeGeneratedM2Dups) {
         this.config = config;
         topLevelDirectoryName = config.getTopLevelDirectoryPrefix() + "maven-repository";
         this.configurationDirectory = configurationDirectory;
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
     }
 
-
     public File build(File bomFile) {
         try {
             File projectLocation = createProject(bomFile);
-            String settingsXml = ResourceUtils
-                    .extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-                    .getAbsolutePath();
+            String settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
             File m2Repo = buildProjectWithOverriddenM2(projectLocation, settingsXml);
             RepositoryUtils.removeIrrelevantFiles(m2Repo);
             if (removeGeneratedM2Dups) {
-              RepositoryUtils.keepOnlyLatestRedHatArtifacts(m2Repo);
+                RepositoryUtils.keepOnlyLatestRedHatArtifacts(m2Repo);
             }
-          return m2Repo;
+            return m2Repo;
         } catch (IOException e) {
             throw new RuntimeException("Unable to build pom", e);
         }
     }
 
     private File buildProjectWithOverriddenM2(File projectLocation, String settingsXml) {
-        log.debug("Building the project in {} with overwritten local repository",
-                projectLocation.getAbsolutePath());
+        log.debug("Building the project in {} with overwritten local repository", projectLocation.getAbsolutePath());
         boolean noFailure = true;
         File repoWorkDir = org.jboss.pnc.bacon.pig.impl.utils.FileUtils.mkTempDir("repository");
         File repoParentDir = new File(repoWorkDir, topLevelDirectoryName);
         File repoDir = new File(repoParentDir, RepoDescriptor.MAVEN_REPOSITORY);
         repoDir.mkdirs();
         String baseCmd = "mvn clean package -B -s %s -Dmaven.repo.local=%s";
-        String command = String.format(
-                baseCmd,
-                settingsXml,
-                repoDir.getAbsolutePath()
-        );
+        String command = String.format(baseCmd, settingsXml, repoDir.getAbsolutePath());
         List<String> output = OSCommandExecutor.runCommandIn(command, projectLocation.toPath());
         if (output.stream().anyMatch(line -> line.contains("BUILD SUCCESS"))) {
             if (config.getFlow().getRepositoryGeneration().getIncludeJavadoc()) {
                 log.debug("Running project again to include Javadocs");
-                command = String.format(
-                        baseCmd + " -Dclassifier=javadoc",
-                        settingsXml,
-                        repoDir.getAbsolutePath());
+                command = String.format(baseCmd + " -Dclassifier=javadoc", settingsXml, repoDir.getAbsolutePath());
                 output = OSCommandExecutor.runCommandIn(command, projectLocation.toPath());
                 if (output.stream().noneMatch(line -> line.contains("BUILD SUCCESS"))) {
                     noFailure = false;
@@ -138,11 +123,8 @@ public class RepoBuilder {
 
         File projectDirectory = org.jboss.pnc.bacon.pig.impl.utils.FileUtils.mkTempDir("helper-project");
         String pomContent = ResourceUtils.getOverridableResource(POM_TEMPLATE_LOCATION, configurationDirectory)
-                .replace("<bom-contents/>", dependencies)
-                .replace("<bom-group-id/>", bomGroupId)
-                .replace("<bom-artifact-id/>", artifactId)
-                .replace("<bom-version/>", bomVersion);
-
+                .replace("<bom-contents/>", dependencies).replace("<bom-group-id/>", bomGroupId)
+                .replace("<bom-artifact-id/>", artifactId).replace("<bom-version/>", bomVersion);
 
         File pom = new File(projectDirectory, "pom.xml");
         FileUtils.write(pom, pomContent, ENCODING);
@@ -153,14 +135,10 @@ public class RepoBuilder {
     static String extractRedhatDependencies(File bomFile) {
         Map<String, String> properties = XmlUtils.getProperties(bomFile);
 
-        List<Node> dependencyNodes = XmlUtils.
-                listNodes(bomFile, "/project/dependencyManagement/dependencies/dependency");
+        List<Node> dependencyNodes = XmlUtils.listNodes(bomFile, "/project/dependencyManagement/dependencies/dependency");
 
-        return dependencyNodes.stream()
-                .map(Element.class::cast)
-                .map(element -> GAV.fromXml(element, properties))
-                .filter(gav -> gav.getVersion().contains("redhat"))
-                .map(GAV::asBomXmlDependency)
+        return dependencyNodes.stream().map(Element.class::cast).map(element -> GAV.fromXml(element, properties))
+                .filter(gav -> gav.getVersion().contains("redhat")).map(GAV::asBomXmlDependency)
                 .collect(Collectors.joining("\n"));
     }
 }

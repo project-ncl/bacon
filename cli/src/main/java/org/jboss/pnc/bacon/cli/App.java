@@ -34,46 +34,36 @@ import org.jboss.pnc.bacon.pnc.Pnc;
 import java.io.IOException;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/13/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/13/18
  */
 
-
 @Slf4j
-@GroupCommandDefinition(
-        name = "bacon.jar",
-        description = "Bacon CLI",
-        groupCommands = {Pnc.class, Da.class, Pig.class})
+@GroupCommandDefinition(name = "bacon.jar", description = "Bacon CLI", groupCommands = { Pnc.class, Da.class, Pig.class })
 public class App extends AbstractCommand {
 
     public void run(String[] args) throws Exception {
 
-        CommandRegistry registry = AeshCommandRegistryBuilder.builder()
-                .command(this.getClass())
-                .create();
+        CommandRegistry registry = AeshCommandRegistryBuilder.builder().command(this.getClass()).create();
 
-       CommandRuntime runtime = AeshCommandRuntimeBuilder
-                .builder()
-                .commandRegistry(registry)
-                .build();
+        CommandRuntime runtime = AeshCommandRuntimeBuilder.builder().commandRegistry(registry).build();
 
-       try {
-           runtime.executeCommand(buildCLIOutput(args));
-       } catch (OptionParserException | RequiredOptionException ex) {
-           log.error("Missing argument/option: {}", ex.getMessage());
-           System.exit(1);
-       } catch (RuntimeException ex) {
-           log.error(ex.getMessage());
+        try {
+            runtime.executeCommand(buildCLIOutput(args));
+        } catch (OptionParserException | RequiredOptionException ex) {
+            log.error("Missing argument/option: {}", ex.getMessage());
+            System.exit(1);
+        } catch (RuntimeException ex) {
+            log.error(ex.getMessage());
 
-           // if stacktrace not thrown from aesh
-           if (!ex.getCause().getClass().getCanonicalName().contains("aesh")) {
-               log.error("Stacktrace", ex);
-           }
+            // if stacktrace not thrown from aesh
+            if (!ex.getCause().getClass().getCanonicalName().contains("aesh")) {
+                log.error("Stacktrace", ex);
+            }
 
-           // signal that an error has occurred
-           System.exit(1);
-       }
+            // signal that an error has occurred
+            System.exit(1);
+        }
     }
 
     private static String buildCLIOutput(String[] args) {
@@ -110,9 +100,9 @@ public class App extends AbstractCommand {
         try {
             Config.configure(configLocation);
         } catch (IOException e) {
-            System.err.println("Configuration file not found. " +
-                    "Please create a config file and either name it 'config.yaml' and put it in the working directory" +
-                    " or specify it with -Dconfig");
+            System.err.println("Configuration file not found. "
+                    + "Please create a config file and either name it 'config.yaml' and put it in the working directory"
+                    + " or specify it with -Dconfig");
             System.exit(1);
         }
     }

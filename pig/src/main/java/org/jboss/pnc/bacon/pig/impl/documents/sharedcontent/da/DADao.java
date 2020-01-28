@@ -35,9 +35,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/2/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/2/17
  */
 public class DADao {
     private static final Logger log = LoggerFactory.getLogger(DADao.class);
@@ -46,22 +45,14 @@ public class DADao {
     private final ListingsApi listingsClient;
 
     public DADao(DaConfig daConfig) {
-        reportsClient = new ResteasyClientBuilder()
-                .build()
-                .target(daConfig.getUrl())
-                .proxy(ReportsApi.class);
+        reportsClient = new ResteasyClientBuilder().build().target(daConfig.getUrl()).proxy(ReportsApi.class);
 
-        listingsClient = new ResteasyClientBuilder().build()
-                .target(daConfig.getUrl())
-                .proxy(ListingsApi.class);
+        listingsClient = new ResteasyClientBuilder().build().target(daConfig.getUrl()).proxy(ListingsApi.class);
     }
-
 
     public void fillDaData(CommunityDependency dependency) {
         log.debug("Starting analysis for: {}", dependency);
-        LookupGAVsRequest lookupRequest = new LookupGAVsRequest(
-                Collections.singletonList(dependency.toDaGav())
-        );
+        LookupGAVsRequest lookupRequest = new LookupGAVsRequest(Collections.singletonList(dependency.toDaGav()));
         List<LookupReportDto> lookupReports = reportsClient.lookupGav(lookupRequest);
         LookupReportDto lookupReport = getSingle(lookupReports);
         String bestMatchVersion = lookupReport.getBestMatchVersion();
@@ -91,9 +82,7 @@ public class DADao {
     public List<DAListArtifact> getWhitelist() {
         Collection<RestProductGAV> allWhiteArtifacts = listingsClient.getAllWhiteArtifacts();
 
-        return allWhiteArtifacts.stream()
-                .map(DAListArtifact::new)
-                .collect(Collectors.toList());
+        return allWhiteArtifacts.stream().map(DAListArtifact::new).collect(Collectors.toList());
     }
 
     private static DADao instance;

@@ -17,7 +17,6 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
@@ -33,8 +32,8 @@ import org.jboss.pnc.client.ClientException;
  *
  * Provides a default implementation of 'execute' to print the help usage if the '-h' option is used.
  *
- * Also provides 'executeHelper', which accepts a lambda to print the help usate if the '-h' option is provided, or
- * run the lambda otherwise
+ * Also provides 'executeHelper', which accepts a lambda to print the help usate if the '-h' option is provided, or run the
+ * lambda otherwise
  */
 @Slf4j
 public class AbstractCommand implements Command {
@@ -74,15 +73,14 @@ public class AbstractCommand implements Command {
         return activated;
     }
 
-
     /**
      * Print help method if a group command is invoked
+     * 
      * @param commandInvocation
      * @return
      */
     private boolean printHelpIfNoFinalCommandSelected(CommandInvocation commandInvocation) {
         GroupCommandDefinition groupCommandDefinition = this.getClass().getAnnotation(GroupCommandDefinition.class);
-
 
         if (groupCommandDefinition == null) {
             return false;
@@ -95,8 +93,8 @@ public class AbstractCommand implements Command {
     }
 
     /**
-     * Default implementation of execute method. For now it just tries to figure out if the user used the '-h' option
-     * and print the help usage if yes.
+     * Default implementation of execute method. For now it just tries to figure out if the user used the '-h' option and print
+     * the help usage if yes.
      *
      * If the user used the '-h' option, it'll return CommandResult.SUCCESS, else CommandResult.FAILURE
      *
@@ -111,8 +109,8 @@ public class AbstractCommand implements Command {
     }
 
     /**
-     * executePrivate is present so that executeHelper can reference to this implementation instead of the
-     * overridden execute method in a sub-class
+     * executePrivate is present so that executeHelper can reference to this implementation instead of the overridden execute
+     * method in a sub-class
      *
      * @param commandInvocation
      * @return
@@ -154,8 +152,8 @@ public class AbstractCommand implements Command {
     }
 
     /**
-     * Override this method if you'd like to provide examples for a command
-     * The text will be printed after the help text is printed.
+     * Override this method if you'd like to provide examples for a command The text will be printed after the help text is
+     * printed.
      *
      * Layout is:
      *
@@ -165,6 +163,7 @@ public class AbstractCommand implements Command {
      * Example:
      *
      * <exampleText stuff>
+     * 
      * @return
      */
     public String exampleText() {

@@ -4,12 +4,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * @author Paul Gallagher, pgallagh@redhat
- * <br>
- * Date: 12/10/2018
+ * @author Paul Gallagher, pgallagh@redhat <br>
+ *         Date: 12/10/2018
  */
 @XmlRootElement
-public class Project{
+public class Project {
     @XmlElement
     String modelVersion = "4.0.0";
     @XmlElement
@@ -22,19 +21,34 @@ public class Project{
     @XmlElement
     Profiles profiles = new Profiles();
 
-    public String getGroupId() {return groupId;}
+    public String getGroupId() {
+        return groupId;
+    }
+
     @XmlElement
     public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 
-    public String getArtifactId() {return artifactId;}
-    @XmlElement
-    public void setArtifactId(String artifactId) {this.artifactId = artifactId;}
+    public String getArtifactId() {
+        return artifactId;
+    }
 
-    public String getVersion() {return version;}
     @XmlElement
-    public void setVersion(String version) {this.version = version;}
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
+    }
 
-    public Profiles getProfiles() {return profiles;}
+    public String getVersion() {
+        return version;
+    }
+
+    @XmlElement
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public Profiles getProfiles() {
+        return profiles;
+    }
 }

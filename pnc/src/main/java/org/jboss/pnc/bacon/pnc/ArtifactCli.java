@@ -15,13 +15,8 @@ import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
 
 @Slf4j
-@GroupCommandDefinition(
-        name = "artifact",
-        description = "Artifact",
-        groupCommands = {
-                ArtifactCli.Get.class,
-                ArtifactCli.ListFromHash.class
-        })
+@GroupCommandDefinition(name = "artifact", description = "Artifact", groupCommands = { ArtifactCli.Get.class,
+        ArtifactCli.ListFromHash.class })
 public class ArtifactCli extends AbstractCommand {
 
     private static ArtifactClient clientCache;
@@ -41,7 +36,6 @@ public class ArtifactCli extends AbstractCommand {
             return getClient().getSpecific(id);
         }
     }
-
 
     @CommandDefinition(name = "list-from-hash", description = "List artifacts based on hash")
     public class ListFromHash extends AbstractCommand {

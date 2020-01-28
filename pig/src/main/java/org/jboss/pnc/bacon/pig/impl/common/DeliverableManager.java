@@ -32,25 +32,25 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * A superclass for deliverable generation.
- * Out of the box it supports downloading of artifacts and repackaging them to deliverables.
- * A concrete implementation can add different methods of generating the deliverables.
+ * A superclass for deliverable generation. Out of the box it supports downloading of artifacts and repackaging them to
+ * deliverables. A concrete implementation can add different methods of generating the deliverables.
  * <p>
  * The execution is controlled by a Groovy snippet. The manager is injected to the script under 'gen'.
  * </p>
  * E.g. to download an artifact matching *license.zip from a build named WildFly-Swarm, one would use:
+ * 
  * <pre>
  *     gen.downloadFrom 'WildFly-Swarm' matching '.*license\\.zip'
  * </pre>
  * <p>
  * If another method, <code>generate()</code> is added to a custom manager, it can be used as follows:
+ * 
  * <pre>
- *     gen.generate()
+ * gen.generate()
  * </pre>
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/5/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/5/17
  */
 public abstract class DeliverableManager<MetadataType extends GenerationData<?>, ResultType> {
 
@@ -62,10 +62,7 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
     protected final Map<String, PncBuild> builds;
     protected final File workDir;
 
-    protected DeliverableManager(Config config,
-                              String releasePath,
-                              Deliverables deliverables,
-                              Map<String, PncBuild> builds) {
+    protected DeliverableManager(Config config, String releasePath, Deliverables deliverables, Map<String, PncBuild> builds) {
         this.config = config;
         this.releasePath = releasePath;
         this.deliverables = deliverables;
@@ -113,7 +110,8 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
     protected File getTopLevelDirectory(File repoDirectory) {
         File[] files = repoDirectory.listFiles();
         if (files.length > 1) {
-            throw new RuntimeException("Expected one top level directory in the repository zip, found: " + Arrays.toString(repoDirectory.list()));
+            throw new RuntimeException(
+                    "Expected one top level directory in the repository zip, found: " + Arrays.toString(repoDirectory.list()));
         }
         return files[0];
     }

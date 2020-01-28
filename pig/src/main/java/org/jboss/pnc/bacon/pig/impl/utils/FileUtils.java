@@ -65,9 +65,8 @@ import java.util.stream.Stream;
 import static java.nio.file.Files.createTempDirectory;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 7/28/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 7/28/17
  */
 public class FileUtils {
     private FileUtils() {
@@ -96,7 +95,8 @@ public class FileUtils {
     }
 
     public static String getCompressorType(final File file) {
-        try (final InputStream is = Files.newInputStream(file.toPath()); final BufferedInputStream bis = new BufferedInputStream(is)) {
+        try (final InputStream is = Files.newInputStream(file.toPath());
+                final BufferedInputStream bis = new BufferedInputStream(is)) {
             return CompressorStreamFactory.detect(bis);
         } catch (IOException | CompressorException e) {
             return null;
@@ -127,8 +127,11 @@ public class FileUtils {
         final List<String> entries = new ArrayList<>();
 
         try (final InputStream is = Files.newInputStream(input.toPath());
-             final InputStream cin = compressorType != null ? new CompressorStreamFactory().createCompressorInputStream(compressorType, is) : is;
-             final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, cin)) {
+                final InputStream cin = compressorType != null
+                        ? new CompressorStreamFactory().createCompressorInputStream(compressorType, is)
+                        : is;
+                final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR,
+                        cin)) {
             final Path dir = directory.toPath();
             final Path canonicalDir = dir.toAbsolutePath().normalize();
 
@@ -191,7 +194,12 @@ public class FileUtils {
 
         List<String> entries = new ArrayList<>();
 
-        try (final OutputStream os = Files.newOutputStream(output.toPath()); OutputStream cout = compressorType != null ? new CompressorStreamFactory().createCompressorOutputStream(compressorType, os) : os; final ArchiveOutputStream out = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.TAR, cout)) {
+        try (final OutputStream os = Files.newOutputStream(output.toPath());
+                OutputStream cout = compressorType != null
+                        ? new CompressorStreamFactory().createCompressorOutputStream(compressorType, os)
+                        : os;
+                final ArchiveOutputStream out = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.TAR,
+                        cout)) {
             try (Stream<Path> stream = Files.walk(directory)) {
                 Iterator<Path> iterator = stream.iterator();
 
@@ -202,7 +210,8 @@ public class FileUtils {
                         continue;
                     }
 
-                    final String entryName = FilenameUtils.normalize(workingDirectory.toPath().relativize(path).toString(), true);
+                    final String entryName = FilenameUtils.normalize(workingDirectory.toPath().relativize(path).toString(),
+                            true);
 
                     log.debug("tar: {}", entryName);
 
@@ -222,12 +231,13 @@ public class FileUtils {
                     }
 
                     if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-                        final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, new LinkOption[]{});
+                        final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, new LinkOption[] {});
                         final int mode = PermissionUtils.modeFromPermissions(perms, FileType.of(path));
 
                         entry.setMode(mode);
                     } else {
-                        log.debug("Cannot set mode since {} filesystem does not support POSIX", Files.getFileStore(path).type());
+                        log.debug("Cannot set mode since {} filesystem does not support POSIX",
+                                Files.getFileStore(path).type());
                     }
 
                     out.putArchiveEntry(entry);
@@ -255,7 +265,9 @@ public class FileUtils {
 
         final List<String> entries = new ArrayList<>();
 
-        try (final InputStream is = Files.newInputStream(input.toPath()); final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
+        try (final InputStream is = Files.newInputStream(input.toPath());
+                final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.ZIP,
+                        is)) {
             final Path dir = directory.toPath();
             final Path canonicalDir = dir.toAbsolutePath().normalize();
 
@@ -281,7 +293,9 @@ public class FileUtils {
                 if (entry.isDirectory()) {
                     Files.createDirectories(path);
                 } else if (entry.isUnixSymlink()) {
-                    final ZipEncoding entryEncoding = entry.getGeneralPurposeBit().usesUTF8ForNames() ? ZipEncodingHelper.getZipEncoding("UTF8") : ZipEncodingHelper.getZipEncoding(Charset.defaultCharset().name());
+                    final ZipEncoding entryEncoding = entry.getGeneralPurposeBit().usesUTF8ForNames()
+                            ? ZipEncodingHelper.getZipEncoding("UTF8")
+                            : ZipEncodingHelper.getZipEncoding(Charset.defaultCharset().name());
                     final String targetName = entryEncoding.decode(IOUtils.toByteArray(in));
                     final Path target = FileSystems.getDefault().getPath(targetName);
 
@@ -306,7 +320,8 @@ public class FileUtils {
 
                         Files.setPosixFilePermissions(path, perms);
                     } else {
-                        log.debug("Cannot set mode: {} since {} filesystem does not support POSIX", String.format("%o", mode), Files.getFileStore(path).type());
+                        log.debug("Cannot set mode: {} since {} filesystem does not support POSIX", String.format("%o", mode),
+                                Files.getFileStore(path).type());
                     }
                 }
             }
@@ -325,18 +340,20 @@ public class FileUtils {
         List<String> entries = new ArrayList<>();
 
         try (final OutputStream out = Files.newOutputStream(output.toPath());
-             final ArchiveOutputStream os = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, out)) {
+                final ArchiveOutputStream os = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP,
+                        out)) {
             try (Stream<Path> stream = Files.walk(directory)) {
                 Iterator<Path> iterator = stream.iterator();
 
-                while (iterator.hasNext()) {    // TODO get rid of iterator
+                while (iterator.hasNext()) { // TODO get rid of iterator
                     final Path path = iterator.next();
 
                     if (path.equals(directory)) {
                         continue;
                     }
 
-                    final String entryName = FilenameUtils.normalize(workingDirectory.toPath().relativize(path).toString(), true);
+                    final String entryName = FilenameUtils.normalize(workingDirectory.toPath().relativize(path).toString(),
+                            true);
 
                     log.debug("zip: {}", entryName);
 
@@ -345,12 +362,13 @@ public class FileUtils {
                     final ZipArchiveEntry entry = new ZipArchiveEntry(path.toFile(), entryName);
 
                     if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-                        final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, new LinkOption[]{});
+                        final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, new LinkOption[] {});
                         final int mode = PermissionUtils.modeFromPermissions(perms, FileType.of(path));
 
                         entry.setUnixMode(mode);
                     } else {
-                        log.debug("Cannot set mode since {} filesystem does not support POSIX", Files.getFileStore(path).type());
+                        log.debug("Cannot set mode since {} filesystem does not support POSIX",
+                                Files.getFileStore(path).type());
                     }
 
                     os.putArchiveEntry(entry);

@@ -33,9 +33,8 @@ import java.util.Properties;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 7/14/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 7/14/17
  */
 public class ResourceUtils {
 
@@ -62,42 +61,37 @@ public class ResourceUtils {
         }
     }
 
-    public static void copyResourceWithFiltering(String sourceFileName,
-                                                 String targetFileName,
-                                                 File targetDirectory,
-                                                 Properties properties,
-                                                 Path configurationDirectory) {
+    public static void copyResourceWithFiltering(String sourceFileName, String targetFileName, File targetDirectory,
+            Properties properties, Path configurationDirectory) {
         String text = getOverridableResource(sourceFileName, configurationDirectory);
         text = PropertyUtils.replaceProperties(text, properties);
         File targetFile = new File(targetDirectory, targetFileName);
         try {
             writeStringToFile(targetFile, text, ENCODING);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to copy resource " + sourceFileName +
-                    " to " + targetDirectory.getAbsolutePath());
+            throw new RuntimeException(
+                    "Unable to copy resource " + sourceFileName + " to " + targetDirectory.getAbsolutePath());
         }
     }
 
-    public static void copyOverridableResource(String sourceFileName,
-                                               String targetFileName,
-                                               File targetDirectory,
-                                               Path configurationDirectory) {
+    public static void copyOverridableResource(String sourceFileName, String targetFileName, File targetDirectory,
+            Path configurationDirectory) {
         String text = getOverridableResource(sourceFileName, configurationDirectory);
         File targetFile = new File(targetDirectory, targetFileName);
         try {
             writeStringToFile(targetFile, text, ENCODING);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to copy resource " + sourceFileName +
-                    " to " + targetDirectory.getAbsolutePath());
+            throw new RuntimeException(
+                    "Unable to copy resource " + sourceFileName + " to " + targetDirectory.getAbsolutePath());
         }
     }
 
     /**
-     * Get file contents either from configurationDirectory or resources.
-     * If a file called `fileName` is defined in the `configurationDirectory`, than its contents will be returned,
-     * otherwise a resource from jar file with the same name will be used as a source
+     * Get file contents either from configurationDirectory or resources. If a file called `fileName` is defined in the
+     * `configurationDirectory`, than its contents will be returned, otherwise a resource from jar file with the same name will
+     * be used as a source
      *
-     * @param fileName               name of the file to read
+     * @param fileName name of the file to read
      * @param configurationDirectory directory to check for the files
      * @return file content read to string
      */

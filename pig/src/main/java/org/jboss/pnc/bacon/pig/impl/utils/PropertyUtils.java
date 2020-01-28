@@ -22,9 +22,8 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 9/29/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 9/29/17
  */
 public class PropertyUtils {
     public static String replaceProperties(String text, Properties properties) {

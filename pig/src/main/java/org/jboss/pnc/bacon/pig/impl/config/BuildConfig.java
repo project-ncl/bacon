@@ -44,9 +44,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/28/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/28/17
  */
 @Data
 public class BuildConfig {
@@ -72,7 +71,7 @@ public class BuildConfig {
                 f.setAccessible(true);
                 if (Collection.class.isAssignableFrom(f.getType())) {
                     Collection<?> defaultValues = (Collection<?>) f.get(defaults);
-                    //noinspection unchecked
+                    // noinspection unchecked
                     ((Collection) f.get(this)).addAll(defaultValues);
                 } else {
                     if (f.get(this) == null) {
@@ -86,8 +85,7 @@ public class BuildConfig {
     }
 
     public static Map<String, BuildConfig> mapByName(List<BuildConfig> newConfigs) {
-        return newConfigs.stream()
-                .collect(toMap(BuildConfig::getName, identity()));
+        return newConfigs.stream().collect(toMap(BuildConfig::getName, identity()));
     }
 
     public void sanitizebuildScript() {
@@ -96,33 +94,28 @@ public class BuildConfig {
 
     @JsonIgnore
     public boolean isTheSameAs(BuildConfiguration old) {
-        return old != null
-                && StringUtils.equals(name, old.getName())
-                && StringUtils.equals(project, old.getProject().getName())
+        return old != null && StringUtils.equals(name, old.getName()) && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
-                && StringUtils.equals(scmRevision, old.getScmRevision())
-                && environmentId.equals(old.getEnvironment().getId())
-                && customPmeParameters.equals(getPmeParameters(old))
-                && urlsEqual(old.getScmRepository())
+                && StringUtils.equals(scmRevision, old.getScmRevision()) && environmentId.equals(old.getEnvironment().getId())
+                && customPmeParameters.equals(getPmeParameters(old)) && urlsEqual(old.getScmRepository())
                 && !isBranchModified(old);
     }
 
     private Set<String> getPmeParameters(BuildConfiguration old) {
         String parametersAsString = old.getParameters().get("CUSTOM_PME_PARAMETERS");
-        return Arrays.stream(parametersAsString.split(","))
-              .collect(Collectors.toSet());
+        return Arrays.stream(parametersAsString.split(",")).collect(Collectors.toSet());
     }
 
     private synchronized boolean isBranchModified(BuildConfiguration oldVersion) {
         if (branchModified == null) {
-            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(), oldVersion.getScmRepository().getInternalUrl(), getScmRevision());
+            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(),
+                    oldVersion.getScmRepository().getInternalUrl(), getScmRevision());
         }
         return branchModified;
     }
 
     private boolean urlsEqual(SCMRepository repo) {
-        return StringUtils.equals(externalScmUrl, repo.getExternalUrl()) ||
-                StringUtils.equals(scmUrl, repo.getInternalUrl());
+        return StringUtils.equals(externalScmUrl, repo.getExternalUrl()) || StringUtils.equals(scmUrl, repo.getInternalUrl());
     }
 
     @JsonIgnore
@@ -140,7 +133,7 @@ public class BuildConfig {
         return result;
     }
 
-    //Work around for NCL-3670
+    // Work around for NCL-3670
     public String getShortScmURIPath() {
         String scmUrl = getScmUrl() != null ? getScmUrl() : getExternalScmUrl();
         try {
@@ -187,8 +180,8 @@ public class BuildConfig {
     }
 
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
-       String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
-       if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
+        String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
+        if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
             log.error("Scm url for {} changed from {} to {}. Please update it via UI", name, oldInternalUrl, scmUrl);
             return false;
         }

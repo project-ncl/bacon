@@ -34,14 +34,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
 public class SharedContentReportGenerator {
     private static final Logger log = LoggerFactory.getLogger(SharedContentReportGenerator.class);
 
-    private static final String[] IGNORED = {"md5", "sha1", "-sources", "example-settings.xml", "README"};
+    private static final String[] IGNORED = { "md5", "sha1", "-sources", "example-settings.xml", "README" };
 
     private final Collection<File> repositoryFiles;
     private final DASearcher daSearcher = new DASearcher();
@@ -49,16 +48,13 @@ public class SharedContentReportGenerator {
     private Integer limit;
     private AtomicInteger analyzed = new AtomicInteger(0);
 
-    public SharedContentReportGenerator(Set<GAV> projectsArtifacts,
-                                        Collection<File> repositoryFiles,
-                                        Integer limit) {
+    public SharedContentReportGenerator(Set<GAV> projectsArtifacts, Collection<File> repositoryFiles, Integer limit) {
         this.repositoryFiles = repositoryFiles;
         this.limit = limit;
         this.projectsArtifacts = projectsArtifacts;
     }
 
-    public SharedContentReportGenerator(Collection<File> repositoryFiles,
-                                        Set<GAV> projectsArtifacts) {
+    public SharedContentReportGenerator(Collection<File> repositoryFiles, Set<GAV> projectsArtifacts) {
         this(projectsArtifacts, repositoryFiles, null);
     }
 
@@ -70,23 +66,19 @@ public class SharedContentReportGenerator {
     }
 
     protected StringBuilder generateReportString() {
-        StringBuilder output = new StringBuilder("Artifact;Product name; Product version; " +
-                "Released?; Build id; Build Author; Candidate tags; All tags\n");
+        StringBuilder output = new StringBuilder(
+                "Artifact;Product name; Product version; " + "Released?; Build id; Build Author; Candidate tags; All tags\n");
         List<SharedContentReportRow> rows = repositoryFiles.stream()
                 .filter(f -> Stream.of(IGNORED).noneMatch(f.getAbsolutePath()::contains))
                 .map(f -> new SharedContentReportRow(f, RepoDescriptor.MAVEN_REPOSITORY))
-                .filter(r -> !projectsArtifacts.contains(r.getGav()))
-                .collect(Collectors.toList());
+                .filter(r -> !projectsArtifacts.contains(r.getGav())).collect(Collectors.toList());
         if (limit == null) {
             limit = rows.size();
         }
-        rows = rows
-                .subList(0, limit);
+        rows = rows.subList(0, limit);
         log.info("Gathering data for shared content report");
         rows.parallelStream().forEach(this::fill);
-        rows.stream()
-                .sorted(SharedContentReportRow::byProductAndGav)
-                .forEach(r -> r.printTo(output));
+        rows.stream().sorted(SharedContentReportRow::byProductAndGav).forEach(r -> r.printTo(output));
         return output;
     }
 
@@ -100,8 +92,9 @@ public class SharedContentReportGenerator {
                     BrewSearcher.fillBrewData(row);
                     break;
                 } catch (Exception e) {
-                    log.debug("Failed to fill Brew data to shared content report row, attempt " + (i + 1)
-                            + " out of " + attempts, e);
+                    log.debug(
+                            "Failed to fill Brew data to shared content report row, attempt " + (i + 1) + " out of " + attempts,
+                            e);
                 }
             }
         }

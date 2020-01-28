@@ -31,8 +31,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/5/17
  */
 public class FileGenerator {
@@ -65,9 +64,7 @@ public class FileGenerator {
         return configuration;
     }
 
-    public <DataRootType> void generateFileFromResource(DataRootType data,
-                                                        String resourceName,
-                                                        File outputFile) {
+    public <DataRootType> void generateFileFromResource(DataRootType data, String resourceName, File outputFile) {
         generateToFile(data, outputFile, resourceName);
     }
 
@@ -86,9 +83,7 @@ public class FileGenerator {
 
     private <DataRootType> void generateToFile(DataRootType data, File output, String templateName) {
         try (FileWriter writer = new FileWriter(output)) {
-            Environment env =
-                    getTemplate(templateName)
-                            .createProcessingEnvironment(data, writer);
+            Environment env = getTemplate(templateName).createProcessingEnvironment(data, writer);
             env.setOutputEncoding("UTF-8");
             env.setNumberFormat("computer");
             env.process();
@@ -99,10 +94,8 @@ public class FileGenerator {
 
     private freemarker.template.Template getTemplate(String templateName) {
         try {
-            if (configurationDir
-                    .map(d -> d.resolve(templateName).toFile().exists())
-                    .orElse(false)) {
-                //noinspection OptionalGetWithoutIsPresent
+            if (configurationDir.map(d -> d.resolve(templateName).toFile().exists()).orElse(false)) {
+                // noinspection OptionalGetWithoutIsPresent
                 return fileLoadingConfiguration.get().getTemplate(templateName);
             } else {
                 return resourceLoadingConfiguration.getTemplate(templateName);

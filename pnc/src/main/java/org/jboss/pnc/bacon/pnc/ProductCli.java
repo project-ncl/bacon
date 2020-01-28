@@ -37,15 +37,8 @@ import org.jboss.pnc.dto.Product;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(
-        name = "product",
-        description = "Product",
-        groupCommands = {
-                ProductCli.Create.class,
-                ProductCli.Get.class,
-                ProductCli.List.class,
-                ProductCli.Update.class
-        })
+@GroupCommandDefinition(name = "product", description = "Product", groupCommands = { ProductCli.Create.class,
+        ProductCli.Get.class, ProductCli.List.class, ProductCli.Update.class })
 public class ProductCli extends AbstractCommand {
 
     private static ProductClient clientCache;
@@ -67,7 +60,6 @@ public class ProductCli extends AbstractCommand {
     @CommandDefinition(name = "create", description = "Create a product")
     public class Create extends AbstractCommand {
 
-
         @Argument(required = true, description = "Name of product")
         private String name;
 
@@ -77,14 +69,10 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(name = "product-code",
-                description = "The official Product code to be used in URLs and filenames etc e.g. eap",
-                defaultValue = "")
+        @Option(name = "product-code", description = "The official Product code to be used in URLs and filenames etc e.g. eap", defaultValue = "")
         private String productCode;
 
-        @Option(name = "system-code",
-                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap",
-                defaultValue = "")
+        @Option(name = "system-code", description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap", defaultValue = "")
         private String systemCode;
 
         @Override
@@ -92,13 +80,8 @@ public class ProductCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Product product = Product.builder()
-                        .name(name)
-                        .abbreviation(abbreviation)
-                        .description(description)
-                        .productCode(productCode)
-                        .pgmSystemName(systemCode)
-                        .build();
+                Product product = Product.builder().name(name).abbreviation(abbreviation).description(description)
+                        .productCode(productCode).pgmSystemName(systemCode).build();
 
                 System.out.println(getClientAuthenticated().createNew(product));
             });
@@ -139,12 +122,10 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(name = "product-code",
-                description = "The official Product code to be used in URLs and filenames etc e.g. eap")
+        @Option(name = "product-code", description = "The official Product code to be used in URLs and filenames etc e.g. eap")
         private String productCode;
 
-        @Option(name = "system-code",
-                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap")
+        @Option(name = "system-code", description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap")
         private String systemCode;
 
         @Override

@@ -57,9 +57,8 @@ import java.util.stream.Collectors;
  *
  * TODO: incremental suffix!
  *
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/1/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/1/17
  */
 public class PigFacade {
 
@@ -78,9 +77,7 @@ public class PigFacade {
         return pncImporter.readCurrentPncEntities();
     }
 
-    public static Map<String, PncBuild> build(boolean tempBuild,
-                                              boolean tempBuildTS,
-                                              RebuildMode rebuildMode) {
+    public static Map<String, PncBuild> build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -90,26 +87,13 @@ public class PigFacade {
             log.info("Temporary build");
         }
 
-        new PncBuilder().buildAndWait(importResult.getBuildGroup(),
-                tempBuild,
-                tempBuildTS,
-                rebuildMode);
+        new PncBuilder().buildAndWait(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode);
         return getBuilds(importResult);
     }
 
-    public static String run(
-            boolean skipRepo,
-            boolean skipPncUpdate,
-            boolean skipBuilds,
-            boolean skipSources,
-            boolean skipJavadoc,
-            boolean skipLicenses,
-            boolean skipSharedContent,
-            boolean removeGeneratedM2Dups,
-            String repoZipPath,
-            boolean tempBuild,
-            boolean tempBuildTS,
-            RebuildMode rebuildMode) {
+    public static String run(boolean skipRepo, boolean skipPncUpdate, boolean skipBuilds, boolean skipSources,
+            boolean skipJavadoc, boolean skipLicenses, boolean skipSharedContent, boolean removeGeneratedM2Dups,
+            String repoZipPath, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
 
         PigContext context = context();
 
@@ -130,9 +114,7 @@ public class PigFacade {
             if (tempBuild) {
                 log.info("Temprorary build");
             }
-            builds = build(tempBuild,
-                    tempBuildTS,
-                    rebuildMode);
+            builds = build(tempBuild, tempBuildTS, rebuildMode);
         }
 
         context.setBuilds(builds);
@@ -194,37 +176,27 @@ public class PigFacade {
         }
         return "PiG run completed, the results are in: " + ""; // TODO target directory name
 
-//        verifyZipContents(); TODO a separate Jenkins Job to do it?
+        // verifyZipContents(); TODO a separate Jenkins Job to do it?
     }
 
     public static void generateScripts() {
-        ScriptGenerator scriptGenerator = new ScriptGenerator(context().getConfig(),
-                context().getDeliverables());
-        scriptGenerator.generateReleaseScripts(
-                context().getPncImportResult().getMilestone(),
-                context().getRepositoryData().getRepositoryPath(),
-                Paths.get(context().getTargetPath()),
-                Paths.get(context().getReleasePath()),
-                getBrewTag(context().getPncImportResult().getVersion()),
+        ScriptGenerator scriptGenerator = new ScriptGenerator(context().getConfig(), context().getDeliverables());
+        scriptGenerator.generateReleaseScripts(context().getPncImportResult().getMilestone(),
+                context().getRepositoryData().getRepositoryPath(), Paths.get(context().getTargetPath()),
+                Paths.get(context().getReleasePath()), getBrewTag(context().getPncImportResult().getVersion()),
                 getBuildIdsToPush(context().getBuilds()));
     }
 
     public static void generateDocuments() {
-        DocumentGenerator docGenerator =
-                new DocumentGenerator(context().getConfig(),
-                        context().getReleasePath(),
-                        context().getExtrasPath(),
-                        context().getDeliverables());
+        DocumentGenerator docGenerator = new DocumentGenerator(context().getConfig(), context().getReleasePath(),
+                context().getExtrasPath(), context().getDeliverables());
         docGenerator.generateDocuments(context().getBuilds(), context().getRepositoryData());
     }
 
     public static void prepareSharedContentAnalysis() {
         try {
-            DocumentGenerator docGenerator =
-                    new DocumentGenerator(context().getConfig(),
-                            context().getReleasePath(),
-                            context().getExtrasPath(),
-                            context().getDeliverables());
+            DocumentGenerator docGenerator = new DocumentGenerator(context().getConfig(), context().getReleasePath(),
+                    context().getExtrasPath(), context().getDeliverables());
             docGenerator.generateSharedContentReport(context().getRepositoryData(), context().getBuilds());
         } catch (Exception any) {
             throw new RuntimeException("Failed to generate shared content request doc", any);
@@ -235,11 +207,9 @@ public class PigFacade {
         Config config = context().getConfig();
         Map<String, PncBuild> builds = context().getBuilds();
         RepositoryData repo = context().getRepositoryData();
-        SourcesGenerator sourcesGenerator =
-                new SourcesGenerator(
-                        config.getFlow().getSourcesGeneration(),
-                        config.getTopLevelDirectoryPrefix() + "src",
-                        context().getReleasePath() + context().getDeliverables().getSourceZipName());
+        SourcesGenerator sourcesGenerator = new SourcesGenerator(config.getFlow().getSourcesGeneration(),
+                config.getTopLevelDirectoryPrefix() + "src",
+                context().getReleasePath() + context().getDeliverables().getSourceZipName());
         sourcesGenerator.generateSources(builds, repo);
     }
 
@@ -252,11 +222,7 @@ public class PigFacade {
     }
 
     private static List<String> getBuildIdsToPush(Map<String, PncBuild> builds) {
-        return builds.values()
-                .stream()
-                .filter(PigFacade::notPushedToBrew)
-                .map(PncBuild::getId)
-                .collect(Collectors.toList());
+        return builds.values().stream().filter(PigFacade::notPushedToBrew).map(PncBuild::getId).collect(Collectors.toList());
     }
 
     private static boolean notPushedToBrew(PncBuild build) {
@@ -283,35 +249,23 @@ public class PigFacade {
     }
 
     public static void triggerAddOns() {
-        AddOnFactory.listAddOns(
-                context().getConfig(),
-                context().getBuilds(),
-                context().getReleasePath(),
-                context().getExtrasPath()
-        )
-                .stream()
-                .filter(AddOn::shouldRun)
-                .forEach(AddOn::trigger);
+        AddOnFactory
+                .listAddOns(context().getConfig(), context().getBuilds(), context().getReleasePath(), context().getExtrasPath())
+                .stream().filter(AddOn::shouldRun).forEach(AddOn::trigger);
     }
 
     public static RepositoryData generateRepo(boolean removeGeneratedM2Dups) {
         PigContext context = context();
-        RepoManager repoManager = new RepoManager(context.getConfig(),
-                context().getReleasePath(),
-                context().getDeliverables(),
-                context().getBuilds(),
-                Paths.get("."), // TODO!
+        RepoManager repoManager = new RepoManager(context.getConfig(), context().getReleasePath(), context().getDeliverables(),
+                context().getBuilds(), Paths.get("."), // TODO!
                 removeGeneratedM2Dups);
         return repoManager.prepare();
     }
 
     private static Map<String, PncBuild> getBuilds(ImportResult importResult) {
         BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
-        return importResult.getBuildConfigs()
-                .parallelStream()
-                .map(BuildConfigData::getId)
-                .map(buildInfoCollector::getLatestBuild)
-                .collect(Collectors.toMap(PncBuild::getName, Function.identity()));
+        return importResult.getBuildConfigs().parallelStream().map(BuildConfigData::getId)
+                .map(buildInfoCollector::getLatestBuild).collect(Collectors.toMap(PncBuild::getName, Function.identity()));
     }
 
     public static void generateLicenses() {
@@ -319,18 +273,12 @@ public class PigFacade {
         Config config = context.getConfig();
         RepositoryData repo = context.getRepositoryData();
         Map<String, PncBuild> builds = context.getBuilds();
-        new LicenseManager(config,
-                context.getReleasePath(),
-                context.getDeliverables(),
-                builds,
-                repo
-        ).prepare();
+        new LicenseManager(config, context.getReleasePath(), context.getDeliverables(), builds, repo).prepare();
     }
 
     public static void generateJavadoc() {
         Config config = context().getConfig();
         Map<String, PncBuild> builds = context().getBuilds();
-        new JavadocManager(config, context().getReleasePath(), context().getDeliverables(), builds)
-                .prepare();
+        new JavadocManager(config, context().getReleasePath(), context().getDeliverables(), builds).prepare();
     }
 }

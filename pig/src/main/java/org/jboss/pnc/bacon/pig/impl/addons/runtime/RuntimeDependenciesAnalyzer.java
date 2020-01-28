@@ -35,17 +35,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 12/11/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 12/11/17
  */
 public class RuntimeDependenciesAnalyzer extends AddOn {
     private static final Logger log = LoggerFactory.getLogger(RuntimeDependenciesAnalyzer.class);
 
-    public RuntimeDependenciesAnalyzer(Config config,
-                                       Map<String, PncBuild> builds,
-                                       String releasePath,
-                                       String extrasPath) {
+    public RuntimeDependenciesAnalyzer(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
         super(config, builds, releasePath, extrasPath);
     }
 
@@ -74,8 +70,7 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
             throw new RuntimeException("Unable to read dependency list from " + dependencyListPath);
         }
 
-        List<String> communityDependencies = dependencies.stream()
-                .filter(d -> !d.contains("redhat"))
+        List<String> communityDependencies = dependencies.stream().filter(d -> !d.contains("redhat"))
                 .collect(Collectors.toList());
 
         List<String> buildLog = builds.get(referenceBuildName).getBuildLog();
@@ -83,7 +78,7 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
         Path targetPath = Paths.get(extrasPath, "community-dependencies.csv");
 
         CommunityDepAnalyzer analyzer = new CommunityDepAnalyzer(communityDependencies, buildLog);
-        analyzer.skipDa(false);   // TODO: 
+        analyzer.skipDa(false); // TODO:
         analyzer.generateAnalysis(targetPath.toAbsolutePath().toString());
         log.info("Done");
     }

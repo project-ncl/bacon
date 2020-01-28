@@ -38,15 +38,9 @@ import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(
-        name = "scm-repository",
-        description = "Scm repository",
-        groupCommands = {
-                ScmRepositoryCli.CreateAndSync.class,
-                ScmRepositoryCli.Get.class,
-                ScmRepositoryCli.List.class,
-                ScmRepositoryCli.ListBuildConfigs.class,
-        })
+@GroupCommandDefinition(name = "scm-repository", description = "Scm repository", groupCommands = {
+        ScmRepositoryCli.CreateAndSync.class, ScmRepositoryCli.Get.class, ScmRepositoryCli.List.class,
+        ScmRepositoryCli.ListBuildConfigs.class, })
 public class ScmRepositoryCli extends AbstractCommand {
 
     private static SCMRepositoryClient clientCache;
@@ -79,9 +73,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
-                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync))
-                        .scmUrl(scmUrl)
-                        .build();
+                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync)).scmUrl(scmUrl).build();
 
                 System.out.println(getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });

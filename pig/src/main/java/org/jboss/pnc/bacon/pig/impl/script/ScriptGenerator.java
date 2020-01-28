@@ -31,9 +31,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 1/4/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 1/4/18
  */
 public class ScriptGenerator {
 
@@ -46,13 +45,10 @@ public class ScriptGenerator {
         this.deliverables = deliverables;
     }
 
-    public void generateReleaseScripts(ProductMilestoneRef milestone,
-                                       Path repoZipLocation,
-                                       Path targetDir,
-                                       Path releaseDir,
-                                       String brewTag,
-                                       List<String> buildIdsToPush) {
-        ReleaseScriptData dataRoot = getReleaseScriptData(milestone, repoZipLocation, targetDir, releaseDir, brewTag, buildIdsToPush);
+    public void generateReleaseScripts(ProductMilestoneRef milestone, Path repoZipLocation, Path targetDir, Path releaseDir,
+            String brewTag, List<String> buildIdsToPush) {
+        ReleaseScriptData dataRoot = getReleaseScriptData(milestone, repoZipLocation, targetDir, releaseDir, brewTag,
+                buildIdsToPush);
         generateCloseMilestoneScript(targetDir, dataRoot);
         generateUploadToCandidatesScript(targetDir, dataRoot);
     }
@@ -74,24 +70,15 @@ public class ScriptGenerator {
         generator.generateFileFromResource(dataRoot, "release.sh", releaseScriptLocation);
     }
 
-    private ReleaseScriptData getReleaseScriptData(ProductMilestoneRef milestone,
-                                                   Path repoZipLocation,
-                                                   Path targetDir,
-                                                   Path releaseDir,
-                                                   String brewTag,
-                                                   List<String> buildIdsToPush) {
+    private ReleaseScriptData getReleaseScriptData(ProductMilestoneRef milestone, Path repoZipLocation, Path targetDir,
+            Path releaseDir, String brewTag, List<String> buildIdsToPush) {
         String nvrListName = deliverables.getNvrListName();
         String nvrScriptLocation = extractNvrListScript(targetDir.toFile());
         String nvrListPath = releaseDir.resolve(nvrListName).toAbsolutePath().toString();
         String productWithVersion = config.getProduct().prefix() + "-" + config.getVersion() + "." + config.getMilestone();
 
-        return new ReleaseScriptData(milestone.getId(),
-                nvrScriptLocation,
-                repoZipLocation.toAbsolutePath().toString(),
-                nvrListPath,
-                productWithVersion,
-                brewTag,
-                buildIdsToPush);
+        return new ReleaseScriptData(milestone.getId(), nvrScriptLocation, repoZipLocation.toAbsolutePath().toString(),
+                nvrListPath, productWithVersion, brewTag, buildIdsToPush);
     }
 
     private String extractNvrListScript(File targetDir) {

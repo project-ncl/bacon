@@ -28,9 +28,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 6/1/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 6/1/17
  */
 public class CommunityDepAnalyzer {
     private static final Logger log = LoggerFactory.getLogger(CommunityDepAnalyzer.class);
@@ -41,20 +40,13 @@ public class CommunityDepAnalyzer {
     private final List<String> downloadedForSwarm;
     private boolean skipDa = false;
 
-    public CommunityDepAnalyzer(List<String> dependencyLines,
-                                List<String> swarmLog) {
+    public CommunityDepAnalyzer(List<String> dependencyLines, List<String> swarmLog) {
         daDao = DADao.getInstance();
-        downloadedForSwarm =
-                swarmLog.stream()
-                        .filter(line -> line.startsWith("Downloaded"))
-                        .filter(line -> line.contains(".jar"))
-                        // lines are of the form: Downloaded: http://... (some add. info)
-                        .map(l -> l.split("\\s+")[1])
-                        .sorted()
-                        .collect(Collectors.toList());
-        dependencies = dependencyLines
-                .stream().map(CommunityDependency::new)
-                .collect(Collectors.toList());
+        downloadedForSwarm = swarmLog.stream().filter(line -> line.startsWith("Downloaded"))
+                .filter(line -> line.contains(".jar"))
+                // lines are of the form: Downloaded: http://... (some add. info)
+                .map(l -> l.split("\\s+")[1]).sorted().collect(Collectors.toList());
+        dependencies = dependencyLines.stream().map(CommunityDependency::new).collect(Collectors.toList());
     }
 
     public File generateAnalysis(String path) {
@@ -67,7 +59,8 @@ public class CommunityDepAnalyzer {
             File csvFile = new File(path);
 
             try (FileWriter writer = new FileWriter(csvFile)) {
-                writer.append("Community dependencies in Swarm;;Productized counterpart;Other productized versions;Used in the Swarm build\n");
+                writer.append(
+                        "Community dependencies in Swarm;;Productized counterpart;Other productized versions;Used in the Swarm build\n");
                 dependencies.forEach(d -> d.appendToCsv(writer));
             }
             log.info("DONE");
@@ -90,12 +83,10 @@ public class CommunityDepAnalyzer {
 
     private void addSwarmBuildDependencies(CommunityDependency communityDependency) {
         List<String> swarmBuildDownloads = downloadedForSwarm.stream()
-                .filter(d -> d.contains(communityDependency.toPathSubstring()))
-                .map(l -> l.substring(l.lastIndexOf("/") + 1))
+                .filter(d -> d.contains(communityDependency.toPathSubstring())).map(l -> l.substring(l.lastIndexOf("/") + 1))
                 .collect(Collectors.toList());
         communityDependency.setUsedForSwarm(swarmBuildDownloads);
     }
-
 
     public void skipDa(boolean skip) {
         skipDa = skip;

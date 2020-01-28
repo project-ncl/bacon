@@ -24,8 +24,7 @@ import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- *         <br>
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/20/17
  */
 @Getter

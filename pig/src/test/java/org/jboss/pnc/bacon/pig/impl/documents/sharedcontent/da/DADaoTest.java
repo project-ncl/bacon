@@ -29,9 +29,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 24/04/2019
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 24/04/2019
  */
 @RemoteTest
 class DADaoTest {
@@ -52,24 +51,23 @@ class DADaoTest {
 
     @Test
     public void shouldLookupJunit412() {
-        CommunityDependency dependency =
-                new CommunityDependency("junit", "junit", "4.12", "jar");
+        CommunityDependency dependency = new CommunityDependency("junit", "junit", "4.12", "jar");
         daDao.fillDaData(dependency);
         assertThat(dependency.getRecommendation()).isEqualTo("4.12.0.redhat-003");
         assertThat(dependency.getState()).isEqualTo(DependencyState.MATCH_FOUND);
     }
+
     @Test
     public void shouldLookupJunit456() {
-        CommunityDependency dependency =
-                new CommunityDependency("junit", "junit", "4.56", "jar");
+        CommunityDependency dependency = new CommunityDependency("junit", "junit", "4.56", "jar");
         daDao.fillDaData(dependency);
         assertThat(dependency.getRecommendation()).isNull();
         assertThat(dependency.getState()).isEqualTo(DependencyState.REVERSION_POSSIBLE);
     }
+
     @Test
     public void shouldLookupJunity456() {
-        CommunityDependency dependency =
-                new CommunityDependency("junit", "junity", "4.56", "jar");
+        CommunityDependency dependency = new CommunityDependency("junit", "junity", "4.56", "jar");
         daDao.fillDaData(dependency);
         assertThat(dependency.getRecommendation()).isNull();
         assertThat(dependency.getState()).isEqualTo(DependencyState.NO_MATCH);

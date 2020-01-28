@@ -27,16 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 3/26/18
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 3/26/18
  */
 public class ExtraDeliverableDownloader extends AddOn {
 
-    protected ExtraDeliverableDownloader(Config config,
-                                         Map<String, PncBuild> builds,
-                                         String releasePath,
-                                         String extrasPath) {
+    protected ExtraDeliverableDownloader(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
         super(config, builds, releasePath, extrasPath);
     }
 
@@ -47,17 +43,13 @@ public class ExtraDeliverableDownloader extends AddOn {
 
     @Override
     public void trigger() {
-        //noinspection unchecked
-        getConfig().forEach(
-                (key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts)
-        );
+        // noinspection unchecked
+        getConfig().forEach((key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts));
     }
 
     private void downloadArtifacts(String buildName, List<Map<String, String>> artifacts) {
         PncBuild build = builds.get(buildName);
-        artifacts.forEach(artifact ->
-                downloadArtifact(build, artifact.get("matching"), artifact.get("suffix"))
-        );
+        artifacts.forEach(artifact -> downloadArtifact(build, artifact.get("matching"), artifact.get("suffix")));
     }
 
     private void downloadArtifact(PncBuild build, String pattern, String suffix) {
@@ -68,7 +60,7 @@ public class ExtraDeliverableDownloader extends AddOn {
     }
 
     private String constructFileName(String suffix) {
-        return String.format("%s-%s.%s-%s",
-                config.getOutputPrefixes().getReleaseFile(), config.getVersion(), config.getMilestone(), suffix);
+        return String.format("%s-%s.%s-%s", config.getOutputPrefixes().getReleaseFile(), config.getVersion(),
+                config.getMilestone(), suffix);
     }
 }

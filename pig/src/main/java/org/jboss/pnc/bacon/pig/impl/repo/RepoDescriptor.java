@@ -29,21 +29,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/14/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/14/17
  */
 public class RepoDescriptor {
 
-    public static final String[] CHECKSUM_EXTENSIONS = {".md5", ".sha1"};
+    public static final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1" };
     public static final String MAVEN_REPOSITORY = "maven-repository/";
 
     public static Collection<GAV> listGavs(File m2RepoDirectory) {
-        List<GAV> allGavs = listFiles(m2RepoDirectory)
-                .stream()
+        List<GAV> allGavs = listFiles(m2RepoDirectory).stream()
                 .filter(f -> Stream.of(CHECKSUM_EXTENSIONS).noneMatch(ext -> f.getName().endsWith(ext)))
-                .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY))
-                .collect(Collectors.toList());
+                .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY)).collect(Collectors.toList());
         Set<GAV> resultSet = new TreeSet<>(Comparator.comparing(GAV::toGav));
         resultSet.addAll(allGavs);
         return resultSet;

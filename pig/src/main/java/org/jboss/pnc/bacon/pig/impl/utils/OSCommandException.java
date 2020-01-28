@@ -18,9 +18,8 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/20/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/20/17
  */
 public class OSCommandException extends RuntimeException {
     private static final long serialVersionUID = 1L;

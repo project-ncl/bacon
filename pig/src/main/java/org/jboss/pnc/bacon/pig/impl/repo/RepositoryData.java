@@ -25,9 +25,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 8/29/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 8/29/17
  */
 @Data
 public class RepositoryData {

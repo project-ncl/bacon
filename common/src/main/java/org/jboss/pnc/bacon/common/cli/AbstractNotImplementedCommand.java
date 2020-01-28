@@ -17,7 +17,6 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;

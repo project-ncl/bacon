@@ -22,9 +22,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/29/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/29/17
  */
 @Data
 @NoArgsConstructor

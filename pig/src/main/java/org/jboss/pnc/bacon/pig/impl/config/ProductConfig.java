@@ -20,9 +20,8 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import lombok.Data;
 
 /**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 11/28/17
+ * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
+ *         Date: 11/28/17
  */
 @Data
 public class ProductConfig {
@@ -32,7 +31,7 @@ public class ProductConfig {
     private String issueTrackerUrl;
 
     public String prefix() {
-        //noinspection StringToUpperCaseOrToLowerCaseWithoutLocale
+        // noinspection StringToUpperCaseOrToLowerCaseWithoutLocale
         return getName().toLowerCase().replaceAll(" ", "-");
     }
 }
