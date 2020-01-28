@@ -23,7 +23,7 @@ import java.util.Optional;
 public class DirectKeycloakClientImpl implements KeycloakClient {
 
     static {
-        setupUnirest();
+                setupUnirest();
     }
 
     private static void setupUnirest() {
