@@ -8,10 +8,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.jboss.pnc.bacon.common.Constant;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,9 +34,10 @@ public class CacheFile {
     }
 
     public static void writeCredentialToCacheFile(String keycloakUrl, String realm, String username, Credential credential) {
-        log.debug("Writing credential to cache file");
 
         createConfigFolderIfAbsent();
+
+        log.debug("Writing credential to cache file");
 
         try {
             Map<String, Credential> data = new HashMap<>();
@@ -42,7 +46,7 @@ public class CacheFile {
             CacheFile cacheFile = new CacheFile();
             cacheFile.setCachedData(data);
             mapper.writeValue(new File(CACHE_FILE), cacheFile);
-
+            setOwnerFilePermissions(CACHE_FILE);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,6 +78,19 @@ public class CacheFile {
         if (!fileExists(Constant.CONFIG_FOLDER)) {
             log.debug("Creating config folder...");
             new File(Constant.CONFIG_FOLDER).mkdirs();
+        }
+    }
+
+    private static void setOwnerFilePermissions(String path) {
+        HashSet<PosixFilePermission> set = new HashSet<PosixFilePermission>();
+
+        set.add(PosixFilePermission.OWNER_READ);
+        set.add(PosixFilePermission.OWNER_WRITE);
+
+        try {
+            Files.setPosixFilePermissions(Paths.get(CACHE_FILE), set);
+        } catch (IOException e) {
+            log.error("Cache file doesn't exist!");
         }
     }
 
