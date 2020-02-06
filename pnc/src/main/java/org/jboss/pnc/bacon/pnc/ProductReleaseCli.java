@@ -73,6 +73,8 @@ public class ProductReleaseCli extends AbstractCommand {
         private String downloadUrl;
         @Option(name = "issue-tracker-url", description = "Link to issues fixed in this release")
         private String issueTrackerUrl;
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -97,7 +99,8 @@ public class ProductReleaseCli extends AbstractCommand {
                         .productVersion(productMilestone.getProductVersion()).supportLevel(SupportLevel.valueOf(supportLevel))
                         .downloadUrl(downloadUrl).issueTrackerUrl(issueTrackerUrl).build();
 
-                System.out.println(getClientAuthenticated().createNew(productRelease));
+                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
+                        .writeValueAsString(getClientAuthenticated().createNew(productRelease)));
             });
         }
     }
@@ -163,14 +166,16 @@ public class ProductReleaseCli extends AbstractCommand {
     @CommandDefinition(name = "list-support-levels", description = "List supported levels")
     public class ListSupportLevel extends AbstractCommand {
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                // TODO: YAML or JSON format?
-                for (SupportLevel supportLevel : getClient().getAllSupportLevel()) {
-                    System.out.println(supportLevel);
-                }
+                System.out
+                        .println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getClient().getAllSupportLevel()));
+
             });
         }
     }

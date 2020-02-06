@@ -26,6 +26,7 @@ import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -88,6 +89,8 @@ public class BuildCli extends AbstractCommand {
         private String timestampAlignment;
         @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
         private String temporaryBuild;
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -99,7 +102,8 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
 
             return super.executeHelper(commandInvocation, () -> {
-                System.out.println(BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams));
+                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
+                        .writeValueAsString(BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams)));
             });
         }
     }

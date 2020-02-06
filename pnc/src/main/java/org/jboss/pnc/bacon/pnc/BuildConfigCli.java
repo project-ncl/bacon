@@ -92,6 +92,8 @@ public class BuildConfigCli extends AbstractCommand {
         private String productVersionId;
         @Option(name = "build-type", description = "Build Type. Options are: MVN,GRADLE. Default: MVN", defaultValue = "MVN")
         private String buildType;
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -107,7 +109,8 @@ public class BuildConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productVersionId, () -> buildConfigurationBuilder
                         .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                System.out.println(getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
+                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
+                        .writeValueAsString(getClientAuthenticated().createNew(buildConfigurationBuilder.build())));
             });
         }
 

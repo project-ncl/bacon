@@ -22,6 +22,8 @@ import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.client.ClientException;
 
 /**
@@ -36,10 +38,15 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
     @Argument(required = true, description = "Id of item")
     private String id;
 
+    @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+    private boolean jsonOutput = false;
+
     @Override
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
-        return super.executeHelper(commandInvocation, () -> System.out.println(getSpecific(id)));
+        return super.executeHelper(commandInvocation, () -> {
+            System.out.println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getSpecific(id)));
+        });
     }
 
     public abstract T getSpecific(String id) throws ClientException;

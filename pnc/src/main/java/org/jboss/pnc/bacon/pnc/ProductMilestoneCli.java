@@ -81,6 +81,8 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String startDate;
         @Option(required = true, name = "end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -104,7 +106,8 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .productVersion(productVersionRef).issueTrackerUrl(issueTrackerUrl).startingDate(startDateInstant)
                         .plannedEndDate(endDateInstant).build();
 
-                System.out.println(getClientAuthenticated().createNew(milestone));
+                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
+                        .writeValueAsString(getClientAuthenticated().createNew(milestone)));
             });
         }
     }

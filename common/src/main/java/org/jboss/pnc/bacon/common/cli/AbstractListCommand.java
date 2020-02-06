@@ -22,6 +22,7 @@ import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 
@@ -41,15 +42,14 @@ public abstract class AbstractListCommand<T> extends AbstractCommand {
     @Option(description = "Query parameter (using RSQL)")
     private String query;
 
+    @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+    private boolean jsonOutput = false;
+
     @Override
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
         return super.executeHelper(commandInvocation, () -> {
-
-            for (T item : getAll(sort, query)) {
-                // TODO: to print in JSON or YAML format
-                System.out.println(item);
-            }
+            System.out.println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getAll(sort, query)));
         });
     }
 

@@ -24,6 +24,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -68,6 +69,9 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Option(name = "pre-build-sync", description = "Pre-build-sync feature: Default: true", defaultValue = "true")
         private String preBuildSync;
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
@@ -75,7 +79,8 @@ public class ScmRepositoryCli extends AbstractCommand {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
                         .preBuildSyncEnabled(Boolean.valueOf(preBuildSync)).scmUrl(scmUrl).build();
 
-                System.out.println(getClientAuthenticated().createNew(createAndSyncSCMRequest));
+                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
+                        .writeValueAsString(getClientAuthenticated().createNew(createAndSyncSCMRequest)));
             });
         }
     }
