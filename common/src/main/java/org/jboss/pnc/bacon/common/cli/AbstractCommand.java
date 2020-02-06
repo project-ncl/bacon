@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
+import ch.qos.logback.classic.Level;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
@@ -25,6 +26,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.client.ClientException;
 
 /**
@@ -47,6 +49,9 @@ public class AbstractCommand implements Command {
 
     @Option(shortName = 'V', overrideRequired = true, hasValue = false, description = "print version")
     private boolean version = false;
+
+    @Option(shortName = 'v', overrideRequired = true, hasValue = false, description = "Verbose output")
+    private boolean verbose = false;
 
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {
 
@@ -71,6 +76,22 @@ public class AbstractCommand implements Command {
         }
 
         return activated;
+    }
+
+    /**
+     * Set the verbosity of logback if the verbosity flag is set
+     *
+     */
+    private void setVerbosityIfPresent() {
+
+        if (verbose) {
+            ObjectHelper.setRootLoggingLevel(Level.DEBUG);
+
+            // Add more loggers that you want to switch to DEBUG here
+            ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.DEBUG);
+
+            log.debug("Log level set to DEBUG");
+        }
     }
 
     /**
@@ -118,6 +139,9 @@ public class AbstractCommand implements Command {
      * @throws InterruptedException
      */
     private CommandResult executePrivate(CommandInvocation commandInvocation) {
+
+        setVerbosityIfPresent();
+
         boolean helpNoFinalCommandPrinted = false;
         boolean helpOrVersionPrinted = printHelpOrVersionIfPresent(commandInvocation);
 
