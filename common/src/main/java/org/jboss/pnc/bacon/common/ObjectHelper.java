@@ -21,7 +21,7 @@ public class ObjectHelper {
     public static void print(boolean json, Object o) throws JsonProcessingException {
         System.out.println(getOutputMapper(json).writeValueAsString(o));
     }
-  
+
     public static void setRootLoggingLevel(Level level) {
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
                 .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
