@@ -79,8 +79,7 @@ public class ScmRepositoryCli extends AbstractCommand {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
                         .preBuildSyncEnabled(Boolean.valueOf(preBuildSync)).scmUrl(scmUrl).build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(createAndSyncSCMRequest)));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });
         }
     }

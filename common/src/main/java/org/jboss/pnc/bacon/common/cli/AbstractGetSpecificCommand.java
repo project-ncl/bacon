@@ -45,7 +45,7 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
         return super.executeHelper(commandInvocation, () -> {
-            System.out.println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getSpecific(id)));
+            ObjectHelper.print(jsonOutput, getSpecific(id));
         });
     }
 

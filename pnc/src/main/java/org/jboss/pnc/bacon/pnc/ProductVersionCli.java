@@ -94,8 +94,7 @@ public class ProductVersionCli extends AbstractCommand {
                 ProductVersion productVersion = ProductVersion.builder().product(productRef).version(this.productVersion)
                         .build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(productVersion)));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(productVersion));
             });
         }
     }

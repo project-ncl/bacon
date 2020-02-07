@@ -88,8 +88,7 @@ public class GroupConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(groupConfigurationBuilder.build())));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
             });
         }
     }

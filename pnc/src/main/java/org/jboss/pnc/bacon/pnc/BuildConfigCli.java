@@ -109,8 +109,7 @@ public class BuildConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productVersionId, () -> buildConfigurationBuilder
                         .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(buildConfigurationBuilder.build())));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
             });
         }
 

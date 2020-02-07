@@ -49,7 +49,7 @@ public abstract class AbstractListCommand<T> extends AbstractCommand {
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
         return super.executeHelper(commandInvocation, () -> {
-            System.out.println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getAll(sort, query)));
+            ObjectHelper.print(jsonOutput, getAll(sort, query));
         });
     }
 

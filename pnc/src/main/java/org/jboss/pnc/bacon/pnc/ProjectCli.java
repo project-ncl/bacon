@@ -82,8 +82,7 @@ public class ProjectCli extends AbstractCommand {
                 Project project = Project.builder().name(name).description(description).projectUrl(projectUrl)
                         .issueTrackerUrl(issueTrackerUrl).build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(project)));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(project));
             });
         }
     }

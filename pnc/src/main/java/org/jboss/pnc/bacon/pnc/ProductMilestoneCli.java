@@ -106,8 +106,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .productVersion(productVersionRef).issueTrackerUrl(issueTrackerUrl).startingDate(startDateInstant)
                         .plannedEndDate(endDateInstant).build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(milestone)));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(milestone));
             });
         }
     }

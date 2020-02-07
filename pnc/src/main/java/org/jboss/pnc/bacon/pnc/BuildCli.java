@@ -102,8 +102,7 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
 
             return super.executeHelper(commandInvocation, () -> {
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams)));
+                ObjectHelper.print(jsonOutput, BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams));
             });
         }
     }

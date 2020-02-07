@@ -60,7 +60,7 @@ public class BrewPushCli extends AbstractCommand {
                 BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(Boolean.valueOf(reimport))
                         .build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(client.push(id, request)));
+                ObjectHelper.print(jsonOutput, client.push(id, request));
             });
         }
 
@@ -113,7 +113,7 @@ public class BrewPushCli extends AbstractCommand {
 
                 BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false));
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(client.getPushResult(id)));
+                ObjectHelper.print(jsonOutput, client.getPushResult(id));
             });
         }
     }

@@ -99,8 +99,7 @@ public class ProductReleaseCli extends AbstractCommand {
                         .productVersion(productMilestone.getProductVersion()).supportLevel(SupportLevel.valueOf(supportLevel))
                         .downloadUrl(downloadUrl).issueTrackerUrl(issueTrackerUrl).build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(productRelease)));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(productRelease));
             });
         }
     }
@@ -173,8 +172,7 @@ public class ProductReleaseCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                System.out
-                        .println(ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getClient().getAllSupportLevel()));
+                ObjectHelper.print(jsonOutput, getClient().getAllSupportLevel());
 
             });
         }

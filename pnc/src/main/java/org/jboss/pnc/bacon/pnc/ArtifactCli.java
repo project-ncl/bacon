@@ -61,8 +61,7 @@ public class ArtifactCli extends AbstractCommand {
                 if (md5 == null && sha1 == null && sha256 == null) {
                     log.error("You need to use at least one hash option!");
                 } else {
-                    System.out.println(
-                            ObjectHelper.getOutputMapper(jsonOutput).writeValueAsString(getClient().getAll(sha256, md5, sha1)));
+                    ObjectHelper.print(jsonOutput, getClient().getAll(sha256, md5, sha1));
                 }
             });
         }

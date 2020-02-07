@@ -86,8 +86,7 @@ public class ProductCli extends AbstractCommand {
                 Product product = Product.builder().name(name).abbreviation(abbreviation).description(description)
                         .productCode(productCode).pgmSystemName(systemCode).build();
 
-                System.out.println(ObjectHelper.getOutputMapper(jsonOutput)
-                        .writeValueAsString(getClientAuthenticated().createNew(product)));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(product));
             });
         }
     }
