@@ -76,6 +76,8 @@ public class ProductVersionCli extends AbstractCommand {
         private String productVersion;
         @Option(required = true, name = "product-id", description = "Product ID of product version")
         private String productId;
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
@@ -92,7 +94,7 @@ public class ProductVersionCli extends AbstractCommand {
                 ProductVersion productVersion = ProductVersion.builder().product(productRef).version(this.productVersion)
                         .build();
 
-                System.out.println(getClientAuthenticated().createNew(productVersion));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(productVersion));
             });
         }
     }

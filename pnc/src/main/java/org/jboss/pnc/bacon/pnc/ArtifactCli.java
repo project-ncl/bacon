@@ -7,8 +7,9 @@ import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
@@ -49,6 +50,9 @@ public class ArtifactCli extends AbstractCommand {
         @Option
         private String sha256;
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
@@ -57,12 +61,8 @@ public class ArtifactCli extends AbstractCommand {
                 if (md5 == null && sha1 == null && sha256 == null) {
                     log.error("You need to use at least one hash option!");
                 } else {
-                    for (Artifact artifact : getClient().getAll(sha256, md5, sha1)) {
-                        // TODO: print in yaml or json
-                        System.out.println(artifact);
-                    }
+                    ObjectHelper.print(jsonOutput, getClient().getAll(sha256, md5, sha1));
                 }
-
             });
         }
     }

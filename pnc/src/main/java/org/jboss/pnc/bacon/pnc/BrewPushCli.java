@@ -24,6 +24,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
@@ -46,6 +47,9 @@ public class BrewPushCli extends AbstractCommand {
         @Option(name = "reimport", description = "Should we re-import the build in case it was already imported?", defaultValue = "false")
         private String reimport;
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
@@ -56,7 +60,7 @@ public class BrewPushCli extends AbstractCommand {
                 BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(Boolean.valueOf(reimport))
                         .build();
 
-                System.out.println(client.push(id, request));
+                ObjectHelper.print(jsonOutput, client.push(id, request));
             });
         }
 
@@ -99,13 +103,17 @@ public class BrewPushCli extends AbstractCommand {
         @Argument(required = true, description = "Brew Push ID")
         private String id;
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
                 BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false));
-                System.out.println(client.getPushResult(id));
+
+                ObjectHelper.print(jsonOutput, client.getPushResult(id));
             });
         }
     }

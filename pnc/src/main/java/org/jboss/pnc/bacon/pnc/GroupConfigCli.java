@@ -38,7 +38,6 @@ import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Optional;
 
 @GroupCommandDefinition(name = "group-config", description = "Group configuration", groupCommands = {
@@ -73,6 +72,9 @@ public class GroupConfigCli extends AbstractCommand {
         @Option(name = "build-configuration-ids", description = "Build configuration ids in Group Config. Comma separated")
         private String buildConfigurationIds;
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
@@ -86,7 +88,7 @@ public class GroupConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                System.out.println(getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
             });
         }
     }

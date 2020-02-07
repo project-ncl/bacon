@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import ch.qos.logback.classic.Level;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
@@ -41,7 +42,7 @@ import org.jboss.pnc.client.ClientException;
 public class AbstractCommand implements Command {
 
     public interface SubCommandExecuteInterface {
-        void call() throws ClientException;
+        void call() throws ClientException, JsonProcessingException;
     }
 
     @Option(shortName = 'h', overrideRequired = true, hasValue = false, description = "print help")

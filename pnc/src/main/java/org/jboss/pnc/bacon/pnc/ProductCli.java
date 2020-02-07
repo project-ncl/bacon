@@ -75,6 +75,9 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "system-code", description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap", defaultValue = "")
         private String systemCode;
 
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
@@ -83,7 +86,7 @@ public class ProductCli extends AbstractCommand {
                 Product product = Product.builder().name(name).abbreviation(abbreviation).description(description)
                         .productCode(productCode).pgmSystemName(systemCode).build();
 
-                System.out.println(getClientAuthenticated().createNew(product));
+                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(product));
             });
         }
     }
