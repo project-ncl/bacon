@@ -61,7 +61,7 @@
     <logger name="org.infinispan" level="WARN"/>
     <!-- from koji-build-finder -->
 
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDERR"/>
     </root>
 </configuration>
