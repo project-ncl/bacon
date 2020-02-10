@@ -137,7 +137,7 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
                     .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn())).build();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }

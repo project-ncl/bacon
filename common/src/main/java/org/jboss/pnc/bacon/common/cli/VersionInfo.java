@@ -40,7 +40,7 @@ public class VersionInfo {
                 log.warn("Incomplete manifest file, missing version.");
             }
         } catch (IOException e) {
-            log.warn("Cannot read manifest file.", e);
+            log.warn("Cannot read manifest file. {}", e.getMessage());
         }
     }
 

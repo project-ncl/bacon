@@ -170,7 +170,7 @@ public class AbstractCommand implements Command {
         try {
             callback.call();
         } catch (Exception e) {
-            log.error("Something wrong happened", e);
+            log.error("Something wrong happened: {}", e.getMessage());
             return CommandResult.FAILURE;
         }
         return CommandResult.SUCCESS;

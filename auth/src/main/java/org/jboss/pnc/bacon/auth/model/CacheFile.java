@@ -48,7 +48,7 @@ public class CacheFile {
             mapper.writeValue(new File(CACHE_FILE), cacheFile);
             setOwnerFilePermissions(CACHE_FILE);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
@@ -69,7 +69,7 @@ public class CacheFile {
                 return Optional.empty();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return Optional.empty();
         }
     }
