@@ -27,6 +27,7 @@ import org.aesh.command.parser.RequiredOptionException;
 import org.aesh.command.registry.CommandRegistry;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
@@ -52,7 +53,7 @@ public class App extends AbstractCommand {
             runtime.executeCommand(buildCLIOutput(args));
         } catch (OptionParserException | RequiredOptionException ex) {
             log.error("Missing argument/option: {}", ex.getMessage());
-            System.exit(1);
+            throw new FatalException();
         } catch (RuntimeException ex) {
             log.error(ex.getMessage());
 
@@ -62,7 +63,7 @@ public class App extends AbstractCommand {
             }
 
             // signal that an error has occurred
-            System.exit(1);
+            throw new FatalException();
         }
     }
 
@@ -89,10 +90,14 @@ public class App extends AbstractCommand {
 
     public static void main(String[] args) throws Exception {
 
-        initializeConfig();
+        try {
+            initializeConfig();
 
-        App app = new App();
-        app.run(args);
+            App app = new App();
+            app.run(args);
+        } catch (FatalException e) {
+            System.exit(1);
+        }
     }
 
     private static void initializeConfig() {
@@ -103,7 +108,7 @@ public class App extends AbstractCommand {
             System.err.println("Configuration file not found. "
                     + "Please create a config file and either name it 'config.yaml' and put it in the working directory"
                     + " or specify it with -Dconfig");
-            System.exit(1);
+            throw new FatalException();
         }
     }
 }
