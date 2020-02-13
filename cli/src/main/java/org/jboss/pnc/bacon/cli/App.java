@@ -50,13 +50,15 @@ public class App extends AbstractCommand {
         CommandRuntime runtime = AeshCommandRuntimeBuilder.builder().commandRegistry(registry).build();
 
         try {
+
             runtime.executeCommand(buildCLIOutput(args));
         } catch (OptionParserException | RequiredOptionException ex) {
             log.error("Missing argument/option: {}", ex.getMessage());
             throw new FatalException();
         } catch (RuntimeException ex) {
-            log.error(ex.getMessage());
-
+            if (ex.getMessage().contains(FatalException.class.getCanonicalName())) {
+                throw new FatalException();
+            }
             // if stacktrace not thrown from aesh
             if (!ex.getCause().getClass().getCanonicalName().contains("aesh")) {
                 log.error("Stacktrace", ex);

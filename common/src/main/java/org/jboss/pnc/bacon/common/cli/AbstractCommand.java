@@ -28,6 +28,7 @@ import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
 
 /**
@@ -169,6 +170,8 @@ public class AbstractCommand implements Command {
 
         try {
             callback.call();
+        } catch (FatalException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Something wrong happened: {}", e.getMessage());
             return CommandResult.FAILURE;
