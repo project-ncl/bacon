@@ -28,6 +28,7 @@ import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.Path;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
 
@@ -54,6 +55,9 @@ public class AbstractCommand implements Command {
 
     @Option(shortName = 'v', overrideRequired = true, hasValue = false, description = "Verbose output")
     private boolean verbose = false;
+
+    @Option(shortName = 'p', description = "Path to configuration file")
+    private String configPath = null;
 
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {
 
@@ -93,6 +97,22 @@ public class AbstractCommand implements Command {
             ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.DEBUG);
 
             log.debug("Log level set to DEBUG");
+        }
+    }
+
+
+    /**
+     * Set the path to config file if the configPath flag or environment variable is set
+     *
+     */
+    private void setConfigurationFileLocationIfPresent() {
+
+        if (configPath != null) {
+            Path.CONFIG_FOLDER = configPath;
+            log.debug("Config file set from flag to "+ Path.CONFIG_FOLDER);
+        } else if (System.getenv(Path.CONFIG_ENV) != null) {
+            Path.CONFIG_FOLDER = System.getenv(Path.CONFIG_ENV);
+            log.debug("Config file set from environment variable to "+ Path.CONFIG_FOLDER);
         }
     }
 

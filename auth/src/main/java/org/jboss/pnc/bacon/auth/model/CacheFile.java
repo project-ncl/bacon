@@ -5,12 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.common.Path;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashMap;
@@ -23,7 +22,7 @@ import java.util.Optional;
 @Slf4j
 public class CacheFile {
 
-    public static final String CACHE_FILE = Constant.CONFIG_FOLDER + "/" + "saved-user.json";
+    public static final String CACHE_FILE = Path.CONFIG_FOLDER + "/" + "saved-user.json";
 
     private Map<String, Credential> cachedData;
     private static com.fasterxml.jackson.databind.ObjectMapper mapper;
@@ -75,9 +74,9 @@ public class CacheFile {
     }
 
     private static void createConfigFolderIfAbsent() {
-        if (!fileExists(Constant.CONFIG_FOLDER)) {
+        if (!fileExists(Path.CONFIG_FOLDER)) {
             log.debug("Creating config folder...");
-            new File(Constant.CONFIG_FOLDER).mkdirs();
+            new File(Path.CONFIG_FOLDER).mkdirs();
         }
     }
 
@@ -100,7 +99,7 @@ public class CacheFile {
 
     private static boolean fileExists(String pathString) {
 
-        Path path = Paths.get(pathString);
+        java.nio.file.Path path = Paths.get(pathString);
         return Files.exists(path);
     }
 
