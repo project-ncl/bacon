@@ -26,6 +26,7 @@ import org.aesh.command.parser.OptionParserException;
 import org.aesh.command.parser.RequiredOptionException;
 import org.aesh.command.registry.CommandRegistry;
 import org.jboss.bacon.da.Da;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
@@ -91,26 +92,11 @@ public class App extends AbstractCommand {
     }
 
     public static void main(String[] args) throws Exception {
-
         try {
-            initializeConfig();
-
             App app = new App();
             app.run(args);
         } catch (FatalException e) {
             System.exit(1);
-        }
-    }
-
-    private static void initializeConfig() {
-        String configLocation = System.getProperty("config", "config.yaml");
-        try {
-            Config.configure(configLocation);
-        } catch (IOException e) {
-            System.err.println("Configuration file not found. "
-                    + "Please create a config file and either name it 'config.yaml' and put it in the working directory"
-                    + " or specify it with -Dconfig");
-            throw new FatalException();
         }
     }
 }

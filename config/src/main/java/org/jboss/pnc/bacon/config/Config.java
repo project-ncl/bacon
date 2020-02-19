@@ -36,6 +36,7 @@ import java.util.Map;
 public class Config {
 
     private static String configLocation;
+    private static String configFilePath;
 
     private String keycloakUrl;
     private PncConfig pnc;
@@ -58,22 +59,30 @@ public class Config {
         return instance;
     }
 
-    public static void configure(String configLocation) throws IOException {
+    public static void configure(String configLocation, String configFileName) {
         Config.configLocation = configLocation;
+        Config.configFilePath = configLocation + "/" + configFileName;
     }
 
     public static void initialize() throws IOException {
-        File configFile = new File(configLocation);
+        File configFile = new File(configFilePath);
         if (!configFile.exists()) {
-            throw new IOException("Config file " + configLocation
-                    + " does not exist! Please create a config file and either name it 'config.yaml' and put it in the working directory or specify it with -Dconfig");
+            throw new IOException("Config file " + configFilePath + " does not exist! Please create it.");
         } else if (configFile.length() == 0) {
-            log.warn("Config file: {} has no content", configLocation);
+            log.warn("Config file: {} has no content", configFilePath);
             instance = new Config();
         } else {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            instance = mapper.readValue(new File(configLocation), Config.class);
+            instance = mapper.readValue(new File(configFilePath), Config.class);
         }
+    }
+
+    public static String getConfigLocation() {
+        return configLocation;
+    }
+
+    public static String getConfigFilePath() {
+        return configFilePath;
     }
 }

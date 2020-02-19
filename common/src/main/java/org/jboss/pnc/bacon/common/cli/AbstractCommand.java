@@ -28,9 +28,12 @@ import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.Path;
+import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
+
+import java.io.IOException;
 
 /**
  * Abstract command that implements Command
@@ -56,7 +59,7 @@ public class AbstractCommand implements Command {
     @Option(shortName = 'v', overrideRequired = true, hasValue = false, description = "Verbose output")
     private boolean verbose = false;
 
-    @Option(shortName = 'p', description = "Path to configuration file")
+    @Option(shortName = 'p', description = "Path to configuration folder")
     private String configPath = null;
 
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {
@@ -100,20 +103,24 @@ public class AbstractCommand implements Command {
         }
     }
 
-
     /**
      * Set the path to config file if the configPath flag or environment variable is set
      *
      */
-    private void setConfigurationFileLocationIfPresent() {
+    private void setConfigurationFileLocation() {
 
         if (configPath != null) {
-            Path.CONFIG_FOLDER = configPath;
-            log.debug("Config file set from flag to "+ Path.CONFIG_FOLDER);
-        } else if (System.getenv(Path.CONFIG_ENV) != null) {
-            Path.CONFIG_FOLDER = System.getenv(Path.CONFIG_ENV);
-            log.debug("Config file set from environment variable to "+ Path.CONFIG_FOLDER);
+            setConfigLocation(configPath, "flag");
+        } else if (System.getenv(Constant.CONFIG_ENV) != null) {
+            setConfigLocation(System.getenv(Constant.CONFIG_ENV), "environment variable");
+        } else {
+            setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "Constant");
         }
+    }
+
+    private void setConfigLocation(String configLocation, String source) {
+        Config.configure(configLocation, Constant.CONFIG_FILE_NAME);
+        log.debug("Config file set from " + source + " to " + Config.getConfigFilePath());
     }
 
     /**
@@ -163,6 +170,7 @@ public class AbstractCommand implements Command {
     private CommandResult executePrivate(CommandInvocation commandInvocation) {
 
         setVerbosityIfPresent();
+        setConfigurationFileLocation();
 
         boolean helpNoFinalCommandPrinted = false;
         boolean helpOrVersionPrinted = printHelpOrVersionIfPresent(commandInvocation);

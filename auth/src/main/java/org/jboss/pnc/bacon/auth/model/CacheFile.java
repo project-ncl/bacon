@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.jboss.pnc.bacon.common.Path;
+import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.config.Config;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashMap;
@@ -21,8 +23,6 @@ import java.util.Optional;
 @Setter
 @Slf4j
 public class CacheFile {
-
-    public static final String CACHE_FILE = Path.CONFIG_FOLDER + "/" + "saved-user.json";
 
     private Map<String, Credential> cachedData;
     private static com.fasterxml.jackson.databind.ObjectMapper mapper;
@@ -44,8 +44,8 @@ public class CacheFile {
 
             CacheFile cacheFile = new CacheFile();
             cacheFile.setCachedData(data);
-            mapper.writeValue(new File(CACHE_FILE), cacheFile);
-            setOwnerFilePermissions(CACHE_FILE);
+            mapper.writeValue(new File(getCacheFile()), cacheFile);
+            setOwnerFilePermissions(getCacheFile());
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -55,12 +55,12 @@ public class CacheFile {
 
         String key = generateUsernameMd5(keycloakUrl, realm, username);
 
-        if (!fileExists(CACHE_FILE)) {
+        if (!fileExists(getCacheFile())) {
             return Optional.empty();
         }
 
         try {
-            CacheFile cacheFile = mapper.readValue(new File(CACHE_FILE), CacheFile.class);
+            CacheFile cacheFile = mapper.readValue(new File(getCacheFile()), CacheFile.class);
 
             if (cacheFile.getCachedData() != null && cacheFile.getCachedData().containsKey(key)) {
                 return Optional.of(cacheFile.getCachedData().get(key));
@@ -74,9 +74,9 @@ public class CacheFile {
     }
 
     private static void createConfigFolderIfAbsent() {
-        if (!fileExists(Path.CONFIG_FOLDER)) {
+        if (!fileExists(Config.getConfigLocation())) {
             log.debug("Creating config folder...");
-            new File(Path.CONFIG_FOLDER).mkdirs();
+            new File(Config.getConfigLocation()).mkdirs();
         }
     }
 
@@ -87,7 +87,7 @@ public class CacheFile {
         set.add(PosixFilePermission.OWNER_WRITE);
 
         try {
-            Files.setPosixFilePermissions(Paths.get(CACHE_FILE), set);
+            Files.setPosixFilePermissions(Paths.get(getCacheFile()), set);
         } catch (IOException e) {
             log.error("Cache file doesn't exist!");
         }
@@ -99,8 +99,12 @@ public class CacheFile {
 
     private static boolean fileExists(String pathString) {
 
-        java.nio.file.Path path = Paths.get(pathString);
+        Path path = Paths.get(pathString);
         return Files.exists(path);
+    }
+
+    private static String getCacheFile() {
+        return Config.getConfigLocation() + "/" + Constant.CACHE_FILE;
     }
 
 }
