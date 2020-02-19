@@ -3,8 +3,10 @@ package org.jboss.pnc.bacon.common;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import ch.qos.logback.classic.Level;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ObjectHelper {
 
@@ -15,7 +17,10 @@ public class ObjectHelper {
     }
 
     private static ObjectMapper getOutputMapper(boolean json) {
-        return json ? new ObjectMapper(new JsonFactory()) : new ObjectMapper(new YAMLFactory());
+        ObjectMapper om = json ? new ObjectMapper(new JsonFactory()) : new ObjectMapper(new YAMLFactory());
+        om.registerModule(new JavaTimeModule());
+        om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return om;
     }
 
     public static void print(boolean json, Object o) throws JsonProcessingException {
