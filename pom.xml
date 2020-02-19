@@ -118,7 +118,7 @@
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-jaxrs</artifactId>
-                <version>3.10.0.Final</version>
+                <version>3.11.0.Final</version>
             </dependency>
 
             <!-- log -->
