@@ -1,6 +1,6 @@
 package org.jboss.pnc.bacon.config;
 
-import org.jboss.pnc.bacon.common.Fail;
+import utils.Validator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,17 +20,19 @@ public interface Validate {
     static void validateUrl(String url, String kind) {
 
         if (url == null || url.isEmpty()) {
-            Fail.fail(kind + " Url is not specified in the config file!");
+            Validator.fail(kind + " Url is not specified in the config file!");
         }
 
         try {
             URI uri = new URI(url);
 
-            Fail.failIfNull(uri.getScheme(), "You need to specify the protocol of the " + kind + " URL in the config file");
-            Fail.failIfNull(uri.getHost(), "You need to specify the host of the " + kind + " URL in the config file");
+            Validator.checkIfNull(uri.getScheme(),
+                    "You need to specify the protocol of the " + kind + " URL in the config file");
+            Validator.checkIfNull(uri.getHost(), "You need to specify the host of the " + kind + " URL in the config file");
 
         } catch (URISyntaxException e) {
-            Fail.fail("Could not parse the " + kind + " Url at all! " + e.getMessage());
+            Validator.fail("Could not parse the " + kind + " Url at all! " + e.getMessage());
         }
     }
+
 }

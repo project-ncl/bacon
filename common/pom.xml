@@ -13,6 +13,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jboss.pnc.bacon</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.aesh</groupId>
             <artifactId>aesh</artifactId>
         </dependency>

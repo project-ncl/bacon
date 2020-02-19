@@ -19,7 +19,7 @@ package org.jboss.pnc.bacon.config;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.bacon.common.Fail;
+import utils.Validator;
 
 @Data
 @Slf4j
@@ -51,14 +51,14 @@ public class KeycloakConfig implements Validate {
 
         Validate.validateUrl(url, "Keycloak");
 
-        Fail.failIfNull(realm, "The Keycloak realm has to be specified");
-        Fail.failIfNull(username, "The username in the Keycloak config has to be specified");
+        Validator.checkIfNull(realm, "The Keycloak realm has to be specified");
+        Validator.checkIfNull(username, "The username in the Keycloak config has to be specified");
 
         if (isServiceAccount()) {
             log.debug("clientSecret is in the config file! Assuming this is a service account");
         } else {
             log.debug("clientSecret is not specified in the config file! Assuming this is a regular user");
-            Fail.failIfNull(clientId, "You need to specify the client id for your regular account in the config file");
+            Validator.checkIfNull(clientId, "You need to specify the client id for your regular account in the config file");
         }
 
     }

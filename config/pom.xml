@@ -12,10 +12,7 @@
     <artifactId>config</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.jboss.pnc.bacon</groupId>
-            <artifactId>common</artifactId>
-        </dependency>
+
 
         <dependency>
             <groupId>org.projectlombok</groupId>
