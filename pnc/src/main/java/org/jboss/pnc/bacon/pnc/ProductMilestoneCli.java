@@ -31,6 +31,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductMilestoneClient;
 import org.jboss.pnc.client.ProductVersionClient;
@@ -52,21 +53,8 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
         ProductMilestoneCli.Get.class, ProductMilestoneCli.PerformedBuilds.class })
 public class ProductMilestoneCli extends AbstractCommand {
 
-    private static ProductMilestoneClient clientCache;
-
-    private static ProductMilestoneClient getClient() {
-        if (clientCache == null) {
-            clientCache = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static ProductMilestoneClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(ProductMilestoneClient::new);
+    private static final ClientCreator<ProductVersionClient> VERSION_CREATOR = new ClientCreator<>(ProductVersionClient::new);
 
     @CommandDefinition(name = "create", description = "Create product milestone")
     public class Create extends AbstractCommand {
@@ -106,7 +94,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .productVersion(productVersionRef).issueTrackerUrl(issueTrackerUrl).startingDate(startDateInstant)
                         .plannedEndDate(endDateInstant).build();
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(milestone));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(milestone));
             });
         }
     }
@@ -131,7 +119,7 @@ public class ProductMilestoneCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                ProductMilestone productMilestone = getClient().getSpecific(productMilestoneId);
+                ProductMilestone productMilestone = CREATOR.getClient().getSpecific(productMilestoneId);
 
                 ProductMilestone.Builder updated = productMilestone.toBuilder();
 
@@ -161,7 +149,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                     updated.plannedEndDate(endDateInstant);
                 });
 
-                getClientAuthenticated().update(productMilestoneId, updated.build());
+                CREATOR.getClientAuthenticated().update(productMilestoneId, updated.build());
             });
         }
     }
@@ -175,7 +163,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
-            return super.executeHelper(commandInvocation, () -> getClientAuthenticated().cancelMilestoneClose(id));
+            return super.executeHelper(commandInvocation, () -> CREATOR.getClientAuthenticated().cancelMilestoneClose(id));
         }
     }
 
@@ -184,7 +172,7 @@ public class ProductMilestoneCli extends AbstractCommand {
 
         @Override
         public ProductMilestone getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -197,7 +185,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
             // TODO: figure out what to do with BuildsFilter
-            return getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
+            return CREATOR.getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
         }
     }
 
@@ -211,8 +199,7 @@ public class ProductMilestoneCli extends AbstractCommand {
     public static boolean validateProductMilestoneVersion(String productVersionId, String milestoneVersion)
             throws ClientException {
 
-        ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration(false));
-        ProductVersion productVersionDTO = productVersionClient.getSpecific(productVersionId);
+        ProductVersion productVersionDTO = VERSION_CREATOR.getClient().getSpecific(productVersionId);
 
         String productVersion = productVersionDTO.getVersion();
 

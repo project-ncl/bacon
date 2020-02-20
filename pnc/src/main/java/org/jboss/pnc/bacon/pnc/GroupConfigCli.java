@@ -28,7 +28,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -44,21 +44,7 @@ import java.util.Optional;
         GroupConfigCli.Create.class, GroupConfigCli.Update.class, GroupConfigCli.List.class, GroupConfigCli.Get.class, })
 public class GroupConfigCli extends AbstractCommand {
 
-    private static GroupConfigurationClient clientCache;
-
-    private static GroupConfigurationClient getClient() {
-        if (clientCache == null) {
-            clientCache = new GroupConfigurationClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static GroupConfigurationClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new GroupConfigurationClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(GroupConfigurationClient::new);
 
     @CommandDefinition(name = "create", description = "Create a group configuration")
     public class Create extends AbstractCommand {
@@ -88,7 +74,7 @@ public class GroupConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
             });
         }
     }
@@ -113,7 +99,7 @@ public class GroupConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                GroupConfiguration groupConfiguration = getClient().getSpecific(groupConfigId);
+                GroupConfiguration groupConfiguration = CREATOR.getClient().getSpecific(groupConfigId);
                 GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
 
                 ObjectHelper.executeIfNotNull(groupConfigName, () -> updated.name(groupConfigName));
@@ -123,7 +109,7 @@ public class GroupConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(buildConfigurationIds,
                         () -> updated.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                getClientAuthenticated().update(groupConfigId, updated.build());
+                CREATOR.getClientAuthenticated().update(groupConfigId, updated.build());
             });
         }
     }
@@ -133,7 +119,7 @@ public class GroupConfigCli extends AbstractCommand {
 
         @Override
         public GroupConfiguration getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -142,7 +128,7 @@ public class GroupConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

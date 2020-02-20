@@ -10,7 +10,7 @@ import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
@@ -20,21 +20,14 @@ import org.jboss.pnc.dto.Artifact;
         ArtifactCli.ListFromHash.class })
 public class ArtifactCli extends AbstractCommand {
 
-    private static ArtifactClient clientCache;
-
-    private static ArtifactClient getClient() {
-        if (clientCache == null) {
-            clientCache = new ArtifactClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
 
     @CommandDefinition(name = "get", description = "Get artifact")
     public class Get extends AbstractGetSpecificCommand<Artifact> {
 
         @Override
         public Artifact getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -61,7 +54,7 @@ public class ArtifactCli extends AbstractCommand {
                 if (md5 == null && sha1 == null && sha256 == null) {
                     log.error("You need to use at least one hash option!");
                 } else {
-                    ObjectHelper.print(jsonOutput, getClient().getAll(sha256, md5, sha1));
+                    ObjectHelper.print(jsonOutput, CREATOR.getClient().getAll(sha256, md5, sha1));
                 }
             });
         }

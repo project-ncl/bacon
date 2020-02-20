@@ -24,7 +24,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GenericSettingClient;
 
 @GroupCommandDefinition(name = "announcement-banner", description = "Announcement banner related tasks", groupCommands = {
@@ -32,21 +32,7 @@ import org.jboss.pnc.client.GenericSettingClient;
         AnnouncementBannerCli.GetAnnouncementBanner.class })
 public class AnnouncementBannerCli extends AbstractCommand {
 
-    private static GenericSettingClient clientCache;
-
-    private static GenericSettingClient getClient() {
-        if (clientCache == null) {
-            clientCache = new GenericSettingClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static GenericSettingClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new GenericSettingClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<GenericSettingClient> CREATOR = new ClientCreator<>(GenericSettingClient::new);
 
     @CommandDefinition(name = "set", description = "This will set the announcement banner")
     public class SetAnnouncementBanner extends AbstractCommand {
@@ -57,7 +43,7 @@ public class AnnouncementBannerCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().setAnnouncementBanner(announcement);
+                CREATOR.getClientAuthenticated().setAnnouncementBanner(announcement);
             });
         }
     }
@@ -68,7 +54,7 @@ public class AnnouncementBannerCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().setAnnouncementBanner("");
+                CREATOR.getClientAuthenticated().setAnnouncementBanner("");
             });
         }
     }
@@ -79,7 +65,7 @@ public class AnnouncementBannerCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                System.out.println(getClient().getAnnouncementBanner().getBanner());
+                System.out.println(CREATOR.getClient().getAnnouncementBanner().getBanner());
             });
         }
     }

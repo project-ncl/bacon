@@ -29,6 +29,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductMilestoneClient;
 import org.jboss.pnc.client.ProductReleaseClient;
@@ -41,21 +42,9 @@ import org.jboss.pnc.enums.SupportLevel;
         ProductReleaseCli.ListSupportLevel.class })
 public class ProductReleaseCli extends AbstractCommand {
 
-    private static ProductReleaseClient clientCache;
-
-    private static ProductReleaseClient getClient() {
-        if (clientCache == null) {
-            clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static ProductReleaseClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new ProductReleaseClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<ProductReleaseClient> CREATOR = new ClientCreator<>(ProductReleaseClient::new);
+    private static final ClientCreator<ProductMilestoneClient> MILESTONE_CREATOR = new ClientCreator<>(
+            ProductMilestoneClient::new);
 
     @CommandDefinition(name = "create", description = "Create a product release")
     public class Create extends AbstractCommand {
@@ -90,16 +79,14 @@ public class ProductReleaseCli extends AbstractCommand {
                 }
 
                 // we have to specify the product version, otherwise PNC is not happy. Why though???
-                ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(
-                        PncClientHelper.getPncConfiguration(false));
-                ProductMilestone productMilestone = productMilestoneClient.getSpecific(productMilestoneId);
+                ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
 
                 ProductRelease productRelease = ProductRelease.builder().version(productReleaseVersion)
                         .releaseDate(PncClientHelper.parseDateFormat(releaseDate)).productMilestone(productMilestone)
                         .productVersion(productMilestone.getProductVersion()).supportLevel(SupportLevel.valueOf(supportLevel))
                         .downloadUrl(downloadUrl).issueTrackerUrl(issueTrackerUrl).build();
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(productRelease));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productRelease));
             });
         }
     }
@@ -126,7 +113,7 @@ public class ProductReleaseCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                ProductRelease productRelease = getClient().getSpecific(productReleaseId);
+                ProductRelease productRelease = CREATOR.getClient().getSpecific(productReleaseId);
                 ProductRelease.Builder updated = productRelease.toBuilder();
 
                 ObjectHelper.executeIfNotNull(productReleaseVersion, () -> {
@@ -148,7 +135,7 @@ public class ProductReleaseCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(downloadUrl, () -> updated.downloadUrl(downloadUrl));
                 ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
-                getClientAuthenticated().update(productReleaseId, updated.build());
+                CREATOR.getClientAuthenticated().update(productReleaseId, updated.build());
             });
         }
     }
@@ -158,7 +145,7 @@ public class ProductReleaseCli extends AbstractCommand {
 
         @Override
         public ProductRelease getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -172,15 +159,14 @@ public class ProductReleaseCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                ObjectHelper.print(jsonOutput, getClient().getAllSupportLevel());
+                ObjectHelper.print(jsonOutput, CREATOR.getClient().getAllSupportLevel());
 
             });
         }
     }
 
     private static boolean validateReleaseVersion(String productMilestoneId, String productVersion) throws ClientException {
-        ProductMilestoneClient productMilestoneClient = new ProductMilestoneClient(PncClientHelper.getPncConfiguration(false));
-        ProductMilestone productMilestone = productMilestoneClient.getSpecific(productMilestoneId);
+        ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
 
         return ProductMilestoneCli.validateProductMilestoneVersion(productMilestone.getProductVersion().getId(),
                 productVersion);

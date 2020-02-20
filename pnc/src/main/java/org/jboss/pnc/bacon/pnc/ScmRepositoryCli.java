@@ -28,7 +28,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
@@ -44,21 +44,7 @@ import java.util.Optional;
         ScmRepositoryCli.ListBuildConfigs.class, })
 public class ScmRepositoryCli extends AbstractCommand {
 
-    private static SCMRepositoryClient clientCache;
-
-    private static SCMRepositoryClient getClient() {
-        if (clientCache == null) {
-            clientCache = new SCMRepositoryClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static SCMRepositoryClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new SCMRepositoryClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<SCMRepositoryClient> CREATOR = new ClientCreator<>(SCMRepositoryClient::new);
 
     @CommandDefinition(name = "create-and-sync", description = "Create a repository")
     public class CreateAndSync extends AbstractCommand {
@@ -79,7 +65,7 @@ public class ScmRepositoryCli extends AbstractCommand {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
                         .preBuildSyncEnabled(Boolean.valueOf(preBuildSync)).scmUrl(scmUrl).build();
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(createAndSyncSCMRequest));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });
         }
     }
@@ -89,7 +75,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public SCMRepository getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -104,7 +90,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -116,7 +102,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 }

@@ -24,7 +24,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GenericSettingClient;
 
 @GroupCommandDefinition(name = "maintenance-mode", description = "Maintenance mode related tasks", groupCommands = {
@@ -32,21 +32,7 @@ import org.jboss.pnc.client.GenericSettingClient;
         MaintenanceModeCli.StatusMaintenanceMode.class })
 public class MaintenanceModeCli extends AbstractCommand {
 
-    private static GenericSettingClient clientCache;
-
-    private static GenericSettingClient getClient() {
-        if (clientCache == null) {
-            clientCache = new GenericSettingClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static GenericSettingClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new GenericSettingClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<GenericSettingClient> CREATOR = new ClientCreator<>(GenericSettingClient::new);
 
     @CommandDefinition(name = "activate", description = "This will disable any new builds from being accepted")
     public class ActivateMaintenanceMode extends AbstractCommand {
@@ -57,8 +43,7 @@ public class MaintenanceModeCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().activateMaintenanceMode(reason);
-
+                CREATOR.getClientAuthenticated().activateMaintenanceMode(reason);
             });
         }
     }
@@ -69,9 +54,7 @@ public class MaintenanceModeCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().deactivateMaintenanceMode();
-                ;
-
+                CREATOR.getClientAuthenticated().deactivateMaintenanceMode();
             });
         }
     }
@@ -82,9 +65,9 @@ public class MaintenanceModeCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                if (getClient().isInMaintenanceMode()) {
+                if (CREATOR.getClient().isInMaintenanceMode()) {
                     System.out.println("PNC is in maintenance mode");
-                    System.out.println(getClient().getAnnouncementBanner().getBanner());
+                    System.out.println(CREATOR.getClient().getAnnouncementBanner().getBanner());
                 } else {
                     System.out.println("PNC is NOT in maintenance mode");
                 }

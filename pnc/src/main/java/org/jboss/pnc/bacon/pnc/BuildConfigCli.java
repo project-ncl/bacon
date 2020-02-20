@@ -30,7 +30,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
@@ -52,21 +52,7 @@ import java.util.Optional;
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
-    private static BuildConfigurationClient clientCache;
-
-    public static BuildConfigurationClient getClient() {
-        if (clientCache == null) {
-            clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    public static BuildConfigurationClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new BuildConfigurationClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(BuildConfigurationClient::new);
 
     @CommandDefinition(name = "create", description = "Create a build configuration")
     public class Create extends AbstractCommand {
@@ -109,7 +95,7 @@ public class BuildConfigCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productVersionId, () -> buildConfigurationBuilder
                         .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
             });
         }
 
@@ -154,7 +140,7 @@ public class BuildConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildConfiguration buildConfiguration = getClient().getSpecific(buildConfigId);
+                BuildConfiguration buildConfiguration = CREATOR.getClient().getSpecific(buildConfigId);
                 BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
 
                 ObjectHelper.executeIfNotNull(buildConfigName, () -> updated.name(buildConfigName));
@@ -169,7 +155,7 @@ public class BuildConfigCli extends AbstractCommand {
                         () -> updated.parameters(processGenericParameters(genericParameters)));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
 
-                getClientAuthenticated().update(buildConfigId, updated.build());
+                CREATOR.getClientAuthenticated().update(buildConfigId, updated.build());
             });
         }
     }
@@ -179,7 +165,7 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public BuildConfiguration getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -188,7 +174,7 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -200,7 +186,7 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getBuilds(buildConfigId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuilds(buildConfigId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
