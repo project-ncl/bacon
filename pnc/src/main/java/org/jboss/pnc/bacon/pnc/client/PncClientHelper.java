@@ -35,6 +35,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import org.jboss.pnc.dto.Banner;
 
 @Slf4j
 public class PncClientHelper {
@@ -79,8 +80,13 @@ public class PncClientHelper {
         try {
             URI uri = new URI(url);
 
-            configuration = Configuration.builder().protocol(uri.getScheme()).host(uri.getHost()).bearerToken(bearerToken)
-                    .pageSize(50).build();
+            Integer port = null;
+            if (uri.getPort() != -1) {
+                port = uri.getPort();
+            }
+
+            configuration = Configuration.builder().protocol(uri.getScheme()).port(port).host(uri.getHost())
+                    .bearerToken(bearerToken).pageSize(50).build();
 
             GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
             try {
