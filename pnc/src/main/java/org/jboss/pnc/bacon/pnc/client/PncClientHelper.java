@@ -116,7 +116,7 @@ public class PncClientHelper {
             Credential credential;
 
             if (keycloakConfig.isServiceAccount()) {
-                credential = client.getCredential(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
+                credential = client.getCredentialServiceAccount(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
                         keycloakConfig.getUsername(), keycloakConfig.getClientSecret());
             } else {
                 credential = client.getCredential(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
