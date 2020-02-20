@@ -22,7 +22,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -35,21 +35,14 @@ import java.util.Optional;
         EnvironmentCli.List.class })
 public class EnvironmentCli extends AbstractCommand {
 
-    private static EnvironmentClient clientCache;
-
-    private static EnvironmentClient getClient() {
-        if (clientCache == null) {
-            clientCache = new EnvironmentClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<EnvironmentClient> CREATOR = new ClientCreator<>(EnvironmentClient::new);
 
     @CommandDefinition(name = "get", description = "Get environment")
     public class Get extends AbstractGetSpecificCommand<Environment> {
 
         @Override
         public Environment getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -58,7 +51,7 @@ public class EnvironmentCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Environment> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

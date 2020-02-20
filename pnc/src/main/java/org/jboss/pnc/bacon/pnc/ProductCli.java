@@ -28,7 +28,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -41,21 +41,7 @@ import java.util.Optional;
         ProductCli.Get.class, ProductCli.List.class, ProductCli.Update.class })
 public class ProductCli extends AbstractCommand {
 
-    private static ProductClient clientCache;
-
-    private static ProductClient getClient() {
-        if (clientCache == null) {
-            clientCache = new ProductClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static ProductClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new ProductClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<ProductClient> CREATOR = new ClientCreator<>(ProductClient::new);
 
     @CommandDefinition(name = "create", description = "Create a product")
     public class Create extends AbstractCommand {
@@ -86,7 +72,7 @@ public class ProductCli extends AbstractCommand {
                 Product product = Product.builder().name(name).abbreviation(abbreviation).description(description)
                         .productCode(productCode).pgmSystemName(systemCode).build();
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(product));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(product));
             });
         }
     }
@@ -96,7 +82,7 @@ public class ProductCli extends AbstractCommand {
 
         @Override
         public Product getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -106,7 +92,7 @@ public class ProductCli extends AbstractCommand {
         @Override
         public RemoteCollection<Product> getAll(String sort, String query) throws RemoteResourceException {
 
-            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -136,7 +122,7 @@ public class ProductCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Product product = getClient().getSpecific(id);
+                Product product = CREATOR.getClient().getSpecific(id);
                 Product.Builder updated = product.toBuilder();
 
                 ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
@@ -145,7 +131,7 @@ public class ProductCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productCode, () -> updated.productCode(productCode));
                 ObjectHelper.executeIfNotNull(systemCode, () -> updated.pgmSystemName(systemCode));
 
-                getClientAuthenticated().update(id, updated.build());
+                CREATOR.getClientAuthenticated().update(id, updated.build());
             });
         }
     }

@@ -33,11 +33,8 @@ import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
-import org.jboss.pnc.client.BuildClient;
-import org.jboss.pnc.client.ClientException;
-import org.jboss.pnc.client.RemoteCollection;
-import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.client.*;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.RebuildMode;
@@ -60,21 +57,9 @@ import java.util.Optional;
 @Slf4j
 public class BuildCli extends AbstractCommand {
 
-    private static BuildClient clientCache;
-
-    private static BuildClient getClient() {
-        if (clientCache == null) {
-            clientCache = new BuildClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static BuildClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new BuildClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
+    private static final ClientCreator<BuildConfigurationClient> BC_CREATOR = new ClientCreator<>(
+            BuildConfigurationClient::new);
 
     @CommandDefinition(name = "start", description = "Start a new build")
     public class Start extends AbstractCommand {
@@ -111,7 +96,7 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
 
             return super.executeHelper(commandInvocation, () -> {
-                ObjectHelper.print(jsonOutput, BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams));
+                ObjectHelper.print(jsonOutput, BC_CREATOR.getClientAuthenticated().trigger(buildConfigId, buildParams));
             });
         }
 
@@ -139,7 +124,7 @@ public class BuildCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().cancel(buildId);
+                CREATOR.getClientAuthenticated().cancel(buildId);
             });
         }
     }
@@ -149,7 +134,7 @@ public class BuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(null, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(null, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -161,7 +146,7 @@ public class BuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -173,7 +158,7 @@ public class BuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -182,7 +167,7 @@ public class BuildCli extends AbstractCommand {
 
         @Override
         public Build getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -203,7 +188,7 @@ public class BuildCli extends AbstractCommand {
             try {
                 Optional<InputStream> buildLogs;
                 try {
-                    buildLogs = getClient().getBuildLogs(buildId);
+                    buildLogs = CREATOR.getClient().getBuildLogs(buildId);
                 } catch (Exception e) {
                     e.printStackTrace(); // TODO, client should return Optional.empty not throw the exception (NCL-5348)
                     buildLogs = Optional.empty();
@@ -243,7 +228,7 @@ public class BuildCli extends AbstractCommand {
 
                 String filename = id + "-sources.tar.gz";
 
-                Response response = getClient().getInternalScmArchiveLink(id);
+                Response response = CREATOR.getClient().getInternalScmArchiveLink(id);
 
                 InputStream in = (InputStream) response.getEntity();
 

@@ -26,7 +26,7 @@ import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.dto.requests.BuildPushRequest;
@@ -35,6 +35,9 @@ import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
 @GroupCommandDefinition(name = "brew-push", description = "brew-push", groupCommands = { BrewPushCli.Build.class,
         BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
 public class BrewPushCli extends AbstractCommand {
+
+    private static final ClientCreator<BuildClient> BUILD_CREATOR = new ClientCreator<>(BuildClient::new);
+    private static final ClientCreator<GroupBuildClient> GROUP_BUILD_CREATOR = new ClientCreator<>(GroupBuildClient::new);
 
     @CommandDefinition(name = "build", description = "Push build to Brew")
     public class Build extends AbstractCommand {
@@ -55,12 +58,10 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(true));
-
                 BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(Boolean.valueOf(reimport))
                         .build();
 
-                ObjectHelper.print(jsonOutput, client.push(id, request));
+                ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClientAuthenticated().push(id, request));
             });
         }
 
@@ -83,11 +84,8 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                GroupBuildClient client = new GroupBuildClient(PncClientHelper.getPncConfiguration(true));
-
                 GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
-
-                client.brewPush(id, request);
+                GROUP_BUILD_CREATOR.getClientAuthenticated().brewPush(id, request);
             });
         }
 
@@ -111,9 +109,7 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false));
-
-                ObjectHelper.print(jsonOutput, client.getPushResult(id));
+                ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClient().getPushResult(id));
             });
         }
     }

@@ -28,7 +28,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProjectClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -44,21 +44,7 @@ import java.util.Optional;
         ProjectCli.Update.class, })
 public class ProjectCli extends AbstractCommand {
 
-    private static ProjectClient clientCache;
-
-    private static ProjectClient getClient() {
-        if (clientCache == null) {
-            clientCache = new ProjectClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static ProjectClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new ProjectClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<ProjectClient> CREATOR = new ClientCreator<>(ProjectClient::new);
 
     @CommandDefinition(name = "create", description = "Create a project")
     public class Create extends AbstractCommand {
@@ -82,7 +68,7 @@ public class ProjectCli extends AbstractCommand {
                 Project project = Project.builder().name(name).description(description).projectUrl(projectUrl)
                         .issueTrackerUrl(issueTrackerUrl).build();
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(project));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(project));
             });
         }
     }
@@ -92,7 +78,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public Project getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -101,7 +87,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -113,7 +99,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -125,7 +111,7 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -148,7 +134,7 @@ public class ProjectCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                Project project = getClient().getSpecific(id);
+                Project project = CREATOR.getClient().getSpecific(id);
                 Project.Builder updated = project.toBuilder();
 
                 ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
@@ -156,7 +142,7 @@ public class ProjectCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(projectUrl, () -> updated.projectUrl(projectUrl));
                 ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
-                getClientAuthenticated().update(id, updated.build());
+                CREATOR.getClientAuthenticated().update(id, updated.build());
             });
         }
     }

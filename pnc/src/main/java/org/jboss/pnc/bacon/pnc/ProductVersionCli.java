@@ -30,7 +30,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -51,23 +51,7 @@ import java.util.Optional;
 @Slf4j
 public class ProductVersionCli extends AbstractCommand {
 
-    private static ProductVersionClient clientCache;
-
-    private static ProductVersionClient getClient() {
-
-        if (clientCache == null) {
-            clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static ProductVersionClient getClientAuthenticated() {
-
-        if (clientCache == null) {
-            clientCache = new ProductVersionClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<ProductVersionClient> CREATOR = new ClientCreator<>(ProductVersionClient::new);
 
     @CommandDefinition(name = "create", description = "Create a product version")
     public class Create extends AbstractCommand {
@@ -94,7 +78,7 @@ public class ProductVersionCli extends AbstractCommand {
                 ProductVersion productVersion = ProductVersion.builder().product(productRef).version(this.productVersion)
                         .build();
 
-                ObjectHelper.print(jsonOutput, getClientAuthenticated().createNew(productVersion));
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productVersion));
             });
         }
     }
@@ -104,7 +88,7 @@ public class ProductVersionCli extends AbstractCommand {
 
         @Override
         public ProductVersion getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 
@@ -117,7 +101,7 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -130,7 +114,7 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return getClient().getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -144,7 +128,7 @@ public class ProductVersionCli extends AbstractCommand {
         public RemoteCollection<org.jboss.pnc.dto.ProductMilestone> getAll(String sort, String query)
                 throws RemoteResourceException {
 
-            return getClient().getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -157,7 +141,7 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<ProductRelease> getAll(String sort, String query) throws RemoteResourceException {
 
-            return getClient().getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -173,7 +157,7 @@ public class ProductVersionCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                ProductVersion pV = getClient().getSpecific(id);
+                ProductVersion pV = CREATOR.getClient().getSpecific(id);
                 ProductVersion.Builder updated = pV.toBuilder();
                 ObjectHelper.executeIfNotNull(productVersion, () -> {
 
@@ -184,7 +168,7 @@ public class ProductVersionCli extends AbstractCommand {
 
                     updated.version(productVersion);
                 });
-                getClientAuthenticated().update(id, updated.build());
+                CREATOR.getClientAuthenticated().update(id, updated.build());
             });
         }
     }

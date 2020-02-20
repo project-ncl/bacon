@@ -26,7 +26,7 @@ import org.aesh.command.option.Argument;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -40,21 +40,7 @@ import java.util.Optional;
         GroupBuildCli.List.class, GroupBuildCli.ListBuilds.class, GroupBuildCli.Get.class })
 public class GroupBuildCli extends AbstractCommand {
 
-    private static GroupBuildClient clientCache;
-
-    private static GroupBuildClient getClient() {
-        if (clientCache == null) {
-            clientCache = new GroupBuildClient(PncClientHelper.getPncConfiguration(false));
-        }
-        return clientCache;
-    }
-
-    private static GroupBuildClient getClientAuthenticated() {
-        if (clientCache == null) {
-            clientCache = new GroupBuildClient(PncClientHelper.getPncConfiguration(true));
-        }
-        return clientCache;
-    }
+    private static final ClientCreator<GroupBuildClient> CREATOR = new ClientCreator<>(GroupBuildClient::new);
 
     @CommandDefinition(name = "cancel", description = "Cancel a group build")
     public class Cancel extends AbstractCommand {
@@ -66,7 +52,7 @@ public class GroupBuildCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                getClientAuthenticated().cancel(groupBuildId);
+                CREATOR.getClientAuthenticated().cancel(groupBuildId);
             });
         }
     }
@@ -76,7 +62,7 @@ public class GroupBuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<GroupBuild> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -88,7 +74,7 @@ public class GroupBuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return getClient().getBuilds(groupBuildId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuilds(groupBuildId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -97,7 +83,7 @@ public class GroupBuildCli extends AbstractCommand {
 
         @Override
         public GroupBuild getSpecific(String id) throws ClientException {
-            return getClient().getSpecific(id);
+            return CREATOR.getClient().getSpecific(id);
         }
     }
 }
