@@ -188,7 +188,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get-performed-builds", description = "Get performed builds")
+    @CommandDefinition(name = "list-performed-builds", description = "List performed builds")
     public class PerformedBuilds extends AbstractListCommand<Build> {
 
         @Argument(required = true, description = "Milestone id")
