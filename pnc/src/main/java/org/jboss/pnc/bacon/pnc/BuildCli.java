@@ -30,6 +30,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
@@ -81,7 +82,7 @@ public class BuildCli extends AbstractCommand {
         @Argument(required = true, description = "Build Config ID")
         private String buildConfigId;
 
-        @Option(name = "rebuild-mode")
+        @Option(name = "rebuild-mode", description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
         @Option(name = "keep-pod-on-failure", description = "Default: false", defaultValue = "false")
         private String keepPodOnFailure;
@@ -92,10 +93,18 @@ public class BuildCli extends AbstractCommand {
         @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        public Start() {
+        }
+
         @Override
         public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
             BuildParameters buildParams = new BuildParameters();
+            if (rebuildMode == null) {
+                rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
+            }
+            checkRebuildModeOption(rebuildMode);
+
             buildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
             buildParams.setKeepPodOnFailure(Boolean.parseBoolean(keepPodOnFailure));
             buildParams.setTimestampAlignment(Boolean.parseBoolean(timestampAlignment));
@@ -104,6 +113,19 @@ public class BuildCli extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
                 ObjectHelper.print(jsonOutput, BuildConfigCli.getClientAuthenticated().trigger(buildConfigId, buildParams));
             });
+        }
+
+        private void checkRebuildModeOption(String rebuildMode) {
+
+            try {
+                RebuildMode.valueOf(rebuildMode);
+            } catch (IllegalArgumentException | NullPointerException e) {
+                log.error("The rebuild flag contains an illegal option. Possibilities are: ");
+                for (RebuildMode mode : RebuildMode.values()) {
+                    log.error(mode.toString());
+                }
+                throw new FatalException();
+            }
         }
     }
 
