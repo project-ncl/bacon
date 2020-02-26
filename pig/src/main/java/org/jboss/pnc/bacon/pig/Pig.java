@@ -17,14 +17,14 @@
  */
 package org.jboss.pnc.bacon.pig;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
-import org.jboss.pnc.bacon.pig.impl.MisconfigurationException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -42,8 +42,6 @@ import java.util.Map;
         Pig.GenerateSharedContentAnalysis.class, Pig.GenerateDocuments.class, Pig.GenerateScripts.class,
         Pig.TriggerAddOns.class })
 public class Pig extends AbstractCommand {
-
-    private static final ObjectMapper jsonMapper = new ObjectMapper();
 
     public static final String REBUILD_MODE_DESC = "If specified, artifacts from temporary builds will have timestamp in versions";
     public static final String REBUILD_MODE_DEFAULT = "EXPLICIT_DEPENDENCY_CHECK";
@@ -66,23 +64,18 @@ public class Pig extends AbstractCommand {
     public abstract class PigCommand<T> extends AbstractCommand {
         @Option(shortName = CONFIG_SHORT, overrideRequired = true, defaultValue = CONFIG_DEFAULT, description = CONFIG_DESC)
         String config;
+        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) {
-            try {
-                PigContext.get().loadConfig(config);
-                T result = doExecute();
-                jsonMapper.writer().writeValue(System.out, result);
-            } catch (MisconfigurationException e) {
-                System.err.println(e.getMessage());
-                return CommandResult.FAILURE;
-            } catch (Exception any) {
-                return CommandResult.FAILURE;
-            }
-            return CommandResult.SUCCESS;
+        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+            PigContext.get().loadConfig(config);
+            return super.executeHelper(commandInvocation, () -> {
+                ObjectHelper.print(jsonOutput, doExecute());
+            });
         }
 
-        abstract T doExecute() throws Exception;
+        abstract T doExecute();
     }
 
     /* System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "10"); */
