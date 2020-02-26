@@ -170,7 +170,6 @@ public class AbstractCommand implements Command {
     private CommandResult executePrivate(CommandInvocation commandInvocation) {
 
         setVerbosityIfPresent();
-        setConfigurationFileLocation();
 
         boolean helpNoFinalCommandPrinted = false;
         boolean helpOrVersionPrinted = printHelpOrVersionIfPresent(commandInvocation);
@@ -196,6 +195,7 @@ public class AbstractCommand implements Command {
             return CommandResult.SUCCESS;
         }
 
+        setConfigurationFileLocation();
         try {
             callback.call();
         } catch (FatalException e) {
