@@ -1,7 +1,5 @@
 package org.jboss.pnc.bacon.config;
 
-import utils.Validator;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -20,18 +18,33 @@ public interface Validate {
     static void validateUrl(String url, String kind) {
 
         if (url == null || url.isEmpty()) {
-            Validator.fail(kind + " Url is not specified in the config file!");
+            fail(kind + " Url is not specified in the config file!");
         }
 
         try {
             URI uri = new URI(url);
 
-            Validator.checkIfNull(uri.getScheme(),
-                    "You need to specify the protocol of the " + kind + " URL in the config file");
-            Validator.checkIfNull(uri.getHost(), "You need to specify the host of the " + kind + " URL in the config file");
+            checkIfNull(uri.getScheme(), "You need to specify the protocol of the " + kind + " URL in the config file");
+            checkIfNull(uri.getHost(), "You need to specify the host of the " + kind + " URL in the config file");
 
         } catch (URISyntaxException e) {
-            Validator.fail("Could not parse the " + kind + " Url at all! " + e.getMessage());
+            fail("Could not parse the " + kind + " Url at all! " + e.getMessage());
+        }
+    }
+
+    static void checkIfNull(Object object, String reason) {
+        if (object == null) {
+            throw new ConfigMissingException(reason);
+        }
+    }
+
+    static void fail(String reason) {
+        checkIfNull(null, reason);
+    }
+
+    class ConfigMissingException extends RuntimeException {
+        public ConfigMissingException(String reason) {
+            super("ConfigMissingException: " + reason);
         }
     }
 
