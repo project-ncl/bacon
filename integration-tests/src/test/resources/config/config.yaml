@@ -1,0 +1,33 @@
+# ##############################################################################
+#
+# Config for bacon
+#
+# All urls are the base paths only.
+#
+#     e.g USE http://example.co
+#
+#                 as opposed to:
+#
+#             http://example.com/path
+#
+# ##############################################################################
+
+# ******************************************************************************
+# PNC details
+#
+# ******************************************************************************
+pnc:
+    url: "${pnc-url}/pnc-rest-new/rest-new/"
+    bifrostBaseurl: "http://example.com"
+
+# ******************************************************************************
+# Authentication information
+#
+# Uncomment this section if you want to create / update / delete
+# ******************************************************************************
+
+keycloak:
+    url: "${keycloak-url}"
+    realm: "${keycloak-realm}"
+    username: "${keycloak-user}"
+    clientSecret: "${keycloak-secret}"
