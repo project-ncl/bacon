@@ -32,12 +32,15 @@ import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.dto.requests.BuildPushRequest;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
 
-@GroupCommandDefinition(name = "brew-push", description = "brew-push", groupCommands = { BrewPushCli.Build.class,
-        BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
+@GroupCommandDefinition(
+        name = "brew-push",
+        description = "brew-push",
+        groupCommands = { BrewPushCli.Build.class, BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
 public class BrewPushCli extends AbstractCommand {
 
     private static final ClientCreator<BuildClient> BUILD_CREATOR = new ClientCreator<>(BuildClient::new);
-    private static final ClientCreator<GroupBuildClient> GROUP_BUILD_CREATOR = new ClientCreator<>(GroupBuildClient::new);
+    private static final ClientCreator<GroupBuildClient> GROUP_BUILD_CREATOR = new ClientCreator<>(
+            GroupBuildClient::new);
 
     @CommandDefinition(name = "build", description = "Push build to Brew")
     public class Build extends AbstractCommand {
@@ -47,18 +50,28 @@ public class BrewPushCli extends AbstractCommand {
         @Option(required = true, name = "tag-prefix", description = "Brew Tag Prefix")
         private String tagPrefix;
 
-        @Option(name = "reimport", description = "Should we re-import the build in case it was already imported?", defaultValue = "false")
+        @Option(
+                name = "reimport",
+                description = "Should we re-import the build in case it was already imported?",
+                defaultValue = "false")
         private String reimport;
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(Boolean.valueOf(reimport))
+                BuildPushRequest request = BuildPushRequest.builder()
+                        .tagPrefix(tagPrefix)
+                        .reimport(Boolean.valueOf(reimport))
                         .build();
 
                 ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClientAuthenticated().push(id, request));
@@ -80,7 +93,8 @@ public class BrewPushCli extends AbstractCommand {
         private String tagPrefix;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -101,11 +115,16 @@ public class BrewPushCli extends AbstractCommand {
         @Argument(required = true, description = "Brew Push ID")
         private String id;
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 

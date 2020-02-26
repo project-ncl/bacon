@@ -37,8 +37,11 @@ import org.jboss.pnc.dto.Product;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "product", description = "Product", groupCommands = { ProductCli.Create.class,
-        ProductCli.Get.class, ProductCli.List.class, ProductCli.Update.class })
+@GroupCommandDefinition(
+        name = "product",
+        description = "Product",
+        groupCommands = { ProductCli.Create.class, ProductCli.Get.class, ProductCli.List.class,
+                ProductCli.Update.class })
 public class ProductCli extends AbstractCommand {
 
     private static final ClientCreator<ProductClient> CREATOR = new ClientCreator<>(ProductClient::new);
@@ -55,22 +58,38 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(name = "product-code", description = "The official Product code to be used in URLs and filenames etc e.g. eap", defaultValue = "")
+        @Option(
+                name = "product-code",
+                description = "The official Product code to be used in URLs and filenames etc e.g. eap",
+                defaultValue = "")
         private String productCode;
 
-        @Option(name = "system-code", description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap", defaultValue = "")
+        @Option(
+                name = "system-code",
+                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap",
+                defaultValue = "")
         private String systemCode;
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Product product = Product.builder().name(name).abbreviation(abbreviation).description(description)
-                        .productCode(productCode).pgmSystemName(systemCode).build();
+                Product product = Product.builder()
+                        .name(name)
+                        .abbreviation(abbreviation)
+                        .description(description)
+                        .productCode(productCode)
+                        .pgmSystemName(systemCode)
+                        .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(product));
             });
@@ -111,14 +130,19 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(name = "product-code", description = "The official Product code to be used in URLs and filenames etc e.g. eap")
+        @Option(
+                name = "product-code",
+                description = "The official Product code to be used in URLs and filenames etc e.g. eap")
         private String productCode;
 
-        @Option(name = "system-code", description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap")
+        @Option(
+                name = "system-code",
+                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap")
         private String systemCode;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 

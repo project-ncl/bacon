@@ -39,8 +39,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * TODO: replace with programmatic maven api to remove OSCommandExecutor? TODO: CON: would mean that users have to stick to the
- * same maven version
+ * TODO: replace with programmatic maven api to remove OSCommandExecutor? TODO: CON: would mean that users have to stick
+ * to the same maven version
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/25/17
@@ -65,7 +65,8 @@ public class RepoBuilder {
     public File build(File bomFile) {
         try {
             File projectLocation = createProject(bomFile);
-            String settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
+            String settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml")
+                    .getAbsolutePath();
             File m2Repo = buildProjectWithOverriddenM2(projectLocation, settingsXml);
             RepositoryUtils.removeIrrelevantFiles(m2Repo);
             if (removeGeneratedM2Dups) {
@@ -123,8 +124,10 @@ public class RepoBuilder {
 
         File projectDirectory = org.jboss.pnc.bacon.pig.impl.utils.FileUtils.mkTempDir("helper-project");
         String pomContent = ResourceUtils.getOverridableResource(POM_TEMPLATE_LOCATION, configurationDirectory)
-                .replace("<bom-contents/>", dependencies).replace("<bom-group-id/>", bomGroupId)
-                .replace("<bom-artifact-id/>", artifactId).replace("<bom-version/>", bomVersion);
+                .replace("<bom-contents/>", dependencies)
+                .replace("<bom-group-id/>", bomGroupId)
+                .replace("<bom-artifact-id/>", artifactId)
+                .replace("<bom-version/>", bomVersion);
 
         File pom = new File(projectDirectory, "pom.xml");
         FileUtils.write(pom, pomContent, ENCODING);
@@ -135,10 +138,14 @@ public class RepoBuilder {
     static String extractRedhatDependencies(File bomFile) {
         Map<String, String> properties = XmlUtils.getProperties(bomFile);
 
-        List<Node> dependencyNodes = XmlUtils.listNodes(bomFile, "/project/dependencyManagement/dependencies/dependency");
+        List<Node> dependencyNodes = XmlUtils
+                .listNodes(bomFile, "/project/dependencyManagement/dependencies/dependency");
 
-        return dependencyNodes.stream().map(Element.class::cast).map(element -> GAV.fromXml(element, properties))
-                .filter(gav -> gav.getVersion().contains("redhat")).map(GAV::asBomXmlDependency)
+        return dependencyNodes.stream()
+                .map(Element.class::cast)
+                .map(element -> GAV.fromXml(element, properties))
+                .filter(gav -> gav.getVersion().contains("redhat"))
+                .map(GAV::asBomXmlDependency)
                 .collect(Collectors.joining("\n"));
     }
 }

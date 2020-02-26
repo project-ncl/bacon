@@ -42,10 +42,13 @@ public class CommunityDepAnalyzer {
 
     public CommunityDepAnalyzer(List<String> dependencyLines, List<String> swarmLog) {
         daDao = DADao.getInstance();
-        downloadedForSwarm = swarmLog.stream().filter(line -> line.startsWith("Downloaded"))
+        downloadedForSwarm = swarmLog.stream()
+                .filter(line -> line.startsWith("Downloaded"))
                 .filter(line -> line.contains(".jar"))
                 // lines are of the form: Downloaded: http://... (some add. info)
-                .map(l -> l.split("\\s+")[1]).sorted().collect(Collectors.toList());
+                .map(l -> l.split("\\s+")[1])
+                .sorted()
+                .collect(Collectors.toList());
         dependencies = dependencyLines.stream().map(CommunityDependency::new).collect(Collectors.toList());
     }
 
@@ -83,7 +86,8 @@ public class CommunityDepAnalyzer {
 
     private void addSwarmBuildDependencies(CommunityDependency communityDependency) {
         List<String> swarmBuildDownloads = downloadedForSwarm.stream()
-                .filter(d -> d.contains(communityDependency.toPathSubstring())).map(l -> l.substring(l.lastIndexOf("/") + 1))
+                .filter(d -> d.contains(communityDependency.toPathSubstring()))
+                .map(l -> l.substring(l.lastIndexOf("/") + 1))
                 .collect(Collectors.toList());
         communityDependency.setUsedForSwarm(swarmBuildDownloads);
     }

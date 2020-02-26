@@ -28,8 +28,11 @@ public interface KeycloakClient {
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredentialServiceAccount(String keycloakBaseUrl, String realm, String serviceAccountUsername, String secret)
-            throws KeycloakClientException;
+    Credential getCredentialServiceAccount(
+            String keycloakBaseUrl,
+            String realm,
+            String serviceAccountUsername,
+            String secret) throws KeycloakClientException;
 
     default String keycloakEndpoint(String keycloakBaseUrl, String realm) {
 

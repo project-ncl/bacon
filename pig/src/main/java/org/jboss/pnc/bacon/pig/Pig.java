@@ -37,10 +37,13 @@ import java.util.Map;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-@GroupCommandDefinition(name = "pig", description = "PiG tool", groupCommands = { Pig.Configure.class, Pig.Build.class,
-        Pig.GenerateRepository.class, Pig.GenerateLicenses.class, Pig.GenerateJavadocs.class, Pig.GenerateSources.class,
-        Pig.GenerateSharedContentAnalysis.class, Pig.GenerateDocuments.class, Pig.GenerateScripts.class,
-        Pig.TriggerAddOns.class })
+@GroupCommandDefinition(
+        name = "pig",
+        description = "PiG tool",
+        groupCommands = { Pig.Configure.class, Pig.Build.class, Pig.GenerateRepository.class,
+                Pig.GenerateLicenses.class, Pig.GenerateJavadocs.class, Pig.GenerateSources.class,
+                Pig.GenerateSharedContentAnalysis.class, Pig.GenerateDocuments.class, Pig.GenerateScripts.class,
+                Pig.TriggerAddOns.class })
 public class Pig extends AbstractCommand {
 
     public static final String REBUILD_MODE_DESC = "If specified, artifacts from temporary builds will have timestamp in versions";
@@ -62,13 +65,22 @@ public class Pig extends AbstractCommand {
     public static final String REMOVE_M2_DUPLICATES_DEFAULT = "false";
 
     public abstract class PigCommand<T> extends AbstractCommand {
-        @Option(shortName = CONFIG_SHORT, overrideRequired = true, defaultValue = CONFIG_DEFAULT, description = CONFIG_DESC)
+        @Option(
+                shortName = CONFIG_SHORT,
+                overrideRequired = true,
+                defaultValue = CONFIG_DEFAULT,
+                description = CONFIG_DESC)
         String config;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
             PigContext.get().loadConfig(config);
             return super.executeHelper(commandInvocation, () -> {
                 ObjectHelper.print(jsonOutput, doExecute());
@@ -88,49 +100,109 @@ public class Pig extends AbstractCommand {
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
 
-        @Option(shortName = TEMP_BUILD_SHORT, name = TEMP_BUILD, overrideRequired = true, defaultValue = TEMP_BUILD_DEFAULT, description = TEMP_BUILD_DESC)
+        @Option(
+                shortName = TEMP_BUILD_SHORT,
+                name = TEMP_BUILD,
+                overrideRequired = true,
+                defaultValue = TEMP_BUILD_DEFAULT,
+                description = TEMP_BUILD_DESC)
         private boolean tempBuild;
 
-        @Option(name = TEMP_BUILD_TIME_STAMP, overrideRequired = true, defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT, description = TEMP_BUILD_TIME_STAMP_DESC)
+        @Option(
+                name = TEMP_BUILD_TIME_STAMP,
+                overrideRequired = true,
+                defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
+                description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
 
-        @Option(name = REBUILD_MODE, overrideRequired = true, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
+        @Option(
+                name = REBUILD_MODE,
+                overrideRequired = true,
+                defaultValue = REBUILD_MODE_DEFAULT,
+                description = REBUILD_MODE_DESC)
         private RebuildMode rebuildMode;
 
-        @Option(name = "skipRepo", overrideRequired = true, defaultValue = "false", description = "Skip maven repository generation")
+        @Option(
+                name = "skipRepo",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip maven repository generation")
         private boolean skipRepo;
 
-        @Option(name = "skipPncUpdate", overrideRequired = true, defaultValue = "false", description = "Skip updating PNC entities. Use only if you have all entities created properly.")
+        @Option(
+                name = "skipPncUpdate",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip updating PNC entities. Use only if you have all entities created properly.")
         private boolean skipPncUpdate;
 
-        @Option(name = "skipBuilds", overrideRequired = true, defaultValue = "false", description = "Skip PNC builds. Use when all your builds went fine, something failed later "
-                + "and you want to retry generating deliverables without rebuilding.")
+        @Option(
+                name = "skipBuilds",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip PNC builds. Use when all your builds went fine, something failed later "
+                        + "and you want to retry generating deliverables without rebuilding.")
         private boolean skipBuilds;
 
-        @Option(name = "skipSources", overrideRequired = true, defaultValue = "false", description = "Skip sources generation.")
+        @Option(
+                name = "skipSources",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip sources generation.")
         private boolean skipSources;
 
-        @Option(name = "skipJavadoc", overrideRequired = true, defaultValue = "false", description = "Skip Javadoc generation.")
+        @Option(
+                name = "skipJavadoc",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip Javadoc generation.")
         private boolean skipJavadoc;
 
-        @Option(name = "skipLicenses", overrideRequired = true, defaultValue = "false", description = "Skip Licenses generation.")
+        @Option(
+                name = "skipLicenses",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip Licenses generation.")
         private boolean skipLicenses;
 
-        @Option(name = "skipSharedContent", overrideRequired = true, defaultValue = "false", description = "Skip generating shared content request input.")
+        @Option(
+                name = "skipSharedContent",
+                overrideRequired = true,
+                defaultValue = "false",
+                description = "Skip generating shared content request input.")
         private boolean skipSharedContent;
 
-        @Option(name = REMOVE_M2_DUPLICATES, overrideRequired = true, defaultValue = REMOVE_M2_DUPLICATES_DEFAULT, description = REMOVE_M2_DUPLICATES_DESC)
+        @Option(
+                name = REMOVE_M2_DUPLICATES,
+                overrideRequired = true,
+                defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
+                description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
 
-        @Option(shortName = 'r', name = "repoZip", overrideRequired = true, description = "Repository zip. "
-                + "Might be used if you have already downloaded repository zip to speed up the process.")
+        @Option(
+                shortName = 'r',
+                name = "repoZip",
+                overrideRequired = true,
+                description = "Repository zip. "
+                        + "Might be used if you have already downloaded repository zip to speed up the process.")
         private String repoZipPath;
 
         @Override
         public String doExecute() {
             PigContext.get().loadConfig(config);
-            return PigFacade.run(skipRepo, skipPncUpdate, skipBuilds, skipSources, skipJavadoc, skipLicenses, skipSharedContent,
-                    removeGeneratedM2Dups, repoZipPath, tempBuild, tempBuildTS, rebuildMode);
+            return PigFacade.run(
+                    skipRepo,
+                    skipPncUpdate,
+                    skipBuilds,
+                    skipSources,
+                    skipJavadoc,
+                    skipLicenses,
+                    skipSharedContent,
+                    removeGeneratedM2Dups,
+                    repoZipPath,
+                    tempBuild,
+                    tempBuildTS,
+                    rebuildMode);
         }
     }
 
@@ -154,13 +226,26 @@ public class Pig extends AbstractCommand {
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
 
-        @Option(shortName = TEMP_BUILD_SHORT, name = TEMP_BUILD, overrideRequired = true, defaultValue = TEMP_BUILD_DEFAULT, description = TEMP_BUILD_DESC)
+        @Option(
+                shortName = TEMP_BUILD_SHORT,
+                name = TEMP_BUILD,
+                overrideRequired = true,
+                defaultValue = TEMP_BUILD_DEFAULT,
+                description = TEMP_BUILD_DESC)
         private boolean tempBuild;
 
-        @Option(name = TEMP_BUILD_TIME_STAMP, overrideRequired = true, defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT, description = TEMP_BUILD_TIME_STAMP_DESC)
+        @Option(
+                name = TEMP_BUILD_TIME_STAMP,
+                overrideRequired = true,
+                defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
+                description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
 
-        @Option(name = REBUILD_MODE, overrideRequired = true, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
+        @Option(
+                name = REBUILD_MODE,
+                overrideRequired = true,
+                defaultValue = REBUILD_MODE_DEFAULT,
+                description = REBUILD_MODE_DESC)
         private RebuildMode rebuildMode;
 
         @Override
@@ -174,7 +259,11 @@ public class Pig extends AbstractCommand {
 
     @CommandDefinition(name = "repo", description = "GenerateRepository")
     public class GenerateRepository extends PigCommand<RepositoryData> {
-        @Option(name = REMOVE_M2_DUPLICATES, overrideRequired = true, defaultValue = REMOVE_M2_DUPLICATES_DEFAULT, description = REMOVE_M2_DUPLICATES_DESC)
+        @Option(
+                name = REMOVE_M2_DUPLICATES,
+                overrideRequired = true,
+                defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
+                description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
 
         @Override

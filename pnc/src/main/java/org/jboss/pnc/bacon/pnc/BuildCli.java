@@ -51,9 +51,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "build", description = "build", groupCommands = { BuildCli.Start.class, BuildCli.Cancel.class,
-        BuildCli.List.class, BuildCli.ListBuildArtifacts.class, BuildCli.ListDependencies.class, BuildCli.Get.class,
-        BuildCli.GetLog.class, BuildCli.DownloadSources.class })
+@GroupCommandDefinition(
+        name = "build",
+        description = "build",
+        groupCommands = { BuildCli.Start.class, BuildCli.Cancel.class, BuildCli.List.class,
+                BuildCli.ListBuildArtifacts.class, BuildCli.ListDependencies.class, BuildCli.Get.class,
+                BuildCli.GetLog.class, BuildCli.DownloadSources.class })
 @Slf4j
 public class BuildCli extends AbstractCommand {
 
@@ -67,7 +70,9 @@ public class BuildCli extends AbstractCommand {
         @Argument(required = true, description = "Build Config ID")
         private String buildConfigId;
 
-        @Option(name = "rebuild-mode", description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
+        @Option(
+                name = "rebuild-mode",
+                description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
         @Option(name = "keep-pod-on-failure", description = "Default: false", defaultValue = "false")
         private String keepPodOnFailure;
@@ -75,14 +80,19 @@ public class BuildCli extends AbstractCommand {
         private String timestampAlignment;
         @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
         private String temporaryBuild;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         public Start() {
         }
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             BuildParameters buildParams = new BuildParameters();
             if (rebuildMode == null) {
@@ -121,7 +131,8 @@ public class BuildCli extends AbstractCommand {
         private String buildId;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().cancel(buildId);
@@ -146,7 +157,8 @@ public class BuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -158,7 +170,8 @@ public class BuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -180,7 +193,8 @@ public class BuildCli extends AbstractCommand {
         private boolean follow;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> printLog(commandInvocation.getShell()));
         }
 
@@ -222,7 +236,8 @@ public class BuildCli extends AbstractCommand {
         private String id;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 

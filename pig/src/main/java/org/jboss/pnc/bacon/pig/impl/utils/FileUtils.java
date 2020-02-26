@@ -130,8 +130,8 @@ public class FileUtils {
                 final InputStream cin = compressorType != null
                         ? new CompressorStreamFactory().createCompressorInputStream(compressorType, is)
                         : is;
-                final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR,
-                        cin)) {
+                final ArchiveInputStream in = new ArchiveStreamFactory()
+                        .createArchiveInputStream(ArchiveStreamFactory.TAR, cin)) {
             final Path dir = directory.toPath();
             final Path canonicalDir = dir.toAbsolutePath().normalize();
 
@@ -198,8 +198,8 @@ public class FileUtils {
                 OutputStream cout = compressorType != null
                         ? new CompressorStreamFactory().createCompressorOutputStream(compressorType, os)
                         : os;
-                final ArchiveOutputStream out = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.TAR,
-                        cout)) {
+                final ArchiveOutputStream out = new ArchiveStreamFactory()
+                        .createArchiveOutputStream(ArchiveStreamFactory.TAR, cout)) {
             try (Stream<Path> stream = Files.walk(directory)) {
                 Iterator<Path> iterator = stream.iterator();
 
@@ -210,8 +210,8 @@ public class FileUtils {
                         continue;
                     }
 
-                    final String entryName = FilenameUtils.normalize(workingDirectory.toPath().relativize(path).toString(),
-                            true);
+                    final String entryName = FilenameUtils
+                            .normalize(workingDirectory.toPath().relativize(path).toString(), true);
 
                     log.debug("tar: {}", entryName);
 
@@ -236,7 +236,8 @@ public class FileUtils {
 
                         entry.setMode(mode);
                     } else {
-                        log.debug("Cannot set mode since {} filesystem does not support POSIX",
+                        log.debug(
+                                "Cannot set mode since {} filesystem does not support POSIX",
                                 Files.getFileStore(path).type());
                     }
 
@@ -266,8 +267,8 @@ public class FileUtils {
         final List<String> entries = new ArrayList<>();
 
         try (final InputStream is = Files.newInputStream(input.toPath());
-                final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.ZIP,
-                        is)) {
+                final ArchiveInputStream in = new ArchiveStreamFactory()
+                        .createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
             final Path dir = directory.toPath();
             final Path canonicalDir = dir.toAbsolutePath().normalize();
 
@@ -320,7 +321,9 @@ public class FileUtils {
 
                         Files.setPosixFilePermissions(path, perms);
                     } else {
-                        log.debug("Cannot set mode: {} since {} filesystem does not support POSIX", String.format("%o", mode),
+                        log.debug(
+                                "Cannot set mode: {} since {} filesystem does not support POSIX",
+                                String.format("%o", mode),
                                 Files.getFileStore(path).type());
                     }
                 }
@@ -340,8 +343,8 @@ public class FileUtils {
         List<String> entries = new ArrayList<>();
 
         try (final OutputStream out = Files.newOutputStream(output.toPath());
-                final ArchiveOutputStream os = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP,
-                        out)) {
+                final ArchiveOutputStream os = new ArchiveStreamFactory()
+                        .createArchiveOutputStream(ArchiveStreamFactory.ZIP, out)) {
             try (Stream<Path> stream = Files.walk(directory)) {
                 Iterator<Path> iterator = stream.iterator();
 
@@ -352,8 +355,8 @@ public class FileUtils {
                         continue;
                     }
 
-                    final String entryName = FilenameUtils.normalize(workingDirectory.toPath().relativize(path).toString(),
-                            true);
+                    final String entryName = FilenameUtils
+                            .normalize(workingDirectory.toPath().relativize(path).toString(), true);
 
                     log.debug("zip: {}", entryName);
 
@@ -367,7 +370,8 @@ public class FileUtils {
 
                         entry.setUnixMode(mode);
                     } else {
-                        log.debug("Cannot set mode since {} filesystem does not support POSIX",
+                        log.debug(
+                                "Cannot set mode since {} filesystem does not support POSIX",
                                 Files.getFileStore(path).type());
                     }
 

@@ -31,7 +31,10 @@ public class GerritUtils {
     public static final String GERRIT = "gerrit";
 
     public static URI gerritSnapshotDownloadUrl(String scmUrl, String scmRevision) {
-        String uriString = String.format("https://%s/gitweb?p=%s;a=snapshot;h=%s;sf=tgz", gerritUrl(scmUrl), repository(scmUrl),
+        String uriString = String.format(
+                "https://%s/gitweb?p=%s;a=snapshot;h=%s;sf=tgz",
+                gerritUrl(scmUrl),
+                repository(scmUrl),
                 scmRevision);
         return URI.create(uriString);
     }

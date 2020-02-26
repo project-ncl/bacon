@@ -57,7 +57,9 @@ public class KeycloakConfig implements Validate {
             log.debug("clientSecret is in the config file! Assuming this is a service account");
         } else {
             log.debug("clientSecret is not specified in the config file! Assuming this is a regular user");
-            Validate.checkIfNull(clientId, "You need to specify the client id for your regular account in the config file");
+            Validate.checkIfNull(
+                    clientId,
+                    "You need to specify the client id for your regular account in the config file");
         }
 
     }

@@ -41,7 +41,9 @@ class DADaoTest {
     private static void init() throws IOException {
         String testConfigLocation = System.getProperty("configLocation");
         if (StringUtils.isBlank(testConfigLocation)) {
-            fail("configLocation system property pointing to a config yaml has to be defined to run " + DADaoTest.class);
+            fail(
+                    "configLocation system property pointing to a config yaml has to be defined to run "
+                            + DADaoTest.class);
         }
         Config.configure(testConfigLocation, "config.yaml");
         Config.initialize();

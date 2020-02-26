@@ -34,7 +34,8 @@ public class ObjectHelper {
     }
 
     public static void setLoggingLevel(String loggerName, Level level) {
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(loggerName);
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
+                .getLogger(loggerName);
         logger.setLevel(level);
     }
 }

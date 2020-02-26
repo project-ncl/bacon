@@ -51,7 +51,11 @@ public class OSCommandExecutor {
 
     // TODO replace with maven api call (so that there's no need to have maven installed)
     public static List<String> runCommandIn(String command, Path directory) {
-        return executor(command).directory(directory).redirectErrorStream(true).failOnInvalidStatusCode().exec().getOut();
+        return executor(command).directory(directory)
+                .redirectErrorStream(true)
+                .failOnInvalidStatusCode()
+                .exec()
+                .getOut();
     }
 
     public static CommandExecutor executor(String command) {
@@ -119,7 +123,9 @@ public class OSCommandExecutor {
 
         public CommandExecutor exec() {
             String command = prepareCommand(this.command);
-            log.debug("will execute {}, execution directory {}", command,
+            log.debug(
+                    "will execute {}, execution directory {}",
+                    command,
                     directory != null ? directory.toAbsolutePath().toString() : null);
             ProcessBuilder builder = new ProcessBuilder(unescape(splitCommand(command)));
             try {
@@ -156,15 +162,20 @@ public class OSCommandExecutor {
 
                 } while ((timedOut || status != 0) && attempts > 0);
                 if (failOnStatusCode && status != 0) {
-                    log.error("Failed to execute command {}. Status code: {}. Process output: {}", builder.command(), status,
+                    log.error(
+                            "Failed to execute command {}. Status code: {}. Process output: {}",
+                            builder.command(),
+                            status,
                             joinedOutput());
-                    throw new OSCommandException("Failed to execute command " + builder.command() + ". Status code: " + status
-                            + " Process output: " + joinedOutput());
+                    throw new OSCommandException(
+                            "Failed to execute command " + builder.command() + ". Status code: " + status
+                                    + " Process output: " + joinedOutput());
                 }
             } catch (IOException | InterruptedException | ExecutionException e) {
                 log.error("Failed to execute command {}. Process output: {}", builder.command(), joinedOutput(), e);
                 throw new OSCommandException(
-                        "Failed to execute command " + builder.command() + ". Process output: " + joinedOutput(), e);
+                        "Failed to execute command " + builder.command() + ". Process output: " + joinedOutput(),
+                        e);
             }
             return this;
         }

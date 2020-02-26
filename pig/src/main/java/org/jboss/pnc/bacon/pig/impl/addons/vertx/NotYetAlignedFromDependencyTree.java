@@ -31,14 +31,18 @@ import java.util.stream.Collectors;
  * @author Paul Gallagher, pgallagh@redhat.com <br>
  *         Date: 2018-11-20
  *
- *         If you run your builds with 'dependency:tree' then you can use this addon to give you the list of compile scope
- *         dependencies that are not redhat builds
+ *         If you run your builds with 'dependency:tree' then you can use this addon to give you the list of compile
+ *         scope dependencies that are not redhat builds
  */
 public class NotYetAlignedFromDependencyTree extends AddOn {
 
     private static final Logger log = LoggerFactory.getLogger(NotYetAlignedFromDependencyTree.class);
 
-    public NotYetAlignedFromDependencyTree(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
+    public NotYetAlignedFromDependencyTree(
+            Config config,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath) {
         super(config, builds, releasePath, extrasPath);
     }
 

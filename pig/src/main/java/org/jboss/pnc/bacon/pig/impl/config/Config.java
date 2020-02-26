@@ -71,7 +71,8 @@ public class Config {
     private void init() {
         String[] splittedVersion = version.split("\\.");
         if (splittedVersion.length != 3) {
-            throw new RuntimeException("Version property should be of a form of <number>.<number>.<number>. Found: " + version);
+            throw new RuntimeException(
+                    "Version property should be of a form of <number>.<number>.<number>. Found: " + version);
         } else {
             majorMinor = splittedVersion[0] + "." + splittedVersion[1];
             micro = splittedVersion[2];
@@ -99,7 +100,8 @@ public class Config {
 
         uniqueNames.forEach(configNames::remove);
 
-        configNames.forEach(duplicateName -> errors.add("More than one configuration is named '" + duplicateName + "'"));
+        configNames
+                .forEach(duplicateName -> errors.add("More than one configuration is named '" + duplicateName + "'"));
     }
 
     private static List<String> getAllMatches(String text, String regex) {
@@ -124,8 +126,12 @@ public class Config {
     }
 
     private static Map<String, String> convertbuildVarsOverridesStringToMap(String buildVarsOverrides) {
-        return Arrays.stream(buildVarsOverrides.split(",")).map(String::trim).filter(s -> s.contains("="))
-                .map(s -> s.split("=")).filter(a -> a.length == 2).collect(toMap((a) -> a[0].trim(), (a) -> a[1].trim()));
+        return Arrays.stream(buildVarsOverrides.split(","))
+                .map(String::trim)
+                .filter(s -> s.contains("="))
+                .map(s -> s.split("="))
+                .filter(a -> a.length == 2)
+                .collect(toMap((a) -> a[0].trim(), (a) -> a[1].trim()));
     }
 
     private static Map<String, String> readVariables(String contents, String buildVarsOverrides) {

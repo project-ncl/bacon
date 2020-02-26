@@ -145,9 +145,14 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     private Collection<GAV> findSourceBuilds() {
-        Collection<GAV> srcBuilds = builds.values().stream().filter(build -> sourceBuilds.contains(build.getName()))
-                .map(PncBuild::getBuiltArtifacts).flatMap(Collection::stream).map(ArtifactWrapper::toGAV)
-                .filter(g -> g.getClassifier() != null && g.getClassifier().equals("sources")).collect(Collectors.toList());
+        Collection<GAV> srcBuilds = builds.values()
+                .stream()
+                .filter(build -> sourceBuilds.contains(build.getName()))
+                .map(PncBuild::getBuiltArtifacts)
+                .flatMap(Collection::stream)
+                .map(ArtifactWrapper::toGAV)
+                .filter(g -> g.getClassifier() != null && g.getClassifier().equals("sources"))
+                .collect(Collectors.toList());
         return srcBuilds;
     }
 
@@ -208,8 +213,9 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private boolean writeProject(Project project) {
         try {
-            File dir = new File(localRepo.getPath() + File.separator + project_gid.replace('.', File.separatorChar)
-                    + File.separator + project_aid + File.separator + project_version);
+            File dir = new File(
+                    localRepo.getPath() + File.separator + project_gid.replace('.', File.separatorChar) + File.separator
+                            + project_aid + File.separator + project_version);
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
                     log.error("Error while creating directory {}", dir);
@@ -232,7 +238,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     /**
-     * Use PME to insert the profile into the cloned project and run with any extra custom PME parameters in the yaml config
+     * Use PME to insert the profile into the cloned project and run with any extra custom PME parameters in the yaml
+     * config
      *
      * @return
      */
@@ -247,9 +254,10 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             return false;
         }
         log.debug("Running PME to insert the dependencies into the project (see log {})", outStream);
-        StringBuilder cmd = new StringBuilder("-f " + topLevelDirectory.getPath() + File.separator + "pom.xml"
-                + " -DprofileInjection=" + project_gid + ":" + project_aid + ":" + project_version + " -s " + settingsXml
-                + " -Dmaven.repo.local=" + localRepo + " -t");
+        StringBuilder cmd = new StringBuilder(
+                "-f " + topLevelDirectory.getPath() + File.separator + "pom.xml" + " -DprofileInjection=" + project_gid
+                        + ":" + project_aid + ":" + project_version + " -s " + settingsXml + " -Dmaven.repo.local="
+                        + localRepo + " -t");
         if (generationData.getCustomPmeParameters() != null && !generationData.getCustomPmeParameters().isEmpty()) {
             for (String customPME : generationData.getCustomPmeParameters()) {
                 cmd.append(" " + customPME);
@@ -339,8 +347,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                     if (executeMavenBuild()) {
                         // Archive the generated source artifact to the release archive name
                         Pattern pattern = Pattern.compile(generationData.getSourceArtifact(), Pattern.CASE_INSENSITIVE);
-                        List<File> files = (List<File>) org.apache.commons.io.FileUtils.listFiles(temporaryDestination,
-                                TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+                        List<File> files = (List<File>) org.apache.commons.io.FileUtils
+                                .listFiles(temporaryDestination, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
                         List<File> found = new ArrayList<>();
                         for (File file : files) {
                             if (pattern.matcher(file.getName()).matches()) {

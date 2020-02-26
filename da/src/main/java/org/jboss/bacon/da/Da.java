@@ -26,7 +26,10 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-@GroupCommandDefinition(name = "da", description = "Dependency Analysis related commands", groupCommands = { Da.Lookup.class })
+@GroupCommandDefinition(
+        name = "da",
+        description = "Dependency Analysis related commands",
+        groupCommands = { Da.Lookup.class })
 public class Da extends AbstractCommand {
 
     @CommandDefinition(name = "lookup", description = "lookup available productized artifact version for an artifact")

@@ -37,7 +37,10 @@ import org.jboss.pnc.bacon.pnc.Pnc;
  */
 
 @Slf4j
-@GroupCommandDefinition(name = "bacon.jar", description = "Bacon CLI", groupCommands = { Pnc.class, Da.class, Pig.class })
+@GroupCommandDefinition(
+        name = "bacon.jar",
+        description = "Bacon CLI",
+        groupCommands = { Pnc.class, Da.class, Pig.class })
 public class App extends AbstractCommand {
 
     public void run(String[] args) throws Exception {

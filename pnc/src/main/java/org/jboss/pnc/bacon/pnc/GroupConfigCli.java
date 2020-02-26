@@ -40,11 +40,15 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import java.util.HashMap;
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "group-config", description = "Group configuration", groupCommands = {
-        GroupConfigCli.Create.class, GroupConfigCli.Update.class, GroupConfigCli.List.class, GroupConfigCli.Get.class, })
+@GroupCommandDefinition(
+        name = "group-config",
+        description = "Group configuration",
+        groupCommands = { GroupConfigCli.Create.class, GroupConfigCli.Update.class, GroupConfigCli.List.class,
+                GroupConfigCli.Get.class, })
 public class GroupConfigCli extends AbstractCommand {
 
-    private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(GroupConfigurationClient::new);
+    private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(
+            GroupConfigurationClient::new);
 
     @CommandDefinition(name = "create", description = "Create a group configuration")
     public class Create extends AbstractCommand {
@@ -55,26 +59,39 @@ public class GroupConfigCli extends AbstractCommand {
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
 
-        @Option(name = "build-configuration-ids", description = "Build configuration ids in Group Config. Comma separated")
+        @Option(
+                name = "build-configuration-ids",
+                description = "Build configuration ids in Group Config. Comma separated")
         private String buildConfigurationIds;
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder().name(groupConfigName);
+                GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder()
+                        .name(groupConfigName);
 
-                ObjectHelper.executeIfNotNull(productVersionId, () -> groupConfigurationBuilder
-                        .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+                ObjectHelper.executeIfNotNull(
+                        productVersionId,
+                        () -> groupConfigurationBuilder
+                                .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                ObjectHelper.executeIfNotNull(buildConfigurationIds,
+                ObjectHelper.executeIfNotNull(
+                        buildConfigurationIds,
                         () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
+                ObjectHelper.print(
+                        jsonOutput,
+                        CREATOR.getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
             });
         }
     }
@@ -91,11 +108,14 @@ public class GroupConfigCli extends AbstractCommand {
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
 
-        @Option(name = "build-configuration-ids", description = "Build configuration ids in Group Config. Comma separated")
+        @Option(
+                name = "build-configuration-ids",
+                description = "Build configuration ids in Group Config. Comma separated")
         private String buildConfigurationIds;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -103,10 +123,12 @@ public class GroupConfigCli extends AbstractCommand {
                 GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
 
                 ObjectHelper.executeIfNotNull(groupConfigName, () -> updated.name(groupConfigName));
-                ObjectHelper.executeIfNotNull(productVersionId,
+                ObjectHelper.executeIfNotNull(
+                        productVersionId,
                         () -> updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                ObjectHelper.executeIfNotNull(buildConfigurationIds,
+                ObjectHelper.executeIfNotNull(
+                        buildConfigurationIds,
                         () -> updated.buildConfigs(addBuildConfigs(buildConfigurationIds)));
 
                 CREATOR.getClientAuthenticated().update(groupConfigId, updated.build());

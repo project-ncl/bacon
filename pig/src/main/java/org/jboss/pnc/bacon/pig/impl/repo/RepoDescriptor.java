@@ -40,7 +40,8 @@ public class RepoDescriptor {
     public static Collection<GAV> listGavs(File m2RepoDirectory) {
         List<GAV> allGavs = listFiles(m2RepoDirectory).stream()
                 .filter(f -> Stream.of(CHECKSUM_EXTENSIONS).noneMatch(ext -> f.getName().endsWith(ext)))
-                .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY)).collect(Collectors.toList());
+                .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY))
+                .collect(Collectors.toList());
         Set<GAV> resultSet = new TreeSet<>(Comparator.comparing(GAV::toGav));
         resultSet.addAll(allGavs);
         return resultSet;

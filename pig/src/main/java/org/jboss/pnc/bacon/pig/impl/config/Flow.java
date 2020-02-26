@@ -32,7 +32,8 @@ public class Flow {
     private JavadocGenerationData javadocGeneration;
 
     /**
-     * Add defaults to avoid having existing configurations having to define a sourceGeneration object in the flow section
+     * Add defaults to avoid having existing configurations having to define a sourceGeneration object in the flow
+     * section
      */
     private SourcesGenerationData sourcesGeneration = new SourcesGenerationData();
 }

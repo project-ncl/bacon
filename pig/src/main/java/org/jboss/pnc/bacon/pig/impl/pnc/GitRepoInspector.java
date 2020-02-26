@@ -51,8 +51,9 @@ public class GitRepoInspector {
 
     public static boolean isModifiedBranch(String configId, String internalUrl, String refSpec) {
 
-        log.info("Trying to check if branch '" + refSpec + "' in '" + internalUrl
-                + "' has been modified, compared to latest build of build config '" + configId + "'");
+        log.info(
+                "Trying to check if branch '" + refSpec + "' in '" + internalUrl
+                        + "' has been modified, compared to latest build of build config '" + configId + "'");
         File tempDir = FileUtils.mkTempDir("git");
         try (Git git = cloneRepo(internalUrl, tempDir)) {
             String latestCommit = headRevision(git, refSpec);
@@ -101,8 +102,8 @@ public class GitRepoInspector {
     }
 
     /**
-     * TODO: smarter check is required, here if a repour tag is on an "upstream" commit TODO: we may miss modifications (because
-     * we return here the tag commit and its parent)
+     * TODO: smarter check is required, here if a repour tag is on an "upstream" commit TODO: we may miss modifications
+     * (because we return here the tag commit and its parent)
      */
     private static Set<String> getBaseCommitPossibilities(Git git, String tagName) throws GitAPIException, IOException {
         Set<String> result = new HashSet<>();

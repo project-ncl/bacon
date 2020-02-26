@@ -42,7 +42,11 @@ public abstract class AbstractListCommand<T> extends AbstractCommand {
     @Option(description = "Query parameter (using RSQL)")
     private String query;
 
-    @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+    @Option(
+            shortName = 'o',
+            overrideRequired = false,
+            hasValue = false,
+            description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
     @Override

@@ -63,13 +63,14 @@ public class LicenseGenerator {
     }
 
     private static List<Gav> gavsToLicenseGeneratorGavs(Collection<GAV> gavs) {
-        return gavs.stream().map(gav -> new Gav(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getPackaging()))
+        return gavs.stream()
+                .map(gav -> new Gav(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getPackaging()))
                 .collect(Collectors.toList());
     }
 
     private static GeneratorProperties prepareGeneratorProperties() {
-        File propertiesFile = ResourceUtils.extractToTmpFile("/license-generator.properties", "license-generator",
-                ".properties");
+        File propertiesFile = ResourceUtils
+                .extractToTmpFile("/license-generator.properties", "license-generator", ".properties");
         return new GeneratorProperties(propertiesFile.getAbsolutePath());
     }
 }

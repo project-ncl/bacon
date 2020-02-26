@@ -44,10 +44,12 @@ import org.jboss.pnc.dto.ProductVersion;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "product-version", description = "Product Version", groupCommands = {
-        ProductVersionCli.Create.class, ProductVersionCli.Get.class, ProductVersionCli.Update.class,
-        ProductVersionCli.ListBuildConfigurations.class, ProductVersionCli.ListGroupConfigurations.class,
-        ProductVersionCli.ListMilestones.class, ProductVersionCli.ListReleases.class })
+@GroupCommandDefinition(
+        name = "product-version",
+        description = "Product Version",
+        groupCommands = { ProductVersionCli.Create.class, ProductVersionCli.Get.class, ProductVersionCli.Update.class,
+                ProductVersionCli.ListBuildConfigurations.class, ProductVersionCli.ListGroupConfigurations.class,
+                ProductVersionCli.ListMilestones.class, ProductVersionCli.ListReleases.class })
 @Slf4j
 public class ProductVersionCli extends AbstractCommand {
 
@@ -60,22 +62,30 @@ public class ProductVersionCli extends AbstractCommand {
         private String productVersion;
         @Option(required = true, name = "product-id", description = "Product ID of product version")
         private String productId;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
                 if (!validateProductVersion(productVersion)) {
-                    Fail.fail("Version specified '" + productVersion + "' is not valid! "
-                            + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
+                    Fail.fail(
+                            "Version specified '" + productVersion + "' is not valid! "
+                                    + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
                 }
 
                 ProductRef productRef = ProductRef.refBuilder().id(productId).build();
 
-                ProductVersion productVersion = ProductVersion.builder().product(productRef).version(this.productVersion)
+                ProductVersion productVersion = ProductVersion.builder()
+                        .product(productRef)
+                        .version(this.productVersion)
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productVersion));
@@ -92,7 +102,9 @@ public class ProductVersionCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-build-configurations", description = "List Build configurations for a particular product version")
+    @CommandDefinition(
+            name = "list-build-configurations",
+            description = "List Build configurations for a particular product version")
     public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Product version id")
@@ -101,11 +113,14 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
-    @CommandDefinition(name = "list-group-configurations", description = "List Group configurations for a particular product version")
+    @CommandDefinition(
+            name = "list-group-configurations",
+            description = "List Group configurations for a particular product version")
     public class ListGroupConfigurations extends AbstractListCommand<GroupConfiguration> {
 
         @Argument(required = true, description = "Product version id")
@@ -114,7 +129,8 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -153,7 +169,8 @@ public class ProductVersionCli extends AbstractCommand {
         @Option(name = "product-version", description = "Version of product version")
         private String productVersion;
 
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -162,8 +179,9 @@ public class ProductVersionCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productVersion, () -> {
 
                     if (!validateProductVersion(productVersion)) {
-                        Fail.fail("Version specified '" + productVersion + "' is not valid! "
-                                + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
+                        Fail.fail(
+                                "Version specified '" + productVersion + "' is not valid! "
+                                        + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
                     }
 
                     updated.version(productVersion);

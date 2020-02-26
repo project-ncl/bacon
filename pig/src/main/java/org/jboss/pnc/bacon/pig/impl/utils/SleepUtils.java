@@ -54,14 +54,19 @@ public class SleepUtils {
      * @param condition the condition to evaluate
      * @param checkInterval [seconds] amount of time to wait before attempts
      * @param timeout [seconds] timeout
-     * @param ignoreException if set to true will treat condition throwing an exception the same way as returning null value
+     * @param ignoreException if set to true will treat condition throwing an exception the same way as returning null
+     *        value
      * @param timeoutMessage message in the case of timeout
      * @param <T> return type of the condition
      * @return the value returned by the condition
      *
      * @throws RuntimeException if the timeout is reached
      */
-    public static <T> T waitFor(Supplier<T> condition, int checkInterval, long timeout, boolean ignoreException,
+    public static <T> T waitFor(
+            Supplier<T> condition,
+            int checkInterval,
+            long timeout,
+            boolean ignoreException,
             String timeoutMessage) {
         int startTime = (int) System.currentTimeMillis() / 1000;
         T value = tryGet(condition, ignoreException);

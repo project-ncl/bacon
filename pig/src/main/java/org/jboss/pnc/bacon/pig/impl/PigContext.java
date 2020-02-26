@@ -46,7 +46,8 @@ import static java.lang.System.getProperty;
 public class PigContext {
     private static final ObjectMapper jsonMapper = new ObjectMapper();
 
-    private static final String contextLocation = getProperty("pig.context.dir",
+    private static final String contextLocation = getProperty(
+            "pig.context.dir",
             getProperty("java.io.tmpdir") + File.separator + "pig-context");
 
     private Config config; // TODO merge config instead of setting it?
@@ -62,7 +63,10 @@ public class PigContext {
     public void setConfig(Config config) {
         this.config = config;
         if (deliverables == null) {
-            String prefix = String.format("%s-%s.%s", config.getOutputPrefixes().getReleaseFile(), config.getVersion(),
+            String prefix = String.format(
+                    "%s-%s.%s",
+                    config.getOutputPrefixes().getReleaseFile(),
+                    config.getVersion(),
                     config.getMilestone());
 
             deliverables = new Deliverables();

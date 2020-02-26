@@ -85,8 +85,13 @@ public class PncClientHelper {
                 port = uri.getPort();
             }
 
-            configuration = Configuration.builder().protocol(uri.getScheme()).port(port).host(uri.getHost())
-                    .bearerToken(bearerToken).pageSize(50).build();
+            configuration = Configuration.builder()
+                    .protocol(uri.getScheme())
+                    .port(port)
+                    .host(uri.getHost())
+                    .bearerToken(bearerToken)
+                    .pageSize(50)
+                    .build();
 
             GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
             try {
@@ -122,11 +127,17 @@ public class PncClientHelper {
             Credential credential;
 
             if (keycloakConfig.isServiceAccount()) {
-                credential = client.getCredentialServiceAccount(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
-                        keycloakConfig.getUsername(), keycloakConfig.getClientSecret());
+                credential = client.getCredentialServiceAccount(
+                        keycloakConfig.getUrl(),
+                        keycloakConfig.getRealm(),
+                        keycloakConfig.getUsername(),
+                        keycloakConfig.getClientSecret());
             } else {
-                credential = client.getCredential(keycloakConfig.getUrl(), keycloakConfig.getRealm(),
-                        keycloakConfig.getClientId(), keycloakConfig.getUsername());
+                credential = client.getCredential(
+                        keycloakConfig.getUrl(),
+                        keycloakConfig.getRealm(),
+                        keycloakConfig.getClientId(),
+                        keycloakConfig.getUsername());
             }
 
             return credential.getAccessToken();

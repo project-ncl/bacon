@@ -153,8 +153,9 @@ public class GAV {
             case 5:
                 return new GAV(split[0], split[1], split[3], split[2], split[4]);
             default:
-                throw new RuntimeException("Error parsing gav: " + colonSeparatedGav
-                        + ". Expected groupId:artifactId:packaging:classifier:version or groupId:artifactId:packaging:version");
+                throw new RuntimeException(
+                        "Error parsing gav: " + colonSeparatedGav
+                                + ". Expected groupId:artifactId:packaging:classifier:version or groupId:artifactId:packaging:version");
 
         }
     }
@@ -165,11 +166,15 @@ public class GAV {
             return "";
         }
 
-        return String.format("      <dependency>\n" + "         <groupId>%s</groupId>\n"
-                + "         <artifactId>%s</artifactId>\n" + "         <type>%s</type>\n"
-                + (scope != null ? "         <scope>" + scope + "</scope>\n" : "")
-                + (classifier != null ? "         <classifier>" + classifier + "</classifier>\n" : "") + "      </dependency>",
-                groupId, artifactId, packaging);
+        return String.format(
+                "      <dependency>\n" + "         <groupId>%s</groupId>\n" + "         <artifactId>%s</artifactId>\n"
+                        + "         <type>%s</type>\n"
+                        + (scope != null ? "         <scope>" + scope + "</scope>\n" : "")
+                        + (classifier != null ? "         <classifier>" + classifier + "</classifier>\n" : "")
+                        + "      </dependency>",
+                groupId,
+                artifactId,
+                packaging);
     }
 
     public static GAV fromFileName(String absolutePath, String repoRootName) {

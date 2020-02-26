@@ -36,12 +36,24 @@ public class ProductTest extends AbstractTest {
         final String abbreviation = "BT-NPN-" + suffix;
         final String description = "*";
 
-        Product response = Product.builder().id("666").name(productName).abbreviation(abbreviation).description(description)
+        Product response = Product.builder()
+                .id("666")
+                .name(productName)
+                .abbreviation(abbreviation)
+                .description(description)
                 .build();
         wmock.creation(PRODUCT, response);
 
-        Product product = executeAndDeserialize(Product.class, "pnc", "product", "create", productName, "--abbreviation",
-                abbreviation, "--description", description);
+        Product product = executeAndDeserialize(
+                Product.class,
+                "pnc",
+                "product",
+                "create",
+                productName,
+                "--abbreviation",
+                abbreviation,
+                "--description",
+                description);
 
         assertThat(product.getName()).isEqualTo(productName);
         assertThat(product.getAbbreviation()).isEqualTo(abbreviation);

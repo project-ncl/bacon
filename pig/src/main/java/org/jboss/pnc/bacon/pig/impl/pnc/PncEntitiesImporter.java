@@ -99,8 +99,8 @@ public class PncEntitiesImporter {
     public ImportResult performImport() {
         product = getOrGenerateProduct();
         version = getOrGenerateVersion();
-        milestone = pncConfigurator.getOrGenerateMilestone(version, pncMilestoneString(),
-                config.getProduct().getIssueTrackerUrl());
+        milestone = pncConfigurator
+                .getOrGenerateMilestone(version, pncMilestoneString(), config.getProduct().getIssueTrackerUrl());
         pncConfigurator.markMilestoneCurrent(version, milestone);
         buildGroup = getOrGenerateBuildGroup();
 
@@ -121,7 +121,10 @@ public class PncEntitiesImporter {
         String id = config.getId();
 
         // todo : store build configuration refs in BuildConfigData and use it instead of ids here
-        Set<String> dependencies = config.getDependencies().stream().map(this::configByName).collect(Collectors.toSet());
+        Set<String> dependencies = config.getDependencies()
+                .stream()
+                .map(this::configByName)
+                .collect(Collectors.toSet());
         Set<String> currentDependencies = getCurrentDependencies(id);
 
         Set<String> superfluous = CollectionUtils.subtractSet(currentDependencies, dependencies);
@@ -151,7 +154,9 @@ public class PncEntitiesImporter {
         try {
             buildConfigClient.removeDependency(buildConfigId, dependencyId);
         } catch (RemoteResourceException e) {
-            throw new RuntimeException("Failed to remove dependency" + dependencyId + " from config" + buildConfigId, e);
+            throw new RuntimeException(
+                    "Failed to remove dependency" + dependencyId + " from config" + buildConfigId,
+                    e);
         }
     }
 
@@ -167,13 +172,17 @@ public class PncEntitiesImporter {
     private String configByName(String name) {
         Optional<BuildConfigData> maybeConfig = configs.stream().filter(c -> c.getName().equals(name)).findAny();
         return maybeConfig
-                .orElseThrow(() -> new RuntimeException(
-                        "Build config name " + name + " used to reference a dependency but no such build config defined"))
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Build config name " + name
+                                        + " used to reference a dependency but no such build config defined"))
                 .getId();
     }
 
     private void addBuildConfigIdsToGroup() {
-        String configIdsAsString = configs.stream().map(BuildConfigData::getId).map(String::valueOf)
+        String configIdsAsString = configs.stream()
+                .map(BuildConfigData::getId)
+                .map(String::valueOf)
                 .collect(Collectors.joining(" "));
         Set<String> existing = getExistingGroupConstituents();
 
@@ -282,9 +291,16 @@ public class PncEntitiesImporter {
         SCMRepository repository = getOrGenerateRepository(buildConfig);
 
         Environment environment = Environment.builder().id(buildConfig.getEnvironmentId()).build();
-        return BuildConfiguration.builder().productVersion(version).parameters(buildConfig.getGenericParameters(null, false))
-                .name(buildConfig.getName()).project(project).environment(environment).scmRepository(repository)
-                .scmRevision(buildConfig.getScmRevision()).buildScript(buildConfig.getBuildScript()).build();
+        return BuildConfiguration.builder()
+                .productVersion(version)
+                .parameters(buildConfig.getGenericParameters(null, false))
+                .name(buildConfig.getName())
+                .project(project)
+                .environment(environment)
+                .scmRepository(repository)
+                .scmRevision(buildConfig.getScmRevision())
+                .buildScript(buildConfig.getBuildScript())
+                .build();
     }
 
     private SCMRepository getOrGenerateRepository(BuildConfig buildConfig) {
@@ -303,7 +319,9 @@ public class PncEntitiesImporter {
 
     private SCMRepository createRepository(BuildConfig buildConfig) {
         String scmUrl = buildConfig.getScmUrl() == null ? buildConfig.getExternalScmUrl() : buildConfig.getScmUrl();
-        CreateAndSyncSCMRequest createRepoRequest = CreateAndSyncSCMRequest.builder().preBuildSyncEnabled(true).scmUrl(scmUrl)
+        CreateAndSyncSCMRequest createRepoRequest = CreateAndSyncSCMRequest.builder()
+                .preBuildSyncEnabled(true)
+                .scmUrl(scmUrl)
                 .build();
         try {
             // todo: does it work with the external urls?
@@ -313,9 +331,12 @@ public class PncEntitiesImporter {
                 return repository;
             } else {
                 // a task to create repo has been triggered, let's wait for a while in a hope it will be created:
-                return SleepUtils.waitFor(() -> getExistingRepository(buildConfig).orElse(null), 5, // s
+                return SleepUtils.waitFor(
+                        () -> getExistingRepository(buildConfig).orElse(null),
+                        5, // s
                         5 * 60, // s
-                        false, "Timed out waiting for repository to be created");
+                        false,
+                        "Timed out waiting for repository to be created");
             }
         } catch (ClientException e) {
             throw new RuntimeException("Failed to trigger repository creation for " + scmUrl, e);
@@ -354,15 +375,18 @@ public class PncEntitiesImporter {
         }
     }
 
-    private List<BuildConfiguration> dropConfigsFromInvalidVersion(List<BuildConfiguration> currentConfigs,
+    private List<BuildConfiguration> dropConfigsFromInvalidVersion(
+            List<BuildConfiguration> currentConfigs,
             List<BuildConfig> newConfigs) {
         Map<String, BuildConfig> newConfigsByName = BuildConfig.mapByName(newConfigs);
         List<BuildConfiguration> configsToDrop = currentConfigs.stream()
-                .filter(config -> shouldBeDropped(config, newConfigsByName)).collect(Collectors.toList());
+                .filter(config -> shouldBeDropped(config, newConfigsByName))
+                .collect(Collectors.toList());
         if (!configsToDrop.isEmpty()) {
-            throw new RuntimeException("The following configurations should be dropped or updated "
-                    + "in an unsupported fashion, please drop or update them via PNC UI: " + configsToDrop
-                    + ". Look above for the cause");
+            throw new RuntimeException(
+                    "The following configurations should be dropped or updated "
+                            + "in an unsupported fashion, please drop or update them via PNC UI: " + configsToDrop
+                            + ". Look above for the cause");
         }
         return configsToDrop;
     }
@@ -373,7 +397,9 @@ public class PncEntitiesImporter {
         ProductVersionRef productVersion = oldConfig.getProductVersion();
         boolean configMismatch = productVersion == null || !productVersion.getId().equals(version.getId());
         if (configMismatch) {
-            log.warn("Product version in the old config is different than the one in the new config for config {}", name);
+            log.warn(
+                    "Product version in the old config is different than the one in the new config for config {}",
+                    name);
         }
         return configMismatch || newConfig == null || !newConfig.isUpgradableFrom(oldConfig);
     }
@@ -417,7 +443,10 @@ public class PncEntitiesImporter {
     }
 
     private ProductVersion generateVersion() {
-        ProductVersion productVersion = ProductVersion.builder().product(product).version(config.getMajorMinor()).build();
+        ProductVersion productVersion = ProductVersion.builder()
+                .product(product)
+                .version(config.getMajorMinor())
+                .build();
         try {
             return versionClient.createNew(productVersion);
         } catch (ClientException e) {
@@ -427,7 +456,10 @@ public class PncEntitiesImporter {
 
     private Product generateProduct() {
         ProductConfig productConfig = config.getProduct();
-        Product product = Product.builder().name(productConfig.getName()).abbreviation(productConfig.getAbbreviation()).build();
+        Product product = Product.builder()
+                .name(productConfig.getName())
+                .abbreviation(productConfig.getAbbreviation())
+                .build();
         try {
             return productClient.createNew(product);
         } catch (ClientException e) {
@@ -445,13 +477,16 @@ public class PncEntitiesImporter {
     }
 
     public ImportResult readCurrentPncEntities() {
-        product = getProduct().orElseThrow(() -> new RuntimeException("Unable to product " + config.getProduct().getName()));
+        product = getProduct()
+                .orElseThrow(() -> new RuntimeException("Unable to product " + config.getProduct().getName()));
         version = getVersion().orElseThrow(
-                () -> new RuntimeException("Unable to find version " + config.getMajorMinor() + " for product " + product));
+                () -> new RuntimeException(
+                        "Unable to find version " + config.getMajorMinor() + " for product " + product));
         milestone = pncConfigurator.getExistingMilestone(version, pncMilestoneString())
                 .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // TODO
 
-        buildGroup = getBuildGroup().orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
+        buildGroup = getBuildGroup()
+                .orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
 
         configs = getBuildConfigs();
 

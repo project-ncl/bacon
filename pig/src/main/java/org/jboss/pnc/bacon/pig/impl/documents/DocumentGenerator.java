@@ -56,8 +56,15 @@ public class DocumentGenerator {
 
     public void generateDocuments(Map<String, PncBuild> builds, RepositoryData repo) {
         String repositoryContents = repo.getGavs().stream().map(GAV::toGav).collect(Collectors.joining("\n"));
-        String duplicates = repo.getGavs().stream().collect(Collectors.groupingBy(GAV::getGa)).values().stream()
-                .filter(listForGa -> listForGa.size() > 1).flatMap(Collection::stream).map(GAV::toGav).sorted()
+        String duplicates = repo.getGavs()
+                .stream()
+                .collect(Collectors.groupingBy(GAV::getGa))
+                .values()
+                .stream()
+                .filter(listForGa -> listForGa.size() > 1)
+                .flatMap(Collection::stream)
+                .map(GAV::toGav)
+                .sorted()
                 .collect(Collectors.joining("\n"));
 
         DataRoot templateData = new DataRoot(config, deliverables, duplicates, repositoryContents, builds.values());
@@ -68,14 +75,19 @@ public class DocumentGenerator {
     }
 
     public void generateSharedContentReport(RepositoryData repoData, Map<String, PncBuild> builds) throws IOException {
-        SharedContentReportGenerator sharedContentReportGenerator = new SharedContentReportGenerator(repoData.getFiles(),
+        SharedContentReportGenerator sharedContentReportGenerator = new SharedContentReportGenerator(
+                repoData.getFiles(),
                 getAllBuiltArtifacts(builds));
         File reportFile = new File(extrasPath, deliverables.getSharedContentReport());
         sharedContentReportGenerator.generateReport(reportFile);
     }
 
     private static Set<GAV> getAllBuiltArtifacts(Map<String, PncBuild> builds) {
-        return builds.values().stream().map(PncBuild::getBuiltArtifacts).flatMap(List::stream).map(ArtifactWrapper::toGAV)
+        return builds.values()
+                .stream()
+                .map(PncBuild::getBuiltArtifacts)
+                .flatMap(List::stream)
+                .map(ArtifactWrapper::toGAV)
                 .collect(Collectors.toSet());
     }
 }

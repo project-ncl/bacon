@@ -34,7 +34,9 @@ import javax.ws.rs.Produces;
 import java.util.List;
 
 @Path("/reports")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2019-04-24T11:30:42.593645+02:00[Europe/Warsaw]")
+@javax.annotation.Generated(
+        value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen",
+        date = "2019-04-24T11:30:42.593645+02:00[Europe/Warsaw]")
 public interface ReportsApi {
 
     @POST

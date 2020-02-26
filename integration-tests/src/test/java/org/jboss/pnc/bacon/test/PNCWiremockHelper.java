@@ -35,10 +35,10 @@ public class PNCWiremockHelper {
 
     private static final String TOKEN = "wiremocked-token";
 
-    private static final String TOKEN_MESSAGE = "{" + "  \"access_token\": \"" + TOKEN + "\"," + "  \"expires_in\": 123456,"
-            + "  \"refresh_expires_in\": 123456," + "  \"refresh_token\": \"eee\"," + "  \"token_type\": \"bearer\","
-            + "  \"not-before-policy\": 123456789," + "  \"session_state\": \"002f6422-4e1b-4953-8432-e8a3472cd2dc\","
-            + "  \"scope\": \"profile email\"" + "}";
+    private static final String TOKEN_MESSAGE = "{" + "  \"access_token\": \"" + TOKEN + "\","
+            + "  \"expires_in\": 123456," + "  \"refresh_expires_in\": 123456," + "  \"refresh_token\": \"eee\","
+            + "  \"token_type\": \"bearer\"," + "  \"not-before-policy\": 123456789,"
+            + "  \"session_state\": \"002f6422-4e1b-4953-8432-e8a3472cd2dc\"," + "  \"scope\": \"profile email\"" + "}";
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -54,7 +54,9 @@ public class PNCWiremockHelper {
     }
 
     private void stubAuthentication() {
-        stubFor(WireMock.post(urlMatching("/auth/realms/.*/protocol/openid-connect/token")).willReturn(okJson(TOKEN_MESSAGE)));
+        stubFor(
+                WireMock.post(urlMatching("/auth/realms/.*/protocol/openid-connect/token"))
+                        .willReturn(okJson(TOKEN_MESSAGE)));
     }
 
     private void stubAnnouncementBanner() {
@@ -62,14 +64,34 @@ public class PNCWiremockHelper {
     }
 
     private void stubUnauthenticatedAccess() {
-        stubFor(WireMock.post(urlMatching(REST + "/.*")).withHeader("Authorization", absent())
-                .willReturn(aResponse().withStatus(401).withHeader("Content-Type", "text/plain").withBody("Unauthorized")));
-        stubFor(WireMock.put(urlMatching(REST + "/.*")).withHeader("Authorization", absent())
-                .willReturn(aResponse().withStatus(401).withHeader("Content-Type", "text/plain").withBody("Unauthorized")));
-        stubFor(WireMock.patch(urlMatching(REST + "/.*")).withHeader("Authorization", absent())
-                .willReturn(aResponse().withStatus(401).withHeader("Content-Type", "text/plain").withBody("Unauthorized")));
-        stubFor(WireMock.delete(urlMatching(REST + "/.*")).withHeader("Authorization", absent())
-                .willReturn(aResponse().withStatus(401).withHeader("Content-Type", "text/plain").withBody("Unauthorized")));
+        stubFor(
+                WireMock.post(urlMatching(REST + "/.*"))
+                        .withHeader("Authorization", absent())
+                        .willReturn(
+                                aResponse().withStatus(401)
+                                        .withHeader("Content-Type", "text/plain")
+                                        .withBody("Unauthorized")));
+        stubFor(
+                WireMock.put(urlMatching(REST + "/.*"))
+                        .withHeader("Authorization", absent())
+                        .willReturn(
+                                aResponse().withStatus(401)
+                                        .withHeader("Content-Type", "text/plain")
+                                        .withBody("Unauthorized")));
+        stubFor(
+                WireMock.patch(urlMatching(REST + "/.*"))
+                        .withHeader("Authorization", absent())
+                        .willReturn(
+                                aResponse().withStatus(401)
+                                        .withHeader("Content-Type", "text/plain")
+                                        .withBody("Unauthorized")));
+        stubFor(
+                WireMock.delete(urlMatching(REST + "/.*"))
+                        .withHeader("Authorization", absent())
+                        .willReturn(
+                                aResponse().withStatus(401)
+                                        .withHeader("Content-Type", "text/plain")
+                                        .withBody("Unauthorized")));
     }
 
     private MappingBuilder _get(String endpoint) {
@@ -108,9 +130,13 @@ public class PNCWiremockHelper {
 
     private static final String SC_UPDATE = " update scenario";
 
-    public <T extends DTOEntity> void update(String endpoint, T oldResponse, T updatedResponse) throws JsonProcessingException {
+    public <T extends DTOEntity> void update(String endpoint, T oldResponse, T updatedResponse)
+            throws JsonProcessingException {
         String id = Objects.requireNonNull(oldResponse.getId(), "DTO id must be set");
-        scenario(endpoint + SC_UPDATE).getEntity(endpoint, oldResponse).when().put(endpoint + "/" + id).then()
+        scenario(endpoint + SC_UPDATE).getEntity(endpoint, oldResponse)
+                .when()
+                .put(endpoint + "/" + id)
+                .then()
                 .getEntity(endpoint, updatedResponse);
     }
 
@@ -141,7 +167,8 @@ public class PNCWiremockHelper {
 
         public ScenarioBuilder when() {
             nextState.ifPresent(e -> {
-                throw new IllegalStateException("Defining another scenario state when curent definition is not finished yet.");
+                throw new IllegalStateException(
+                        "Defining another scenario state when curent definition is not finished yet.");
             });
             nextState = Optional.of(UUID.randomUUID().toString());
             return this;
@@ -154,7 +181,8 @@ public class PNCWiremockHelper {
         }
 
         public ScenarioBuilder get(String endpoint, ResponseDefinitionBuilder response) throws JsonProcessingException {
-            ScenarioMappingBuilder builder = _get(endpoint).inScenario(scenarioName).whenScenarioStateIs(mockingState)
+            ScenarioMappingBuilder builder = _get(endpoint).inScenario(scenarioName)
+                    .whenScenarioStateIs(mockingState)
                     .willReturn(response);
             nextState.ifPresent(builder::willSetStateTo);
             stubFor(builder);
@@ -162,7 +190,8 @@ public class PNCWiremockHelper {
         }
 
         public ScenarioBuilder post(String endpoint, ResponseDefinitionBuilder response) {
-            ScenarioMappingBuilder builder = _post(endpoint).inScenario(scenarioName).whenScenarioStateIs(mockingState)
+            ScenarioMappingBuilder builder = _post(endpoint).inScenario(scenarioName)
+                    .whenScenarioStateIs(mockingState)
                     .willReturn(response);
             nextState.ifPresent(builder::willSetStateTo);
             stubFor(builder);
@@ -170,7 +199,8 @@ public class PNCWiremockHelper {
         }
 
         public ScenarioBuilder put(String endpoint, ResponseDefinitionBuilder response) {
-            ScenarioMappingBuilder builder = _put(endpoint).inScenario(scenarioName).whenScenarioStateIs(mockingState)
+            ScenarioMappingBuilder builder = _put(endpoint).inScenario(scenarioName)
+                    .whenScenarioStateIs(mockingState)
                     .willReturn(response);
             nextState.ifPresent(builder::willSetStateTo);
             stubFor(builder);
@@ -178,7 +208,8 @@ public class PNCWiremockHelper {
         }
 
         public ScenarioBuilder delete(String endpoint, ResponseDefinitionBuilder response) {
-            ScenarioMappingBuilder builder = _delete(endpoint).inScenario(scenarioName).whenScenarioStateIs(mockingState)
+            ScenarioMappingBuilder builder = _delete(endpoint).inScenario(scenarioName)
+                    .whenScenarioStateIs(mockingState)
                     .willReturn(response);
             nextState.ifPresent(builder::willSetStateTo);
             stubFor(builder);
