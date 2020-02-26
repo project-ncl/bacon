@@ -50,7 +50,7 @@ public class ClientCreator<T extends ClientBase> {
      */
     public T getClientAuthenticated() {
 
-        if (clientAuthenticated != null) {
+        if (clientAuthenticated == null) {
             clientAuthenticated = getClientPrivate(true);
         }
         return clientAuthenticated;
