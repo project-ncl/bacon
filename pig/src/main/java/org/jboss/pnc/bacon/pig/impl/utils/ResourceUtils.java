@@ -61,8 +61,12 @@ public class ResourceUtils {
         }
     }
 
-    public static void copyResourceWithFiltering(String sourceFileName, String targetFileName, File targetDirectory,
-            Properties properties, Path configurationDirectory) {
+    public static void copyResourceWithFiltering(
+            String sourceFileName,
+            String targetFileName,
+            File targetDirectory,
+            Properties properties,
+            Path configurationDirectory) {
         String text = getOverridableResource(sourceFileName, configurationDirectory);
         text = PropertyUtils.replaceProperties(text, properties);
         File targetFile = new File(targetDirectory, targetFileName);
@@ -74,7 +78,10 @@ public class ResourceUtils {
         }
     }
 
-    public static void copyOverridableResource(String sourceFileName, String targetFileName, File targetDirectory,
+    public static void copyOverridableResource(
+            String sourceFileName,
+            String targetFileName,
+            File targetDirectory,
             Path configurationDirectory) {
         String text = getOverridableResource(sourceFileName, configurationDirectory);
         File targetFile = new File(targetDirectory, targetFileName);
@@ -88,8 +95,8 @@ public class ResourceUtils {
 
     /**
      * Get file contents either from configurationDirectory or resources. If a file called `fileName` is defined in the
-     * `configurationDirectory`, than its contents will be returned, otherwise a resource from jar file with the same name will
-     * be used as a source
+     * `configurationDirectory`, than its contents will be returned, otherwise a resource from jar file with the same
+     * name will be used as a source
      *
      * @param fileName name of the file to read
      * @param configurationDirectory directory to check for the files

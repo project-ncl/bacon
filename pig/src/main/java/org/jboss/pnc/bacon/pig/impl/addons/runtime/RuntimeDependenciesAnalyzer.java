@@ -41,7 +41,11 @@ import java.util.stream.Collectors;
 public class RuntimeDependenciesAnalyzer extends AddOn {
     private static final Logger log = LoggerFactory.getLogger(RuntimeDependenciesAnalyzer.class);
 
-    public RuntimeDependenciesAnalyzer(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
+    public RuntimeDependenciesAnalyzer(
+            Config config,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath) {
         super(config, builds, releasePath, extrasPath);
     }
 
@@ -70,7 +74,8 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
             throw new RuntimeException("Unable to read dependency list from " + dependencyListPath);
         }
 
-        List<String> communityDependencies = dependencies.stream().filter(d -> !d.contains("redhat"))
+        List<String> communityDependencies = dependencies.stream()
+                .filter(d -> !d.contains("redhat"))
                 .collect(Collectors.toList());
 
         List<String> buildLog = builds.get(referenceBuildName).getBuildLog();

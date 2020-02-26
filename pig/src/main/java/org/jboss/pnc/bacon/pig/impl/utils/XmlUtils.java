@@ -97,7 +97,9 @@ public class XmlUtils {
             }
             return resultList;
         } catch (Exception any) {
-            throw new RuntimeException("Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(), any);
+            throw new RuntimeException(
+                    "Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(),
+                    any);
         }
     }
 
@@ -105,8 +107,9 @@ public class XmlUtils {
         List<Element> children = getChildrenWithTagName(parent, tagName);
         int length = children.size();
         if (children.size() > 1) {
-            throw new IllegalStateException("Too many elements with name '" + tagName + "'  in " + describe(parent)
-                    + ". Expected at most 1, got " + length);
+            throw new IllegalStateException(
+                    "Too many elements with name '" + tagName + "'  in " + describe(parent)
+                            + ". Expected at most 1, got " + length);
         }
 
         if (length == 0) {
@@ -175,7 +178,9 @@ public class XmlUtils {
 
     public static Map<String, String> getProperties(File file) {
         Map<String, String> result = new HashMap<>();
-        listNodes(file, "/project/properties/*").stream().filter(n -> n instanceof Element).map(n -> (Element) n)
+        listNodes(file, "/project/properties/*").stream()
+                .filter(n -> n instanceof Element)
+                .map(n -> (Element) n)
                 .forEach(e -> result.put(e.getTagName(), e.getTextContent().trim()));
         return result;
     }

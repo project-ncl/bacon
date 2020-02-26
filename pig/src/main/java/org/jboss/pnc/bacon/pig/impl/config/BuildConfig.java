@@ -94,9 +94,11 @@ public class BuildConfig {
 
     @JsonIgnore
     public boolean isTheSameAs(BuildConfiguration old) {
-        return old != null && StringUtils.equals(name, old.getName()) && StringUtils.equals(project, old.getProject().getName())
+        return old != null && StringUtils.equals(name, old.getName())
+                && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
-                && StringUtils.equals(scmRevision, old.getScmRevision()) && environmentId.equals(old.getEnvironment().getId())
+                && StringUtils.equals(scmRevision, old.getScmRevision())
+                && environmentId.equals(old.getEnvironment().getId())
                 && customPmeParameters.equals(getPmeParameters(old)) && urlsEqual(old.getScmRepository())
                 && !isBranchModified(old);
     }
@@ -108,14 +110,17 @@ public class BuildConfig {
 
     private synchronized boolean isBranchModified(BuildConfiguration oldVersion) {
         if (branchModified == null) {
-            branchModified = GitRepoInspector.isModifiedBranch(oldVersion.getId(),
-                    oldVersion.getScmRepository().getInternalUrl(), getScmRevision());
+            branchModified = GitRepoInspector.isModifiedBranch(
+                    oldVersion.getId(),
+                    oldVersion.getScmRepository().getInternalUrl(),
+                    getScmRevision());
         }
         return branchModified;
     }
 
     private boolean urlsEqual(SCMRepository repo) {
-        return StringUtils.equals(externalScmUrl, repo.getExternalUrl()) || StringUtils.equals(scmUrl, repo.getInternalUrl());
+        return StringUtils.equals(externalScmUrl, repo.getExternalUrl())
+                || StringUtils.equals(scmUrl, repo.getInternalUrl());
     }
 
     @JsonIgnore

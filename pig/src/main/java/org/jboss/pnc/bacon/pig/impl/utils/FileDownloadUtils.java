@@ -63,8 +63,10 @@ public class FileDownloadUtils {
     private static final Supplier<CloseableHttpClient> unsafeHttpClient;
 
     static {
-        requestConfig = RequestConfig.copy(RequestConfig.DEFAULT).setConnectTimeout(CONNECTION_TIMEOUT)
-                .setSocketTimeout(READ_TIMEOUT).build();
+        requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
+                .setConnectTimeout(CONNECTION_TIMEOUT)
+                .setSocketTimeout(READ_TIMEOUT)
+                .build();
         safeHttpClient = () -> HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
         unsafeHttpClient = () -> {
             try {
@@ -81,9 +83,12 @@ public class FileDownloadUtils {
                         }
                         return false;
                     }
-                }).setDefaultRequestConfig(requestConfig)
-                        .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
-                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+                })
+                        .setDefaultRequestConfig(requestConfig)
+                        .setSSLContext(
+                                new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
+                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                        .build();
             } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
                 throw new RuntimeException("Failed to initialize unsafe http client for file downloads", e);
             }
@@ -100,15 +105,19 @@ public class FileDownloadUtils {
             try {
                 downloadWithClient(unsafeHttpClient, downloadUrl, targetPath);
             } catch (Exception any) {
-                throw new RuntimeException("failed to download " + downloadUrl + " to " + targetPath.getAbsolutePath(), any);
+                throw new RuntimeException(
+                        "failed to download " + downloadUrl + " to " + targetPath.getAbsolutePath(),
+                        any);
             }
         }
 
         log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
-    private static void downloadWithClient(Supplier<CloseableHttpClient> httpClientSupplier, URI downloadUrl, File targetPath)
-            throws Exception {
+    private static void downloadWithClient(
+            Supplier<CloseableHttpClient> httpClientSupplier,
+            URI downloadUrl,
+            File targetPath) throws Exception {
         try (CloseableHttpClient httpClient = httpClientSupplier.get()) {
             HttpResponse response = httpClient.execute(new HttpGet(downloadUrl));
 

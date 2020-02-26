@@ -62,7 +62,11 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
     protected final Map<String, PncBuild> builds;
     protected final File workDir;
 
-    protected DeliverableManager(Config config, String releasePath, Deliverables deliverables, Map<String, PncBuild> builds) {
+    protected DeliverableManager(
+            Config config,
+            String releasePath,
+            Deliverables deliverables,
+            Map<String, PncBuild> builds) {
         this.config = config;
         this.releasePath = releasePath;
         this.deliverables = deliverables;
@@ -111,7 +115,8 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
         File[] files = repoDirectory.listFiles();
         if (files.length > 1) {
             throw new RuntimeException(
-                    "Expected one top level directory in the repository zip, found: " + Arrays.toString(repoDirectory.list()));
+                    "Expected one top level directory in the repository zip, found: "
+                            + Arrays.toString(repoDirectory.list()));
         }
         return files[0];
     }

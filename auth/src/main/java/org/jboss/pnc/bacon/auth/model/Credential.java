@@ -33,7 +33,8 @@ public class Credential {
     @JsonIgnore
     public boolean isValid() {
 
-        if (accessToken == null || refreshToken == null || accessTokenExpiresIn == null || refreshTokenExpiresIn == null) {
+        if (accessToken == null || refreshToken == null || accessTokenExpiresIn == null
+                || refreshTokenExpiresIn == null) {
             return false;
         } else {
             // return whether we have reached the expiry date or not

@@ -53,10 +53,14 @@ public class RepositoryUtils {
     public static void addCheckSums(File mavenRepositoryDirectory) {
         log.debug("Generating missing checksums");
         try {
-            Files.walk(mavenRepositoryDirectory.toPath()).filter(p -> p.toFile().isFile())
-                    .filter(RepositoryUtils::isNotCheckSumFile).forEach(RepositoryUtils::addCheckSums);
+            Files.walk(mavenRepositoryDirectory.toPath())
+                    .filter(p -> p.toFile().isFile())
+                    .filter(RepositoryUtils::isNotCheckSumFile)
+                    .forEach(RepositoryUtils::addCheckSums);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to generate checksums for " + mavenRepositoryDirectory.getAbsolutePath(), e);
+            throw new RuntimeException(
+                    "Unable to generate checksums for " + mavenRepositoryDirectory.getAbsolutePath(),
+                    e);
         }
     }
 
@@ -138,14 +142,17 @@ public class RepositoryUtils {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
 
-                final List<File> redHatFiles = Stream.of(children).filter(f -> !isCommunity(f)).collect(Collectors.toList());
+                final List<File> redHatFiles = Stream.of(children)
+                        .filter(f -> !isCommunity(f))
+                        .collect(Collectors.toList());
 
                 if (redHatFiles.isEmpty()) {
                     // continue since we are at an intermediate directory
                     return FileVisitResult.CONTINUE;
                 }
 
-                redHatFiles.stream().map(f -> new AbstractMap.SimpleEntry<>(f, RedHatArtifactVersion.fromVersion(f.getName())))
+                redHatFiles.stream()
+                        .map(f -> new AbstractMap.SimpleEntry<>(f, RedHatArtifactVersion.fromVersion(f.getName())))
                         // split by unique upstream version
                         .collect(Collectors.groupingBy(e -> e.getValue().getUpstreamVersion()))
                         // for each unique upstream version, delete the directories corresponding
@@ -157,8 +164,9 @@ public class RepositoryUtils {
                             matchingRHArtifactVersions.stream().skip(1).forEach(e -> {
                                 final File directoryToBeDeleted = e.getKey();
 
-                                log.info("Deleting redhat artifact " + directoryToBeDeleted.getAbsolutePath()
-                                        + " which is redundant since a newer redhat version exists");
+                                log.info(
+                                        "Deleting redhat artifact " + directoryToBeDeleted.getAbsolutePath()
+                                                + " which is redundant since a newer redhat version exists");
 
                                 try {
                                     FileUtils.deleteDirectory(directoryToBeDeleted);
@@ -190,8 +198,9 @@ public class RepositoryUtils {
             if (matcher.matches()) {
                 return new RedHatArtifactVersion(matcher.group(1), Integer.parseInt(matcher.group(2)));
             } else {
-                throw new IllegalStateException("Invalid use of '" + RedHatArtifactVersion.class.getName()
-                        + "#fromVersion' for " + version + ". Can only be used on redhat artifact versions");
+                throw new IllegalStateException(
+                        "Invalid use of '" + RedHatArtifactVersion.class.getName() + "#fromVersion' for " + version
+                                + ". Can only be used on redhat artifact versions");
             }
         }
 

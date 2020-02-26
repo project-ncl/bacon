@@ -41,7 +41,9 @@ import java.util.Collection;
 import java.util.List;
 
 @Path("/listings")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2019-04-24T11:30:42.593645+02:00[Europe/Warsaw]")
+@javax.annotation.Generated(
+        value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen",
+        date = "2019-04-24T11:30:42.593645+02:00[Europe/Warsaw]")
 public interface ListingsApi {
 
     @POST
@@ -98,13 +100,17 @@ public interface ListingsApi {
     @GET
     @Path("/blacklist/ga")
     @Produces({ "application/json" })
-    Collection<RestArtifact> getBlackArtifacts(@QueryParam("groupid") String groupid,
+    Collection<RestArtifact> getBlackArtifacts(
+            @QueryParam("groupid") String groupid,
             @QueryParam("artifactid") String artifactid);
 
     @GET
     @Path("/whitelist/product")
-    Collection<RestProduct> getProduct(@QueryParam("id") Long id, @QueryParam("name") String name,
-            @QueryParam("version") String version, @QueryParam("supportStatus") ProductSupportStatus supportStatus);
+    Collection<RestProduct> getProduct(
+            @QueryParam("id") Long id,
+            @QueryParam("name") String name,
+            @QueryParam("version") String version,
+            @QueryParam("supportStatus") ProductSupportStatus supportStatus);
 
     @GET
     @Path("/whitelist/products")
@@ -114,20 +120,26 @@ public interface ListingsApi {
     @GET
     @Path("/blacklist/gav")
     @Produces({ "application/json" })
-    ContainsResponse isBlackArtifactPresent(@QueryParam("groupid") String groupid, @QueryParam("artifactid") String artifactid,
+    ContainsResponse isBlackArtifactPresent(
+            @QueryParam("groupid") String groupid,
+            @QueryParam("artifactid") String artifactid,
             @QueryParam("version") String version);
 
     @GET
     @Path("/whitelist/artifacts/gastatus")
     @Produces({ "application/json" })
-    List<RestProductGAV> productsWithArtifactGAAndStatus(@QueryParam("groupid") String groupid,
-            @QueryParam("artifactid") String artifactid, @QueryParam("status") ProductSupportStatus status);
+    List<RestProductGAV> productsWithArtifactGAAndStatus(
+            @QueryParam("groupid") String groupid,
+            @QueryParam("artifactid") String artifactid,
+            @QueryParam("status") ProductSupportStatus status);
 
     @GET
     @Path("/whitelist/artifacts/gav")
     @Produces({ "application/json" })
-    List<RestProductGAV> productsWithArtifactGAV(@QueryParam("groupid") String groupid,
-            @QueryParam("artifactid") String artifactid, @QueryParam("version") String version);
+    List<RestProductGAV> productsWithArtifactGAV(
+            @QueryParam("groupid") String groupid,
+            @QueryParam("artifactid") String artifactid,
+            @QueryParam("version") String version);
 
     @GET
     @Path("/whitelist/artifacts/status")

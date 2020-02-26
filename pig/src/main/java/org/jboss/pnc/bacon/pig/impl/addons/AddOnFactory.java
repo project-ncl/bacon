@@ -36,7 +36,11 @@ public class AddOnFactory {
     private AddOnFactory() {
     }
 
-    public static List<AddOn> listAddOns(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
+    public static List<AddOn> listAddOns(
+            Config config,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath) {
         ArrayList<AddOn> resultList = new ArrayList<>();
 
         resultList.add(new RuntimeDependenciesAnalyzer(config, builds, releasePath, extrasPath));

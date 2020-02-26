@@ -39,9 +39,11 @@ import org.jboss.pnc.dto.Project;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "project", description = "Project", groupCommands = { ProjectCli.Create.class,
-        ProjectCli.Get.class, ProjectCli.List.class, ProjectCli.ListBuildConfigurations.class, ProjectCli.ListBuilds.class,
-        ProjectCli.Update.class, })
+@GroupCommandDefinition(
+        name = "project",
+        description = "Project",
+        groupCommands = { ProjectCli.Create.class, ProjectCli.Get.class, ProjectCli.List.class,
+                ProjectCli.ListBuildConfigurations.class, ProjectCli.ListBuilds.class, ProjectCli.Update.class, })
 public class ProjectCli extends AbstractCommand {
 
     private static final ClientCreator<ProjectClient> CREATOR = new ClientCreator<>(ProjectClient::new);
@@ -57,16 +59,25 @@ public class ProjectCli extends AbstractCommand {
         private String projectUrl;
         @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project", defaultValue = "")
         private String issueTrackerUrl;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Project project = Project.builder().name(name).description(description).projectUrl(projectUrl)
-                        .issueTrackerUrl(issueTrackerUrl).build();
+                Project project = Project.builder()
+                        .name(name)
+                        .description(description)
+                        .projectUrl(projectUrl)
+                        .issueTrackerUrl(issueTrackerUrl)
+                        .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(project));
             });
@@ -99,7 +110,8 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -131,7 +143,8 @@ public class ProjectCli extends AbstractCommand {
         private String issueTrackerUrl;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
                 Project project = CREATOR.getClient().getSpecific(id);

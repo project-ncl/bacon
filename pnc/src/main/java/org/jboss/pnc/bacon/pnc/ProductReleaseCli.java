@@ -37,9 +37,11 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.enums.SupportLevel;
 
-@GroupCommandDefinition(name = "product-release", description = "Product Release", groupCommands = {
-        ProductReleaseCli.Create.class, ProductReleaseCli.Update.class, ProductReleaseCli.Get.class,
-        ProductReleaseCli.ListSupportLevel.class })
+@GroupCommandDefinition(
+        name = "product-release",
+        description = "Product Release",
+        groupCommands = { ProductReleaseCli.Create.class, ProductReleaseCli.Update.class, ProductReleaseCli.Get.class,
+                ProductReleaseCli.ListSupportLevel.class })
 public class ProductReleaseCli extends AbstractCommand {
 
     private static final ClientCreator<ProductReleaseClient> CREATOR = new ClientCreator<>(ProductReleaseClient::new);
@@ -54,19 +56,32 @@ public class ProductReleaseCli extends AbstractCommand {
 
         @Option(name = "release-date", description = "Release date, default is today. Format: <yyyy>-<mm>-<dd>")
         private String releaseDate;
-        @Option(required = true, name = "milestone-id", description = "Product Milestone ID from which release is based")
+        @Option(
+                required = true,
+                name = "milestone-id",
+                description = "Product Milestone ID from which release is based")
         private String productMilestoneId;
-        @Option(required = true, name = "support-level", description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
+        @Option(
+                required = true,
+                name = "support-level",
+                description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
-        @Option(name = "download-url", description = "Internal or public location to download the product distribution artifacts")
+        @Option(
+                name = "download-url",
+                description = "Internal or public location to download the product distribution artifacts")
         private String downloadUrl;
         @Option(name = "issue-tracker-url", description = "Link to issues fixed in this release")
         private String issueTrackerUrl;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -81,10 +96,15 @@ public class ProductReleaseCli extends AbstractCommand {
                 // we have to specify the product version, otherwise PNC is not happy. Why though???
                 ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
 
-                ProductRelease productRelease = ProductRelease.builder().version(productReleaseVersion)
-                        .releaseDate(PncClientHelper.parseDateFormat(releaseDate)).productMilestone(productMilestone)
-                        .productVersion(productMilestone.getProductVersion()).supportLevel(SupportLevel.valueOf(supportLevel))
-                        .downloadUrl(downloadUrl).issueTrackerUrl(issueTrackerUrl).build();
+                ProductRelease productRelease = ProductRelease.builder()
+                        .version(productReleaseVersion)
+                        .releaseDate(PncClientHelper.parseDateFormat(releaseDate))
+                        .productMilestone(productMilestone)
+                        .productVersion(productMilestone.getProductVersion())
+                        .supportLevel(SupportLevel.valueOf(supportLevel))
+                        .downloadUrl(downloadUrl)
+                        .issueTrackerUrl(issueTrackerUrl)
+                        .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productRelease));
             });
@@ -101,15 +121,20 @@ public class ProductReleaseCli extends AbstractCommand {
         private String productReleaseVersion;
         @Option(name = "release-date", description = "Release date, default is today. Format: <yyyy>-<mm>-<dd>")
         private String releaseDate;
-        @Option(name = "support-level", description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
+        @Option(
+                name = "support-level",
+                description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
-        @Option(name = "download-url", description = "Internal or public location to download the product distribution artifacts")
+        @Option(
+                name = "download-url",
+                description = "Internal or public location to download the product distribution artifacts")
         private String downloadUrl;
         @Option(required = true, name = "issue-tracker-url", description = "Link to issues fixed in this release")
         private String issueTrackerUrl;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -119,7 +144,9 @@ public class ProductReleaseCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productReleaseVersion, () -> {
 
                     try {
-                        if (validateReleaseVersion(productRelease.getProductMilestone().getId(), productReleaseVersion)) {
+                        if (validateReleaseVersion(
+                                productRelease.getProductMilestone().getId(),
+                                productReleaseVersion)) {
                             updated.version(productReleaseVersion);
                         } else {
                             Fail.fail("Product Release Version '" + productReleaseVersion + "' is not valid!");
@@ -129,9 +156,11 @@ public class ProductReleaseCli extends AbstractCommand {
                     }
                 });
 
-                ObjectHelper.executeIfNotNull(releaseDate,
+                ObjectHelper.executeIfNotNull(
+                        releaseDate,
                         () -> updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate)));
-                ObjectHelper.executeIfNotNull(supportLevel, () -> updated.supportLevel(SupportLevel.valueOf(supportLevel)));
+                ObjectHelper
+                        .executeIfNotNull(supportLevel, () -> updated.supportLevel(SupportLevel.valueOf(supportLevel)));
                 ObjectHelper.executeIfNotNull(downloadUrl, () -> updated.downloadUrl(downloadUrl));
                 ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
@@ -152,11 +181,16 @@ public class ProductReleaseCli extends AbstractCommand {
     @CommandDefinition(name = "list-support-levels", description = "List supported levels")
     public class ListSupportLevel extends AbstractCommand {
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
                 ObjectHelper.print(jsonOutput, CREATOR.getClient().getAllSupportLevel());
@@ -165,10 +199,11 @@ public class ProductReleaseCli extends AbstractCommand {
         }
     }
 
-    private static boolean validateReleaseVersion(String productMilestoneId, String productVersion) throws ClientException {
+    private static boolean validateReleaseVersion(String productMilestoneId, String productVersion)
+            throws ClientException {
         ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
 
-        return ProductMilestoneCli.validateProductMilestoneVersion(productMilestone.getProductVersion().getId(),
-                productVersion);
+        return ProductMilestoneCli
+                .validateProductMilestoneVersion(productMilestone.getProductVersion().getId(), productVersion);
     }
 }

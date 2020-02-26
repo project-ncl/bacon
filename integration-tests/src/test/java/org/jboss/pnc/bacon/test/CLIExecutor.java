@@ -36,11 +36,14 @@ public class CLIExecutor {
             String[] env = new String[1];
             env[0] = Constant.CONFIG_ENV + "=" + CONFIG_LOCATION;
 
-            System.out.println("Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'")));
+            System.out.println(
+                    "Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'")));
             Process process = Runtime.getRuntime().exec(cmdarray, env);
 
-            CompletableFuture<String> output = CompletableFuture.supplyAsync(() -> readInputStream(process.getInputStream()));
-            CompletableFuture<String> error = CompletableFuture.supplyAsync(() -> readInputStream(process.getErrorStream()));
+            CompletableFuture<String> output = CompletableFuture
+                    .supplyAsync(() -> readInputStream(process.getInputStream()));
+            CompletableFuture<String> error = CompletableFuture
+                    .supplyAsync(() -> readInputStream(process.getErrorStream()));
 
             process.waitFor(10, TimeUnit.MINUTES);
             return new ExecutionResult(output.get(), error.get(), process.exitValue());

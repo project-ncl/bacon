@@ -48,13 +48,18 @@ import java.util.Optional;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
 
 @Slf4j
-@GroupCommandDefinition(name = "product-milestone", description = "Product Milestones", groupCommands = {
-        ProductMilestoneCli.Create.class, ProductMilestoneCli.Update.class, ProductMilestoneCli.CancelMilestoneClose.class,
-        ProductMilestoneCli.Get.class, ProductMilestoneCli.PerformedBuilds.class })
+@GroupCommandDefinition(
+        name = "product-milestone",
+        description = "Product Milestones",
+        groupCommands = { ProductMilestoneCli.Create.class, ProductMilestoneCli.Update.class,
+                ProductMilestoneCli.CancelMilestoneClose.class, ProductMilestoneCli.Get.class,
+                ProductMilestoneCli.PerformedBuilds.class })
 public class ProductMilestoneCli extends AbstractCommand {
 
-    private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(ProductMilestoneClient::new);
-    private static final ClientCreator<ProductVersionClient> VERSION_CREATOR = new ClientCreator<>(ProductVersionClient::new);
+    private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(
+            ProductMilestoneClient::new);
+    private static final ClientCreator<ProductVersionClient> VERSION_CREATOR = new ClientCreator<>(
+            ProductVersionClient::new);
 
     @CommandDefinition(name = "create", description = "Create product milestone")
     public class Create extends AbstractCommand {
@@ -69,11 +74,16 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String startDate;
         @Option(required = true, name = "end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -90,9 +100,13 @@ public class ProductMilestoneCli extends AbstractCommand {
 
                 ProductVersionRef productVersionRef = ProductVersionRef.refBuilder().id(productVersionId).build();
 
-                ProductMilestone milestone = ProductMilestone.builder().version(productMilestoneVersion)
-                        .productVersion(productVersionRef).issueTrackerUrl(issueTrackerUrl).startingDate(startDateInstant)
-                        .plannedEndDate(endDateInstant).build();
+                ProductMilestone milestone = ProductMilestone.builder()
+                        .version(productMilestoneVersion)
+                        .productVersion(productVersionRef)
+                        .issueTrackerUrl(issueTrackerUrl)
+                        .startingDate(startDateInstant)
+                        .plannedEndDate(endDateInstant)
+                        .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(milestone));
             });
@@ -115,7 +129,8 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String endDate;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -126,7 +141,8 @@ public class ProductMilestoneCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(productMilestoneVersion, () -> {
 
                     try {
-                        if (validateProductMilestoneVersion(productMilestone.getProductVersion().getId(),
+                        if (validateProductMilestoneVersion(
+                                productMilestone.getProductVersion().getId(),
                                 productMilestoneVersion)) {
                             updated.version(productMilestoneVersion);
                         } else {
@@ -161,9 +177,12 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String id;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
-            return super.executeHelper(commandInvocation, () -> CREATOR.getClientAuthenticated().cancelMilestoneClose(id));
+            return super.executeHelper(
+                    commandInvocation,
+                    () -> CREATOR.getClientAuthenticated().cancelMilestoneClose(id));
         }
     }
 
@@ -190,7 +209,8 @@ public class ProductMilestoneCli extends AbstractCommand {
     }
 
     /**
-     * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product version
+     * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product
+     * version
      * 
      * @param productVersionId
      * @param milestoneVersion

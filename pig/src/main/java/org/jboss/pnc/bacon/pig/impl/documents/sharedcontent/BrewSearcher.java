@@ -67,7 +67,8 @@ public class BrewSearcher {
             final String json = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             return getKojiBuildFinderConfigFromJson(json);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(),
+            throw new IllegalStateException(
+                    "Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(),
                     e);
         }
     }
@@ -164,7 +165,9 @@ public class BrewSearcher {
             session.close();
         }
 
-        List<KojiArchiveInfo> archiveInfos = buildList.stream().map(KojiBuild::getProjectSourcesTgz).filter(Objects::nonNull)
+        List<KojiArchiveInfo> archiveInfos = buildList.stream()
+                .map(KojiBuild::getProjectSourcesTgz)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         try {

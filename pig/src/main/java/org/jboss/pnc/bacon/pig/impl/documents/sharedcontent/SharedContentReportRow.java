@@ -67,8 +67,8 @@ public class SharedContentReportRow {
     }
 
     /**
-     * Appends g:a:p:v;productName;productVersion;isReleased;buildUrl;buildAuthor;comma,separated,tags to the given buffer
-     * (string builder)
+     * Appends g:a:p:v;productName;productVersion;isReleased;buildUrl;buildAuthor;comma,separated,tags to the given
+     * buffer (string builder)
      *
      * @param builder output
      */

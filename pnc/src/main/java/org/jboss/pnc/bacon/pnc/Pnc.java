@@ -24,9 +24,12 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-@GroupCommandDefinition(name = "pnc", description = "PNC sub-command", groupCommands = { AdminCli.class, ArtifactCli.class,
-        BrewPushCli.class, BuildCli.class, BuildConfigCli.class, EnvironmentCli.class, GroupBuildCli.class,
-        GroupConfigCli.class, ProductCli.class, ProductMilestoneCli.class, ProductReleaseCli.class, ProductVersionCli.class,
-        ProjectCli.class, ScmRepositoryCli.class })
+@GroupCommandDefinition(
+        name = "pnc",
+        description = "PNC sub-command",
+        groupCommands = { AdminCli.class, ArtifactCli.class, BrewPushCli.class, BuildCli.class, BuildConfigCli.class,
+                EnvironmentCli.class, GroupBuildCli.class, GroupConfigCli.class, ProductCli.class,
+                ProductMilestoneCli.class, ProductReleaseCli.class, ProductVersionCli.class, ProjectCli.class,
+                ScmRepositoryCli.class })
 public class Pnc extends AbstractCommand {
 }

@@ -69,8 +69,15 @@ public class CommunityDependency {
      * @return g:a:v; state; recommendation; availableVersions; usedForSwarm
      */
     private String toCsvLine() {
-        return String.format("%s:%s:%s; %s; %s; %s; %s", getGroupId(), getArtifactId(), getVersion(), state, recommendation,
-                availableVersions, usedForSwarm);
+        return String.format(
+                "%s:%s:%s; %s; %s; %s; %s",
+                getGroupId(),
+                getArtifactId(),
+                getVersion(),
+                state,
+                recommendation,
+                availableVersions,
+                usedForSwarm);
     }
 
     public org.jboss.da.model.rest.GAV toDaGav() {

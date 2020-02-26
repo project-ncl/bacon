@@ -8,8 +8,8 @@ import org.jboss.pnc.client.Configuration;
 import java.util.function.Function;
 
 /**
- * Helper class to create the PNC CLI client to use in the CLI objects. There are 2 variants, the unauthenticated one and the
- * authenticated one
+ * Helper class to create the PNC CLI client to use in the CLI objects. There are 2 variants, the unauthenticated one
+ * and the authenticated one
  *
  * @param <T> : PNC client to initialize
  */

@@ -45,12 +45,20 @@ public class PncBuilder {
         groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
     }
 
-    public void buildAndWait(GroupConfigurationRef group, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+    public void buildAndWait(
+            GroupConfigurationRef group,
+            boolean tempBuild,
+            boolean tempBuildTS,
+            RebuildMode rebuildMode) {
         GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode);
         waitForSuccessfulFinish(groupBuild.getId());
     }
 
-    private GroupBuild run(GroupConfigurationRef group, boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+    private GroupBuild run(
+            GroupConfigurationRef group,
+            boolean tempBuild,
+            boolean tempBuildTS,
+            RebuildMode rebuildMode) {
         log.info("Performing builds of build group {} in PNC", group.getId());
         GroupBuildParameters buildParams = new GroupBuildParameters();
         buildParams.setRebuildMode(rebuildMode);

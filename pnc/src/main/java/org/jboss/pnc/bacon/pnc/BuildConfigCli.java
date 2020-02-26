@@ -47,12 +47,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "build-config", description = "build-config", groupCommands = { BuildConfigCli.Create.class,
-        BuildConfigCli.Get.class, BuildConfigCli.List.class, BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class, })
+@GroupCommandDefinition(
+        name = "build-config",
+        description = "build-config",
+        groupCommands = { BuildConfigCli.Create.class, BuildConfigCli.Get.class, BuildConfigCli.List.class,
+                BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class, })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
-    private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(BuildConfigurationClient::new);
+    private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(
+            BuildConfigurationClient::new);
 
     @CommandDefinition(name = "create", description = "Create a build configuration")
     public class Create extends AbstractCommand {
@@ -76,26 +80,43 @@ public class BuildConfigCli extends AbstractCommand {
         private String genericParameters;
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
-        @Option(name = "build-type", description = "Build Type. Options are: MVN,GRADLE. Default: MVN", defaultValue = "MVN")
+        @Option(
+                name = "build-type",
+                description = "Build Type. Options are: MVN,GRADLE. Default: MVN",
+                defaultValue = "MVN")
         private String buildType;
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder().name(buildConfigName)
-                        .description(description).environment(Environment.builder().id(environmentId).build())
-                        .project((ProjectRef.refBuilder().id(projectId).build())).buildScript(buildScript)
-                        .scmRepository(SCMRepository.builder().id(scmRepositoryId).build()).scmRevision(scmRevision)
-                        .buildType(BuildType.valueOf(buildType)).parameters(processGenericParameters(genericParameters));
+                BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder()
+                        .name(buildConfigName)
+                        .description(description)
+                        .environment(Environment.builder().id(environmentId).build())
+                        .project((ProjectRef.refBuilder().id(projectId).build()))
+                        .buildScript(buildScript)
+                        .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
+                        .scmRevision(scmRevision)
+                        .buildType(BuildType.valueOf(buildType))
+                        .parameters(processGenericParameters(genericParameters));
 
-                ObjectHelper.executeIfNotNull(productVersionId, () -> buildConfigurationBuilder
-                        .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
+                ObjectHelper.executeIfNotNull(
+                        productVersionId,
+                        () -> buildConfigurationBuilder
+                                .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
+                ObjectHelper.print(
+                        jsonOutput,
+                        CREATOR.getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
             });
         }
 
@@ -136,7 +157,8 @@ public class BuildConfigCli extends AbstractCommand {
         private String buildType;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 
@@ -145,13 +167,16 @@ public class BuildConfigCli extends AbstractCommand {
 
                 ObjectHelper.executeIfNotNull(buildConfigName, () -> updated.name(buildConfigName));
                 ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
-                ObjectHelper.executeIfNotNull(environmentId,
+                ObjectHelper.executeIfNotNull(
+                        environmentId,
                         () -> updated.environment(Environment.builder().id(environmentId).build()));
                 ObjectHelper.executeIfNotNull(buildScript, () -> updated.buildScript(buildScript));
-                ObjectHelper.executeIfNotNull(scmRepositoryId,
+                ObjectHelper.executeIfNotNull(
+                        scmRepositoryId,
                         () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
                 ObjectHelper.executeIfNotNull(scmRevision, () -> updated.scmRevision(scmRevision));
-                ObjectHelper.executeIfNotNull(genericParameters,
+                ObjectHelper.executeIfNotNull(
+                        genericParameters,
                         () -> updated.parameters(processGenericParameters(genericParameters)));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
 
@@ -186,7 +211,8 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuilds(buildConfigId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getBuilds(buildConfigId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -205,7 +231,10 @@ public class BuildConfigCli extends AbstractCommand {
                 if (keyValue.contains("=")) {
                     String[] keyValueResult = keyValue.split("=");
                     if (keyValueResult.length == 2) {
-                        log.debug("Adding parameter with key: '{}' and value: '{}'", keyValueResult[0], keyValueResult[1]);
+                        log.debug(
+                                "Adding parameter with key: '{}' and value: '{}'",
+                                keyValueResult[0],
+                                keyValueResult[1]);
                         params.put(keyValueResult[0], keyValueResult[1]);
                     } else {
                         log.error("Generic parameter format is in the form: KEY1=VALUE1,KEY2=VALUE2");

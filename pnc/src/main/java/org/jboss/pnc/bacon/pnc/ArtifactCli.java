@@ -16,8 +16,10 @@ import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
 
 @Slf4j
-@GroupCommandDefinition(name = "artifact", description = "Artifact", groupCommands = { ArtifactCli.Get.class,
-        ArtifactCli.ListFromHash.class })
+@GroupCommandDefinition(
+        name = "artifact",
+        description = "Artifact",
+        groupCommands = { ArtifactCli.Get.class, ArtifactCli.ListFromHash.class })
 public class ArtifactCli extends AbstractCommand {
 
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
@@ -43,11 +45,16 @@ public class ArtifactCli extends AbstractCommand {
         @Option
         private String sha256;
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
 

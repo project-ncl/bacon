@@ -32,7 +32,11 @@ public class CacheFile {
         mapper.registerModule(new JavaTimeModule());
     }
 
-    public static void writeCredentialToCacheFile(String keycloakUrl, String realm, String username, Credential credential) {
+    public static void writeCredentialToCacheFile(
+            String keycloakUrl,
+            String realm,
+            String username,
+            Credential credential) {
 
         createConfigFolderIfAbsent();
 

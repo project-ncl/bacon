@@ -62,7 +62,8 @@ public class BomVerifierAddon extends AddOn {
         List<GAV> unallowedUnreleasedGavs = getUnallowedUnreleasedGavs();
         if (unallowedUnreleasedGavs.size() > 0) {
             throw new RuntimeException(
-                    "Unreleased artifacts referenced from BOM found:\n" + StringUtils.join(unallowedUnreleasedGavs, "\n"));
+                    "Unreleased artifacts referenced from BOM found:\n"
+                            + StringUtils.join(unallowedUnreleasedGavs, "\n"));
         }
     }
 
@@ -91,7 +92,9 @@ public class BomVerifierAddon extends AddOn {
     }
 
     public List<GAV> getUnallowedUnreleasedGavs() {
-        return getDependencyGavs().filter(this::internallyBuilt).filter(this::unreleased).filter(this::notWhitelisted)
+        return getDependencyGavs().filter(this::internallyBuilt)
+                .filter(this::unreleased)
+                .filter(this::notWhitelisted)
                 .collect(Collectors.toList());
     }
 

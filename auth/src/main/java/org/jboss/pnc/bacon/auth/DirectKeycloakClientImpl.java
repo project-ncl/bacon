@@ -71,17 +71,26 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
 
             log.debug("Getting token via username/password");
 
-            HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint).field("grant_type", "password")
-                    .field("client_id", client).field("username", username).field("password", askForPassword())
+            HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint)
+                    .field("grant_type", "password")
+                    .field("client_id", client)
+                    .field("username", username)
+                    .field("password", askForPassword())
                     .asObject(KeycloakResponse.class);
 
             KeycloakResponse response = postResponse.getBody();
             Instant now = Instant.now();
 
-            Credential credential = Credential.builder().keycloakBaseUrl(keycloakBaseUrl).realm(realm).client(client)
-                    .username(username).accessToken(response.getAccessToken())
-                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn())).refreshToken(response.getRefreshToken())
-                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn())).build();
+            Credential credential = Credential.builder()
+                    .keycloakBaseUrl(keycloakBaseUrl)
+                    .realm(realm)
+                    .client(client)
+                    .username(username)
+                    .accessToken(response.getAccessToken())
+                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
+                    .refreshToken(response.getRefreshToken())
+                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
+                    .build();
 
             CacheFile.writeCredentialToCacheFile(keycloakBaseUrl, realm, username, credential);
             return credential;
@@ -95,7 +104,10 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
      * TODO: save current token in a file
      */
     @Override
-    public Credential getCredentialServiceAccount(String keycloakBaseUrl, String realm, String serviceAccountUsername,
+    public Credential getCredentialServiceAccount(
+            String keycloakBaseUrl,
+            String realm,
+            String serviceAccountUsername,
             String secret) throws KeycloakClientException {
 
         String keycloakEndpoint = keycloakEndpoint(keycloakBaseUrl, realm);
@@ -105,16 +117,23 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
             log.debug("Getting token via clientServiceAccountUsername / secret");
 
             HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint)
-                    .field("grant_type", "client_credentials").field("client_id", serviceAccountUsername)
-                    .field("client_secret", secret).asObject(KeycloakResponse.class);
+                    .field("grant_type", "client_credentials")
+                    .field("client_id", serviceAccountUsername)
+                    .field("client_secret", secret)
+                    .asObject(KeycloakResponse.class);
 
             KeycloakResponse response = postResponse.getBody();
             Instant now = Instant.now();
 
-            return Credential.builder().keycloakBaseUrl(keycloakBaseUrl).realm(realm).client(serviceAccountUsername)
-                    .accessToken(response.getAccessToken()).accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
+            return Credential.builder()
+                    .keycloakBaseUrl(keycloakBaseUrl)
+                    .realm(realm)
+                    .client(serviceAccountUsername)
+                    .accessToken(response.getAccessToken())
+                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
                     .refreshToken(response.getRefreshToken())
-                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn())).build();
+                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
+                    .build();
 
         } catch (Exception e) {
             throw new KeycloakClientException(e);
@@ -125,16 +144,21 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
 
         try {
             String keycloakEndpoint = keycloakEndpoint(credential.getKeycloakBaseUrl(), credential.getRealm());
-            HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint).field("grant_type", "refresh_token")
-                    .field("client_id", credential.getClient()).field("refresh_token", credential.getRefreshToken())
+            HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint)
+                    .field("grant_type", "refresh_token")
+                    .field("client_id", credential.getClient())
+                    .field("refresh_token", credential.getRefreshToken())
                     .asObject(KeycloakResponse.class);
 
             KeycloakResponse response = postResponse.getBody();
             Instant now = Instant.now();
 
-            return credential.toBuilder().accessToken(response.getAccessToken())
-                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn())).refreshToken(response.getRefreshToken())
-                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn())).build();
+            return credential.toBuilder()
+                    .accessToken(response.getAccessToken())
+                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
+                    .refreshToken(response.getRefreshToken())
+                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
+                    .build();
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -153,7 +177,10 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         return new String(passwordArray);
     }
 
-    private Credential refreshCredentialIfNeededAndReturnNewCredential(String keycloakUrl, String realm, String username,
+    private Credential refreshCredentialIfNeededAndReturnNewCredential(
+            String keycloakUrl,
+            String realm,
+            String username,
             Credential cred) {
 
         if (cred.needsNewAccessToken()) {

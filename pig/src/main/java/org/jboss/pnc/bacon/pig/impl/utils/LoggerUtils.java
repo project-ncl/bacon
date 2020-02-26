@@ -39,7 +39,8 @@ public class LoggerUtils {
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
             Logger logger = lc.getLoggerList().iterator().next();
             List<Filter<ILoggingEvent>> filters = logger.getAppender("STDOUT").getCopyOfAttachedFiltersList();
-            filters.stream().filter(LevelFilter.class::isInstance)
+            filters.stream()
+                    .filter(LevelFilter.class::isInstance)
                     .forEach(filter -> ((LevelFilter) filter).setLevel(Level.DEBUG));
             System.out.println("Enabled debug logging");
         }

@@ -40,7 +40,9 @@ public class SourcesGenerator {
 
     private final String targetZipFileName;
 
-    public SourcesGenerator(SourcesGenerationData sourcesGenerationData, String topLevelDirectoryName,
+    public SourcesGenerator(
+            SourcesGenerationData sourcesGenerationData,
+            String topLevelDirectoryName,
             String targetZipFileName) {
         this.sourcesGenerationData = sourcesGenerationData;
         this.topLevelDirectoryName = topLevelDirectoryName;
@@ -72,12 +74,14 @@ public class SourcesGenerator {
             File targetPath = new File(workDir, build.getName() + ".tar.gz");
             FileDownloadUtils.downloadTo(url, targetPath);
             Collection<String> untaredFiles = FileUtils.untar(targetPath, contentsDir);
-            List<String> topLevelDirectories = untaredFiles.stream().filter(this::isNotANestedFile)
+            List<String> topLevelDirectories = untaredFiles.stream()
+                    .filter(this::isNotANestedFile)
                     .collect(Collectors.toList());
 
             if (topLevelDirectories.size() != 1) {
-                throw new RuntimeException("Invalid number of top level directories untared for build " + build + ", "
-                        + "the untared archive: " + targetPath.getAbsolutePath());
+                throw new RuntimeException(
+                        "Invalid number of top level directories untared for build " + build + ", "
+                                + "the untared archive: " + targetPath.getAbsolutePath());
             }
 
             String topLevelDirectoryName = untaredFiles.iterator().next();
@@ -97,7 +101,8 @@ public class SourcesGenerator {
         File unreleasedWorkDir = new File(workDir, topLevelDirectoryName);
         unreleasedWorkDir.mkdirs();
         addUnreleasedSources(repo, unreleasedWorkDir);
-        Stream.of(unreleasedWorkDir.listFiles()).filter(f -> f.getName().endsWith("tar.gz"))
+        Stream.of(unreleasedWorkDir.listFiles())
+                .filter(f -> f.getName().endsWith("tar.gz"))
                 .forEach(f -> FileUtils.untar(f, contentsDir));
     }
 
@@ -106,16 +111,21 @@ public class SourcesGenerator {
         Predicate<File> isWhitelisted = sourcesGenerationData.getWhitelistedArtifacts().isEmpty() ? f -> true
                 : f -> sourcesGenerationData.getWhitelistedArtifacts().stream().anyMatch(a -> f.getName().contains(a));
 
-        repo.getFiles().stream().filter(f -> f.getName().endsWith(".jar")).filter(SourcesGenerator::isUnreleased)
-                .filter(isWhitelisted).map(SourcesGenerator::getSingleBuild).distinct()
+        repo.getFiles()
+                .stream()
+                .filter(f -> f.getName().endsWith(".jar"))
+                .filter(SourcesGenerator::isUnreleased)
+                .filter(isWhitelisted)
+                .map(SourcesGenerator::getSingleBuild)
+                .distinct()
                 .forEach(build -> downloadSourcesTo(build, contentsDir));
     }
 
     private static boolean isUnreleased(File file) {
         final String fileAbsolutePath = file.getAbsolutePath();
         final String lastPartOfPath = "maven-repository";
-        final String repoDirName = fileAbsolutePath.substring(0,
-                fileAbsolutePath.indexOf(lastPartOfPath) + lastPartOfPath.length() + 1);
+        final String repoDirName = fileAbsolutePath
+                .substring(0, fileAbsolutePath.indexOf(lastPartOfPath) + lastPartOfPath.length() + 1);
         GAV gav = GAV.fromFileName(fileAbsolutePath, repoDirName);
 
         return !mrrcSearcher.isReleased(gav);
@@ -125,7 +135,10 @@ public class SourcesGenerator {
         URI downloadUrl = getSourcesArtifactURL(build);
         String filename = FilenameUtils.getName(downloadUrl.getPath());
 
-        log.info("Downloading sources artifact url {} for build id {} to {}", downloadUrl, build.getBuildInfo().getId(),
+        log.info(
+                "Downloading sources artifact url {} for build id {} to {}",
+                downloadUrl,
+                build.getBuildInfo().getId(),
                 directory);
 
         File destination = new File(directory, filename);
@@ -142,10 +155,19 @@ public class SourcesGenerator {
             sb.append(String.format("/vol/%s", buildInfo.getVolumeName()));
         }
 
-        sb.append(String.format("/packages/%s/%s/%s", buildInfo.getName(), buildInfo.getVersion(), buildInfo.getRelease()));
+        sb.append(
+                String.format(
+                        "/packages/%s/%s/%s",
+                        buildInfo.getName(),
+                        buildInfo.getVersion(),
+                        buildInfo.getRelease()));
         sb.append("/maven");
-        sb.append("/" + String.format("%s/%s/%s", archiveInfo.getGroupId().replace('.', '/'), archiveInfo.getArtifactId(),
-                archiveInfo.getVersion()));
+        sb.append(
+                "/" + String.format(
+                        "%s/%s/%s",
+                        archiveInfo.getGroupId().replace('.', '/'),
+                        archiveInfo.getArtifactId(),
+                        archiveInfo.getVersion()));
         sb.append("/" + archiveInfo.getFilename());
 
         final String str = sb.toString();

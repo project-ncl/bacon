@@ -36,8 +36,11 @@ import org.jboss.pnc.dto.GroupBuild;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "group-build", description = "Group builds", groupCommands = { GroupBuildCli.Cancel.class,
-        GroupBuildCli.List.class, GroupBuildCli.ListBuilds.class, GroupBuildCli.Get.class })
+@GroupCommandDefinition(
+        name = "group-build",
+        description = "Group builds",
+        groupCommands = { GroupBuildCli.Cancel.class, GroupBuildCli.List.class, GroupBuildCli.ListBuilds.class,
+                GroupBuildCli.Get.class })
 public class GroupBuildCli extends AbstractCommand {
 
     private static final ClientCreator<GroupBuildClient> CREATOR = new ClientCreator<>(GroupBuildClient::new);
@@ -49,7 +52,8 @@ public class GroupBuildCli extends AbstractCommand {
         private String groupBuildId;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().cancel(groupBuildId);
@@ -74,7 +78,8 @@ public class GroupBuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuilds(groupBuildId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getBuilds(groupBuildId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

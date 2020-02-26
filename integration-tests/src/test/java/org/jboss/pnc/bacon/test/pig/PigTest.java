@@ -68,25 +68,50 @@ public class PigTest extends AbstractTest {
         final String configFile = CONFIG_LOCATION + "/pig.yaml";
         replaceSuffixInConfigFile(configFile);
 
-        final Product product = Product.builder().id(UNIVERSAL_ID).name(PRODUCT_NAME).abbreviation(PRODUCT_ABBREVIATION)
+        final Product product = Product.builder()
+                .id(UNIVERSAL_ID)
+                .name(PRODUCT_NAME)
+                .abbreviation(PRODUCT_ABBREVIATION)
                 .build();
-        final ProductVersion productVersion = ProductVersion.builder().id(UNIVERSAL_ID).version(VERSION).product(product)
+        final ProductVersion productVersion = ProductVersion.builder()
+                .id(UNIVERSAL_ID)
+                .version(VERSION)
+                .product(product)
                 .build();
-        final ProductMilestone productMilestone = ProductMilestone.builder().id(UNIVERSAL_ID).productVersion(productVersion)
-                .version(MILESTONE).build();
+        final ProductMilestone productMilestone = ProductMilestone.builder()
+                .id(UNIVERSAL_ID)
+                .productVersion(productVersion)
+                .version(MILESTONE)
+                .build();
         final ProductVersion productVersionWithCurrentMilestone = productVersion.toBuilder()
-                .currentProductMilestone(productMilestone).build();
-        final GroupConfiguration groupConfig = GroupConfiguration.builder().id(UNIVERSAL_ID).name(GROUP_NAME)
-                .productVersion(productVersionWithCurrentMilestone).build();
+                .currentProductMilestone(productMilestone)
+                .build();
+        final GroupConfiguration groupConfig = GroupConfiguration.builder()
+                .id(UNIVERSAL_ID)
+                .name(GROUP_NAME)
+                .productVersion(productVersionWithCurrentMilestone)
+                .build();
         final Project project = Project.builder().id(UNIVERSAL_ID).name(PROJECT_NAME).build();
-        final SCMRepository scmRepository = SCMRepository.builder().id(UNIVERSAL_ID).internalUrl(SCM_URL)
-                .preBuildSyncEnabled(true).build();
-        final BuildConfiguration buildConfig = BuildConfiguration.builder().id(UNIVERSAL_ID).name(BC_NAME)
-                .buildScript(BUILD_SCRIPT).scmRevision(SCM_REVISION).creationTime(Instant.now()).modificationTime(Instant.now())
-                .scmRepository(scmRepository).environment(Environment.builder().id(UNIVERSAL_ID).build()).project(project)
-                .productVersion(productVersionWithCurrentMilestone).build();
+        final SCMRepository scmRepository = SCMRepository.builder()
+                .id(UNIVERSAL_ID)
+                .internalUrl(SCM_URL)
+                .preBuildSyncEnabled(true)
+                .build();
+        final BuildConfiguration buildConfig = BuildConfiguration.builder()
+                .id(UNIVERSAL_ID)
+                .name(BC_NAME)
+                .buildScript(BUILD_SCRIPT)
+                .scmRevision(SCM_REVISION)
+                .creationTime(Instant.now())
+                .modificationTime(Instant.now())
+                .scmRepository(scmRepository)
+                .environment(Environment.builder().id(UNIVERSAL_ID).build())
+                .project(project)
+                .productVersion(productVersionWithCurrentMilestone)
+                .build();
         final GroupConfiguration groupConfigWithBuildConfig = groupConfig.toBuilder()
-                .buildConfigs(Collections.singletonMap(UNIVERSAL_ID, buildConfig)).build();
+                .buildConfigs(Collections.singletonMap(UNIVERSAL_ID, buildConfig))
+                .build();
 
         wmock.list(PRODUCT, new Page<Product>());
         wmock.creation(PRODUCT, product);
@@ -108,8 +133,11 @@ public class PigTest extends AbstractTest {
         wmock.get(BUILD_CONFIG, buildConfig);
         wmock.creation(BUILD_CONFIG, buildConfig);
 
-        wmock.scenario("add BC to GC").getEntity(GROUP_CONFIG, groupConfig).when()
-                .post(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID)).then()
+        wmock.scenario("add BC to GC")
+                .getEntity(GROUP_CONFIG, groupConfig)
+                .when()
+                .post(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID))
+                .then()
                 .getEntity(GROUP_CONFIG, groupConfigWithBuildConfig);
         ExecutionResult output = executeAndGetResult("pig", "configure", "-c", configFile);
         assertThat(output.getOutput()).contains("name: \"Product Foobar " + SUFFIX + "\"");
@@ -117,7 +145,8 @@ public class PigTest extends AbstractTest {
 
     private void replaceSuffixInConfigFile(String configFile) throws IOException {
         final Path configPath = Paths.get(configFile);
-        List<String> fileContent = Files.lines(configPath).map(l -> l.contains("#!suffix=") ? "#!suffix=" + SUFFIX : l)
+        List<String> fileContent = Files.lines(configPath)
+                .map(l -> l.contains("#!suffix=") ? "#!suffix=" + SUFFIX : l)
                 .collect(Collectors.toList());
         Files.write(configPath, fileContent);
     }

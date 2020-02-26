@@ -67,11 +67,13 @@ public class SharedContentReportGenerator {
 
     protected StringBuilder generateReportString() {
         StringBuilder output = new StringBuilder(
-                "Artifact;Product name; Product version; " + "Released?; Build id; Build Author; Candidate tags; All tags\n");
+                "Artifact;Product name; Product version; "
+                        + "Released?; Build id; Build Author; Candidate tags; All tags\n");
         List<SharedContentReportRow> rows = repositoryFiles.stream()
                 .filter(f -> Stream.of(IGNORED).noneMatch(f.getAbsolutePath()::contains))
                 .map(f -> new SharedContentReportRow(f, RepoDescriptor.MAVEN_REPOSITORY))
-                .filter(r -> !projectsArtifacts.contains(r.getGav())).collect(Collectors.toList());
+                .filter(r -> !projectsArtifacts.contains(r.getGav()))
+                .collect(Collectors.toList());
         if (limit == null) {
             limit = rows.size();
         }
@@ -93,7 +95,8 @@ public class SharedContentReportGenerator {
                     break;
                 } catch (Exception e) {
                     log.debug(
-                            "Failed to fill Brew data to shared content report row, attempt " + (i + 1) + " out of " + attempts,
+                            "Failed to fill Brew data to shared content report row, attempt " + (i + 1) + " out of "
+                                    + attempts,
                             e);
                 }
             }

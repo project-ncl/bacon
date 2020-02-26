@@ -58,9 +58,14 @@ public class ParentPomDownloader {
             log.debug("Downloading: {}", gav.toString());
             // Call Maven to download dependency
 
-            ProcessBuilder builder = new ProcessBuilder("mvn", "-B",
-                    "org.apache.maven.plugins:maven-dependency-plugin:3.0.1:get", "-Dartifact=" + gav.toString(),
-                    "-Dmaven.repo.local=" + repoPath.toAbsolutePath().toString(), "-s", settingsXml);
+            ProcessBuilder builder = new ProcessBuilder(
+                    "mvn",
+                    "-B",
+                    "org.apache.maven.plugins:maven-dependency-plugin:3.0.1:get",
+                    "-Dartifact=" + gav.toString(),
+                    "-Dmaven.repo.local=" + repoPath.toAbsolutePath().toString(),
+                    "-s",
+                    settingsXml);
 
             builder.directory(execDir).inheritIO();
 
@@ -110,7 +115,10 @@ public class ParentPomDownloader {
     }
 
     private Set<Pom> retrievePoms(Path repoPath) throws IOException {
-        return Files.walk(repoPath).filter(Files::isRegularFile).filter(ParentPomDownloader::isPom).map(Pom::new)
+        return Files.walk(repoPath)
+                .filter(Files::isRegularFile)
+                .filter(ParentPomDownloader::isPom)
+                .map(Pom::new)
                 .collect(Collectors.toSet());
     }
 
@@ -128,7 +136,9 @@ public class ParentPomDownloader {
         try {
             Document pomDoc = pom.parse();
 
-            return new PomGAV(parentGroupIdExpression().evaluate(pomDoc), parentArtifactIdExpression().evaluate(pomDoc),
+            return new PomGAV(
+                    parentGroupIdExpression().evaluate(pomDoc),
+                    parentArtifactIdExpression().evaluate(pomDoc),
                     parentVersionExpression().evaluate(pomDoc));
         } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
             throw new RuntimeException(e);

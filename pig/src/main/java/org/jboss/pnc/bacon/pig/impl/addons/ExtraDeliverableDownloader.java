@@ -32,7 +32,11 @@ import java.util.Map;
  */
 public class ExtraDeliverableDownloader extends AddOn {
 
-    protected ExtraDeliverableDownloader(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
+    protected ExtraDeliverableDownloader(
+            Config config,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath) {
         super(config, builds, releasePath, extrasPath);
     }
 
@@ -60,7 +64,11 @@ public class ExtraDeliverableDownloader extends AddOn {
     }
 
     private String constructFileName(String suffix) {
-        return String.format("%s-%s.%s-%s", config.getOutputPrefixes().getReleaseFile(), config.getVersion(),
-                config.getMilestone(), suffix);
+        return String.format(
+                "%s-%s.%s-%s",
+                config.getOutputPrefixes().getReleaseFile(),
+                config.getVersion(),
+                config.getMilestone(),
+                suffix);
     }
 }

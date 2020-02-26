@@ -39,8 +39,9 @@ public class MilestoneNumberFinder {
             return milestoneBase;
         }
         if (url == null) {
-            throw new RuntimeException("Invalid configuration. " + "Milestone is configured to be updated incrementally"
-                    + " but release storage area url (--releaseStorageUrl) is not provided");
+            throw new RuntimeException(
+                    "Invalid configuration. " + "Milestone is configured to be updated incrementally"
+                            + " but release storage area url (--releaseStorageUrl) is not provided");
         }
         String milestonePrefix = milestoneBase.replaceAll("\\*", "");
 

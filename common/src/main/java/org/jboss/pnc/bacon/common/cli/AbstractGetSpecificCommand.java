@@ -27,8 +27,8 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.client.ClientException;
 
 /**
- * Class used to get specific item from PNC. The subclass only has to implement 'getSpecific' to teach it how to retrieve the
- * specific item
+ * Class used to get specific item from PNC. The subclass only has to implement 'getSpecific' to teach it how to
+ * retrieve the specific item
  * 
  * @param <T>
  */
@@ -38,7 +38,11 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
     @Argument(required = true, description = "Id of item")
     private String id;
 
-    @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+    @Option(
+            shortName = 'o',
+            overrideRequired = false,
+            hasValue = false,
+            description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
     @Override

@@ -39,9 +39,11 @@ import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(name = "scm-repository", description = "Scm repository", groupCommands = {
-        ScmRepositoryCli.CreateAndSync.class, ScmRepositoryCli.Get.class, ScmRepositoryCli.List.class,
-        ScmRepositoryCli.ListBuildConfigs.class, })
+@GroupCommandDefinition(
+        name = "scm-repository",
+        description = "Scm repository",
+        groupCommands = { ScmRepositoryCli.CreateAndSync.class, ScmRepositoryCli.Get.class, ScmRepositoryCli.List.class,
+                ScmRepositoryCli.ListBuildConfigs.class, })
 public class ScmRepositoryCli extends AbstractCommand {
 
     private static final ClientCreator<SCMRepositoryClient> CREATOR = new ClientCreator<>(SCMRepositoryClient::new);
@@ -55,15 +57,22 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Option(name = "pre-build-sync", description = "Pre-build-sync feature: Default: true", defaultValue = "true")
         private String preBuildSync;
 
-        @Option(shortName = 'o', overrideRequired = false, hasValue = false, description = "use json for output (default to yaml)")
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
-                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync)).scmUrl(scmUrl).build();
+                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync))
+                        .scmUrl(scmUrl)
+                        .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });
@@ -90,11 +99,14 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
-    @CommandDefinition(name = "list-build-configs", description = "List build configs that use a particular SCM repository")
+    @CommandDefinition(
+            name = "list-build-configs",
+            description = "List build configs that use a particular SCM repository")
     public class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(description = "SCM Repository ID")
@@ -102,7 +114,8 @@ public class ScmRepositoryCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient()
+                    .getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 }
