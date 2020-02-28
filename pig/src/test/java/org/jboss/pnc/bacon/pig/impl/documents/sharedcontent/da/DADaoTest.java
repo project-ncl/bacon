@@ -45,7 +45,7 @@ class DADaoTest {
                     "configLocation system property pointing to a config yaml has to be defined to run "
                             + DADaoTest.class);
         }
-        Config.configure(testConfigLocation, "config.yaml");
+        Config.configure(testConfigLocation, "config.yaml", "default");
         Config.initialize();
 
         daDao = DADao.getInstance();

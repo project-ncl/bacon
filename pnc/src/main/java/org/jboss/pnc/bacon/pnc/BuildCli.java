@@ -218,7 +218,7 @@ public class BuildCli extends AbstractCommand {
                     }
                 } else {
                     // print live log
-                    String bifrostBase = Config.instance().getPnc().getBifrostBaseurl();
+                    String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
                     URI bifrostUri = URI.create(bifrostBase);
                     BifrostClient logProcessor = new BifrostClient(bifrostUri);
                     logProcessor.writeLog(buildId, follow, line -> shell.writeln(line));

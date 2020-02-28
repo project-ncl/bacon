@@ -62,7 +62,7 @@ public class PncClientHelper {
             Fail.fail(e.getMessage());
         }
 
-        KeycloakConfig keycloakConfig = config.getKeycloak();
+        KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
         String bearerToken = "";
 
         if (authenticationNeeded && keycloakConfig != null) {
@@ -74,8 +74,8 @@ public class PncClientHelper {
             }
         }
 
-        config.getPnc().validate();
-        String url = config.getPnc().getUrl();
+        config.getActiveProfile().getPnc().validate();
+        String url = config.getActiveProfile().getPnc().getUrl();
 
         try {
             URI uri = new URI(url);

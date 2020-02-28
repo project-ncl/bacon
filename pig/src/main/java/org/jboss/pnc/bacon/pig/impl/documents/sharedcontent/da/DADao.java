@@ -89,7 +89,7 @@ public class DADao {
 
     public static synchronized DADao getInstance() {
         if (instance == null) {
-            instance = new DADao(Config.instance().getDa());
+            instance = new DADao(Config.instance().getActiveProfile().getDa());
         }
         return instance;
     }
