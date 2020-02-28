@@ -36,9 +36,6 @@ public class KeycloakConfig implements Validate {
     // username: can be a regular user or service account
     private String username;
 
-    // password: used if regular user
-    private String password;
-
     // clientSecret used if user is a service account
     private String clientSecret;
 

@@ -25,7 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -37,14 +38,10 @@ public class Config {
 
     private static String configLocation;
     private static String configFilePath;
+    private static String activeProfileName;
 
-    private String keycloakUrl;
-    private PncConfig pnc;
-    private DaConfig da;
-    private IndyConfig indy;
-    private KeycloakConfig keycloak;
-
-    private Map<String, Map<String, ?>> addOns;
+    private ConfigProfile activeProfile;
+    private List<ConfigProfile> profile;
 
     private static Config instance;
 
@@ -59,9 +56,10 @@ public class Config {
         return instance;
     }
 
-    public static void configure(String configLocation, String configFileName) {
+    public static void configure(String configLocation, String configFileName, String profileName) {
         Config.configLocation = configLocation;
         Config.configFilePath = configLocation + "/" + configFileName;
+        Config.activeProfileName = profileName;
     }
 
     public static void initialize() throws IOException {
@@ -76,6 +74,22 @@ public class Config {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             instance = mapper.readValue(new File(configFilePath), Config.class);
         }
+        instance.setActiveProfile(getProfileByName(activeProfileName));
+    }
+
+    public static ConfigProfile getProfileByName(String name) {
+        List<ConfigProfile> potentialConfig;
+        potentialConfig = instance.getProfile()
+                .stream()
+                .filter(ConfigProfile -> ConfigProfile.getName().equals(name))
+                .collect(Collectors.toList());
+        if (potentialConfig.size() == 0 && name.equals("default"))
+            throw new IllegalArgumentException("Default configuration profile doesn't exist");
+        if (potentialConfig.size() == 0)
+            throw new IllegalArgumentException("Configuration profile with this name doesn't exist");
+        if (potentialConfig.size() > 1)
+            throw new IllegalArgumentException("There are multiple configuration profiles with same name!");
+        return potentialConfig.get(0);
     }
 
     public static String getConfigLocation() {

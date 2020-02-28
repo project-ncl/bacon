@@ -16,23 +16,48 @@
 # PNC details
 #
 # ******************************************************************************
-pnc:
-    url: ""
-    bifrostBaseurl: "http://example.com"
-
+ profile:
+    - name: "default"
+      pnc:
+          url: ""
+          bifrostBaseurl: ""
+  
 # ******************************************************************************
 # Authentication information
 #
 # Uncomment this section if you want to create / update / delete
 # ******************************************************************************
+  
 
-# keycloak:
-#     url: ""
-#     realm: ""
-#     username: ""
+#      keycloak:
+#          url: ""
+#          realm: ""
+#          username: ""
+# 
+#          # if regular user
+#          clientId: ""
+# 
+#          # if service account
+#          clientSecret: ""
+    - name: "coolProfile"
+      pnc:
+          url: ""
+          bifrostBaseurl: ""
+  
+# ******************************************************************************
+# Authentication information
 #
-#     # if regular user
-#     clientId: ""
-#
-#     # if service account
-#     clientSecret: ""
+# Uncomment this section if you want to create / update / delete
+# ******************************************************************************
+  
+
+#      keycloak:
+#          url: ""
+#          realm: ""
+#          username: ""
+# 
+#          # if regular user
+#          clientId: ""
+# 
+#          # if service account
+#          clientSecret: ""

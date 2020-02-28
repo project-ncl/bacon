@@ -33,8 +33,6 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
 
-import java.io.IOException;
-
 /**
  * Abstract command that implements Command
  *
@@ -61,6 +59,13 @@ public class AbstractCommand implements Command {
 
     @Option(shortName = 'p', description = "Path to configuration folder")
     private String configPath = null;
+
+    @Option(
+            shortName = 'P',
+            overrideRequired = false,
+            defaultValue = { "default" },
+            description = "Configuration profile")
+    private String profile;
 
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {
 
@@ -119,7 +124,7 @@ public class AbstractCommand implements Command {
     }
 
     private void setConfigLocation(String configLocation, String source) {
-        Config.configure(configLocation, Constant.CONFIG_FILE_NAME);
+        Config.configure(configLocation, Constant.CONFIG_FILE_NAME, profile);
         log.debug("Config file set from " + source + " to " + Config.getConfigFilePath());
     }
 

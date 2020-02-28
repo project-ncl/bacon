@@ -16,9 +16,11 @@
 # PNC details
 #
 # ******************************************************************************
-pnc:
-    url: "${pnc-url}/pnc-rest-new/rest-new/"
-    bifrostBaseurl: "http://example.com"
+ profile:
+    -  name: "default"
+       pnc:
+           url: "${pnc-url}/pnc-rest-new/rest-new/"
+           bifrostBaseurl: "http://example.com"
 
 # ******************************************************************************
 # Authentication information
@@ -26,8 +28,8 @@ pnc:
 # Uncomment this section if you want to create / update / delete
 # ******************************************************************************
 
-keycloak:
-    url: "${keycloak-url}"
-    realm: "${keycloak-realm}"
-    username: "${keycloak-user}"
-    clientSecret: "${keycloak-secret}"
+       keycloak:
+          url: "${keycloak-url}"
+          realm: "${keycloak-realm}"
+          username: "${keycloak-user}"
+          clientSecret: "${keycloak-secret}"
