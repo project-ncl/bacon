@@ -25,10 +25,10 @@ import lombok.Getter;
  *         Date: 6/5/17
  */
 public enum Template {
-    README("README.ftl", "README.html", false), REPOSITORY_COORDINATES("REPOSITORY_COORDINATES.ftl",
-            "REPOSITORY_COORDINATES.properties",
-            true), ARTIFACT_LIST("ARTIFACT_LIST.ftl", "repository-artifact-list.txt", true), DUPLICATE_ARTIFACT_LIST(
-                    "DUPLICATE_ARTIFACT_LIST.ftl", "repository-duplicate-artifact-list.txt", true);
+    README("README.ftl", "README.html", false),
+    REPOSITORY_COORDINATES("REPOSITORY_COORDINATES.ftl", "REPOSITORY_COORDINATES.properties", true),
+    ARTIFACT_LIST("ARTIFACT_LIST.ftl", "repository-artifact-list.txt", true),
+    DUPLICATE_ARTIFACT_LIST("DUPLICATE_ARTIFACT_LIST.ftl", "repository-duplicate-artifact-list.txt", true);
 
     @Getter
     private final String filename;
