@@ -38,6 +38,8 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Project;
 
 import java.util.Optional;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 @GroupCommandDefinition(
         name = "project",
@@ -121,14 +123,16 @@ public class ProjectCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list-builds", description = "List builds for a project")
-    public class ListBuilds extends AbstractListCommand<Build> {
+    public class ListBuilds extends AbstractBuildListCommand {
 
         @Argument(required = true, description = "Project id")
         private String id;
 
         @Override
-        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+                throws RemoteResourceException {
+            return CREATOR.getClient()
+                    .getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

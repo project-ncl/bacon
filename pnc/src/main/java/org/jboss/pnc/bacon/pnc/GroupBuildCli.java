@@ -40,6 +40,8 @@ import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 @GroupCommandDefinition(
         name = "group-build",
@@ -178,15 +180,16 @@ public class GroupBuildCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list-builds", description = "List builds associated with the group build")
-    public class ListBuilds extends AbstractListCommand<Build> {
+    public class ListBuilds extends AbstractBuildListCommand {
 
         @Argument(required = true, description = "Group Build ID")
         private String groupBuildId;
 
         @Override
-        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
+        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+                throws RemoteResourceException {
             return CREATOR.getClient()
-                    .getBuilds(groupBuildId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+                    .getBuilds(groupBuildId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
