@@ -48,7 +48,7 @@ import java.util.Optional;
         name = "product-version",
         description = "Product Version",
         groupCommands = { ProductVersionCli.Create.class, ProductVersionCli.Get.class, ProductVersionCli.Update.class,
-                ProductVersionCli.ListBuildConfigurations.class, ProductVersionCli.ListGroupConfigurations.class,
+                ProductVersionCli.ListBuildConfigs.class, ProductVersionCli.ListGroupConfigs.class,
                 ProductVersionCli.ListMilestones.class, ProductVersionCli.ListReleases.class })
 @Slf4j
 public class ProductVersionCli extends AbstractCommand {
@@ -107,10 +107,8 @@ public class ProductVersionCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(
-            name = "list-build-configs",
-            description = "List Build configurations for a particular product version")
-    public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
+    @CommandDefinition(name = "list-build-configs", description = "List Build configs for a particular product version")
+    public class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Product version id")
         private String id;
@@ -123,10 +121,8 @@ public class ProductVersionCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(
-            name = "list-group-configs",
-            description = "List Group configurations for a particular product version")
-    public class ListGroupConfigurations extends AbstractListCommand<GroupConfiguration> {
+    @CommandDefinition(name = "list-group-configs", description = "List Group configs for a particular product version")
+    public class ListGroupConfigs extends AbstractListCommand<GroupConfiguration> {
 
         @Argument(required = true, description = "Product version id")
         private String id;

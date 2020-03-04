@@ -42,7 +42,7 @@ import java.util.Optional;
 
 @GroupCommandDefinition(
         name = "group-config",
-        description = "Group configuration",
+        description = "Group config",
         groupCommands = { GroupConfigCli.Create.class, GroupConfigCli.Update.class, GroupConfigCli.List.class,
                 GroupConfigCli.Get.class, })
 public class GroupConfigCli extends AbstractCommand {
@@ -50,16 +50,16 @@ public class GroupConfigCli extends AbstractCommand {
     private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(
             GroupConfigurationClient::new);
 
-    @CommandDefinition(name = "create", description = "Create a group configuration")
+    @CommandDefinition(name = "create", description = "Create a group config")
     public class Create extends AbstractCommand {
 
-        @Argument(required = true, description = "Name of group configuration")
+        @Argument(required = true, description = "Name of group config")
         private String groupConfigName;
 
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
 
-        @Option(name = "build-config-ids", description = "Build configuration ids in Group Config. Comma separated")
+        @Option(name = "build-config-ids", description = "Build config ids in Group Config. Comma separated")
         private String buildConfigIds;
 
         @Option(
@@ -99,19 +99,19 @@ public class GroupConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a group configuration")
+    @CommandDefinition(name = "update", description = "Update a group config")
     public class Update extends AbstractCommand {
 
-        @Argument(required = true, description = "Group Configuration ID")
+        @Argument(required = true, description = "Group Config ID")
         private String groupConfigId;
 
-        @Option(name = "name", description = "Name of group configuration")
+        @Option(name = "name", description = "Name of group config")
         private String groupConfigName;
 
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
 
-        @Option(name = "build-config-ids", description = "Build configuration ids in Group Config. Comma separated")
+        @Option(name = "build-config-ids", description = "Build config ids in Group Config. Comma separated")
         private String buildConfigIds;
 
         @Override
@@ -141,7 +141,7 @@ public class GroupConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get group configuration")
+    @CommandDefinition(name = "get", description = "Get group config")
     public class Get extends AbstractGetSpecificCommand<GroupConfiguration> {
 
         @Override
@@ -150,7 +150,7 @@ public class GroupConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list", description = "List group configurations")
+    @CommandDefinition(name = "list", description = "List group configs")
     public class List extends AbstractListCommand<GroupConfiguration> {
 
         @Override
@@ -159,11 +159,11 @@ public class GroupConfigCli extends AbstractCommand {
         }
     }
 
-    private static java.util.Map<String, BuildConfigurationRef> addBuildConfigs(String buildConfigurationIds) {
+    private static java.util.Map<String, BuildConfigurationRef> addBuildConfigs(String buildConfigIds) {
 
         java.util.Map<String, BuildConfigurationRef> buildConfigurationRefList = new HashMap<>();
 
-        for (String id : buildConfigurationIds.split(",")) {
+        for (String id : buildConfigIds.split(",")) {
 
             id = id.trim();
             buildConfigurationRefList.put(id, BuildConfigurationRef.refBuilder().id(id).build());

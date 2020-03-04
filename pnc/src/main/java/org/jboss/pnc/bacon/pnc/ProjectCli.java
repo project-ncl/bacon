@@ -107,7 +107,7 @@ public class ProjectCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-build-configurations", description = "List build configurations for a project")
+    @CommandDefinition(name = "list-build-configs", description = "List build configs for a project")
     public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Project id")
