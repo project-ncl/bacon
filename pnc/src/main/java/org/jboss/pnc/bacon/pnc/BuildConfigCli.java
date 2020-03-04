@@ -59,7 +59,7 @@ public class BuildConfigCli extends AbstractCommand {
     private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(
             BuildConfigurationClient::new);
 
-    @CommandDefinition(name = "create", description = "Create a build configuration")
+    @CommandDefinition(name = "create", description = "Create a build config")
     public class Create extends AbstractCommand {
 
         @Argument(required = true, description = "Name of build config")
@@ -133,7 +133,7 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a build configuration")
+    @CommandDefinition(name = "update", description = "Update a build config")
     public class Update extends AbstractCommand {
 
         @Argument(required = true, description = "Build config ID")
@@ -219,7 +219,7 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get build configuration")
+    @CommandDefinition(name = "get", description = "Get build config")
     public class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
 
         @Override
@@ -228,7 +228,7 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list", description = "List build configurations")
+    @CommandDefinition(name = "list", description = "List build configs")
     public class List extends AbstractListCommand<BuildConfiguration> {
 
         @Override
@@ -237,7 +237,7 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-builds", description = "List builds of build configurations")
+    @CommandDefinition(name = "list-builds", description = "List builds of build configs")
     public class ListBuilds extends AbstractListCommand<Build> {
 
         @Argument(required = true, description = "Build config id")
