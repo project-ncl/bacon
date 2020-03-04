@@ -82,14 +82,17 @@ public class BuildCli extends AbstractCommand {
                 name = "rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(name = "keep-pod-on-failure", description = "Keep pod alive if the build fails", hasValue = false)
+        @Option(
+                name = "keep-pod-on-failure",
+                description = "Keep the builder pod online after the build fails.",
+                hasValue = false)
         private boolean keepPodOnFailure = false;
         @Option(
                 name = "timestamp-alignment",
-                description = "Do timestamp alignment with temprary build",
+                description = "Do timestamp alignment with temprary build.",
                 hasValue = false)
         private boolean timestampAlignment = false;
-        @Option(name = "temporary-build", description = "Perform a temporary build", hasValue = false)
+        @Option(name = "temporary-build", description = "Perform a temporary build.", hasValue = false)
         private boolean temporaryBuild = false;
         @Option(name = "wait", overrideRequired = false, hasValue = false, description = "Wait for build to complete")
         private boolean wait = false;
