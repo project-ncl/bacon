@@ -47,6 +47,8 @@ import org.jboss.pnc.enums.BuildType;
 import java.util.Map;
 import java.util.Optional;
 import org.aesh.command.option.OptionGroup;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 @GroupCommandDefinition(
         name = "build-config",
@@ -238,15 +240,16 @@ public class BuildConfigCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list-builds", description = "List builds of build configs")
-    public class ListBuilds extends AbstractListCommand<Build> {
+    public class ListBuilds extends AbstractBuildListCommand {
 
         @Argument(required = true, description = "Build config id")
         private String buildConfigId;
 
         @Override
-        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
+        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+                throws RemoteResourceException {
             return CREATOR.getClient()
-                    .getBuilds(buildConfigId, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+                    .getBuilds(buildConfigId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

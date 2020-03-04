@@ -55,6 +55,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.aesh.command.option.OptionList;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 @GroupCommandDefinition(
         name = "build",
@@ -180,7 +183,19 @@ public class BuildCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list", description = "List builds")
-    public class List extends AbstractListCommand<Build> {
+    public class List extends AbstractBuildListCommand {
+
+        @OptionList(
+                name = "attributes",
+                description = "Get only builds with given attributes. Format: KEY=VALUE,KEY=VALUE")
+        private java.util.List<String> attributes;
+
+        @Override
+        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+                throws RemoteResourceException {
+            return CREATOR.getClient()
+                    .getAll(buildsFilter, attributes, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
 
         @Override
         public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {

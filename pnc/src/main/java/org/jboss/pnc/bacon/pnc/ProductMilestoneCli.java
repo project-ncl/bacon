@@ -46,6 +46,8 @@ import java.time.Instant;
 import java.util.Optional;
 
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 @Slf4j
 @GroupCommandDefinition(
@@ -213,15 +215,15 @@ public class ProductMilestoneCli extends AbstractCommand {
     }
 
     @CommandDefinition(name = "list-performed-builds", description = "List performed builds")
-    public class PerformedBuilds extends AbstractListCommand<Build> {
+    public class PerformedBuilds extends AbstractBuildListCommand {
 
         @Argument(required = true, description = "Milestone id")
         private String id;
 
         @Override
-        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            // TODO: figure out what to do with BuildsFilter
-            return CREATOR.getClient().getBuilds(id, null, Optional.ofNullable(sort), Optional.of(query));
+        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+                throws RemoteResourceException {
+            return CREATOR.getClient().getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.of(query));
         }
     }
 
