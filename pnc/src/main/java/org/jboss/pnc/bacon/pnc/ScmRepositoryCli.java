@@ -54,7 +54,10 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Argument(required = true, description = "SCM URL")
         private String scmUrl;
 
-        @Option(name = "no-pre-build-sync", description = "Disable Pre-build-sync feature", hasValue = false)
+        @Option(
+                name = "no-pre-build-sync",
+                description = "Disable the pre-build sync of external repo.",
+                hasValue = false)
         private boolean noPreBuildSync = false;
 
         @Option(
@@ -96,10 +99,10 @@ public class ScmRepositoryCli extends AbstractCommand {
     @CommandDefinition(name = "list", description = "List repositories")
     public class List extends AbstractListCommand<SCMRepository> {
 
-        @Option(description = "Exact URL to search")
+        @Option(name = "match-url", description = "Exact URL to search")
         private String matchUrl;
 
-        @Option(description = "Part of the URL to search")
+        @Option(name = "search-url", description = "Part of the URL to search")
         private String searchUrl;
 
         @Override
