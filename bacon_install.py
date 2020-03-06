@@ -34,7 +34,6 @@ relevant bacon jar and the new bacon Bash script
 import os
 import sys
 import tempfile
-import urllib.request as request
 import xml.etree.ElementTree as ET
 
 
@@ -101,6 +100,11 @@ def download_link(link, folder, filename):
     """
 
     print("Downloading: " + link)
+    if sys.version_info[0] >= 3:
+        import urllib.request as request
+    else:
+        import urllib2 as request
+
     try:
         r = request.urlopen(link).read()
 
