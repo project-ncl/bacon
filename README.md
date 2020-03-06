@@ -15,7 +15,7 @@ java -jar cli/target/bacon.jar
 
 Install:
 ```
-curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python - snapshot
+curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python2 - snapshot
 ```
 
 Upgrade installed version:
