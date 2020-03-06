@@ -32,15 +32,10 @@ The Bash script also supports update:
 relevant bacon jar and the new bacon Bash script
 """
 import os
-import logging
-import requests
 import sys
 import tempfile
+import urllib.request as request
 import xml.etree.ElementTree as ET
-
-logger = logging.getLogger(__name__)
-logging.root.setLevel(logging.DEBUG)
-logger.setLevel(logging.DEBUG)
 
 
 MAVEN_CENTRAL_LINK = "https://repo.maven.org/maven2/org/jboss/pnc/ear-package/"
@@ -108,7 +103,7 @@ class BaconInstall:
         self.__create_bacon_shell_script()
 
         print("")
-        logger.warning("Installed version: {}!".format(latest_version))
+        print("Installed version: {}!".format(latest_version))
 
     def __download_latest_version(self):
         """
@@ -129,7 +124,7 @@ class BaconInstall:
             self.bacon_jar_location,
             "bacon.jar")
 
-        logger.warning("bacon installed in: {}".format(
+        print("bacon installed in: {}".format(
             self.bacon_jar_location + "/bacon.jar"))
 
     def __get_latest_version(self):
@@ -179,14 +174,12 @@ class BaconInstall:
 
     def __download_link(self, link, folder, filename):
 
-        logger.warning("Downloading: " + link)
+        print("Downloading: " + link)
         try:
-            r = requests.get(link)
-
-            logger.debug("Writing to: " + folder + "/" + filename)
+            r = request.urlopen(link).read()
 
             with open(folder + "/" + filename, "wb") as f:
-                f.write(r.content)
+                f.write(r)
         except Exception:
             raise Exception("Something wrong happened while downloading the link: " + link)
 
@@ -212,12 +205,12 @@ def main():
     """
     Main entry point to the program
     """
-    snapshot = False
     if len(sys.argv) >= 2 and sys.argv[1] == 'snapshot':
         maven_link = MAVEN_SNAPSHOT_LINK
         snapshot = True
     else:
         maven_link = MAVEN_CENTRAL_LINK
+        snapshot = False
 
     bacon_jar_location = USER_BACON_JAR_FOLDER_LOCATION
     shell_location = USER_SHELL_LOCATION
