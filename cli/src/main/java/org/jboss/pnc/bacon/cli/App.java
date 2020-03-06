@@ -37,10 +37,7 @@ import org.jboss.pnc.bacon.pnc.Pnc;
  */
 
 @Slf4j
-@GroupCommandDefinition(
-        name = "bacon.jar",
-        description = "Bacon CLI",
-        groupCommands = { Pnc.class, Da.class, Pig.class })
+@GroupCommandDefinition(name = "bacon", description = "Bacon CLI", groupCommands = { Pnc.class, Da.class, Pig.class })
 public class App extends AbstractCommand {
 
     public void run(String[] args) throws Exception {
@@ -72,7 +69,7 @@ public class App extends AbstractCommand {
     private static String buildCLIOutput(String[] args) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("bacon.jar ");
+        builder.append("bacon ");
 
         for (String opt : args) {
             // if opt contains spaces, that means it was grouped inside quotation marks

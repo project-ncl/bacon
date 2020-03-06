@@ -4,10 +4,28 @@ Bacon is a new Java CLI for PNC 2.0 combining features of old PNC CLI and PiG to
 
 # Usage
 Compile:
-  mvn clean install
+```
+mvn clean install
+```
 
 Run:
-  java -jar cli/target/bacon.jar 
+```
+java -jar cli/target/bacon.jar
+```
+
+Install:
+```
+curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python - snapshot
+```
+
+Upgrade installed version:
+```
+# released version
+bacon update
+
+# snapshot version
+bacon update snapshot
+```
 
 # Authentication
 
