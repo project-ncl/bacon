@@ -63,14 +63,14 @@ if [ "$1" == "update" ]; then
     fi
 
     # Script runs the bacon_install.py to update itself
-    curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python - $2
+    curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python2 - $2
 else
     check_if_java_installed
-    java -jar {JAR_LOCATION}/bacon.jar "$@"
+    java -jar {0}/bacon.jar {1} "$@"
 fi
 
 if [ -z "$1" ]; then
-    echo "To update to the latest released version of bacon, run:"
+    echo "To update to the latest released version of bacon/pnc/da/pig, run:"
     echo ""
     echo "    bacon update"
     echo ""
@@ -218,12 +218,24 @@ class BaconInstall:
 
     def __create_bacon_shell_script(self):
 
-        filename = self.shell_location + "/bacon"
+        filename_bacon = self.shell_location + "/bacon"
+        filename_pnc = self.shell_location + "/pnc"
+        filename_da = self.shell_location + "/da"
+        filename_pig = self.shell_location + "/pig"
 
-        with open(filename, "w") as f:
-            f.write(TEMPLATE_BASH.format(JAR_LOCATION=self.bacon_jar_location))
+        with open(filename_bacon, "w") as f:
+            f.write(TEMPLATE_BASH.format(self.bacon_jar_location, ""))
+        with open(filename_pnc, "w") as f:
+            f.write(TEMPLATE_BASH.format(self.bacon_jar_location, "pnc"))
+        with open(filename_da, "w") as f:
+            f.write(TEMPLATE_BASH.format(self.bacon_jar_location, "da"))
+        with open(filename_pig, "w") as f:
+            f.write(TEMPLATE_BASH.format(self.bacon_jar_location, "pig"))
 
-        os.chmod(filename, 0o755)
+        os.chmod(filename_bacon, 0o755)
+        os.chmod(filename_pnc, 0o755)
+        os.chmod(filename_da, 0o755)
+        os.chmod(filename_pig, 0o755)
 
 
 def is_root():
