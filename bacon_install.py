@@ -51,6 +51,10 @@ TEMPLATE_BASH = """
 #!/bin/bash
 set -e
 
+function check_if_java_installed {{
+    command -v java > /dev/null 2>&1 || {{ echo >&2 "java is required to run this command... Aborting!"; exit 1; }}
+}}
+
 if [ "$1" == "update" ]; then
     if [ "$2" == "snapshot" ]; then
         echo "Updating to latest snapshot version..."
@@ -61,6 +65,7 @@ if [ "$1" == "update" ]; then
     # Script runs the bacon_install.py to update itself
     curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python - $2
 else
+    check_if_java_installed
     java -jar {JAR_LOCATION}/bacon.jar "$@"
 fi
 
