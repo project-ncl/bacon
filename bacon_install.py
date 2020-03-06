@@ -32,6 +32,7 @@ The Bash script also supports update:
 relevant bacon jar and the new bacon Bash script
 """
 import os
+import platform
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
@@ -79,6 +80,21 @@ if [ -z "$1" ]; then
     echo ""
 fi
 """
+
+
+def print_mac_notice_if_required():
+    """
+    Print this notice for Mac users since their PATH env var is different than
+    in Linux
+    """
+
+    if platform.system() == 'Darwin':
+        print("")
+        print("Mac user detected! Please adjust your $PATH variable if" +
+              " necessary to run 'bacon'")
+        print("")
+        print("    $ echo 'export PATH=\"$PATH:${HOME}/bin\"' >> " +
+              "~/.bash_profile")
 
 
 def download_maven_metadata_xml(url, folder):
@@ -146,6 +162,7 @@ class BaconInstall:
 
         print("")
         print("Installed version: {}!".format(latest_version))
+        print_mac_notice_if_required()
 
     def __download_latest_version(self):
         """
