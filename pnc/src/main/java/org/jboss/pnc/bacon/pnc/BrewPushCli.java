@@ -80,7 +80,7 @@ public class BrewPushCli extends AbstractCommand {
 
         @Override
         public String exampleText() {
-            return "$ java -jar bacon.jar brew-push build 8 --tag-prefix=\"1.0-pnc\" --reimport=false";
+            return "$ bacon brew-push build 8 --tag-prefix=\"1.0-pnc\" --reimport=false";
         }
     }
 
@@ -105,7 +105,7 @@ public class BrewPushCli extends AbstractCommand {
 
         @Override
         public String exampleText() {
-            return "$ java -jar bacon.jar brew-push group-build 8 --tag-prefix=\"1.0-pnc\"";
+            return "$ bacon brew-push group-build 8 --tag-prefix=\"1.0-pnc\"";
         }
     }
 
