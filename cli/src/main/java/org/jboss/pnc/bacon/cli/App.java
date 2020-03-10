@@ -22,6 +22,7 @@ import org.aesh.command.AeshCommandRuntimeBuilder;
 import org.aesh.command.CommandRuntime;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.impl.registry.AeshCommandRegistryBuilder;
+import org.aesh.command.parser.CommandLineParserException;
 import org.aesh.command.parser.OptionParserException;
 import org.aesh.command.parser.RequiredOptionException;
 import org.aesh.command.registry.CommandRegistry;
@@ -51,6 +52,9 @@ public class App extends AbstractCommand {
             runtime.executeCommand(buildCLIOutput(args));
         } catch (OptionParserException | RequiredOptionException ex) {
             log.error("Missing argument/option: {}", ex.getMessage());
+            throw new FatalException();
+        } catch (CommandLineParserException ex) {
+            log.error("Wrong arguments: {}", ex.getMessage());
             throw new FatalException();
         } catch (RuntimeException ex) {
             if (ex.getMessage().contains(FatalException.class.getCanonicalName())) {
