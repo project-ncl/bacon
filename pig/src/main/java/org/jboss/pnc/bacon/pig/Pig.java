@@ -81,8 +81,9 @@ public class Pig extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
-            PigContext.get().loadConfig(config);
+
             return super.executeHelper(commandInvocation, () -> {
+                PigContext.get().loadConfig(config);
                 ObjectHelper.print(jsonOutput, doExecute());
             });
         }
