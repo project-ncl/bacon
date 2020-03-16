@@ -57,14 +57,14 @@ public class AbstractCommand implements Command {
     @Option(shortName = 'v', overrideRequired = true, hasValue = false, description = "Verbose output")
     private boolean verbose = false;
 
-    @Option(shortName = 'p', description = "Path to configuration folder")
+    @Option(shortName = 'p', description = "Path to PNC configuration folder")
     private String configPath = null;
 
     @Option(
             shortName = 'P',
             overrideRequired = false,
             defaultValue = { "default" },
-            description = "Configuration profile")
+            description = "PNC Configuration profile")
     private String profile;
 
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {
