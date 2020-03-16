@@ -56,7 +56,7 @@ public class Pig extends AbstractCommand {
     public static final String TEMP_BUILD_DEFAULT = "false";
     public static final String TEMP_BUILD = "tempBuild";
     public static final char TEMP_BUILD_SHORT = 't';
-    public static final String CONFIG_DESC = "location of configuration file";
+    public static final String CONFIG_DESC = "Location of Pig configuration file";
     public static final String CONFIG_DEFAULT = "build-config.yaml";
     public static final char CONFIG_SHORT = 'c';
     public static final String REMOVE_M2_DUPLICATES_DESC = "If enabled, only the newest versions of each of the dependencies (groupId:artifactId) "
