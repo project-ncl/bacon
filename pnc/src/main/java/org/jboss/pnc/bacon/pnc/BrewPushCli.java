@@ -27,10 +27,12 @@ import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
-import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.dto.requests.BuildPushRequest;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
+import org.jboss.pnc.restclient.AdvancedBuildClient;
+
+import java.util.concurrent.TimeUnit;
 
 @GroupCommandDefinition(
         name = "brew-push",
@@ -38,7 +40,8 @@ import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
         groupCommands = { BrewPushCli.Build.class, BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
 public class BrewPushCli extends AbstractCommand {
 
-    private static final ClientCreator<BuildClient> BUILD_CREATOR = new ClientCreator<>(BuildClient::new);
+    private static final ClientCreator<AdvancedBuildClient> BUILD_CREATOR = new ClientCreator<>(
+            AdvancedBuildClient::new);
     private static final ClientCreator<GroupBuildClient> GROUP_BUILD_CREATOR = new ClientCreator<>(
             GroupBuildClient::new);
 
@@ -55,6 +58,16 @@ public class BrewPushCli extends AbstractCommand {
                 description = "Should we re-import the build in case it was already imported?",
                 defaultValue = "false")
         private String reimport;
+
+        @Option(
+                name = "wait",
+                overrideRequired = false,
+                hasValue = false,
+                description = "wait for BrewPush to complete")
+        private boolean wait = false;
+
+        @Option(name = "timeout", description = "Time in milliseconds the command waits for Group Build completion")
+        private String timeout;
 
         @Option(
                 shortName = 'o',
@@ -74,7 +87,25 @@ public class BrewPushCli extends AbstractCommand {
                         .reimport(Boolean.valueOf(reimport))
                         .build();
 
-                ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClientAuthenticated().push(id, request));
+                if (timeout != null) {
+                    try {
+                        ObjectHelper.print(
+                                jsonOutput,
+                                BUILD_CREATOR.getClientAuthenticated()
+                                        .executeBrewPush(id, request)
+                                        .get(Long.parseLong(timeout), TimeUnit.MILLISECONDS));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    return;
+                }
+
+                if (wait)
+                    ObjectHelper.print(
+                            jsonOutput,
+                            BUILD_CREATOR.getClientAuthenticated().executeBrewPush(id, request).join());
+                else
+                    ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClientAuthenticated().push(id, request));
             });
         }
 
@@ -95,7 +126,7 @@ public class BrewPushCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
-
+            // TODO add wait option for GroupPush
             return super.executeHelper(commandInvocation, () -> {
 
                 GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
