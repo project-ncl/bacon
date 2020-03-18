@@ -34,11 +34,15 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
-import org.jboss.pnc.client.*;
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
+import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
 
 import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
@@ -50,6 +54,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @GroupCommandDefinition(
         name = "build",
@@ -61,8 +66,8 @@ import java.util.Optional;
 public class BuildCli extends AbstractCommand {
 
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
-    private static final ClientCreator<BuildConfigurationClient> BC_CREATOR = new ClientCreator<>(
-            BuildConfigurationClient::new);
+    private static final ClientCreator<AdvancedBuildConfigurationClient> BC_CREATOR = new ClientCreator<>(
+            AdvancedBuildConfigurationClient::new);
 
     @CommandDefinition(name = "start", description = "Start a new build")
     public class Start extends AbstractCommand {
@@ -80,6 +85,10 @@ public class BuildCli extends AbstractCommand {
         private String timestampAlignment;
         @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
         private String temporaryBuild;
+        @Option(name = "wait", overrideRequired = false, hasValue = false, description = "wait for build to complete")
+        private boolean wait = false;
+        @Option(name = "timeout", description = "Time in milliseconds the command waits for Build completion")
+        private String timeout;
         @Option(
                 shortName = 'o',
                 overrideRequired = false,
@@ -106,7 +115,27 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
 
             return super.executeHelper(commandInvocation, () -> {
-                ObjectHelper.print(jsonOutput, BC_CREATOR.getClientAuthenticated().trigger(buildConfigId, buildParams));
+                if (timeout != null) {
+                    try {
+                        ObjectHelper.print(
+                                jsonOutput,
+                                BC_CREATOR.getClientAuthenticated()
+                                        .executeBuild(buildConfigId, buildParams)
+                                        .get(Long.parseLong(timeout), TimeUnit.MILLISECONDS));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    return;
+                }
+
+                if (wait) {
+                    ObjectHelper.print(
+                            jsonOutput,
+                            BC_CREATOR.getClientAuthenticated().executeBuild(buildConfigId, buildParams).join());
+                } else {
+                    ObjectHelper
+                            .print(jsonOutput, BC_CREATOR.getClientAuthenticated().trigger(buildConfigId, buildParams));
+                }
             });
         }
 

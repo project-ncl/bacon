@@ -17,33 +17,133 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
-import org.jboss.pnc.client.ClientException;
-import org.jboss.pnc.client.GroupBuildClient;
-import org.jboss.pnc.client.RemoteCollection;
-import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.client.*;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
+import org.jboss.pnc.enums.RebuildMode;
+import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
+import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @GroupCommandDefinition(
         name = "group-build",
         description = "Group builds",
         groupCommands = { GroupBuildCli.Cancel.class, GroupBuildCli.List.class, GroupBuildCli.ListBuilds.class,
                 GroupBuildCli.Get.class })
+@Slf4j
 public class GroupBuildCli extends AbstractCommand {
 
     private static final ClientCreator<GroupBuildClient> CREATOR = new ClientCreator<>(GroupBuildClient::new);
+    private static final ClientCreator<AdvancedGroupConfigurationClient> GC_CREATOR = new ClientCreator<>(
+            AdvancedGroupConfigurationClient::new);
+
+    @CommandDefinition(name = "start", description = "Start a new Group build")
+    public class Start extends AbstractCommand {
+
+        @Argument(required = true, description = "Group Build Config ID")
+        private String groupBuildConfigId;
+
+        @Option(
+                name = "rebuild-mode",
+                description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
+        private String rebuildMode;
+        @Option(name = "timestamp-alignment", description = "Default: false", defaultValue = "false")
+        private String timestampAlignment;
+        @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
+        private String temporaryBuild;
+        @Option(
+                name = "wait",
+                overrideRequired = false,
+                hasValue = false,
+                description = "wait for group build to complete")
+        private boolean wait = false;
+        @Option(name = "timeout", description = "Time in milliseconds the command waits for Group Build completion")
+        private String timeout;
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
+        public Start() {
+        }
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            GroupBuildParameters groupBuildParams = new GroupBuildParameters();
+            if (rebuildMode == null) {
+                rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
+            }
+            checkRebuildModeOption(rebuildMode);
+
+            groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
+            groupBuildParams.setTimestampAlignment(Boolean.parseBoolean(timestampAlignment));
+            groupBuildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
+
+            // TODO add GroupBuildRequest with an option to specify BC revisions
+
+            return super.executeHelper(commandInvocation, () -> {
+                if (timeout != null) {
+                    try {
+                        ObjectHelper.print(
+                                jsonOutput,
+                                GC_CREATOR.getClientAuthenticated()
+                                        .executeGroupBuild(groupBuildConfigId, groupBuildParams)
+                                        .get(Long.parseLong(timeout), TimeUnit.MILLISECONDS));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    return;
+                }
+
+                if (wait) {
+                    ObjectHelper.print(
+                            jsonOutput,
+                            GC_CREATOR.getClientAuthenticated()
+                                    .executeGroupBuild(groupBuildConfigId, groupBuildParams)
+                                    .join());
+                } else {
+                    ObjectHelper.print(
+                            jsonOutput,
+                            GC_CREATOR.getClientAuthenticated().trigger(groupBuildConfigId, groupBuildParams, null));
+                }
+            });
+        }
+
+        private void checkRebuildModeOption(String rebuildMode) {
+
+            try {
+                RebuildMode.valueOf(rebuildMode);
+            } catch (IllegalArgumentException | NullPointerException e) {
+                log.error("The rebuild flag contains an illegal option. Possibilities are: ");
+                for (RebuildMode mode : RebuildMode.values()) {
+                    log.error(mode.toString());
+                }
+                throw new FatalException();
+            }
+        }
+    }
 
     @CommandDefinition(name = "cancel", description = "Cancel a group build")
     public class Cancel extends AbstractCommand {
