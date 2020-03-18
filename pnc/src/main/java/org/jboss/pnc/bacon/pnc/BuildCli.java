@@ -204,7 +204,7 @@ public class BuildCli extends AbstractCommand {
                 try {
                     buildLogs = CREATOR.getClient().getBuildLogs(buildId);
                 } catch (Exception e) {
-                    e.printStackTrace(); // TODO, client should return Optional.empty not throw the exception (NCL-5348)
+                    e.printStackTrace();
                     buildLogs = Optional.empty();
                 }
                 // is there a stored record
