@@ -100,9 +100,6 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         }
     }
 
-    /**
-     * TODO: save current token in a file
-     */
     @Override
     public Credential getCredentialServiceAccount(
             String keycloakBaseUrl,
