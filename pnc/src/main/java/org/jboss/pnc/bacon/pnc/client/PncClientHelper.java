@@ -65,6 +65,10 @@ public class PncClientHelper {
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
         String bearerToken = "";
 
+        if (authenticationNeeded && keycloakConfig == null) {
+            Fail.fail("Keycloak section is needed in the configuration file!");
+        }
+
         if (authenticationNeeded && keycloakConfig != null) {
             keycloakConfig.validate();
             bearerToken = getBearerToken(keycloakConfig);
