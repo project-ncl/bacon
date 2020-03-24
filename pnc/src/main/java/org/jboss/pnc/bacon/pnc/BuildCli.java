@@ -85,9 +85,9 @@ public class BuildCli extends AbstractCommand {
         private String timestampAlignment;
         @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
         private String temporaryBuild;
-        @Option(name = "wait", overrideRequired = false, hasValue = false, description = "wait for build to complete")
+        @Option(name = "wait", overrideRequired = false, hasValue = false, description = "Wait for build to complete")
         private boolean wait = false;
-        @Option(name = "timeout", description = "Time in milliseconds the command waits for Build completion")
+        @Option(name = "timeout", description = "Time in minutes the command waits for Build completion")
         private String timeout;
         @Option(
                 shortName = 'o',
@@ -123,7 +123,7 @@ public class BuildCli extends AbstractCommand {
                                             buildConfigId,
                                             buildParams,
                                             Long.parseLong(timeout),
-                                            TimeUnit.MILLISECONDS));
+                                            TimeUnit.MINUTES));
                 }
 
                 if (wait) {

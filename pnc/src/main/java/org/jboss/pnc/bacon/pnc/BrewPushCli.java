@@ -63,10 +63,10 @@ public class BrewPushCli extends AbstractCommand {
                 name = "wait",
                 overrideRequired = false,
                 hasValue = false,
-                description = "wait for BrewPush to complete")
+                description = "Wait for BrewPush to complete")
         private boolean wait = false;
 
-        @Option(name = "timeout", description = "Time in milliseconds the command waits for Group Build completion")
+        @Option(name = "timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
 
         @Option(
@@ -91,7 +91,7 @@ public class BrewPushCli extends AbstractCommand {
                     ObjectHelper.print(
                             jsonOutput,
                             BUILD_CREATOR.getClientAuthenticated()
-                                    .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MILLISECONDS));
+                                    .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES));
                     return;
                 }
 
