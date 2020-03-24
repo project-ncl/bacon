@@ -116,16 +116,14 @@ public class BuildCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 if (timeout != null) {
-                    try {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                BC_CREATOR.getClientAuthenticated()
-                                        .executeBuild(buildConfigId, buildParams)
-                                        .get(Long.parseLong(timeout), TimeUnit.MILLISECONDS));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    return;
+                    ObjectHelper.print(
+                            jsonOutput,
+                            BC_CREATOR.getClientAuthenticated()
+                                    .executeBuild(
+                                            buildConfigId,
+                                            buildParams,
+                                            Long.parseLong(timeout),
+                                            TimeUnit.MILLISECONDS));
                 }
 
                 if (wait) {

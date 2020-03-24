@@ -105,15 +105,14 @@ public class GroupBuildCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 if (timeout != null) {
-                    try {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                GC_CREATOR.getClientAuthenticated()
-                                        .executeGroupBuild(groupBuildConfigId, groupBuildParams)
-                                        .get(Long.parseLong(timeout), TimeUnit.MILLISECONDS));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    ObjectHelper.print(
+                            jsonOutput,
+                            GC_CREATOR.getClientAuthenticated()
+                                    .executeGroupBuild(
+                                            groupBuildConfigId,
+                                            groupBuildParams,
+                                            Long.parseLong(timeout),
+                                            TimeUnit.MILLISECONDS));
                     return;
                 }
 
