@@ -88,15 +88,10 @@ public class BrewPushCli extends AbstractCommand {
                         .build();
 
                 if (timeout != null) {
-                    try {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                BUILD_CREATOR.getClientAuthenticated()
-                                        .executeBrewPush(id, request)
-                                        .get(Long.parseLong(timeout), TimeUnit.MILLISECONDS));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    ObjectHelper.print(
+                            jsonOutput,
+                            BUILD_CREATOR.getClientAuthenticated()
+                                    .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MILLISECONDS));
                     return;
                 }
 
