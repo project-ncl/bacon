@@ -73,9 +73,9 @@ public class GroupBuildCli extends AbstractCommand {
                 name = "wait",
                 overrideRequired = false,
                 hasValue = false,
-                description = "wait for group build to complete")
+                description = "Wait for group build to complete")
         private boolean wait = false;
-        @Option(name = "timeout", description = "Time in milliseconds the command waits for Group Build completion")
+        @Option(name = "timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
         @Option(
                 shortName = 'o',
@@ -112,7 +112,7 @@ public class GroupBuildCli extends AbstractCommand {
                                             groupBuildConfigId,
                                             groupBuildParams,
                                             Long.parseLong(timeout),
-                                            TimeUnit.MILLISECONDS));
+                                            TimeUnit.MINUTES));
                     return;
                 }
 
