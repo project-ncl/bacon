@@ -59,18 +59,6 @@ public class ProductCli extends AbstractCommand {
         private String description;
 
         @Option(
-                name = "product-code",
-                description = "The official Product code to be used in URLs and filenames etc e.g. eap",
-                defaultValue = "")
-        private String productCode;
-
-        @Option(
-                name = "system-code",
-                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap",
-                defaultValue = "")
-        private String systemCode;
-
-        @Option(
                 shortName = 'o',
                 overrideRequired = false,
                 hasValue = false,
@@ -87,8 +75,6 @@ public class ProductCli extends AbstractCommand {
                         .name(name)
                         .abbreviation(abbreviation)
                         .description(description)
-                        .productCode(productCode)
-                        .pgmSystemName(systemCode)
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(product));
@@ -130,16 +116,6 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(
-                name = "product-code",
-                description = "The official Product code to be used in URLs and filenames etc e.g. eap")
-        private String productCode;
-
-        @Option(
-                name = "system-code",
-                description = "The eventual code needed to integrate with external systems, portals, etc, i.e. jbosseap")
-        private String systemCode;
-
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
@@ -152,8 +128,6 @@ public class ProductCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
                 ObjectHelper.executeIfNotNull(abbreviation, () -> updated.abbreviation(abbreviation));
                 ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
-                ObjectHelper.executeIfNotNull(productCode, () -> updated.productCode(productCode));
-                ObjectHelper.executeIfNotNull(systemCode, () -> updated.pgmSystemName(systemCode));
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
             });
