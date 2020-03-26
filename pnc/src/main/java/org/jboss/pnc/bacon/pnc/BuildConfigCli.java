@@ -147,9 +147,9 @@ public class BuildConfigCli extends AbstractCommand {
         private String environmentId;
         @Option(name = "build-script", description = "Build Script to build project")
         private String buildScript;
-        @Option(required = true, name = "scm-repository-id", description = "SCM Repository ID to use")
+        @Option(name = "scm-repository-id", description = "SCM Repository ID to use")
         private String scmRepositoryId;
-        @Option(required = true, name = "scm-revision", description = "SCM Revision")
+        @Option(name = "scm-revision", description = "SCM Revision")
         private String scmRevision;
         @Option(name = "generic-parameters", description = "Generic parameters. Format: KEY=VALUE,KEY=VALUE")
         private String genericParameters;
@@ -182,6 +182,11 @@ public class BuildConfigCli extends AbstractCommand {
 
                 CREATOR.getClientAuthenticated().update(buildConfigId, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc build-config update --description \"new me new description\" 50";
         }
     }
 

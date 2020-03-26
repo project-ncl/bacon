@@ -80,6 +80,11 @@ public class ProductCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(product));
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product create --abbreviation testing Testing";
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get product")
@@ -131,6 +136,11 @@ public class ProductCli extends AbstractCommand {
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product update --abbreviation testingme2 42";
         }
     }
 }

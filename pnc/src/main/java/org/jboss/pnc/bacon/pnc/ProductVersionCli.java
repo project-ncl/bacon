@@ -91,6 +91,11 @@ public class ProductVersionCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productVersion));
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product-version create --product-id 20 2.1";
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get product version")
@@ -103,7 +108,7 @@ public class ProductVersionCli extends AbstractCommand {
     }
 
     @CommandDefinition(
-            name = "list-build-configurations",
+            name = "list-build-configs",
             description = "List Build configurations for a particular product version")
     public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
@@ -119,7 +124,7 @@ public class ProductVersionCli extends AbstractCommand {
     }
 
     @CommandDefinition(
-            name = "list-group-configurations",
+            name = "list-group-configs",
             description = "List Group configurations for a particular product version")
     public class ListGroupConfigurations extends AbstractListCommand<GroupConfiguration> {
 
@@ -166,6 +171,7 @@ public class ProductVersionCli extends AbstractCommand {
 
         @Argument(required = true, description = "Product Version ID to update")
         private String id;
+
         @Option(name = "product-version", description = "Version of product version")
         private String productVersion;
 
@@ -188,6 +194,11 @@ public class ProductVersionCli extends AbstractCommand {
                 });
                 CREATOR.getClientAuthenticated().update(id, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product-version update --product-version 2.2 42";
         }
     }
 

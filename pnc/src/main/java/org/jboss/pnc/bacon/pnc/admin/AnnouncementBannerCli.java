@@ -50,6 +50,11 @@ public class AnnouncementBannerCli extends AbstractCommand {
                 CREATOR.getClientAuthenticated().setAnnouncementBanner(announcement);
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc admin announcement-banner set \"Wash your hands!\"";
+        }
     }
 
     @CommandDefinition(name = "unset", description = "This will unset the announcement banner")

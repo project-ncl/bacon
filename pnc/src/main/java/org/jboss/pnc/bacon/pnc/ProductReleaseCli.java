@@ -109,6 +109,11 @@ public class ProductReleaseCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productRelease));
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product-release create --milestone-id 32 --support-level EOL 2.1.0.GA";
+        }
     }
 
     @CommandDefinition(name = "update", description = "Update product release")
@@ -129,7 +134,7 @@ public class ProductReleaseCli extends AbstractCommand {
                 name = "download-url",
                 description = "Internal or public location to download the product distribution artifacts")
         private String downloadUrl;
-        @Option(required = true, name = "issue-tracker-url", description = "Link to issues fixed in this release")
+        @Option(name = "issue-tracker-url", description = "Link to issues fixed in this release")
         private String issueTrackerUrl;
 
         @Override
@@ -166,6 +171,11 @@ public class ProductReleaseCli extends AbstractCommand {
 
                 CREATOR.getClientAuthenticated().update(productReleaseId, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product-release update --support-level UNRELEASED 14";
         }
     }
 

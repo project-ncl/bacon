@@ -49,6 +49,11 @@ public class MaintenanceModeCli extends AbstractCommand {
                 CREATOR.getClientAuthenticated().activateMaintenanceMode(reason);
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for upcoming migration\"";
+        }
     }
 
     @CommandDefinition(name = "deactivate", description = "Deactivate maintenance mode and accept new builds")

@@ -82,6 +82,11 @@ public class ProjectCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(project));
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc project create --description \"Morning sunshine\" best-project-ever";
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get a project")
@@ -157,6 +162,11 @@ public class ProjectCli extends AbstractCommand {
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "bacon pnc project update --name \"bad-guy\" 1";
         }
     }
 }
