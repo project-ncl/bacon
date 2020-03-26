@@ -31,6 +31,11 @@ public class ArtifactCli extends AbstractCommand {
         public Artifact getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc artifact get 10";
+        }
     }
 
     @CommandDefinition(name = "list-from-hash", description = "List artifacts based on hash")
@@ -64,6 +69,11 @@ public class ArtifactCli extends AbstractCommand {
                     ObjectHelper.print(jsonOutput, CREATOR.getClient().getAll(sha256, md5, sha1));
                 }
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc artifact list-from-hash --md5 stiritup";
         }
     }
 }

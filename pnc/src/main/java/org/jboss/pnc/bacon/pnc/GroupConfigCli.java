@@ -59,10 +59,8 @@ public class GroupConfigCli extends AbstractCommand {
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
 
-        @Option(
-                name = "build-configuration-ids",
-                description = "Build configuration ids in Group Config. Comma separated")
-        private String buildConfigurationIds;
+        @Option(name = "build-config-ids", description = "Build configuration ids in Group Config. Comma separated")
+        private String buildConfigIds;
 
         @Option(
                 shortName = 'o',
@@ -86,13 +84,18 @@ public class GroupConfigCli extends AbstractCommand {
                                 .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
                 ObjectHelper.executeIfNotNull(
-                        buildConfigurationIds,
-                        () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigurationIds)));
+                        buildConfigIds,
+                        () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds)));
 
                 ObjectHelper.print(
                         jsonOutput,
                         CREATOR.getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name";
         }
     }
 
@@ -108,10 +111,8 @@ public class GroupConfigCli extends AbstractCommand {
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
 
-        @Option(
-                name = "build-configuration-ids",
-                description = "Build configuration ids in Group Config. Comma separated")
-        private String buildConfigurationIds;
+        @Option(name = "build-config-ids", description = "Build configuration ids in Group Config. Comma separated")
+        private String buildConfigIds;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
@@ -127,12 +128,16 @@ public class GroupConfigCli extends AbstractCommand {
                         productVersionId,
                         () -> updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
 
-                ObjectHelper.executeIfNotNull(
-                        buildConfigurationIds,
-                        () -> updated.buildConfigs(addBuildConfigs(buildConfigurationIds)));
+                ObjectHelper
+                        .executeIfNotNull(buildConfigIds, () -> updated.buildConfigs(addBuildConfigs(buildConfigIds)));
 
                 CREATOR.getClientAuthenticated().update(groupConfigId, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc group-config update --name group-config-updated 503";
         }
     }
 

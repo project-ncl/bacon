@@ -39,15 +39,13 @@ import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @GroupCommandDefinition(
         name = "group-build",
         description = "Group builds",
-        groupCommands = { GroupBuildCli.Cancel.class, GroupBuildCli.List.class, GroupBuildCli.ListBuilds.class,
-                GroupBuildCli.Get.class })
+        groupCommands = { GroupBuildCli.Start.class, GroupBuildCli.Cancel.class, GroupBuildCli.List.class,
+                GroupBuildCli.ListBuilds.class, GroupBuildCli.Get.class })
 @Slf4j
 public class GroupBuildCli extends AbstractCommand {
 
@@ -65,10 +63,13 @@ public class GroupBuildCli extends AbstractCommand {
                 name = "rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(name = "timestamp-alignment", description = "Default: false", defaultValue = "false")
-        private String timestampAlignment;
-        @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
-        private String temporaryBuild;
+        @Option(
+                name = "timestamp-alignment",
+                description = "Do timestamp alignment with temporary builds",
+                hasValue = false)
+        private boolean timestampAlignment = false;
+        @Option(name = "temporary-build", description = "Perform temporary builds", hasValue = false)
+        private boolean temporaryBuild = false;
         @Option(
                 name = "wait",
                 overrideRequired = false,
@@ -84,9 +85,6 @@ public class GroupBuildCli extends AbstractCommand {
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
-        public Start() {
-        }
-
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
@@ -98,8 +96,8 @@ public class GroupBuildCli extends AbstractCommand {
             checkRebuildModeOption(rebuildMode);
 
             groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
-            groupBuildParams.setTimestampAlignment(Boolean.parseBoolean(timestampAlignment));
-            groupBuildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
+            groupBuildParams.setTimestampAlignment(timestampAlignment);
+            groupBuildParams.setTemporaryBuild(temporaryBuild);
 
             // TODO add GroupBuildRequest with an option to specify BC revisions
 
@@ -130,6 +128,11 @@ public class GroupBuildCli extends AbstractCommand {
             });
         }
 
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc group-build start --temporary-build 23";
+        }
+
         private void checkRebuildModeOption(String rebuildMode) {
 
             try {
@@ -157,6 +160,11 @@ public class GroupBuildCli extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().cancel(groupBuildId);
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc group-build cancel 42";
         }
     }
 

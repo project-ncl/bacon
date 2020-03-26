@@ -55,9 +55,10 @@ public class BrewPushCli extends AbstractCommand {
 
         @Option(
                 name = "reimport",
-                description = "Should we re-import the build in case it was already imported?",
-                defaultValue = "false")
-        private String reimport;
+                description = "Re-import the build in case it was already imported",
+                overrideRequired = false,
+                hasValue = false)
+        private boolean reimport = false;
 
         @Option(
                 name = "wait",
@@ -82,10 +83,7 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildPushRequest request = BuildPushRequest.builder()
-                        .tagPrefix(tagPrefix)
-                        .reimport(Boolean.valueOf(reimport))
-                        .build();
+                BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(reimport).build();
 
                 if (timeout != null) {
                     ObjectHelper.print(
@@ -106,7 +104,12 @@ public class BrewPushCli extends AbstractCommand {
 
         @Override
         public String exampleText() {
-            return "$ bacon brew-push build 8 --tag-prefix=\"1.0-pnc\" --reimport=false";
+            StringBuilder commands = new StringBuilder();
+            commands.append("$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"\n")
+                    .append("\n")
+                    .append("# To wait for the push to finish, use the '--wait' flag. See the '--timeout' flag also\n")
+                    .append("$ bacon pnc brew-push build 100 --tag-prefix=\"music-1\" --wait");
+            return commands.toString();
         }
     }
 
@@ -131,7 +134,10 @@ public class BrewPushCli extends AbstractCommand {
 
         @Override
         public String exampleText() {
-            return "$ bacon brew-push group-build 8 --tag-prefix=\"1.0-pnc\"";
+            StringBuilder commands = new StringBuilder();
+            commands.append("$ bacon pnc brew-push group-build 8 --tag-prefix=\"1.0-pnc\"\n");
+
+            return commands.toString();
         }
     }
 
@@ -156,6 +162,11 @@ public class BrewPushCli extends AbstractCommand {
 
                 ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClient().getPushResult(id));
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc brew-push status 10";
         }
     }
 }

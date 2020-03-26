@@ -79,12 +79,15 @@ public class BuildCli extends AbstractCommand {
                 name = "rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(name = "keep-pod-on-failure", description = "Default: false", defaultValue = "false")
-        private String keepPodOnFailure;
-        @Option(name = "timestamp-alignment", description = "Default: false", defaultValue = "false")
-        private String timestampAlignment;
-        @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
-        private String temporaryBuild;
+        @Option(name = "keep-pod-on-failure", description = "Keep pod alive if the build fails", hasValue = false)
+        private boolean keepPodOnFailure = false;
+        @Option(
+                name = "timestamp-alignment",
+                description = "Do timestamp alignment with temprary build",
+                hasValue = false)
+        private boolean timestampAlignment = false;
+        @Option(name = "temporary-build", description = "Perform a temporary build", hasValue = false)
+        private boolean temporaryBuild = false;
         @Option(name = "wait", overrideRequired = false, hasValue = false, description = "Wait for build to complete")
         private boolean wait = false;
         @Option(name = "timeout", description = "Time in minutes the command waits for Build completion")
@@ -96,9 +99,6 @@ public class BuildCli extends AbstractCommand {
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
-        public Start() {
-        }
-
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
@@ -108,11 +108,10 @@ public class BuildCli extends AbstractCommand {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
             }
             checkRebuildModeOption(rebuildMode);
-
             buildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
-            buildParams.setKeepPodOnFailure(Boolean.parseBoolean(keepPodOnFailure));
-            buildParams.setTimestampAlignment(Boolean.parseBoolean(timestampAlignment));
-            buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
+            buildParams.setKeepPodOnFailure(keepPodOnFailure);
+            buildParams.setTimestampAlignment(timestampAlignment);
+            buildParams.setTemporaryBuild(temporaryBuild);
 
             return super.executeHelper(commandInvocation, () -> {
                 if (timeout != null) {
@@ -135,6 +134,14 @@ public class BuildCli extends AbstractCommand {
                             .print(jsonOutput, BC_CREATOR.getClientAuthenticated().trigger(buildConfigId, buildParams));
                 }
             });
+        }
+
+        @Override
+        public String exampleText() {
+
+            StringBuilder command = new StringBuilder();
+            command.append("$ bacon pnc build start \\\n").append("\t--rebuild-mode=FORCE --temporary-build --wait");
+            return command.toString();
         }
 
         private void checkRebuildModeOption(String rebuildMode) {
@@ -165,6 +172,11 @@ public class BuildCli extends AbstractCommand {
                 CREATOR.getClientAuthenticated().cancel(buildId);
             });
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc build cancel 10000";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List builds")
@@ -187,6 +199,11 @@ public class BuildCli extends AbstractCommand {
             return CREATOR.getClient()
                     .getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc build list-built-artifacts 10000";
+        }
     }
 
     @CommandDefinition(name = "list-dependencies", description = "List dependencies")
@@ -199,6 +216,11 @@ public class BuildCli extends AbstractCommand {
         public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient()
                     .getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc build list-dependencies 10000";
         }
     }
 

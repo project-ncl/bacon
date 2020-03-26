@@ -54,8 +54,8 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Argument(required = true, description = "SCM URL")
         private String scmUrl;
 
-        @Option(name = "pre-build-sync", description = "Pre-build-sync feature: Default: true", defaultValue = "true")
-        private String preBuildSync;
+        @Option(name = "no-pre-build-sync", description = "Disable Pre-build-sync feature", hasValue = false)
+        private boolean noPreBuildSync = false;
 
         @Option(
                 shortName = 'o',
@@ -70,12 +70,17 @@ public class ScmRepositoryCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
-                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync))
+                        .preBuildSyncEnabled(!noPreBuildSync)
                         .scmUrl(scmUrl)
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc scm-repository create-and-sync --no-pre-build-sync http://github.com/project-ncl/pnc.git";
         }
     }
 

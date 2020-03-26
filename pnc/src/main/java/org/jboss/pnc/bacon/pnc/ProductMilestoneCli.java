@@ -111,6 +111,18 @@ public class ProductMilestoneCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(milestone));
             });
         }
+
+        @Override
+        public String exampleText() {
+
+            StringBuilder command = new StringBuilder();
+            command.append("$ bacon pnc product-milestone create \\\n")
+                    .append("\t--product-version-id 3 \\\n")
+                    .append("\t--issue-tracker-url http://example.com \\\n")
+                    .append("\t--end-date 2030-12-26 1.2.0.CR1");
+
+            return command.toString();
+        }
     }
 
     @CommandDefinition(name = "update", description = "Update product milestone")
@@ -167,6 +179,11 @@ public class ProductMilestoneCli extends AbstractCommand {
 
                 CREATOR.getClientAuthenticated().update(productMilestoneId, updated.build());
             });
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc product-milestone update --issue-tracker-url http://lakaz.org 5";
         }
     }
 
