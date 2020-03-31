@@ -234,7 +234,7 @@ public class BuildConfigCli extends AbstractCommand {
                 keyValue = keyValue.trim();
 
                 if (keyValue.contains("=")) {
-                    String[] keyValueResult = keyValue.split("=");
+                    String[] keyValueResult = keyValue.split("=", 2);
                     if (keyValueResult.length == 2) {
                         log.debug(
                                 "Adding parameter with key: '{}' and value: '{}'",
