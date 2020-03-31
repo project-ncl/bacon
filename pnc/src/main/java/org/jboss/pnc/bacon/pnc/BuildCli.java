@@ -140,7 +140,7 @@ public class BuildCli extends AbstractCommand {
         public String exampleText() {
 
             StringBuilder command = new StringBuilder();
-            command.append("$ bacon pnc build start \\\n").append("\t--rebuild-mode=FORCE --temporary-build --wait");
+            command.append("$ bacon pnc build start \\\n").append("\t--rebuild-mode=FORCE --temporary-build --wait 27");
             return command.toString();
         }
 
