@@ -62,7 +62,7 @@ public class BuildConfig {
     private String description;
     private String environmentId;
     private List<String> dependencies = new ArrayList<>();
-    private Set<String> customPmeParameters = new TreeSet<>();
+    private Set<String> alignmentParameters = new TreeSet<>();
     private Boolean branchModified;
 
     public void setDefaults(BuildConfig defaults) {
@@ -99,12 +99,12 @@ public class BuildConfig {
                 && StringUtils.equals(buildScript, old.getBuildScript())
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && environmentId.equals(old.getEnvironment().getId())
-                && customPmeParameters.equals(getPmeParameters(old)) && urlsEqual(old.getScmRepository())
+                && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
                 && !isBranchModified(old);
     }
 
-    private Set<String> getPmeParameters(BuildConfiguration old) {
-        String parametersAsString = old.getParameters().get("CUSTOM_PME_PARAMETERS");
+    private Set<String> getAlignmentParameters(BuildConfiguration old) {
+        String parametersAsString = old.getParameters().get("ALIGNMENT_PARAMETERS");
         return Arrays.stream(parametersAsString.split(",")).collect(Collectors.toSet());
     }
 
@@ -130,9 +130,9 @@ public class BuildConfig {
         String oldForceValue = oldConfig == null ? "" : oldConfig.getParameters().getOrDefault(BUILD_FORCE, "");
         String forceValue = forceRebuild ? randomAlphabetic(5) : oldForceValue;
 
-        String dependencyExclusions = String.join(" ", customPmeParameters);
+        String dependencyExclusions = String.join(" ", alignmentParameters);
 
-        result.put("CUSTOM_PME_PARAMATERS", dependencyExclusions);
+        result.put("ALIGNMENT_PARAMETERS", dependencyExclusions);
         result.put(BUILD_FORCE, forceValue);
 
         return result;
