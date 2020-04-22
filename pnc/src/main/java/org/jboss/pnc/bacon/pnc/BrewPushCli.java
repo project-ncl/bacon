@@ -28,7 +28,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
-import org.jboss.pnc.dto.requests.BuildPushRequest;
+import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
 
@@ -83,7 +83,10 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildPushRequest request = BuildPushRequest.builder().tagPrefix(tagPrefix).reimport(reimport).build();
+                BuildPushParameters request = BuildPushParameters.builder()
+                        .tagPrefix(tagPrefix)
+                        .reimport(reimport)
+                        .build();
 
                 if (timeout != null) {
                     ObjectHelper.print(
