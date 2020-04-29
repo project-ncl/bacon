@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.bacon.cli;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.AeshCommandRuntimeBuilder;
 import org.aesh.command.CommandRuntime;
@@ -26,6 +28,7 @@ import org.aesh.command.parser.CommandLineParserException;
 import org.aesh.command.parser.OptionParserException;
 import org.aesh.command.parser.RequiredOptionException;
 import org.aesh.command.registry.CommandRegistry;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -71,24 +74,8 @@ public class App extends AbstractCommand {
     }
 
     private static String buildCLIOutput(String[] args) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("bacon ");
-
-        for (String opt : args) {
-            // if opt contains spaces, that means it was grouped inside quotation marks
-            // we have to pass the same quotation marks to bacon (it's removed in the args array)
-            if (opt.contains(" ")) {
-                builder.append("\"");
-                builder.append(opt);
-                builder.append("\" ");
-            } else {
-                builder.append(opt);
-                builder.append(" ");
-            }
-        }
-
-        return builder.toString();
+        return "bacon "
+                + Arrays.stream(args).map(s -> s.replaceAll("([\"' \\\\])", "\\\\$1")).collect(Collectors.joining(" "));
     }
 
     public static void main(String[] args) throws Exception {
