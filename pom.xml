@@ -359,6 +359,14 @@
 
     <repositories>
         <repository>
+            <id>Nexus Staging</id>
+            <url>https://oss.sonatype.org/content/groups/staging</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
             <id>jboss-nexus</id> <!--TODO: remove once PNC 2.0 hits central -->
             <releases>
                 <enabled>false</enabled>
