@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
@@ -46,12 +47,13 @@ import org.jboss.pnc.enums.BuildType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.jboss.pnc.dto.ProductVersion;
 
 @GroupCommandDefinition(
         name = "build-config",
-        description = "build-config",
+        description = "Build Config",
         groupCommands = { BuildConfigCli.Create.class, BuildConfigCli.Get.class, BuildConfigCli.List.class,
-                BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class, })
+                BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class, BuildConfigCli.CreateRevision.class })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
@@ -136,7 +138,7 @@ public class BuildConfigCli extends AbstractCommand {
     public class Update extends AbstractCommand {
 
         @Argument(required = true, description = "Build config ID")
-        private String buildConfigId;
+        protected String buildConfigId;
 
         @Option(description = "Build config name")
         private String buildConfigName;
@@ -155,6 +157,8 @@ public class BuildConfigCli extends AbstractCommand {
         private String genericParameters;
         @Option(name = "build-type", description = "Build Type. Options are: Maven,Gradle. Default: Maven")
         private String buildType;
+        @Option(name = "product-version-id", description = "Product Version ID")
+        private String productVersionId;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
@@ -179,14 +183,42 @@ public class BuildConfigCli extends AbstractCommand {
                         genericParameters,
                         () -> updated.parameters(processGenericParameters(genericParameters)));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
+                ObjectHelper.executeIfNotNull(
+                        productVersionId,
+                        () -> updated.productVersion(ProductVersion.refBuilder().id(productVersionId).build()));
 
-                CREATOR.getClientAuthenticated().update(buildConfigId, updated.build());
+                callUpdate(updated.build());
             });
+        }
+
+        protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
+            CREATOR.getClientAuthenticated().update(buildConfigId, updated);
         }
 
         @Override
         public String exampleText() {
             return "$ bacon pnc build-config update --description \"new me new description\" 50";
+        }
+    }
+
+    @CommandDefinition(name = "create-revision", description = "Create a new revision for a build configuration")
+    public class CreateRevision extends Update {
+
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
+        @Override
+        protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
+            ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createRevision(buildConfigId, updated));
+        }
+
+        @Override
+        public String exampleText() {
+            return "$ bacon pnc build-config create-revision --description \"new me new description\" 50";
         }
     }
 
