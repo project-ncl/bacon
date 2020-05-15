@@ -65,7 +65,9 @@ public class Config {
     public static void initialize() throws IOException {
         File configFile = new File(configFilePath);
         if (!configFile.exists()) {
-            throw new IOException("Config file " + configFilePath + " does not exist! Please create it.");
+            throw new IOException(
+                    "Config file " + configFilePath
+                            + " does not exist! Please create it. See: https://github.com/project-ncl/bacon/blob/master/config.yaml for an example");
         } else if (configFile.length() == 0) {
             log.warn("Config file: {} has no content", configFilePath);
             instance = new Config();
