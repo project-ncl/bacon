@@ -2,3 +2,10 @@
 *.iml
 target
 __pycache__
+
+# vscode crap
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
+.vscode
