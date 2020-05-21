@@ -119,7 +119,7 @@ public class ResourceUtils {
         return Optional.empty();
     }
 
-    private static String getResourceAsString(String resource) {
+    public static String getResourceAsString(String resource) {
         InputStream resourceStream = ResourceUtils.class.getResourceAsStream(resource);
         if (resourceStream == null) {
             throw new IllegalArgumentException("Resource " + resource + " not found");

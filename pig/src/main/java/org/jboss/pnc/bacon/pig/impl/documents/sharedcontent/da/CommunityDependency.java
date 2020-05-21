@@ -53,6 +53,10 @@ public class CommunityDependency {
         gav = new GAV(groupId, artifactId, communityVersion, packaging);
     }
 
+    public CommunityDependency(GAV gav) {
+        this.gav = gav;
+    }
+
     public String toPathSubstring() {
         return String.format("%s/%s/", getGroupId().replace('.', '/'), getArtifactId());
     }

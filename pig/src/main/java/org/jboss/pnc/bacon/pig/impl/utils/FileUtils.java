@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -420,6 +421,22 @@ public class FileUtils {
             }
         } catch (IOException e) {
             throw new RuntimeException("Unable to copy " + srcFile + " to " + destFile, e);
+        }
+    }
+
+    public static Collection<String> listZipContents(final File input) {
+        log.debug("listing contents of {}", input);
+        try (final InputStream is = Files.newInputStream(input.toPath());
+                final ArchiveInputStream in = new ArchiveStreamFactory()
+                        .createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
+            List<String> result = new ArrayList<>();
+            ArchiveEntry entry;
+            while ((entry = in.getNextEntry()) != null) {
+                result.add(entry.getName());
+            }
+            return result;
+        } catch (IOException | ArchiveException e) {
+            throw new RuntimeException("Listing contents of " + input + " failed", e);
         }
     }
 }

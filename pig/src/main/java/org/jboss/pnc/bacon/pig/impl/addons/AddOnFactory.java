@@ -17,10 +17,12 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
+import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.spring.BomVerifierAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.vertx.NotYetAlignedFromDependencyTree;
 import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
 import java.util.ArrayList;
@@ -40,13 +42,15 @@ public class AddOnFactory {
             Config config,
             Map<String, PncBuild> builds,
             String releasePath,
-            String extrasPath) {
+            String extrasPath,
+            Deliverables deliverables) {
         ArrayList<AddOn> resultList = new ArrayList<>();
 
         resultList.add(new RuntimeDependenciesAnalyzer(config, builds, releasePath, extrasPath));
         resultList.add(new ExtraDeliverableDownloader(config, builds, releasePath, extrasPath));
         resultList.add(new BomVerifierAddon(config, builds, releasePath, extrasPath));
         resultList.add(new NotYetAlignedFromDependencyTree(config, builds, releasePath, extrasPath));
+        resultList.add(new QuarkusCommunityDepAnalyzer(config, builds, releasePath, extrasPath, deliverables));
 
         return resultList;
     }
