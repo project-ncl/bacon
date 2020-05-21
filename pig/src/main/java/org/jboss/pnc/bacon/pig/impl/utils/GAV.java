@@ -192,6 +192,10 @@ public class GAV {
         return toGapvc().matches(expression);
     }
 
+    public boolean isCommunity() {
+        return !version.contains("redhat");
+    }
+
     public boolean isTemporary() {
         return version.contains("temporary-redhat");
     }

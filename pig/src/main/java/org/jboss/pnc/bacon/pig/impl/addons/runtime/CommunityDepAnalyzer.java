@@ -19,11 +19,13 @@ package org.jboss.pnc.bacon.pig.impl.addons.runtime;
 
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DADao;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +52,12 @@ public class CommunityDepAnalyzer {
                 .sorted()
                 .collect(Collectors.toList());
         dependencies = dependencyLines.stream().map(CommunityDependency::new).collect(Collectors.toList());
+    }
+
+    public CommunityDepAnalyzer(Collection<GAV> gavs) {
+        dependencies = gavs.stream().map(CommunityDependency::new).collect(Collectors.toList());
+        daDao = null;
+        downloadedForSwarm = null;
     }
 
     public File generateAnalysis(String path) {

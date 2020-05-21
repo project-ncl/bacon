@@ -278,7 +278,8 @@ public class PigFacade {
                         context().getConfig(),
                         context().getBuilds(),
                         context().getReleasePath(),
-                        context().getExtrasPath())
+                        context().getExtrasPath(),
+                        context().getDeliverables())
                 .stream()
                 .filter(AddOn::shouldRun)
                 .forEach(AddOn::trigger);
