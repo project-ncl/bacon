@@ -235,7 +235,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
             return unpackArtifactIdsFrom(devtoolsCommonJars.get(0));
         }
         throw new RuntimeException(
-                "Expected 2a single " + devtoolsJarName() + " in the repo, found: " + devtoolsCommonJars.size());
+                "Expected a single " + devtoolsJarName() + " in the repo, found: " + devtoolsCommonJars.size());
     }
 
     private String devtoolsJarName() {
