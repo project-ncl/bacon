@@ -419,7 +419,8 @@ public class PncEntitiesImporter {
 
     private Optional<GroupConfiguration> getBuildGroup() {
         try {
-            return toStream(groupConfigClient.getAll(empty(), Optional.of("name==" + config.getGroup()))).findAny();
+            return toStream(groupConfigClient.getAll(empty(), Optional.of("name=='" + config.getGroup() + "'")))
+                    .findAny();
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to check if build group exists");
         }
@@ -505,7 +506,7 @@ public class PncEntitiesImporter {
 
     private Optional<ProductVersion> getVersion() {
         try {
-            Optional<String> byName = query("version==%s", config.getMajorMinor());
+            Optional<String> byName = query("version=='%s'", config.getMajorMinor());
             return maybeSingle(productClient.getProductVersions(product.getId(), empty(), byName));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to query for version", e);

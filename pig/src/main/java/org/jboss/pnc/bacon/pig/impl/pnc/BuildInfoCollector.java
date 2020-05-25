@@ -64,7 +64,7 @@ public class BuildInfoCollector {
             BuildsFilterParameters filter = new BuildsFilterParameters();
             filter.setLatest(true);
             Iterator<Build> buildIterator = buildConfigClient
-                    .getBuilds(configId, filter, of("=desc=id"), query("status==", BuildStatus.SUCCESS))
+                    .getBuilds(configId, filter, of("=desc=id"), query("status=='", BuildStatus.SUCCESS + "'"))
                     .iterator();
 
             if (!buildIterator.hasNext()) {
