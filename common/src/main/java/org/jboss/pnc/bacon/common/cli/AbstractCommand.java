@@ -207,6 +207,7 @@ public class AbstractCommand implements Command {
             throw e;
         } catch (Exception e) {
             log.error("Something wrong happened: {}", e.getMessage());
+            log.debug("Stacktrace", e);
             throw new FatalException();
             // Aesh doesnt take care of exit codes, thrown FatalException will be caught in App class and app will exit
             // with code 1
