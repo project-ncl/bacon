@@ -67,11 +67,9 @@ public class PncConfigurator {
                 .orElseGet(() -> createMilestone(version, milestone, issueTrackerUrl));
     }
 
-    public void markMilestoneCurrent(ProductVersionRef version, ProductMilestoneRef milestone) {
-        ProductVersion updated = ProductVersion.builder()
-                .version(version.getVersion())
-                .currentProductMilestone(milestone)
-                .build();
+    public void markMilestoneCurrent(ProductVersion version, ProductMilestoneRef milestone) {
+
+        ProductVersion updated = version.toBuilder().currentProductMilestone(milestone).build();
         try {
             versionClient.update(version.getId(), updated);
         } catch (RemoteResourceException e) {
