@@ -80,7 +80,7 @@ public class PncConfigurator {
     }
 
     public Optional<ProductMilestone> getExistingMilestone(ProductVersionRef version, String milestone) {
-        String milestoneName = version.getVersion() + '.' + milestone;
+        String milestoneName = milestone;
         RemoteCollection<ProductMilestone> milestones = null;
         try {
             milestones = versionClient
