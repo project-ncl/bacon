@@ -79,7 +79,7 @@ public class PncEntitiesImporter {
     private final ProductVersionClient versionClient;
 
     private ProductRef product;
-    private ProductVersionRef version;
+    private ProductVersion version;
     private ProductMilestone milestone;
     private GroupConfiguration buildGroup;
     private List<BuildConfigData> configs;
