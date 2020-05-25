@@ -97,8 +97,8 @@ public class PncConfigurator {
                 .productVersion(version)
                 .issueTrackerUrl(issueTrackerUrl)
                 .startingDate(START_DATE)
-                .endDate(END_DATE)
-                .version(milestoneName) // todo not sure if it's what should be here
+                .plannedEndDate(END_DATE)
+                .version(milestoneName)
                 .build();
 
         try {
