@@ -40,7 +40,7 @@ import java.util.Map;
 @GroupCommandDefinition(
         name = "pig",
         description = "PiG tool",
-        groupCommands = { Pig.Configure.class, Pig.Build.class, Pig.GenerateRepository.class,
+        groupCommands = { Pig.Configure.class, Pig.Build.class, Pig.Run.class, Pig.GenerateRepository.class,
                 Pig.GenerateLicenses.class, Pig.GenerateJavadocs.class, Pig.GenerateSources.class,
                 Pig.GenerateSharedContentAnalysis.class, Pig.GenerateDocuments.class, Pig.GenerateScripts.class,
                 Pig.TriggerAddOns.class })
