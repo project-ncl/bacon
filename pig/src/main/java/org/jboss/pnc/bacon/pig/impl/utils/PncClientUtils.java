@@ -39,7 +39,7 @@ public class PncClientUtils {
     }
 
     public static Optional<String> findByNameQuery(String name) {
-        return query(name, "name==%s");
+        return query("name==%s", name);
     }
 
     public static Optional<String> query(String format, Object... values) {

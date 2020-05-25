@@ -505,7 +505,7 @@ public class PncEntitiesImporter {
 
     private Optional<ProductVersion> getVersion() {
         try {
-            Optional<String> byName = query("version==", config.getMajorMinor());
+            Optional<String> byName = query("version==%s", config.getMajorMinor());
             return maybeSingle(productClient.getProductVersions(product.getId(), empty(), byName));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to query for version", e);
