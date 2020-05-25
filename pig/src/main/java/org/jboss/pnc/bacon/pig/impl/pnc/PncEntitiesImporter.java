@@ -513,6 +513,6 @@ public class PncEntitiesImporter {
     }
 
     private String pncMilestoneString() {
-        return config.getMicro() + "." + config.getMilestone();
+        return config.getMajorMinor() + "." + config.getMicro() + "." + config.getMilestone();
     }
 }
