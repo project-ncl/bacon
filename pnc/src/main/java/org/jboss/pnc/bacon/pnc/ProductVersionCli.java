@@ -116,8 +116,7 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient()
-                    .getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
@@ -130,8 +129,7 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient()
-                    .getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            return CREATOR.getClient().getGroupConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 

@@ -203,7 +203,7 @@ public class ProductReleaseCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                ObjectHelper.print(jsonOutput, CREATOR.getClient().getAllSupportLevel());
+                ObjectHelper.print(jsonOutput, CREATOR.getClient().getSupportLevels());
 
             });
         }
