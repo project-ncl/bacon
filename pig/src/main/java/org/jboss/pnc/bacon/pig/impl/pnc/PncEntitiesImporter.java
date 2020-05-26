@@ -48,6 +48,7 @@ import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 import org.jboss.pnc.dto.response.RepositoryCreationResponse;
+import org.jboss.pnc.enums.BuildType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,7 +250,7 @@ public class PncEntitiesImporter {
                 if (config.getName().equals(bc.getName())) {
                     data.setOldConfig(config);
                     if (data.shouldBeUpdated()) {
-                        updateBuildConfig(data);
+                        updateBuildConfig(data, config);
                     }
                 }
             }
@@ -260,7 +261,7 @@ public class PncEntitiesImporter {
                 log.debug("Found matching build config for {}", bc.getName());
                 data.setOldConfig(matchedBuildConfig.get());
                 if (data.shouldBeUpdated()) {
-                    updateBuildConfig(data);
+                    updateBuildConfig(data, matchedBuildConfig.get());
                 }
                 data.setModified(true);
             } else {
@@ -286,13 +287,30 @@ public class PncEntitiesImporter {
     }
 
     private BuildConfiguration generatePncBuildConfig(BuildConfig buildConfig) {
+        return generatePncBuildConfig(buildConfig, null);
+    }
+
+    /**
+     * @param buildConfig PiG buildconfig to generate
+     * @param existing if present, we'll use it as the buildconfig to modify if null: we'll use a fresh buildconfig
+     *        object
+     *
+     * @return BuildConfiguration generated
+     */
+    private BuildConfiguration generatePncBuildConfig(BuildConfig buildConfig, BuildConfiguration existing) {
         ProjectRef project = getOrGenerateProject(buildConfig.getProject());
 
         SCMRepository repository = getOrGenerateRepository(buildConfig);
 
         Environment environment = Environment.builder().id(buildConfig.getEnvironmentId()).build();
-        return BuildConfiguration.builder()
-                .productVersion(version)
+
+        BuildConfiguration.Builder builder = BuildConfiguration.builder();
+
+        if (existing != null) {
+            builder = existing.toBuilder();
+        }
+
+        return builder.productVersion(version)
                 .parameters(buildConfig.getGenericParameters(null, false))
                 .name(buildConfig.getName())
                 .project(project)
@@ -300,6 +318,7 @@ public class PncEntitiesImporter {
                 .scmRepository(repository)
                 .scmRevision(buildConfig.getScmRevision())
                 .buildScript(buildConfig.getBuildScript())
+                .buildType(BuildType.valueOf(buildConfig.getBuildType()))
                 .build();
     }
 
@@ -343,10 +362,10 @@ public class PncEntitiesImporter {
         }
     }
 
-    private BuildConfiguration updateBuildConfig(BuildConfigData data) {
+    private BuildConfiguration updateBuildConfig(BuildConfigData data, BuildConfiguration existing) {
         String configId = data.getId();
 
-        BuildConfiguration buildConfiguration = generatePncBuildConfig(data.getNewConfig());
+        BuildConfiguration buildConfiguration = generatePncBuildConfig(data.getNewConfig(), existing);
 
         try {
             buildConfigClient.update(configId, buildConfiguration);

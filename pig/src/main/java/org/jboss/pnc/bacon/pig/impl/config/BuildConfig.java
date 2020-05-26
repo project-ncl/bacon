@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.enums.BuildType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,15 +57,25 @@ public class BuildConfig {
     private String name;
     private String project;
     private String buildScript;
+    private String buildType;
+
     private String scmUrl;
     private String externalScmUrl;
     private String scmRevision;
     private String description;
     private String environmentId;
+
     private List<String> dependencies = new ArrayList<>();
     private Set<String> alignmentParameters = new TreeSet<>();
     private Boolean branchModified;
 
+    /**
+     * Set the defaults of buildConfig if not explicitly specified
+     *
+     * If buildType is not specified in the buildConfig or in the defaults, it is set to MVN
+     *
+     * @param defaults
+     */
     public void setDefaults(BuildConfig defaults) {
         try {
             for (Field f : BuildConfig.class.getDeclaredFields()) {
@@ -82,6 +93,11 @@ public class BuildConfig {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Unable to set default values for " + this + " from " + defaults);
         }
+
+        // set buildtype to Maven if not specified
+        if (buildType == null) {
+            buildType = BuildType.MVN.toString();
+        }
     }
 
     public static Map<String, BuildConfig> mapByName(List<BuildConfig> newConfigs) {
@@ -97,6 +113,7 @@ public class BuildConfig {
         return old != null && StringUtils.equals(name, old.getName())
                 && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
+                && StringUtils.equals(buildType, old.getBuildType().toString())
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && environmentId.equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
