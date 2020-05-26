@@ -123,7 +123,7 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient()
-                    .getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
+                    .getBuildConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 }

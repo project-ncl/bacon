@@ -195,7 +195,7 @@ public class PncEntitiesImporter {
 
     private Set<String> getExistingGroupConstituents() {
         try {
-            return toStream(groupConfigClient.getConfigurations(buildGroup.getId())).map(BuildConfiguration::getId)
+            return toStream(groupConfigClient.getBuildConfigs(buildGroup.getId())).map(BuildConfiguration::getId)
                     .collect(Collectors.toSet());
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get configs from the group", e);
@@ -204,7 +204,7 @@ public class PncEntitiesImporter {
 
     private void removeConfigurationFromGroup(String superfluousId) {
         try {
-            groupConfigClient.removeConfiguration(buildGroup.getId(), superfluousId);
+            groupConfigClient.removeBuildConfig(buildGroup.getId(), superfluousId);
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to remove config " + superfluousId + " from the group", e);
         }
@@ -212,7 +212,7 @@ public class PncEntitiesImporter {
 
     private void addConfigurationToGroup(String newConfigId) {
         try {
-            groupConfigClient.addConfiguration(buildGroup.getId(), getBuildConfigFromId(newConfigId));
+            groupConfigClient.addBuildConfig(buildGroup.getId(), getBuildConfigFromId(newConfigId));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to add config " + newConfigId + " to the group", e);
         }
@@ -406,7 +406,7 @@ public class PncEntitiesImporter {
 
     private List<BuildConfiguration> getCurrentBuildConfigs() {
         try {
-            return PncClientUtils.toList(groupConfigClient.getConfigurations(buildGroup.getId()));
+            return PncClientUtils.toList(groupConfigClient.getBuildConfigs(buildGroup.getId()));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get configurations for config group: " + buildGroup.getId());
         }
