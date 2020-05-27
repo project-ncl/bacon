@@ -52,6 +52,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <aesh.version>2.6</aesh.version>
+        <tagSuffix/>
     </properties>
 
     <dependencyManagement>
@@ -354,9 +355,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
-                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <tagNameFormat>@{project.version}${tagSuffix}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <releaseProfiles>release</releaseProfiles>
+                    <stagingRepository>https://oss.sonatype.org/service/local/staging/deploy/maven2/</stagingRepository>
                 </configuration>
              </plugin>
              <plugin>
