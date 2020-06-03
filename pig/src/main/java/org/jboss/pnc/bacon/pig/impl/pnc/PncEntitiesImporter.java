@@ -345,6 +345,7 @@ public class PncEntitiesImporter {
         try {
             // todo: does it work with the external urls?
             RepositoryCreationResponse response = repoClient.createNew(createRepoRequest);
+
             SCMRepository repository = response.getRepository();
             if (repository != null) {
                 return repository;

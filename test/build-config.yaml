@@ -1,0 +1,104 @@
+###############################################################################
+# Variable definition in the format :
+#       #!<variableName>=<value>
+#
+# Variables can be used anywhere in the YAML file in the format :
+#
+# example :
+#
+#!version=7.1.0
+#!milestone=DR1
+###############################################################################
+
+
+###############################################################################
+# Product section
+###############################################################################
+product:
+  name: ProductB # full product name
+  abbreviation: testb # official product name abbreviation - used to create the brew/koji tag name
+  stage: Alpha1 # product phase, if we're targetting GA, should be GA, etc
+  issueTrackerUrl: http://issues.jboss.org/browse/TEST
+version: 1.2.0
+
+###############################################################################
+# version of the product, PNC will use <major>.<minor> (in this case 7.1) as the product version
+# and prepend the <micro> to the milestone name
+#
+# Example values are DR1, ER2, CR1
+#
+# It is also possible to use have an auto-incremented milestone number.
+# To achieve it, use an asterisk in the place of milestone number, e.g. ER*
+# The auto-incremented milestone requires -releaseStorageUrl option
+###############################################################################
+milestone: ER1
+group: ProductA 1.2 all # name of the PNC build group
+
+###############################################################################
+# build configurations. If there are some properties that are shared among most of the configurations
+# they can be defined in defaultBuildParameters. For a complete list of available properties, take a look at BuildConfig class.
+###############################################################################
+defaultBuildParameters:
+  project: my-project # name of the project to assign the configuration to
+  environmentId: 1 # PNC environment ID. You can list available environments with `bacon pnc environment list`
+  buildScript: mvn clean deploy -DskipTests -B
+  buildType: GRADLE
+
+builds:
+  - name: my-app-a-7.1
+    buildScript: mvn clean install -DskipTests=true # overriden build script
+    externalScmUrl: https://github.com/janinko/empty.git
+    scmRevision: master
+    dependencies:
+      - my-app-b-7.2
+
+  - name: my-app-b-7.3
+    project: my-other-project
+    externalScmUrl: https://github.com/pkocandr/empty.git
+    scmRevision: master
+
+# ###############################################################################
+# # after the builds are done, the deliverables are prepared.
+# # the following sections configure deliverables preparation
+# ###############################################################################
+outputPrefixes:
+  releaseFile: product-a # prefix for the deliverables. Version and milestone will be appended to it
+  releaseDir: product-a # prefix for a top level directory name inside the deliverables
+# flow:
+  # licensesGeneration:
+    # strategy: GENERATE
+  # repositoryGeneration:
+    # strategy: DOWNLOAD # it's also possible to generate them, see below for an examlpe config
+
+    # # an artifact which filename matches .*maven-repository\.zip produced by my-app-a-7.1 build will be used as a base
+    # # of the repository generation
+    # sourceBuild: my-app-a-7.1
+    # sourceArtifact: '.*maven-repository\.zip'
+
+    # # Add artifacts from given builds to the repository zip
+    # # The expression is matched against the PNC identifier for the file.
+    # additionalArtifacts:
+     # - from: 'my-app-a-7.1'
+       # download:
+         # - '^my.groupId:my-artifact-id:jar:7.1.0.redhat-\d\d:sources'
+     # - from: 'my-app-b-7.1'
+       # download:
+         # - 'org.eclipse.aether:aether-util:jar:1.0.0.v20140518-redhat-\d\d:sources'
+
+    # # add artifacts from outside the current builds to the repository zip.
+    # # Note this section requires exact groupId:artifactId:packaging:version or groupId:artifactId:packaging:version:classifier
+    # externalAdditionalArtifacts:
+        # - 'org.jboss.eap:wildfly-ejb-client-bom:pom:7.1.1.GA-redhat-2'
+  # javadocGeneration:
+    # strategy: DOWNLOAD # another option is IGNORE
+    # sourceBuild: 'my-app-a-7.1'
+    # sourceArtifact: '.*javadoc\.zip'
+
+# ###############################################################################
+# # a place to define product-specific add-ons.
+# # Add ons have to extend AddOn and be registered in AddOnFactory.
+# ###############################################################################
+# addons:
+  # addOnName:
+    # addOnConfigProperty:
+      # add on configuration

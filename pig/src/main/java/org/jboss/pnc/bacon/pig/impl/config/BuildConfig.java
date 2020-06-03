@@ -27,9 +27,12 @@ import org.jboss.pnc.enums.BuildType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,13 +68,23 @@ public class BuildConfig {
     private String description;
     private String environmentId;
 
+    /**
+     * build pod memory in GB
+     */
+    private Integer buildPodMemory;
+    private String pigYamlMetadata;
+
+    private Set<String> customPmeParameters = new TreeSet<>();
+    private Set<String> extraRepositories = new TreeSet<>();
+    private String executionRoot;
+
     private List<String> dependencies = new ArrayList<>();
     private Set<String> alignmentParameters = new TreeSet<>();
     private Boolean branchModified;
 
     /**
      * Set the defaults of buildConfig if not explicitly specified
-     *
+     * <p>
      * If buildType is not specified in the buildConfig or in the defaults, it is set to MVN
      *
      * @param defaults
@@ -142,6 +155,11 @@ public class BuildConfig {
 
     @JsonIgnore
     public Map<String, String> getGenericParameters(BuildConfiguration oldConfig, boolean forceRebuild) {
+
+        if (!customPmeParameters.isEmpty() && alignmentParameters.isEmpty()) {
+            log.warn("[Deprecated] Please rename 'customPmeParameters' section to 'alignmentParameters'");
+            alignmentParameters = customPmeParameters;
+        }
         Map<String, String> result = new HashMap<>();
 
         String oldForceValue = oldConfig == null ? "" : oldConfig.getParameters().getOrDefault(BUILD_FORCE, "");
@@ -151,6 +169,29 @@ public class BuildConfig {
 
         result.put("ALIGNMENT_PARAMETERS", dependencyExclusions);
         result.put(BUILD_FORCE, forceValue);
+
+        if (buildPodMemory != null) {
+            result.put("BUILDER_POD_MEMORY", buildPodMemory.toString());
+        }
+
+        if (pigYamlMetadata != null) {
+            String metadata = "";
+            try {
+                metadata = URLDecoder.decode(pigYamlMetadata, StandardCharsets.UTF_8.toString());
+            } catch (UnsupportedEncodingException ex) {
+                metadata = pigYamlMetadata;
+            }
+            result.put("PIG_YAML_METADATA", metadata);
+        }
+
+        if (executionRoot != null) {
+            result.put("EXECUTION_ROOT_NAME", executionRoot);
+        }
+
+        if (!extraRepositories.isEmpty()) {
+            String repositoriesAsString = String.join("\\n", extraRepositories);
+            result.put("EXTRA_REPOSITORIES", repositoriesAsString);
+        }
 
         return result;
     }
