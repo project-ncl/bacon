@@ -63,7 +63,7 @@ if [ "$1" == "update" ]; then
     fi
 
     # Script runs the bacon_install.py to update itself
-    curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python2 - $2
+    curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - $2
 else
     check_if_java_installed
     java -jar {0}/bacon.jar {1} "$@"

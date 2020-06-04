@@ -16,12 +16,12 @@ java -jar cli/target/bacon.jar
 
 To install the latest ***released*** version:
 ```bash
-curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python2 - 
+curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - 
 ```
 
 To install the latest ***snapshot*** (no need to compile):
 ```bash
-curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python2 - snapshot
+curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - snapshot
 ```
 
 This will install the `bacon`, `pig`, `da` and `pnc` commands in the `~/bin`
