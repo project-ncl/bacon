@@ -18,10 +18,12 @@
 package org.jboss.pnc.bacon.pig.impl.license;
 
 import lombok.Getter;
+import org.jboss.pnc.bacon.pig.impl.PigProperties;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.LicenseGenerationStrategy;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
@@ -45,19 +47,25 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
     @Getter
     private final GenerationData<LicenseGenerationStrategy> generationData;
 
+    private final boolean useTempBuilds;
+
     public LicenseManager(
-            Config config,
+            PigConfiguration pigConfiguration,
             String releasePath,
             Deliverables deliverables,
             Map<String, PncBuild> builds,
             RepositoryData repositoryData) {
-        super(config, releasePath, deliverables, builds);
+        super(pigConfiguration, releasePath, deliverables, builds);
         this.repositoryData = repositoryData;
-        generationData = config.getFlow().getLicensesGeneration();
+
+        generationData = pigConfiguration.getFlow().getLicensesGeneration();
+        useTempBuilds = PigProperties.get().isTemporary();
     }
 
     public void prepare() {
-        switch (generationData.getStrategy()) {
+        LicenseGenerationStrategy strategy = (generationData == null) ? LicenseGenerationStrategy.IGNORE
+                : generationData.getStrategy();
+        switch (strategy) {
             case DOWNLOAD:
                 downloadAndRepackage();
                 break;
@@ -79,19 +87,27 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
 
     @Override
     protected String getTargetTopLevelDirectoryName() {
-        return config.getTopLevelDirectoryPrefix() + "licenses";
+        return pigConfiguration.getTopLevelDirectoryPrefix() + "licenses";
     }
 
     @Override
     protected Path getTargetZipPath() {
-        return Paths.get(releasePath + deliverables.getLicenseZipName());
+        return Paths.get(releasePath, deliverables.getLicenseZipName());
     }
 
     private void generate() {
         log.info("Generating licenses");
-        LicenseGenerator.generateLicenses(
-                repositoryData.getGavs(),
-                getTargetZipPath().toFile(),
-                getTargetTopLevelDirectoryName());
+        RepoGenerationData repoGen = pigConfiguration.getFlow().getRepositoryGeneration();
+        if (repoGen.isIncludeLicenses()) {
+            LicenseGenerator.extractLicenses(
+                    repositoryData.getRepositoryPath().toFile(),
+                    getTargetZipPath().toFile(),
+                    getTargetTopLevelDirectoryName());
+        } else {
+            LicenseGenerator.generateLicenses(
+                    repositoryData.getGavs(),
+                    getTargetZipPath().toFile(),
+                    getTargetTopLevelDirectoryName());
+        }
     }
 }

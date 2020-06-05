@@ -17,7 +17,7 @@ package org.jboss.pnc.bacon.pig.impl.addons.spring;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.MRRCSearcher;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
@@ -47,8 +47,12 @@ public class BomVerifierAddon extends AddOn {
     private final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
     private List<GAV> unreleasedWhitelist;
 
-    public BomVerifierAddon(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
-        super(config, builds, releasePath, extrasPath);
+    public BomVerifierAddon(
+            PigConfiguration pigConfiguration,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath) {
+        super(pigConfiguration, builds, releasePath, extrasPath);
     }
 
     @Override
@@ -75,9 +79,10 @@ public class BomVerifierAddon extends AddOn {
         }).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> getListFromConfig() {
         try {
-            Map<String, ?> config = getConfig();
+            Map<String, ?> config = getPigConfiguration();
             if (config != null) {
                 List<String> result = (List<String>) config.get("allowUnreleased");
                 return result == null ? emptyList() : result;
@@ -111,10 +116,11 @@ public class BomVerifierAddon extends AddOn {
     }
 
     protected Stream<GAV> getDependencyGavs() {
-        PncBuild build = builds.get(config.getFlow().getRepositoryGeneration().getSourceBuild());
+        PncBuild build = builds.get(pigConfiguration.getFlow().getRepositoryGeneration().getSourceBuild());
         File bom = new File("bom");
 
-        build.findArtifactByFileName(config.getFlow().getRepositoryGeneration().getSourceArtifact()).downloadTo(bom);
+        build.findArtifactByFileName(pigConfiguration.getFlow().getRepositoryGeneration().getSourceArtifact())
+                .downloadTo(bom);
 
         List<Node> nodeList = listNodes(bom, "//dependencies/dependency");
         Map<String, String> properties = XmlUtils.getProperties(bom);

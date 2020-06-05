@@ -52,8 +52,8 @@ import static org.apache.commons.lang3.StringUtils.join;
  *         Date: 11/28/17
  */
 @Data
-public class Config {
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+public class PigConfiguration {
+    private static final Logger log = LoggerFactory.getLogger(PigConfiguration.class);
 
     private @NotBlank ProductConfig product;
     private @NotBlank String version;
@@ -155,7 +155,7 @@ public class Config {
         }
 
         Map<String, String> variables = readVariables(contents, buildVarsOverrides);
-        Integer passes = 0;
+        int passes = 0;
         // We also have to take into account variable used inside variables, just keep going over until
         // they have all expanded, maxTries will be hit if one is left over after that many
         List<String> matches;
@@ -187,7 +187,7 @@ public class Config {
         return stream;
     }
 
-    public static Config load(File buildConfigFile, String buildVarsOverrides) {
+    public static PigConfiguration load(File buildConfigFile, String buildVarsOverrides) {
         try (InputStream configStream = new FileInputStream(buildConfigFile)) {
             return load(configStream, buildVarsOverrides);
         } catch (IOException e) {
@@ -195,21 +195,21 @@ public class Config {
         }
     }
 
-    public static Config load(InputStream configStream) {
+    public static PigConfiguration load(InputStream configStream) {
         return load(configStream, "");
     }
 
-    public static Config load(InputStream configStream, String buildVarsOverrides) {
+    public static PigConfiguration load(InputStream configStream, String buildVarsOverrides) {
         if (buildVarsOverrides == null) {
             buildVarsOverrides = "";
         }
 
-        Yaml yaml = new Yaml(new Constructor(Config.class));
+        Yaml yaml = new Yaml(new Constructor(PigConfiguration.class));
 
         try (InputStream in = preProcess(configStream, buildVarsOverrides)) {
-            Config config = (Config) yaml.load(in);
-            config.init();
-            return config;
+            PigConfiguration pigConfiguration = (PigConfiguration) yaml.load(in);
+            pigConfiguration.init();
+            return pigConfiguration;
         } catch (IOException e) {
             throw new RuntimeException("Unable to load config file", e);
         }

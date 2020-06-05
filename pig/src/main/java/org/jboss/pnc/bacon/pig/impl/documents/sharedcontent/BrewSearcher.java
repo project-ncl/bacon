@@ -19,8 +19,6 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.BuildFinder;
 import com.redhat.red.build.finder.DistributionAnalyzer;
@@ -30,12 +28,13 @@ import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +60,7 @@ public class BrewSearcher {
 
     private static final String KOJI_BUILD_FINDER_CONFIG_PROP = "koji.build.finder.config";
 
-    private static final String KOJI_BUILD_FINDER_CONFIG_RES = "koji-build-finder/config.json";
+    private static final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "koji-build-finder/config.json";
 
     public static BuildConfig getKojiBuildFinderConfigFromFile(final File file) {
         try {
@@ -78,14 +78,12 @@ public class BrewSearcher {
     }
 
     public static BuildConfig getKojiBuildFinderConfigFromResource(final String resourceName) {
-        final URL url = Resources.getResource(resourceName);
+        Properties props = new Properties();
+        props.setProperty("KOJI_URL", Config.instance().getActiveProfile().getPig().getKojiHubUrl());
 
-        try {
-            final String json = Resources.toString(url, Charsets.UTF_8);
-            return getKojiBuildFinderConfigFromJson(json);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed read Koji Build Finder configuration from resource: " + url, e);
-        }
+        String json = ResourceUtils.extractToStringWithFiltering(KOJI_BUILD_FINDER_CONFIG_TEMPLATE, props);
+
+        return getKojiBuildFinderConfigFromJson(json);
     }
 
     public static BuildConfig getKojiBuildFinderConfigFromJson(final String json) {
@@ -112,7 +110,7 @@ public class BrewSearcher {
             return getKojiBuildFinderConfigFromFile(envFilename);
         }
 
-        return getKojiBuildFinderConfigFromResource(KOJI_BUILD_FINDER_CONFIG_RES);
+        return getKojiBuildFinderConfigFromResource(KOJI_BUILD_FINDER_CONFIG_TEMPLATE);
     }
 
     public static void fillBrewData(SharedContentReportRow row) {

@@ -29,6 +29,7 @@ public class ConfigProfile {
     private PncConfig pnc;
     private DaConfig da;
     private IndyConfig indy;
+    private PigConfig pig;
     private KeycloakConfig keycloak;
 
     private Map<String, Map<String, ?>> addOns;

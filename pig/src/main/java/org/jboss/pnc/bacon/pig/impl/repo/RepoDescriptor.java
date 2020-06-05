@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  */
 public class RepoDescriptor {
 
-    public static final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1" };
+    public static final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1", "maven-metadata.xml" };
     public static final String MAVEN_REPOSITORY = "maven-repository/";
 
     public static Collection<GAV> listGavs(File m2RepoDirectory) {

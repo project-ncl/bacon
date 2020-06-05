@@ -17,7 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
 import java.util.Map;
@@ -27,24 +27,28 @@ import java.util.Map;
  *         Date: 12/11/17
  */
 public abstract class AddOn {
-    protected final Config config;
+    protected final PigConfiguration pigConfiguration;
     protected final Map<String, PncBuild> builds;
     protected final String releasePath;
     protected final String extrasPath;
 
-    protected AddOn(Config config, Map<String, PncBuild> builds, String releasePath, String extrasPath) {
-        this.config = config;
+    protected AddOn(
+            PigConfiguration pigConfiguration,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath) {
+        this.pigConfiguration = pigConfiguration;
         this.builds = builds;
         this.releasePath = releasePath;
         this.extrasPath = extrasPath;
     }
 
     public boolean shouldRun() {
-        return config.getAddons().keySet().contains(getName());
+        return pigConfiguration.getAddons().containsKey(getName());
     }
 
-    public Map<String, ?> getConfig() {
-        return config.getAddons().get(getName());
+    public Map<String, ?> getPigConfiguration() {
+        return pigConfiguration.getAddons().get(getName());
     }
 
     protected abstract String getName();

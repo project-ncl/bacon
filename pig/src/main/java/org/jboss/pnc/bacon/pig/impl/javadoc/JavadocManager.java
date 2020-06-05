@@ -22,17 +22,21 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.commonjava.maven.ext.cli.Cli;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.jboss.pnc.bacon.pig.impl.PigProperties;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.pom.Dependency;
+import org.jboss.pnc.bacon.pig.impl.utils.pom.Profile;
+import org.jboss.pnc.bacon.pig.impl.utils.pom.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +46,7 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -74,10 +79,16 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private File topLevelDirectory;
     private File archiveFile;
     private String scmRevision;
+    private boolean tempBuild;
 
-    public JavadocManager(Config config, String releasePath, Deliverables deliverables, Map<String, PncBuild> builds) {
-        super(config, releasePath, deliverables, builds);
-        generationData = config.getFlow().getJavadocGeneration();
+    public JavadocManager(
+            PigConfiguration pigConfiguration,
+            String releasePath,
+            Deliverables deliverables,
+            Map<String, PncBuild> builds) {
+        super(pigConfiguration, releasePath, deliverables, builds);
+        this.tempBuild = PigProperties.get().isTemporary();
+        this.generationData = pigConfiguration.getFlow().getJavadocGeneration();
     }
 
     public void prepare() {
@@ -93,6 +104,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                 break;
             case IGNORE:
                 log.info("Ignoring javadoc zip generation");
+                deliverables.setJavadocZipName(null);
                 break;
             default:
                 throw new IllegalStateException("Unsupported javadoc generation strategy: " + strategy);
@@ -106,7 +118,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     @Override
     protected String getTargetTopLevelDirectoryName() {
-        return config.getTopLevelDirectoryPrefix() + "javadoc";
+        return pigConfiguration.getTopLevelDirectoryPrefix() + "javadoc";
     }
 
     @Override
@@ -128,20 +140,26 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     private void init() {
-        temporaryDestination = FileUtils.mkTempDir("javadoc");
-        settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
+        this.temporaryDestination = FileUtils.mkTempDir("javadoc");
+        if (this.tempBuild) {
+            this.settingsXml = ResourceUtils.extractToTmpFile("/indy-temp-settings.xml", "settings", ".xml")
+                    .getAbsolutePath();
 
-        localRepo = new File(temporaryDestination + File.separator + "localRepo");
-        localRepo.mkdir();
-        topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());
-        archiveFile = getTargetZipPath().toFile();
-
-        generationProject = generationData.getGenerationProject();
-        sourceBuilds = generationData.getSourceBuilds();
-        if (sourceBuilds == null || sourceBuilds.isEmpty()) {
-            sourceBuilds = builds.values().stream().map(PncBuild::getName).collect(Collectors.toList());
+        } else {
+            this.settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml")
+                    .getAbsolutePath();
         }
-        scmRevision = generationData.getScmRevision();
+        this.localRepo = new File(temporaryDestination + File.separator + "localRepo");
+        this.localRepo.mkdir();
+        this.topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());
+        this.archiveFile = getTargetZipPath().toFile();
+
+        this.generationProject = generationData.getGenerationProject();
+        this.sourceBuilds = generationData.getSourceBuilds();
+        if (this.sourceBuilds == null || this.sourceBuilds.isEmpty()) {
+            this.sourceBuilds = builds.values().stream().map(PncBuild::getName).collect(Collectors.toList());
+        }
+        this.scmRevision = generationData.getScmRevision();
     }
 
     private Collection<GAV> findSourceBuilds() {
@@ -264,9 +282,11 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             }
         }
         System.setOut(outStream);
+        log.info("PME Command run [{}]", cmd.toString());
         if (new Cli().run(cmd.toString().split("\\s+")) != 0) {
             System.setOut(stdout);
             log.error("Error running PME see {}", filePath);
+            dumpLog(filePath);
             return false;
         }
         System.setOut(stdout);
@@ -295,17 +315,24 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             if (!writeProject(project)) {
                 return false;
             } else {
-                runPME();
+                return runPME();
             }
         }
-        return true;
+    }
+
+    private void dumpLog(String filePath) {
+        try {
+            System.out.println(new String(Files.readAllBytes(Paths.get(filePath))));
+        } catch (IOException e) {
+            log.error("Unable to dump log {}", filePath, e);
+        }
     }
 
     private boolean executeMavenBuild() {
         log.debug("Executing Javadoc generation maven project");
         String command = generationData.getBuildScript();
         Process process = null;
-        if (command == null && command.isEmpty()) {
+        if (command == null || command.isEmpty()) {
             // Use a default mvn command on project
             command = "mvn package -B";
         }
@@ -320,13 +347,16 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             process.waitFor();
             if (process.exitValue() != 0) {
                 log.error("Error while running Javadoc generation project [{}]", process.exitValue());
+                dumpLog(mavenRun.getAbsolutePath());
                 return false;
             }
         } catch (IOException e) {
             log.error("Unable to start build Javadoc generation project", e);
+            dumpLog(mavenRun.getAbsolutePath());
             return false;
         } catch (InterruptedException e) {
             log.error("Javadoc generation build was Interrupted", e);
+            dumpLog(mavenRun.getAbsolutePath());
             return false;
         }
         return true;

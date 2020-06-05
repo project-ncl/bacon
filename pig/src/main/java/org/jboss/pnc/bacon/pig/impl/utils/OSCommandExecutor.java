@@ -41,7 +41,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
- * todo: clean up + possibly move out to a separate lib
+ * todo: clean up + possibly move out to a separate lib TODO: remove !!
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/2/17
@@ -49,7 +49,10 @@ import static org.apache.commons.lang3.StringUtils.join;
 public class OSCommandExecutor {
     private static final Logger log = LoggerFactory.getLogger(OSCommandExecutor.class);
 
-    // TODO replace with maven api call (so that there's no need to have maven installed)
+    public static List<String> runCommand(String s) {
+        return runCommandIn(s, null);
+    }
+
     public static List<String> runCommandIn(String command, Path directory) {
         return executor(command).directory(directory)
                 .redirectErrorStream(true)
@@ -66,7 +69,6 @@ public class OSCommandExecutor {
     public static class CommandExecutor {
         private final String command;
         private Path directory;
-        // private final ProcessBuilder builder;
         private boolean failOnStatusCode = false;
         private boolean printOutputInOneLine = false;
         private int status = -1;
@@ -84,7 +86,7 @@ public class OSCommandExecutor {
         /**
          * split by spaces, except for elements in double quotes
          *
-         * @param e.g. docker run prod-docs "ls -la"
+         * @param command e.g. docker run prod-docs "ls -la"
          * @return e.g. ["docker", "run", "prod-docs", "ls -la"
          */
         private String[] splitCommand(String command) {
@@ -275,7 +277,7 @@ public class OSCommandExecutor {
         }
 
         public CommandExecutor timeout(int seconds) {
-            this.timeout = seconds;
+            timeout = seconds;
             return this;
         }
 

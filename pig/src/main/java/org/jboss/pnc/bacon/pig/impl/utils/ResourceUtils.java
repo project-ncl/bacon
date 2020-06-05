@@ -43,22 +43,42 @@ public class ResourceUtils {
     public static final String ENCODING = "UTF-8";
 
     public static File extractToTmpFile(String resource, String prefix, String suffix) {
+        return extractToTmpFileWithFiltering(resource, prefix, suffix, null);
+    }
+
+    public static File extractToTmpFileWithFiltering(
+            String resource,
+            String prefix,
+            String suffix,
+            Properties properties) {
         try {
             File tempFile = File.createTempFile(prefix, suffix);
-            return extractToFile(resource, tempFile);
+            return extractToFileWithFiltering(resource, tempFile, properties);
         } catch (IOException e) {
             throw new RuntimeException("Unable to extract resource: '" + resource + "' to file", e);
         }
     }
 
     public static File extractToFile(String resource, File targetFile) {
+        return extractToFileWithFiltering(resource, targetFile, null);
+    }
+
+    public static File extractToFileWithFiltering(String resource, File targetFile, Properties properties) {
         try {
-            String resourceAsString = getResourceAsString(resource);
+            String resourceAsString = extractToStringWithFiltering(resource, properties);
             FileUtils.write(targetFile, resourceAsString, ENCODING);
             return targetFile;
         } catch (IOException e) {
             throw new RuntimeException("Unable to extract resource: '" + resource + "' to file", e);
         }
+    }
+
+    public static String extractToStringWithFiltering(String resource, Properties properties) {
+        String resourceAsString = getResourceAsString(resource);
+        if (properties != null) {
+            resourceAsString = PropertyUtils.replaceProperties(resourceAsString, properties);
+        }
+        return resourceAsString;
     }
 
     public static void copyResourceWithFiltering(
