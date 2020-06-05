@@ -18,8 +18,8 @@
 
 package org.jboss.pnc.bacon.pig.impl.common;
 
-import org.jboss.pnc.bacon.pig.impl.config.Config;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
@@ -56,18 +56,18 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
 
     private static final Logger log = LoggerFactory.getLogger(DeliverableManager.class);
 
-    protected final Config config;
+    protected final PigConfiguration pigConfiguration;
     protected final String releasePath;
     protected final Deliverables deliverables;
     protected final Map<String, PncBuild> builds;
     protected final File workDir;
 
     protected DeliverableManager(
-            Config config,
+            PigConfiguration pigConfiguration,
             String releasePath,
             Deliverables deliverables,
             Map<String, PncBuild> builds) {
-        this.config = config;
+        this.pigConfiguration = pigConfiguration;
         this.releasePath = releasePath;
         this.deliverables = deliverables;
         this.builds = builds;

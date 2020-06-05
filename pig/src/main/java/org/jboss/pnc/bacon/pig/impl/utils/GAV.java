@@ -30,6 +30,8 @@ import org.w3c.dom.Element;
 import java.util.Comparator;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
@@ -192,11 +194,35 @@ public class GAV {
         return toGapvc().matches(expression);
     }
 
+    public boolean isTemporary() {
+        return isTempVersion(version);
+    }
+
+    public boolean isNormalJar() {
+        return isBlank(classifier) && packaging.equals("jar");
+    }
+
+    public GAV toSourcesJar() {
+        return new GAV(groupId, artifactId, version, "jar", "sources");
+    }
+
+    public GAV toJar() {
+        return new GAV(groupId, artifactId, version, "jar");
+    }
+
+    public GAV toPom() {
+        return new GAV(groupId, artifactId, version, "pom");
+    }
+
+    public GAV toJavadocJar() {
+        return new GAV(groupId, artifactId, version, "jar", "javadoc");
+    }
+
     public boolean isCommunity() {
         return !version.contains("redhat");
     }
 
-    public boolean isTemporary() {
-        return version.contains("temporary-redhat");
+    public static boolean isTempVersion(String v) {
+        return v.contains("temporary-redhat") || v.matches(".*\\.t\\d{8}-\\d+-\\d+-redhat-\\d+");
     }
 }

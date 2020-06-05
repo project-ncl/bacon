@@ -5,17 +5,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Sets;
 import lombok.SneakyThrows;
-
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.CommunityDepAnalyzer;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.*;
-
+import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pig.impl.utils.MavenRepositoryUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.OSCommandExecutor;
+import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -61,12 +69,12 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     public QuarkusCommunityDepAnalyzer(
-            Config config,
+            PigConfiguration pigConfiguration,
             Map<String, PncBuild> builds,
             String releasePath,
             String extrasPath,
             Deliverables deliverables) {
-        super(config, builds, releasePath, extrasPath);
+        super(pigConfiguration, builds, releasePath, extrasPath);
         this.deliverables = deliverables;
     }
 
@@ -83,7 +91,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         Path repoZipPath = Paths.get(releasePath + deliverables.getRepositoryZipName());
         unpackRepository(repoZipPath);
 
-        String additionalRepository = (String) getConfig().get("additionalRepository");
+        String additionalRepository = (String) getPigConfiguration().get("additionalRepository");
         String settingsSelector = "";
         if (additionalRepository != null) {
             try {
@@ -114,6 +122,15 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
         Path targetPath = Paths.get(extrasPath, "community-dependencies.csv");
         depAnalyzer.generateAnalysis(targetPath.toAbsolutePath().toString());
+
+        Set<String> problematicDeps = gatherProblematicDeps();
+        Path problematicDepsOut = Paths.get(extrasPath, "nonexistent-redhat-deps.txt");
+
+        try (BufferedWriter writer = Files.newBufferedWriter(problematicDepsOut)) {
+            writer.write(String.join("\n", problematicDeps));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write problematic dependencies to the output file", e);
+        }
     }
 
     private Path buildReactiveProject(String settingsSelector) {
@@ -130,7 +147,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     private Collection<String> skippedExtensions() {
         // noinspection unchecked
-        Collection<String> skipped = (Collection<String>) getConfig().get("skippedExtensions");
+        Collection<String> skipped = (Collection<String>) getPigConfiguration().get("skippedExtensions");
         return skipped == null ? Collections.emptyList() : skipped;
     }
 
@@ -156,8 +173,8 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     @SneakyThrows
     private Set<GAV> listDependencies(Path projectPath, Path depThreeOut, String settingsSelector) {
-        List<String> result = OSCommandExecutor
-                .runCommandIn("mvn dependency:tree" + repoDefinition + settingsSelector, projectPath);
+        List<String> result = OSCommandExecutor // mstodo!!!
+                .runCommandIn("mvn dependency:tree " + repoDefinition + settingsSelector, projectPath);
 
         Files.write(depThreeOut, result);
         return depTreeToNonRedhatGAVs(result);
@@ -278,5 +295,73 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                     "Failed to walk through repository contents: " + repoPath.toAbsolutePath().toString());
         }
         return visitor.getFilePaths();
+    }
+
+    private Set<String> gatherProblematicDeps() {
+        Set<String> problemmaticDeps = new TreeSet<>();
+        problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom/.*\\.pom"));
+        problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom-deployment/.*\\.pom"));
+        problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom/.*\\.pom"));
+        problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom-deployment/.*\\.pom"));
+        return problemmaticDeps;
+    }
+
+    private Collection<String> checkBomContents(String bomLocator) {
+        String quarkusRuntimeBom = repoZipContents.stream()
+                // todo file separator for Wi***ws may be different
+                .filter(file -> file.matches(bomLocator))
+                .findAny()
+                .get();
+        return checkReferencesInRepo(quarkusRuntimeBom);
+    }
+
+    // mstodo store the result properly
+    // mstodo add it add on trigger
+    private Collection<String> checkReferencesInRepo(String quarkusRuntimeBom) {
+        try {
+            String str = "/maven-repository/";
+            int repoDirIdx = quarkusRuntimeBom.indexOf(str);
+            quarkusRuntimeBom = quarkusRuntimeBom.substring(repoDirIdx + str.length());
+            Path bomFile = repoPath.resolve(quarkusRuntimeBom).toAbsolutePath();
+            Model model = new MavenXpp3Reader().read(Files.newInputStream(bomFile));
+
+            List<Dependency> dependencies = model.getDependencyManagement().getDependencies();
+
+            return dependencies.stream()
+                    .filter(dep -> isRHAndMissing(dep, model))
+                    .map(
+                            dep -> String.format(
+                                    "'%s:%s:%s',",
+                                    dep.getGroupId(),
+                                    dep.getArtifactId(),
+                                    deVar(model, dep.getVersion())))
+                    .collect(Collectors.toSet());
+        } catch (XmlPullParserException | IOException e) {
+            log.error("Parsing error when generating quarkus artifact references", e);
+            return Collections.emptySet();
+        }
+    }
+
+    private boolean isRHAndMissing(Dependency dependency, Model model) {
+        String version = dependency.getVersion();
+        version = deVar(model, version);
+        if (!version.contains("redhat")) {
+            return false;
+        }
+        GAV gav = new GAV(
+                dependency.getGroupId(),
+                dependency.getArtifactId(),
+                version,
+                dependency.getType() != null && dependency.getType().equals("jar") ? dependency.getType() : "jar");
+        Path filePath = repoPath.resolve(gav.toVersionPath()).resolve(gav.toFileName());
+        return !filePath.toFile().exists();
+    }
+
+    private String deVar(Model model, String version) {
+        if (version.startsWith("$")) {
+            version = version.substring(2, version.length() - 1);
+            version = model.getProperties().getProperty(version);
+        }
+        return version;
     }
 }

@@ -48,10 +48,10 @@ public class BuildInfoCollector {
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
 
-    public void addDependencies(PncBuild bd) {
+    public void addDependencies(PncBuild bd, String filter) {
         List<Artifact> artifacts = null;
         try {
-            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId()));
+            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
         }
@@ -92,8 +92,8 @@ public class BuildInfoCollector {
         StringBuilder logBuilder = new StringBuilder();
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader reader = new BufferedReader(inputStreamReader);) {
-            reader.lines().forEach(l -> logBuilder.append(l));
-            return reader.toString();
+            reader.lines().forEach(logBuilder::append);
+            return logBuilder.toString();
         }
     }
 

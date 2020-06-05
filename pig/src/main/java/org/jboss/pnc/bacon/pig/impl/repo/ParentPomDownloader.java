@@ -1,7 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -21,8 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Ken Finnigan
@@ -31,7 +30,8 @@ public class ParentPomDownloader {
 
     public static final Logger log = LoggerFactory.getLogger(ParentPomDownloader.class);
 
-    private ParentPomDownloader() {
+    private ParentPomDownloader(Path repoPath) {
+        this.repoPath = repoPath;
     }
 
     public static void addParentPoms(Path repoPath) {
@@ -40,61 +40,38 @@ public class ParentPomDownloader {
         }
 
         try {
-            new ParentPomDownloader().process(repoPath);
+            new ParentPomDownloader(repoPath).process();
         } catch (IOException e) {
             throw new RuntimeException("Unable to download parent poms", e);
         }
     }
 
-    private void process(final Path repoPath) throws IOException {
-        Set<Pom> pomArtifacts = retrievePoms(repoPath);
-
-        File execDir = FileUtils.mkTempDir("parent-pom-retrieval");
-
-        pomArtifacts.stream().filter(Pom::hasParent).forEach(p -> processPoms(repoPath, p));
-
-        String settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
-        toDownload.parallelStream().forEach(gav -> {
-            log.debug("Downloading: {}", gav.toString());
-            // Call Maven to download dependency
-
-            ProcessBuilder builder = new ProcessBuilder(
-                    "mvn",
-                    "-B",
-                    "org.apache.maven.plugins:maven-dependency-plugin:3.0.1:get",
-                    "-Dartifact=" + gav.toString(),
-                    "-Dmaven.repo.local=" + repoPath.toAbsolutePath().toString(),
-                    "-s",
-                    settingsXml);
-
-            builder.directory(execDir).inheritIO();
-
-            Process process = null;
-            try {
-                process = builder.start();
-            } catch (IOException e) {
-                log.error("Unable to download gav {}", gav.toString(), e);
-                System.out.println(14);
-            }
-
-            while (process.isAlive()) {
-                try {
-                    Thread.sleep(1000);
-                    if (process.exitValue() == 0) {
-                        break;
-                    }
-                } catch (IllegalThreadStateException e) {
-                    // ignore as process not exited
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-        }
-
-        );
+    private void process() throws IOException {
+        // iterate until the working set is empty
+        // this is to download parent POM of a parent POM of a parent POM of a parent POM of a ...
+        do {
+            toDownload.clear();
+            doProcess();
+        } while (!toDownload.isEmpty());
     }
 
-    private void processPoms(Path repoPath, Pom pom) {
+    private void doProcess() throws IOException {
+        Files.walk(repoPath)
+                .filter(Files::isRegularFile)
+                .filter(ParentPomDownloader::isPom)
+                .map(Pom::new)
+                .filter(Pom::hasParent)
+                .forEach(p -> processPom(repoPath, p));
+
+        toDownload.parallelStream().map(PomGAV::toGav).forEach(this::download);
+    }
+
+    private void download(GAV gav) {
+        log.info("Downloading missing parent POM {}", gav);
+        ExternalArtifactDownloader.downloadExternalArtifact(gav, repoPath, false);
+    }
+
+    private void processPom(Path repoPath, Pom pom) {
         PomGAV coords = parentCoordinates(pom);
         if (!coords.version.contains("redhat")) {
             // community parent POM not required
@@ -102,11 +79,12 @@ public class ParentPomDownloader {
         }
 
         Path parentDir = artifactDir(repoPath, coords);
-        Path parentPomPath = parentDir.resolve(coords.artifactId() + "-" + coords.version() + ".pom");
+        Path parentPomPath = parentDir.resolve(coords.artifactId + "-" + coords.version + ".pom");
 
         if (!alreadyChecked.contains(coords)) {
             if (!Files.isRegularFile(parentPomPath)) {
                 // File missing
+                log.debug("Will download {} because it's a parent of {}", coords, pom.path);
                 toDownload.add(coords);
             }
 
@@ -114,22 +92,14 @@ public class ParentPomDownloader {
         }
     }
 
-    private Set<Pom> retrievePoms(Path repoPath) throws IOException {
-        return Files.walk(repoPath)
-                .filter(Files::isRegularFile)
-                .filter(ParentPomDownloader::isPom)
-                .map(Pom::new)
-                .collect(Collectors.toSet());
-    }
-
     private static boolean isPom(Path path) {
         return path.toString().endsWith(".pom");
     }
 
     private static Path artifactDir(Path repoPath, PomGAV coords) {
-        Path groupDir = repoPath.resolve(coords.groupId().replace('.', File.separatorChar));
-        Path artifactDir = groupDir.resolve(coords.artifactId());
-        return artifactDir.resolve(coords.version());
+        Path groupDir = repoPath.resolve(coords.groupId.replace('.', File.separatorChar));
+        Path artifactDir = groupDir.resolve(coords.artifactId);
+        return artifactDir.resolve(coords.version);
     }
 
     private PomGAV parentCoordinates(Pom pom) {
@@ -174,9 +144,11 @@ public class ParentPomDownloader {
         return parentVersionExpression;
     }
 
-    private Set<PomGAV> alreadyChecked = new HashSet<>();
+    private final Set<PomGAV> alreadyChecked = new HashSet<>();
 
-    private Set<PomGAV> toDownload = new HashSet<>();
+    private final Set<PomGAV> toDownload = new HashSet<>();
+
+    private final Path repoPath;
 
     private XPath xpath;
 
@@ -186,7 +158,7 @@ public class ParentPomDownloader {
 
     private XPathExpression parentVersionExpression;
 
-    private class Pom {
+    private static class Pom {
         private final Path path;
 
         private DocumentBuilder documentBuilder;
@@ -220,7 +192,7 @@ public class ParentPomDownloader {
         }
     }
 
-    private class PomGAV {
+    private static class PomGAV {
         private final String groupId;
 
         private final String artifactId;
@@ -233,21 +205,29 @@ public class ParentPomDownloader {
             this.version = version;
         }
 
-        String groupId() {
-            return groupId;
-        }
-
-        String artifactId() {
-            return artifactId;
-        }
-
-        String version() {
-            return version;
-        }
-
         @Override
         public String toString() {
             return groupId + ':' + artifactId + ':' + version + ":pom";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof PomGAV))
+                return false;
+            PomGAV pomGAV = (PomGAV) o;
+            return Objects.equals(groupId, pomGAV.groupId) && Objects.equals(artifactId, pomGAV.artifactId)
+                    && Objects.equals(version, pomGAV.version);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(groupId, artifactId, version);
+        }
+
+        public GAV toGav() {
+            return new GAV(groupId, artifactId, version, "pom");
         }
     }
 }

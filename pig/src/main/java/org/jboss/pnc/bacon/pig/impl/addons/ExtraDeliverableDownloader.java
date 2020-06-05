@@ -17,7 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
@@ -33,11 +33,11 @@ import java.util.Map;
 public class ExtraDeliverableDownloader extends AddOn {
 
     protected ExtraDeliverableDownloader(
-            Config config,
+            PigConfiguration pigConfiguration,
             Map<String, PncBuild> builds,
             String releasePath,
             String extrasPath) {
-        super(config, builds, releasePath, extrasPath);
+        super(pigConfiguration, builds, releasePath, extrasPath);
     }
 
     @Override
@@ -45,10 +45,11 @@ public class ExtraDeliverableDownloader extends AddOn {
         return "extraDeliverablesDownloader";
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void trigger() {
-        // noinspection unchecked
-        getConfig().forEach((key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts));
+        getPigConfiguration()
+                .forEach((key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts));
     }
 
     private void downloadArtifacts(String buildName, List<Map<String, String>> artifacts) {
@@ -66,9 +67,9 @@ public class ExtraDeliverableDownloader extends AddOn {
     private String constructFileName(String suffix) {
         return String.format(
                 "%s-%s.%s-%s",
-                config.getOutputPrefixes().getReleaseFile(),
-                config.getVersion(),
-                config.getMilestone(),
+                pigConfiguration.getOutputPrefixes().getReleaseFile(),
+                pigConfiguration.getVersion(),
+                pigConfiguration.getMilestone(),
                 suffix);
     }
 }

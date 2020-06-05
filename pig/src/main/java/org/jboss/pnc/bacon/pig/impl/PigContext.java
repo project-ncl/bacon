@@ -19,7 +19,7 @@ package org.jboss.pnc.bacon.pig.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class PigContext {
             "pig.context.dir",
             getProperty("java.io.tmpdir") + File.separator + "pig-context");
 
-    private Config config; // TODO merge config instead of setting it?
+    private PigConfiguration pigConfiguration; // TODO merge config instead of setting it?
     private ImportResult pncImportResult;
     private Map<String, PncBuild> builds;
     private RepositoryData repositoryData;
@@ -60,14 +61,14 @@ public class PigContext {
     private String releasePath;
     private String extrasPath;
 
-    public void setConfig(Config config) {
-        this.config = config;
+    public void setPigConfiguration(PigConfiguration pigConfiguration) {
+        this.pigConfiguration = pigConfiguration;
         if (deliverables == null) {
             String prefix = String.format(
                     "%s-%s.%s",
-                    config.getOutputPrefixes().getReleaseFile(),
-                    config.getVersion(),
-                    config.getMilestone());
+                    pigConfiguration.getOutputPrefixes().getReleaseFile(),
+                    pigConfiguration.getVersion(),
+                    pigConfiguration.getMilestone());
 
             deliverables = new Deliverables();
 
@@ -77,13 +78,14 @@ public class PigContext {
             deliverables.setJavadocZipName(prefix + "-javadoc.zip");
             deliverables.setNvrListName(prefix + "-nvr-list.txt");
         }
-        configureTargetDirectories(config);
+        configureTargetDirectories(pigConfiguration);
     }
 
-    private void configureTargetDirectories(Config config) {
-        String productPrefix = config.getProduct().prefix();
+    private void configureTargetDirectories(PigConfiguration pigConfiguration) {
+        String productPrefix = pigConfiguration.getProduct().prefix();
         targetPath = "target"; // TODO: a way to customize it
-        releasePath = targetPath + "/" + productPrefix + "-" + config.getVersion() + "." + config.getMilestone() + "/";
+        releasePath = targetPath + "/" + productPrefix + "-" + pigConfiguration.getVersion() + "."
+                + pigConfiguration.getMilestone() + "/";
 
         File releaseDirectory = Paths.get(releasePath).toFile();
         if (!releaseDirectory.isDirectory()) {
@@ -108,16 +110,18 @@ public class PigContext {
         }
     }
 
-    public void loadConfig(String config) {
-        File configFile = new File(config);
+    public void loadConfig(String configDirStr) {
+        Path configDir = Paths.get(configDirStr);
+        File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
-                setConfig(Config.load(configStream));
+                setPigConfiguration(PigConfiguration.load(configStream));
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
             }
         } else {
-            throw new MisconfigurationException("The provided config file: " + config + " does not exist");
+            throw new MisconfigurationException(
+                    "The provided config file: " + configFile.getAbsolutePath() + " does not exist");
         }
     }
 

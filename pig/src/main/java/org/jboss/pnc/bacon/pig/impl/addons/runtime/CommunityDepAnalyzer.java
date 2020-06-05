@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.addons.runtime;
 
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CsvExportable;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DADao;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -39,40 +41,34 @@ public class CommunityDepAnalyzer {
     private final DADao daDao;
 
     private final List<CommunityDependency> dependencies;
-    private final List<String> downloadedForSwarm;
+    private final Function<List<CommunityDependency>, List<? extends CsvExportable>> enricher;
+
     private boolean skipDa = false;
 
-    public CommunityDepAnalyzer(List<String> dependencyLines, List<String> swarmLog) {
+    public CommunityDepAnalyzer(
+            List<String> dependencyLines,
+            Function<List<CommunityDependency>, List<? extends CsvExportable>> enricher) {
         daDao = DADao.getInstance();
-        downloadedForSwarm = swarmLog.stream()
-                .filter(line -> line.startsWith("Downloaded"))
-                .filter(line -> line.contains(".jar"))
-                // lines are of the form: Downloaded: http://... (some add. info)
-                .map(l -> l.split("\\s+")[1])
-                .sorted()
-                .collect(Collectors.toList());
         dependencies = dependencyLines.stream().map(CommunityDependency::new).collect(Collectors.toList());
+        this.enricher = enricher;
     }
 
     public CommunityDepAnalyzer(Collection<GAV> gavs) {
         dependencies = gavs.stream().map(CommunityDependency::new).collect(Collectors.toList());
         daDao = null;
-        downloadedForSwarm = null;
+        enricher = null;
     }
 
     public File generateAnalysis(String path) {
         try {
-            if (!skipDa) {
-                analyzeDAResults();
-            }
-            analyzeSwarmBuildLog();
             log.info("generating analysis to {} ...", path);
+            List<? extends CsvExportable> csvContents = analyze();
             File csvFile = new File(path);
 
             try (FileWriter writer = new FileWriter(csvFile)) {
                 writer.append(
-                        "Community dependencies in Swarm;;Productized counterpart;Other productized versions;Used in the Swarm build\n");
-                dependencies.forEach(d -> d.appendToCsv(writer));
+                        "Community dependencies;;Productized counterpart;Other productized versions;Additional info\n");
+                csvContents.forEach(d -> d.appendToCsv(writer));
             }
             log.info("DONE");
 
@@ -82,22 +78,20 @@ public class CommunityDepAnalyzer {
         }
     }
 
+    protected List<? extends CsvExportable> analyze() {
+        if (!skipDa) {
+            analyzeDAResults();
+        }
+        return productSpecificAnalysis();
+    }
+
+    private List<? extends CsvExportable> productSpecificAnalysis() {
+        return enricher != null ? enricher.apply(dependencies) : dependencies;
+    }
+
     protected List<CommunityDependency> analyzeDAResults() {
         dependencies.parallelStream().forEach(daDao::fillDaData);
         return dependencies;
-    }
-
-    protected List<CommunityDependency> analyzeSwarmBuildLog() {
-        dependencies.parallelStream().forEach(this::addSwarmBuildDependencies);
-        return dependencies;
-    }
-
-    private void addSwarmBuildDependencies(CommunityDependency communityDependency) {
-        List<String> swarmBuildDownloads = downloadedForSwarm.stream()
-                .filter(d -> d.contains(communityDependency.toPathSubstring()))
-                .map(l -> l.substring(l.lastIndexOf("/") + 1))
-                .collect(Collectors.toList());
-        communityDependency.setUsedForSwarm(swarmBuildDownloads);
     }
 
     public void skipDa(boolean skip) {
