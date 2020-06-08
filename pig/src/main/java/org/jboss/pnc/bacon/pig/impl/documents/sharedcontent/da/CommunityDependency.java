@@ -24,10 +24,6 @@ import lombok.ToString;
 import lombok.experimental.Delegate;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
@@ -35,13 +31,12 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class CommunityDependency {
+public class CommunityDependency implements CsvExportable {
     @Delegate
-    private final GAV gav;
-    private String recommendation;
-    private String availableVersions;
-    private DependencyState state;
-    private List<String> usedForSwarm;
+    final GAV gav;
+    String recommendation;
+    String availableVersions;
+    DependencyState state;
 
     /* org/ow2/asm/asm-all/5.0.4/asm-all-5.0.4.jar */
     public CommunityDependency(String logLine) {
@@ -61,27 +56,18 @@ public class CommunityDependency {
         return String.format("%s/%s/", getGroupId().replace('.', '/'), getArtifactId());
     }
 
-    public void appendToCsv(FileWriter writer) {
-        try {
-            writer.append(toCsvLine()).append("\n");
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot write to the output file", e);
-        }
-    }
-
     /**
      * @return g:a:v; state; recommendation; availableVersions; usedForSwarm
      */
-    private String toCsvLine() {
+    public String toCsvLine() {
         return String.format(
-                "%s:%s:%s; %s; %s; %s; %s",
+                "%s:%s:%s; %s; %s; %s",
                 getGroupId(),
                 getArtifactId(),
                 getVersion(),
                 state,
                 recommendation,
-                availableVersions,
-                usedForSwarm);
+                availableVersions);
     }
 
     public org.jboss.da.model.rest.GAV toDaGav() {

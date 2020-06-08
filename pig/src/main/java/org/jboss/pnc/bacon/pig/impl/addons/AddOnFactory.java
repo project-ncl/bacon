@@ -17,11 +17,12 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
+import org.jboss.pnc.bacon.pig.impl.addons.microprofile.MicroProfileSmallRyeCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.spring.BomVerifierAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.vertx.NotYetAlignedFromDependencyTree;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
@@ -35,23 +36,25 @@ import java.util.Map;
  */
 public class AddOnFactory {
 
-    private AddOnFactory() {
-    }
-
     public static List<AddOn> listAddOns(
-            Config config,
+            PigConfiguration pigConfiguration,
             Map<String, PncBuild> builds,
             String releasePath,
             String extrasPath,
             Deliverables deliverables) {
         ArrayList<AddOn> resultList = new ArrayList<>();
 
-        resultList.add(new RuntimeDependenciesAnalyzer(config, builds, releasePath, extrasPath));
-        resultList.add(new ExtraDeliverableDownloader(config, builds, releasePath, extrasPath));
-        resultList.add(new BomVerifierAddon(config, builds, releasePath, extrasPath));
-        resultList.add(new NotYetAlignedFromDependencyTree(config, builds, releasePath, extrasPath));
-        resultList.add(new QuarkusCommunityDepAnalyzer(config, builds, releasePath, extrasPath, deliverables));
+        resultList.add(new RuntimeDependenciesAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new ExtraDeliverableDownloader(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new BomVerifierAddon(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new NotYetAlignedFromDependencyTree(pigConfiguration, builds, releasePath, extrasPath));
+        resultList
+                .add(new QuarkusCommunityDepAnalyzer(pigConfiguration, builds, releasePath, extrasPath, deliverables));
+        resultList.add(new MicroProfileSmallRyeCommunityDepAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
 
         return resultList;
+    }
+
+    private AddOnFactory() {
     }
 }

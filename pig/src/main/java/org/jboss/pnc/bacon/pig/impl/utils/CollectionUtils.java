@@ -26,9 +26,9 @@ import java.util.Set;
  *         Date: 7/7/17
  */
 public class CollectionUtils {
-    // public static List<String> skipFirstInList(List<String> output, Integer number) {
-    // return output.subList(number, output.size());
-    // }
+
+    private CollectionUtils() {
+    }
 
     public static <T> Set<T> subtractSet(Set<T> minuend, Set<T> subtrahend) {
         Set<T> resultSet = new HashSet<>(minuend);

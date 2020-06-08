@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
+import com.google.common.collect.Maps;
 import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
@@ -50,11 +51,21 @@ public class SourcesGenerator {
     }
 
     public void generateSources(Map<String, PncBuild> builds, RepositoryData repo) {
+        if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.IGNORE) {
+            log.info("Ignoring source zip generation");
+            return;
+        }
+
         File workDir = FileUtils.mkTempDir("sources");
 
         File contentsDir = new File(workDir, topLevelDirectoryName);
 
         contentsDir.mkdirs();
+
+        if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_SELECTED) {
+            PncBuild sourceBuild = builds.get(sourcesGenerationData.getSourceBuild());
+            builds = Maps.filterEntries(builds, entry -> entry.getKey().equals(sourceBuild.getName()));
+        }
 
         downloadSourcesFromBuilds(builds, workDir, contentsDir);
 

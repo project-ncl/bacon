@@ -19,29 +19,38 @@ package org.jboss.pnc.bacon.pig.impl.script;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.dto.ProductMilestoneRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 1/4/18
  */
 public class ScriptGenerator {
+    private static final Logger log = LoggerFactory.getLogger(ScriptGenerator.class);
 
     public static final String SCRIPT_NAME = "generate-nvr-list.sh";
-    private final Config config;
+    private final PigConfiguration pigConfiguration;
     private final Deliverables deliverables;
 
-    public ScriptGenerator(Config config, Deliverables deliverables) {
-        this.config = config;
+    public ScriptGenerator(PigConfiguration pigConfiguration, Deliverables deliverables) {
+        this.pigConfiguration = pigConfiguration;
         this.deliverables = deliverables;
     }
 
@@ -69,6 +78,8 @@ public class ScriptGenerator {
         File uploadScriptLocation = targetDir.resolve("upload-to-candidates.sh").toFile();
 
         generator.generateFileFromResource(dataRoot, "uploadToCandidates.sh", uploadScriptLocation);
+
+        makeScriptExecutable(uploadScriptLocation.toPath());
     }
 
     private void generateCloseMilestoneScript(Path targetPath, ReleaseScriptData dataRoot) {
@@ -78,6 +89,8 @@ public class ScriptGenerator {
         File releaseScriptLocation = targetPath.resolve("release.sh").toFile();
 
         generator.generateFileFromResource(dataRoot, "release.sh", releaseScriptLocation);
+
+        makeScriptExecutable(releaseScriptLocation.toPath());
     }
 
     private ReleaseScriptData getReleaseScriptData(
@@ -90,8 +103,8 @@ public class ScriptGenerator {
         String nvrListName = deliverables.getNvrListName();
         String nvrScriptLocation = extractNvrListScript(targetDir.toFile());
         String nvrListPath = releaseDir.resolve(nvrListName).toAbsolutePath().toString();
-        String productWithVersion = config.getProduct().prefix() + "-" + config.getVersion() + "."
-                + config.getMilestone();
+        String productWithVersion = pigConfiguration.getProduct().prefix() + "-" + pigConfiguration.getVersion() + "."
+                + pigConfiguration.getMilestone();
 
         return new ReleaseScriptData(
                 milestone.getId(),
@@ -100,13 +113,35 @@ public class ScriptGenerator {
                 nvrListPath,
                 productWithVersion,
                 brewTag,
+                getKojiHubUrl(),
                 buildIdsToPush);
+    }
+
+    private String getKojiHubUrl() {
+        PigConfig pig = Config.instance().getActiveProfile().getPig();
+        if (pig == null || pig.getKojiHubUrl() == null) {
+            throw new RuntimeException("kojiHubUrl missing in pig config. Script generation aborted");
+        }
+        return pig.getKojiHubUrl();
     }
 
     private String extractNvrListScript(File targetDir) {
         File nvrListScriptFile = new File(targetDir, SCRIPT_NAME);
         File scriptFile = ResourceUtils.extractToFile("/" + SCRIPT_NAME, nvrListScriptFile);
+        makeScriptExecutable(scriptFile.toPath());
         return scriptFile.getAbsolutePath();
+    }
+
+    private void makeScriptExecutable(Path script) {
+        try {
+            Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(script);
+            permissions.add(PosixFilePermission.OWNER_EXECUTE);
+            permissions.add(PosixFilePermission.GROUP_EXECUTE);
+            permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+            Files.setPosixFilePermissions(script, permissions);
+        } catch (IOException | UnsupportedOperationException e) {
+            log.info("Couldn't make script {} executable: {}", script, e.getMessage());
+        }
     }
 
     @Data
@@ -118,6 +153,7 @@ public class ScriptGenerator {
         private String targetPath;
         private String productWithVersion;
         private String brewTag;
+        private String kojiHubUrl;
         private List<String> buildsToPush;
     }
 }

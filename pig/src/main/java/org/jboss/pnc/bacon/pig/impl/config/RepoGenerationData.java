@@ -21,6 +21,8 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -34,7 +36,16 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
      * list of groupId:artifactId:packaging:version with <strong>exact</strong> version
      */
     private List<String> externalAdditionalArtifacts = new ArrayList<>();
+    private List<String> excludeArtifacts = new ArrayList<>();
+    private List<String> sourceBuilds = new ArrayList<>();
     private String bomGroupId;
     private String bomArtifactId;
-    private Boolean includeJavadoc;
+    private boolean includeJavadoc;
+    private boolean includeLicenses;
+    private boolean includeMavenMetadata;
+    private String buildScript;
+    private Set<String> ignored;
+    private String additionalRepo;
+    private List<Map<String, String>> stages;
+    private Map<String, String> parameters;
 }

@@ -16,7 +16,7 @@
 package org.jboss.pnc.bacon.pig.impl.addons.vertx;
 
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +39,11 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
     private static final Logger log = LoggerFactory.getLogger(NotYetAlignedFromDependencyTree.class);
 
     public NotYetAlignedFromDependencyTree(
-            Config config,
+            PigConfiguration pigConfiguration,
             Map<String, PncBuild> builds,
             String releasePath,
             String extrasPath) {
-        super(config, builds, releasePath, extrasPath);
+        super(pigConfiguration, builds, releasePath, extrasPath);
     }
 
     @Override

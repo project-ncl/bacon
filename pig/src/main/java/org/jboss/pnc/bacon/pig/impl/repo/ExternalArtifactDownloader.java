@@ -19,6 +19,9 @@ package org.jboss.pnc.bacon.pig.impl.repo;
 
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
@@ -30,36 +33,38 @@ import java.nio.file.Path;
  */
 public class ExternalArtifactDownloader {
 
+    private static final Logger log = LoggerFactory.getLogger(ExternalArtifactDownloader.class);
+
     private ExternalArtifactDownloader() {
     }
 
-    private static final String TEMPORARY_ARTIFACTS_URL;
-    private static final String ARTIFACTS_URL;
+    public static File downloadExternalArtifact(GAV gav, Path targetRepoContents, boolean sourcesOptional) {
+        File targetPath = targetPath(gav, targetRepoContents);
 
-    static {
-        String indyRepoUrl = System.getenv("INDY_REPO_URL");
-        if (indyRepoUrl == null) {
-            indyRepoUrl = "http://indy.psi.redhat.com/";
-        }
-        if (!indyRepoUrl.endsWith("/")) {
-            indyRepoUrl = indyRepoUrl + "/";
-        }
-        TEMPORARY_ARTIFACTS_URL = indyRepoUrl + "api/content/maven/group/temporary-builds";
-        ARTIFACTS_URL = indyRepoUrl + "api/group/builds-untested+shared-imports+public";
+        return downloadExternalArtifact(gav, targetPath, sourcesOptional);
     }
 
-    public static File downloadExternalArtifact(GAV gav, Path targetRepoContents) {
-        Path versionPath = targetRepoContents.resolve(gav.toVersionPath());
-        versionPath.toFile().mkdirs();
+    public static File downloadExternalArtifact(GAV gav, File targetPath, boolean sourcesOptional) {
+        targetPath.toPath().getParent().toFile().mkdirs();
 
-        File targetPath = versionPath.resolve(gav.toFileName()).toFile();
-
-        String indyUrl = gav.isTemporary() ? TEMPORARY_ARTIFACTS_URL : ARTIFACTS_URL;
+        String indyUrl = gav.isTemporary() ? Indy.getIndyTempUrl() : Indy.getIndyUrl();
 
         URI downloadUrl = URI.create(String.format("%s/%s", indyUrl, gav.toUri()));
-
-        FileDownloadUtils.downloadTo(downloadUrl, targetPath);
+        try {
+            FileDownloadUtils.downloadTo(downloadUrl, targetPath);
+        } catch (RuntimeException any) {
+            if (sourcesOptional && "sources".equals(gav.getClassifier()) || "javadoc".equals(gav.getClassifier())) {
+                log.warn("Unable to download sources for " + gav, any);
+            } else {
+                throw any;
+            }
+        }
 
         return targetPath;
+    }
+
+    public static File targetPath(GAV gav, Path targetRepoContents) {
+        Path versionPath = targetRepoContents.resolve(gav.toVersionPath());
+        return versionPath.resolve(gav.toFileName()).toFile();
     }
 }

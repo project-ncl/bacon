@@ -1,5 +1,7 @@
 package org.jboss.pnc.bacon.test;
 
+import org.jboss.pnc.bacon.common.Constant;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.jboss.pnc.bacon.common.Constant;
 
 /**
  *
@@ -20,7 +21,7 @@ import org.jboss.pnc.bacon.common.Constant;
  */
 public class CLIExecutor {
     private static final Path BACON_JAR = Paths.get("../cli/target/bacon.jar").toAbsolutePath().normalize();
-    public static final String CONFIG_LOCATION = "target/test-config";
+    public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
 
     public ExecutionResult runCommand(String... args) {
         try {
@@ -34,7 +35,7 @@ public class CLIExecutor {
                 cmdarray[i + 3] = args[i];
             }
             String[] env = new String[1];
-            env[0] = Constant.CONFIG_ENV + "=" + CONFIG_LOCATION;
+            env[0] = Constant.CONFIG_ENV + "=" + CONFIG_LOCATION.toString();
 
             System.out.println(
                     "Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'")));

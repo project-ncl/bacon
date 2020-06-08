@@ -20,7 +20,7 @@ package org.jboss.pnc.bacon.pig;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.DocumentGenerator;
 import org.jboss.pnc.bacon.pig.impl.javadoc.JavadocManager;
 import org.jboss.pnc.bacon.pig.impl.license.LicenseManager;
@@ -67,9 +67,9 @@ public class PigFacade {
     private PigFacade() {
     }
 
-    public static ImportResult importPncEntities() {
+    public static ImportResult importPncEntities(boolean skipBranchCheck) {
         PncEntitiesImporter pncImporter = new PncEntitiesImporter();
-        return pncImporter.performImport();
+        return pncImporter.performImport(skipBranchCheck);
     }
 
     public static ImportResult readPncEntities() {
@@ -78,6 +78,7 @@ public class PigFacade {
     }
 
     public static Map<String, PncBuild> build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+        context().setTempBuild(tempBuild);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -103,7 +104,8 @@ public class PigFacade {
             String repoZipPath,
             boolean tempBuild,
             boolean tempBuildTS,
-            RebuildMode rebuildMode) {
+            RebuildMode rebuildMode,
+            boolean skipBranchCheck) {
 
         PigContext context = context();
 
@@ -111,7 +113,7 @@ public class PigFacade {
         if (skipPncUpdate) {
             importResult = readPncEntities();
         } else {
-            importResult = importPncEntities();
+            importResult = importPncEntities(skipBranchCheck);
         }
         context.setPncImportResult(importResult);
         context.storeContext();
@@ -190,7 +192,9 @@ public class PigFacade {
     }
 
     public static void generateScripts() {
-        ScriptGenerator scriptGenerator = new ScriptGenerator(context().getConfig(), context().getDeliverables());
+        ScriptGenerator scriptGenerator = new ScriptGenerator(
+                context().getPigConfiguration(),
+                context().getDeliverables());
         scriptGenerator.generateReleaseScripts(
                 context().getPncImportResult().getMilestone(),
                 context().getRepositoryData().getRepositoryPath(),
@@ -202,7 +206,7 @@ public class PigFacade {
 
     public static void generateDocuments() {
         DocumentGenerator docGenerator = new DocumentGenerator(
-                context().getConfig(),
+                context().getPigConfiguration(),
                 context().getReleasePath(),
                 context().getExtrasPath(),
                 context().getDeliverables());
@@ -212,7 +216,7 @@ public class PigFacade {
     public static void prepareSharedContentAnalysis() {
         try {
             DocumentGenerator docGenerator = new DocumentGenerator(
-                    context().getConfig(),
+                    context().getPigConfiguration(),
                     context().getReleasePath(),
                     context().getExtrasPath(),
                     context().getDeliverables());
@@ -223,12 +227,12 @@ public class PigFacade {
     }
 
     public static void generateSources() {
-        Config config = context().getConfig();
+        PigConfiguration pigConfiguration = context().getPigConfiguration();
         Map<String, PncBuild> builds = context().getBuilds();
         RepositoryData repo = context().getRepositoryData();
         SourcesGenerator sourcesGenerator = new SourcesGenerator(
-                config.getFlow().getSourcesGeneration(),
-                config.getTopLevelDirectoryPrefix() + "src",
+                pigConfiguration.getFlow().getSourcesGeneration(),
+                pigConfiguration.getTopLevelDirectoryPrefix() + "src",
                 context().getReleasePath() + context().getDeliverables().getSourceZipName());
         sourcesGenerator.generateSources(builds, repo);
     }
@@ -275,7 +279,7 @@ public class PigFacade {
     public static void triggerAddOns() {
         AddOnFactory
                 .listAddOns(
-                        context().getConfig(),
+                        context().getPigConfiguration(),
                         context().getBuilds(),
                         context().getReleasePath(),
                         context().getExtrasPath(),
@@ -288,7 +292,7 @@ public class PigFacade {
     public static RepositoryData generateRepo(boolean removeGeneratedM2Dups) {
         PigContext context = context();
         RepoManager repoManager = new RepoManager(
-                context.getConfig(),
+                context.getPigConfiguration(),
                 context().getReleasePath(),
                 context().getDeliverables(),
                 context().getBuilds(),
@@ -308,15 +312,16 @@ public class PigFacade {
 
     public static void generateLicenses() {
         PigContext context = context();
-        Config config = context.getConfig();
+        PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
         Map<String, PncBuild> builds = context.getBuilds();
-        new LicenseManager(config, context.getReleasePath(), context.getDeliverables(), builds, repo).prepare();
+        new LicenseManager(pigConfiguration, context.getReleasePath(), context.getDeliverables(), builds, repo)
+                .prepare();
     }
 
     public static void generateJavadoc() {
-        Config config = context().getConfig();
+        PigConfiguration pigConfiguration = context().getPigConfiguration();
         Map<String, PncBuild> builds = context().getBuilds();
-        new JavadocManager(config, context().getReleasePath(), context().getDeliverables(), builds).prepare();
+        new JavadocManager(pigConfiguration, context().getReleasePath(), context().getDeliverables(), builds).prepare();
     }
 }

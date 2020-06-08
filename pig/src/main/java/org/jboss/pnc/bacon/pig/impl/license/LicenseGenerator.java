@@ -22,15 +22,22 @@ import me.snowdrop.licenses.LicensesGenerator;
 import me.snowdrop.licenses.LicensesGeneratorException;
 import me.snowdrop.licenses.properties.GeneratorProperties;
 import me.snowdrop.licenses.utils.Gav;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -47,19 +54,36 @@ public class LicenseGenerator {
         File temporaryDestination = FileUtils.mkTempDir("licenses");
         File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
 
-        generateLicenses(gavs, topLevelDirectory);
+        generateLicenses(gavs, topLevelDirectory, PigContext.get().isTempBuild());
         FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
         log.debug("Generated zip archive {}", archiveFile);
     }
 
-    private static void generateLicenses(Collection<GAV> gavs, File temporaryDestination) {
+    public static void generateLicenses(Collection<GAV> gavs, File licensesDirectory, boolean useTempBuilds) {
         try {
-            LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties());
+            LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties(useTempBuilds));
 
-            generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), temporaryDestination.getAbsolutePath());
+            generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), licensesDirectory.getAbsolutePath());
         } catch (LicensesGeneratorException e) {
             throw new RuntimeException("Failed to generate licenses", e);
         }
+    }
+
+    public static void extractLicenses(File repoZip, File archiveFile, String topLevelDirectoryName) {
+        File temporaryDestination = FileUtils.mkTempDir("licenses");
+        File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
+
+        try {
+            FileUtils.unzip(repoZip, topLevelDirectory, "^[^/]*/licenses/.*");
+            File repoDir = Files.list(topLevelDirectory.toPath()).iterator().next().toFile();
+            FileUtils.moveDirectoryContents(new File(repoDir, "licenses"), topLevelDirectory);
+            org.apache.commons.io.FileUtils.deleteDirectory(repoDir);
+            FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
+            log.info("Generated zip archive {}", archiveFile);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to extract licenses from zip", ex);
+        }
+
     }
 
     private static List<Gav> gavsToLicenseGeneratorGavs(Collection<GAV> gavs) {
@@ -68,9 +92,30 @@ public class LicenseGenerator {
                 .collect(Collectors.toList());
     }
 
-    private static GeneratorProperties prepareGeneratorProperties() {
-        File propertiesFile = ResourceUtils
-                .extractToTmpFile("/license-generator.properties", "license-generator", ".properties");
+    private static GeneratorProperties prepareGeneratorProperties(boolean useTempBuilds) {
+        Properties props = new Properties();
+        PigConfig pig = Config.instance().getActiveProfile().getPig();
+        String licenseServiceUrl = pig.getLicenseServiceUrl();
+        String licenseServiceProp = "";
+        if (licenseServiceUrl != null) {
+            licenseServiceProp = String.format(
+                    "licenseServiceUrl=http://%s/find-license-check-record-and-license-info",
+                    licenseServiceUrl);
+        }
+        props.setProperty("licenseServiceUrl", licenseServiceProp);
+        if (useTempBuilds) {
+            props.setProperty("names", "Indy Temp Builds,Indy Static");
+            props.setProperty("urls", Indy.getIndyTempUrl() + "," + Indy.getIndyUrl());
+        } else {
+            props.setProperty("names", "Indy Static");
+            props.setProperty("urls", Indy.getIndyUrl());
+        }
+
+        File propertiesFile = ResourceUtils.extractToTmpFileWithFiltering(
+                "/license-generator.properties",
+                "license-generator",
+                ".properties",
+                props);
         return new GeneratorProperties(propertiesFile.getAbsolutePath());
     }
 }
