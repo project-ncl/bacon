@@ -84,9 +84,9 @@ public class PncEntitiesImporter {
     private ProductMilestone milestone;
     private GroupConfiguration buildGroup;
     private List<BuildConfigData> configs;
-    private PigConfiguration pigConfiguration = PigContext.get().getPigConfiguration();
+    private final PigConfiguration pigConfiguration = PigContext.get().getPigConfiguration();
 
-    private PncConfigurator pncConfigurator = new PncConfigurator();
+    private final PncConfigurator pncConfigurator = new PncConfigurator();
 
     public PncEntitiesImporter() {
         buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
@@ -97,7 +97,7 @@ public class PncEntitiesImporter {
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
     }
 
-    public ImportResult performImport() {
+    public ImportResult performImport(boolean skipBranchCheck) {
         product = getOrGenerateProduct();
         version = getOrGenerateVersion();
         milestone = pncConfigurator.getOrGenerateMilestone(
@@ -107,7 +107,7 @@ public class PncEntitiesImporter {
         pncConfigurator.markMilestoneCurrent(version, milestone);
         buildGroup = getOrGenerateBuildGroup();
 
-        configs = getAddOrUpdateBuildConfigs();
+        configs = getAddOrUpdateBuildConfigs(skipBranchCheck);
         log.debug("Setting up build dependencies");
         setUpBuildDependencies();
 
@@ -221,11 +221,11 @@ public class PncEntitiesImporter {
         }
     }
 
-    private List<BuildConfigData> getAddOrUpdateBuildConfigs() {
+    private List<BuildConfigData> getAddOrUpdateBuildConfigs(boolean skipBranchCheck) {
         log.info("Adding/updating build configurations");
         List<BuildConfiguration> currentConfigs = getCurrentBuildConfigs();
         dropConfigsFromInvalidVersion(currentConfigs, pigConfiguration.getBuilds());
-        return updateOrCreate(currentConfigs, pigConfiguration.getBuilds());
+        return updateOrCreate(currentConfigs, pigConfiguration.getBuilds(), skipBranchCheck);
     }
 
     private Optional<BuildConfiguration> getBuildConfigFromName(String name) {
@@ -244,14 +244,17 @@ public class PncEntitiesImporter {
         }
     }
 
-    private List<BuildConfigData> updateOrCreate(List<BuildConfiguration> currentConfigs, List<BuildConfig> builds) {
+    private List<BuildConfigData> updateOrCreate(
+            List<BuildConfiguration> currentConfigs,
+            List<BuildConfig> builds,
+            boolean skipBranchCheck) {
         List<BuildConfigData> buildList = new ArrayList<>();
         for (BuildConfig bc : builds) {
             BuildConfigData data = new BuildConfigData(bc);
             for (BuildConfiguration config : currentConfigs) {
                 if (config.getName().equals(bc.getName())) {
                     data.setOldConfig(config);
-                    if (data.shouldBeUpdated()) {
+                    if (data.shouldBeUpdated(skipBranchCheck)) {
                         updateBuildConfig(data, config);
                     }
                 }
@@ -262,7 +265,7 @@ public class PncEntitiesImporter {
             if (matchedBuildConfig.isPresent()) {
                 log.debug("Found matching build config for {}", bc.getName());
                 data.setOldConfig(matchedBuildConfig.get());
-                if (data.shouldBeUpdated()) {
+                if (data.shouldBeUpdated(skipBranchCheck)) {
                     updateBuildConfig(data, matchedBuildConfig.get());
                 }
                 data.setModified(true);

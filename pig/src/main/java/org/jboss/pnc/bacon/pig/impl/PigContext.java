@@ -61,6 +61,8 @@ public class PigContext {
     private String releasePath;
     private String extrasPath;
 
+    private boolean tempBuild;
+
     public void setPigConfiguration(PigConfiguration pigConfiguration) {
         this.pigConfiguration = pigConfiguration;
         if (deliverables == null) {

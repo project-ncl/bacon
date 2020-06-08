@@ -20,7 +20,6 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.pnc.bacon.pig.impl.PigProperties;
 import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.SCMRepository;
@@ -124,8 +123,8 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public synchronized boolean isBranchModified(BuildConfiguration oldVersion) {
-        if (PigProperties.get().isSkipBranchCheck()) {
+    public synchronized boolean isBranchModified(BuildConfiguration oldVersion, boolean skipBranchCheck) {
+        if (skipBranchCheck) {
             return false;
         }
         if (branchModified == null) {
@@ -138,7 +137,7 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public boolean isTheSameAs(BuildConfiguration old) {
+    public boolean isTheSameAs(BuildConfiguration old, boolean skipBranchCheck) {
         return old != null && StringUtils.equals(name, old.getName())
                 && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
@@ -146,7 +145,7 @@ public class BuildConfig {
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && environmentId.equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
-                && !isBranchModified(old);
+                && !isBranchModified(old, skipBranchCheck);
     }
 
     private Set<String> getAlignmentParameters(BuildConfiguration old) {

@@ -20,7 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.repo;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.pnc.bacon.pig.impl.PigProperties;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -70,15 +70,16 @@ public class RepoBuilder {
             PigConfiguration pigConfiguration,
             String additionalRepo,
             Path configurationDirectory,
-            Map<String, PncBuild> builds) {
+            Map<String, PncBuild> builds,
+            boolean removeGeneratedM2Dups) {
         this.pigConfiguration = pigConfiguration;
         this.additionalRepo = additionalRepo;
         this.builds = builds;
         this.configurationDirectory = configurationDirectory;
+        this.removeGeneratedM2Dups = removeGeneratedM2Dups;
 
         repoGeneration = pigConfiguration.getFlow().getRepositoryGeneration();
-        removeGeneratedM2Dups = PigProperties.get().isRemoveGeneratedM2Dups();
-        tempBuild = PigProperties.get().isTemporary();
+        tempBuild = PigContext.get().isTempBuild();
         topLevelDirectoryName = pigConfiguration.getTopLevelDirectoryPrefix() + "maven-repository";
     }
 

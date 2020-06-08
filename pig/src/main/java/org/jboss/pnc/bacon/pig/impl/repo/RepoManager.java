@@ -18,7 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
 import lombok.Getter;
-import org.jboss.pnc.bacon.pig.impl.PigProperties;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -297,7 +297,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 pigConfiguration,
                 generationData.getAdditionalRepo(),
                 configurationDirectory,
-                builds);
+                builds,
+                removeGeneratedM2Dups);
         File bomFile = new File(bomDirectory, "bom.pom");
         build.downloadArtifact(generationData.getSourceArtifact(), bomFile);
 
@@ -370,7 +371,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             LicenseGenerator.generateLicenses(
                     RepoDescriptor.listGavs(new File(m2Repo, RepoDescriptor.MAVEN_REPOSITORY)),
                     new File(m2Repo, "licenses"),
-                    PigProperties.get().isTemporary());
+                    PigContext.get().isTempBuild());
         }
     }
 }

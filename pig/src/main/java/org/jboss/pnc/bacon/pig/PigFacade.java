@@ -67,9 +67,9 @@ public class PigFacade {
     private PigFacade() {
     }
 
-    public static ImportResult importPncEntities() {
+    public static ImportResult importPncEntities(boolean skipBranchCheck) {
         PncEntitiesImporter pncImporter = new PncEntitiesImporter();
-        return pncImporter.performImport();
+        return pncImporter.performImport(skipBranchCheck);
     }
 
     public static ImportResult readPncEntities() {
@@ -78,6 +78,7 @@ public class PigFacade {
     }
 
     public static Map<String, PncBuild> build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+        context().setTempBuild(tempBuild);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -103,7 +104,8 @@ public class PigFacade {
             String repoZipPath,
             boolean tempBuild,
             boolean tempBuildTS,
-            RebuildMode rebuildMode) {
+            RebuildMode rebuildMode,
+            boolean skipBranchCheck) {
 
         PigContext context = context();
 
@@ -111,7 +113,7 @@ public class PigFacade {
         if (skipPncUpdate) {
             importResult = readPncEntities();
         } else {
-            importResult = importPncEntities();
+            importResult = importPncEntities(skipBranchCheck);
         }
         context.setPncImportResult(importResult);
         context.storeContext();

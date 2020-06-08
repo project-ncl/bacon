@@ -24,7 +24,7 @@ import me.snowdrop.licenses.properties.GeneratorProperties;
 import me.snowdrop.licenses.utils.Gav;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
-import org.jboss.pnc.bacon.pig.impl.PigProperties;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
@@ -54,7 +54,7 @@ public class LicenseGenerator {
         File temporaryDestination = FileUtils.mkTempDir("licenses");
         File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
 
-        generateLicenses(gavs, topLevelDirectory, PigProperties.get().isTemporary());
+        generateLicenses(gavs, topLevelDirectory, PigContext.get().isTempBuild());
         FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
         log.debug("Generated zip archive {}", archiveFile);
     }

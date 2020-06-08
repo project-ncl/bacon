@@ -62,9 +62,22 @@ public class Pig extends AbstractCommand {
     public static final String REMOVE_M2_DUPLICATES = "removeGeneratedM2Dups";
     public static final String REMOVE_M2_DUPLICATES_DEFAULT = "false";
 
+    public static final String SKIP_BRANCH_CHECK = "skipBranchCheck";
+    public static final String SKIP_BRANCH_CHECK_DEFAULT = "false";
+    public static final String SKIP_BRANCH_CHECK_DESC = "If set to true, pig won't try to determine if the branch that is used to build from is modified. "
+            + "Branch modification check takes a lot of time, if you use tag, this switch can speed up the build.";
+
     public abstract class PigCommand<T> extends AbstractCommand {
         @Argument(required = true, description = "Directory containing the Pig configuration file")
         String configDir;
+
+        @Option(
+                shortName = TEMP_BUILD_SHORT,
+                name = TEMP_BUILD,
+                overrideRequired = true,
+                defaultValue = TEMP_BUILD_DEFAULT,
+                description = TEMP_BUILD_DESC)
+        boolean tempBuild; // mstodo add support for specifying tempBuild for more commands
 
         @Option(
                 shortName = 'o',
@@ -95,14 +108,6 @@ public class Pig extends AbstractCommand {
         // overrideRequired = true,
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
-
-        @Option(
-                shortName = TEMP_BUILD_SHORT,
-                name = TEMP_BUILD,
-                overrideRequired = true,
-                defaultValue = TEMP_BUILD_DEFAULT,
-                description = TEMP_BUILD_DESC)
-        private boolean tempBuild;
 
         @Option(
                 name = TEMP_BUILD_TIME_STAMP,
@@ -176,6 +181,13 @@ public class Pig extends AbstractCommand {
         private boolean removeGeneratedM2Dups;
 
         @Option(
+                name = SKIP_BRANCH_CHECK,
+                overrideRequired = true,
+                defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
+                description = SKIP_BRANCH_CHECK_DESC)
+        private boolean skipBranchCheck;
+
+        @Option(
                 shortName = 'r',
                 name = "repoZip",
                 overrideRequired = true,
@@ -198,16 +210,24 @@ public class Pig extends AbstractCommand {
                     repoZipPath,
                     tempBuild,
                     tempBuildTS,
-                    rebuildMode);
+                    rebuildMode,
+                    skipBranchCheck);
         }
     }
 
     @CommandDefinition(name = "configure", description = "Configure PNC entities")
     public class Configure extends PigCommand<ImportResult> {
 
+        @Option(
+                name = SKIP_BRANCH_CHECK,
+                overrideRequired = true,
+                defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
+                description = SKIP_BRANCH_CHECK_DESC)
+        private boolean skipBranchCheck;
+
         @Override
         public ImportResult doExecute() {
-            ImportResult importResult = PigFacade.importPncEntities();
+            ImportResult importResult = PigFacade.importPncEntities(skipBranchCheck);
             PigContext.get().setPncImportResult(importResult);
             return importResult;
         }
@@ -221,14 +241,6 @@ public class Pig extends AbstractCommand {
         // overrideRequired = true,
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
-
-        @Option(
-                shortName = TEMP_BUILD_SHORT,
-                name = TEMP_BUILD,
-                overrideRequired = true,
-                defaultValue = TEMP_BUILD_DEFAULT,
-                description = TEMP_BUILD_DESC)
-        private boolean tempBuild;
 
         @Option(
                 name = TEMP_BUILD_TIME_STAMP,

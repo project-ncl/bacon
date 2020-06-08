@@ -18,7 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.license;
 
 import lombok.Getter;
-import org.jboss.pnc.bacon.pig.impl.PigProperties;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.LicenseGenerationStrategy;
@@ -59,7 +59,7 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
         this.repositoryData = repositoryData;
 
         generationData = pigConfiguration.getFlow().getLicensesGeneration();
-        useTempBuilds = PigProperties.get().isTemporary();
+        useTempBuilds = PigContext.get().isTempBuild();
     }
 
     public void prepare() {

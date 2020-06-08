@@ -22,7 +22,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.commonjava.maven.ext.cli.Cli;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.jboss.pnc.bacon.pig.impl.PigProperties;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationData;
@@ -70,6 +70,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     @Getter
     private final JavadocGenerationData generationData;
+    private final boolean tempBuild;
 
     private String generationProject;
     private List<String> sourceBuilds;
@@ -79,7 +80,6 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private File topLevelDirectory;
     private File archiveFile;
     private String scmRevision;
-    private boolean tempBuild;
 
     public JavadocManager(
             PigConfiguration pigConfiguration,
@@ -87,8 +87,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             Deliverables deliverables,
             Map<String, PncBuild> builds) {
         super(pigConfiguration, releasePath, deliverables, builds);
-        this.tempBuild = PigProperties.get().isTemporary();
-        this.generationData = pigConfiguration.getFlow().getJavadocGeneration();
+        tempBuild = PigContext.get().isTempBuild();
+        generationData = pigConfiguration.getFlow().getJavadocGeneration();
     }
 
     public void prepare() {
