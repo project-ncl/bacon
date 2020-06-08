@@ -17,8 +17,8 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import ch.qos.logback.classic.Level;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
@@ -27,10 +27,10 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
-import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.Constant;
-import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.client.ClientException;
 
 /**
@@ -206,7 +206,7 @@ public class AbstractCommand implements Command {
         } catch (FatalException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Something wrong happened: {}", e.getMessage());
+            log.error("Something wrong happened: ", e); // TODO rollback to print message only?
             log.debug("Stacktrace", e);
             throw new FatalException();
             // Aesh doesnt take care of exit codes, thrown FatalException will be caught in App class and app will exit

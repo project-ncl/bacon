@@ -21,7 +21,7 @@ package org.jboss.pnc.bacon.pig.impl.documents;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
 import java.util.Collection;
@@ -34,9 +34,10 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DataRoot {
-    private Config config;
+    private PigConfiguration pigConfiguration;
     private Deliverables deliverables;
     private String duplicates;
     private String repositoryContents;
     private Collection<PncBuild> builds;
+    private String pncUrl;
 }

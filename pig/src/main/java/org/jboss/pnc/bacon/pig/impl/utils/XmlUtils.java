@@ -18,8 +18,6 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -56,11 +54,7 @@ import java.util.Set;
  *         Date: 7/11/17
  */
 public class XmlUtils {
-    private static final Logger log = LoggerFactory.getLogger(XmlUtils.class);
 
-    /*
-     * TODO: WARNING! Some of the code here is COPIED from wildfly-swarm-repository. Move it out to a separate location!
-     */
     public static XmlToString extract(File xmlFile, String xpathLocator) {
         try {
             NodeList nodeList = extractNodes(xmlFile, xpathLocator);
@@ -200,7 +194,7 @@ public class XmlUtils {
 
         public String getContent() {
             if (nodeList.getLength() != 1) {
-                throw new RuntimeException("Expecting 1 element, found " + nodeList.getLength());
+                return null;
             }
             Node item = nodeList.item(0);
             return item.getTextContent();

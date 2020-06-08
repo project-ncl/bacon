@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -60,13 +61,12 @@ public class BuildConfig {
     private String name;
     private String project;
     private String buildScript;
-    private String buildType;
-
     private String scmUrl;
     private String externalScmUrl;
     private String scmRevision;
     private String description;
     private String environmentId;
+    private List<String> dependencies = new ArrayList<>();
 
     /**
      * build pod memory in GB
@@ -76,11 +76,11 @@ public class BuildConfig {
 
     private Set<String> customPmeParameters = new TreeSet<>();
     private Set<String> extraRepositories = new TreeSet<>();
+    private Boolean branchModified;
+    private String buildType;
     private String executionRoot;
 
-    private List<String> dependencies = new ArrayList<>();
     private Set<String> alignmentParameters = new TreeSet<>();
-    private Boolean branchModified;
 
     /**
      * Set the defaults of buildConfig if not explicitly specified
@@ -89,6 +89,7 @@ public class BuildConfig {
      *
      * @param defaults
      */
+    @SuppressWarnings("rawtypes")
     public void setDefaults(BuildConfig defaults) {
         try {
             for (Field f : BuildConfig.class.getDeclaredFields()) {
@@ -122,23 +123,10 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public boolean isTheSameAs(BuildConfiguration old) {
-        return old != null && StringUtils.equals(name, old.getName())
-                && StringUtils.equals(project, old.getProject().getName())
-                && StringUtils.equals(buildScript, old.getBuildScript())
-                && StringUtils.equals(buildType, old.getBuildType().toString())
-                && StringUtils.equals(scmRevision, old.getScmRevision())
-                && environmentId.equals(old.getEnvironment().getId())
-                && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
-                && !isBranchModified(old);
-    }
-
-    private Set<String> getAlignmentParameters(BuildConfiguration old) {
-        String parametersAsString = old.getParameters().get("ALIGNMENT_PARAMETERS");
-        return Arrays.stream(parametersAsString.split(",")).collect(Collectors.toSet());
-    }
-
-    private synchronized boolean isBranchModified(BuildConfiguration oldVersion) {
+    public synchronized boolean isBranchModified(BuildConfiguration oldVersion, boolean skipBranchCheck) {
+        if (skipBranchCheck) {
+            return false;
+        }
         if (branchModified == null) {
             branchModified = GitRepoInspector.isModifiedBranch(
                     oldVersion.getId(),
@@ -146,6 +134,23 @@ public class BuildConfig {
                     getScmRevision());
         }
         return branchModified;
+    }
+
+    @JsonIgnore
+    public boolean isTheSameAs(BuildConfiguration old, boolean skipBranchCheck) {
+        return old != null && StringUtils.equals(name, old.getName())
+                && StringUtils.equals(project, old.getProject().getName())
+                && StringUtils.equals(buildScript, old.getBuildScript())
+                && StringUtils.equals(buildType, old.getBuildType().toString())
+                && StringUtils.equals(scmRevision, old.getScmRevision())
+                && environmentId.equals(old.getEnvironment().getId())
+                && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
+                && !isBranchModified(old, skipBranchCheck);
+    }
+
+    private Set<String> getAlignmentParameters(BuildConfiguration old) {
+        String parametersAsString = old.getParameters().get("ALIGNMENT_PARAMETERS");
+        return Arrays.stream(parametersAsString.split(",")).collect(Collectors.toSet());
     }
 
     private boolean urlsEqual(SCMRepository repo) {
@@ -162,13 +167,13 @@ public class BuildConfig {
         }
         Map<String, String> result = new HashMap<>();
 
-        String oldForceValue = oldConfig == null ? "" : oldConfig.getParameters().getOrDefault(BUILD_FORCE, "");
-        String forceValue = forceRebuild ? randomAlphabetic(5) : oldForceValue;
+        Optional<String> oldForceValue = oldConfig == null ? Optional.empty()
+                : Optional.ofNullable(oldConfig.getParameters().get(BUILD_FORCE));
+        Optional<String> forceValue = forceRebuild ? Optional.of(randomAlphabetic(5)) : oldForceValue;
+        forceValue.ifPresent(val -> result.put(BUILD_FORCE, val));
 
         String dependencyExclusions = String.join(" ", alignmentParameters);
-
         result.put("ALIGNMENT_PARAMETERS", dependencyExclusions);
-        result.put(BUILD_FORCE, forceValue);
 
         if (buildPodMemory != null) {
             result.put("BUILDER_POD_MEMORY", buildPodMemory.toString());
@@ -225,6 +230,9 @@ public class BuildConfig {
     }
 
     private boolean areSameRepoUrls(String scmUrl1, String scmUrl2) {
+        if (scmUrl1 == null ^ scmUrl2 == null) {
+            throw new RuntimeException("trying to compare null and non-null scm url: " + scmUrl1 + ", " + scmUrl2);
+        }
         String normalizedUrl1 = normalize(scmUrl1);
         String normalizedUrl2 = normalize(scmUrl2);
         return normalizedUrl1.equals(normalizedUrl2);

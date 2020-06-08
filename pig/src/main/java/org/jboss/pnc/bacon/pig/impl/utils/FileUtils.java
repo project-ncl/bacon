@@ -52,7 +52,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
@@ -61,6 +60,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.nio.file.Files.createTempDirectory;
@@ -77,19 +78,7 @@ public class FileUtils {
 
     public static File mkTempDir(String prefix) {
         try {
-            File temporaryDirectory;
-            switch (OSCheck.getOperatingSystemType()) {
-                case MacOS:
-                    // TODO: remove when we figure out what the problem with mounting directories outside user home is
-                    File tmpSpace = Paths.get("target", "tmpSpace").toFile();
-                    tmpSpace.mkdirs();
-                    temporaryDirectory = createTempDirectory(tmpSpace.toPath(), prefix).toFile();
-                    break;
-                default:
-                    temporaryDirectory = createTempDirectory(prefix).toFile();
-                    break;
-            }
-            return temporaryDirectory;
+            return createTempDirectory(prefix).toFile();
         } catch (IOException e) {
             throw new RuntimeException("Unable to create temporary directory", e);
         }
@@ -262,10 +251,35 @@ public class FileUtils {
         return entries;
     }
 
+    public static Collection<String> listZipContents(final File input) {
+        log.debug("listing contents of {}", input);
+        try (final InputStream is = Files.newInputStream(input.toPath());
+                final ArchiveInputStream in = new ArchiveStreamFactory()
+                        .createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
+            List<String> result = new ArrayList<>();
+            ArchiveEntry entry;
+            while ((entry = in.getNextEntry()) != null) {
+                result.add(entry.getName());
+            }
+            return result;
+        } catch (IOException | ArchiveException e) {
+            throw new RuntimeException("Listing contents of " + input + " failed", e);
+        }
+    }
+
     public static Collection<String> unzip(final File input, final File directory) {
+        return unzip(input, directory, null);
+    }
+
+    public static Collection<String> unzip(final File input, final File directory, String extraction) {
         log.debug("unzip -o {} -d {}", input, directory);
 
         final List<String> entries = new ArrayList<>();
+
+        Pattern extractionPattern = null;
+        if (extraction != null && !extraction.isEmpty()) {
+            extractionPattern = Pattern.compile(extraction);
+        }
 
         try (final InputStream is = Files.newInputStream(input.toPath());
                 final ArchiveInputStream in = new ArchiveStreamFactory()
@@ -280,9 +294,19 @@ public class FileUtils {
             while ((entry = (ZipArchiveEntry) in.getNextEntry()) != null) {
                 final String entryName = entry.getName();
 
-                entries.add(entryName);
+                // If extraction is specified, only unzip the specified file or directory.
+                // Directories must end in '/' otherwise just the empty directory will be created.
+                if (extractionPattern != null) {
+                    Matcher matcher = extractionPattern.matcher(entryName);
+                    if (!matcher.find()) {
+                        // If the entry doesn't match the extraction, try the next.
+                        continue;
+                    }
+                }
 
-                final Path path = dir.resolve(entry.getName());
+                final Path path = dir.resolve(entryName);
+
+                entries.add(entryName);
 
                 log.debug("unzip: {}", path);
 
@@ -424,19 +448,24 @@ public class FileUtils {
         }
     }
 
-    public static Collection<String> listZipContents(final File input) {
-        log.debug("listing contents of {}", input);
-        try (final InputStream is = Files.newInputStream(input.toPath());
-                final ArchiveInputStream in = new ArchiveStreamFactory()
-                        .createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
-            List<String> result = new ArrayList<>();
-            ArchiveEntry entry;
-            while ((entry = in.getNextEntry()) != null) {
-                result.add(entry.getName());
-            }
-            return result;
-        } catch (IOException | ArchiveException e) {
-            throw new RuntimeException("Listing contents of " + input + " failed", e);
+    /**
+     * Moves the contents of srcDir into destDir. Equivalent of calling "mv srcDir/* destDir" in a shell.
+     * 
+     * @param srcDir
+     * @param destDir
+     */
+    public static boolean moveDirectoryContents(File srcDir, File destDir) throws IOException {
+
+        if (!srcDir.isDirectory() || !destDir.isDirectory()) {
+            return false;
         }
+        Files.list(srcDir.toPath()).forEach(path -> {
+            try {
+                Files.move(path, new File(destDir, path.toFile().getName()).toPath());
+            } catch (IOException ex) {
+                throw new RuntimeException("Unable to move file " + path, ex);
+            }
+        });
+        return true;
     }
 }

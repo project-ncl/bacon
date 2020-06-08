@@ -1,29 +1,6 @@
 package org.jboss.pnc.bacon.test.pig;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.jboss.pnc.bacon.test.AbstractTest;
-import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
-import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG;
-import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG_DEPENDENCIES;
-import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG;
-import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG_BUILD_CONFIGS;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_MILESTONE;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSIONS;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION_MILESTONES;
-import static org.jboss.pnc.bacon.test.Endpoints.PROJECT;
-import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY;
-import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
 import org.jboss.pnc.bacon.test.ExecutionResult;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Environment;
@@ -40,6 +17,29 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
+import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG;
+import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG_DEPENDENCIES;
+import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG;
+import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG_BUILD_CONFIGS;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_MILESTONE;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSIONS;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION_MILESTONES;
+import static org.jboss.pnc.bacon.test.Endpoints.PROJECT;
+import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY;
+import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
 
 /**
  *
@@ -64,9 +64,9 @@ public class PigTest extends AbstractTest {
 
     @Test
     @Order(1)
-    public void shouldCreateProduct() throws JsonProcessingException, IOException {
-        final String configFile = CONFIG_LOCATION + "/pig.yaml";
-        replaceSuffixInConfigFile(configFile);
+    public void shouldCreateProduct() throws IOException {
+        final Path configFile = CONFIG_LOCATION;
+        replaceSuffixInConfigFile(configFile.resolve("build-config.yaml"));
 
         final Product product = Product.builder()
                 .id(UNIVERSAL_ID)
@@ -139,12 +139,11 @@ public class PigTest extends AbstractTest {
                 .post(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID))
                 .then()
                 .getEntity(GROUP_CONFIG, groupConfigWithBuildConfig);
-        ExecutionResult output = executeAndGetResult("pig", "configure", "-c", configFile);
+        ExecutionResult output = executeAndGetResult("pig", "configure", configFile.toString());
         assertThat(output.getOutput()).contains("name: \"Product Foobar " + SUFFIX + "\"");
     }
 
-    private void replaceSuffixInConfigFile(String configFile) throws IOException {
-        final Path configPath = Paths.get(configFile);
+    private void replaceSuffixInConfigFile(Path configPath) throws IOException {
         List<String> fileContent = Files.lines(configPath)
                 .map(l -> l.contains("#!suffix=") ? "#!suffix=" + SUFFIX : l)
                 .collect(Collectors.toList());

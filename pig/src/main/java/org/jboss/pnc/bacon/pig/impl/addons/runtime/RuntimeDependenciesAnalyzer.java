@@ -19,7 +19,7 @@ package org.jboss.pnc.bacon.pig.impl.addons.runtime;
 
 import org.apache.commons.io.IOUtils;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.slf4j.Logger;
@@ -42,11 +42,11 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
     private static final Logger log = LoggerFactory.getLogger(RuntimeDependenciesAnalyzer.class);
 
     public RuntimeDependenciesAnalyzer(
-            Config config,
+            PigConfiguration pigConfiguration,
             Map<String, PncBuild> builds,
             String releasePath,
             String extrasPath) {
-        super(config, builds, releasePath, extrasPath);
+        super(pigConfiguration, builds, releasePath, extrasPath);
     }
 
     @Override
@@ -59,9 +59,9 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
         log.info("Running RuntimeDependenciesAnalyzer");
         File workDir = FileUtils.mkTempDir("runtimeDepAnalyzer");
 
-        String buildName = (String) getConfig().get("downloadFrom");
-        String regex = (String) getConfig().get("matching");
-        String referenceBuildName = (String) getConfig().get("referenceBuild");
+        String buildName = (String) getPigConfiguration().get("downloadFrom");
+        String regex = (String) getPigConfiguration().get("matching");
+        String referenceBuildName = (String) getPigConfiguration().get("referenceBuild");
         File dependencyListPath = new File(workDir, "runtime-dependency-list.txt");
 
         builds.get(buildName).downloadArtifact(regex, dependencyListPath);
@@ -82,8 +82,10 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
 
         Path targetPath = Paths.get(extrasPath, "community-dependencies.csv");
 
-        CommunityDepAnalyzer analyzer = new CommunityDepAnalyzer(communityDependencies, buildLog);
-        analyzer.skipDa(false); // TODO:
+        CommunityDepAnalyzer analyzer = new CommunityDepAnalyzer(
+                communityDependencies,
+                new ThorntailDepAnalyzer(buildLog));
+        analyzer.skipDa(false);
         analyzer.generateAnalysis(targetPath.toAbsolutePath().toString());
         log.info("Done");
     }

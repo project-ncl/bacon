@@ -19,9 +19,17 @@ package org.jboss.pnc.bacon.pig.impl.repo;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.repository.metadata.Metadata;
+import org.apache.maven.artifact.repository.metadata.Versioning;
+import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.util.ArtifactPathInfo;
+import org.commonjava.maven.atlas.ident.version.SingleVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,12 +37,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +63,75 @@ import static java.util.Comparator.comparingInt;
  */
 public class RepositoryUtils {
     public static final Logger log = LoggerFactory.getLogger(RepositoryUtils.class);
+
+    public static void generateMavenMetadata(File mavenRepositoryDirectory) {
+        log.debug("Generating maven-metadata.xml files");
+        Set<String> pomPaths = new HashSet<>();
+        RepositoryUtils.searchForPomPaths(mavenRepositoryDirectory, mavenRepositoryDirectory, pomPaths);
+        RepositoryUtils.generateMetadata(mavenRepositoryDirectory, pomPaths);
+    }
+
+    private static void searchForPomPaths(File root, File mavenRepositoryDirectory, Set<String> pomPaths) {
+        if (root.isDirectory()) {
+            for (File file : root.listFiles()) {
+                searchForPomPaths(file, mavenRepositoryDirectory, pomPaths);
+            }
+        } else if (root.isFile() && root.getName().endsWith(".pom")) {
+            pomPaths.add(root.getAbsolutePath().substring(mavenRepositoryDirectory.getAbsolutePath().length() + 1));
+        }
+    }
+
+    /*
+     * This code was taken from the offliner tool see
+     * https://github.com/release-engineering/offliner/blob/master/src/main/java/com/redhat/red/offliner/Main.java#L687
+     * discussed with John Casey if it would be possible to make this public and a deployed shared lib, there is also
+     * functionality in offliner for creating the md5 and sha1 files which we could use as well
+     */
+    private static void generateMetadata(File mavenRepositoryDirectory, Set<String> pomPaths) {
+        Map<ProjectRef, List<SingleVersion>> metas = new HashMap<>();
+        for (String path : pomPaths) {
+            ArtifactPathInfo artifactPathInfo = ArtifactPathInfo.parse(path);
+            ProjectVersionRef gav = artifactPathInfo.getProjectId();
+            List<SingleVersion> singleVersions = new ArrayList<SingleVersion>();
+            if (!metas.isEmpty() && metas.containsKey(gav.asProjectRef())) {
+                singleVersions = metas.get(gav.asProjectRef());
+            }
+            singleVersions.add((SingleVersion) gav.getVersionSpec());
+            metas.put(gav.asProjectRef(), singleVersions);
+        }
+        for (ProjectRef ga : metas.keySet()) {
+            List<SingleVersion> singleVersions = metas.get(ga);
+            Collections.sort(singleVersions);
+
+            Metadata master = new Metadata();
+            master.setGroupId(ga.getGroupId());
+            master.setArtifactId(ga.getArtifactId());
+            Versioning versioning = new Versioning();
+            for (SingleVersion v : singleVersions) {
+                versioning.addVersion(v.renderStandard());
+            }
+            String latest = singleVersions.get(singleVersions.size() - 1).renderStandard();
+            versioning.setLatest(latest);
+            versioning.setRelease(latest);
+            master.setVersioning(versioning);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            File metadataFile = Paths
+                    .get(
+                            mavenRepositoryDirectory.getAbsolutePath(),
+                            ga.getGroupId().replace('.', File.separatorChar),
+                            ga.getArtifactId(),
+                            "maven-metadata.xml")
+                    .toFile();
+            try {
+                new MetadataXpp3Writer().write(baos, master);
+                FileUtils.writeByteArrayToFile(metadataFile, baos.toByteArray());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to generate maven-metadata file: %s" + metadataFile, e);
+            }
+        }
+        log.debug("Finished generating maven-metadata.xml files");
+    }
 
     public static void addCheckSums(File mavenRepositoryDirectory) {
         log.debug("Generating missing checksums");

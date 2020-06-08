@@ -1,0 +1,10 @@
+{
+  "archive-extensions" : [ "dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml" ],
+  "archive-types" : [ "jar", "xml", "pom", "so", "dll", "dylib" ],
+  "checksum-only" : false,
+  "checksum-type" : "md5",
+  "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
+  "koji-hub-url" : "${KOJI_URL}/brewhub",
+  "koji-web-url" : "${KOJI_URL}/brew"
+}
+

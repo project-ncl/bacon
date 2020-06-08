@@ -18,11 +18,13 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
 import lombok.Getter;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
+import org.jboss.pnc.bacon.pig.impl.license.LicenseGenerator;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -35,9 +37,16 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -54,14 +63,14 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private final Path configurationDirectory;
 
     public RepoManager(
-            Config config,
+            PigConfiguration pigConfiguration,
             String releasePath,
             Deliverables deliverables,
             Map<String, PncBuild> builds,
             Path configurationDirectory,
             boolean removeGeneratedM2Dups) {
-        super(config, releasePath, deliverables, builds);
-        generationData = config.getFlow().getRepositoryGeneration();
+        super(pigConfiguration, releasePath, deliverables, builds);
+        generationData = pigConfiguration.getFlow().getRepositoryGeneration();
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
         this.configurationDirectory = configurationDirectory;
         buildInfoCollector = new BuildInfoCollector();
@@ -73,8 +82,15 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return downloadAndRepackage();
             case GENERATE:
                 return generate();
+            // PACK_ALL is deprecated, replaced with BUILD_CONFIGS, remove in next major version
             case PACK_ALL:
                 return packAllBuiltAndDependencies();
+            case BUILD_GROUP:
+                return buildGroup();
+            case MILESTONE:
+                return milestone();
+            case BUILD_CONFIGS:
+                return buildConfigs();
             case IGNORE:
                 log.info("Ignoring repository zip generation");
                 return null;
@@ -83,23 +99,112 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
-    private RepositoryData packAllBuiltAndDependencies() {
-        PncBuild build = getBuild(generationData.getSourceBuild());
-
-        buildInfoCollector.addDependencies(build);
-        List<ArtifactWrapper> artifactsToPack = build.getBuiltArtifacts();
+    void getRedhatArtifacts(List<ArtifactWrapper> artifactsToPack, PncBuild build) {
+        log.info(" - getting all artifacts and dependencies for [" + build.getName() + "]");
+        buildInfoCollector.addDependencies(build, "identifier=like=%redhat%");
+        artifactsToPack.addAll(build.getBuiltArtifacts());
         artifactsToPack.addAll(build.getDependencyArtifacts());
+    }
 
+    private File createMavenGenerationDir() {
+        File sourceDir = new File(workDir, "maven-repository");
+        sourceDir.mkdirs();
+        return sourceDir;
+    }
+
+    private void filterAndDownload(List<ArtifactWrapper> artifactsToPack, File sourceDir) {
         artifactsToPack.removeIf(
                 artifact -> !artifact.getGapv().contains("redhat-")
                         && !artifact.getGapv().contains("eap-runtime-artifacts"));
+        artifactsToPack.removeIf(artifact -> isArtifactExcluded(artifact.getGapv()));
+        List<GAV> originalListToPack = artifactsToPack.stream()
+                .map(ArtifactWrapper::toGAV)
+                .collect(Collectors.toList());
 
-        File sourceDir = new File(workDir, "maven-repository");
-        sourceDir.mkdirs();
+        Set<GAV> gavsToPack = new TreeSet<>(GAV.gapvcComparator);
+        gavsToPack.addAll(originalListToPack);
+        originalListToPack.stream()
+                .filter(GAV::isNormalJar)
+                .filter(g -> areSourcesMissing(gavsToPack, g))
+                .map(GAV::toSourcesJar)
+                .forEach(gavsToPack::add);
 
-        artifactsToPack
-                .forEach(a -> ExternalArtifactDownloader.downloadExternalArtifact(a.toGAV(), sourceDir.toPath()));
+        originalListToPack.stream()
+                .filter(GAV::isNormalJar)
+                .filter(g -> isPomMissing(gavsToPack, g))
+                .map(GAV::toPom)
+                .forEach(gavsToPack::add);
+
+        if (pigConfiguration.getFlow().getRepositoryGeneration().isIncludeJavadoc()) {
+            originalListToPack.stream()
+                    .filter(GAV::isNormalJar)
+                    .filter(g -> areJavadocsMissing(gavsToPack, g))
+                    .map(GAV::toJavadocJar)
+                    .forEach(gavsToPack::add);
+        }
+        gavsToPack.forEach(a -> ExternalArtifactDownloader.downloadExternalArtifact(a, sourceDir.toPath(), true));
+    }
+
+    @Deprecated
+    private RepositoryData packAllBuiltAndDependencies() {
+        log.warn("Repo generation stratagy 'PACK_ALL' is deprecated please use BUILD_CONFIGS");
+        PncBuild build = getBuild(generationData.getSourceBuild());
+        List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
+        getRedhatArtifacts(artifactsToPack, build);
+        File sourceDir = createMavenGenerationDir();
+        filterAndDownload(artifactsToPack, sourceDir);
         return repackage(sourceDir);
+    }
+
+    private RepositoryData buildGroup() {
+        log.info("Generating maven repo for build group [" + pigConfiguration.getGroup() + "]");
+        List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
+        for (PncBuild build : builds.values()) {
+            getRedhatArtifacts(artifactsToPack, build);
+        }
+        File sourceDir = createMavenGenerationDir();
+        filterAndDownload(artifactsToPack, sourceDir);
+        return repackage(sourceDir);
+    }
+
+    private RepositoryData buildConfigs() {
+        log.info("Generating maven repo for named build configs");
+        List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
+        for (String buildConfigName : generationData.getSourceBuilds()) {
+            PncBuild build = getBuild(buildConfigName);
+            getRedhatArtifacts(artifactsToPack, build);
+        }
+        File sourceDir = createMavenGenerationDir();
+        filterAndDownload(artifactsToPack, sourceDir);
+        return repackage(sourceDir);
+    }
+
+    private RepositoryData milestone() {
+        log.info("Generating maven repo for milestone [" + pigConfiguration.getMilestone() + "]");
+        // TODO
+        return null;
+    }
+
+    private boolean areSourcesMissing(Set<GAV> list, GAV gav) {
+        return list.stream().noneMatch(a -> a.equals(gav) && "sources".equals(a.getClassifier()));
+    }
+
+    private boolean isPomMissing(Set<GAV> list, GAV gav) {
+        return list.stream().noneMatch(a -> a.equals(gav) && "pom".equals(a.getPackaging()));
+    }
+
+    private boolean areJavadocsMissing(Set<GAV> list, GAV gav) {
+        return list.stream().noneMatch(a -> a.equals(gav) && "javadoc".equals(a.getClassifier()));
+    }
+
+    private boolean isArtifactExcluded(String artifact) {
+        List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
+        for (String exclusion : excludeArtifacts) {
+            if (Pattern.matches(exclusion, artifact)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected RepositoryData downloadAndRepackage() {
@@ -109,6 +214,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private RepositoryData repackage(File sourceTopLevelDirectory) {
+        log.info("repackaging the repository");
         File targetTopLevelDirectory = new File(workDir, getTargetTopLevelDirectoryName());
 
         Path targetZipPath = getTargetZipPath();
@@ -122,11 +228,31 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
         RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
 
-        RepositoryUtils.addCheckSums(targetRepoContentsDir);
+        addMissingSources();
 
+        RepositoryUtils.addCheckSums(targetRepoContentsDir);
+        if (generationData.isIncludeMavenMetadata()) {
+            RepositoryUtils.generateMavenMetadata(targetRepoContentsDir);
+        }
         zip(targetTopLevelDirectory, targetZipPath);
 
         return result(targetTopLevelDirectory, targetZipPath);
+    }
+
+    private void addMissingSources() {
+        Collection<GAV> gavs = RepoDescriptor.listGavs(targetRepoContentsDir);
+
+        for (GAV gav : gavs) {
+            GAV sourceGav = gav.toSourcesJar();
+            GAV jarGav = gav.toJar();
+
+            File jarFile = ExternalArtifactDownloader.targetPath(jarGav, targetRepoContentsDir.toPath());
+            File sourceFile = ExternalArtifactDownloader.targetPath(sourceGav, targetRepoContentsDir.toPath());
+
+            if (jarFile.exists() && !sourceFile.exists()) {
+                ExternalArtifactDownloader.downloadExternalArtifact(sourceGav, sourceFile, true);
+            }
+        }
     }
 
     private File download() {
@@ -153,7 +279,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private void downloadExternalArtifact(GAV gav) {
-        ExternalArtifactDownloader.downloadExternalArtifact(gav, targetRepoContentsDir.toPath());
+        ExternalArtifactDownloader.downloadExternalArtifact(gav, targetRepoContentsDir.toPath(), false);
     }
 
     private void downloadArtifact(ArtifactWrapper artifact) {
@@ -165,20 +291,46 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     public RepositoryData generate() {
         log.info("generating maven repository");
         PncBuild build = getBuild(generationData.getSourceBuild());
-        RepoBuilder repoBuilder = new RepoBuilder(config, configurationDirectory, removeGeneratedM2Dups);
         File bomDirectory = FileUtils.mkTempDir("repo-from-bom-generation");
+
+        RepoBuilder repoBuilder = new RepoBuilder(
+                pigConfiguration,
+                generationData.getAdditionalRepo(),
+                configurationDirectory,
+                builds,
+                removeGeneratedM2Dups);
         File bomFile = new File(bomDirectory, "bom.pom");
         build.downloadArtifact(generationData.getSourceArtifact(), bomFile);
-        File topLevelDir = repoBuilder.build(bomFile);
-        return repackage(new File(topLevelDir, "maven-repository"));
+
+        String topLevelDirectoryName = pigConfiguration.getTopLevelDirectoryPrefix() + "maven-repository";
+
+        File repoWorkDir = FileUtils.mkTempDir("repository");
+        File repoParentDir = new File(repoWorkDir, topLevelDirectoryName);
+        List<Map<String, String>> stages = generationData.getStages();
+        if (stages != null) {
+            stages.forEach(stage -> repoBuilder.build(bomFile, repoParentDir, predicate(stage)));
+        } else {
+            repoBuilder.build(bomFile, repoParentDir, gav -> true);
+        }
+
+        return repackage(new File(repoParentDir, "maven-repository"));
+    }
+
+    private Predicate<GAV> predicate(Map<String, String> stage) {
+        String matching = stage.getOrDefault("matching", ".*");
+        String notMatching = stage.getOrDefault("not-matching", "^$");
+        return gav -> {
+            String ga = String.format("%s:%s", gav.getGroupId(), gav.getArtifactId());
+            return ga.matches(matching) && !ga.matches(notMatching);
+        };
     }
 
     protected Path getTargetZipPath() {
-        return Paths.get(releasePath + deliverables.getRepositoryZipName());
+        return Paths.get(releasePath, deliverables.getRepositoryZipName());
     }
 
     protected String getTargetTopLevelDirectoryName() {
-        return config.getTopLevelDirectoryPrefix() + "maven-repository";
+        return pigConfiguration.getTopLevelDirectoryPrefix() + "maven-repository";
     }
 
     private RepositoryData result(File targetTopLevelDirectory, Path targetZipPath) {
@@ -187,6 +339,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         result.setFiles(RepoDescriptor.listFiles(contentsDirectory));
         result.setGavs(RepoDescriptor.listGavs(contentsDirectory));
         result.setRepositoryPath(targetZipPath);
+        log.info("create repository: {}", targetZipPath);
         return result;
     }
 
@@ -199,7 +352,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private void addExtraFiles(File m2Repo) {
         log.debug("Adding repository documents");
         Properties properties = new Properties();
-        properties.put("PRODUCT_NAME", config.getProduct().getName());
+        properties.put("PRODUCT_NAME", pigConfiguration.getProduct().getName());
 
         ResourceUtils.copyResourceWithFiltering(
                 "/repository-example-settings.xml",
@@ -213,5 +366,12 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 m2Repo,
                 properties,
                 configurationDirectory);
+
+        if (generationData.isIncludeLicenses()) {
+            LicenseGenerator.generateLicenses(
+                    RepoDescriptor.listGavs(new File(m2Repo, RepoDescriptor.MAVEN_REPOSITORY)),
+                    new File(m2Repo, "licenses"),
+                    PigContext.get().isTempBuild());
+        }
     }
 }

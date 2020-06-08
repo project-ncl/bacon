@@ -19,7 +19,7 @@ package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.bacon.pig.impl.config.Config;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
 import org.jboss.pnc.bacon.pig.impl.utils.CollectionUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
@@ -84,9 +84,9 @@ public class PncEntitiesImporter {
     private ProductMilestone milestone;
     private GroupConfiguration buildGroup;
     private List<BuildConfigData> configs;
-    private Config config = PigContext.get().getConfig();
+    private final PigConfiguration pigConfiguration = PigContext.get().getPigConfiguration();
 
-    private PncConfigurator pncConfigurator = new PncConfigurator();
+    private final PncConfigurator pncConfigurator = new PncConfigurator();
 
     public PncEntitiesImporter() {
         buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
@@ -97,15 +97,17 @@ public class PncEntitiesImporter {
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
     }
 
-    public ImportResult performImport() {
+    public ImportResult performImport(boolean skipBranchCheck) {
         product = getOrGenerateProduct();
         version = getOrGenerateVersion();
-        milestone = pncConfigurator
-                .getOrGenerateMilestone(version, pncMilestoneString(), config.getProduct().getIssueTrackerUrl());
+        milestone = pncConfigurator.getOrGenerateMilestone(
+                version,
+                pncMilestoneString(),
+                pigConfiguration.getProduct().getIssueTrackerUrl());
         pncConfigurator.markMilestoneCurrent(version, milestone);
         buildGroup = getOrGenerateBuildGroup();
 
-        configs = getAddOrUpdateBuildConfigs();
+        configs = getAddOrUpdateBuildConfigs(skipBranchCheck);
         log.debug("Setting up build dependencies");
         setUpBuildDependencies();
 
@@ -219,11 +221,11 @@ public class PncEntitiesImporter {
         }
     }
 
-    private List<BuildConfigData> getAddOrUpdateBuildConfigs() {
+    private List<BuildConfigData> getAddOrUpdateBuildConfigs(boolean skipBranchCheck) {
         log.info("Adding/updating build configurations");
         List<BuildConfiguration> currentConfigs = getCurrentBuildConfigs();
-        dropConfigsFromInvalidVersion(currentConfigs, config.getBuilds());
-        return updateOrCreate(currentConfigs, config.getBuilds());
+        dropConfigsFromInvalidVersion(currentConfigs, pigConfiguration.getBuilds());
+        return updateOrCreate(currentConfigs, pigConfiguration.getBuilds(), skipBranchCheck);
     }
 
     private Optional<BuildConfiguration> getBuildConfigFromName(String name) {
@@ -242,14 +244,17 @@ public class PncEntitiesImporter {
         }
     }
 
-    private List<BuildConfigData> updateOrCreate(List<BuildConfiguration> currentConfigs, List<BuildConfig> builds) {
+    private List<BuildConfigData> updateOrCreate(
+            List<BuildConfiguration> currentConfigs,
+            List<BuildConfig> builds,
+            boolean skipBranchCheck) {
         List<BuildConfigData> buildList = new ArrayList<>();
         for (BuildConfig bc : builds) {
             BuildConfigData data = new BuildConfigData(bc);
             for (BuildConfiguration config : currentConfigs) {
                 if (config.getName().equals(bc.getName())) {
                     data.setOldConfig(config);
-                    if (data.shouldBeUpdated()) {
+                    if (data.shouldBeUpdated(skipBranchCheck)) {
                         updateBuildConfig(data, config);
                     }
                 }
@@ -260,7 +265,7 @@ public class PncEntitiesImporter {
             if (matchedBuildConfig.isPresent()) {
                 log.debug("Found matching build config for {}", bc.getName());
                 data.setOldConfig(matchedBuildConfig.get());
-                if (data.shouldBeUpdated()) {
+                if (data.shouldBeUpdated(skipBranchCheck)) {
                     updateBuildConfig(data, matchedBuildConfig.get());
                 }
                 data.setModified(true);
@@ -439,8 +444,9 @@ public class PncEntitiesImporter {
 
     private Optional<GroupConfiguration> getBuildGroup() {
         try {
-            return toStream(groupConfigClient.getAll(empty(), Optional.of("name=='" + config.getGroup() + "'")))
-                    .findAny();
+            return toStream(
+                    groupConfigClient.getAll(empty(), Optional.of("name=='" + pigConfiguration.getGroup() + "'")))
+                            .findAny();
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to check if build group exists");
         }
@@ -455,7 +461,7 @@ public class PncEntitiesImporter {
     }
 
     private Optional<Product> getProduct() {
-        String productName = config.getProduct().getName();
+        String productName = pigConfiguration.getProduct().getName();
         try {
             return maybeSingle(productClient.getAll(empty(), findByNameQuery(productName)));
         } catch (RemoteResourceException e) {
@@ -466,7 +472,7 @@ public class PncEntitiesImporter {
     private ProductVersion generateVersion() {
         ProductVersion productVersion = ProductVersion.builder()
                 .product(product)
-                .version(config.getMajorMinor())
+                .version(pigConfiguration.getMajorMinor())
                 .build();
         try {
             return versionClient.createNew(productVersion);
@@ -476,7 +482,7 @@ public class PncEntitiesImporter {
     }
 
     private Product generateProduct() {
-        ProductConfig productConfig = config.getProduct();
+        ProductConfig productConfig = pigConfiguration.getProduct();
         Product product = Product.builder()
                 .name(productConfig.getName())
                 .abbreviation(productConfig.getAbbreviation())
@@ -489,25 +495,28 @@ public class PncEntitiesImporter {
     }
 
     private GroupConfiguration generateBuildGroup(ProductVersionRef version) {
-        GroupConfiguration group = GroupConfiguration.builder().productVersion(version).name(config.getGroup()).build();
+        GroupConfiguration group = GroupConfiguration.builder()
+                .productVersion(version)
+                .name(pigConfiguration.getGroup())
+                .build();
         try {
             return groupConfigClient.createNew(group);
         } catch (ClientException e) {
-            throw new RuntimeException("Failed to create group config: " + config.getGroup());
+            throw new RuntimeException("Failed to create group config: " + pigConfiguration.getGroup());
         }
     }
 
     public ImportResult readCurrentPncEntities() {
-        product = getProduct()
-                .orElseThrow(() -> new RuntimeException("Unable to product " + config.getProduct().getName()));
+        product = getProduct().orElseThrow(
+                () -> new RuntimeException("Unable to product " + pigConfiguration.getProduct().getName()));
         version = getVersion().orElseThrow(
                 () -> new RuntimeException(
-                        "Unable to find version " + config.getMajorMinor() + " for product " + product));
+                        "Unable to find version " + pigConfiguration.getMajorMinor() + " for product " + product));
         milestone = pncConfigurator.getExistingMilestone(version, pncMilestoneString())
                 .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // TODO
 
         buildGroup = getBuildGroup()
-                .orElseThrow(() -> new RuntimeException("Unable to find build group " + config.getGroup()));
+                .orElseThrow(() -> new RuntimeException("Unable to find build group " + pigConfiguration.getGroup()));
 
         configs = getBuildConfigs();
 
@@ -526,7 +535,7 @@ public class PncEntitiesImporter {
 
     private Optional<ProductVersion> getVersion() {
         try {
-            Optional<String> byName = query("version=='%s'", config.getMajorMinor());
+            Optional<String> byName = query("version=='%s'", pigConfiguration.getMajorMinor());
             return maybeSingle(productClient.getProductVersions(product.getId(), empty(), byName));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to query for version", e);
@@ -534,6 +543,7 @@ public class PncEntitiesImporter {
     }
 
     private String pncMilestoneString() {
-        return config.getMajorMinor() + "." + config.getMicro() + "." + config.getMilestone();
+        return pigConfiguration.getMajorMinor() + "." + pigConfiguration.getMicro() + "."
+                + pigConfiguration.getMilestone();
     }
 }

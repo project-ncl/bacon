@@ -34,6 +34,6 @@ public class JavadocGenerationData extends GenerationData<JavadocGenerationStrat
     private String scmRevision;
     private String generationProject;
     private String buildScript;
-    private Set<String> alignmentParameters = new TreeSet<>();
+    private Set<String> customPmeParameters = new TreeSet<>();
     private String importBom;
 }
