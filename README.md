@@ -95,11 +95,11 @@ The all-in-one phase that combines all the phases is:
 The `configure` phase pushes all the settings in the YAML file to PNC, and the `build` phase tells PNC to build everything.
 
 ```bash
-bacon pig <phase> -c ...
+bacon pig <phase> ...
 ```
 ## Configuration
 
-The application is configured via the `build-config.yaml` file. The file path is passed to the application with `-c` option.
+The application is configured via the `build-config.yaml` file. 
 
 A PiG `build-config.yaml` looks like this: https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml
 
@@ -109,14 +109,14 @@ TODO: add a command that allows users to specify variables via cli
 
 Usage:
 ```bash
-bacon pig configure -c <location of build-config.yaml>
+bacon pig configure <directrory containing build-config.yaml>
 ```
 
 ## build
 
 Usage:
 ```bash
-bacon pig configure -c <location of build-config.yaml>
+bacon pig configure <directrory containing build-config.yaml>
 ```
 
 You can specify if you want temporary builds or not with the `-t` flag.

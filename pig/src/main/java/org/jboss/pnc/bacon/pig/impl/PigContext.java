@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -109,8 +110,9 @@ public class PigContext {
         }
     }
 
-    public void loadConfig(String config) {
-        File configFile = new File(config);
+    public void loadConfig(String configDirStr) {
+        Path configDir = Paths.get(configDirStr);
+        File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
                 setPigConfiguration(PigConfiguration.load(configStream));
@@ -118,7 +120,8 @@ public class PigContext {
                 throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
             }
         } else {
-            throw new MisconfigurationException("The provided config file: " + config + " does not exist");
+            throw new MisconfigurationException(
+                    "The provided config file: " + configFile.getAbsolutePath() + " does not exist");
         }
     }
 

@@ -22,6 +22,7 @@ import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
@@ -56,21 +57,15 @@ public class Pig extends AbstractCommand {
     public static final String TEMP_BUILD_DEFAULT = "false";
     public static final String TEMP_BUILD = "tempBuild";
     public static final char TEMP_BUILD_SHORT = 't';
-    public static final String CONFIG_DESC = "Location of Pig configuration file";
-    public static final String CONFIG_DEFAULT = "build-config.yaml";
-    public static final char CONFIG_SHORT = 'c';
     public static final String REMOVE_M2_DUPLICATES_DESC = "If enabled, only the newest versions of each of the dependencies (groupId:artifactId) "
             + "are kept in the generated repository zip";
     public static final String REMOVE_M2_DUPLICATES = "removeGeneratedM2Dups";
     public static final String REMOVE_M2_DUPLICATES_DEFAULT = "false";
 
     public abstract class PigCommand<T> extends AbstractCommand {
-        @Option(
-                shortName = CONFIG_SHORT,
-                overrideRequired = true,
-                defaultValue = CONFIG_DEFAULT,
-                description = CONFIG_DESC)
-        String config;
+        @Argument(required = true, description = "Directory containing the Pig configuration file")
+        String configDir;
+
         @Option(
                 shortName = 'o',
                 overrideRequired = false,
@@ -83,7 +78,7 @@ public class Pig extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                PigContext.get().loadConfig(config);
+                PigContext.get().loadConfig(configDir);
                 ObjectHelper.print(jsonOutput, doExecute());
             });
         }
@@ -190,7 +185,7 @@ public class Pig extends AbstractCommand {
 
         @Override
         public String doExecute() {
-            PigContext.get().loadConfig(config);
+            PigContext.get().loadConfig(configDir);
             return PigFacade.run(
                     skipRepo,
                     skipPncUpdate,
