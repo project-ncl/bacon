@@ -42,6 +42,7 @@ import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.dto.requests.BuildConfigWithSCMRequest;
 import org.jboss.pnc.enums.BuildType;
 
 import java.util.Map;
@@ -53,8 +54,9 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 @GroupCommandDefinition(
         name = "build-config",
         description = "Build Config",
-        groupCommands = { BuildConfigCli.Create.class, BuildConfigCli.Get.class, BuildConfigCli.List.class,
-                BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class, BuildConfigCli.CreateRevision.class })
+        groupCommands = { BuildConfigCli.Create.class, BuildConfigCli.CreateWithSCM.class, BuildConfigCli.Get.class,
+                BuildConfigCli.List.class, BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class,
+                BuildConfigCli.CreateRevision.class })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
@@ -131,6 +133,88 @@ public class BuildConfigCli extends AbstractCommand {
                     .append("\t--scm-repository-id 176 --scm-revision master \\ \n")
                     .append("\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n")
                     .append("\t--build-type MVN buildconfigname");
+            return builder.toString();
+        }
+    }
+
+    @CommandDefinition(name = "create-with-scm", description = "Create BC with SCM")
+    public class CreateWithSCM extends AbstractCommand {
+
+        @Argument(required = true, description = "Name of build config")
+        private String buildConfigName;
+
+        @Option(name = "description", description = "Description of build config")
+        private String description;
+        @Option(required = true, name = "environment-id", description = "Environment ID of build config")
+        private String environmentId;
+        @Option(required = true, name = "project-id", description = "Project ID of build config")
+        private String projectId;
+        @Option(required = true, name = "build-script", description = "Build Script to build project")
+        private String buildScript;
+        @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE")
+        private Map<String, String> parameters;
+        @Option(name = "product-version-id", description = "Product Version ID")
+        private String productVersionId;
+        @Option(
+                name = "build-type",
+                description = "Build Type. Options are: MVN,GRADLE. Default: MVN",
+                defaultValue = "MVN")
+        private String buildType;
+
+        @Option(required = true, name = "scm-url", description = "SCM URL")
+        private String scmUrl;
+        @Option(required = true, name = "scm-revision", description = "SCM Revision")
+        private String scmRevision;
+
+        @Option(
+                name = "no-pre-build-sync",
+                description = "Disable the pre-build sync of external repo.",
+                hasValue = false)
+        private boolean noPreBuildSync = false;
+
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+                BuildConfiguration buildConfiguration = BuildConfiguration.builder()
+                        .name(buildConfigName)
+                        .description(description)
+                        .environment(Environment.builder().id(environmentId).build())
+                        .project((ProjectRef.refBuilder().id(projectId).build()))
+                        .scmRevision(scmRevision)
+                        .buildScript(buildScript)
+                        .buildType(BuildType.valueOf(buildType))
+                        .parameters(parameters)
+                        .build();
+
+                BuildConfigWithSCMRequest request = BuildConfigWithSCMRequest.builder()
+                        .scmUrl(scmUrl)
+                        .buildConfig(buildConfiguration)
+                        .preBuildSyncEnabled(!noPreBuildSync)
+                        .build();
+
+                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createWithSCM(request));
+            });
+        }
+
+        @Override
+        public String exampleText() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("$ bacon pnc build-config create-with-scm \\ \n")
+                    .append("\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n")
+                    .append("\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n")
+                    .append("\t--build-type MVN buildconfigname \\ \n")
+                    .append("\t--scm-url=http://github.com/project-ncl/pnc.git \\ \n")
+                    .append("\t--scm-revision=master")
+                    .append("\t--no-prebuild-sync");
             return builder.toString();
         }
     }
