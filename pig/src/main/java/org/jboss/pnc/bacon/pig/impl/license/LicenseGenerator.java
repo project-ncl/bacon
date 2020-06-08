@@ -98,7 +98,9 @@ public class LicenseGenerator {
         String licenseServiceUrl = pig.getLicenseServiceUrl();
         String licenseServiceProp = "";
         if (licenseServiceUrl != null) {
-            licenseServiceProp = String.format("licenseServiceUrl=%s", licenseServiceUrl);
+            licenseServiceProp = String.format(
+                    "licenseServiceUrl=http://%s/find-license-check-record-and-license-info",
+                    licenseServiceUrl);
         }
         props.setProperty("licenseServiceUrl", licenseServiceProp);
         if (useTempBuilds) {
