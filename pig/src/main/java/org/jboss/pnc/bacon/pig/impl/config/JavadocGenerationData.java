@@ -24,16 +24,31 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 5/25/18
  */
 @Data
 public class JavadocGenerationData extends GenerationData<JavadocGenerationStrategy> {
+    private static final Logger log = LoggerFactory.getLogger(JavadocGenerationData.class);
+
     private List<String> sourceBuilds = new ArrayList<>();
     private String scmRevision;
     private String generationProject;
     private String buildScript;
+    // customPmeParameters Deprecated - alignmentParameters should be used
     private Set<String> customPmeParameters = new TreeSet<>();
+    private Set<String> alignmentParameters = new TreeSet<>();
     private String importBom;
+
+    public Set<String> getAlignmentParameters() {
+        if (!customPmeParameters.isEmpty() && alignmentParameters.isEmpty()) {
+            log.warn("[Deprecated] Please rename 'customPmeParameters' section to 'alignmentParameters'");
+            alignmentParameters = customPmeParameters;
+        }
+        return alignmentParameters;
+    }
 }

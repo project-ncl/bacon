@@ -276,8 +276,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                 "-f " + topLevelDirectory.getPath() + File.separator + "pom.xml" + " -DprofileInjection=" + project_gid
                         + ":" + project_aid + ":" + project_version + " -s " + settingsXml + " -Dmaven.repo.local="
                         + localRepo + " -t");
-        if (generationData.getCustomPmeParameters() != null && !generationData.getCustomPmeParameters().isEmpty()) {
-            for (String parameter : generationData.getCustomPmeParameters()) {
+        if (generationData.getAlignmentParameters() != null && !generationData.getAlignmentParameters().isEmpty()) {
+            for (String parameter : generationData.getAlignmentParameters()) {
                 cmd.append(" " + parameter);
             }
         }
