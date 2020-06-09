@@ -47,7 +47,7 @@ import java.util.Map;
                 Pig.TriggerAddOns.class })
 public class Pig extends AbstractCommand {
 
-    public static final String REBUILD_MODE_DESC = "If specified, artifacts from temporary builds will have timestamp in versions";
+    public static final String REBUILD_MODE_DESC = "The build mode EXPLICIT_DEPENDENCY_CHECK, IMPLICIT_DEPENDENCY_CHECK, FORCE. Defaults to EXPLICIT";
     public static final String REBUILD_MODE_DEFAULT = "EXPLICIT_DEPENDENCY_CHECK";
     public static final String REBUILD_MODE = "mode";
     public static final String TEMP_BUILD_TIME_STAMP = "tempBuildTimeStamp";
@@ -74,6 +74,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 shortName = TEMP_BUILD_SHORT,
                 name = TEMP_BUILD,
+                hasValue = false,
                 overrideRequired = true,
                 defaultValue = TEMP_BUILD_DEFAULT,
                 description = TEMP_BUILD_DESC)
@@ -112,6 +113,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = TEMP_BUILD_TIME_STAMP,
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
                 description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
@@ -126,6 +128,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipRepo",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip maven repository generation")
         private boolean skipRepo;
@@ -133,6 +136,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipPncUpdate",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip updating PNC entities. Use only if you have all entities created properly.")
         private boolean skipPncUpdate;
@@ -140,6 +144,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipBuilds",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip PNC builds. Use when all your builds went fine, something failed later "
                         + "and you want to retry generating deliverables without rebuilding.")
@@ -148,6 +153,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipSources",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip sources generation.")
         private boolean skipSources;
@@ -155,6 +161,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipJavadoc",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip Javadoc generation.")
         private boolean skipJavadoc;
@@ -162,6 +169,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipLicenses",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip Licenses generation.")
         private boolean skipLicenses;
@@ -169,6 +177,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = "skipSharedContent",
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = "false",
                 description = "Skip generating shared content request input.")
         private boolean skipSharedContent;
@@ -176,6 +185,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = REMOVE_M2_DUPLICATES,
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
                 description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
@@ -183,6 +193,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = SKIP_BRANCH_CHECK,
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
                 description = SKIP_BRANCH_CHECK_DESC)
         private boolean skipBranchCheck;
@@ -221,6 +232,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = SKIP_BRANCH_CHECK,
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
                 description = SKIP_BRANCH_CHECK_DESC)
         private boolean skipBranchCheck;
@@ -245,6 +257,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = TEMP_BUILD_TIME_STAMP,
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
                 description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
@@ -270,6 +283,7 @@ public class Pig extends AbstractCommand {
         @Option(
                 name = REMOVE_M2_DUPLICATES,
                 overrideRequired = true,
+                hasValue = false,
                 defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
                 description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
