@@ -70,8 +70,6 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String productMilestoneVersion;
         @Option(required = true, name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
-        @Option(required = true, name = "issue-tracker-url", description = "Issue Tracker URL")
-        private String issueTrackerUrl;
         @Option(name = "starting-date", description = "Starting date, default is today: Format: <yyyy>-<mm>-<dd>")
         private String startDate;
         @Option(required = true, name = "end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
@@ -105,7 +103,6 @@ public class ProductMilestoneCli extends AbstractCommand {
                 ProductMilestone milestone = ProductMilestone.builder()
                         .version(productMilestoneVersion)
                         .productVersion(productVersionRef)
-                        .issueTrackerUrl(issueTrackerUrl)
                         .startingDate(startDateInstant)
                         .plannedEndDate(endDateInstant)
                         .build();
@@ -135,8 +132,6 @@ public class ProductMilestoneCli extends AbstractCommand {
 
         @Option(name = "product-milestone-version", description = "Product Milestone Version")
         private String productMilestoneVersion;
-        @Option(name = "issue-tracker-url", description = "Issue Tracker URL")
-        private String issueTrackerUrl;
         @Option(name = "starting-date", description = "Starting date, default is today: Format: <yyyy>-<mm>-<dd>")
         private String startDate;
         @Option(name = "end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
@@ -166,8 +161,6 @@ public class ProductMilestoneCli extends AbstractCommand {
                         Fail.fail(e.getMessage());
                     }
                 });
-
-                ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
                 ObjectHelper.executeIfNotNull(startDate, () -> {
                     Instant startDateInstant = parseDateFormat(startDate);

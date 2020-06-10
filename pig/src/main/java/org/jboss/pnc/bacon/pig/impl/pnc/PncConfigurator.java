@@ -57,14 +57,10 @@ public class PncConfigurator {
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
     }
 
-    public ProductMilestone getOrGenerateMilestone(
-            ProductVersionRef version,
-            String milestone,
-            String issueTrackerUrl) {
+    public ProductMilestone getOrGenerateMilestone(ProductVersionRef version, String milestone) {
         log.info("Generating milestone for versionId {} and milestone {} in PNC", version, milestone);
 
-        return getExistingMilestone(version, milestone)
-                .orElseGet(() -> createMilestone(version, milestone, issueTrackerUrl));
+        return getExistingMilestone(version, milestone).orElseGet(() -> createMilestone(version, milestone));
     }
 
     public void markMilestoneCurrent(ProductVersion version, ProductMilestoneRef milestone) {
@@ -90,10 +86,9 @@ public class PncConfigurator {
         return toStream(milestones).findAny();
     }
 
-    private ProductMilestone createMilestone(ProductVersionRef version, String milestoneName, String issueTrackerUrl) {
+    private ProductMilestone createMilestone(ProductVersionRef version, String milestoneName) {
         ProductMilestone milestone = ProductMilestone.builder()
                 .productVersion(version)
-                .issueTrackerUrl(issueTrackerUrl)
                 .startingDate(START_DATE)
                 .plannedEndDate(END_DATE)
                 .version(milestoneName)
