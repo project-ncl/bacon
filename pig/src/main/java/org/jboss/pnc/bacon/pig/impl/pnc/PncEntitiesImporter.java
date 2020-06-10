@@ -100,10 +100,7 @@ public class PncEntitiesImporter {
     public ImportResult performImport(boolean skipBranchCheck) {
         product = getOrGenerateProduct();
         version = getOrGenerateVersion();
-        milestone = pncConfigurator.getOrGenerateMilestone(
-                version,
-                pncMilestoneString(),
-                pigConfiguration.getProduct().getIssueTrackerUrl());
+        milestone = pncConfigurator.getOrGenerateMilestone(version, pncMilestoneString());
         pncConfigurator.markMilestoneCurrent(version, milestone);
         buildGroup = getOrGenerateBuildGroup();
 

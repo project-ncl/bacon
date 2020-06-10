@@ -67,12 +67,6 @@ public class ProductReleaseCli extends AbstractCommand {
                 description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
         @Option(
-                name = "download-url",
-                description = "Internal or public location to download the product distribution artifacts")
-        private String downloadUrl;
-        @Option(name = "issue-tracker-url", description = "Link to issues fixed in this release")
-        private String issueTrackerUrl;
-        @Option(
                 shortName = 'o',
                 overrideRequired = false,
                 hasValue = false,
@@ -102,8 +96,6 @@ public class ProductReleaseCli extends AbstractCommand {
                         .productMilestone(productMilestone)
                         .productVersion(productMilestone.getProductVersion())
                         .supportLevel(SupportLevel.valueOf(supportLevel))
-                        .downloadUrl(downloadUrl)
-                        .issueTrackerUrl(issueTrackerUrl)
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productRelease));
@@ -130,12 +122,6 @@ public class ProductReleaseCli extends AbstractCommand {
                 name = "support-level",
                 description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
-        @Option(
-                name = "download-url",
-                description = "Internal or public location to download the product distribution artifacts")
-        private String downloadUrl;
-        @Option(name = "issue-tracker-url", description = "Link to issues fixed in this release")
-        private String issueTrackerUrl;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
@@ -166,8 +152,6 @@ public class ProductReleaseCli extends AbstractCommand {
                         () -> updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate)));
                 ObjectHelper
                         .executeIfNotNull(supportLevel, () -> updated.supportLevel(SupportLevel.valueOf(supportLevel)));
-                ObjectHelper.executeIfNotNull(downloadUrl, () -> updated.downloadUrl(downloadUrl));
-                ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
                 CREATOR.getClientAuthenticated().update(productReleaseId, updated.build());
             });
