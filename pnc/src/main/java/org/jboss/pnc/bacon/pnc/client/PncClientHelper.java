@@ -39,21 +39,19 @@ import java.util.Date;
 @Slf4j
 public class PncClientHelper {
 
-    private static Configuration configuration;
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+    private static boolean bannerChecked = false;
+
     public static Configuration getPncConfiguration(boolean authenticationNeeded) {
-        if (configuration == null) {
-            setup(authenticationNeeded);
-        }
-        return configuration;
+        return setup(authenticationNeeded);
     }
 
     public static Configuration getPncConfiguration() {
         return getPncConfiguration(true);
     }
 
-    public static void setup(boolean authenticationNeeded) {
+    public static Configuration setup(boolean authenticationNeeded) {
         Config config = null;
         try {
             config = Config.instance();
@@ -88,7 +86,7 @@ public class PncClientHelper {
                 port = uri.getPort();
             }
 
-            configuration = Configuration.builder()
+            Configuration configuration = Configuration.builder()
                     .protocol(uri.getScheme())
                     .port(port)
                     .host(uri.getHost())
@@ -96,21 +94,14 @@ public class PncClientHelper {
                     .pageSize(50)
                     .build();
 
-            GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
-            try {
-                String banner = genericSettingClient.getAnnouncementBanner().getBanner();
-                if (banner != null && !banner.isEmpty()) {
-                    log.warn("***********************");
-                    log.warn("Announcement: {}", banner);
-                    log.warn("***********************");
-                }
-            } catch (RemoteResourceException e) {
-                log.error(e.getMessage());
-            }
+            printBannerIfNecessary(configuration);
+            return configuration;
 
         } catch (URISyntaxException e) {
             Fail.fail(e.getMessage());
         }
+        // if we're here it's game over
+        return null;
     }
 
     /**
@@ -151,6 +142,25 @@ public class PncClientHelper {
             Fail.fail(e.getMessage());
 
             return null;
+        }
+    }
+
+    private static void printBannerIfNecessary(Configuration configuration) {
+
+        if (!bannerChecked) {
+            GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
+            try {
+                String banner = genericSettingClient.getAnnouncementBanner().getBanner();
+                if (banner != null && !banner.isEmpty()) {
+                    log.warn("***********************");
+                    log.warn("Announcement: {}", banner);
+                    log.warn("***********************");
+                }
+            } catch (RemoteResourceException e) {
+                log.error(e.getMessage());
+            }
+
+            bannerChecked = true;
         }
     }
 
