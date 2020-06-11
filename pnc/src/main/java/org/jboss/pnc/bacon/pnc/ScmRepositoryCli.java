@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -32,10 +33,10 @@ import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.client.SCMRepositoryClient;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
+import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 
 import java.util.Optional;
 
@@ -44,11 +45,15 @@ import java.util.Optional;
         description = "Scm repository",
         groupCommands = { ScmRepositoryCli.CreateAndSync.class, ScmRepositoryCli.Get.class, ScmRepositoryCli.List.class,
                 ScmRepositoryCli.ListBuildConfigs.class, })
+@Slf4j
 public class ScmRepositoryCli extends AbstractCommand {
 
-    private static final ClientCreator<SCMRepositoryClient> CREATOR = new ClientCreator<>(SCMRepositoryClient::new);
+    private static final ClientCreator<AdvancedSCMRepositoryClient> CREATOR = new ClientCreator<>(
+            AdvancedSCMRepositoryClient::new);
 
-    @CommandDefinition(name = "create-and-sync", description = "Create a repository")
+    @CommandDefinition(
+            name = "create-and-sync",
+            description = "Create a repository, and wait for PNC to give us the status of creation")
     public class CreateAndSync extends AbstractCommand {
 
         @Argument(required = true, description = "SCM URL")
@@ -71,13 +76,27 @@ public class ScmRepositoryCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
 
+            // TODO: do the same for pig side
             return super.executeHelper(commandInvocation, () -> {
+
+                RemoteCollection<SCMRepository> existing = CREATOR.getClient().getAll(scmUrl, null);
+
+                // if already exists, don't try to create!
+                if (existing != null && existing.size() > 0) {
+
+                    log.warn("Repository already exists on PNC! No creation needed");
+                    ObjectHelper.print(jsonOutput, existing.getAll().iterator());
+                    return;
+                }
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
                         .preBuildSyncEnabled(!noPreBuildSync)
                         .scmUrl(scmUrl)
                         .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(createAndSyncSCMRequest));
+                log.info("Waiting for repository '{}' to be created on PNC...", scmUrl);
+                ObjectHelper.print(
+                        jsonOutput,
+                        CREATOR.getClientAuthenticated().createNewAndWait(createAndSyncSCMRequest).join());
             });
         }
 
