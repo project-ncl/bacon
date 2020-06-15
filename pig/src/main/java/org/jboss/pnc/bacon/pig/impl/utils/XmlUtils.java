@@ -221,6 +221,23 @@ public class XmlUtils {
         }
     }
 
+    public static boolean isValidNodePresent(File file, String xpathString) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(file);
+            XPathFactory xPathfactory = XPathFactory.newInstance();
+            XPath xpath = xPathfactory.newXPath();
+            XPathExpression expr = xpath.compile(xpathString);
+            boolean isValidNodePresent = (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
+            return isValidNodePresent;
+        } catch (Exception any) {
+            throw new RuntimeException(
+                    "Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(),
+                    any);
+        }
+    }
+
     private XmlUtils() {
     }
 }

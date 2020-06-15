@@ -28,6 +28,7 @@ import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.XmlUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,12 @@ public class LicenseGenerator {
             LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties(useTempBuilds));
 
             generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), licensesDirectory.getAbsolutePath());
+            //Checking if the URL for licenses are present and are valid
+            File xmlFile = new File(licensesDirectory.getAbsolutePath());
+            boolean isInvalidLicensesPresent = XmlUtils.isValidNodePresent(xmlFile,"//license[not(url)] or //url[not(string(.))]");
+            if(isInvalidLicensesPresent){
+                throw new RuntimeException("Invalid licenses XML file");
+            }
         } catch (LicensesGeneratorException e) {
             throw new RuntimeException("Failed to generate licenses", e);
         }
