@@ -32,6 +32,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.XmlUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,8 +68,17 @@ public class LicenseGenerator {
             generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), licensesDirectory.getAbsolutePath());
             //Checking if the URL for licenses are present and are valid
             File xmlFile = new File(licensesDirectory.getAbsolutePath());
-            boolean isInvalidLicensesPresent = XmlUtils.isValidNodePresent(xmlFile,"//license[not(url)] or //url[not(string(.))]");
-            if(isInvalidLicensesPresent){
+            boolean isInvalidLicensesPresent = XmlUtils
+                    .isValidNodePresent(xmlFile, "//license[not(url)] or //url[not(string(.))]");
+            if (isInvalidLicensesPresent) {
+                log.error(
+                        "There are some invalid licenses in XML file generated. Following are the details of the invalid licenses:");
+                List<Node> nodes = XmlUtils.listNodes(xmlFile, "//license[not(url)]/parent::node()/parent::node()");
+                nodes.forEach(node -> {
+                    log.error(
+                            "Group id is " + node.getChildNodes().item(1).getTextContent() + " Artifact id is "
+                                    + node.getChildNodes().item(3).getTextContent());
+                });
                 throw new RuntimeException("Invalid licenses XML file");
             }
         } catch (LicensesGeneratorException e) {
