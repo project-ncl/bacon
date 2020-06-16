@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
- *         Date: 8/24/17
+ * Date: 8/24/17
  */
 public class LicenseGenerator {
     private static final Logger log = LoggerFactory.getLogger(LicenseGenerator.class);

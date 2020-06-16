@@ -33,27 +33,20 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
- *         Date: 7/11/17
+ * Date: 7/11/17
  */
 public class XmlUtils {
+
+    private XmlUtils() {
+    }
 
     public static XmlToString extract(File xmlFile, String xpathLocator) {
         try {
@@ -110,7 +103,7 @@ public class XmlUtils {
             return null;
         }
 
-        Element child = (Element) children.get(0);
+        Element child = children.get(0);
         String value = child.getTextContent();
 
         for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -179,6 +172,23 @@ public class XmlUtils {
         return result;
     }
 
+    public static boolean isValidNodePresent(File file, String xpathString) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(file);
+            XPathFactory xPathfactory = XPathFactory.newInstance();
+            XPath xpath = xPathfactory.newXPath();
+            XPathExpression expr = xpath.compile(xpathString);
+            boolean isValidNodePresent = (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
+            return isValidNodePresent;
+        } catch (Exception any) {
+            throw new RuntimeException(
+                    "Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(),
+                    any);
+        }
+    }
+
     public static class XmlToString {
         private final NodeList nodeList;
         private final Set<String> expressionsToSkip = new HashSet<>();
@@ -219,25 +229,5 @@ public class XmlUtils {
 
             return result.toString();
         }
-    }
-
-    public static boolean isValidNodePresent(File file, String xpathString) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(file);
-            XPathFactory xPathfactory = XPathFactory.newInstance();
-            XPath xpath = xPathfactory.newXPath();
-            XPathExpression expr = xpath.compile(xpathString);
-            boolean isValidNodePresent = (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
-            return isValidNodePresent;
-        } catch (Exception any) {
-            throw new RuntimeException(
-                    "Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(),
-                    any);
-        }
-    }
-
-    private XmlUtils() {
     }
 }
