@@ -35,7 +35,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import org.jboss.pnc.dto.Banner;
 
 @Slf4j
 public class PncClientHelper {
