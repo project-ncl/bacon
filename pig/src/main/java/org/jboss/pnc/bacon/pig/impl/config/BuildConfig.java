@@ -202,11 +202,23 @@ public class BuildConfig {
     }
 
     // Work around for NCL-3670
+
+    /**
+     * Return the short scm uri path of the scm urls (scmUrl or externalScmUrl respectively)
+     *
+     * If the scmUrl or the getExternalScmUrl is null, this method will also return null
+     *
+     * @return short scm uri path
+     */
     public String getShortScmURIPath() {
         String scmUrl = getScmUrl() != null ? getScmUrl() : getExternalScmUrl();
         try {
-            URI scmUri = new URI(scmUrl);
-            return scmUri.getPath();
+            if (scmUrl != null) {
+                URI scmUri = new URI(scmUrl);
+                return scmUri.getPath();
+            } else {
+                return null;
+            }
         } catch (URISyntaxException e) {
             throw new RuntimeException("Invalid scm URI: " + getScmUrl(), e);
         }

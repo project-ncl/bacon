@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.jboss.pnc.bacon.common.futures.FutureUtils;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -33,7 +34,6 @@ import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.ProjectClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.client.SCMRepositoryClient;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.Environment;
@@ -49,6 +49,7 @@ import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 import org.jboss.pnc.dto.response.RepositoryCreationResponse;
 import org.jboss.pnc.enums.BuildType;
+import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.empty;
@@ -76,7 +78,7 @@ public class PncEntitiesImporter {
     private final GroupConfigurationClient groupConfigClient;
     private final ProductClient productClient;
     private final ProjectClient projectClient;
-    private final SCMRepositoryClient repoClient;
+    private final AdvancedSCMRepositoryClient repoClient;
     private final ProductVersionClient versionClient;
 
     private ProductRef product;
@@ -93,7 +95,7 @@ public class PncEntitiesImporter {
         groupConfigClient = new GroupConfigurationClient(PncClientHelper.getPncConfiguration());
         productClient = new ProductClient(PncClientHelper.getPncConfiguration());
         projectClient = new ProjectClient(PncClientHelper.getPncConfiguration());
-        repoClient = new SCMRepositoryClient(PncClientHelper.getPncConfiguration());
+        repoClient = new AdvancedSCMRepositoryClient(PncClientHelper.getPncConfiguration());
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
     }
 
@@ -330,11 +332,17 @@ public class PncEntitiesImporter {
     }
 
     private Optional<SCMRepository> getExistingRepository(BuildConfig buildConfig) {
-        String searchTerm = buildConfig.getShortScmURIPath();
+
+        String matchUrl = buildConfig.getScmUrl();
+
+        if (matchUrl == null) {
+            matchUrl = buildConfig.getExternalScmUrl();
+        }
+
         try {
-            return toStream(repoClient.getAll(null, searchTerm)).filter(buildConfig::matchesRepository).findAny();
+            return toStream(repoClient.getAll(matchUrl, null)).filter(buildConfig::matchesRepository).findAny();
         } catch (RemoteResourceException e) {
-            throw new RuntimeException("Failed to search for repository by " + searchTerm, e);
+            throw new RuntimeException("Failed to search for repository by " + matchUrl, e);
         }
     }
 
@@ -345,20 +353,18 @@ public class PncEntitiesImporter {
                 .scmUrl(scmUrl)
                 .build();
         try {
-            // todo: does it work with the external urls?
-            RepositoryCreationResponse response = repoClient.createNew(createRepoRequest);
+            CompletableFuture<AdvancedSCMRepositoryClient.SCMCreationResult> response = repoClient
+                    .createNewAndWait(createRepoRequest);
 
-            SCMRepository repository = response.getRepository();
-            if (repository != null) {
-                return repository;
+            log.info("Waiting for repository creation of '{}'", scmUrl);
+            FutureUtils.printDotWhileFutureIsInProgress(response, 10);
+            AdvancedSCMRepositoryClient.SCMCreationResult result = response.join();
+            log.info("{}", result.toString());
+
+            if (result.isSuccess()) {
+                return result.getScmRepositoryCreationSuccess().getScmRepository();
             } else {
-                // a task to create repo has been triggered, let's wait for a while in a hope it will be created:
-                return SleepUtils.waitFor(
-                        () -> getExistingRepository(buildConfig).orElse(null),
-                        5, // s
-                        5 * 60, // s
-                        false,
-                        "Timed out waiting for repository to be created");
+                throw new RuntimeException("Error on creation of repository: " + result.getRepositoryCreationFailure());
             }
         } catch (ClientException e) {
             throw new RuntimeException("Failed to trigger repository creation for " + scmUrl, e);
