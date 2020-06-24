@@ -79,7 +79,7 @@ if [ -z "$1" ]; then
     echo "    bacon update snapshot"
     echo ""
 fi
-"""
+""".strip()
 
 
 def print_mac_notice_if_required():
