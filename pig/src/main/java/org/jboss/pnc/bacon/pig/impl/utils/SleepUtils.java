@@ -39,12 +39,15 @@ public class SleepUtils {
         }
     }
 
-    public static void waitFor(Supplier<Boolean> condition, int checkInterval) {
+    public static void waitFor(Supplier<Boolean> condition, int checkInterval, boolean printDot) {
         if (condition.get()) {
             return;
         }
         do {
             sleep(checkInterval);
+            if (printDot) {
+                System.out.print(".");
+            }
         } while (!condition.get());
     }
 

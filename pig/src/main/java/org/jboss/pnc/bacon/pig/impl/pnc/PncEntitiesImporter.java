@@ -17,7 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
-import org.jboss.pnc.bacon.common.futures.FutureUtils;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -47,7 +46,6 @@ import org.jboss.pnc.dto.Project;
 import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
-import org.jboss.pnc.dto.response.RepositoryCreationResponse;
 import org.jboss.pnc.enums.BuildType;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 import org.slf4j.Logger;
@@ -357,7 +355,7 @@ public class PncEntitiesImporter {
                     .createNewAndWait(createRepoRequest);
 
             log.info("Waiting for repository creation of '{}'", scmUrl);
-            FutureUtils.printDotWhileFutureIsInProgress(response, 10);
+            SleepUtils.waitFor(() -> response.isDone(), 10, true);
             AdvancedSCMRepositoryClient.SCMCreationResult result = response.join();
             log.info("{}", result.toString());
 
