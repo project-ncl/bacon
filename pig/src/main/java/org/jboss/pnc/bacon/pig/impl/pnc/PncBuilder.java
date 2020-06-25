@@ -75,7 +75,7 @@ public class PncBuilder {
 
     private void waitForSuccessfulFinish(String groupBuildId) {
         log.info("waiting for finish of group build {}", groupBuildId);
-        SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30);
+        SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30, true);
         log.info("group build finished successfully");
     }
 
