@@ -39,6 +39,9 @@ import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
 
 @GroupCommandDefinition(
         name = "scm-repository",
@@ -93,10 +96,18 @@ public class ScmRepositoryCli extends AbstractCommand {
                         .scmUrl(scmUrl)
                         .build();
 
-                log.info("Waiting for repository '{}' to be created on PNC...", scmUrl);
-                ObjectHelper.print(
-                        jsonOutput,
-                        CREATOR.getClientAuthenticated().createNewAndWait(createAndSyncSCMRequest).join());
+                CompletableFuture<SCMCreationResult> futureResult = CREATOR.getClientAuthenticated()
+                        .createNewAndWait(createAndSyncSCMRequest);
+                if (!futureResult.isDone()) {
+                    log.info("Waiting for repository '{}' to be created on PNC...", scmUrl);
+                }
+                final SCMCreationResult result = futureResult.join();
+                if (result.isSuccess()) {
+                    ObjectHelper.print(jsonOutput, result.getScmRepositoryCreationSuccess().getScmRepository());
+                } else {
+                    log.error("Failure while creating repository: {}", result.getRepositoryCreationFailure());
+                    throw new FatalException();
+                }
             });
         }
 
