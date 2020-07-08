@@ -97,7 +97,9 @@ public class BuildCli extends AbstractCommand {
         @Option(name = "wait", overrideRequired = false, hasValue = false, description = "Wait for build to complete")
         private boolean wait = false;
         @Option(name = "timeout", description = "Time in minutes the command waits for Build completion")
-        private String timeout;
+        private Integer timeout;
+        @Option(name = "revision", description = "Build Config revision to build.")
+        private Integer revision;
         @Option(
                 shortName = 'o',
                 overrideRequired = false,
@@ -120,25 +122,27 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(temporaryBuild);
 
             return super.executeHelper(commandInvocation, () -> {
-                if (timeout != null) {
-                    ObjectHelper.print(
-                            jsonOutput,
-                            BC_CREATOR.getClientAuthenticated()
-                                    .executeBuild(
-                                            buildConfigId,
-                                            buildParams,
-                                            Long.parseLong(timeout),
-                                            TimeUnit.MINUTES));
-                }
+                final AdvancedBuildConfigurationClient client = BC_CREATOR.getClientAuthenticated();
 
-                if (wait) {
-                    ObjectHelper.print(
-                            jsonOutput,
-                            BC_CREATOR.getClientAuthenticated().executeBuild(buildConfigId, buildParams).join());
+                final Build build;
+                if (revision == null) {
+                    if (timeout != null) {
+                        build = client.executeBuild(buildConfigId, buildParams, timeout, TimeUnit.MINUTES);
+                    } else if (wait) {
+                        build = client.executeBuild(buildConfigId, buildParams).join();
+                    } else {
+                        build = client.trigger(buildConfigId, buildParams);
+                    }
                 } else {
-                    ObjectHelper
-                            .print(jsonOutput, BC_CREATOR.getClientAuthenticated().trigger(buildConfigId, buildParams));
+                    if (timeout != null) {
+                        build = client.executeBuild(buildConfigId, revision, buildParams, timeout, TimeUnit.MINUTES);
+                    } else if (wait) {
+                        build = client.executeBuild(buildConfigId, revision, buildParams).join();
+                    } else {
+                        build = client.triggerRevision(buildConfigId, revision, buildParams);
+                    }
                 }
+                ObjectHelper.print(jsonOutput, build);
             });
         }
 
