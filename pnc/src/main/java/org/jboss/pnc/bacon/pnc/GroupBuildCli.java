@@ -31,6 +31,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.*;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
@@ -95,7 +96,7 @@ public class GroupBuildCli extends AbstractCommand {
             if (rebuildMode == null) {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
             }
-            checkRebuildModeOption(rebuildMode);
+            ParameterChecker.checkRebuildModeOption(rebuildMode);
 
             groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
             groupBuildParams.setTimestampAlignment(timestampAlignment);
@@ -135,18 +136,6 @@ public class GroupBuildCli extends AbstractCommand {
             return "$ bacon pnc group-build start --temporary-build 23";
         }
 
-        private void checkRebuildModeOption(String rebuildMode) {
-
-            try {
-                RebuildMode.valueOf(rebuildMode);
-            } catch (IllegalArgumentException | NullPointerException e) {
-                log.error("The rebuild flag contains an illegal option. Possibilities are: ");
-                for (RebuildMode mode : RebuildMode.values()) {
-                    log.error(mode.toString());
-                }
-                throw new FatalException();
-            }
-        }
     }
 
     @CommandDefinition(name = "cancel", description = "Cancel a group build")

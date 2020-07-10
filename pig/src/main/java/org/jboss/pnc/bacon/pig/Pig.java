@@ -30,6 +30,7 @@ import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
 
 import java.util.Map;
@@ -123,7 +124,7 @@ public class Pig extends AbstractCommand {
                 overrideRequired = true,
                 defaultValue = REBUILD_MODE_DEFAULT,
                 description = REBUILD_MODE_DESC)
-        private RebuildMode rebuildMode;
+        private String rebuildMode;
 
         @Option(
                 name = "skipRepo",
@@ -208,6 +209,9 @@ public class Pig extends AbstractCommand {
 
         @Override
         public String doExecute() {
+
+            ParameterChecker.checkRebuildModeOption(rebuildMode);
+
             PigContext.get().loadConfig(configDir);
             return PigFacade.run(
                     skipRepo,
@@ -221,7 +225,7 @@ public class Pig extends AbstractCommand {
                     repoZipPath,
                     tempBuild,
                     tempBuildTS,
-                    rebuildMode,
+                    RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck);
         }
     }
@@ -267,11 +271,13 @@ public class Pig extends AbstractCommand {
                 overrideRequired = true,
                 defaultValue = REBUILD_MODE_DEFAULT,
                 description = REBUILD_MODE_DESC)
-        private RebuildMode rebuildMode;
+        private String rebuildMode;
 
         @Override
         public Map<String, PncBuild> doExecute() {
-            Map<String, PncBuild> builds = PigFacade.build(tempBuild, tempBuildTS, rebuildMode);
+
+            ParameterChecker.checkRebuildModeOption(rebuildMode);
+            Map<String, PncBuild> builds = PigFacade.build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode));
             PigContext.get().setBuilds(builds);
             PigContext.get().storeContext();
             return builds;
