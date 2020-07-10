@@ -23,9 +23,13 @@ import org.jboss.bacon.da.rest.LookupReportDto;
 import org.jboss.bacon.da.rest.ReportsApi;
 import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.da.reports.model.request.LookupGAVsRequest;
+import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +41,29 @@ import java.util.stream.Collectors;
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/2/17
+ *         <p>
+ *         TODO: unify with DA common client code when ready
  */
 public class DADao {
     private static final Logger log = LoggerFactory.getLogger(DADao.class);
 
     private final ReportsApi reportsClient;
     private final ListingsApi listingsClient;
+    private final String DA_PATH = "/da/rest/v-1";
 
     public DADao(DaConfig daConfig) {
-        reportsClient = new ResteasyClientBuilder().build().target(daConfig.getUrl()).proxy(ReportsApi.class);
+        // Setup required so that resteasy client builder knows how to parse json. Check if still needed?
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
+        builder.providerFactory(factory);
+        factory.registerProvider(ResteasyJackson2Provider.class);
+        ResteasyProviderFactory.setRegisterBuiltinByDefault(true);
+        RegisterBuiltin.register(factory);
 
-        listingsClient = new ResteasyClientBuilder().build().target(daConfig.getUrl()).proxy(ListingsApi.class);
+        String daUrl = Utils.generateUrlPath(daConfig.getUrl(), DA_PATH);
+
+        reportsClient = builder.build().target(daUrl).proxy(ReportsApi.class);
+        listingsClient = builder.build().target(daUrl).proxy(ListingsApi.class);
     }
 
     public void fillDaData(CommunityDependency dependency) {
