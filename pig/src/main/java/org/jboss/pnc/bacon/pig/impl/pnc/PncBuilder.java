@@ -86,6 +86,7 @@ public class PncBuilder {
                 case BUILDING:
                     return false;
                 case REJECTED: // PNC has already built the project
+                case NO_REBUILD_REQUIRED:
                 case SUCCESS:
                     return true;
                 default:
