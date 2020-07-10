@@ -12,12 +12,19 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +39,7 @@ public class SourcesGenerator {
 
     private static final String KOJI_TOP_URL = "http://download.eng.bos.redhat.com/brewroot";
 
+    private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
     public static final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
     public static final String SEPARATOR = FileSystems.getDefault().getSeparator();
 
@@ -83,7 +91,14 @@ public class SourcesGenerator {
             URI url = gerritSnapshotDownloadUrl(build.getScmRepository().getInternalUrl(), build.getScmRevision());
 
             File targetPath = new File(workDir, build.getName() + ".tar.gz");
-            FileDownloadUtils.downloadTo(url, targetPath);
+            try {
+                Response response = CREATOR.getClient().getInternalScmArchiveLink(build.getId());
+                InputStream in = (InputStream) response.getEntity();
+                Files.copy(in, targetPath.toPath());
+            } catch (IOException | RemoteResourceException e) {
+                throw new RuntimeException(e);
+            }
+
             Collection<String> untaredFiles = FileUtils.untar(targetPath, contentsDir);
             List<String> topLevelDirectories = untaredFiles.stream()
                     .filter(this::isNotANestedFile)

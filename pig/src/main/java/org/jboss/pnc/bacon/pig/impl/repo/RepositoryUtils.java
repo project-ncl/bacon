@@ -205,9 +205,6 @@ public class RepositoryUtils {
     private static void removeMatchingCondition(File element, Function<File, Boolean> condition) {
         if (element.isDirectory()) {
             Stream.of(element.listFiles()).forEach(file -> removeMatchingCondition(file, condition));
-            if (element.listFiles().length == 0) {
-                element.delete();
-            }
         } else {
             if (condition.apply(element)) {
                 element.delete();
