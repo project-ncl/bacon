@@ -19,11 +19,10 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.dto.Artifact;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
@@ -34,8 +33,8 @@ import java.nio.file.Path;
  *         Date: 6/13/17
  */
 @Getter
+@Slf4j
 public class ArtifactWrapper {
-    private final Logger log = LoggerFactory.getLogger(ArtifactWrapper.class);
 
     private final String gapv;
     private final String fileName;

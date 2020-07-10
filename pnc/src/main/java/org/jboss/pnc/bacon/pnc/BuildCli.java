@@ -34,6 +34,7 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
@@ -115,7 +116,7 @@ public class BuildCli extends AbstractCommand {
             if (rebuildMode == null) {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
             }
-            checkRebuildModeOption(rebuildMode);
+            ParameterChecker.checkRebuildModeOption(rebuildMode);
             buildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
             buildParams.setKeepPodOnFailure(keepPodOnFailure);
             buildParams.setTimestampAlignment(timestampAlignment);
@@ -152,19 +153,6 @@ public class BuildCli extends AbstractCommand {
             StringBuilder command = new StringBuilder();
             command.append("$ bacon pnc build start \\\n").append("\t--rebuild-mode=FORCE --temporary-build --wait 27");
             return command.toString();
-        }
-
-        private void checkRebuildModeOption(String rebuildMode) {
-
-            try {
-                RebuildMode.valueOf(rebuildMode);
-            } catch (IllegalArgumentException | NullPointerException e) {
-                log.error("The rebuild flag contains an illegal option. Possibilities are: ");
-                for (RebuildMode mode : RebuildMode.values()) {
-                    log.error(mode.toString());
-                }
-                throw new FatalException();
-            }
         }
     }
 
