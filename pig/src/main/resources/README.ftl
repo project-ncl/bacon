@@ -4,10 +4,10 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>${config.product.name} ${config.version}</title>
+    <title>${pigConfiguration.product.name} ${pigConfiguration.version}</title>
 </head>
 <body>
-<h1>${config.product.name} ${config.version}</h1>
+<h1>${pigConfiguration.product.name} ${pigConfiguration.version}</h1>
 
 <h2>Product Deliverables</h2>
 <ul>
