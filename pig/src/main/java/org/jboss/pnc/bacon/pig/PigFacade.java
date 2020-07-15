@@ -46,6 +46,7 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.NotFoundException;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
@@ -186,7 +187,7 @@ public class PigFacade {
         } else {
             log.info("Skipping Release Script Generation");
         }
-        return "PiG run completed, the results are in: " + ""; // TODO target directory name
+        return "PiG run completed, the results are in: " + Paths.get(context().getTargetPath()).toAbsolutePath();
 
         // verifyZipContents(); TODO a separate Jenkins Job to do it?
     }
@@ -259,7 +260,12 @@ public class PigFacade {
         try {
             pushResult = buildClient.getPushResult(build.getId());
         } catch (ClientException e) {
-            throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
+            // Didn't find results with 404 exception, therefore it's not pushed
+            if (e.getCause().getClass().isAssignableFrom(NotFoundException.class)) {
+                return true;
+            } else {
+                throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
+            }
         }
         return pushResult != null && pushResult.getStatus() == BuildPushStatus.SUCCESS;
     }
