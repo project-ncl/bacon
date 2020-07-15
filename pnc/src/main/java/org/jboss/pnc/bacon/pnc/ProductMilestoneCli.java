@@ -55,7 +55,7 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
         description = "Product Milestones",
         groupCommands = { ProductMilestoneCli.Create.class, ProductMilestoneCli.Update.class,
                 ProductMilestoneCli.CancelMilestoneClose.class, ProductMilestoneCli.Get.class,
-                ProductMilestoneCli.PerformedBuilds.class })
+                ProductMilestoneCli.PerformedBuilds.class, ProductMilestoneCli.MilestoneClose.class })
 public class ProductMilestoneCli extends AbstractCommand {
 
     private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(

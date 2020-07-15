@@ -45,7 +45,7 @@ import org.aesh.command.option.OptionList;
         name = "group-config",
         description = "Group config",
         groupCommands = { GroupConfigCli.Create.class, GroupConfigCli.Update.class, GroupConfigCli.List.class,
-                GroupConfigCli.Get.class, })
+                GroupConfigCli.Get.class, GroupConfigCli.AddBuildConfig.class, GroupConfigCli.RemoveBuildConfig.class })
 public class GroupConfigCli extends AbstractCommand {
 
     private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(
