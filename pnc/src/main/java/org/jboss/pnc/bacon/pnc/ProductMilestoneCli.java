@@ -182,6 +182,22 @@ public class ProductMilestoneCli extends AbstractCommand {
         }
     }
 
+    @CommandDefinition(name = "close", description = "Close milestone")
+    public class MilestoneClose extends AbstractCommand {
+
+        @Argument(required = true, description = "Milestone id")
+        private String id;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            return super.executeHelper(
+                    commandInvocation,
+                    () -> CREATOR.getClientAuthenticated().closeMilestone(id, null));
+        }
+    }
+
     @CommandDefinition(name = "cancel-milestone-close", description = "Cancel milestone close")
     public class CancelMilestoneClose extends AbstractCommand {
 
@@ -223,7 +239,7 @@ public class ProductMilestoneCli extends AbstractCommand {
     /**
      * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product
      * version
-     * 
+     *
      * @param productVersionId
      * @param milestoneVersion
      * @return
