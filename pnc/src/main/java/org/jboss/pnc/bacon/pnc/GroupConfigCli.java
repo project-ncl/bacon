@@ -39,6 +39,7 @@ import org.jboss.pnc.dto.ProductVersionRef;
 
 import java.util.HashMap;
 import java.util.Optional;
+import org.aesh.command.option.OptionList;
 
 @GroupCommandDefinition(
         name = "group-config",
@@ -156,6 +157,54 @@ public class GroupConfigCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "add-build-config", description = "Add build config to group config")
+    public class AddBuildConfig extends AbstractCommand {
+
+        @Argument(required = true, description = "Group config id")
+        private String id;
+
+        @OptionList(
+                name = "bc-id",
+                required = true,
+                description = "ID of the build configuration to add. You cen enter multiple ids separated by comma.")
+        private java.util.List<String> attributes;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+                for (String bcid : attributes) {
+                    CREATOR.getClient().addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
+                }
+            });
+        }
+    }
+
+    @CommandDefinition(name = "remove-build-config", description = "Remove build config from group config")
+    public class RemoveBuildConfig extends AbstractCommand {
+
+        @Argument(required = true, description = "Group config id")
+        private String id;
+
+        @OptionList(
+                name = "bc-id",
+                required = true,
+                description = "ID of the build configuration to remove. You cen enter multiple ids separated by comma.")
+        private java.util.List<String> attributes;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+                for (String bcid : attributes) {
+                    CREATOR.getClient().removeBuildConfig(id, bcid);
+                }
+            });
         }
     }
 
