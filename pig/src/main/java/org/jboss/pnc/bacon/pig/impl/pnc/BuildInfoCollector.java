@@ -62,9 +62,9 @@ public class BuildInfoCollector {
     public PncBuild getLatestBuild(String configId) {
         try {
             BuildsFilterParameters filter = new BuildsFilterParameters();
-            filter.setLatest(true);
+            // Note: sort by id not allowed
             Iterator<Build> buildIterator = buildConfigClient
-                    .getBuilds(configId, filter, of("=desc=id"), query("status=='", BuildStatus.SUCCESS + "'"))
+                    .getBuilds(configId, filter, of("=desc=submitTime"), query("status==%s", BuildStatus.SUCCESS))
                     .iterator();
 
             if (!buildIterator.hasNext()) {
