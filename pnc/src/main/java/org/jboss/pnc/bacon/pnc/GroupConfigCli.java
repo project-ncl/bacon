@@ -178,7 +178,7 @@ public class GroupConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 for (String bcid : attributes) {
-                    CREATOR.getClient().addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
+                    CREATOR.getClientAuthenticated().addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
                 }
             });
         }
@@ -202,7 +202,7 @@ public class GroupConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 for (String bcid : attributes) {
-                    CREATOR.getClient().removeBuildConfig(id, bcid);
+                    CREATOR.getClientAuthenticated().removeBuildConfig(id, bcid);
                 }
             });
         }
