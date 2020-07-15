@@ -27,10 +27,7 @@ public class VersionInfo {
         InputStream manifestStream = getClass().getClassLoader().getResourceAsStream(manifestName);
         try {
             Manifest manifest = new Manifest(manifestStream);
-            Attributes attributes = manifest.getEntries().get("Versions");
-            if (attributes == null) {
-                log.warn("Missing 'Versions' section in the Manifest file.");
-            }
+            Attributes attributes = manifest.getMainAttributes();
             revision = attributes.getValue("Implementation-SCM-Revision");
             if (revision == null) {
                 log.warn("Incomplete manifest file, missing revision property.");

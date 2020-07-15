@@ -67,7 +67,8 @@ public class LicenseGenerator {
 
             generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), licensesDirectory.getAbsolutePath());
             // Checking if the URL for licenses are present and are valid
-            File xmlFile = new File(licensesDirectory.getAbsolutePath());
+            File xmlFile = new File(licensesDirectory.getAbsolutePath(), "licenses.xml");
+            System.out.println(licensesDirectory.getAbsolutePath());
             boolean isInvalidLicensesPresent = XmlUtils
                     .isValidNodePresent(xmlFile, "//license[not(url)] or //url[not(string(.))]");
             if (isInvalidLicensesPresent) {
