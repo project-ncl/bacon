@@ -164,7 +164,7 @@ public class PigConfiguration {
             passes++;
 
             for (Map.Entry<String, String> entry : variables.entrySet()) {
-                String name = "\\{\\{" + entry.getKey() + "}}";
+                String name = "\\{\\{[\\s]*" + entry.getKey() + "[\\s]*}}";
                 String value = entry.getValue();
                 contents = contents.replaceAll(name, value);
             }
