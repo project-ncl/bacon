@@ -173,10 +173,10 @@ class BaconInstall:
         if self.snapshot:
             snapshot_version = self.__get_latest_snapshot_version()
             url = self.maven_url + \
-                latest_version + "/cli-" + snapshot_version + ".jar"
+                latest_version + "/cli-" + snapshot_version + "-shaded.jar"
         else:
             url = self.maven_url + \
-                latest_version + "/cli-" + latest_version + ".jar"
+                latest_version + "/cli-" + latest_version + "-shaded.jar"
 
         download_link(url, self.bacon_jar_location, "bacon.jar")
 
