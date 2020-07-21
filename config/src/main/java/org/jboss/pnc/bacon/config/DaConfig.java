@@ -24,6 +24,11 @@ import lombok.Data;
  *         Date: 12/17/18
  */
 @Data
-public class DaConfig {
+public class DaConfig implements Validate {
     private String url;
+
+    @Override
+    public void validate() {
+        Validate.validateUrl(url, "Dependency Analysis URL");
+    }
 }

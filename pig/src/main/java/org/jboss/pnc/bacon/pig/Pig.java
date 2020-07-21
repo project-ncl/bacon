@@ -26,6 +26,7 @@ import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -93,6 +94,10 @@ public class Pig extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
+
+                // validate the PiG config
+                Config.instance().getActiveProfile().getPig().validate();
+
                 PigContext.get().loadConfig(configDir);
                 ObjectHelper.print(jsonOutput, doExecute());
             });

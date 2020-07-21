@@ -43,6 +43,7 @@ public class KeycloakConfig implements Validate {
         return clientSecret != null && !clientSecret.isEmpty();
     }
 
+    @Override
     public void validate() {
 
         Validate.validateUrl(url, "Keycloak");
