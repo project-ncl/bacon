@@ -59,12 +59,28 @@ public class BuildInfoCollector {
         bd.setDependencyArtifacts(artifacts);
     }
 
-    public PncBuild getLatestBuild(String configId) {
+    public PncBuild getLatestBuild(String configId, BuildSearchType searchType) {
         try {
             BuildsFilterParameters filter = new BuildsFilterParameters();
+
+            Optional<String> queryParam;
+            switch (searchType) {
+                case ALL:
+                    queryParam = query("status==%s", BuildStatus.SUCCESS);
+                    break;
+                case PERMANENT:
+                    queryParam = query("status==%s;temporaryBuild==%s", BuildStatus.SUCCESS, false);
+                    break;
+                case TEMPORARY:
+                    queryParam = query("status==%s;temporaryBuild==%s", BuildStatus.SUCCESS, true);
+                    break;
+                default:
+                    queryParam = Optional.empty();
+            }
+
             // Note: sort by id not allowed
             Iterator<Build> buildIterator = buildConfigClient
-                    .getBuilds(configId, filter, of("=desc=submitTime"), query("status==%s", BuildStatus.SUCCESS))
+                    .getBuilds(configId, filter, of("=desc=submitTime"), queryParam)
                     .iterator();
 
             if (!buildIterator.hasNext()) {
@@ -100,5 +116,19 @@ public class BuildInfoCollector {
     public BuildInfoCollector() {
         buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
         buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
+    }
+
+    /**
+     * When using getLatestBuild, specify what latest build you want to find
+     */
+    public static enum BuildSearchType {
+        /** Find latest build whether it's permanent or temporary */
+        ALL,
+
+        /** Find latest permanent build */
+        PERMANENT,
+
+        /** Find latest temporary build */
+        TEMPORARY
     }
 }

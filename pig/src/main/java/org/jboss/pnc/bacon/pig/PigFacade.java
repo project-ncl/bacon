@@ -90,7 +90,7 @@ public class PigFacade {
         }
 
         new PncBuilder().buildAndWait(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode);
-        return getBuilds(importResult);
+        return getBuilds(importResult, tempBuild);
     }
 
     public static String run(
@@ -122,7 +122,7 @@ public class PigFacade {
         Map<String, PncBuild> builds;
         if (skipBuilds) {
             log.info("Skipping builds");
-            builds = getBuilds(importResult);
+            builds = getBuilds(importResult, tempBuild);
         } else {
             if (tempBuild) {
                 log.info("Temporary build");
@@ -307,12 +307,14 @@ public class PigFacade {
         return repoManager.prepare();
     }
 
-    private static Map<String, PncBuild> getBuilds(ImportResult importResult) {
+    private static Map<String, PncBuild> getBuilds(ImportResult importResult, boolean tempBuild) {
         BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
+        BuildInfoCollector.BuildSearchType buildSearchType = tempBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
+                : BuildInfoCollector.BuildSearchType.PERMANENT;
         return importResult.getBuildConfigs()
                 .parallelStream()
                 .map(BuildConfigData::getId)
-                .map(buildInfoCollector::getLatestBuild)
+                .map(bcId -> buildInfoCollector.getLatestBuild(bcId, buildSearchType))
                 .collect(Collectors.toMap(PncBuild::getName, Function.identity()));
     }
 
