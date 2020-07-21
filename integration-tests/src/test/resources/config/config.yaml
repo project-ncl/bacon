@@ -33,3 +33,8 @@
           realm: "${keycloak-realm}"
           username: "${keycloak-user}"
           clientSecret: "${keycloak-secret}"
+
+       pig:
+          kojiHubUrl: "http://koji.url"
+          licenseServiceUrl: "http://license.url"
+          indyUrl: "http://indy.url"
