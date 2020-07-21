@@ -192,9 +192,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
 
-            return super.executeHelper(
-                    commandInvocation,
-                    () -> CREATOR.getClientAuthenticated().closeMilestone(id, null));
+            return super.executeHelper(commandInvocation, () -> CREATOR.getClientAuthenticated().closeMilestone(id));
         }
     }
 
