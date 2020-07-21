@@ -125,7 +125,7 @@ public class PigFacade {
             builds = getBuilds(importResult);
         } else {
             if (tempBuild) {
-                log.info("Temprorary build");
+                log.info("Temporary build");
             }
             builds = build(tempBuild, tempBuildTS, rebuildMode);
         }

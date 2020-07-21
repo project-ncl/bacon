@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -526,9 +527,12 @@ public class PncEntitiesImporter {
 
     private List<BuildConfigData> getBuildConfigs() {
         List<BuildConfiguration> configs = getCurrentBuildConfigs();
+        Map<String, BuildConfig> nameToBC = pigConfiguration.getBuilds()
+                .stream()
+                .collect(Collectors.toMap(BuildConfig::getName, bc -> bc));
 
         return configs.stream().map(config -> {
-            BuildConfigData result = new BuildConfigData(null);
+            BuildConfigData result = new BuildConfigData(nameToBC.get(config.getName()));
             result.setOldConfig(config);
             return result;
         }).collect(Collectors.toList());
