@@ -117,7 +117,7 @@ public class LicenseGenerator {
         String licenseServiceProp = "";
         if (licenseServiceUrl != null) {
             licenseServiceProp = String.format(
-                    "licenseServiceUrl=http://%s/find-license-check-record-and-license-info",
+                    "licenseServiceUrl=%s/find-license-check-record-and-license-info",
                     licenseServiceUrl);
         }
         props.setProperty("licenseServiceUrl", licenseServiceProp);
