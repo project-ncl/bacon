@@ -30,8 +30,10 @@ import org.jboss.pnc.client.GenericSettingClient;
 @GroupCommandDefinition(
         name = "maintenance-mode",
         description = "Maintenance mode related tasks",
-        groupCommands = { MaintenanceModeCli.ActivateMaintenanceMode.class,
-                MaintenanceModeCli.DeactivateMaintenanceMode.class, MaintenanceModeCli.StatusMaintenanceMode.class })
+        groupCommands = {
+                MaintenanceModeCli.ActivateMaintenanceMode.class,
+                MaintenanceModeCli.DeactivateMaintenanceMode.class,
+                MaintenanceModeCli.StatusMaintenanceMode.class })
 public class MaintenanceModeCli extends AbstractCommand {
 
     private static final ClientCreator<GenericSettingClient> CREATOR = new ClientCreator<>(GenericSettingClient::new);

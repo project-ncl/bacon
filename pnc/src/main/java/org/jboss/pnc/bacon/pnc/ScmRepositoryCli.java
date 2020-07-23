@@ -46,7 +46,10 @@ import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
 @GroupCommandDefinition(
         name = "scm-repository",
         description = "Scm repository",
-        groupCommands = { ScmRepositoryCli.CreateAndSync.class, ScmRepositoryCli.Get.class, ScmRepositoryCli.List.class,
+        groupCommands = {
+                ScmRepositoryCli.CreateAndSync.class,
+                ScmRepositoryCli.Get.class,
+                ScmRepositoryCli.List.class,
                 ScmRepositoryCli.ListBuildConfigs.class, })
 @Slf4j
 public class ScmRepositoryCli extends AbstractCommand {

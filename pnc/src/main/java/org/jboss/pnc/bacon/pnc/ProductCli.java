@@ -40,7 +40,10 @@ import java.util.Optional;
 @GroupCommandDefinition(
         name = "product",
         description = "Product",
-        groupCommands = { ProductCli.Create.class, ProductCli.Get.class, ProductCli.List.class,
+        groupCommands = {
+                ProductCli.Create.class,
+                ProductCli.Get.class,
+                ProductCli.List.class,
                 ProductCli.Update.class })
 public class ProductCli extends AbstractCommand {
 

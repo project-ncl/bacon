@@ -40,7 +40,10 @@ import org.jboss.pnc.enums.SupportLevel;
 @GroupCommandDefinition(
         name = "product-release",
         description = "Product Release",
-        groupCommands = { ProductReleaseCli.Create.class, ProductReleaseCli.Update.class, ProductReleaseCli.Get.class,
+        groupCommands = {
+                ProductReleaseCli.Create.class,
+                ProductReleaseCli.Update.class,
+                ProductReleaseCli.Get.class,
                 ProductReleaseCli.ListSupportLevel.class })
 public class ProductReleaseCli extends AbstractCommand {
 
