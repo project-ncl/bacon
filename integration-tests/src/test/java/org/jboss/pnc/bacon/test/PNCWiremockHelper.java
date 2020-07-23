@@ -31,7 +31,7 @@ import org.jboss.pnc.dto.response.Page;
  */
 public class PNCWiremockHelper {
 
-    protected static final String REST = "/pnc-rest-new/rest-new";
+    protected static final String REST = "/pnc-rest/v2";
 
     private static final String TOKEN = "wiremocked-token";
 

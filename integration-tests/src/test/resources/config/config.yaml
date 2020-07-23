@@ -19,7 +19,7 @@
  profile:
     -  name: "default"
        pnc:
-           url: "${pnc-url}/pnc-rest-new/rest-new/"
+           url: "${pnc-url}/pnc-rest/v2/"
            bifrostBaseurl: "http://example.com"
 
 # ******************************************************************************
