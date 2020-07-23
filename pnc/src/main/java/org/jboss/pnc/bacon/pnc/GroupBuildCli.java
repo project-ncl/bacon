@@ -47,8 +47,12 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 @GroupCommandDefinition(
         name = "group-build",
         description = "Group builds",
-        groupCommands = { GroupBuildCli.Start.class, GroupBuildCli.Cancel.class, GroupBuildCli.List.class,
-                GroupBuildCli.ListBuilds.class, GroupBuildCli.Get.class })
+        groupCommands = {
+                GroupBuildCli.Start.class,
+                GroupBuildCli.Cancel.class,
+                GroupBuildCli.List.class,
+                GroupBuildCli.ListBuilds.class,
+                GroupBuildCli.Get.class })
 @Slf4j
 public class GroupBuildCli extends AbstractCommand {
 

@@ -47,9 +47,14 @@ import java.util.Optional;
 @GroupCommandDefinition(
         name = "product-version",
         description = "Product Version",
-        groupCommands = { ProductVersionCli.Create.class, ProductVersionCli.Get.class, ProductVersionCli.Update.class,
-                ProductVersionCli.ListBuildConfigs.class, ProductVersionCli.ListGroupConfigs.class,
-                ProductVersionCli.ListMilestones.class, ProductVersionCli.ListReleases.class })
+        groupCommands = {
+                ProductVersionCli.Create.class,
+                ProductVersionCli.Get.class,
+                ProductVersionCli.Update.class,
+                ProductVersionCli.ListBuildConfigs.class,
+                ProductVersionCli.ListGroupConfigs.class,
+                ProductVersionCli.ListMilestones.class,
+                ProductVersionCli.ListReleases.class })
 @Slf4j
 public class ProductVersionCli extends AbstractCommand {
 

@@ -43,9 +43,17 @@ import java.util.Map;
 @GroupCommandDefinition(
         name = "pig",
         description = "PiG tool",
-        groupCommands = { Pig.Configure.class, Pig.Build.class, Pig.Run.class, Pig.GenerateRepository.class,
-                Pig.GenerateLicenses.class, Pig.GenerateJavadocs.class, Pig.GenerateSources.class,
-                Pig.GenerateSharedContentAnalysis.class, Pig.GenerateDocuments.class, Pig.GenerateScripts.class,
+        groupCommands = {
+                Pig.Configure.class,
+                Pig.Build.class,
+                Pig.Run.class,
+                Pig.GenerateRepository.class,
+                Pig.GenerateLicenses.class,
+                Pig.GenerateJavadocs.class,
+                Pig.GenerateSources.class,
+                Pig.GenerateSharedContentAnalysis.class,
+                Pig.GenerateDocuments.class,
+                Pig.GenerateScripts.class,
                 Pig.TriggerAddOns.class })
 public class Pig extends AbstractCommand {
 

@@ -40,7 +40,12 @@ import java.util.stream.Stream;
 public class SharedContentReportGenerator {
     private static final Logger log = LoggerFactory.getLogger(SharedContentReportGenerator.class);
 
-    private static final String[] IGNORED = { "md5", "sha1", "-sources", "example-settings.xml", "README",
+    private static final String[] IGNORED = {
+            "md5",
+            "sha1",
+            "-sources",
+            "example-settings.xml",
+            "README",
             "maven-metadata.xml" };
 
     private final Collection<File> repositoryFiles;

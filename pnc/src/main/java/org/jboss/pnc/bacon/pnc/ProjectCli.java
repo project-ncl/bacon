@@ -44,8 +44,13 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 @GroupCommandDefinition(
         name = "project",
         description = "Project",
-        groupCommands = { ProjectCli.Create.class, ProjectCli.Get.class, ProjectCli.List.class,
-                ProjectCli.ListBuildConfigurations.class, ProjectCli.ListBuilds.class, ProjectCli.Update.class, })
+        groupCommands = {
+                ProjectCli.Create.class,
+                ProjectCli.Get.class,
+                ProjectCli.List.class,
+                ProjectCli.ListBuildConfigurations.class,
+                ProjectCli.ListBuilds.class,
+                ProjectCli.Update.class, })
 public class ProjectCli extends AbstractCommand {
 
     private static final ClientCreator<ProjectClient> CREATOR = new ClientCreator<>(ProjectClient::new);

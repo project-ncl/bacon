@@ -30,7 +30,8 @@ import org.jboss.pnc.client.GenericSettingClient;
 @GroupCommandDefinition(
         name = "announcement-banner",
         description = "Announcement banner related tasks",
-        groupCommands = { AnnouncementBannerCli.SetAnnouncementBanner.class,
+        groupCommands = {
+                AnnouncementBannerCli.SetAnnouncementBanner.class,
                 AnnouncementBannerCli.UnsetAnnouncementBanner.class,
                 AnnouncementBannerCli.GetAnnouncementBanner.class })
 public class AnnouncementBannerCli extends AbstractCommand {

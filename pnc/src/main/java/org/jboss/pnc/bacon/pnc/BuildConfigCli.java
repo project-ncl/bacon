@@ -54,8 +54,13 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 @GroupCommandDefinition(
         name = "build-config",
         description = "Build Config",
-        groupCommands = { BuildConfigCli.Create.class, BuildConfigCli.CreateWithSCM.class, BuildConfigCli.Get.class,
-                BuildConfigCli.List.class, BuildConfigCli.ListBuilds.class, BuildConfigCli.Update.class,
+        groupCommands = {
+                BuildConfigCli.Create.class,
+                BuildConfigCli.CreateWithSCM.class,
+                BuildConfigCli.Get.class,
+                BuildConfigCli.List.class,
+                BuildConfigCli.ListBuilds.class,
+                BuildConfigCli.Update.class,
                 BuildConfigCli.CreateRevision.class })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
