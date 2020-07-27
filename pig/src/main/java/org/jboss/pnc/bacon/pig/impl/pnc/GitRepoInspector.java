@@ -122,7 +122,7 @@ public class GitRepoInspector {
     }
 
     private static String getLatestBuiltRevision(String configId) {
-        PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, BuildInfoCollector.BuildSearchType.ALL);
+        PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, BuildInfoCollector.BuildSearchType.ANY);
         return latestBuild.getBuildConfigRevision().getScmRevision();
     }
 

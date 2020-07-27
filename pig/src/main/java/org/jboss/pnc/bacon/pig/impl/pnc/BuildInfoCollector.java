@@ -65,7 +65,7 @@ public class BuildInfoCollector {
 
             Optional<String> queryParam;
             switch (searchType) {
-                case ALL:
+                case ANY:
                     queryParam = query("status==%s", BuildStatus.SUCCESS);
                     break;
                 case PERMANENT:
@@ -123,7 +123,7 @@ public class BuildInfoCollector {
      */
     public static enum BuildSearchType {
         /** Find latest build whether it's permanent or temporary */
-        ALL,
+        ANY,
 
         /** Find latest permanent build */
         PERMANENT,
