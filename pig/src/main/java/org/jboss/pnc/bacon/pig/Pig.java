@@ -256,7 +256,7 @@ public class Pig extends AbstractCommand {
 
         @Override
         public ImportResult doExecute() {
-            ImportResult importResult = PigFacade.importPncEntities(skipBranchCheck);
+            ImportResult importResult = PigFacade.importPncEntities(skipBranchCheck, tempBuild);
             PigContext.get().setPncImportResult(importResult);
             return importResult;
         }

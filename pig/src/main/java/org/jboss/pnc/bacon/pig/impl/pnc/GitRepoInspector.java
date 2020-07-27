@@ -49,7 +49,21 @@ public class GitRepoInspector {
 
     private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
 
-    public static boolean isModifiedBranch(String configId, String internalUrl, String refSpec) {
+    /**
+     * Check if branch 'refSpec' is different from the branch used in the last successful build (either temporary or
+     * permanent).
+     *
+     * @param configId
+     * @param internalUrl
+     * @param refSpec
+     * @param temporaryBuild
+     * @return
+     */
+    public static boolean isModifiedBranch(
+            String configId,
+            String internalUrl,
+            String refSpec,
+            boolean temporaryBuild) {
 
         log.info(
                 "Trying to check if branch '" + refSpec + "' in '" + internalUrl
@@ -58,7 +72,7 @@ public class GitRepoInspector {
         try (Git git = cloneRepo(internalUrl, tempDir)) {
             String latestCommit = headRevision(git, refSpec);
 
-            String tagName = getLatestBuiltRevision(configId);
+            String tagName = getLatestBuiltRevision(configId, temporaryBuild);
             Set<String> baseCommitPosibilities = getBaseCommitPossibilities(git, tagName);
 
             return !baseCommitPosibilities.contains(latestCommit);
@@ -121,8 +135,10 @@ public class GitRepoInspector {
         return result;
     }
 
-    private static String getLatestBuiltRevision(String configId) {
-        PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, BuildInfoCollector.BuildSearchType.ANY);
+    private static String getLatestBuiltRevision(String configId, boolean temporaryBuild) {
+        BuildInfoCollector.BuildSearchType searchType = temporaryBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
+                : BuildInfoCollector.BuildSearchType.PERMANENT;
+        PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, searchType);
         return latestBuild.getBuildConfigRevision().getScmRevision();
     }
 

@@ -123,7 +123,10 @@ public class BuildConfig {
     }
 
     @JsonIgnore
-    public synchronized boolean isBranchModified(BuildConfiguration oldVersion, boolean skipBranchCheck) {
+    public synchronized boolean isBranchModified(
+            BuildConfiguration oldVersion,
+            boolean skipBranchCheck,
+            boolean temporaryBuild) {
         if (skipBranchCheck) {
             return false;
         }
@@ -131,13 +134,14 @@ public class BuildConfig {
             branchModified = GitRepoInspector.isModifiedBranch(
                     oldVersion.getId(),
                     oldVersion.getScmRepository().getInternalUrl(),
-                    getScmRevision());
+                    getScmRevision(),
+                    temporaryBuild);
         }
         return branchModified;
     }
 
     @JsonIgnore
-    public boolean isTheSameAs(BuildConfiguration old, boolean skipBranchCheck) {
+    public boolean isTheSameAs(BuildConfiguration old, boolean skipBranchCheck, boolean temporaryBuild) {
         return old != null && StringUtils.equals(name, old.getName())
                 && StringUtils.equals(project, old.getProject().getName())
                 && StringUtils.equals(buildScript, old.getBuildScript())
@@ -145,7 +149,7 @@ public class BuildConfig {
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && environmentId.equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
-                && !isBranchModified(old, skipBranchCheck);
+                && !isBranchModified(old, skipBranchCheck, temporaryBuild);
     }
 
     private Set<String> getAlignmentParameters(BuildConfiguration old) {
