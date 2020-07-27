@@ -41,8 +41,8 @@ public class BuildConfigData {
         this.newConfig = newConfig;
     }
 
-    public boolean shouldBeUpdated(boolean skipBranchCheck) {
-        return !newConfig.isTheSameAs(oldConfig, skipBranchCheck);
+    public boolean shouldBeUpdated(boolean skipBranchCheck, boolean temporaryBuild) {
+        return !newConfig.isTheSameAs(oldConfig, skipBranchCheck, temporaryBuild);
     }
 
     public void setOldConfig(BuildConfiguration oldConfig) {

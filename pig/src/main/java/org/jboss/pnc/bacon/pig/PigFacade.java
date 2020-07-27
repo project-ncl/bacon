@@ -68,9 +68,9 @@ public class PigFacade {
     private PigFacade() {
     }
 
-    public static ImportResult importPncEntities(boolean skipBranchCheck) {
+    public static ImportResult importPncEntities(boolean skipBranchCheck, boolean temporaryBuild) {
         PncEntitiesImporter pncImporter = new PncEntitiesImporter();
-        return pncImporter.performImport(skipBranchCheck);
+        return pncImporter.performImport(skipBranchCheck, temporaryBuild);
     }
 
     public static ImportResult readPncEntities() {
@@ -114,7 +114,7 @@ public class PigFacade {
         if (skipPncUpdate) {
             importResult = readPncEntities();
         } else {
-            importResult = importPncEntities(skipBranchCheck);
+            importResult = importPncEntities(skipBranchCheck, tempBuild);
         }
         context.setPncImportResult(importResult);
         context.storeContext();
