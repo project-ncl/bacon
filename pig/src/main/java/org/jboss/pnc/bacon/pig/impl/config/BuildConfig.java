@@ -20,8 +20,13 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.client.EnvironmentClient;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.enums.BuildType;
 import org.slf4j.Logger;
@@ -37,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +55,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 /**
+ * DTO representing the build-config field in build-config.yaml
+ *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/28/17
  */
@@ -57,6 +65,7 @@ public class BuildConfig {
     public static final String BUILD_FORCE = "BUILD_FORCE";
 
     private static final Logger log = LoggerFactory.getLogger(BuildConfig.class);
+    private static final ClientCreator<EnvironmentClient> CREATOR = new ClientCreator<>(EnvironmentClient::new);
 
     private String name;
     private String project;
@@ -66,6 +75,12 @@ public class BuildConfig {
     private String scmRevision;
     private String description;
     private String environmentId;
+
+    /**
+     * If environmentId is not specified, use 'environmentSystemImageId' to find the environmentId
+     */
+    private String systemImageId;
+
     private List<String> dependencies = new ArrayList<>();
 
     /**
@@ -147,14 +162,18 @@ public class BuildConfig {
                 && StringUtils.equals(buildScript, old.getBuildScript())
                 && StringUtils.equals(buildType, old.getBuildType().toString())
                 && StringUtils.equals(scmRevision, old.getScmRevision())
-                && environmentId.equals(old.getEnvironment().getId())
+                && getEnvironmentId().equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
                 && !isBranchModified(old, skipBranchCheck, temporaryBuild);
     }
 
     private Set<String> getAlignmentParameters(BuildConfiguration old) {
         String parametersAsString = old.getParameters().get("ALIGNMENT_PARAMETERS");
-        return Arrays.stream(parametersAsString.split(",")).collect(Collectors.toSet());
+        if (parametersAsString != null) {
+            return Arrays.stream(parametersAsString.split(",")).collect(Collectors.toSet());
+        } else {
+            return new HashSet<>();
+        }
     }
 
     private boolean urlsEqual(SCMRepository repo) {
@@ -273,5 +292,40 @@ public class BuildConfig {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Get the environmentId either as defined in the build-config.yaml or find it via environmentSystemImageId.
+     * 
+     * @return
+     */
+    public String getEnvironmentId() {
+
+        if (environmentId != null) {
+            return environmentId;
+        } else if (systemImageId != null) {
+
+            try {
+                Optional<Environment> environment = CREATOR.getClient()
+                        .getAll(Optional.empty(), Optional.of("systemImageId==" + systemImageId + ";deprecated==false"))
+                        .getAll()
+                        .stream()
+                        .findFirst();
+
+                if (environment.isPresent()) {
+                    environmentId = environment.get().getId();
+                    return environment.get().getId();
+                } else {
+                    log.error("Cannot find the environment in PNC for {}", systemImageId);
+                    throw new FatalException();
+                }
+            } catch (RemoteResourceException e) {
+                log.error("Exception while talking to PNC", e);
+                throw new FatalException();
+            }
+        } else {
+            log.error("No environmentId / environmentSystemImageId defined for the build config");
+            throw new FatalException();
+        }
     }
 }
