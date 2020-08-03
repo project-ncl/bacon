@@ -27,6 +27,8 @@ import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -88,7 +90,7 @@ public class Pig extends AbstractCommand {
                 overrideRequired = true,
                 defaultValue = TEMP_BUILD_DEFAULT,
                 description = TEMP_BUILD_DESC)
-        boolean tempBuild; // mstodo add support for specifying tempBuild for more commands
+        boolean tempBuild;
 
         @Option(
                 shortName = 'o',
@@ -104,7 +106,11 @@ public class Pig extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
 
                 // validate the PiG config
-                Config.instance().getActiveProfile().getPig().validate();
+                PigConfig pig = Config.instance().getActiveProfile().getPig();
+                if (pig == null) {
+                    throw new Validate.ConfigMissingException("Pig configuration missing");
+                }
+                pig.validate();
 
                 PigContext.get().loadConfig(configDir);
                 ObjectHelper.print(jsonOutput, doExecute());
