@@ -41,6 +41,7 @@ import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
 import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
@@ -109,28 +110,29 @@ public class GroupBuildCli extends AbstractCommand {
             // TODO add GroupBuildRequest with an option to specify BC revisions
 
             return super.executeHelper(commandInvocation, () -> {
-                if (timeout != null) {
-                    ObjectHelper.print(
-                            jsonOutput,
-                            GC_CREATOR.getClientAuthenticated()
-                                    .executeGroupBuild(
-                                            groupBuildConfigId,
-                                            groupBuildParams,
-                                            Long.parseLong(timeout),
-                                            TimeUnit.MINUTES));
-                    return;
-                }
+                try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
+                        .getClientAuthenticated()) {
+                    if (timeout != null) {
+                        ObjectHelper.print(
+                                jsonOutput,
+                                advancedGroupConfigurationClient.executeGroupBuild(
+                                        groupBuildConfigId,
+                                        groupBuildParams,
+                                        Long.parseLong(timeout),
+                                        TimeUnit.MINUTES));
+                        return;
+                    }
 
-                if (wait) {
-                    ObjectHelper.print(
-                            jsonOutput,
-                            GC_CREATOR.getClientAuthenticated()
-                                    .executeGroupBuild(groupBuildConfigId, groupBuildParams)
-                                    .join());
-                } else {
-                    ObjectHelper.print(
-                            jsonOutput,
-                            GC_CREATOR.getClientAuthenticated().trigger(groupBuildConfigId, groupBuildParams, null));
+                    if (wait) {
+                        ObjectHelper.print(
+                                jsonOutput,
+                                advancedGroupConfigurationClient.executeGroupBuild(groupBuildConfigId, groupBuildParams)
+                                        .join());
+                    } else {
+                        ObjectHelper.print(
+                                jsonOutput,
+                                advancedGroupConfigurationClient.trigger(groupBuildConfigId, groupBuildParams, null));
+                    }
                 }
             });
         }
