@@ -137,29 +137,27 @@ public class BuildCli extends AbstractCommand {
             buildParams.setBuildDependencies(!noBuildDependencies);
 
             return super.executeHelper(commandInvocation, () -> {
-                try (AdvancedBuildConfigurationClient client = BC_CREATOR.getClientAuthenticated()) {
+                final AdvancedBuildConfigurationClient client = BC_CREATOR.getClientAuthenticated();
 
-                    final Build build;
-                    if (revision == null) {
-                        if (timeout != null) {
-                            build = client.executeBuild(buildConfigId, buildParams, timeout, TimeUnit.MINUTES);
-                        } else if (wait) {
-                            build = client.executeBuild(buildConfigId, buildParams).join();
-                        } else {
-                            build = client.trigger(buildConfigId, buildParams);
-                        }
+                final Build build;
+                if (revision == null) {
+                    if (timeout != null) {
+                        build = client.executeBuild(buildConfigId, buildParams, timeout, TimeUnit.MINUTES);
+                    } else if (wait) {
+                        build = client.executeBuild(buildConfigId, buildParams).join();
                     } else {
-                        if (timeout != null) {
-                            build = client
-                                    .executeBuild(buildConfigId, revision, buildParams, timeout, TimeUnit.MINUTES);
-                        } else if (wait) {
-                            build = client.executeBuild(buildConfigId, revision, buildParams).join();
-                        } else {
-                            build = client.triggerRevision(buildConfigId, revision, buildParams);
-                        }
+                        build = client.trigger(buildConfigId, buildParams);
                     }
-                    ObjectHelper.print(jsonOutput, build);
+                } else {
+                    if (timeout != null) {
+                        build = client.executeBuild(buildConfigId, revision, buildParams, timeout, TimeUnit.MINUTES);
+                    } else if (wait) {
+                        build = client.executeBuild(buildConfigId, revision, buildParams).join();
+                    } else {
+                        build = client.triggerRevision(buildConfigId, revision, buildParams);
+                    }
                 }
+                ObjectHelper.print(jsonOutput, build);
             });
         }
 

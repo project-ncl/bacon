@@ -83,24 +83,25 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                try (AdvancedBuildClient buildClient = BUILD_CREATOR.getClientAuthenticated()) {
-                    BuildPushParameters request = BuildPushParameters.builder()
-                            .tagPrefix(tagPrefix)
-                            .reimport(reimport)
-                            .build();
+                BuildPushParameters request = BuildPushParameters.builder()
+                        .tagPrefix(tagPrefix)
+                        .reimport(reimport)
+                        .build();
 
-                    if (timeout != null) {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                buildClient.executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES));
-                        return;
-                    }
-
-                    if (wait)
-                        ObjectHelper.print(jsonOutput, buildClient.executeBrewPush(id, request).join());
-                    else
-                        ObjectHelper.print(jsonOutput, buildClient.push(id, request));
+                if (timeout != null) {
+                    ObjectHelper.print(
+                            jsonOutput,
+                            BUILD_CREATOR.getClientAuthenticated()
+                                    .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES));
+                    return;
                 }
+
+                if (wait)
+                    ObjectHelper.print(
+                            jsonOutput,
+                            BUILD_CREATOR.getClientAuthenticated().executeBrewPush(id, request).join());
+                else
+                    ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClientAuthenticated().push(id, request));
             });
         }
 
