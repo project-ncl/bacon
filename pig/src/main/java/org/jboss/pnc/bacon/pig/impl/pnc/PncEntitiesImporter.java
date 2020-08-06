@@ -52,7 +52,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -511,7 +510,7 @@ public class PncEntitiesImporter {
 
     public ImportResult readCurrentPncEntities() {
         product = getProduct().orElseThrow(
-                () -> new RuntimeException("Unable to product " + pigConfiguration.getProduct().getName()));
+                () -> new RuntimeException("Unable to get product by name " + pigConfiguration.getProduct().getName()));
         version = getVersion().orElseThrow(
                 () -> new RuntimeException(
                         "Unable to find version " + pigConfiguration.getMajorMinor() + " for product " + product));

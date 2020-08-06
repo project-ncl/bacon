@@ -30,12 +30,16 @@ import org.jboss.pnc.dto.BuildConfiguration;
 @Getter
 public class BuildConfigData {
     @Delegate
-    private final BuildConfig newConfig;
+    private BuildConfig newConfig;
     @Setter
     private String id;
     private BuildConfiguration oldConfig;
     @Setter
     private boolean modified = false;
+
+    @Deprecated // for jackson
+    public BuildConfigData() {
+    }
 
     public BuildConfigData(BuildConfig newConfig) {
         this.newConfig = newConfig;

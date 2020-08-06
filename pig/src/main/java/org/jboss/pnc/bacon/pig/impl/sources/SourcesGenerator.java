@@ -88,7 +88,7 @@ public class SourcesGenerator {
 
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
         builds.values().forEach(build -> {
-            URI url = gerritSnapshotDownloadUrl(build.getScmRepository().getInternalUrl(), build.getScmRevision());
+            URI url = gerritSnapshotDownloadUrl(build.getInternalScmUrl(), build.getScmRevision());
 
             File targetPath = new File(workDir, build.getName() + ".tar.gz");
             try {

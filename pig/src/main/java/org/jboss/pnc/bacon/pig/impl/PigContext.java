@@ -17,7 +17,10 @@
  */
 package org.jboss.pnc.bacon.pig.impl;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
@@ -45,11 +48,19 @@ import static java.lang.System.getProperty;
  */
 @Data
 public class PigContext {
-    private static final ObjectMapper jsonMapper = new ObjectMapper();
+    private static final ObjectMapper jsonMapper;
 
     private static final String contextLocation = getProperty(
             "pig.context.dir",
             getProperty("java.io.tmpdir") + File.separator + "pig-context");
+
+    static {
+        jsonMapper = new ObjectMapper();
+        jsonMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        jsonMapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+        jsonMapper.setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE);
+        jsonMapper.registerModule(new JavaTimeModule());
+    }
 
     private PigConfiguration pigConfiguration; // TODO merge config instead of setting it?
     private ImportResult pncImportResult;

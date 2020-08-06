@@ -36,4 +36,8 @@ public class ImportResult {
     private GroupConfigurationRef buildGroup;
     private ProductVersionRef version;
     private List<BuildConfigData> buildConfigs;
+
+    @Deprecated // for jackson only
+    public ImportResult() {
+    }
 }

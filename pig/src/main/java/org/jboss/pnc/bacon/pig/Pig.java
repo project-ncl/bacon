@@ -55,7 +55,7 @@ import java.util.Map;
                 Pig.GenerateSources.class,
                 Pig.GenerateSharedContentAnalysis.class,
                 Pig.GenerateDocuments.class,
-                Pig.GenerateScripts.class,
+                Pig.Release.class,
                 Pig.TriggerAddOns.class })
 public class Pig extends AbstractCommand {
 
@@ -264,6 +264,7 @@ public class Pig extends AbstractCommand {
         public ImportResult doExecute() {
             ImportResult importResult = PigFacade.importPncEntities(skipBranchCheck, tempBuild);
             PigContext.get().setPncImportResult(importResult);
+            PigContext.get().storeContext();
             return importResult;
         }
     }
@@ -317,6 +318,7 @@ public class Pig extends AbstractCommand {
         public RepositoryData doExecute() {
             RepositoryData result = PigFacade.generateRepo(removeGeneratedM2Dups);
             PigContext.get().setRepositoryData(result);
+            PigContext.get().storeContext();
             return result;
         }
     }
@@ -371,16 +373,6 @@ public class Pig extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "scripts", description = "GenerateScripts")
-    public class GenerateScripts extends PigCommand<String> {
-
-        @Override
-        public String doExecute() {
-            PigFacade.generateScripts();
-            return "Scripts generated successfully"; // TODO: better output
-        }
-    }
-
     @CommandDefinition(name = "addons", description = "Addons")
     public class TriggerAddOns extends PigCommand<String> {
 
@@ -388,6 +380,17 @@ public class Pig extends AbstractCommand {
         public String doExecute() {
             PigFacade.triggerAddOns();
             return "Add-ons executed successfully";
+        }
+    }
+
+    @CommandDefinition(name = "release", description = "Push builds to brew, generate the NVR list, " +
+            "close the PNC milestone, generate the upload to candidates script")
+    public class Release extends PigCommand<String> {
+
+        @Override
+        public String doExecute() {
+            PigFacade.release();
+            return "Release tasks complete";
         }
     }
 

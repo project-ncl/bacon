@@ -44,12 +44,17 @@ public class GAV {
 
     public static final Comparator<GAV> gapvcComparator = Comparator.comparing(GAV::toGapvc);
 
-    private final String packaging;
-    private final String groupId;
-    private final String artifactId;
-    private final String version;
+    private String packaging; // not final for jackson
+    private String groupId; // not final for jackson
+    private String artifactId; // not final for jackson
+    private String version; // not final for jackson
     private String scope;
     private String classifier;
+
+    @Deprecated // for jackson
+    public GAV() {
+
+    }
 
     public GAV(String path) {
         log.debug("parsing artifact path {}", path);

@@ -18,10 +18,11 @@
 
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Delegate;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.slf4j.Logger;
@@ -40,33 +41,44 @@ import static java.util.Arrays.asList;
  *         Date: 6/3/17
  */
 @Getter
+@Setter
 @ToString(exclude = "buildLog")
 @AllArgsConstructor
+@JsonIgnoreProperties(value = { "startTime", "endTime" })
 public class PncBuild {
     private static final Logger log = LoggerFactory.getLogger(PncBuild.class);
 
     public static final String SUCCESSFUL_STATUS = "DONE";
 
-    @Delegate
-    private final Build build;
-
+    private String internalScmUrl;
+    private String scmRevision;
+    private String id;
+    private String name;
     private List<String> buildLog;
     private List<ArtifactWrapper> builtArtifacts;
     private List<ArtifactWrapper> dependencyArtifacts;
 
-    public PncBuild(Build build) {
-        this.build = build;
+    @Deprecated // only for jackson
+    public PncBuild() {
+
     }
 
-    public void setBuiltArtifacts(List<Artifact> artifacts) {
+    public PncBuild(Build build) {
+        name = build.getBuildConfigRevision().getName();
+        id = build.getId();
+        internalScmUrl = build.getScmRepository().getInternalUrl();
+        scmRevision = build.getScmRevision();
+    }
+
+    public void addBuiltArtifacts(List<Artifact> artifacts) {
         builtArtifacts = artifacts.stream().map(ArtifactWrapper::new).collect(Collectors.toList());
     }
 
-    public void setBuildLog(String log) {
+    public void addBuildLog(String log) {
         buildLog = log == null ? Collections.emptyList() : asList(log.split("\\r?\\n"));
     }
 
-    public void setDependencyArtifacts(List<Artifact> artifacts) {
+    public void addDependencyArtifacts(List<Artifact> artifacts) {
         dependencyArtifacts = artifacts.stream().map(ArtifactWrapper::new).collect(Collectors.toList());
     }
 
@@ -95,18 +107,14 @@ public class PncBuild {
         if (artifacts.size() != 1) {
             throw new RuntimeException(
                     "Unexpected number of artifacts to download found.\n" + "Expecting one artifact matching " + pattern
-                            + " in build " + build.getId() + " , found: " + artifacts);
+                            + " in build " + id + " , found: " + artifacts);
         }
 
         ArtifactWrapper artifact = artifacts.get(0);
         artifact.downloadTo(downloadedZip);
     }
 
-    public String getName() {
-        return getBuildConfigRevision().getName();
-    }
-
     private List<ArtifactWrapper> findArtifactsMatching(Predicate<ArtifactWrapper> query) {
-        return getBuiltArtifacts().stream().filter(query).collect(Collectors.toList());
+        return builtArtifacts.stream().filter(query).collect(Collectors.toList());
     }
 }
