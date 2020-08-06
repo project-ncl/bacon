@@ -19,6 +19,7 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
@@ -34,11 +35,12 @@ import java.nio.file.Path;
  */
 @Getter
 @Slf4j
+@NoArgsConstructor
 public class ArtifactWrapper {
 
-    private final String gapv;
-    private final String fileName;
-    private final String downloadUrl;
+    private String gapv;
+    private String fileName;
+    private String downloadUrl;
 
     public ArtifactWrapper(Artifact artifact) {
         fileName = artifact.getFilename();

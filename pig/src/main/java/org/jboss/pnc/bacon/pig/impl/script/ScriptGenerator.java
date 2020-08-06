@@ -24,8 +24,6 @@ import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
-import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.pnc.dto.ProductMilestoneRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,7 +42,6 @@ import java.util.Set;
 public class ScriptGenerator {
     private static final Logger log = LoggerFactory.getLogger(ScriptGenerator.class);
 
-    public static final String SCRIPT_NAME = "generate-nvr-list.sh";
     private final PigConfiguration pigConfiguration;
     private final Deliverables deliverables;
 
@@ -54,21 +50,11 @@ public class ScriptGenerator {
         this.deliverables = deliverables;
     }
 
-    public void generateReleaseScripts(
-            ProductMilestoneRef milestone,
-            Path repoZipLocation,
-            Path targetDir,
-            Path releaseDir,
-            String brewTag,
-            List<String> buildIdsToPush) {
-        ReleaseScriptData dataRoot = getReleaseScriptData(
-                milestone,
-                repoZipLocation,
-                targetDir,
-                releaseDir,
-                brewTag,
-                buildIdsToPush);
-        generateCloseMilestoneScript(targetDir, dataRoot);
+    public void generateReleaseScripts(Path targetDir) {
+        String productWithVersion = pigConfiguration.getProduct().prefix() + "-" + pigConfiguration.getVersion() + "."
+                + pigConfiguration.getMilestone();
+
+        ReleaseScriptData dataRoot = new ReleaseScriptData(productWithVersion);
         generateUploadToCandidatesScript(targetDir, dataRoot);
     }
 
@@ -82,54 +68,13 @@ public class ScriptGenerator {
         makeScriptExecutable(uploadScriptLocation.toPath());
     }
 
-    private void generateCloseMilestoneScript(Path targetPath, ReleaseScriptData dataRoot) {
-
-        FileGenerator generator = new FileGenerator(Optional.empty());
-
-        File releaseScriptLocation = targetPath.resolve("release.sh").toFile();
-
-        generator.generateFileFromResource(dataRoot, "release.sh", releaseScriptLocation);
-
-        makeScriptExecutable(releaseScriptLocation.toPath());
-    }
-
-    private ReleaseScriptData getReleaseScriptData(
-            ProductMilestoneRef milestone,
-            Path repoZipLocation,
-            Path targetDir,
-            Path releaseDir,
-            String brewTag,
-            List<String> buildIdsToPush) {
-        String nvrListName = deliverables.getNvrListName();
-        String nvrScriptLocation = extractNvrListScript(targetDir.toFile());
-        String nvrListPath = releaseDir.resolve(nvrListName).toAbsolutePath().toString();
-        String productWithVersion = pigConfiguration.getProduct().prefix() + "-" + pigConfiguration.getVersion() + "."
-                + pigConfiguration.getMilestone();
-
-        return new ReleaseScriptData(
-                milestone.getId(),
-                nvrScriptLocation,
-                repoZipLocation.toAbsolutePath().toString(),
-                nvrListPath,
-                productWithVersion,
-                brewTag,
-                getKojiHubUrl(),
-                buildIdsToPush);
-    }
-
+    // mstodo this will be needed somewhere else
     private String getKojiHubUrl() {
         PigConfig pig = Config.instance().getActiveProfile().getPig();
         if (pig == null || pig.getKojiHubUrl() == null) {
             throw new RuntimeException("kojiHubUrl missing in pig config. Script generation aborted");
         }
         return pig.getKojiHubUrl();
-    }
-
-    private String extractNvrListScript(File targetDir) {
-        File nvrListScriptFile = new File(targetDir, SCRIPT_NAME);
-        File scriptFile = ResourceUtils.extractToFile("/" + SCRIPT_NAME, nvrListScriptFile);
-        makeScriptExecutable(scriptFile.toPath());
-        return scriptFile.getAbsolutePath();
     }
 
     private void makeScriptExecutable(Path script) {
@@ -147,13 +92,6 @@ public class ScriptGenerator {
     @Data
     @AllArgsConstructor
     public static class ReleaseScriptData {
-        private String milestoneId;
-        private String nvrListScriptLocation;
-        private String repoZipLocation;
-        private String targetPath;
         private String productWithVersion;
-        private String brewTag;
-        private String kojiHubUrl;
-        private List<String> buildsToPush;
     }
 }

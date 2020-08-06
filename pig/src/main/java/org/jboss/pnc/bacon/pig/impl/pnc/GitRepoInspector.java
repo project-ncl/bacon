@@ -139,7 +139,7 @@ public class GitRepoInspector {
         BuildInfoCollector.BuildSearchType searchType = temporaryBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
                 : BuildInfoCollector.BuildSearchType.PERMANENT;
         PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, searchType);
-        return latestBuild.getBuildConfigRevision().getScmRevision();
+        return latestBuild.getScmRevision();
     }
 
     private static URIish toAnonymous(String internalUrl) throws MalformedURLException {

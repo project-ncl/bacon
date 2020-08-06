@@ -188,11 +188,13 @@ public class PigFacade {
             log.info("Skipping Release Script Generation");
         }
         return "PiG run completed, the results are in: " + Paths.get(context().getTargetPath()).toAbsolutePath();
-
-        // verifyZipContents(); TODO a separate Jenkins Job to do it?
     }
 
-    public static void generateScripts() {
+    public static void release() {
+        pushToBrew();
+        generateNvrList();
+//        generateScripts();
+        // generate upload to candidates script
         ScriptGenerator scriptGenerator = new ScriptGenerator(
                 context().getPigConfiguration(),
                 context().getDeliverables());

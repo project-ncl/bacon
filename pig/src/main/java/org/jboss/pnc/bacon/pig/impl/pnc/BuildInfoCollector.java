@@ -56,7 +56,7 @@ public class BuildInfoCollector {
             throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
         }
 
-        bd.setDependencyArtifacts(artifacts);
+        bd.addDependencyArtifacts(artifacts);
     }
 
     public PncBuild getLatestBuild(String configId, BuildSearchType searchType) {
@@ -95,9 +95,9 @@ public class BuildInfoCollector {
             if (maybeBuildLogs.isPresent()) {
                 InputStream inputStream = maybeBuildLogs.get();
                 String log = readLog(inputStream);
-                result.setBuildLog(log);
+                result.addBuildLog(log);
             }
-            result.setBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
+            result.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
             return result;
         } catch (ClientException | IOException e) {
             throw new RuntimeException("Failed to get latest successful build for " + configId, e);

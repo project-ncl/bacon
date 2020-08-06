@@ -46,7 +46,7 @@
             <a href="http://${pncUrl}/pnc-web/#/build-records/${build.id}">Build
                 #${build.id}</a>
         </td>
-        <td>${build.scmUrl}</td>
+        <td>${build.internalScmUrl}</td>
         <td>${build.scmRevision}</td>
     </tr>
     </#list>
