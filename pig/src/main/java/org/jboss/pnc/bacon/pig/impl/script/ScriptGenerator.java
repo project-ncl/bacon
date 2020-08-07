@@ -43,11 +43,9 @@ public class ScriptGenerator {
     private static final Logger log = LoggerFactory.getLogger(ScriptGenerator.class);
 
     private final PigConfiguration pigConfiguration;
-    private final Deliverables deliverables;
 
-    public ScriptGenerator(PigConfiguration pigConfiguration, Deliverables deliverables) {
+    public ScriptGenerator(PigConfiguration pigConfiguration) {
         this.pigConfiguration = pigConfiguration;
-        this.deliverables = deliverables;
     }
 
     public void generateReleaseScripts(Path targetDir) {

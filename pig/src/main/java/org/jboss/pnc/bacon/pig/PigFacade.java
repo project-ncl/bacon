@@ -17,6 +17,16 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.NotFoundException;
+
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
@@ -24,6 +34,7 @@ import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.DocumentGenerator;
 import org.jboss.pnc.bacon.pig.impl.javadoc.JavadocManager;
 import org.jboss.pnc.bacon.pig.impl.license.LicenseManager;
+import org.jboss.pnc.bacon.pig.impl.nvr.NvrListGenerator;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildConfigData;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -39,24 +50,20 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.ProductVersionClient;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildPushResult;
+import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.enums.BuildPushStatus;
 import org.jboss.pnc.enums.RebuildMode;
+import org.jboss.pnc.restclient.AdvancedBuildClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.NotFoundException;
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 /**
- *
- * TODO: incremental suffix!
+ * MSTODO: incremental suffix! TODO: javadoc
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
@@ -182,29 +189,48 @@ public class PigFacade {
             log.info("Skipping Document Generation");
         }
 
-        if (!skipRepo && repo != null) {
-            generateScripts();
-        } else {
-            log.info("Skipping Release Script Generation");
-        }
         return "PiG run completed, the results are in: " + Paths.get(context().getTargetPath()).toAbsolutePath();
     }
 
     public static void release() {
-        pushToBrew();
+        pushToBrew(false);
         generateNvrList();
-//        generateScripts();
+
         // generate upload to candidates script
-        ScriptGenerator scriptGenerator = new ScriptGenerator(
-                context().getPigConfiguration(),
-                context().getDeliverables());
-        scriptGenerator.generateReleaseScripts(
-                context().getPncImportResult().getMilestone(),
-                context().getRepositoryData().getRepositoryPath(),
-                Paths.get(context().getTargetPath()),
-                Paths.get(context().getReleasePath()),
-                getBrewTag(context().getPncImportResult().getVersion()),
-                getBuildIdsToPush(context().getBuilds()));
+        ScriptGenerator scriptGenerator = new ScriptGenerator(context().getPigConfiguration());
+        scriptGenerator.generateReleaseScripts(Paths.get(context().getTargetPath()));
+    }
+
+    private static void generateNvrList() {
+        PigContext ctx = PigContext.get();
+        String repoZipPath = ctx.getRepositoryData().getRepositoryPath().toAbsolutePath().toString();
+        String targetPath = Paths.get(ctx.getExtrasPath())
+                .resolve(ctx.getDeliverables().getNvrListName())
+                .toAbsolutePath()
+                .toString();
+        NvrListGenerator.generateNvrList(repoZipPath, targetPath);
+    }
+
+    private static void pushToBrew(boolean reimport) {
+        Map<String, PncBuild> builds = PigContext.get().getBuilds();
+        String tagPrefix = getBrewTag(context().getPncImportResult().getVersion());
+        List<PncBuild> buildsToPush = getBuildsToPush(builds);
+        for (PncBuild build : buildsToPush) {
+            AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration());
+            BuildPushParameters request = BuildPushParameters.builder().tagPrefix(tagPrefix).reimport(reimport).build();
+
+            // TODO: customize the timeout
+            try {
+                BuildPushResult pushResult = pushingClient
+                        .executeBrewPush(build.getId(), request, 15, TimeUnit.MINUTES);
+                if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
+                    throw new RuntimeException(
+                            "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
+                }
+            } catch (RemoteResourceException e) {
+                throw new RuntimeException("Failed to push build " + build.getId() + " to brew", e);
+            }
+        }
     }
 
     public static void generateDocuments() {
@@ -244,16 +270,21 @@ public class PigFacade {
         return PigContext.get();
     }
 
-    private static String getBrewTag(ProductVersionRef version) {
+    private static String getBrewTag(ProductVersionRef versionRef) {
+        ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+        String versionId = versionRef.getId();
+
+        ProductVersion version = null;
+        try {
+            version = productVersionClient.getSpecific(versionId);
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Unable to get product version for " + versionId, e);
+        }
         return version.getAttributes().get("BREW_TAG_PREFIX");
     }
 
-    private static List<String> getBuildIdsToPush(Map<String, PncBuild> builds) {
-        return builds.values()
-                .stream()
-                .filter(PigFacade::notPushedToBrew)
-                .map(PncBuild::getId)
-                .collect(Collectors.toList());
+    private static List<PncBuild> getBuildsToPush(Map<String, PncBuild> builds) {
+        return builds.values().stream().filter(PigFacade::notPushedToBrew).collect(Collectors.toList());
     }
 
     private static boolean notPushedToBrew(PncBuild build) {
@@ -269,7 +300,7 @@ public class PigFacade {
                 throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
             }
         }
-        return pushResult != null && pushResult.getStatus() == BuildPushStatus.SUCCESS;
+        return pushResult == null || pushResult.getStatus() != BuildPushStatus.SUCCESS;
     }
 
     private static RepositoryData parseRepository(File repositoryZipPath) {

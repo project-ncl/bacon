@@ -252,6 +252,7 @@ public class PncEntitiesImporter {
             for (BuildConfiguration config : currentConfigs) {
                 if (config.getName().equals(bc.getName())) {
                     data.setOldConfig(config);
+                    data.setId(config.getId());
                     if (data.shouldBeUpdated(skipBranchCheck, temporaryBuild)) {
                         updateBuildConfig(data, config);
                     }
@@ -263,6 +264,7 @@ public class PncEntitiesImporter {
             if (matchedBuildConfig.isPresent()) {
                 log.debug("Found matching build config for {}", bc.getName());
                 data.setOldConfig(matchedBuildConfig.get());
+                data.setId(matchedBuildConfig.get().getId());
                 if (data.shouldBeUpdated(skipBranchCheck, temporaryBuild)) {
                     updateBuildConfig(data, matchedBuildConfig.get());
                 }
@@ -534,6 +536,7 @@ public class PncEntitiesImporter {
         return configs.stream().map(config -> {
             BuildConfigData result = new BuildConfigData(nameToBC.get(config.getName()));
             result.setOldConfig(config);
+            result.setId(config.getId());
             return result;
         }).collect(Collectors.toList());
     }
