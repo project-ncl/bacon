@@ -40,10 +40,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
- *         Date: 11/24/17
- */
 public class NvrListGenerator {
     private static final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);
 

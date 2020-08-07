@@ -33,6 +33,7 @@ public class BuildConfigData {
     private BuildConfig newConfig;
     @Setter
     private String id;
+    @Setter
     private BuildConfiguration oldConfig;
     @Setter
     private boolean modified = false;
@@ -47,10 +48,5 @@ public class BuildConfigData {
 
     public boolean shouldBeUpdated(boolean skipBranchCheck, boolean temporaryBuild) {
         return !newConfig.isTheSameAs(oldConfig, skipBranchCheck, temporaryBuild);
-    }
-
-    public void setOldConfig(BuildConfiguration oldConfig) {
-        this.oldConfig = oldConfig;
-        id = oldConfig.getId();
     }
 }

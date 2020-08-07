@@ -383,8 +383,10 @@ public class Pig extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "release", description = "Push builds to brew, generate the NVR list, " +
-            "close the PNC milestone, generate the upload to candidates script")
+    @CommandDefinition(
+            name = "release",
+            description = "Push builds to brew, generate the NVR list, "
+                    + "close the PNC milestone, generate the upload to candidates script")
     public class Release extends PigCommand<String> {
 
         @Override
