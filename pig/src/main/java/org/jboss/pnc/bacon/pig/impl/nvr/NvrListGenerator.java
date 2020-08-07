@@ -34,7 +34,6 @@ public final class NvrListGenerator {
     private static final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);
 
     private NvrListGenerator() {
-
     }
 
     public static boolean generateNvrList(String repoZipPath, String targetPath) {

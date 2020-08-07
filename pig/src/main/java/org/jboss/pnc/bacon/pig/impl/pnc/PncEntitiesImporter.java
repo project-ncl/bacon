@@ -100,7 +100,7 @@ public class PncEntitiesImporter {
     public ImportResult performImport(boolean skipBranchCheck, boolean temporaryBuild) {
         product = getOrGenerateProduct();
         version = getOrGenerateVersion();
-        milestone = pncConfigurator.getOrGenerateMilestone(version, pncMilestoneString());
+        milestone = pncConfigurator.getOrGenerateMilestone(version, PigContext.get().getFullVersion());
         pncConfigurator.markMilestoneCurrent(version, milestone);
         buildGroup = getOrGenerateBuildGroup();
 
@@ -516,8 +516,9 @@ public class PncEntitiesImporter {
         version = getVersion().orElseThrow(
                 () -> new RuntimeException(
                         "Unable to find version " + pigConfiguration.getMajorMinor() + " for product " + product));
-        milestone = pncConfigurator.getExistingMilestone(version, pncMilestoneString())
-                .orElseThrow(() -> new RuntimeException("Unable to find milestone " + pncMilestoneString())); // TODO
+        milestone = pncConfigurator.getExistingMilestone(version, PigContext.get().getFullVersion())
+                .orElseThrow(
+                        () -> new RuntimeException("Unable to find milestone " + PigContext.get().getFullVersion())); // TODO
 
         buildGroup = getBuildGroup()
                 .orElseThrow(() -> new RuntimeException("Unable to find build group " + pigConfiguration.getGroup()));
@@ -548,10 +549,5 @@ public class PncEntitiesImporter {
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to query for version", e);
         }
-    }
-
-    private String pncMilestoneString() {
-        return pigConfiguration.getMajorMinor() + "." + pigConfiguration.getMicro() + "."
-                + pigConfiguration.getMilestone();
     }
 }
