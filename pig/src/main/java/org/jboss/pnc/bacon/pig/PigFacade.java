@@ -47,6 +47,7 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.script.ScriptGenerator;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
@@ -63,7 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * MSTODO: incremental suffix! TODO: javadoc
+ * TODO: javadoc
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
@@ -75,7 +76,7 @@ public class PigFacade {
     private PigFacade() {
     }
 
-    public static ImportResult importPncEntities(boolean skipBranchCheck, boolean temporaryBuild) {
+    public static ImportResult configure(boolean skipBranchCheck, boolean temporaryBuild) {
         PncEntitiesImporter pncImporter = new PncEntitiesImporter();
         return pncImporter.performImport(skipBranchCheck, temporaryBuild);
     }
@@ -121,7 +122,7 @@ public class PigFacade {
         if (skipPncUpdate) {
             importResult = readPncEntities();
         } else {
-            importResult = importPncEntities(skipBranchCheck, tempBuild);
+            importResult = configure(skipBranchCheck, tempBuild);
         }
         context.setPncImportResult(importResult);
         context.storeContext();

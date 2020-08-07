@@ -28,7 +28,6 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,6 @@ public class DADao {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
         builder.providerFactory(factory);
-        factory.registerProvider(ResteasyJackson2Provider.class);
         ResteasyProviderFactory.setRegisterBuiltinByDefault(true);
         RegisterBuiltin.register(factory);
 

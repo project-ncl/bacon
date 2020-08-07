@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
 import lombok.Getter;
+import org.jboss.pnc.bacon.common.exception.TodoException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
@@ -180,9 +181,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private RepositoryData milestone() {
-        log.info("Generating maven repo for milestone [" + pigConfiguration.getMilestone() + "]");
+        log.info("Generating maven repo for milestone [" + PigContext.get().getFullVersion() + "]");
         // TODO
-        return null;
+        throw new TodoException();
     }
 
     private boolean areSourcesMissing(Set<GAV> list, GAV gav) {
@@ -339,7 +340,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         result.setFiles(RepoDescriptor.listFiles(contentsDirectory));
         result.setGavs(RepoDescriptor.listGavs(contentsDirectory));
         result.setRepositoryPath(targetZipPath);
-        log.info("create repository: {}", targetZipPath);
+        log.info("created repository: {}", targetZipPath);
         return result;
     }
 

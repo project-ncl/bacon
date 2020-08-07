@@ -66,6 +66,7 @@ public class PigConfiguration {
     private String majorMinor;
     private String micro;
     private Map<String, Map<String, ?>> addons = new HashMap<>();
+    private String releaseStorageUrl;
     private static final Integer maxTries = 256;
 
     private void init() {
@@ -217,5 +218,20 @@ public class PigConfiguration {
 
     public String getTopLevelDirectoryPrefix() {
         return String.format("%s-%s.%s-", outputPrefixes.getReleaseDir(), version, product.getStage());
+    }
+
+    @Deprecated
+    public String getVersion() {
+        return version;
+    }
+
+    @Deprecated
+    public String getMilestone() {
+        return milestone;
+    }
+
+    @Deprecated
+    public String getMajorMinor() {
+        return majorMinor;
     }
 }

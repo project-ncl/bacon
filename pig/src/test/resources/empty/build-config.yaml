@@ -1,38 +1,39 @@
 # at the moment not used in code, used for manual testing
 # TODO: create a functional tests module and move this file there
 product:
-  name: Empty Product
-  abbreviation: empty
-  stage: GA
-version: 1.0.1
-milestone: DR0
-group: empty-all
+    name: Empty Product with Thorntail abbreviation
+    abbreviation: thorn
+    stage: GA
+version: 2.2.0
+milestone: DR*
+releaseStorageUrl: http://rcm-guest.app.eng.bos.redhat.com/rcm-guest/staging/quarkus/
+group: empty-tt-all
 defaultBuildParameters:
-  environmentId: 3
-  buildScript: mvn clean deploy -DskipTests
+    environmentId: 3
+    buildScript: mvn clean deploy -DskipTests
 builds:
-  - name: michalszynkiewicz-empty
-    project: Empty
-    buildScript: mvn clean deploy
-    externalScmUrl: https://github.com/michalszynkiewicz/empty.git
-    scmRevision: master
+    -   name: michalszynkiewicz-et
+        project: Empty
+        buildScript: mvn clean deploy
+        externalScmUrl: https://github.com/michalszynkiewicz/empty.git
+        scmRevision: master
 
-  - name: michalszynkiewicz-empty2
-    project: Empty
-    buildScript: mvn clean deploy -DskipTests -B
-    externalScmUrl: https://github.com/michalszynkiewicz/empty2.git
-    scmRevision: 1.0.2
-    dependencies:
-      - michalszynkiewicz-empty
+    -   name: michalszynkiewicz-et2
+        project: Empty
+        buildScript: mvn clean deploy -DskipTests -B
+        externalScmUrl: https://github.com/michalszynkiewicz/empty2.git
+        scmRevision: 1.0.2
+        dependencies:
+            - michalszynkiewicz-et
 outputPrefixes:
-  releaseFile: rhoar-empty
-  releaseDir: empty
+    releaseFile: rhoar-empty
+    releaseDir: empty
 flow:
-  licensesGeneration:
-    strategy: GENERATE
-  repositoryGeneration:
-    strategy: BUILD_CONFIGS
-    sourceBuilds:
-      - michalszynkiewicz-empty
-  javadocGeneration:
-    strategy: IGNORE
+    licensesGeneration:
+        strategy: GENERATE
+    repositoryGeneration:
+        strategy: BUILD_CONFIGS
+        sourceBuilds:
+            - michalszynkiewicz-et
+    javadocGeneration:
+        strategy: IGNORE

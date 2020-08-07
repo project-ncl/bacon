@@ -17,14 +17,15 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -66,10 +67,9 @@ public class ExtraDeliverableDownloader extends AddOn {
 
     private String constructFileName(String suffix) {
         return String.format(
-                "%s-%s.%s-%s",
+                "%s-%s-%s",
                 pigConfiguration.getOutputPrefixes().getReleaseFile(),
-                pigConfiguration.getVersion(),
-                pigConfiguration.getMilestone(),
+                PigContext.get().getFullVersion(),
                 suffix);
     }
 }

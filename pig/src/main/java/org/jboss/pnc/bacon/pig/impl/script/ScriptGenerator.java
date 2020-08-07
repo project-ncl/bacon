@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
@@ -49,8 +50,8 @@ public class ScriptGenerator {
     }
 
     public void generateReleaseScripts(Path targetDir) {
-        String productWithVersion = pigConfiguration.getProduct().prefix() + "-" + pigConfiguration.getVersion() + "."
-                + pigConfiguration.getMilestone();
+        String version = PigContext.get().getFullVersion();
+        String productWithVersion = pigConfiguration.getProduct().prefix() + "-" + version;
 
         ReleaseScriptData dataRoot = new ReleaseScriptData(productWithVersion);
         generateUploadToCandidatesScript(targetDir, dataRoot);
@@ -64,15 +65,6 @@ public class ScriptGenerator {
         generator.generateFileFromResource(dataRoot, "uploadToCandidates.sh", uploadScriptLocation);
 
         makeScriptExecutable(uploadScriptLocation.toPath());
-    }
-
-    // mstodo this will be needed somewhere else
-    private String getKojiHubUrl() {
-        PigConfig pig = Config.instance().getActiveProfile().getPig();
-        if (pig == null || pig.getKojiHubUrl() == null) {
-            throw new RuntimeException("kojiHubUrl missing in pig config. Script generation aborted");
-        }
-        return pig.getKojiHubUrl();
     }
 
     private void makeScriptExecutable(Path script) {

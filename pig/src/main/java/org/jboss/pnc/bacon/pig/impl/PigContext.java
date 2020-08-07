@@ -27,6 +27,7 @@ import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,8 +52,8 @@ public class PigContext {
     private static final ObjectMapper jsonMapper;
 
     private static final String contextLocation = getProperty(
-            "pig.context.dir",
-            getProperty("java.io.tmpdir") + File.separator + "pig-context");
+            "pig.context.location",
+            getProperty("java.io.tmpdir") + File.separator + "pig-context.json");
 
     static {
         jsonMapper = new ObjectMapper();
@@ -73,15 +74,17 @@ public class PigContext {
     private String extrasPath;
 
     private boolean tempBuild;
+    // mstodo set the value to:
+    // pigConfiguration.getVersion() + "."
+    // + pigConfiguration.getMilestone()
+    private String fullVersion; // version like 1.3.2.DR7
 
     public void setPigConfiguration(PigConfiguration pigConfiguration) {
         this.pigConfiguration = pigConfiguration;
+        setUpFullVersion(pigConfiguration);
+
         if (deliverables == null) {
-            String prefix = String.format(
-                    "%s-%s.%s",
-                    pigConfiguration.getOutputPrefixes().getReleaseFile(),
-                    pigConfiguration.getVersion(),
-                    pigConfiguration.getMilestone());
+            String prefix = String.format("%s-%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion);
 
             deliverables = new Deliverables();
 
@@ -91,14 +94,32 @@ public class PigContext {
             deliverables.setJavadocZipName(prefix + "-javadoc.zip");
             deliverables.setNvrListName(prefix + "-nvr-list.txt");
         }
+
         configureTargetDirectories(pigConfiguration);
+    }
+
+    private void setUpFullVersion(PigConfiguration pigConfiguration) {
+        // TODO this won't work nice if we wanted to do pig build without sharing the context between configure and
+        // build.
+        // TODO: is this a valid scenario?
+        String milestone = pigConfiguration.getMilestone();
+        String version = pigConfiguration.getVersion();
+        if (milestone.contains("*")) {
+            String releaseStorageUrl = System.getProperty("releaseStorageUrl", pigConfiguration.getReleaseStorageUrl());
+            if (releaseStorageUrl == null) {
+                throw new RuntimeException(
+                        "Auto-incremented milestone used but no releaseStorageUrl provided. "
+                                + "Please either set the releaseStorageUrl in the build config yaml, by the product version or set the url by adding `-DreleaseStorageUrl=...` system property");
+            }
+            milestone = MilestoneNumberFinder.getFirstUnused(releaseStorageUrl, version, milestone);
+        }
+        setFullVersion(version + "." + milestone);
     }
 
     private void configureTargetDirectories(PigConfiguration pigConfiguration) {
         String productPrefix = pigConfiguration.getProduct().prefix();
         targetPath = "target"; // TODO: a way to customize it
-        releasePath = targetPath + "/" + productPrefix + "-" + pigConfiguration.getVersion() + "."
-                + pigConfiguration.getMilestone() + "/";
+        releasePath = targetPath + "/" + productPrefix + "-" + fullVersion + "/";
 
         File releaseDirectory = Paths.get(releasePath).toFile();
         if (!releaseDirectory.isDirectory()) {
