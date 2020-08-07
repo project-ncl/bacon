@@ -53,7 +53,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <aesh.version>2.6</aesh.version>
         <tagSuffix/>
-        <jaxb.version>2.2.11</jaxb.version>
+        <jaxb.version>2.3.0.1</jaxb.version>
         <version.compiler.plugin>3.8.1</version.compiler.plugin>
     </properties>
 
