@@ -24,7 +24,7 @@ fi
 REPOSITORY_ZIP=$1
 NVR_LIST_NAME=$2
 BUILD_DIR=nvr-list
-KBF_URL=https://repo1.maven.org/maven2/com/redhat/red/build/koji-build-finder/1.1.0/koji-build-finder-1.1.0-jar-with-dependencies.jar
+KBF_URL=https://repo1.maven.org/maven2/com/redhat/red/build/koji-build-finder/1.5.0/koji-build-finder-1.5.0-jar-with-dependencies.jar
 KBF_JAR=project-source-finder.jar
 
 echo "Generate NVR list from $REPOSITORY_ZIP to $NVR_LIST_NAME"
