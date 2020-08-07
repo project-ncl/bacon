@@ -49,11 +49,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <aesh.version>2.6</aesh.version>
         <tagSuffix/>
         <jaxb.version>2.2.11</jaxb.version>
+        <version.compiler.plugin>3.8.1</version.compiler.plugin>
     </properties>
 
     <dependencyManagement>
@@ -328,6 +329,26 @@
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.compiler.plugin}</version>
+                    <configuration>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <testSource>${maven.compiler.source}</testSource>
+                        <testTarget>${maven.compiler.target}</testTarget>
+                        <compilerArgs>
+                            <arg>-Xlint:unchecked</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -434,7 +455,7 @@
             </snapshots>
             <url>https://repository.jboss.org/nexus/content/groups/public/</url>
         </repository>
-        
+
         <repository>
             <id>Nexus Staging</id>
             <url>https://oss.sonatype.org/content/groups/staging</url>
@@ -443,4 +464,5 @@
             </snapshots>
         </repository>
     </repositories>
+
 </project>
