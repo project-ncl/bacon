@@ -17,71 +17,39 @@
  */
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
-import com.redhat.red.build.finder.BuildConfig;
-import com.redhat.red.build.finder.BuildFinder;
-import com.redhat.red.build.finder.DistributionAnalyzer;
 import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.finder.KojiClientSession;
 import com.redhat.red.build.finder.report.NVRReport;
 import com.redhat.red.build.finder.report.Report;
-import com.redhat.red.build.koji.KojiClientException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
+import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
-public class NvrListGenerator {
+public final class NvrListGenerator {
     private static final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);
+
+    private NvrListGenerator() {
+
+    }
 
     public static boolean generateNvrList(String repoZipPath, String targetPath) {
         log.info("Generating NVR list for {} and saving result to {}", repoZipPath, targetPath);
 
-        BuildConfig config = BrewSearcher.getKojiBuildFinderConfig();
-        DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(repoZipPath)), config);
-        Map<String, Collection<String>> checksumTable;
-
-        try {
-            checksumTable = da.checksumFiles().asMap();
-        } catch (IOException e) {
-            log.error("Failed to get checksums for {}: {}", repoZipPath, e.getMessage());
-            return false;
-        }
-
-        KojiClientSession session;
-
-        try {
-            session = new KojiClientSession(config.getKojiHubURL());
-        } catch (KojiClientException e) {
-            log.error("Failed to create Koji session: {}", e.getMessage());
-            return false;
-        }
-
-        Map<Integer, KojiBuild> builds;
-
-        try {
-            BuildFinder bf = new BuildFinder(session, config);
-            builds = bf.findBuilds(checksumTable);
-        } finally {
-            session.close();
-        }
-
-        List<KojiBuild> buildList = new ArrayList<>(builds.values());
-        buildList.sort(Comparator.comparingInt(b -> b.getBuildInfo().getId()));
-        buildList = Collections.unmodifiableList(buildList);
-
+        List<KojiBuild> builds = BuildFinderUtils.findBuilds(repoZipPath, true);
         File outputDirectory = new File(FilenameUtils.getPath(targetPath));
-        Report nvrReport = new NVRReport(outputDirectory, buildList);
-        nvrReport.outputText();
+        Report nvrReport = new NVRReport(outputDirectory, builds);
+
+        try {
+            nvrReport.outputText();
+        } catch (IOException e) {
+            log.error("Failed to write file {}.txt: {}", nvrReport.getBaseFilename(), e.getMessage(), e);
+            return false;
+        }
 
         File srcFile = new File(outputDirectory, nvrReport.getBaseFilename() + ".txt");
         File destFile = new File(targetPath);
@@ -89,13 +57,10 @@ public class NvrListGenerator {
         try {
             FileUtils.moveFile(srcFile, destFile);
         } catch (IOException e) {
-            log.error("Failed to move {} to {}: {}", srcFile, destFile, e.getMessage());
+            log.error("Failed to move {} to {}: {}", srcFile, destFile, e.getMessage(), e);
             return false;
         }
 
         return destFile.exists();
-    }
-
-    private NvrListGenerator() {
     }
 }

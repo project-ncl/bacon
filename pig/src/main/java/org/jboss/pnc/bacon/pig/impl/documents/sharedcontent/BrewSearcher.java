@@ -18,100 +18,26 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.red.build.finder.BuildConfig;
-import com.redhat.red.build.finder.BuildFinder;
-import com.redhat.red.build.finder.DistributionAnalyzer;
 import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.finder.KojiClientSession;
 import com.redhat.red.build.koji.KojiClientException;
-import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
-import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
-import org.jboss.pnc.bacon.config.Config;
-import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
  * TODO: 1. move out methods that manipulated on SharedContentReportRow TODO: 2. move to a dedicated package
- * 
+ *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
 public class BrewSearcher {
     private static final Logger log = LoggerFactory.getLogger(BrewSearcher.class);
-
-    private static final String KOJI_BUILD_FINDER_CONFIG_ENV = "KOJI_BUILD_FINDER_CONFIG";
-
-    private static final String KOJI_BUILD_FINDER_CONFIG_PROP = "koji.build.finder.config";
-
-    private static final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "koji-build-finder/config.json";
-
-    public static BuildConfig getKojiBuildFinderConfigFromFile(final File file) {
-        try {
-            final String json = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            return getKojiBuildFinderConfigFromJson(json);
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                    "Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(),
-                    e);
-        }
-    }
-
-    public static BuildConfig getKojiBuildFinderConfigFromFile(final String filename) {
-        return getKojiBuildFinderConfigFromFile(new File(filename));
-    }
-
-    public static BuildConfig getKojiBuildFinderConfigFromResource(final String resourceName) {
-        Properties props = new Properties();
-        props.setProperty("KOJI_URL", Config.instance().getActiveProfile().getPig().getKojiHubUrl());
-
-        String json = ResourceUtils.extractToStringWithFiltering(KOJI_BUILD_FINDER_CONFIG_TEMPLATE, props);
-
-        return getKojiBuildFinderConfigFromJson(json);
-    }
-
-    public static BuildConfig getKojiBuildFinderConfigFromJson(final String json) {
-        final ObjectMapper mapper = new KojiObjectMapper();
-
-        try {
-            final BuildConfig config = mapper.readValue(json, BuildConfig.class);
-            return config;
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed read Koji Build Finder configuration from json: " + json, e);
-        }
-    }
-
-    public static BuildConfig getKojiBuildFinderConfig() {
-        final String propFilename = System.getProperty(KOJI_BUILD_FINDER_CONFIG_PROP);
-
-        if (propFilename != null) {
-            return getKojiBuildFinderConfigFromFile(propFilename);
-        }
-
-        final String envFilename = System.getenv(KOJI_BUILD_FINDER_CONFIG_ENV);
-
-        if (envFilename != null) {
-            return getKojiBuildFinderConfigFromFile(envFilename);
-        }
-
-        return getKojiBuildFinderConfigFromResource(KOJI_BUILD_FINDER_CONFIG_TEMPLATE);
-    }
 
     public static void fillBrewData(SharedContentReportRow row) {
         log.debug("Asking for {}\n", row.toGapv());
@@ -137,49 +63,7 @@ public class BrewSearcher {
     }
 
     public static List<KojiBuild> getBuilds(final Path filePath) {
-        KojiClientSession session;
-        BuildConfig config;
-
-        try {
-            config = getKojiBuildFinderConfig();
-            session = new KojiClientSession(config.getKojiHubURL());
-        } catch (KojiClientException e) {
-            throw new IllegalStateException("Failed to create Koji session", e);
-        }
-
-        DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(filePath.toFile()), config);
-        Map<String, Collection<String>> checksumTable;
-        List<KojiBuild> buildList;
-
-        try {
-            checksumTable = da.checksumFiles().asMap();
-            BuildFinder bf = new BuildFinder(session, config);
-            Map<Integer, KojiBuild> builds = bf.findBuilds(checksumTable);
-            buildList = new ArrayList<>(builds.values());
-            buildList.sort(Comparator.comparingInt(b -> b.getBuildInfo().getId()));
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to find Koji builds", e);
-        } finally {
-            session.close();
-        }
-
-        List<KojiArchiveInfo> archiveInfos = buildList.stream()
-                .map(KojiBuild::getProjectSourcesTgz)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        try {
-            session = new KojiClientSession(config.getKojiHubURL());
-            session.enrichArchiveTypeInfo(archiveInfos);
-        } catch (KojiClientException e) {
-            throw new IllegalStateException("Failed to enrich Koji builds", e);
-        } finally {
-            session.close();
-        }
-
-        List<KojiBuild> ret = buildList.stream().skip(1).collect(Collectors.toList());
-
-        return Collections.unmodifiableList(ret);
+        return BuildFinderUtils.findBuilds(filePath, false);
     }
 
     private static void fillBuiltBy(SharedContentReportRow row, KojiBuild build) {
