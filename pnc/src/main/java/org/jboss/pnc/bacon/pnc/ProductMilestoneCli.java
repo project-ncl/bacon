@@ -234,7 +234,8 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
-            return CREATOR.getClient().getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.of(query));
+            return CREATOR.getClient()
+                    .getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
