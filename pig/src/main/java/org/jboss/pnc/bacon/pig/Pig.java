@@ -17,6 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -35,8 +38,6 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
-
-import java.util.Map;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -94,10 +95,14 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
+
+        @Option(
+                name = "releaseStorageUrl",
+                description = "use json for output (default to yaml)")
+        private String releaseStorageUrl;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
@@ -112,7 +117,8 @@ public class Pig extends AbstractCommand {
                 }
                 pig.validate();
 
-                PigContext.get().loadConfig(configDir);
+                Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
+                PigContext.get().loadConfig(configDir, releaseStorageUrl);
                 ObjectHelper.print(jsonOutput, doExecute());
             });
         }
@@ -231,7 +237,6 @@ public class Pig extends AbstractCommand {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
 
-            PigContext.get().loadConfig(configDir);
             return PigFacade.run(
                     skipRepo,
                     skipPncUpdate,

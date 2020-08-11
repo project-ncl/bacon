@@ -6,7 +6,7 @@ product:
     stage: GA
 version: 2.2.0
 milestone: DR*
-releaseStorageUrl: http://rcm-guest.app.eng.bos.redhat.com/rcm-guest/staging/quarkus/
+#releaseStorageUrl: http://rcm-guest.app.eng.bos.redhat.com/rcm-guest/staging/quarkus/tmp/empty
 group: empty-tt-all
 defaultBuildParameters:
     environmentId: 3

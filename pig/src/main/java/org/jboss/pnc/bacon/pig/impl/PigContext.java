@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.System.getProperty;
 
@@ -74,14 +75,12 @@ public class PigContext {
     private String extrasPath;
 
     private boolean tempBuild;
-    // mstodo set the value to:
-    // pigConfiguration.getVersion() + "."
-    // + pigConfiguration.getMilestone()
+
     private String fullVersion; // version like 1.3.2.DR7
 
-    public void setPigConfiguration(PigConfiguration pigConfiguration) {
+    public void setPigConfiguration(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
         this.pigConfiguration = pigConfiguration;
-        setUpFullVersion(pigConfiguration);
+        initFullVersion(pigConfiguration, releaseStorageUrl);
 
         if (deliverables == null) {
             String prefix = String.format("%s-%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion);
@@ -98,20 +97,22 @@ public class PigContext {
         configureTargetDirectories(pigConfiguration);
     }
 
-    private void setUpFullVersion(PigConfiguration pigConfiguration) {
-        // TODO this won't work nice if we wanted to do pig build without sharing the context between configure and
-        // build.
-        // TODO: is this a valid scenario?
+    private void initFullVersion(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
+        if (fullVersion != null) {
+            return;
+        }
+        @SuppressWarnings("deprecation")
         String milestone = pigConfiguration.getMilestone();
+        @SuppressWarnings("deprecation")
         String version = pigConfiguration.getVersion();
         if (milestone.contains("*")) {
-            String releaseStorageUrl = System.getProperty("releaseStorageUrl", pigConfiguration.getReleaseStorageUrl());
-            if (releaseStorageUrl == null) {
+            String url = releaseStorageUrl.orElse(pigConfiguration.getReleaseStorageUrl());
+            if (url == null) {
                 throw new RuntimeException(
                         "Auto-incremented milestone used but no releaseStorageUrl provided. "
-                                + "Please either set the releaseStorageUrl in the build config yaml, by the product version or set the url by adding `-DreleaseStorageUrl=...` system property");
+                                + "Please either set the releaseStorageUrl in the build config yaml, by the product version or set the url by adding `--releaseStorageUrl=...` parameter");
             }
-            milestone = MilestoneNumberFinder.getFirstUnused(releaseStorageUrl, version, milestone);
+            milestone = MilestoneNumberFinder.getFirstUnused(url, version, milestone);
         }
         setFullVersion(version + "." + milestone);
     }
@@ -144,12 +145,12 @@ public class PigContext {
         }
     }
 
-    public void loadConfig(String configDirStr) {
+    public void loadConfig(String configDirStr, Optional<String> releaseStorageUrl) {
         Path configDir = Paths.get(configDirStr);
         File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
-                setPigConfiguration(PigConfiguration.load(configStream));
+                setPigConfiguration(PigConfiguration.load(configStream), releaseStorageUrl);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
             }
