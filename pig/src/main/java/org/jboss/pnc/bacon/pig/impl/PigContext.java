@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -44,7 +45,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_LOCATION;
+import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
 
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed
@@ -59,6 +60,7 @@ public class PigContext {
 
     static {
         jsonMapper = new ObjectMapper();
+        jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
         jsonMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         jsonMapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
         jsonMapper.setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE);
@@ -180,30 +182,28 @@ public class PigContext {
 
     private static PigContext readContext(boolean clean) {
         PigContext result;
-        String ctxLocationEnv = System.getenv(PIG_CONTEXT_LOCATION);
-        Path contextLocation = ctxLocationEnv == null ? Paths.get(".bacon/pig-context.json")
-                : Paths.get(ctxLocationEnv);
-        if (!clean && Files.exists(contextLocation)) {
-
-            try (InputStream input = Files.newInputStream(contextLocation)) {
+        String ctxLocationEnv = System.getenv(PIG_CONTEXT_DIR);
+        Path contextDir = ctxLocationEnv == null ? Paths.get(".bacon") : Paths.get(ctxLocationEnv);
+        Path contextJson = contextDir.resolve("pig-context.json");
+        if (!clean && Files.exists(contextJson)) {
+            try (InputStream input = Files.newInputStream(contextJson)) {
                 result = jsonMapper.readerFor(PigContext.class).readValue(input);
             } catch (IOException e) {
-                throw new RuntimeException("failed to read PigContext from " + contextLocation.toAbsolutePath(), e);
+                throw new RuntimeException("failed to read PigContext from " + contextDir.toAbsolutePath(), e);
             }
         } else {
             result = new PigContext();
         }
 
-        Path ctxDir = contextLocation.getParent();
-        if (!Files.exists(ctxDir)) {
+        if (!Files.exists(contextDir)) {
             try {
-                Files.createDirectories(ctxDir);
+                Files.createDirectories(contextDir);
             } catch (IOException e) {
                 throw new RuntimeException(
-                        "Failed to create a directory to store the pig context: " + ctxDir.toAbsolutePath());
+                        "Failed to create a directory to store the pig context: " + contextDir.toAbsolutePath());
             }
         }
-        result.setContextLocation(contextLocation.toAbsolutePath().toString());
+        result.setContextLocation(contextJson.toAbsolutePath().toString());
 
         return result;
     }
