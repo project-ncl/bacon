@@ -93,16 +93,20 @@ public class Pig extends AbstractCommand {
                 description = TEMP_BUILD_DESC)
         boolean tempBuild;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Option(
                 name = "releaseStorageUrl",
-                description = "use json for output (default to yaml)")
+                description = "Location of the release storage, typically on rcm-guest staging. Required for auto-incremented milestones, e.g. DR*")
         private String releaseStorageUrl;
+
+        @Option(
+                name = "clean",
+                hasValue = false,
+                defaultValue = "false",
+                description = "If enabled, the pig execution will not attempt to continue the previous execution")
+        private boolean clean;
 
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
@@ -118,7 +122,7 @@ public class Pig extends AbstractCommand {
                 pig.validate();
 
                 Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
-                PigContext.get().loadConfig(configDir, releaseStorageUrl);
+                PigContext.init(clean, configDir, releaseStorageUrl);
                 ObjectHelper.print(jsonOutput, doExecute());
             });
         }

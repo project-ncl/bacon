@@ -17,11 +17,18 @@
  */
 package org.jboss.pnc.bacon.pig.impl;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.Data;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Optional;
+
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -29,18 +36,15 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import static java.lang.System.getProperty;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_LOCATION;
 
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed
@@ -49,12 +53,9 @@ import static java.lang.System.getProperty;
  *         Date: 4/1/19
  */
 @Data
+@Slf4j
 public class PigContext {
     private static final ObjectMapper jsonMapper;
-
-    private static final String contextLocation = getProperty(
-            "pig.context.location",
-            getProperty("java.io.tmpdir") + File.separator + "pig-context.json");
 
     static {
         jsonMapper = new ObjectMapper();
@@ -76,9 +77,26 @@ public class PigContext {
 
     private boolean tempBuild;
 
+    private String contextLocation;
+
     private String fullVersion; // version like 1.3.2.DR7
 
-    public void setPigConfiguration(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
+    public void initConfig(String configDirStr, Optional<String> releaseStorageUrl) {
+        Path configDir = Paths.get(configDirStr);
+        File configFile = configDir.resolve("build-config.yaml").toFile();
+        if (configFile.exists()) {
+            try (FileInputStream configStream = new FileInputStream(configFile)) {
+                setPigConfiguration(PigConfiguration.load(configStream), releaseStorageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
+            }
+        } else {
+            throw new MisconfigurationException(
+                    "The provided config file: " + configFile.getAbsolutePath() + " does not exist");
+        }
+    }
+
+    private void setPigConfiguration(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
         this.pigConfiguration = pigConfiguration;
         initFullVersion(pigConfiguration, releaseStorageUrl);
 
@@ -145,45 +163,48 @@ public class PigContext {
         }
     }
 
-    public void loadConfig(String configDirStr, Optional<String> releaseStorageUrl) {
-        Path configDir = Paths.get(configDirStr);
-        File configFile = configDir.resolve("build-config.yaml").toFile();
-        if (configFile.exists()) {
-            try (FileInputStream configStream = new FileInputStream(configFile)) {
-                setPigConfiguration(PigConfiguration.load(configStream), releaseStorageUrl);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
-            }
-        } else {
-            throw new MisconfigurationException(
-                    "The provided config file: " + configFile.getAbsolutePath() + " does not exist");
-        }
-    }
-
     /*
      * STATICS
      */
     private static PigContext instance;
 
-    static {
-        instance = readContext();
-    }
-
     public static PigContext get() {
         return instance;
     }
 
-    private static PigContext readContext() {
-        if (getProperty("pig.continue") != null) {
-            File contextFile = new File(contextLocation);
-            if (contextFile.exists()) {
-                try (InputStream input = new FileInputStream(contextFile)) {
-                    return jsonMapper.readerFor(PigContext.class).readValue(input);
-                } catch (IOException e) {
-                    throw new RuntimeException("failed to read PigContext", e);
-                }
+    public static PigContext init(boolean clean, String configDir, Optional<String> releaseStorageUrl) {
+        instance = readContext(clean);
+        instance.initConfig(configDir, releaseStorageUrl);
+        return instance;
+    }
+
+    private static PigContext readContext(boolean clean) {
+        PigContext result;
+        String ctxLocationEnv = System.getenv(PIG_CONTEXT_LOCATION);
+        Path contextLocation = ctxLocationEnv == null ? Paths.get(".bacon/pig-context.json")
+                : Paths.get(ctxLocationEnv);
+        if (!clean && Files.exists(contextLocation)) {
+
+            try (InputStream input = Files.newInputStream(contextLocation)) {
+                result = jsonMapper.readerFor(PigContext.class).readValue(input);
+            } catch (IOException e) {
+                throw new RuntimeException("failed to read PigContext from " + contextLocation.toAbsolutePath(), e);
+            }
+        } else {
+            result = new PigContext();
+        }
+
+        Path ctxDir = contextLocation.getParent();
+        if (!Files.exists(ctxDir)) {
+            try {
+                Files.createDirectories(ctxDir);
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "Failed to create a directory to store the pig context: " + ctxDir.toAbsolutePath());
             }
         }
-        return new PigContext();
+        result.setContextLocation(contextLocation.toAbsolutePath().toString());
+
+        return result;
     }
 }

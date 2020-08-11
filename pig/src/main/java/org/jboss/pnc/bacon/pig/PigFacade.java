@@ -235,6 +235,11 @@ public class PigFacade {
     }
 
     public static void generateDocuments() {
+        if (context().getRepositoryData() == null) {
+            log.error(
+                    "No repository data available for document generation. Please make sure to run `pig repo` before `pig docs`");
+            System.exit(1);
+        }
         DocumentGenerator docGenerator = new DocumentGenerator(
                 context().getPigConfiguration(),
                 context().getReleasePath(),
