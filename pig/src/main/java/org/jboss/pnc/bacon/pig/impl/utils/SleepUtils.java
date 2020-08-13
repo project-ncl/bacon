@@ -46,14 +46,14 @@ public class SleepUtils {
         do {
             sleep(checkInterval);
             if (printDot) {
-                System.out.print(".");
+                System.err.print(".");
             }
         } while (!condition.get());
     }
 
     /**
      * Wait until the <code>condition</code> returns a non null value or time out is reached
-     * 
+     *
      * @param condition the condition to evaluate
      * @param checkInterval [seconds] amount of time to wait before attempts
      * @param timeout [seconds] timeout
