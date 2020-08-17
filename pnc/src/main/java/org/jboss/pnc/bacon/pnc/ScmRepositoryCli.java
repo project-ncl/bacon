@@ -50,6 +50,7 @@ import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
                 ScmRepositoryCli.CreateAndSync.class,
                 ScmRepositoryCli.Get.class,
                 ScmRepositoryCli.List.class,
+                ScmRepositoryCli.Update.class,
                 ScmRepositoryCli.ListBuildConfigs.class, })
 @Slf4j
 public class ScmRepositoryCli extends AbstractCommand {
@@ -126,6 +127,40 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Override
         public SCMRepository getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
+        }
+    }
+
+    @CommandDefinition(name = "update", description = "Update an SCM Repository")
+    public class Update extends AbstractCommand {
+        @Argument(required = true, description = "SCM Repository Id")
+        private String id;
+
+        @Option(name = "external-scm", description = "External SCM URL")
+        private String externalScm;
+
+        @Option(name = "pre-build", description = "Enable / Disable pre-build")
+        private Boolean preBuild;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                SCMRepository scmRepository = CREATOR.getClient().getSpecific(id);
+                SCMRepository.Builder updated = scmRepository.toBuilder();
+                ObjectHelper.executeIfNotNull(externalScm, () -> updated.externalUrl(externalScm));
+                ObjectHelper.executeIfNotNull(preBuild, () -> updated.preBuildSyncEnabled(preBuild));
+
+                log.debug("SCM Repository updated to: {}", updated);
+
+                CREATOR.getClientAuthenticated().update(id, updated.build());
+            });
+        }
+
+        @Override
+        public String exampleText() {
+            return "bacon pnc scm-repository update 5 --pre-build=false --external-scm=\"http://hello.com/test.git\"";
         }
     }
 
