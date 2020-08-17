@@ -49,7 +49,7 @@ public class BuildInfoCollector {
     private final BuildConfigurationClient buildConfigClient;
 
     public void addDependencies(PncBuild bd, String filter) {
-        List<Artifact> artifacts = null;
+        List<Artifact> artifacts;
         try {
             artifacts = toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
         } catch (RemoteResourceException e) {
@@ -92,7 +92,9 @@ public class BuildInfoCollector {
             PncBuild result = new PncBuild(build);
 
             Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(build.getId());
-            if (maybeBuildLogs.isPresent()) {
+
+            // only store logs if present and build failed: log not that useful if build successful
+            if (maybeBuildLogs.isPresent() && !build.getStatus().completedSuccessfully()) {
                 InputStream inputStream = maybeBuildLogs.get();
                 String log = readLog(inputStream);
                 result.addBuildLog(log);
@@ -107,7 +109,7 @@ public class BuildInfoCollector {
     private String readLog(InputStream inputStream) throws IOException {
         StringBuilder logBuilder = new StringBuilder();
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader reader = new BufferedReader(inputStreamReader);) {
+                BufferedReader reader = new BufferedReader(inputStreamReader)) {
             reader.lines().forEach(logBuilder::append);
             return logBuilder.toString();
         }
@@ -121,7 +123,7 @@ public class BuildInfoCollector {
     /**
      * When using getLatestBuild, specify what latest build you want to find
      */
-    public static enum BuildSearchType {
+    public enum BuildSearchType {
         /** Find latest build whether it's permanent or temporary */
         ANY,
 
