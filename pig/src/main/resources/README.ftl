@@ -43,7 +43,7 @@
     <tr>
         <td>${build.name}</td>
         <td>
-            <a href="http://${pncUrl}/pnc-web/#/build-records/${build.id}">Build
+            <a href="${pncUrl}/pnc-web/#/build-records/${build.id}">Build
                 #${build.id}</a>
         </td>
         <td>${build.internalScmUrl}</td>
