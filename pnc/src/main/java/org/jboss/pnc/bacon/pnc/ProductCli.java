@@ -34,6 +34,7 @@ import org.jboss.pnc.client.ProductClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Product;
+import org.jboss.pnc.dto.ProductVersion;
 
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ import java.util.Optional;
                 ProductCli.Create.class,
                 ProductCli.Get.class,
                 ProductCli.List.class,
+                ProductCli.ListVersions.class,
                 ProductCli.Update.class })
 public class ProductCli extends AbstractCommand {
 
@@ -106,6 +108,19 @@ public class ProductCli extends AbstractCommand {
         public RemoteCollection<Product> getAll(String sort, String query) throws RemoteResourceException {
 
             return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "list-versions", description = "List versions of product")
+    public class ListVersions extends AbstractListCommand<ProductVersion> {
+
+        @Argument(required = true, description = "Product Id")
+        private String id;
+
+        @Override
+        public RemoteCollection<ProductVersion> getAll(String sort, String query) throws RemoteResourceException {
+
+            return CREATOR.getClient().getProductVersions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
