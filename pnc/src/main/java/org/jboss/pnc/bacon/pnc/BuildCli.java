@@ -41,6 +41,7 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
@@ -70,6 +71,7 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
                 BuildCli.ListBuildArtifacts.class,
                 BuildCli.ListDependencies.class,
                 BuildCli.Get.class,
+                BuildCli.GetRevision.class,
                 BuildCli.GetLog.class,
                 BuildCli.DownloadSources.class })
 @Slf4j
@@ -256,6 +258,15 @@ public class BuildCli extends AbstractCommand {
         @Override
         public Build getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
+        }
+    }
+
+    @CommandDefinition(name = "get-revision", description = "Get build-config revision of build")
+    public class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
+
+        @Override
+        public BuildConfigurationRevision getSpecific(String id) throws ClientException {
+            return CREATOR.getClient().getBuildConfigRevision(id);
         }
     }
 
