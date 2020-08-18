@@ -45,13 +45,14 @@ public class PncBuilder {
         groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
     }
 
-    public void buildAndWait(
+    public GroupBuild buildAndWait(
             GroupConfigurationRef group,
             boolean tempBuild,
             boolean tempBuildTS,
             RebuildMode rebuildMode) {
         GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode);
         waitForSuccessfulFinish(groupBuild.getId());
+        return groupBuild;
     }
 
     private GroupBuild run(

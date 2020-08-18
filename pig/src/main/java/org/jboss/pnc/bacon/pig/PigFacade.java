@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
@@ -30,12 +29,12 @@ import javax.ws.rs.NotFoundException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
+import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.DocumentGenerator;
 import org.jboss.pnc.bacon.pig.impl.javadoc.JavadocManager;
 import org.jboss.pnc.bacon.pig.impl.license.LicenseManager;
 import org.jboss.pnc.bacon.pig.impl.nvr.NvrListGenerator;
-import org.jboss.pnc.bacon.pig.impl.pnc.BuildConfigData;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -47,13 +46,13 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.script.ScriptGenerator;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildPushResult;
+import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.requests.BuildPushParameters;
@@ -86,7 +85,7 @@ public class PigFacade {
         return pncImporter.readCurrentPncEntities();
     }
 
-    public static Map<String, PncBuild> build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+    public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
         context().setTempBuild(tempBuild);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
@@ -97,11 +96,12 @@ public class PigFacade {
             log.info("Temporary build");
         }
 
-        new PncBuilder().buildAndWait(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode);
-        return getBuilds(importResult, tempBuild);
+        GroupBuild groupBuild = new PncBuilder()
+                .buildAndWait(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode);
+        return new BuildInfoCollector().getBuildsFromGroupBuild(groupBuild);
     }
 
-    public static String run(
+    public static GroupBuildInfo run(
             boolean skipRepo,
             boolean skipPncUpdate,
             boolean skipBuilds,
@@ -127,18 +127,18 @@ public class PigFacade {
         context.setPncImportResult(importResult);
         context.storeContext();
 
-        Map<String, PncBuild> builds;
+        GroupBuildInfo groupBuildInfo;
         if (skipBuilds) {
             log.info("Skipping builds");
-            builds = getBuilds(importResult, tempBuild);
+            groupBuildInfo = getBuilds(importResult, tempBuild);
         } else {
             if (tempBuild) {
                 log.info("Temporary build");
             }
-            builds = build(tempBuild, tempBuildTS, rebuildMode);
+            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode);
         }
 
-        context.setBuilds(builds);
+        context.setBuilds(groupBuildInfo.getBuilds());
         context.storeContext();
 
         // TODO: there seems to be a gap between the build configs assigned to the product version
@@ -190,7 +190,8 @@ public class PigFacade {
             log.info("Skipping Document Generation");
         }
 
-        return "PiG run completed, the results are in: " + Paths.get(context().getTargetPath()).toAbsolutePath();
+        log.info("PiG run completed, the results are in: {}", Paths.get(context().getTargetPath()).toAbsolutePath());
+        return groupBuildInfo;
     }
 
     public static void release() {
@@ -280,7 +281,7 @@ public class PigFacade {
         ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
         String versionId = versionRef.getId();
 
-        ProductVersion version = null;
+        ProductVersion version;
         try {
             version = productVersionClient.getSpecific(versionId);
         } catch (RemoteResourceException e) {
@@ -295,7 +296,7 @@ public class PigFacade {
 
     private static boolean notPushedToBrew(PncBuild build) {
         BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration()); // todo factory or sth
-        BuildPushResult pushResult = null;
+        BuildPushResult pushResult;
         try {
             pushResult = buildClient.getPushResult(build.getId());
         } catch (ClientException e) {
@@ -346,15 +347,21 @@ public class PigFacade {
         return repoManager.prepare();
     }
 
-    private static Map<String, PncBuild> getBuilds(ImportResult importResult, boolean tempBuild) {
+    /**
+     * From the group configuration defined in the import result, get the latest group build and return the builds done
+     * in it
+     *
+     * @param importResult Data from the 'configuration' part. Will contain information about the group configuration
+     *        used to trigger the builds
+     * @param tempBuild whether the build performed was temporary or not
+     *
+     * @return GroupBuildInfo that contains the group build, and the map of 'build config name' to PncBuild
+     */
+    private static GroupBuildInfo getBuilds(ImportResult importResult, boolean tempBuild) {
+
         BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
-        BuildInfoCollector.BuildSearchType buildSearchType = tempBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
-                : BuildInfoCollector.BuildSearchType.PERMANENT;
-        return importResult.getBuildConfigs()
-                .parallelStream()
-                .map(BuildConfigData::getId)
-                .map(bcId -> buildInfoCollector.getLatestBuild(bcId, buildSearchType))
-                .collect(Collectors.toMap(PncBuild::getName, Function.identity()));
+        return buildInfoCollector
+                .getBuildsFromLatestGroupConfiguration(importResult.getBuildGroup().getId(), tempBuild);
     }
 
     public static void generateLicenses() {
