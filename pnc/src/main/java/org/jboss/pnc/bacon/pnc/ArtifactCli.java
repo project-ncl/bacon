@@ -24,7 +24,7 @@ public class ArtifactCli extends AbstractCommand {
 
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
 
-    @CommandDefinition(name = "get", description = "Get artifact")
+    @CommandDefinition(name = "get", description = "Get an artifact by its id")
     public class Get extends AbstractGetSpecificCommand<Artifact> {
 
         @Override

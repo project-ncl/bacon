@@ -96,7 +96,7 @@ public class ProjectCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a project")
+    @CommandDefinition(name = "get", description = "Get a project by its id")
     public class Get extends AbstractGetSpecificCommand<Project> {
 
         @Override

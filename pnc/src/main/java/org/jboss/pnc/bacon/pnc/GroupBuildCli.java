@@ -188,7 +188,7 @@ public class GroupBuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get group build")
+    @CommandDefinition(name = "get", description = "Get a group build by its id")
     public class Get extends AbstractGetSpecificCommand<GroupBuild> {
 
         @Override

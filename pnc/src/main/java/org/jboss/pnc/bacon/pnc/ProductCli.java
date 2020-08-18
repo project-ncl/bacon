@@ -92,7 +92,7 @@ public class ProductCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get product")
+    @CommandDefinition(name = "get", description = "Get a product by its id")
     public class Get extends AbstractGetSpecificCommand<Product> {
 
         @Override
