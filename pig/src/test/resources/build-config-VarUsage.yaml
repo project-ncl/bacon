@@ -29,6 +29,7 @@ builds:
     scmUrl: git+ssh://code.barfoo.com/vert-x3/vertx-dependencies.git
     externalScmUrl: git+ssh://code.foobar.com/gerrit/vert-x3/vertx-dependencies.git
     scmRevision: {{vertxStackVersion}}
+    buildPodMemory: 24.5
     customPmeParameters:
       - 'versionSuffix={{ redhatSuffix }}'
       - 'groovyManipulatorPrecedence=FIRST'

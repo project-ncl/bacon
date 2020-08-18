@@ -84,7 +84,7 @@ public class BuildConfig {
     /**
      * build pod memory in GB
      */
-    private Integer buildPodMemory;
+    private Double buildPodMemory;
     private String pigYamlMetadata;
 
     private Set<String> customPmeParameters = new TreeSet<>();
@@ -270,7 +270,7 @@ public class BuildConfig {
 
     /**
      * Get the environmentId either as defined in the build-config.yaml or find it via environmentSystemImageId.
-     * 
+     *
      * @return
      */
     public String getEnvironmentId() {
