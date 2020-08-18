@@ -33,6 +33,7 @@ import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -48,6 +49,7 @@ import org.aesh.command.option.OptionList;
                 GroupConfigCli.Create.class,
                 GroupConfigCli.Update.class,
                 GroupConfigCli.List.class,
+                GroupConfigCli.ListBuildConfig.class,
                 GroupConfigCli.Get.class,
                 GroupConfigCli.AddBuildConfig.class,
                 GroupConfigCli.RemoveBuildConfig.class })
@@ -162,6 +164,18 @@ public class GroupConfigCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "list-build-configs", description = "List build configs of group config")
+    public class ListBuildConfig extends AbstractListCommand<BuildConfiguration> {
+
+        @Argument(required = true, description = "Group Config id")
+        private String id;
+
+        @Override
+        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            return CREATOR.getClient().getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
