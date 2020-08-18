@@ -103,7 +103,7 @@ public class ProductVersionCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get product version")
+    @CommandDefinition(name = "get", description = "Get a product version by its id")
     public class Get extends AbstractGetSpecificCommand<ProductVersion> {
 
         @Override
@@ -203,7 +203,7 @@ public class ProductVersionCli extends AbstractCommand {
 
     /**
      * A valid version is one that contains 2 numeric parts seperated by a dot
-     * 
+     *
      * @param version
      * @return
      */

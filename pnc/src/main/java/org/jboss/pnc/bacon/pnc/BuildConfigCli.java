@@ -313,7 +313,7 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get build config")
+    @CommandDefinition(name = "get", description = "Get a build config by its id")
     public class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
 
         @Override

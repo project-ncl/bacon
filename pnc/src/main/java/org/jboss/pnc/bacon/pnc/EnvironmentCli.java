@@ -39,7 +39,7 @@ public class EnvironmentCli extends AbstractCommand {
 
     private static final ClientCreator<EnvironmentClient> CREATOR = new ClientCreator<>(EnvironmentClient::new);
 
-    @CommandDefinition(name = "get", description = "Get environment")
+    @CommandDefinition(name = "get", description = "Get an environment by its id")
     public class Get extends AbstractGetSpecificCommand<Environment> {
 
         @Override

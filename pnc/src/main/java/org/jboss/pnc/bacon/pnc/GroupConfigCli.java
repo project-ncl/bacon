@@ -149,7 +149,7 @@ public class GroupConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get group config")
+    @CommandDefinition(name = "get", description = "Get a group config by its id")
     public class Get extends AbstractGetSpecificCommand<GroupConfiguration> {
 
         @Override

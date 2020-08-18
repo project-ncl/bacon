@@ -166,7 +166,7 @@ public class ProductReleaseCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get product release")
+    @CommandDefinition(name = "get", description = "Get a product release by its id")
     public class Get extends AbstractGetSpecificCommand<ProductRelease> {
 
         @Override

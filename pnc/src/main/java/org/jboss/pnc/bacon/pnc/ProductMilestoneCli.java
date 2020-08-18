@@ -216,7 +216,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get product milestone")
+    @CommandDefinition(name = "get", description = "Get a product milestone by its id")
     public class Get extends AbstractGetSpecificCommand<ProductMilestone> {
 
         @Override

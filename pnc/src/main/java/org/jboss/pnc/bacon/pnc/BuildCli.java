@@ -252,7 +252,7 @@ public class BuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get build")
+    @CommandDefinition(name = "get", description = "Get a build by its id")
     public class Get extends AbstractGetSpecificCommand<Build> {
 
         @Override

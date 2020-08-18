@@ -121,7 +121,7 @@ public class ScmRepositoryCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a repository")
+    @CommandDefinition(name = "get", description = "Get a repository by its id")
     public class Get extends AbstractGetSpecificCommand<SCMRepository> {
 
         @Override
