@@ -37,6 +37,7 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -58,7 +59,9 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
                 BuildConfigCli.Create.class,
                 BuildConfigCli.CreateWithSCM.class,
                 BuildConfigCli.Get.class,
+                BuildConfigCli.GetRevision.class,
                 BuildConfigCli.List.class,
+                BuildConfigCli.ListRevision.class,
                 BuildConfigCli.ListBuilds.class,
                 BuildConfigCli.Update.class,
                 BuildConfigCli.CreateRevision.class })
@@ -319,12 +322,37 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
+    @CommandDefinition(name = "get-revision", description = "Get build config revision")
+    public class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
+
+        @Option(required = true, description = "Revision Id of build configuration")
+        private int revisionId;
+
+        @Override
+        public BuildConfigurationRevision getSpecific(String id) throws ClientException {
+            return CREATOR.getClient().getRevision(id, revisionId);
+        }
+    }
+
     @CommandDefinition(name = "list", description = "List build configs")
     public class List extends AbstractListCommand<BuildConfiguration> {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "list-revisions", description = "List revisions of build config")
+    public class ListRevision extends AbstractListCommand<BuildConfigurationRevision> {
+
+        @Argument(required = true, description = "Build configuration id")
+        private String id;
+
+        @Override
+        public RemoteCollection<BuildConfigurationRevision> getAll(String sort, String query)
+                throws RemoteResourceException {
+            return CREATOR.getClient().getRevisions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
     }
 
