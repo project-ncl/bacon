@@ -18,13 +18,19 @@
 
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.GroupBuildClient;
+import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.BuildRef;
+import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
@@ -32,8 +38,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.of;
@@ -44,9 +53,12 @@ import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/3/17
  */
+@Slf4j
 public class BuildInfoCollector {
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
+    private final GroupBuildClient groupBuildClient;
+    private final GroupConfigurationClient groupConfigurationClient;
 
     public void addDependencies(PncBuild bd, String filter) {
         List<Artifact> artifacts;
@@ -120,19 +132,109 @@ public class BuildInfoCollector {
     public BuildInfoCollector() {
         buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
         buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
+        groupBuildClient = new GroupBuildClient(PncClientHelper.getPncConfiguration());
+        groupConfigurationClient = new GroupConfigurationClient(PncClientHelper.getPncConfiguration());
+    }
+
+    /**
+     * Get the latest GroupBuildInfo from the groupConfiguration id. If there are no group builds, a runtime exception
+     * is thrown.
+     *
+     * @param groupConfigurationId the group configuration id
+     * @param temporaryBuild whether the group build is temporary or not
+     * @return GroupBuildInfo data of the group build and the list of builds
+     */
+    public GroupBuildInfo getBuildsFromLatestGroupConfiguration(String groupConfigurationId, boolean temporaryBuild) {
+        try {
+            Collection<GroupBuild> groupBuilds = groupConfigurationClient
+                    .getAllGroupBuilds(
+                            groupConfigurationId,
+                            of("=desc=submitTime"),
+                            query("temporaryBuild==%s", temporaryBuild))
+                    .getAll();
+
+            if (groupBuilds.isEmpty()) {
+                // no builds!
+                throw new RuntimeException(
+                        "There are no group builds for group configuration id" + groupConfigurationId);
+            } else {
+                // first one will be the latest build
+                GroupBuild latest = groupBuilds.stream().findFirst().get();
+                return getBuildsFromGroupBuild(latest);
+            }
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException(
+                    "Cannot get list of group builds for group configuration " + groupConfigurationId);
+        }
+
+    }
+
+    /**
+     * Get all the builds done in a build group. If the build finished with 'NO_REBUILD_REQUIRED', get the 'original'
+     * successful build and return it instead If the build was successful, we don't grab the logs since they can be
+     * quite long.
+     *
+     * @param groupBuild the group build to get the builds
+     * @return The information on the group build and the builds performed
+     */
+    public GroupBuildInfo getBuildsFromGroupBuild(GroupBuild groupBuild) {
+
+        Map<String, PncBuild> result = new HashMap<>();
+
+        BuildsFilterParameters filter = new BuildsFilterParameters();
+        filter.setLatest(false);
+        filter.setRunning(false);
+
+        try {
+            Collection<Build> builds = groupBuildClient.getBuilds(groupBuild.getId(), filter).getAll();
+
+            for (Build build : builds) {
+                PncBuild pncBuild;
+
+                if (build.getStatus() == BuildStatus.NO_REBUILD_REQUIRED) {
+                    BuildRef buildRef = build.getNoRebuildCause();
+                    Build realBuild = buildClient.getSpecific(buildRef.getId());
+                    pncBuild = new PncBuild(realBuild);
+                } else {
+                    pncBuild = new PncBuild(build);
+                }
+
+                // only get logs when build fail. Is that a good logic?
+                if (!pncBuild.getBuildStatus().completedSuccessfully()) {
+                    Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(pncBuild.getId());
+                    if (maybeBuildLogs.isPresent()) {
+                        InputStream inputStream = maybeBuildLogs.get();
+                        String log = readLog(inputStream);
+                        pncBuild.addBuildLog(log);
+                        inputStream.close();
+                    }
+                }
+                pncBuild.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(pncBuild.getId())));
+                result.put(pncBuild.getName(), pncBuild);
+            }
+            return new GroupBuildInfo(groupBuild, result);
+        } catch (IOException | RemoteResourceException e) {
+            throw new RuntimeException("Failed to get group build info for " + groupBuild.getId(), e);
+        }
     }
 
     /**
      * When using getLatestBuild, specify what latest build you want to find
      */
     public enum BuildSearchType {
-        /** Find latest build whether it's permanent or temporary */
+        /**
+         * Find latest build whether it's permanent or temporary
+         */
         ANY,
 
-        /** Find latest permanent build */
+        /**
+         * Find latest permanent build
+         */
         PERMANENT,
 
-        /** Find latest temporary build */
+        /**
+         * Find latest temporary build
+         */
         TEMPORARY
     }
 }

@@ -25,6 +25,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.enums.BuildStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,7 @@ public class PncBuild {
     private String scmRevision;
     private String id;
     private String name;
+    private BuildStatus buildStatus;
     private List<String> buildLog;
     private List<ArtifactWrapper> builtArtifacts;
     private List<ArtifactWrapper> dependencyArtifacts;
@@ -68,6 +70,7 @@ public class PncBuild {
         id = build.getId();
         internalScmUrl = build.getScmRepository().getInternalUrl();
         scmRevision = build.getScmRevision();
+        buildStatus = build.getStatus();
     }
 
     public void addBuiltArtifacts(List<Artifact> artifacts) {

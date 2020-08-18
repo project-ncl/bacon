@@ -17,7 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.aesh.command.CommandDefinition;
@@ -34,8 +33,9 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
+import org.jboss.pnc.bacon.pig.impl.config.PigRunOutput;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
@@ -135,7 +135,7 @@ public class Pig extends AbstractCommand {
 
     /* System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "10"); */
     @CommandDefinition(name = "run", description = "Run all the steps")
-    public class Run extends PigCommand<String> {
+    public class Run extends PigCommand<PigRunOutput> {
 
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
@@ -240,11 +240,11 @@ public class Pig extends AbstractCommand {
         private String repoZipPath;
 
         @Override
-        public String doExecute() {
+        public PigRunOutput doExecute() {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
 
-            return PigFacade.run(
+            GroupBuildInfo groupBuildInfo = PigFacade.run(
                     skipRepo,
                     skipPncUpdate,
                     skipBuilds,
@@ -258,6 +258,8 @@ public class Pig extends AbstractCommand {
                     tempBuildTS,
                     RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck);
+
+            return new PigRunOutput(PigContext.get().getFullVersion(), groupBuildInfo);
         }
     }
 
@@ -282,7 +284,7 @@ public class Pig extends AbstractCommand {
     }
 
     @CommandDefinition(name = "build", description = "Build")
-    public class Build extends PigCommand<Map<String, PncBuild>> {
+    public class Build extends PigCommand<PigRunOutput> {
 
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
@@ -306,13 +308,13 @@ public class Pig extends AbstractCommand {
         private String rebuildMode;
 
         @Override
-        public Map<String, PncBuild> doExecute() {
+        public PigRunOutput doExecute() {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
-            Map<String, PncBuild> builds = PigFacade.build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode));
-            PigContext.get().setBuilds(builds);
+            GroupBuildInfo groupBuildInfo = PigFacade.build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode));
+            PigContext.get().setBuilds(groupBuildInfo.getBuilds());
             PigContext.get().storeContext();
-            return builds;
+            return new PigRunOutput(PigContext.get().getFullVersion(), groupBuildInfo);
         }
     }
 
