@@ -1,14 +1,13 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.BuildFinder;
 import com.redhat.red.build.finder.BuildSystemInteger;
 import com.redhat.red.build.finder.DistributionAnalyzer;
 import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.finder.KojiClientSession;
+import com.redhat.red.build.finder.Utils;
 import com.redhat.red.build.koji.KojiClientException;
-import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.jboss.pnc.bacon.config.Config;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -43,8 +41,7 @@ public final class BuildFinderUtils {
 
     public static BuildConfig getKojiBuildFinderConfigFromFile(File file) {
         try {
-            final String json = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            return getKojiBuildFinderConfigFromJson(json);
+            return BuildConfig.load(file);
         } catch (IOException e) {
             throw new IllegalStateException(
                     "Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(),
@@ -135,7 +132,7 @@ public final class BuildFinderUtils {
             log.error("Koji client error: {}", e.getMessage(), e);
             return Collections.emptyList();
         } finally {
-            pool.shutdown();
+            Utils.shutdownAndAwaitTermination(pool);
         }
     }
 
