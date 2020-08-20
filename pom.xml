@@ -264,6 +264,7 @@
             <dependency>
                 <groupId>org.commonjava.maven.ext</groupId>
                 <artifactId>pom-manipulation-cli</artifactId>
+                <classifier>minimal</classifier>
                 <version>4.0</version>
             </dependency>
 
