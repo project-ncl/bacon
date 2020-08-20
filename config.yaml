@@ -21,6 +21,17 @@ profile:
   pnc:
       url: ""
       bifrostBaseurl: ""
+  keycloak:
+      url: ""
+      realm: ""
+      username: ""
+      clientId: ""
+  pig:
+      kojiHubUrl: ""
+      licenseServerUrl: ""
+      indyUrl: ""
+  da:
+      url: ""
 # ******************************************************************************
 # Authentication information
 #
