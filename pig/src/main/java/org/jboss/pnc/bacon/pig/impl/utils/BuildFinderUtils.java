@@ -39,7 +39,7 @@ public final class BuildFinderUtils {
 
     private static final String KOJI_BUILD_FINDER_CONFIG_PROP = "koji.build.finder.config";
 
-    private static final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "koji-build-finder/config.json";
+    private static final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "/koji-build-finder/config.json";
 
     public static BuildConfig getKojiBuildFinderConfigFromFile(File file) {
         try {
@@ -66,10 +66,9 @@ public final class BuildFinderUtils {
     }
 
     public static BuildConfig getKojiBuildFinderConfigFromJson(String json) {
-        ObjectMapper mapper = new KojiObjectMapper();
 
         try {
-            return mapper.readValue(json, BuildConfig.class);
+            return BuildConfig.load(json);
         } catch (IOException e) {
             throw new IllegalStateException("Failed read Koji Build Finder configuration from json: " + json, e);
         }
