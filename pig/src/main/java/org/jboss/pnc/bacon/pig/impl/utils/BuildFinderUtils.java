@@ -134,6 +134,8 @@ public final class BuildFinderUtils {
         } catch (KojiClientException e) {
             log.error("Koji client error: {}", e.getMessage(), e);
             return Collections.emptyList();
+        } finally {
+            pool.shutdown();
         }
     }
 
