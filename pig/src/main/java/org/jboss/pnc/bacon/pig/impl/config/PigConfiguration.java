@@ -67,6 +67,9 @@ public class PigConfiguration {
     private String micro;
     private Map<String, Map<String, ?>> addons = new HashMap<>();
     private String releaseStorageUrl;
+
+    /** Allow user to override brewTag auto-generated in PNC for a product version */
+    private String brewTagPrefix;
     private static final Integer maxTries = 256;
 
     private void init() {

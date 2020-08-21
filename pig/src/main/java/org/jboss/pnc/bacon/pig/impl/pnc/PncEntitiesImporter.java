@@ -33,6 +33,7 @@ import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.ProjectClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.constants.Attributes;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.Environment;
@@ -100,6 +101,8 @@ public class PncEntitiesImporter {
     public ImportResult performImport(boolean skipBranchCheck, boolean temporaryBuild) {
         product = getOrGenerateProduct();
         version = getOrGenerateVersion();
+        setBrewTagPrefix(version);
+
         milestone = pncConfigurator.getOrGenerateMilestone(version, PigContext.get().getFullVersion());
         pncConfigurator.markMilestoneCurrent(version, milestone);
         buildGroup = getOrGenerateBuildGroup();
@@ -482,6 +485,31 @@ public class PncEntitiesImporter {
             return versionClient.createNew(productVersion);
         } catch (ClientException e) {
             throw new RuntimeException("Failed to create the product version", e);
+        }
+    }
+
+    /**
+     * Override the default brewTagPrefix for the product version with the one specified in the pig configuration This
+     * only happens if the brewTagPrefix in the pig configuration is not null/empty
+     */
+    private void setBrewTagPrefix(ProductVersion productVersion) {
+
+        String brewTagPrefix = pigConfiguration.getBrewTagPrefix();
+
+        if (brewTagPrefix != null && !brewTagPrefix.isEmpty()) {
+
+            log.info("Updating the product version's brewTagPrefix with: {}", brewTagPrefix);
+
+            Map<String, String> attributes = productVersion.getAttributes();
+            attributes.put(Attributes.BREW_TAG_PREFIX, brewTagPrefix);
+
+            ProductVersion update = productVersion.toBuilder().attributes(attributes).build();
+
+            try {
+                versionClient.update(productVersion.getId(), update);
+            } catch (ClientException e) {
+                throw new RuntimeException("Failed to update the brew tag prefix of the product version", e);
+            }
         }
     }
 
