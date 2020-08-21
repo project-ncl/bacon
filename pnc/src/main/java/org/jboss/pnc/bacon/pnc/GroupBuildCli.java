@@ -17,7 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -29,21 +31,21 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
-import org.jboss.pnc.client.*;
+import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.GroupBuildClient;
+import org.jboss.pnc.client.RemoteCollection;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.enums.RebuildMode;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
-import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
+import lombok.extern.slf4j.Slf4j;
 
 @GroupCommandDefinition(
         name = "group-build",
@@ -113,25 +115,26 @@ public class GroupBuildCli extends AbstractCommand {
                 try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
                         .getClientAuthenticated()) {
                     if (timeout != null) {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                advancedGroupConfigurationClient.executeGroupBuild(
-                                        groupBuildConfigId,
-                                        groupBuildParams,
-                                        Long.parseLong(timeout),
-                                        TimeUnit.MINUTES));
-                        return;
+                        GroupBuild gb = advancedGroupConfigurationClient.executeGroupBuild(
+                                groupBuildConfigId,
+                                groupBuildParams,
+                                Long.parseLong(timeout),
+                                TimeUnit.MINUTES);
+                        ObjectHelper.print(jsonOutput, gb);
+                        return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                     }
 
                     if (wait) {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                advancedGroupConfigurationClient.executeGroupBuild(groupBuildConfigId, groupBuildParams)
-                                        .join());
+                        GroupBuild gb = advancedGroupConfigurationClient
+                                .executeGroupBuild(groupBuildConfigId, groupBuildParams)
+                                .join();
+                        ObjectHelper.print(jsonOutput, gb);
+                        return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                     } else {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                advancedGroupConfigurationClient.trigger(groupBuildConfigId, groupBuildParams, null));
+                        GroupBuild gb = advancedGroupConfigurationClient
+                                .trigger(groupBuildConfigId, groupBuildParams, null);
+                        ObjectHelper.print(jsonOutput, gb);
+                        return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                     }
                 }
             });
@@ -156,6 +159,7 @@ public class GroupBuildCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().cancel(groupBuildId);
+                return 0;
             });
         }
 

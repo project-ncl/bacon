@@ -28,8 +28,10 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
+import org.jboss.pnc.dto.BuildPushResult;
 import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
+import org.jboss.pnc.enums.BuildPushStatus;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
 
 import java.util.concurrent.TimeUnit;
@@ -90,16 +92,21 @@ public class BrewPushCli extends AbstractCommand {
                             .build();
 
                     if (timeout != null) {
-                        ObjectHelper.print(
-                                jsonOutput,
-                                buildClient.executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES));
-                        return;
+                        BuildPushResult bpr = buildClient
+                                .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES);
+                        ObjectHelper.print(jsonOutput, bpr);
+                        return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
                     }
 
-                    if (wait)
-                        ObjectHelper.print(jsonOutput, buildClient.executeBrewPush(id, request).join());
-                    else
-                        ObjectHelper.print(jsonOutput, buildClient.push(id, request));
+                    if (wait) {
+                        BuildPushResult bpr = buildClient.executeBrewPush(id, request).join();
+                        ObjectHelper.print(jsonOutput, bpr);
+                        return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                    } else {
+                        BuildPushResult bpr = buildClient.push(id, request);
+                        ObjectHelper.print(jsonOutput, bpr);
+                        return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                    }
                 }
             });
         }
@@ -128,9 +135,9 @@ public class BrewPushCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
             // TODO add wait option for GroupPush
             return super.executeHelper(commandInvocation, () -> {
-
                 GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
                 GROUP_BUILD_CREATOR.getClientAuthenticated().brewPush(id, request);
+                return 0;
             });
         }
 
@@ -161,8 +168,9 @@ public class BrewPushCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-
-                ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClient().getPushResult(id));
+                BuildPushResult bpr = BUILD_CREATOR.getClient().getPushResult(id);
+                ObjectHelper.print(jsonOutput, bpr);
+                return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
             });
         }
 

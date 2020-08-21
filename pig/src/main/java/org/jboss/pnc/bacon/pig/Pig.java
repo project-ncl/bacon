@@ -126,6 +126,7 @@ public class Pig extends AbstractCommand {
                 Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
                 PigContext.init(clean, configDir, releaseStorageUrl);
                 ObjectHelper.print(jsonOutput, doExecute());
+                return 0;
             });
         }
 

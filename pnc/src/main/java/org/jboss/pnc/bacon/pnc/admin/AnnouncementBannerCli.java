@@ -49,6 +49,7 @@ public class AnnouncementBannerCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().setAnnouncementBanner(announcement);
+                return 0;
             });
         }
 
@@ -66,6 +67,7 @@ public class AnnouncementBannerCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().setAnnouncementBanner("");
+                return 0;
             });
         }
     }
@@ -78,6 +80,7 @@ public class AnnouncementBannerCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
                 System.out.println(CREATOR.getClient().getAnnouncementBanner().getBanner());
+                return 0;
             });
         }
     }

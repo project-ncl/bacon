@@ -83,6 +83,7 @@ public class ProductCli extends AbstractCommand {
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(product));
+                return 0;
             });
         }
 
@@ -153,6 +154,7 @@ public class ProductCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
+                return 0;
             });
         }
 

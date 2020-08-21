@@ -19,10 +19,13 @@ package org.jboss.pnc.bacon.cli;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
+
 import org.aesh.command.AeshCommandRuntimeBuilder;
+import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.CommandRuntime;
+import org.aesh.command.Execution;
+import org.aesh.command.Executor;
 import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.activator.CommandActivator;
 import org.aesh.command.activator.OptionActivator;
@@ -36,6 +39,7 @@ import org.aesh.command.parser.OptionParserException;
 import org.aesh.command.parser.RequiredOptionException;
 import org.aesh.command.registry.CommandRegistry;
 import org.aesh.command.settings.SettingsBuilder;
+import org.aesh.command.validator.CommandValidatorException;
 import org.aesh.command.validator.ValidatorInvocation;
 import org.aesh.readline.Prompt;
 import org.aesh.readline.ReadlineConsole;
@@ -48,6 +52,8 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
@@ -57,7 +63,7 @@ import org.jboss.pnc.bacon.pnc.Pnc;
 @GroupCommandDefinition(name = "bacon", description = "Bacon CLI", groupCommands = { Pnc.class, Da.class, Pig.class })
 public class App extends AbstractCommand {
 
-    public void run(String[] args) throws Exception {
+    public int run(String[] args) throws Exception {
 
         CommandRegistry registry;
 
@@ -89,13 +95,47 @@ public class App extends AbstractCommand {
                                     new TerminalColor(Color.DEFAULT, Color.DEFAULT, Color.Intensity.BRIGHT))));
 
             console.start();
+
+            return 0;
         } else {
             registry = AeshCommandRegistryBuilder.builder().command(this.getClass()).create();
 
             CommandRuntime runtime = AeshCommandRuntimeBuilder.builder().commandRegistry(registry).build();
             try {
-                runtime.executeCommand(buildCLIOutput(args));
-
+                // Code below copied directly from 'executeCommand' - instead of running:
+                // runtime.executeCommand(buildCLIOutput(args));
+                // which allows us to grab the CommandResult and thereby get the return code.
+                // TODO : Remove once https://github.com/aeshell/aesh/issues/323 is fixed and released.
+                Executor executor = runtime.buildExecutor(buildCLIOutput(args));
+                Execution exec;
+                CommandResult commandResult = null;
+                while ((exec = executor.getNextExecution()) != null) {
+                    try {
+                        commandResult = exec.execute();
+                    } catch (CommandException cmd) {
+                        if (exec.getResultHandler() != null) {
+                            exec.getResultHandler().onExecutionFailure(CommandResult.FAILURE, cmd);
+                        }
+                        throw cmd;
+                    } catch (CommandValidatorException | CommandLineParserException e) {
+                        if (exec.getResultHandler() != null) {
+                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
+                        }
+                        throw e;
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        if (exec.getResultHandler() != null) {
+                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, ex);
+                        }
+                        throw ex;
+                    } catch (Exception e) {
+                        if (exec.getResultHandler() != null) {
+                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
+                        }
+                        throw new RuntimeException(e);
+                    }
+                }
+                return commandResult.getResultValue();
             } catch (OptionParserException | RequiredOptionException ex) {
                 log.error("Missing argument/option: {}", ex.getMessage());
                 throw new FatalException();
@@ -125,7 +165,7 @@ public class App extends AbstractCommand {
     public static void main(String[] args) throws Exception {
         try {
             App app = new App();
-            app.run(args);
+            System.exit(app.run(args));
         } catch (FatalException e) {
             System.exit(1);
         }
