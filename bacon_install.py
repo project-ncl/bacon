@@ -195,7 +195,10 @@ class BaconInstall:
             root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
 
             if self.snapshot:
-                latest_tag = root.find("versioning/versions/version")
+                latest_tags = root.findall("versioning/versions/version")
+
+                # choose the one listed last. This might bite us in the future
+                latest_tag = latest_tags[-1]
             else:
                 latest_tag = root.find("versioning/latest")
 
