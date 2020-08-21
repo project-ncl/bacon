@@ -41,7 +41,6 @@ public class SourcesGenerator {
 
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
     public static final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
-    public static final String SEPARATOR = FileSystems.getDefault().getSeparator();
 
     private final SourcesGenerationData sourcesGenerationData;
 
@@ -106,8 +105,9 @@ public class SourcesGenerator {
 
             if (topLevelDirectories.size() != 1) {
                 throw new RuntimeException(
-                        "Invalid number of top level directories untared for build " + build + ", "
-                                + "the untared archive: " + targetPath.getAbsolutePath());
+                        "Found more than one top-level directory (" + topLevelDirectories.size()
+                                + ") untared for build " + build + ", the untared archive: "
+                                + targetPath.getAbsolutePath() + ", the top level directories:" + topLevelDirectories);
             }
 
             String topLevelDirectoryName = untaredFiles.iterator().next();
@@ -120,7 +120,9 @@ public class SourcesGenerator {
 
     private boolean isNotANestedFile(String name) {
         // either "some-directory" or "some-directory/"
-        return !name.contains(SEPARATOR) || name.indexOf(SEPARATOR) + SEPARATOR.length() == name.length();
+        // paths inside tar files only ever contain forward slashes
+        int i = name.indexOf("/");
+        return i == -1 || i + 1 == name.length();
     }
 
     private void addSourcesOfUnreleasedDependencies(RepositoryData repo, File workDir, File contentsDir) {
