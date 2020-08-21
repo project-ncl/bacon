@@ -33,6 +33,33 @@
     <packaging>pom</packaging>
     <version>2.0.0</version>
 
+    <name>bacon</name>
+    <description>PNC 2.0 CLI</description>
+    <url>https://github.com/bacon</url>
+    <inceptionYear>2019</inceptionYear>
+
+    <licenses>
+      <license>
+        <name>Apache License, Version 2.0</name>
+        <distribution>repo</distribution>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      </license>
+    </licenses>
+
+    <scm>
+      <connection>scm:git:http://github.com/project-ncl/bacon.git</connection>
+      <developerConnection>scm:git:git@github.com:project-ncl/bacon.git</developerConnection>
+      <url>http://github.com/project-ncl/bacon</url>
+      <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+      <developer>
+        <organization>RedHat</organization>
+        <organizationUrl>http://www.redhat.com</organizationUrl>
+      </developer>
+    </developers>
+
     <modules>
         <module>auth</module>
         <module>cli</module>
