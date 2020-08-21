@@ -27,6 +27,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.config.Config;
@@ -111,6 +112,8 @@ public class Pig extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
+
+            Fail.failIfNull(configDir, "You need to specify the configuration directory!");
 
             return super.executeHelper(commandInvocation, () -> {
 
