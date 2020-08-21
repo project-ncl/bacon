@@ -94,6 +94,7 @@ public class ProductVersionCli extends AbstractCommand {
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productVersion));
+                return 0;
             });
         }
 
@@ -192,6 +193,7 @@ public class ProductVersionCli extends AbstractCommand {
                     updated.version(productVersion);
                 });
                 CREATOR.getClientAuthenticated().update(id, updated.build());
+                return 0;
             });
         }
 

@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AbstractCommand implements Command {
 
     public interface SubCommandExecuteInterface {
-        void call() throws ClientException, JsonProcessingException;
+        Integer call() throws ClientException, JsonProcessingException;
     }
 
     @Option(shortName = 'h', overrideRequired = true, hasValue = false, description = "print help")
@@ -209,7 +209,7 @@ public class AbstractCommand implements Command {
 
         setConfigurationFileLocation();
         try {
-            callback.call();
+            return CommandResult.valueOf(callback.call());
         } catch (FatalException e) {
             throw e;
         } catch (Exception e) {
@@ -219,7 +219,6 @@ public class AbstractCommand implements Command {
             // Aesh doesnt take care of exit codes, thrown FatalException will be caught in App class and app will exit
             // with code 1
         }
-        return CommandResult.SUCCESS;
     }
 
     /**

@@ -87,6 +87,7 @@ public class ProjectCli extends AbstractCommand {
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(project));
+                return 0;
             });
         }
 
@@ -170,6 +171,7 @@ public class ProjectCli extends AbstractCommand {
                 ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
+                return 0;
             });
         }
 

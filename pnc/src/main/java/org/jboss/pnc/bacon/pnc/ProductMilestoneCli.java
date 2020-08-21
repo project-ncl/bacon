@@ -112,6 +112,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(milestone));
+                return 0;
             });
         }
 
@@ -177,6 +178,7 @@ public class ProductMilestoneCli extends AbstractCommand {
                 });
 
                 CREATOR.getClientAuthenticated().update(productMilestoneId, updated.build());
+                return 0;
             });
         }
 
@@ -196,7 +198,10 @@ public class ProductMilestoneCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
 
-            return super.executeHelper(commandInvocation, () -> CREATOR.getClientAuthenticated().closeMilestone(id));
+            return super.executeHelper(commandInvocation, () -> {
+                CREATOR.getClientAuthenticated().closeMilestone(id);
+                return 0;
+            });
         }
     }
 
@@ -210,9 +215,10 @@ public class ProductMilestoneCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
 
-            return super.executeHelper(
-                    commandInvocation,
-                    () -> CREATOR.getClientAuthenticated().cancelMilestoneClose(id));
+            return super.executeHelper(commandInvocation, () -> {
+                CREATOR.getClientAuthenticated().cancelMilestoneClose(id);
+                return 0;
+            });
         }
     }
 

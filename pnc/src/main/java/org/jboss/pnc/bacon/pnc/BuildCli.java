@@ -17,7 +17,19 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.core.Response;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -25,14 +37,15 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.aesh.command.option.OptionList;
 import org.aesh.command.shell.Shell;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.BuildClient;
@@ -44,22 +57,10 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
 
-import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import org.aesh.command.option.OptionList;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
-import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
+import lombok.extern.slf4j.Slf4j;
 
 @GroupCommandDefinition(
         name = "build",
@@ -161,6 +162,7 @@ public class BuildCli extends AbstractCommand {
                         }
                     }
                     ObjectHelper.print(jsonOutput, build);
+                    return build.getStatus().completedSuccessfully() ? 0 : build.getStatus().ordinal();
                 }
             });
         }
@@ -186,6 +188,7 @@ public class BuildCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().cancel(buildId);
+                return 0;
             });
         }
 
@@ -281,7 +284,10 @@ public class BuildCli extends AbstractCommand {
         @Override
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> printLog(commandInvocation.getShell()));
+            return super.executeHelper(commandInvocation, () -> {
+                printLog(commandInvocation.getShell());
+                return 0;
+            });
         }
 
         private void printLog(Shell shell) throws ClientException {
@@ -340,6 +346,7 @@ public class BuildCli extends AbstractCommand {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                return response.getStatus();
             });
         }
     }

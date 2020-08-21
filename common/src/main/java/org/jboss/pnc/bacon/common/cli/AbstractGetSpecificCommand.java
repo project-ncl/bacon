@@ -29,7 +29,7 @@ import org.jboss.pnc.client.ClientException;
 /**
  * Class used to get specific item from PNC. The subclass only has to implement 'getSpecific' to teach it how to
  * retrieve the specific item
- * 
+ *
  * @param <T>
  */
 @Slf4j
@@ -50,6 +50,7 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
 
         return super.executeHelper(commandInvocation, () -> {
             ObjectHelper.print(jsonOutput, getSpecific(id));
+            return 0;
         });
     }
 

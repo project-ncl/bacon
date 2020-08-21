@@ -130,6 +130,7 @@ public class BuildConfigCli extends AbstractCommand {
                 ObjectHelper.print(
                         jsonOutput,
                         CREATOR.getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
+                return 0;
             });
         }
 
@@ -210,6 +211,7 @@ public class BuildConfigCli extends AbstractCommand {
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createWithSCM(request));
+                return 0;
             });
         }
 
@@ -286,6 +288,7 @@ public class BuildConfigCli extends AbstractCommand {
                 });
 
                 callUpdate(updated.build());
+                return 0;
             });
         }
 

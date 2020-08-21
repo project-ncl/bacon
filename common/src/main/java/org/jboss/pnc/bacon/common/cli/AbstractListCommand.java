@@ -30,7 +30,7 @@ import org.jboss.pnc.client.RemoteResourceException;
  * Class used to provide a default implementation for List* type commands.
  *
  * The subclass only needs to implement the 'getAll' method to teach it how to retrieve all the contents
- * 
+ *
  * @param <T>
  */
 @Slf4j
@@ -54,6 +54,7 @@ public abstract class AbstractListCommand<T> extends AbstractCommand {
 
         return super.executeHelper(commandInvocation, () -> {
             ObjectHelper.print(jsonOutput, getAll(sort, query).getAll());
+            return 0;
         });
     }
 

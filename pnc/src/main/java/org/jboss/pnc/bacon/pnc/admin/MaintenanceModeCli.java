@@ -49,6 +49,7 @@ public class MaintenanceModeCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().activateMaintenanceMode(reason);
+                return 0;
             });
         }
 
@@ -66,6 +67,7 @@ public class MaintenanceModeCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().deactivateMaintenanceMode();
+                return 0;
             });
         }
     }
@@ -83,7 +85,7 @@ public class MaintenanceModeCli extends AbstractCommand {
                 } else {
                     System.out.println("PNC is NOT in maintenance mode");
                 }
-
+                return 0;
             });
         }
     }

@@ -93,7 +93,7 @@ public class ScmRepositoryCli extends AbstractCommand {
 
                     log.warn("Repository already exists on PNC! No creation needed");
                     ObjectHelper.print(jsonOutput, existing.getAll().iterator());
-                    return;
+                    return 0;
                 }
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
                         .preBuildSyncEnabled(!noPreBuildSync)
@@ -112,6 +112,7 @@ public class ScmRepositoryCli extends AbstractCommand {
                     log.error("Failure while creating repository: {}", result.getRepositoryCreationFailure());
                     throw new FatalException();
                 }
+                return 0;
             });
         }
 
@@ -155,6 +156,7 @@ public class ScmRepositoryCli extends AbstractCommand {
                 log.debug("SCM Repository updated to: {}", updated);
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
+                return 0;
             });
         }
 

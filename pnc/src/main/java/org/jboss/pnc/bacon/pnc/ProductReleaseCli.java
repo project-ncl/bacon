@@ -102,6 +102,7 @@ public class ProductReleaseCli extends AbstractCommand {
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productRelease));
+                return 0;
             });
         }
 
@@ -157,6 +158,7 @@ public class ProductReleaseCli extends AbstractCommand {
                         .executeIfNotNull(supportLevel, () -> updated.supportLevel(SupportLevel.valueOf(supportLevel)));
 
                 CREATOR.getClientAuthenticated().update(productReleaseId, updated.build());
+                return 0;
             });
         }
 
@@ -191,7 +193,7 @@ public class ProductReleaseCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 ObjectHelper.print(jsonOutput, CREATOR.getClient().getSupportLevels());
-
+                return 0;
             });
         }
     }
