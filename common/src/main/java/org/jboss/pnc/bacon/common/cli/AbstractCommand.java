@@ -17,9 +17,6 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-import ch.qos.logback.classic.Level;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -27,11 +24,18 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.aesh.command.shell.Shell;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.client.ClientException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import ch.qos.logback.classic.Level;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Abstract command that implements Command
@@ -84,8 +88,11 @@ public class AbstractCommand implements Command {
         }
 
         if (version) {
-            VersionInfo versionInfo = VersionInfo.instance();
-            shell.writeln(versionInfo.getVersion() + " (" + versionInfo.getRevision() + ")");
+            try {
+                shell.writeln(ManifestUtils.getManifestInformation(AbstractCommand.class));
+            } catch (ManipulationException e) {
+                throw new RuntimeException(e);
+            }
             activated = true;
         }
 
@@ -130,7 +137,7 @@ public class AbstractCommand implements Command {
 
     /**
      * Print help method if a group command is invoked
-     * 
+     *
      * @param commandInvocation
      * @return
      */
@@ -227,7 +234,7 @@ public class AbstractCommand implements Command {
      * Example:
      *
      * <exampleText stuff>
-     * 
+     *
      * @return
      */
     public String exampleText() {

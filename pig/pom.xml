@@ -109,6 +109,7 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+        <!-- This is an uber-jar that brings in logback-classic as well -->
         <dependency>
             <groupId>org.commonjava.maven.ext</groupId>
             <artifactId>pom-manipulation-cli</artifactId>
