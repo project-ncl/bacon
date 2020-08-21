@@ -108,7 +108,7 @@ public class CacheFile {
     }
 
     private static String getCacheFile() {
-        return Config.getConfigLocation() + "/" + Constant.CACHE_FILE;
+        return Config.getConfigLocation() + File.separator + Constant.CACHE_FILE;
     }
 
 }

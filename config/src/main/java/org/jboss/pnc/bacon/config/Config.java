@@ -58,7 +58,7 @@ public class Config {
 
     public static void configure(String configLocation, String configFileName, String profileName) {
         Config.configLocation = configLocation;
-        Config.configFilePath = configLocation + "/" + configFileName;
+        Config.configFilePath = configLocation + File.separator + configFileName;
         Config.activeProfileName = profileName;
     }
 

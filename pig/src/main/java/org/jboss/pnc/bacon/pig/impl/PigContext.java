@@ -140,21 +140,21 @@ public class PigContext {
     private void configureTargetDirectories(PigConfiguration pigConfiguration) {
         String productPrefix = pigConfiguration.getProduct().prefix();
         targetPath = "target"; // TODO: a way to customize it
-        releasePath = targetPath + "/" + productPrefix + "-" + fullVersion + "/";
+        releasePath = targetPath + File.separator + productPrefix + "-" + fullVersion + File.separator;
 
         File releaseDirectory = Paths.get(releasePath).toFile();
         if (!releaseDirectory.isDirectory()) {
             releaseDirectory.mkdirs();
         }
         releasePath = releaseDirectory.getAbsolutePath();
-        releasePath = releasePath.endsWith("/") ? releasePath : releasePath + '/';
+        releasePath = releasePath.endsWith(File.separator) ? releasePath : releasePath + File.separator;
 
         File extrasDirectory = Paths.get(releasePath, "extras").toFile();
         if (!extrasDirectory.isDirectory()) {
             extrasDirectory.mkdirs();
         }
         extrasPath = extrasDirectory.getAbsolutePath();
-        extrasPath = extrasPath.endsWith("/") ? extrasPath : extrasPath + '/';
+        extrasPath = extrasPath.endsWith(File.separator) ? extrasPath : extrasPath + File.separator;
     }
 
     public void storeContext() {

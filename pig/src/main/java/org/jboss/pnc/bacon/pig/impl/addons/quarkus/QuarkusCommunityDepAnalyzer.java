@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Sets;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -156,14 +157,12 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         repoZipContents = FileUtils.unzip(repoZipPath.toFile(), unzippedRepo);
 
         Optional<String> quarkusCore = repoZipContents.stream()
-                // todo file separator for Wi***ws may be different
-                .filter(file -> file.matches(".*/io/quarkus/quarkus-core/.*\\.jar"))
+                .filter(file -> FilenameUtils.normalize(file, true).matches(".*/io/quarkus/quarkus-core/.*\\.jar"))
                 .findAny();
 
         String quarkusCorePath = quarkusCore.orElseThrow(
                 () -> new RuntimeException(
                         "Quarkus core not found in the repository, unable to determine Quarkus version"));
-        // todo separators!
         String quarkusCoreDir = quarkusCorePath.substring(0, quarkusCorePath.lastIndexOf("/"));
         quarkusVersion = quarkusCoreDir.substring(quarkusCoreDir.lastIndexOf("/") + 1);
 
@@ -308,8 +307,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     private Collection<String> checkBomContents(String bomLocator) {
         String quarkusRuntimeBom = repoZipContents.stream()
-                // todo file separator for Wi***ws may be different
-                .filter(file -> file.matches(bomLocator))
+                .filter(file -> FilenameUtils.normalize(file, true).matches(bomLocator))
                 .findAny()
                 .get();
         return checkReferencesInRepo(quarkusRuntimeBom);
