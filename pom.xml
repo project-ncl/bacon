@@ -489,9 +489,4 @@
             </snapshots>
         </repository>
     </repositories>
-
-
-  <scm>
-    <tag>2.0.0.RC1</tag>
-  </scm>
 </project>
