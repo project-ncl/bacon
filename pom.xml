@@ -293,6 +293,11 @@
                 <classifier>minimal</classifier>
                 <version>4.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.commonjava.maven.ext</groupId>
+                <artifactId>pom-manipulation-common</artifactId>
+                <version>4.0</version>
+            </dependency>
 
             <!-- jaxb -->
             <dependency>
@@ -410,6 +415,14 @@
                     </execution>
 
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                    <shortRevisionLength>8</shortRevisionLength>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
