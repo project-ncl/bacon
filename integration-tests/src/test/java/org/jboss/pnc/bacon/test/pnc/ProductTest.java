@@ -34,7 +34,7 @@ public class ProductTest extends AbstractTest {
         final String suffix = getRandomString();
         final String productName = PRODUCT_NAME_PREFIX + suffix;
         final String abbreviation = "BT-NPN-" + suffix;
-        final String description = "*";
+        final String description = "BT New Product Description";
 
         Product response = Product.builder()
                 .id("666")
