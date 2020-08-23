@@ -114,6 +114,10 @@
             <artifactId>pom-manipulation-cli</artifactId>
             <classifier>minimal</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 
         <dependency>
           <groupId>ch.qos.logback</groupId>
