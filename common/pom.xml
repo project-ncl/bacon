@@ -31,10 +31,6 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>rest-client</artifactId>
         </dependency>
@@ -46,9 +42,10 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <!-- This is an uber-jar that brings in logback-classic as well -->
         <dependency>
             <groupId>org.commonjava.maven.ext</groupId>
-            <artifactId>pom-manipulation-common</artifactId>
+            <artifactId>pom-manipulation-cli</artifactId>
         </dependency>
     </dependencies>
 </project>
