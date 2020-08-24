@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,8 +15,7 @@ class ObjectHelperTest {
 
     @Test
     void executeIfNotNull() {
-
-        ObjectHelper.executeIfNotNull(null, () -> assertFalse(true, "I shouldn't be run"));
+        ObjectHelper.executeIfNotNull(null, () -> fail("I shouldn't be run"));
 
         boolean[] called = { false };
         ObjectHelper.executeIfNotNull("not null", () -> {
@@ -29,7 +29,7 @@ class ObjectHelperTest {
         PrintStream old = System.out;
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(stream);
+        PrintStream ps = new PrintStream(stream, false, StandardCharsets.UTF_8.name());
         System.setOut(ps);
         Map<String, String> testSubject = Maps.newHashMap();
         testSubject.put("test", "subject");
@@ -38,8 +38,10 @@ class ObjectHelperTest {
         System.out.flush();
         System.setOut(old);
 
-        String output = stream.toString();
-        assertEquals("{\"test\":\"subject\"}\n", output);
+        // FIXME: Ideally, we wouldn't need to trim, but we may get a different final newline
+        // FIXME: See <https://github.com/project-ncl/bacon/issues/349> for details
+        String output = stream.toString().trim();
+        assertEquals("{\"test\":\"subject\"}", output);
     }
 
     @Test
@@ -47,7 +49,7 @@ class ObjectHelperTest {
         PrintStream old = System.out;
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(stream);
+        PrintStream ps = new PrintStream(stream, false, StandardCharsets.UTF_8.name());
         System.setOut(ps);
         Map<String, String> testSubject = Maps.newHashMap();
         testSubject.put("test", "subject");
@@ -57,6 +59,8 @@ class ObjectHelperTest {
         System.out.flush();
         System.setOut(old);
 
+        // FIXME: Ideally, we wouldn't need to trim, but we may get a different final newline
+        // FIXME: See <https://github.com/project-ncl/bacon/issues/349> for details
         String output = stream.toString().trim();
         assertEquals("---\ntest: \"subject\"", output);
     }
@@ -67,18 +71,17 @@ class ObjectHelperTest {
                 .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 
         ObjectHelper.setRootLoggingLevel(Level.TRACE);
-        assertEquals(root.getLevel(), Level.TRACE);
+        assertSame(Level.TRACE, root.getLevel());
     }
 
     @Test
     void setLoggingLevel() {
-
         String loggerName = "test";
 
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
                 .getLogger(loggerName);
 
         ObjectHelper.setLoggingLevel("test", Level.ERROR);
-        assertEquals(logger.getLevel(), Level.ERROR);
+        assertSame(Level.ERROR, logger.getLevel());
     }
 }
