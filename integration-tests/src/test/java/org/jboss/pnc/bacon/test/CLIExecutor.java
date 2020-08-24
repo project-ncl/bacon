@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author jbrazdil
  */
 public class CLIExecutor {
-    private static final Path BACON_JAR = Paths.get("../cli/target/bacon.jar").toAbsolutePath().normalize();
+    private static final Path BACON_JAR = Paths.get("..", "cli", "target", "bacon.jar").toAbsolutePath().normalize();
     public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
 
     public ExecutionResult runCommand(String... args) {
