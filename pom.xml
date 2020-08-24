@@ -271,6 +271,12 @@
                 <groupId>com.redhat.red.build</groupId>
                 <artifactId>koji-build-finder</artifactId>
                 <version>1.5.0</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -290,13 +296,13 @@
             <dependency>
                 <groupId>org.commonjava.maven.ext</groupId>
                 <artifactId>pom-manipulation-cli</artifactId>
-                <classifier>minimal</classifier>
                 <version>4.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.commonjava.maven.ext</groupId>
-                <artifactId>pom-manipulation-common</artifactId>
-                <version>4.0</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- jaxb -->
