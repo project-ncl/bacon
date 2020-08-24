@@ -85,7 +85,7 @@ public class AbstractCommand implements Command {
 
         if (version) {
             VersionInfo versionInfo = VersionInfo.instance();
-            shell.writeln(versionInfo.getVersion() + " (" + versionInfo.getRevision() + ")");
+            shell.writeln(versionInfo.toString());
             activated = true;
         }
 
@@ -130,7 +130,7 @@ public class AbstractCommand implements Command {
 
     /**
      * Print help method if a group command is invoked
-     * 
+     *
      * @param commandInvocation
      * @return
      */
@@ -227,7 +227,7 @@ public class AbstractCommand implements Command {
      * Example:
      *
      * <exampleText stuff>
-     * 
+     *
      * @return
      */
     public String exampleText() {
