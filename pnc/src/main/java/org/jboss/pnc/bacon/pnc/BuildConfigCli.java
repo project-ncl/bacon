@@ -95,7 +95,7 @@ public class BuildConfigCli extends AbstractCommand {
         private String productVersionId;
         @Option(
                 name = "build-type",
-                description = "Build Type. Options are: MVN,GRADLE. Default: MVN",
+                description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
         @Option(
@@ -165,7 +165,7 @@ public class BuildConfigCli extends AbstractCommand {
         private String productVersionId;
         @Option(
                 name = "build-type",
-                description = "Build Type. Options are: MVN,GRADLE. Default: MVN",
+                description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
 
@@ -248,7 +248,7 @@ public class BuildConfigCli extends AbstractCommand {
         private String scmRevision;
         @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE")
         private Map<String, String> parameters;
-        @Option(name = "build-type", description = "Build Type. Options are: Maven,Gradle. Default: Maven")
+        @Option(name = "build-type", description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN")
         private String buildType;
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
