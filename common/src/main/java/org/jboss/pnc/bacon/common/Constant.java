@@ -1,8 +1,11 @@
 package org.jboss.pnc.bacon.common;
 
+import java.io.File;
+
 public class Constant {
 
-    public static final String DEFAULT_CONFIG_FOLDER = System.getProperty("user.home") + "/.config/pnc-bacon";
+    public static final String DEFAULT_CONFIG_FOLDER = System.getProperty("user.home") + File.separator + ".config"
+            + File.separator + "pnc-bacon";
 
     public static final String CONFIG_FILE_NAME = "config.yaml";
 
