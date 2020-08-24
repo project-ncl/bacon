@@ -1,0 +1,324 @@
+[ {
+  "buildInfo" : {
+    "version" : "not found",
+    "release" : "not found",
+    "build_id" : 0,
+    "package_id" : 0,
+    "package_name" : "not found",
+    "completion_time" : 1598287232,
+    "creation_time" : 1598287232,
+    "state" : "ALL"
+  },
+  "archives" : [ {
+    "archive" : {
+      "filename" : "not found",
+      "checksum" : "2138286f823eecd409f736ca19e6aace",
+      "id" : -1,
+      "build_id" : 0,
+      "checksum_type" : "md5"
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "2138286f823eecd409f736ca19e6aace"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/cpaas/tp/cpaas-test-pnc-gradle/1.0.0.redhat-00014/cpaas-test-pnc-gradle-1.0.0.redhat-00014-javadoc.jar" ]
+  }, {
+    "archive" : {
+      "filename" : "not found",
+      "checksum" : "0d1f06e1cc3aa4117bac0dda30a20425",
+      "id" : -2,
+      "build_id" : 0,
+      "checksum_type" : "md5"
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "0d1f06e1cc3aa4117bac0dda30a20425"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/cpaas/tp/cpaas-test-pnc-gradle/1.0.0.redhat-00014/cpaas-test-pnc-gradle-1.0.0.redhat-00014-sources.jar" ]
+  }, {
+    "archive" : {
+      "filename" : "not found",
+      "checksum" : "1199e8e150f38aadf0962cd473e10cba",
+      "id" : -3,
+      "build_id" : 0,
+      "checksum_type" : "md5"
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "1199e8e150f38aadf0962cd473e10cba"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/cpaas/tp/cpaas-test-pnc-gradle/1.0.0.redhat-00014/cpaas-test-pnc-gradle-1.0.0.redhat-00014.pom" ]
+  }, {
+    "archive" : {
+      "filename" : "not found",
+      "checksum" : "d5f97e0a8ee673d64fe7063a520ab127",
+      "id" : -4,
+      "build_id" : 0,
+      "checksum_type" : "md5"
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "d5f97e0a8ee673d64fe7063a520ab127"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/cpaas/tp/cpaas-test-pnc-gradle/1.0.0.redhat-00014/cpaas-test-pnc-gradle-1.0.0.redhat-00014.jar" ]
+  } ]
+}, {
+  "buildInfo" : {
+    "version" : "3.6.0.redhat_1",
+    "release" : "1",
+    "nvr" : "org.apache.commons-commons-lang3-3.6.0.redhat_1-1",
+    "build_id" : 659874,
+    "package_id" : 38467,
+    "package_name" : "org.apache.commons-commons-lang3",
+    "completion_time" : 1520339158,
+    "creation_time" : 1520339156,
+    "task_id" : 15484624,
+    "owner_id" : 3099,
+    "owner_name" : "guest",
+    "state" : "COMPLETE",
+    "creation_event_id" : 18449747,
+    "maven_group_id" : "org.apache.commons",
+    "maven_artifact_id" : "commons-lang3",
+    "maven_version" : "3.6.0.redhat-1",
+    "volume_name" : "rhel-7"
+  },
+  "taskInfo" : {
+    "taskId" : 15484624,
+    "weight" : 0.2,
+    "parentTaskId" : 0,
+    "channelId" : 4,
+    "startTime" : 1520338861,
+    "priority" : 20,
+    "completionTime" : 1520339202,
+    "state" : 2,
+    "createTime" : 1520338828,
+    "ownerId" : 0,
+    "hostId" : 92,
+    "method" : "maven",
+    "arch" : "noarch",
+    "request" : [ "git+https://code/gerrit/apache/commons-lang.git#1dcc2bed833bc55cb964c9cbe40865ccffdb3057", "jb-eap-7.2-maven-candidate", {
+      "goals" : [ "deploy" ]
+    } ]
+  },
+  "taskRequest" : {
+    "request" : [ "git+https://code/gerrit/apache/commons-lang.git#1dcc2bed833bc55cb964c9cbe40865ccffdb3057", "jb-eap-7.2-maven-candidate", {
+      "goals" : [ "deploy" ]
+    } ]
+  },
+  "archives" : [ {
+    "archive" : {
+      "version" : "3.6.0.redhat-1",
+      "filename" : "commons-lang3-3.6.0.redhat-1-sources.jar",
+      "checksum" : "bce0080ede5c999dd2562ca60e1c4370",
+      "size" : 536736,
+      "id" : 2353348,
+      "btype" : "maven",
+      "btype_id" : 2,
+      "group_id" : "org.apache.commons",
+      "artifact_id" : "commons-lang3",
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 659874,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "bce0080ede5c999dd2562ca60e1c4370"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/org/apache/commons/commons-lang3/3.6.0.redhat-1/commons-lang3-3.6.0.redhat-1-sources.jar" ]
+  }, {
+    "archive" : {
+      "version" : "3.6.0.redhat-1",
+      "filename" : "commons-lang3-3.6.0.redhat-1.jar",
+      "checksum" : "23ea543dd0c6e2a9414e5af5abb4f681",
+      "size" : 495549,
+      "id" : 2353344,
+      "btype" : "maven",
+      "btype_id" : 2,
+      "group_id" : "org.apache.commons",
+      "artifact_id" : "commons-lang3",
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 659874,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "23ea543dd0c6e2a9414e5af5abb4f681"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/org/apache/commons/commons-lang3/3.6.0.redhat-1/commons-lang3-3.6.0.redhat-1.jar" ]
+  }, {
+    "archive" : {
+      "version" : "3.6.0.redhat-1",
+      "filename" : "commons-lang3-3.6.0.redhat-1.pom",
+      "checksum" : "fc4df7645302043f3c8796a567ffd412",
+      "size" : 27390,
+      "id" : 2353345,
+      "btype" : "maven",
+      "btype_id" : 2,
+      "group_id" : "org.apache.commons",
+      "artifact_id" : "commons-lang3",
+      "type_extensions" : "pom",
+      "build_id" : 659874,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    },
+    "checksums" : [ {
+      "type" : "md5",
+      "value" : "fc4df7645302043f3c8796a567ffd412"
+    } ],
+    "files" : [ "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/org/apache/commons/commons-lang3/3.6.0.redhat-1/commons-lang3-3.6.0.redhat-1.jar!/META-INF/maven/org.apache.commons/commons-lang3/pom.xml", "cpaas-1.0.0.ER1-maven-repository.zip!/cpaas-1.0.0.GA-maven-repository/maven-repository/org/apache/commons/commons-lang3/3.6.0.redhat-1/commons-lang3-3.6.0.redhat-1.pom" ]
+  } ],
+  "remoteArchives" : [ {
+    "filename" : "commons-lang3-3.6.0.redhat-1-sources.jar",
+    "checksum" : "bce0080ede5c999dd2562ca60e1c4370",
+    "size" : 536736,
+    "id" : 2353348,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+    "build_id" : 659874,
+    "type_name" : "jar",
+    "type_id" : 1,
+    "checksum_type" : "md5",
+    "type_description" : "Jar file",
+    "metadata_only" : false
+  }, {
+    "filename" : "commons-lang3-3.6.0.redhat-1-javadoc.jar",
+    "checksum" : "3acd6aec56680c58bc42f2e1dc506ef7",
+    "size" : 1322000,
+    "id" : 2353347,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+    "build_id" : 659874,
+    "type_name" : "jar",
+    "type_id" : 1,
+    "checksum_type" : "md5",
+    "type_description" : "Jar file",
+    "metadata_only" : false
+  }, {
+    "filename" : "commons-lang3-3.6.0.redhat-1-tests.jar",
+    "checksum" : "f773bfaecd53d23c1ec83ae915bdd90d",
+    "size" : 840333,
+    "id" : 2353346,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+    "build_id" : 659874,
+    "type_name" : "jar",
+    "type_id" : 1,
+    "checksum_type" : "md5",
+    "type_description" : "Jar file",
+    "metadata_only" : false
+  }, {
+    "filename" : "commons-lang3-3.6.0.redhat-1.pom",
+    "checksum" : "fc4df7645302043f3c8796a567ffd412",
+    "size" : 27390,
+    "id" : 2353345,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "type_extensions" : "pom",
+    "build_id" : 659874,
+    "type_name" : "pom",
+    "type_id" : 3,
+    "checksum_type" : "md5",
+    "type_description" : "Maven Project Object Management file",
+    "metadata_only" : false
+  }, {
+    "filename" : "commons-lang3-3.6.0.redhat-1.jar",
+    "checksum" : "23ea543dd0c6e2a9414e5af5abb4f681",
+    "size" : 495549,
+    "id" : 2353344,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+    "build_id" : 659874,
+    "type_name" : "jar",
+    "type_id" : 1,
+    "checksum_type" : "md5",
+    "type_description" : "Jar file",
+    "metadata_only" : false
+  }, {
+    "version" : "3.6.0.redhat-1",
+    "filename" : "commons-lang3-3.6.0.redhat-1-project-sources.tar.gz",
+    "checksum" : "daf6e0c61eb0f029dc7173c906729547",
+    "size" : 876252,
+    "id" : 2353343,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "group_id" : "org.apache.commons",
+    "artifact_id" : "commons-lang3",
+    "type_extensions" : "tar tar.gz tar.bz2 tar.xz tgz",
+    "build_id" : 659874,
+    "type_name" : "tar",
+    "type_id" : 4,
+    "checksum_type" : "md5",
+    "type_description" : "Tar file",
+    "metadata_only" : false
+  }, {
+    "version" : "3.6.0.redhat-1",
+    "filename" : "commons-lang3-3.6.0.redhat-1-scm-sources.zip",
+    "checksum" : "0aeec21746cf6c43a58ce709f501f514",
+    "size" : 1205093,
+    "id" : 2353342,
+    "btype" : "maven",
+    "btype_id" : 2,
+    "group_id" : "org.apache.commons",
+    "artifact_id" : "commons-lang3",
+    "type_extensions" : "zip",
+    "build_id" : 659874,
+    "type_name" : "zip",
+    "type_id" : 2,
+    "checksum_type" : "md5",
+    "type_description" : "Zip file",
+    "metadata_only" : false
+  } ],
+  "tags" : [ {
+    "id" : 2588,
+    "name" : "mead-import-maven-all",
+    "locked" : false,
+    "maven_support" : true,
+    "maven_include_all" : true
+  }, {
+    "id" : 17340,
+    "name" : "jb-eap-7.2.0.beta-maven-deps",
+    "locked" : false,
+    "maven_support" : true,
+    "maven_include_all" : true
+  }, {
+    "id" : 17866,
+    "name" : "jb-eap-7.2.0-rhel-6-released",
+    "locked" : false,
+    "maven_support" : false,
+    "maven_include_all" : false
+  }, {
+    "id" : 17869,
+    "name" : "jb-eap-7.2.0-rhel-7-released",
+    "locked" : false,
+    "maven_support" : false,
+    "maven_include_all" : false
+  }, {
+    "id" : 17874,
+    "name" : "jb-eap-7.2.0-maven-released",
+    "locked" : false,
+    "maven_support" : true,
+    "maven_include_all" : true
+  }, {
+    "id" : 20597,
+    "name" : "rhba-7.3-maven-deps",
+    "locked" : false,
+    "maven_support" : true,
+    "maven_include_all" : true
+  } ],
+  "types" : [ "maven" ]
+} ]

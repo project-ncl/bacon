@@ -42,21 +42,22 @@ public final class NvrListGenerator {
         List<KojiBuild> builds = BuildFinderUtils.findBuilds(repoZipPath, true);
         File outputDirectory = new File(FilenameUtils.getPath(targetPath));
         Report nvrReport = new NVRReport(outputDirectory, builds);
+        String basename = nvrReport.getBaseFilename() + ".txt";
 
         try {
             nvrReport.outputText();
         } catch (IOException e) {
-            log.error("Failed to write file {}.txt: {}", nvrReport.getBaseFilename(), e.getMessage(), e);
+            log.error("Failed to write file {} to {}: {}", basename, outputDirectory, e.getMessage(), e);
             return false;
         }
 
-        File srcFile = new File(outputDirectory, nvrReport.getBaseFilename() + ".txt");
+        File srcFile = new File(outputDirectory, basename);
         File destFile = new File(targetPath);
 
         try {
-            FileUtils.moveFile(srcFile, destFile);
+            FileUtils.copyFile(srcFile, destFile, true);
         } catch (IOException e) {
-            log.error("Failed to move {} to {}: {}", srcFile, destFile, e.getMessage(), e);
+            log.error("Failed to copy file {} to {}: {}", srcFile, destFile, e.getMessage(), e);
             return false;
         }
 
