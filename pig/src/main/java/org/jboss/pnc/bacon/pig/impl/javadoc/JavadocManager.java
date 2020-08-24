@@ -282,7 +282,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             }
         }
         System.setOut(outStream);
-        log.info("PME Command run [{}]", cmd.toString());
+        log.info("PME Command run [{}]", cmd);
         if (new Cli().run(cmd.toString().split("\\s+")) != 0) {
             System.setOut(stdout);
             log.error("Error running PME see {}", filePath);
@@ -322,7 +322,9 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private void dumpLog(String filePath) {
         try {
-            System.out.println(new String(Files.readAllBytes(Paths.get(filePath))));
+            if (log.isErrorEnabled()) {
+                log.error(new String(Files.readAllBytes(Paths.get(filePath))));
+            }
         } catch (IOException e) {
             log.error("Unable to dump log {}", filePath, e);
         }
