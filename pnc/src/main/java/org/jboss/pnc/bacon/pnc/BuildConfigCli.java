@@ -272,11 +272,18 @@ public class BuildConfigCli extends AbstractCommand {
                         scmRepositoryId,
                         () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
                 ObjectHelper.executeIfNotNull(scmRevision, () -> updated.scmRevision(scmRevision));
-                ObjectHelper.executeIfNotNull(parameters, () -> updated.parameters(parameters));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
                 ObjectHelper.executeIfNotNull(
                         productVersionId,
                         () -> updated.productVersion(ProductVersion.refBuilder().id(productVersionId).build()));
+
+                ObjectHelper.executeIfNotNull(parameters, () -> {
+
+                    // update the content of the existing parameters
+                    Map<String, String> existing = buildConfiguration.getParameters();
+                    parameters.forEach(existing::put);
+                    updated.parameters(existing);
+                });
 
                 callUpdate(updated.build());
             });
