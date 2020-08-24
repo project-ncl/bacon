@@ -24,6 +24,8 @@ public class ObjectHelper {
     }
 
     public static void print(boolean json, Object o) throws JsonProcessingException {
+        // FIXME: System.out.println uses system line feed, but writeValueAsString may not
+        // FIXME: See <https://github.com/project-ncl/bacon/issues/349> for details
         System.out.println(getOutputMapper(json).writeValueAsString(o));
     }
 
