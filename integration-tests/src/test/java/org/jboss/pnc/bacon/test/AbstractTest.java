@@ -15,12 +15,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jbrazdil
  */
 public class AbstractTest {
+    private static final Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
     private static WireMockServer wireMockServer;
 
@@ -62,20 +65,20 @@ public class AbstractTest {
         ExecutionResult result = executor.runCommand(args);
         assertThat(result.getOutput()).isEmpty();
         assertThat(result.getError()).isEmpty();
-        assertThat(result.getRetval()).isEqualTo(0);
+        assertThat(result.getRetval()).isZero();
     }
 
     protected <T> T executeAndDeserialize(Class<T> clazz, String... args) throws JsonProcessingException {
         ExecutionResult result = executor.runCommand(args);
-        System.out.println("stderr:\n" + result.getError());
-        assertThat(result.getRetval()).isEqualTo(0);
+        log.debug("stderr:{}{}", System.lineSeparator(), result.getError());
+        assertThat(result.getRetval()).isZero();
         return result.fromYAML(clazz);
     }
 
     protected <T> T executeAndDeserializeJSON(Class<T> clazz, String... args) throws JsonProcessingException {
         ExecutionResult result = executor.runCommand(args);
-        System.out.println("stderr:\n" + result.getError());
-        assertThat(result.getRetval()).isEqualTo(0);
+        log.debug("stderr:{}{}", System.lineSeparator(), result.getError());
+        assertThat(result.getRetval()).isZero();
         return result.fromYAML(clazz);
     }
 

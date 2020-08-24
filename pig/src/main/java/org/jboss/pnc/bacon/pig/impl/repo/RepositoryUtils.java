@@ -62,7 +62,7 @@ import static java.util.Comparator.comparingInt;
  *         Date: 1/18/18
  */
 public class RepositoryUtils {
-    public static final Logger log = LoggerFactory.getLogger(RepositoryUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(RepositoryUtils.class);
 
     public static void generateMavenMetadata(File mavenRepositoryDirectory) {
         log.debug("Generating maven-metadata.xml files");

@@ -100,16 +100,19 @@ public class SharedContentReportGenerator {
                     BrewSearcher.fillBrewData(row);
                     break;
                 } catch (Exception e) {
-                    log.debug(
-                            "Failed to fill Brew data to shared content report row, attempt " + (i + 1) + " out of "
-                                    + attempts,
-                            e);
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "Failed to fill Brew data to shared content report row, attempt {} out of {}",
+                                i + 1,
+                                attempts,
+                                e);
+                    }
                 }
             }
         }
         MRRCSearcher.getInstance().fillMRRCData(row);
         if (log.isDebugEnabled()) {
-            System.out.printf("Analyzed %d/%d\r", analyzed.incrementAndGet(), limit);
+            log.debug("Analyzed {}/{}", analyzed.incrementAndGet(), limit);
         }
     }
 }
