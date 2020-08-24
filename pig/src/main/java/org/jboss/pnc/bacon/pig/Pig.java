@@ -113,10 +113,9 @@ public class Pig extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
 
-            Fail.failIfNull(configDir, "You need to specify the configuration directory!");
-
             return super.executeHelper(commandInvocation, () -> {
 
+                Fail.failIfNull(configDir, "You need to specify the configuration directory!");
                 // validate the PiG config
                 PigConfig pig = Config.instance().getActiveProfile().getPig();
                 if (pig == null) {
