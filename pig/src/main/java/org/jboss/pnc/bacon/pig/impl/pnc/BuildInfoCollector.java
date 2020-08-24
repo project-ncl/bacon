@@ -72,7 +72,9 @@ public class BuildInfoCollector {
                     queryParam = query("status==%s;temporaryBuild==%s", BuildStatus.SUCCESS, false);
                     break;
                 case TEMPORARY:
-                    queryParam = query("status==%s;temporaryBuild==%s", BuildStatus.SUCCESS, true);
+                    // NCL-5943 Cannot ignore permanent(regular) builds because they cause NO_REBUILD_REQUIRED even for
+                    // temporary builds. That means "latest build" for a temporary build can be permanent(regular).
+                    queryParam = query("status==%s", BuildStatus.SUCCESS);
                     break;
                 default:
                     queryParam = Optional.empty();
