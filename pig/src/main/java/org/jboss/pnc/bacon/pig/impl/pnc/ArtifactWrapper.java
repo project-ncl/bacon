@@ -41,11 +41,17 @@ public class ArtifactWrapper {
     private String gapv;
     private String fileName;
     private String downloadUrl;
+    private String md5;
+    private String sha1;
+    private String sha256;
 
     public ArtifactWrapper(Artifact artifact) {
         fileName = artifact.getFilename();
         downloadUrl = artifact.getPublicUrl();
         gapv = artifact.getIdentifier();
+        md5 = artifact.getMd5();
+        sha1 = artifact.getSha1();
+        sha256 = artifact.getSha256();
     }
 
     public GAV toGAV() {
