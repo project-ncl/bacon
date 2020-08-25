@@ -1,6 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
-import groovy.lang.Delegate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,7 +15,6 @@ import java.util.List;
 @ToString
 public class ThorntailCommunityDependency implements CsvExportable {
 
-    @Delegate
     private final CommunityDependency communityDependency;
     private List<String> usedForThorntail;
 
