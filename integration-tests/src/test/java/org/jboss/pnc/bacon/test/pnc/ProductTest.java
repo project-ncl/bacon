@@ -1,10 +1,14 @@
 package org.jboss.pnc.bacon.test.pnc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Collections;
-import org.jboss.pnc.bacon.test.AbstractTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Collections;
+
+import org.jboss.pnc.bacon.test.AbstractTest;
+import org.jboss.pnc.bacon.test.ExecutionResult;
 import org.jboss.pnc.dto.Product;
 import org.jboss.pnc.dto.response.Page;
 import org.junit.jupiter.api.Assumptions;
@@ -15,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  *
@@ -92,7 +98,7 @@ public class ProductTest extends AbstractTest {
 
     @Test
     @Order(3)
-    public void shouldUpdateProduct() throws JsonProcessingException, InterruptedException {
+    public void shouldUpdateProduct() throws JsonProcessingException {
         Assumptions.assumeTrue(productId != null);
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + "suffix").build();
@@ -110,4 +116,15 @@ public class ProductTest extends AbstractTest {
         assertThat(refreshedProduct.getName()).isEqualTo(newName);
     }
 
+    @Test
+    public void shouldGetInvalidProduct() throws JsonProcessingException {
+        productId = "000000";
+
+        wmock.get(PRODUCT, productId);
+
+        ExecutionResult er = executeAndGetResult("pnc", "product", "get", productId);
+
+        assertEquals(er.getRetval(), 1);
+        assertTrue(er.getError().contains("HTTP 404 Not Found"));
+    }
 }
