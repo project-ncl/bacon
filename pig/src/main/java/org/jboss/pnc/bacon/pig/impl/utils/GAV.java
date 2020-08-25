@@ -185,6 +185,8 @@ public class GAV {
     }
 
     public static GAV fromFileName(String absolutePath, String repoRootName) {
+        absolutePath = FilenameUtils.normalize(absolutePath, true);
+        repoRootName = FilenameUtils.normalize(repoRootName, true);
         int repoDirNameIdx = absolutePath.lastIndexOf(repoRootName);
         String gavPart = absolutePath.substring(repoDirNameIdx + repoRootName.length());
 
