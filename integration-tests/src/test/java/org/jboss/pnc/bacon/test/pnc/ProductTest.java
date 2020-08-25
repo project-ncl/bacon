@@ -92,7 +92,6 @@ public class ProductTest extends AbstractTest {
 
     @Test
     @Order(3)
-    @Disabled(value = "NCL-5509")
     public void shouldUpdateProduct() throws JsonProcessingException, InterruptedException {
         Assumptions.assumeTrue(productId != null);
 
