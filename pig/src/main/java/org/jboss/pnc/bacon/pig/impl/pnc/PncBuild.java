@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,7 @@ public class PncBuild {
     private String scmRevision;
     private String id;
     private String name;
+    private Map<String, String> attributes;
     private BuildStatus buildStatus;
     private List<String> buildLog;
     private List<ArtifactWrapper> builtArtifacts;
@@ -71,6 +73,7 @@ public class PncBuild {
         internalScmUrl = build.getScmRepository().getInternalUrl();
         scmRevision = build.getScmRevision();
         buildStatus = build.getStatus();
+        attributes = build.getAttributes();
     }
 
     public void addBuiltArtifacts(List<Artifact> artifacts) {
