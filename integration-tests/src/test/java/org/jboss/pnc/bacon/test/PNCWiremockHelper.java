@@ -12,6 +12,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.created;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -124,6 +125,10 @@ public class PNCWiremockHelper {
         stubFor(_get(endpoint + "/" + id).willReturn(_jsonResponse(ok(), response)));
     }
 
+    public void get(String endpoint, String id) throws JsonProcessingException {
+        stubFor(_get(endpoint + "/" + id).willReturn(notFound()));
+    }
+
     public void list(String endpoint, Page<?> responsePage) throws JsonProcessingException {
         stubFor(_get(endpoint).willReturn(_jsonResponse(ok(), responsePage)));
     }
@@ -148,7 +153,7 @@ public class PNCWiremockHelper {
      * The endpoint "/foo/1" will be returning oldBody untill a post request is sent to "/foo" endpoind. After that, the
      * endpoint "/foo/1" will be returning newBody.
      * </p>
-     * 
+     *
      * @param scenarioName Name of the scanario. Must be unique.
      * @return Scenario builder used to construct the scenario.
      */

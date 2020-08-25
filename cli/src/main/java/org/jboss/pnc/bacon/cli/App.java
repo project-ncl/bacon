@@ -144,7 +144,7 @@ public class App extends AbstractCommand {
                 throw new FatalException();
             } catch (RuntimeException ex) {
                 if (ex.getMessage().contains(FatalException.class.getCanonicalName())) {
-                    throw new FatalException();
+                    throw ex;
                 }
                 // if stacktrace not thrown from aesh
                 if (!ex.getCause().getClass().getCanonicalName().contains("aesh")) {

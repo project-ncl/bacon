@@ -61,7 +61,7 @@ public class AbstractTest {
         return randomString.replaceAll("[+/]", "-"); // some fields allow only [a-zA-Z0-9-]
     }
 
-    protected void execute(String... args) throws JsonProcessingException {
+    protected void execute(String... args) {
         ExecutionResult result = executor.runCommand(args);
         assertThat(result.getOutput()).isEmpty();
         assertThat(result.getError()).isEmpty();
@@ -82,7 +82,7 @@ public class AbstractTest {
         return result.fromYAML(clazz);
     }
 
-    protected ExecutionResult executeAndGetResult(String... args) throws JsonProcessingException {
+    protected ExecutionResult executeAndGetResult(String... args) {
         return executor.runCommand(args);
     }
 
