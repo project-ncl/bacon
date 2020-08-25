@@ -205,7 +205,7 @@ public class PigFacade {
     private static void generateNvrList() {
         PigContext ctx = PigContext.get();
         String repoZipPath = ctx.getRepositoryData().getRepositoryPath().toAbsolutePath().toString();
-        String targetPath = Paths.get(ctx.getExtrasPath())
+        String targetPath = Paths.get(ctx.getReleasePath())
                 .resolve(ctx.getDeliverables().getNvrListName())
                 .toAbsolutePath()
                 .toString();
@@ -216,6 +216,9 @@ public class PigFacade {
         Map<String, PncBuild> builds = PigContext.get().getBuilds();
         String tagPrefix = getBrewTag(context().getPncImportResult().getVersion());
         List<PncBuild> buildsToPush = getBuildsToPush(builds);
+        if (log.isInfoEnabled()) {
+            log.info("Pushing the following builds to brew: {}", buildsToPush.stream().map(PncBuild::getId));
+        }
         for (PncBuild build : buildsToPush) {
             AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration());
             BuildPushParameters request = BuildPushParameters.builder().tagPrefix(tagPrefix).reimport(reimport).build();
@@ -224,6 +227,7 @@ public class PigFacade {
             try {
                 BuildPushResult pushResult = pushingClient
                         .executeBrewPush(build.getId(), request, 15, TimeUnit.MINUTES);
+                log.info("{} pushed to brew", build.getId());
                 if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
                     throw new RuntimeException(
                             "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
