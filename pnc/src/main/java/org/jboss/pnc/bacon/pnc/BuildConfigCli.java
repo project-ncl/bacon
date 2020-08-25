@@ -37,6 +37,7 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersion;
@@ -64,7 +65,8 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
                 BuildConfigCli.ListRevision.class,
                 BuildConfigCli.ListBuilds.class,
                 BuildConfigCli.Update.class,
-                BuildConfigCli.CreateRevision.class })
+                BuildConfigCli.CreateRevision.class,
+                BuildConfigCli.AddDependency.class })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
@@ -377,6 +379,28 @@ public class BuildConfigCli extends AbstractCommand {
                 throws RemoteResourceException {
             return CREATOR.getClient()
                     .getBuilds(buildConfigId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+    }
+
+    @CommandDefinition(name = "add-dependency", description = "Adds a dependency to a BuildConfig")
+    public class AddDependency extends AbstractCommand {
+
+        @Argument(required = true, description = "Build config id")
+        private String buildConfigId;
+
+        @Option(name = "dependency-id", required = true, description = "ID of BuildConfig to add as dependency")
+        private String dependencyConfigId;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+            return super.executeHelper(commandInvocation, () -> {
+                CREATOR.getClientAuthenticated()
+                        .addDependency(
+                                buildConfigId,
+                                BuildConfigurationRef.refBuilder().id(dependencyConfigId).build());
+                return 0;
+            });
         }
     }
 
