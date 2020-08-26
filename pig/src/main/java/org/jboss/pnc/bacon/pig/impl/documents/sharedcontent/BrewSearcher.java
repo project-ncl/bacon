@@ -18,10 +18,9 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
-import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -90,8 +90,12 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.redhat.red.build</groupId>
-            <artifactId>koji-build-finder</artifactId>
+            <groupId>org.jboss.pnc.build.finder</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.build.finder</groupId>
+            <artifactId>report</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
