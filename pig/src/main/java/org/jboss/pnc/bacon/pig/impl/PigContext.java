@@ -74,6 +74,7 @@ public class PigContext {
     private Deliverables deliverables;
 
     private String targetPath;
+    private String releaseDirName;
     private String releasePath;
     private String extrasPath;
 
@@ -140,7 +141,8 @@ public class PigContext {
     private void configureTargetDirectories(PigConfiguration pigConfiguration) {
         String productPrefix = pigConfiguration.getProduct().prefix();
         targetPath = "target"; // TODO: a way to customize it
-        releasePath = targetPath + File.separator + productPrefix + "-" + fullVersion + File.separator;
+        releaseDirName = productPrefix + "-" + fullVersion;
+        releasePath = targetPath + File.separator + releaseDirName + File.separator;
 
         File releaseDirectory = Paths.get(releasePath).toFile();
         if (!releaseDirectory.isDirectory()) {
