@@ -24,6 +24,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipEncoding;
 import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
@@ -36,7 +37,6 @@ import org.apache.commons.compress.compressors.xz.XZUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tools.ant.util.PermissionUtils;
-import org.apache.tools.ant.util.PermissionUtils.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,17 +48,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,13 +73,14 @@ import static java.nio.file.Files.createTempDirectory;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/28/17
  */
-public class FileUtils {
-    private FileUtils() {
-    }
-
+public final class FileUtils {
     private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
-    public static File mkTempDir(String prefix) {
+    private FileUtils() {
+
+    }
+
+    public static File mkTempDir(final String prefix) {
         try {
             return createTempDirectory(prefix).toFile();
         } catch (IOException e) {
@@ -107,6 +111,95 @@ public class FileUtils {
         }
     }
 
+    public static void setModeAndLastModifiedTime(Path path, ArchiveEntry entry) throws IOException {
+        final FileSystem fileSystem = path.getFileSystem();
+        final Set<String> attributeViews = fileSystem.supportedFileAttributeViews();
+
+        log.debug("Supported file attribute views: {}", attributeViews);
+
+        if (attributeViews.contains("posix")) {
+            final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path);
+            final int mode = PermissionUtils.modeFromPermissions(perms, PermissionUtils.FileType.of(path));
+
+            if (log.isDebugEnabled()) {
+                log.debug("chmod {} {}", String.format("%04o", mode), path);
+            }
+
+            if (entry instanceof TarArchiveEntry) {
+                ((TarArchiveEntry) entry).setMode(mode);
+            } else if (entry instanceof ZipArchiveEntry) {
+                ((ZipArchiveEntry) entry).setUnixMode(mode);
+            } else {
+                throw new RuntimeException("Invalid entry type " + entry.getClass().getSimpleName());
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Cannot set mode for {} since {} filesystem does not support POSIX",
+                        path,
+                        Files.getFileStore(path).type());
+            }
+        }
+
+        final FileTime time = Files.getLastModifiedTime(path);
+
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "touch -t {} {}",
+                    new SimpleDateFormat("yyyyMMddHHmm.ss", Locale.US).format(new Date(time.toMillis())),
+                    path);
+        }
+
+        if (entry instanceof TarArchiveEntry) {
+            ((TarArchiveEntry) entry).setModTime(time.toMillis());
+        } else if (entry instanceof ZipArchiveEntry) {
+            ((ZipArchiveEntry) entry).setLastModifiedTime(time);
+        } else {
+            throw new RuntimeException("Invalid entry type " + entry.getClass().getSimpleName());
+        }
+    }
+
+    // FIXME: Setting the mode on a directory before extracting its files can cause problems
+    // FIXME: We should not set the mode until all files in that directory are extracted
+    // FIXME: See <https://www.gnu.org/software/tar/manual/tar.html#SEC85>.
+    public static void setModeAndLastModifiedTime(final Path path, final int mode, final FileTime time)
+            throws IOException {
+        final FileSystem fileSystem = path.getFileSystem();
+        final Set<String> attributeViews = fileSystem.supportedFileAttributeViews();
+
+        log.debug("Supported file attribute views: {}", attributeViews);
+
+        if (mode != 0) {
+            if (attributeViews.contains("posix")) {
+                if (log.isDebugEnabled()) {
+                    log.debug("chmod {} {}", String.format("%04o", mode), path);
+                }
+
+                final Set<PosixFilePermission> perms = PermissionUtils.permissionsFromMode(mode);
+                Files.setPosixFilePermissions(path, perms);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Cannot set mode {} for {} since {} filesystem does not support POSIX",
+                            String.format("%04o", mode),
+                            path,
+                            Files.getFileStore(path).type());
+                }
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "touch -t {} {}",
+                    new SimpleDateFormat("yyyyMMddHHmm.ss", Locale.US).format(new Date(time.toMillis())),
+                    path);
+        }
+
+        if (time != null) {
+            Files.setLastModifiedTime(path, time);
+        }
+    }
+
     public static Collection<String> untar(final File input, final File directory) {
         log.debug("tar -xf {} -C {}", input, directory);
 
@@ -114,7 +207,7 @@ public class FileUtils {
 
         log.debug("untar: detected compressor type: {}", compressorType);
 
-        final List<String> entries = new ArrayList<>();
+        final Collection<String> entries = new ArrayList<>();
 
         try (final InputStream is = Files.newInputStream(input.toPath());
                 final InputStream cin = compressorType != null
@@ -157,20 +250,27 @@ public class FileUtils {
 
                     Files.createSymbolicLink(path, target);
                 } else if (entry.isFile()) {
-                    try (OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)) {
-                        Files.createDirectories(path.getParent());
+                    Files.createDirectories(path.getParent());
+
+                    try (final OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)) {
                         IOUtils.copy(in, out);
                     }
                 } else {
                     throw new RuntimeException("Unsupported file type for: " + entryName);
                 }
 
+                final int mode = entry.getMode();
+                final Date modTime = entry.getModTime();
+                final long value = modTime.getTime();
+                final FileTime time = FileTime.fromMillis(value);
+
+                setModeAndLastModifiedTime(path, mode, time);
             }
         } catch (IOException | ArchiveException | CompressorException e) {
             throw new RuntimeException("Untar of " + input + " to " + directory + " failed", e);
         }
 
-        return entries;
+        return Collections.unmodifiableCollection(entries);
     }
 
     public static Collection<String> tar(final File output, final File workingDirectory, final File directoryToTar) {
@@ -182,16 +282,16 @@ public class FileUtils {
 
         log.debug("tar: detected compressor type: {}", compressorType);
 
-        List<String> entries = new ArrayList<>();
+        final Collection<String> entries = new ArrayList<>();
 
         try (final OutputStream os = Files.newOutputStream(output.toPath());
-                OutputStream cout = compressorType != null
+                final OutputStream cout = compressorType != null
                         ? new CompressorStreamFactory().createCompressorOutputStream(compressorType, os)
                         : os;
                 final ArchiveOutputStream out = new ArchiveStreamFactory()
                         .createArchiveOutputStream(ArchiveStreamFactory.TAR, cout)) {
-            try (Stream<Path> stream = Files.walk(directory)) {
-                Iterator<Path> iterator = stream.iterator();
+            try (final Stream<Path> stream = Files.walk(directory)) {
+                final Iterator<Path> iterator = stream.iterator();
 
                 while (iterator.hasNext()) {
                     final Path path = iterator.next();
@@ -210,7 +310,7 @@ public class FileUtils {
                     final TarArchiveEntry entry;
 
                     if (Files.isSymbolicLink(path)) {
-                        entry = new TarArchiveEntry(entryName, TarArchiveEntry.LF_SYMLINK);
+                        entry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
                         final Path symlinkDestination = Files.readSymbolicLink(path);
 
                         entry.setLinkName(symlinkDestination.toString());
@@ -220,25 +320,14 @@ public class FileUtils {
                         throw new RuntimeException("Unsupported file type for: " + path);
                     }
 
-                    if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-                        final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, new LinkOption[] {});
-                        final int mode = PermissionUtils.modeFromPermissions(perms, FileType.of(path));
-
-                        entry.setMode(mode);
-                    } else {
-                        log.debug(
-                                "Cannot set mode since {} filesystem does not support POSIX",
-                                Files.getFileStore(path).type());
-                    }
+                    setModeAndLastModifiedTime(path, entry);
 
                     out.putArchiveEntry(entry);
 
-                    final InputStream content;
-
                     if (Files.isRegularFile(path)) {
-                        content = Files.newInputStream(path);
-
-                        IOUtils.copy(content, out);
+                        try (final InputStream content = Files.newInputStream(path)) {
+                            IOUtils.copy(content, out);
+                        }
                     }
 
                     out.closeArchiveEntry();
@@ -248,20 +337,23 @@ public class FileUtils {
             throw new RuntimeException("Tar of directory " + directory + " to " + output + " failed", e);
         }
 
-        return entries;
+        return Collections.unmodifiableCollection(entries);
     }
 
     public static Collection<String> listZipContents(final File input) {
-        log.debug("listing contents of {}", input);
+        log.debug("Listing contents of {}", input);
+
         try (final InputStream is = Files.newInputStream(input.toPath());
                 final ArchiveInputStream in = new ArchiveStreamFactory()
                         .createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
-            List<String> result = new ArrayList<>();
+            final Collection<String> result = new ArrayList<>();
             ArchiveEntry entry;
+
             while ((entry = in.getNextEntry()) != null) {
                 result.add(entry.getName());
             }
-            return result;
+
+            return Collections.unmodifiableCollection(result);
         } catch (IOException | ArchiveException e) {
             throw new RuntimeException("Listing contents of " + input + " failed", e);
         }
@@ -271,15 +363,16 @@ public class FileUtils {
         return unzip(input, directory, null);
     }
 
-    public static Collection<String> unzip(final File input, final File directory, String extraction) {
+    public static Collection<String> unzip(final File input, final File directory, final String extraction) {
         log.debug("unzip -o {} -d {}", input, directory);
 
-        final List<String> entries = new ArrayList<>();
-
         Pattern extractionPattern = null;
+
         if (extraction != null && !extraction.isEmpty()) {
             extractionPattern = Pattern.compile(extraction);
         }
+
+        final Collection<String> entries = new ArrayList<>();
 
         try (final InputStream is = Files.newInputStream(input.toPath());
                 final ArchiveInputStream in = new ArchiveStreamFactory()
@@ -297,7 +390,8 @@ public class FileUtils {
                 // If extraction is specified, only unzip the specified file or directory.
                 // Directories must end in '/' otherwise just the empty directory will be created.
                 if (extractionPattern != null) {
-                    Matcher matcher = extractionPattern.matcher(entryName);
+                    final Matcher matcher = extractionPattern.matcher(entryName);
+
                     if (!matcher.find()) {
                         // If the entry doesn't match the extraction, try the next.
                         continue;
@@ -320,44 +414,30 @@ public class FileUtils {
                     Files.createDirectories(path);
                 } else if (entry.isUnixSymlink()) {
                     final ZipEncoding entryEncoding = entry.getGeneralPurposeBit().usesUTF8ForNames()
-                            ? ZipEncodingHelper.getZipEncoding("UTF8")
+                            ? ZipEncodingHelper.getZipEncoding(StandardCharsets.UTF_8.name())
                             : ZipEncodingHelper.getZipEncoding(Charset.defaultCharset().name());
                     final String targetName = entryEncoding.decode(IOUtils.toByteArray(in));
-                    final Path target = FileSystems.getDefault().getPath(targetName);
+                    final Path target = path.getFileSystem().getPath(targetName);
 
                     Files.createSymbolicLink(path, target);
                 } else {
                     Files.createDirectories(path.getParent());
 
-                    try (OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)) {
+                    try (final OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)) {
                         IOUtils.copy(in, out);
                     }
                 }
 
+                final int mode = entry.getUnixMode();
                 final FileTime time = entry.getLastModifiedTime();
 
-                Files.setLastModifiedTime(path, time);
-
-                final int mode = entry.getUnixMode();
-
-                if (mode != 0) {
-                    if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-                        final Set<PosixFilePermission> perms = PermissionUtils.permissionsFromMode(mode);
-
-                        Files.setPosixFilePermissions(path, perms);
-                    } else {
-                        log.debug(
-                                "Cannot set mode: {} since {} filesystem does not support POSIX",
-                                String.format("%o", mode),
-                                Files.getFileStore(path).type());
-                    }
-                }
+                setModeAndLastModifiedTime(path, mode, time);
             }
         } catch (IOException | ArchiveException e) {
             throw new RuntimeException("Unzip of " + input + " to " + directory + " failed", e);
         }
 
-        return entries;
+        return Collections.unmodifiableCollection(entries);
     }
 
     public static Collection<String> zip(final File output, final File workingDirectory, final File directoryToZip) {
@@ -365,13 +445,13 @@ public class FileUtils {
 
         log.debug("zip -r {} {}", output, directory);
 
-        List<String> entries = new ArrayList<>();
+        final Collection<String> entries = new ArrayList<>();
 
         try (final OutputStream out = Files.newOutputStream(output.toPath());
                 final ArchiveOutputStream os = new ArchiveStreamFactory()
                         .createArchiveOutputStream(ArchiveStreamFactory.ZIP, out)) {
-            try (Stream<Path> stream = Files.walk(directory)) {
-                Iterator<Path> iterator = stream.iterator();
+            try (final Stream<Path> stream = Files.walk(directory)) {
+                final Iterator<Path> iterator = stream.iterator();
 
                 while (iterator.hasNext()) { // TODO get rid of iterator
                     final Path path = iterator.next();
@@ -387,47 +467,37 @@ public class FileUtils {
 
                     entries.add(entryName);
 
-                    final ZipArchiveEntry entry = new ZipArchiveEntry(path.toFile(), entryName);
+                    final ArchiveEntry entry = new ZipArchiveEntry(path.toFile(), entryName);
 
-                    if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-                        final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, new LinkOption[] {});
-                        final int mode = PermissionUtils.modeFromPermissions(perms, FileType.of(path));
-
-                        entry.setUnixMode(mode);
-                    } else {
-                        log.debug(
-                                "Cannot set mode since {} filesystem does not support POSIX",
-                                Files.getFileStore(path).type());
-                    }
+                    setModeAndLastModifiedTime(path, entry);
 
                     os.putArchiveEntry(entry);
-
-                    final InputStream content;
 
                     if (Files.isSymbolicLink(path)) {
                         final Path symlinkDestination = Files.readSymbolicLink(path);
                         final byte[] bytes = symlinkDestination.toString().getBytes(StandardCharsets.UTF_8);
-                        content = new ByteArrayInputStream(bytes);
-                        IOUtils.copy(content, os);
-                        content.close();
+                        try (final InputStream content = new ByteArrayInputStream(bytes)) {
+                            IOUtils.copy(content, os);
+                            os.closeArchiveEntry();
+                        }
                     } else if (Files.isRegularFile(path)) {
-                        content = Files.newInputStream(path);
-                        IOUtils.copy(content, os);
-                        content.close();
+                        try (final InputStream content = Files.newInputStream(path)) {
+                            IOUtils.copy(content, os);
+                            os.closeArchiveEntry();
+                        }
                     } else if (!Files.isDirectory(path)) {
                         throw new RuntimeException("Unsupported file type for: " + path);
                     }
-                    os.closeArchiveEntry();
                 }
             }
         } catch (IOException | ArchiveException e) {
             throw new RuntimeException("Zip of directory " + directory + " to " + output + " failed", e);
         }
 
-        return entries;
+        return Collections.unmodifiableCollection(entries);
     }
 
-    public static void copy(File srcFile, File destFile) {
+    public static void copy(final File srcFile, final File destFile) {
         try {
             if (srcFile.isFile()) {
                 if (destFile.isFile()) {
@@ -450,22 +520,25 @@ public class FileUtils {
 
     /**
      * Moves the contents of srcDir into destDir. Equivalent of calling "mv srcDir/* destDir" in a shell.
-     * 
-     * @param srcDir
-     * @param destDir
+     *
+     * @param srcDir the path to the directory to move
+     * @param destDir the path to the target directory
      */
-    public static boolean moveDirectoryContents(File srcDir, File destDir) throws IOException {
-
+    public static boolean moveDirectoryContents(final File srcDir, final File destDir) throws IOException {
         if (!srcDir.isDirectory() || !destDir.isDirectory()) {
             return false;
         }
-        Files.list(srcDir.toPath()).forEach(path -> {
-            try {
-                Files.move(path, new File(destDir, path.toFile().getName()).toPath());
-            } catch (IOException ex) {
-                throw new RuntimeException("Unable to move file " + path, ex);
-            }
-        });
-        return true;
+
+        try (final Stream<Path> stream = Files.list(srcDir.toPath())) {
+            stream.forEach(path -> {
+                try {
+                    Files.move(path, new File(destDir, path.toFile().getName()).toPath());
+                } catch (IOException ex) {
+                    throw new RuntimeException("Unable to move file " + path, ex);
+                }
+            });
+
+            return true;
+        }
     }
 }
