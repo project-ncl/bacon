@@ -146,21 +146,22 @@ public class BuildInfoCollector {
      */
     public GroupBuildInfo getBuildsFromLatestGroupConfiguration(String groupConfigurationId, boolean temporaryBuild) {
         try {
+            // we have to sort by startTime since group builds with 'NO_REBUILD_REQUIRED' don't have the endTime set
             Collection<GroupBuild> groupBuilds = groupConfigurationClient
                     .getAllGroupBuilds(
                             groupConfigurationId,
-                            of("=desc=submitTime"),
+                            of("=desc=startTime"),
                             query("temporaryBuild==%s", temporaryBuild))
                     .getAll();
 
-            if (groupBuilds.isEmpty()) {
+            Optional<GroupBuild> latest = groupBuilds.stream().filter(gb -> gb.getStatus().isFinal()).findFirst();
+            if (latest.isPresent()) {
+                // first one will be the latest build
+                return getBuildsFromGroupBuild(latest.get());
+            } else {
                 // no builds!
                 throw new RuntimeException(
                         "There are no group builds for group configuration id" + groupConfigurationId);
-            } else {
-                // first one will be the latest build
-                GroupBuild latest = groupBuilds.stream().findFirst().get();
-                return getBuildsFromGroupBuild(latest);
             }
         } catch (RemoteResourceException e) {
             throw new RuntimeException(
