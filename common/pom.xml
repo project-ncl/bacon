@@ -42,10 +42,9 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
-        <!-- This is an uber-jar that brings in logback-classic as well -->
         <dependency>
             <groupId>org.commonjava.maven.ext</groupId>
-            <artifactId>pom-manipulation-cli</artifactId>
+            <artifactId>pom-manipulation-common</artifactId>
         </dependency>
     </dependencies>
 </project>
