@@ -344,7 +344,16 @@ public class PncEntitiesImporter {
         }
 
         try {
-            return toStream(repoClient.getAll(matchUrl, null)).filter(buildConfig::matchesRepository).findAny();
+            List<SCMRepository> foundRepository = toStream(repoClient.getAll(matchUrl, null))
+                    .collect(Collectors.toList());
+            if (foundRepository.isEmpty()) {
+                return Optional.empty();
+            } else if (foundRepository.size() == 1) {
+                return Optional.of(foundRepository.get(0));
+            } else {
+                throw new RuntimeException(
+                        "There exists more then one SCM Repository for url: " + matchUrl + " " + foundRepository);
+            }
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to search for repository by " + matchUrl, e);
         }
