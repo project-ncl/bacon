@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
  */
-public class PigFacade {
+public final class PigFacade {
 
     private static final Logger log = LoggerFactory.getLogger(PigFacade.class);
 
@@ -152,7 +152,7 @@ public class PigFacade {
             if (repoZipPath != null) {
                 repo = parseRepository(new File(repoZipPath));
             } else {
-                repo = PigFacade.generateRepo(removeGeneratedM2Dups);
+                repo = generateRepo(removeGeneratedM2Dups);
             }
             context.setRepositoryData(repo);
             context.storeContext();
@@ -220,30 +220,33 @@ public class PigFacade {
         if (log.isInfoEnabled()) {
             log.info("Pushing the following builds to brew: {}", buildsToPush.stream().map(PncBuild::getId));
         }
-        for (PncBuild build : buildsToPush) {
-            AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration());
-            BuildPushParameters request = BuildPushParameters.builder().tagPrefix(tagPrefix).reimport(reimport).build();
+        try (AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration())) {
+            for (PncBuild build : buildsToPush) {
+                BuildPushParameters request = BuildPushParameters.builder()
+                        .tagPrefix(tagPrefix)
+                        .reimport(reimport)
+                        .build();
 
-            // TODO: customize the timeout
-            try {
-                BuildPushResult pushResult = pushingClient
-                        .executeBrewPush(build.getId(), request, 15, TimeUnit.MINUTES);
-                log.info("{} pushed to brew", build.getId());
-                if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
-                    throw new RuntimeException(
-                            "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
+                // TODO: customize the timeout
+                try {
+                    BuildPushResult pushResult = pushingClient
+                            .executeBrewPush(build.getId(), request, 15L, TimeUnit.MINUTES);
+                    if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
+                        throw new RuntimeException(
+                                "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
+                    }
+                    log.info("{} pushed to brew", build.getId());
+                } catch (RemoteResourceException e) {
+                    throw new RuntimeException("Failed to push build " + build.getId() + " to brew", e);
                 }
-            } catch (RemoteResourceException e) {
-                throw new RuntimeException("Failed to push build " + build.getId() + " to brew", e);
             }
         }
     }
 
     public static void generateDocuments() {
         if (context().getRepositoryData() == null) {
-            log.error(
+            throw new RuntimeException(
                     "No repository data available for document generation. Please make sure to run `pig repo` before `pig docs`");
-            System.exit(1);
         }
         DocumentGenerator docGenerator = new DocumentGenerator(
                 context().getPigConfiguration(),
@@ -282,16 +285,18 @@ public class PigFacade {
     }
 
     private static String getBrewTag(ProductVersionRef versionRef) {
-        ProductVersionClient productVersionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
-        String versionId = versionRef.getId();
+        try (ProductVersionClient productVersionClient = new ProductVersionClient(
+                PncClientHelper.getPncConfiguration())) {
+            String versionId = versionRef.getId();
 
-        ProductVersion version;
-        try {
-            version = productVersionClient.getSpecific(versionId);
-        } catch (RemoteResourceException e) {
-            throw new RuntimeException("Unable to get product version for " + versionId, e);
+            ProductVersion version;
+            try {
+                version = productVersionClient.getSpecific(versionId);
+            } catch (RemoteResourceException e) {
+                throw new RuntimeException("Unable to get product version for " + versionId, e);
+            }
+            return version.getAttributes().get("BREW_TAG_PREFIX");
         }
-        return version.getAttributes().get("BREW_TAG_PREFIX");
     }
 
     private static List<PncBuild> getBuildsToPush(Map<String, PncBuild> builds) {
@@ -299,19 +304,20 @@ public class PigFacade {
     }
 
     private static boolean notPushedToBrew(PncBuild build) {
-        BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration()); // todo factory or sth
-        BuildPushResult pushResult;
-        try {
-            pushResult = buildClient.getPushResult(build.getId());
-        } catch (ClientException e) {
-            // Didn't find results with 404 exception, therefore it's not pushed
-            if (e.getCause().getClass().isAssignableFrom(NotFoundException.class)) {
-                return true;
-            } else {
-                throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
+        try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration())) { // todo factory or sth
+            BuildPushResult pushResult;
+            try {
+                pushResult = buildClient.getPushResult(build.getId());
+            } catch (ClientException e) {
+                // Didn't find results with 404 exception, therefore it's not pushed
+                if (e.getCause().getClass().isAssignableFrom(NotFoundException.class)) {
+                    return true;
+                } else {
+                    throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
+                }
             }
+            return pushResult == null || pushResult.getStatus() != BuildPushStatus.SUCCESS;
         }
-        return pushResult == null || pushResult.getStatus() != BuildPushStatus.SUCCESS;
     }
 
     private static RepositoryData parseRepository(File repositoryZipPath) {
