@@ -26,6 +26,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.aesh.command.option.OptionList;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -250,8 +251,12 @@ public class BuildConfigCli extends AbstractCommand {
         private String scmRepositoryId;
         @Option(name = "scm-revision", description = "SCM Revision")
         private String scmRevision;
-        @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE")
+        @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE -PKEY1=VALUE1")
         private Map<String, String> parameters;
+        @OptionList(
+                name = "remove-parameters",
+                description = "Parameters to remove. Format: --remove-parameters=key1,key2,key3")
+        private java.util.List<String> parametersToRemove;
         @Option(name = "build-type", description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN")
         private String buildType;
         @Option(name = "product-version-id", description = "Product Version ID")
@@ -288,6 +293,12 @@ public class BuildConfigCli extends AbstractCommand {
                     parameters.forEach(existing::put);
                     updated.parameters(existing);
                 });
+
+                if (parametersToRemove != null && parametersToRemove.size() > 0) {
+                    Map<String, String> existing = buildConfiguration.getParameters();
+                    parametersToRemove.forEach(existing::remove);
+                    updated.parameters(existing);
+                }
 
                 callUpdate(updated.build());
                 return 0;
