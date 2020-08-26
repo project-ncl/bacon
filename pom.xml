@@ -308,6 +308,12 @@
                 <groupId>org.commonjava.maven.ext</groupId>
                 <artifactId>pom-manipulation-common</artifactId>
                 <version>4.0</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- jaxb -->
