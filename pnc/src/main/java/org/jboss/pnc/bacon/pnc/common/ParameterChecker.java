@@ -39,7 +39,7 @@ public class ParameterChecker {
             for (RebuildMode mode : RebuildMode.values()) {
                 log.error(mode.toString());
             }
-            throw new FatalException();
+            throw new FatalException("Illegal option ('{}') for rebuild mode", rebuildMode);
         }
     }
 }

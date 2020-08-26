@@ -43,6 +43,8 @@ import java.util.concurrent.CompletableFuture;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 @GroupCommandDefinition(
         name = "scm-repository",
         description = "Scm repository",
@@ -109,8 +111,9 @@ public class ScmRepositoryCli extends AbstractCommand {
                 if (result.isSuccess()) {
                     ObjectHelper.print(jsonOutput, result.getScmRepositoryCreationSuccess().getScmRepository());
                 } else {
-                    log.error("Failure while creating repository: {}", result.getRepositoryCreationFailure());
-                    throw new FatalException();
+                    throw new FatalException(
+                            "Failure while creating repository: {}",
+                            result.getRepositoryCreationFailure());
                 }
                 return 0;
             });
@@ -150,9 +153,12 @@ public class ScmRepositoryCli extends AbstractCommand {
 
                 SCMRepository scmRepository = CREATOR.getClient().getSpecific(id);
                 SCMRepository.Builder updated = scmRepository.toBuilder();
-                ObjectHelper.executeIfNotNull(externalScm, () -> updated.externalUrl(externalScm));
-                ObjectHelper.executeIfNotNull(preBuild, () -> updated.preBuildSyncEnabled(preBuild));
-
+                if (isNotEmpty(externalScm)) {
+                    updated.externalUrl(externalScm);
+                }
+                if (preBuild != null) {
+                    updated.preBuildSyncEnabled(preBuild);
+                }
                 log.debug("SCM Repository updated to: {}", updated);
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());

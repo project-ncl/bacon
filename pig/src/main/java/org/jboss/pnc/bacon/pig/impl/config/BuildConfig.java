@@ -257,16 +257,13 @@ public class BuildConfig {
                     environmentId = environment.get().getId();
                     return environment.get().getId();
                 } else {
-                    log.error("Cannot find the environment in PNC for {}", systemImageId);
-                    throw new FatalException();
+                    throw new FatalException("Cannot find the environment in PNC for {}", systemImageId);
                 }
             } catch (RemoteResourceException e) {
-                log.error("Exception while talking to PNC", e);
-                throw new FatalException();
+                throw new FatalException("Exception while talking to PNC", e);
             }
         } else {
-            log.error("No environmentId / environmentSystemImageId defined for the build config");
-            throw new FatalException();
+            throw new FatalException("No environmentId / environmentSystemImageId defined for the build config");
         }
     }
 }

@@ -24,10 +24,10 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
@@ -36,6 +36,8 @@ import org.jboss.pnc.client.ProductReleaseClient;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.enums.SupportLevel;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @GroupCommandDefinition(
         name = "product-release",
@@ -87,7 +89,10 @@ public class ProductReleaseCli extends AbstractCommand {
                 }
 
                 if (!validateReleaseVersion(productMilestoneId, productReleaseVersion)) {
-                    Fail.fail("Product Release version is not valid!");
+                    throw new FatalException(
+                            "Product Release version ('{}') and milestone ('{}') is not valid!",
+                            productReleaseVersion,
+                            productMilestoneId);
                 }
 
                 // we have to specify the product version, otherwise PNC is not happy. Why though???
@@ -136,26 +141,19 @@ public class ProductReleaseCli extends AbstractCommand {
                 ProductRelease productRelease = CREATOR.getClient().getSpecific(productReleaseId);
                 ProductRelease.Builder updated = productRelease.toBuilder();
 
-                ObjectHelper.executeIfNotNull(productReleaseVersion, () -> {
-
-                    try {
-                        if (validateReleaseVersion(
-                                productRelease.getProductMilestone().getId(),
-                                productReleaseVersion)) {
-                            updated.version(productReleaseVersion);
-                        } else {
-                            Fail.fail("Product Release Version '" + productReleaseVersion + "' is not valid!");
-                        }
-                    } catch (ClientException e) {
-                        Fail.fail("Error: " + e.getMessage());
+                if (isNotEmpty(productReleaseVersion)) {
+                    if (validateReleaseVersion(productRelease.getProductMilestone().getId(), productReleaseVersion)) {
+                        updated.version(productReleaseVersion);
+                    } else {
+                        throw new FatalException("Product Release Version ('{}') is not valid!", productReleaseVersion);
                     }
-                });
-
-                ObjectHelper.executeIfNotNull(
-                        releaseDate,
-                        () -> updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate)));
-                ObjectHelper
-                        .executeIfNotNull(supportLevel, () -> updated.supportLevel(SupportLevel.valueOf(supportLevel)));
+                }
+                if (isNotEmpty(releaseDate)) {
+                    updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate));
+                }
+                if (isNotEmpty(supportLevel)) {
+                    updated.supportLevel(SupportLevel.valueOf(supportLevel));
+                }
 
                 CREATOR.getClientAuthenticated().update(productReleaseId, updated.build());
                 return 0;
@@ -198,8 +196,7 @@ public class ProductReleaseCli extends AbstractCommand {
         }
     }
 
-    private static boolean validateReleaseVersion(String productMilestoneId, String productVersion)
-            throws ClientException {
+    static boolean validateReleaseVersion(String productMilestoneId, String productVersion) throws ClientException {
         ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
 
         return ProductMilestoneCli

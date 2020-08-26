@@ -38,6 +38,8 @@ import org.jboss.pnc.dto.ProductVersion;
 
 import java.util.Optional;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 @GroupCommandDefinition(
         name = "product",
         description = "Product",
@@ -149,9 +151,15 @@ public class ProductCli extends AbstractCommand {
                 Product product = CREATOR.getClient().getSpecific(id);
                 Product.Builder updated = product.toBuilder();
 
-                ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
-                ObjectHelper.executeIfNotNull(abbreviation, () -> updated.abbreviation(abbreviation));
-                ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
+                if (isNotEmpty(name)) {
+                    updated.name(name);
+                }
+                if (isNotEmpty(abbreviation)) {
+                    updated.abbreviation(abbreviation);
+                }
+                if (isNotEmpty(description)) {
+                    updated.description(description);
+                }
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
                 return 0;

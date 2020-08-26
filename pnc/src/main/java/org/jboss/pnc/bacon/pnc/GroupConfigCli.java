@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.Optional;
 import org.aesh.command.option.OptionList;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 @GroupCommandDefinition(
         name = "group-config",
         description = "Group config",
@@ -86,15 +88,13 @@ public class GroupConfigCli extends AbstractCommand {
                 GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder()
                         .name(groupConfigName);
 
-                ObjectHelper.executeIfNotNull(
-                        productVersionId,
-                        () -> groupConfigurationBuilder
-                                .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
-
-                ObjectHelper.executeIfNotNull(
-                        buildConfigIds,
-                        () -> groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds)));
-
+                if (isNotEmpty(productVersionId)) {
+                    groupConfigurationBuilder
+                            .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
+                if (isNotEmpty(buildConfigIds)) {
+                    groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds));
+                }
                 ObjectHelper.print(
                         jsonOutput,
                         CREATOR.getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
@@ -132,14 +132,15 @@ public class GroupConfigCli extends AbstractCommand {
                 GroupConfiguration groupConfiguration = CREATOR.getClient().getSpecific(groupConfigId);
                 GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
 
-                ObjectHelper.executeIfNotNull(groupConfigName, () -> updated.name(groupConfigName));
-                ObjectHelper.executeIfNotNull(
-                        productVersionId,
-                        () -> updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
-
-                ObjectHelper
-                        .executeIfNotNull(buildConfigIds, () -> updated.buildConfigs(addBuildConfigs(buildConfigIds)));
-
+                if (isNotEmpty(groupConfigName)) {
+                    updated.name(groupConfigName);
+                }
+                if (isNotEmpty(productVersionId)) {
+                    updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
+                if (isNotEmpty(buildConfigIds)) {
+                    updated.buildConfigs(addBuildConfigs(buildConfigIds));
+                }
                 CREATOR.getClientAuthenticated().update(groupConfigId, updated.build());
                 return 0;
             });

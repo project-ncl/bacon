@@ -18,7 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
 import lombok.Getter;
-import org.jboss.pnc.bacon.common.exception.TodoException;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
@@ -183,7 +183,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private RepositoryData milestone() {
         log.info("Generating maven repo for milestone [" + PigContext.get().getFullVersion() + "]");
         // TODO
-        throw new TodoException();
+        throw new FatalException("Not yet implemented");
     }
 
     private boolean areSourcesMissing(Set<GAV> list, GAV gav) {

@@ -14,17 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ObjectHelperTest {
 
     @Test
-    void executeIfNotNull() {
-        ObjectHelper.executeIfNotNull(null, () -> fail("I shouldn't be run"));
-
-        boolean[] called = { false };
-        ObjectHelper.executeIfNotNull("not null", () -> {
-            called[0] = true;
-        });
-        assertTrue(called[0], "The runnable should be executed");
-    }
-
-    @Test
     void printJson() throws Exception {
         PrintStream old = System.out;
 

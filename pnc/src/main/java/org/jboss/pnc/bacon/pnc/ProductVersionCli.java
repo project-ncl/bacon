@@ -25,11 +25,11 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductVersionClient;
@@ -43,6 +43,8 @@ import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.dto.ProductVersion;
 
 import java.util.Optional;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @GroupCommandDefinition(
         name = "product-version",
@@ -81,7 +83,7 @@ public class ProductVersionCli extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
 
                 if (!validateProductVersion(productVersion)) {
-                    Fail.fail(
+                    throw new FatalException(
                             "Version specified '" + productVersion + "' is not valid! "
                                     + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
                 }
@@ -182,16 +184,14 @@ public class ProductVersionCli extends AbstractCommand {
 
                 ProductVersion pV = CREATOR.getClient().getSpecific(id);
                 ProductVersion.Builder updated = pV.toBuilder();
-                ObjectHelper.executeIfNotNull(productVersion, () -> {
-
+                if (isNotEmpty(productVersion)) {
                     if (!validateProductVersion(productVersion)) {
-                        Fail.fail(
-                                "Version specified '" + productVersion + "' is not valid! "
-                                        + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
+                        throw new FatalException(
+                                "Version specified ('{}') is not valid! The version should consist of two numeric parts separated by a dot (e.g 7.0)",
+                                productVersion);
                     }
-
                     updated.version(productVersion);
-                });
+                }
                 CREATOR.getClientAuthenticated().update(id, updated.build());
                 return 0;
             });

@@ -1,0 +1,11 @@
+profile:
+- name: "default"
+  pnc:
+      url: "http://orch.com"
+      bifrostBaseurl: "http://example.com"
+  da:
+      url: "http://da.com"
+  pig:
+      licenseServiceUrl: "http://license.com"
+      indyUrl: "http://indy.com"
+      kojiHubUrl: "http://koji.com"
