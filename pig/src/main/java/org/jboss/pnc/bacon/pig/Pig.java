@@ -259,7 +259,8 @@ public class Pig extends AbstractCommand {
                     RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck);
 
-            return new PigRunOutput(PigContext.get().getFullVersion(), groupBuildInfo);
+            PigContext context = PigContext.get();
+            return new PigRunOutput(context.getFullVersion(), groupBuildInfo, context.getReleasePath());
         }
     }
 
@@ -312,9 +313,10 @@ public class Pig extends AbstractCommand {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             GroupBuildInfo groupBuildInfo = PigFacade.build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode));
-            PigContext.get().setBuilds(groupBuildInfo.getBuilds());
-            PigContext.get().storeContext();
-            return new PigRunOutput(PigContext.get().getFullVersion(), groupBuildInfo);
+            PigContext context = PigContext.get();
+            context.setBuilds(groupBuildInfo.getBuilds());
+            context.storeContext();
+            return new PigRunOutput(context.getFullVersion(), groupBuildInfo, context.getReleaseDirName());
         }
     }
 
