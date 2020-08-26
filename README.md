@@ -2,6 +2,8 @@
 Bacon is a new Java CLI for PNC 2.0 combining features of old PNC, DA CLI and PiG tooling.
 
 ---
+# Reporting an issue
+To report an issue, please use the internal JIRA instance. The Github issues usage is now deprecated, and will be closed in the future.
 
 # Common Usages
 Compile:
