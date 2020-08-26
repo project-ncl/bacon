@@ -1,7 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
 import com.google.common.collect.Maps;
-import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import org.apache.commons.io.FilenameUtils;
@@ -13,6 +12,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.slf4j.Logger;
@@ -23,11 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -204,16 +204,16 @@ public class SourcesGenerator {
     }
 
     protected static URI getSourcesArtifactURL(KojiBuild build) {
-        KojiArchiveInfo archiveInfo = build.getProjectSourcesTgz();
+        Optional<KojiArchiveInfo> archiveInfo = build.getProjectSourcesTgz();
         KojiBuildInfo buildInfo = build.getBuildInfo();
 
-        if (archiveInfo == null) {
+        if (!archiveInfo.isPresent()) {
             throw new RuntimeException("Could not find project-sources.tar.gz for build id " + buildInfo.getId());
         }
 
-        log.info("Got project sources tgz artifact {}", archiveInfo.getFilename());
+        log.info("Got project sources tgz artifact {}", archiveInfo.get().getFilename());
 
-        return getDownloadURL(buildInfo, archiveInfo);
+        return getDownloadURL(buildInfo, archiveInfo.get());
     }
 
     private static KojiBuild getSingleBuild(File file) {

@@ -1,18 +1,19 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import com.redhat.red.build.finder.BuildConfig;
-import com.redhat.red.build.finder.BuildFinder;
-import com.redhat.red.build.finder.BuildSystemInteger;
-import com.redhat.red.build.finder.Checksum;
-import com.redhat.red.build.finder.DistributionAnalyzer;
-import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.finder.KojiClientSession;
-import com.redhat.red.build.finder.Utils;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.build.finder.core.BuildConfig;
+import org.jboss.pnc.build.finder.core.BuildFinder;
+import org.jboss.pnc.build.finder.core.BuildSystemInteger;
+import org.jboss.pnc.build.finder.core.Checksum;
+import org.jboss.pnc.build.finder.core.ChecksumType;
+import org.jboss.pnc.build.finder.core.DistributionAnalyzer;
+import org.jboss.pnc.build.finder.core.Utils;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.build.finder.koji.KojiClientSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public final class BuildFinderUtils {
             Collection<String> filenames = entry.getValue();
 
             for (String filename : filenames) {
-                Checksum checksum = new Checksum(KojiChecksumType.md5, md5sum, filename);
+                Checksum checksum = new Checksum(ChecksumType.md5, md5sum, filename);
                 multiMap.put(checksum, filename);
             }
         }
@@ -116,15 +117,13 @@ public final class BuildFinderUtils {
      */
     public static Map<String, Collection<String>> findChecksums(File file) {
         BuildConfig config = getKojiBuildFinderConfig();
-        List<File> inputs = Collections.singletonList(file);
+        List<String> inputs = Collections.singletonList(file.getPath());
         ExecutorService pool = Executors.newSingleThreadExecutor();
-        Callable<Map<KojiChecksumType, MultiValuedMap<String, String>>> analyzer = new DistributionAnalyzer(
-                inputs,
-                config);
-        Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
+        DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config);
+        Future<Map<ChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
 
         try {
-            Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = futureChecksums.get();
+            Map<ChecksumType, MultiValuedMap<String, String>> checksums = futureChecksums.get();
             Map<String, Collection<String>> map = checksums.get(KojiChecksumType.md5).asMap();
             return Collections.unmodifiableMap(map);
         } catch (InterruptedException e) {
@@ -172,10 +171,10 @@ public final class BuildFinderUtils {
      */
     public static List<KojiBuild> findBuilds(File file, boolean includeNotFound) {
         BuildConfig config = getKojiBuildFinderConfig();
-        List<File> inputs = Collections.singletonList(file);
+        List<String> inputs = Collections.singletonList(file.getPath());
         ExecutorService pool = Executors.newFixedThreadPool(2);
         DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config);
-        Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
+        Future<Map<ChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
 
         try (KojiClientSession session = new KojiClientSession(config.getKojiHubURL())) {
             BuildFinder finder = new BuildFinder(session, config, analyzer);

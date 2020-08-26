@@ -1,9 +1,9 @@
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
-import com.redhat.red.build.finder.BuildFinderObjectMapper;
-import com.redhat.red.build.finder.KojiBuild;
 import org.apache.commons.io.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
+import org.jboss.pnc.build.finder.core.BuildFinderObjectMapper;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;

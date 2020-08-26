@@ -17,12 +17,12 @@
  */
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
-import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.finder.report.NVRReport;
-import com.redhat.red.build.finder.report.Report;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.build.finder.report.NVRReport;
+import org.jboss.pnc.build.finder.report.Report;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
