@@ -226,39 +226,6 @@ public class BuildConfig {
         // TODO!
     }
 
-    public boolean matchesRepository(SCMRepository repository) {
-        String currentInternalUrl = repository.getInternalUrl();
-
-        // currentInternalUrl cannot be null, if the url from the config is not null, they have to be the same
-        if (scmUrl != null) {
-            return areSameRepoUrls(scmUrl, currentInternalUrl);
-        }
-
-        // if the internal scm url is not provided in the config, check if external scm urls are the same
-        return externalScmUrl != null && areSameRepoUrls(repository.getExternalUrl(), externalScmUrl);
-    }
-
-    private boolean areSameRepoUrls(String scmUrl1, String scmUrl2) {
-        if (scmUrl1 == null ^ scmUrl2 == null) {
-            throw new RuntimeException("trying to compare null and non-null scm url: " + scmUrl1 + ", " + scmUrl2);
-        }
-        String normalizedUrl1 = normalize(scmUrl1);
-        String normalizedUrl2 = normalize(scmUrl2);
-        return normalizedUrl1.equals(normalizedUrl2);
-    }
-
-    private String normalize(String url) {
-        if (!url.endsWith(".git")) {
-            url += ".git";
-        }
-
-        if (url.startsWith("https")) {
-            url = url.replaceFirst("https", "http");
-        }
-
-        return url;
-    }
-
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
         String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
         if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
