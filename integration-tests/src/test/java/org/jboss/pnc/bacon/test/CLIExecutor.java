@@ -31,11 +31,8 @@ public class CLIExecutor {
             cmdarray[0] = "java";
             cmdarray[1] = "-jar";
             cmdarray[2] = BACON_JAR.toString();
-            for (int i = 0; i < args.length; i++) {
-                cmdarray[i + 3] = args[i];
-            }
-            String[] env = new String[1];
-            env[0] = Constant.CONFIG_ENV + "=" + CONFIG_LOCATION.toString();
+            System.arraycopy(args, 0, cmdarray, 3, args.length);
+            String[] env = { Constant.CONFIG_ENV + "=" + CONFIG_LOCATION };
 
             System.out.println(
                     "Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'")));
