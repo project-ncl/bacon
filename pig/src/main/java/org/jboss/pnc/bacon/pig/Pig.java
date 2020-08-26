@@ -260,7 +260,11 @@ public class Pig extends AbstractCommand {
                     skipBranchCheck);
 
             PigContext context = PigContext.get();
-            return new PigRunOutput(context.getFullVersion(), groupBuildInfo, context.getReleasePath());
+            return new PigRunOutput(
+                    context.getFullVersion(),
+                    groupBuildInfo,
+                    context.getReleaseDirName(),
+                    context.getReleasePath());
         }
     }
 
@@ -316,7 +320,11 @@ public class Pig extends AbstractCommand {
             PigContext context = PigContext.get();
             context.setBuilds(groupBuildInfo.getBuilds());
             context.storeContext();
-            return new PigRunOutput(context.getFullVersion(), groupBuildInfo, context.getReleaseDirName());
+            return new PigRunOutput(
+                    context.getFullVersion(),
+                    groupBuildInfo,
+                    context.getReleaseDirName(),
+                    context.getReleasePath());
         }
     }
 

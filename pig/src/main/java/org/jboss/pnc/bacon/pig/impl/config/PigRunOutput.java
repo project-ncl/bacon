@@ -29,11 +29,13 @@ public class PigRunOutput {
     private GroupBuild groupBuild;
     private Collection<PncBuild> builds;
     private String releaseDirName;
+    private String releasePath;
 
-    public PigRunOutput(String fullVersion, GroupBuildInfo groupBuildInfo, String releaseDirName) {
+    public PigRunOutput(String fullVersion, GroupBuildInfo groupBuildInfo, String releaseDirName, String releasePath) {
         this.fullVersion = fullVersion;
         this.groupBuild = groupBuildInfo.getGroupBuild();
         this.builds = groupBuildInfo.getBuilds().values();
         this.releaseDirName = releaseDirName;
+        this.releasePath = releasePath;
     }
 }
