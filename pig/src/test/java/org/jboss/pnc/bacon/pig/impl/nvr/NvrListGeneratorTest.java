@@ -17,8 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,10 +39,11 @@ class NvrListGeneratorTest {
             List<KojiBuild> builds = Collections.unmodifiableList(
                     Arrays.asList(new BuildFinderObjectMapper().readValue(buildsJson, KojiBuild[].class)));
             String repoZipPath = "cpaas-1.0.0.ER1-maven-repository.zip";
+            Map<String, Collection<String>> checksums = Collections.emptyMap();
 
-            utilsMockedStatic.when(() -> BuildFinderUtils.findBuilds(repoZipPath, true)).thenReturn(builds);
+            utilsMockedStatic.when(() -> BuildFinderUtils.findBuilds(checksums, true)).thenReturn(builds);
 
-            assertThat(NvrListGenerator.generateNvrList(repoZipPath, targetPath)).isTrue();
+            assertThat(NvrListGenerator.generateNvrList(checksums, targetPath)).isTrue();
 
             String nvrTxt = FileUtils.readFileToString(target.toFile(), StandardCharsets.UTF_8);
 

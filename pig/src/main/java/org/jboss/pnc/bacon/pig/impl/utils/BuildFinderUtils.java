@@ -3,6 +3,7 @@ package org.jboss.pnc.bacon.pig.impl.utils;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.BuildFinder;
 import com.redhat.red.build.finder.BuildSystemInteger;
+import com.redhat.red.build.finder.Checksum;
 import com.redhat.red.build.finder.DistributionAnalyzer;
 import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.finder.KojiClientSession;
@@ -10,6 +11,7 @@ import com.redhat.red.build.finder.Utils;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.jboss.pnc.bacon.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +19,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +43,23 @@ public final class BuildFinderUtils {
     private static final String KOJI_BUILD_FINDER_CONFIG_PROP = "koji.build.finder.config";
 
     private static final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "/koji-build-finder/config.json";
+
+    private static Map<Checksum, Collection<String>> mapToMultiMap(Map<String, Collection<String>> checksums) {
+        Set<Map.Entry<String, Collection<String>>> entries = checksums.entrySet();
+        MultiValuedMap<Checksum, String> multiMap = new ArrayListValuedHashMap<>(entries.size());
+
+        for (Map.Entry<String, Collection<String>> entry : entries) {
+            String md5sum = entry.getKey();
+            Collection<String> filenames = entry.getValue();
+
+            for (String filename : filenames) {
+                Checksum checksum = new Checksum(KojiChecksumType.md5, md5sum, filename);
+                multiMap.put(checksum, filename);
+            }
+        }
+
+        return Collections.unmodifiableMap(multiMap.asMap());
+    }
 
     public static BuildConfig getKojiBuildFinderConfigFromFile(File file) {
         try {
@@ -63,7 +85,6 @@ public final class BuildFinderUtils {
     }
 
     public static BuildConfig getKojiBuildFinderConfigFromJson(String json) {
-
         try {
             return BuildConfig.load(json);
         } catch (IOException e) {
@@ -88,6 +109,61 @@ public final class BuildFinderUtils {
     }
 
     /**
+     * Compute checksums for the given file and for each file entry if the file is an archive.
+     *
+     * @param file the file
+     * @return the checksums
+     */
+    public static Map<String, Collection<String>> findChecksums(File file) {
+        BuildConfig config = getKojiBuildFinderConfig();
+        List<File> inputs = Collections.singletonList(file);
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        Callable<Map<KojiChecksumType, MultiValuedMap<String, String>>> analyzer = new DistributionAnalyzer(
+                inputs,
+                config);
+        Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
+
+        try {
+            Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = futureChecksums.get();
+            Map<String, Collection<String>> map = checksums.get(KojiChecksumType.md5).asMap();
+            return Collections.unmodifiableMap(map);
+        } catch (InterruptedException e) {
+            log.error("Failed to get checksums: {}", e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            return Collections.emptyMap();
+        } catch (ExecutionException e) {
+            log.error("Failed to get checksums: {}", e.getMessage(), e);
+            return Collections.emptyMap();
+        } finally {
+            Utils.shutdownAndAwaitTermination(pool);
+        }
+    }
+
+    /**
+     * Find builds in Koji for the given checksums.
+     *
+     * @param checksums the checksums
+     * @param includeNotFound whether or not to include not found files as build index 0
+     * @return the builds, including not found files if includeNotFound is true, or the found builds otherwise
+     */
+    public static List<KojiBuild> findBuilds(Map<String, Collection<String>> checksums, boolean includeNotFound) {
+        BuildConfig config = getKojiBuildFinderConfig();
+
+        try (KojiClientSession session = new KojiClientSession(config.getKojiHubURL())) {
+            BuildFinder finder = new BuildFinder(session, config);
+
+            Map<Checksum, Collection<String>> multiMap = mapToMultiMap(checksums);
+
+            finder.findBuilds(multiMap);
+            return includeNotFound ? finder.getBuilds() : finder.getBuildsFound();
+        } catch (KojiClientException e) {
+            log.error("Failed to get builds: {}", e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * Find builds in Koji for the given file.
      *
      * @param file the input file
@@ -97,16 +173,16 @@ public final class BuildFinderUtils {
     public static List<KojiBuild> findBuilds(File file, boolean includeNotFound) {
         BuildConfig config = getKojiBuildFinderConfig();
         List<File> inputs = Collections.singletonList(file);
-        ExecutorService pool = Executors.newFixedThreadPool(config.getChecksumTypes().size());
+        ExecutorService pool = Executors.newFixedThreadPool(2);
         DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config);
-        Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum = pool.submit(analyzer);
+        Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
 
         try (KojiClientSession session = new KojiClientSession(config.getKojiHubURL())) {
             BuildFinder finder = new BuildFinder(session, config, analyzer);
             Future<Map<BuildSystemInteger, KojiBuild>> futureBuilds = pool.submit(finder);
 
             try {
-                futureChecksum.get();
+                futureChecksums.get();
             } catch (InterruptedException e) {
                 log.error("Failed to get checksums: {}", e.getMessage(), e);
                 Thread.currentThread().interrupt();
