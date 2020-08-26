@@ -38,6 +38,7 @@ import java.nio.file.Path;
 @NoArgsConstructor
 public class ArtifactWrapper {
 
+    private String id;
     private String gapv;
     private String fileName;
     private String downloadUrl;
@@ -46,6 +47,7 @@ public class ArtifactWrapper {
     private String sha256;
 
     public ArtifactWrapper(Artifact artifact) {
+        id = artifact.getId();
         fileName = artifact.getFilename();
         downloadUrl = artifact.getPublicUrl();
         gapv = artifact.getIdentifier();
