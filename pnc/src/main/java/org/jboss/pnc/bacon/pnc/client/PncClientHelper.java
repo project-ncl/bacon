@@ -17,24 +17,25 @@
  */
 package org.jboss.pnc.bacon.pnc.client;
 
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.bacon.auth.DirectKeycloakClientImpl;
-import org.jboss.pnc.bacon.auth.KeycloakClientException;
-import org.jboss.pnc.bacon.auth.model.Credential;
-import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
-import org.jboss.pnc.bacon.common.Fail;
-import org.jboss.pnc.bacon.config.Config;
-import org.jboss.pnc.bacon.config.KeycloakConfig;
-import org.jboss.pnc.client.Configuration;
-import org.jboss.pnc.client.GenericSettingClient;
-import org.jboss.pnc.client.RemoteResourceException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+
+import org.jboss.pnc.bacon.auth.DirectKeycloakClientImpl;
+import org.jboss.pnc.bacon.auth.KeycloakClientException;
+import org.jboss.pnc.bacon.auth.model.Credential;
+import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.KeycloakConfig;
+import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.client.GenericSettingClient;
+import org.jboss.pnc.client.RemoteResourceException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PncClientHelper {
@@ -52,18 +53,13 @@ public class PncClientHelper {
     }
 
     public static Configuration setup(boolean authenticationNeeded) {
-        Config config = null;
-        try {
-            config = Config.instance();
-        } catch (Exception e) {
-            Fail.fail(e.getMessage());
-        }
+        Config config = Config.instance();
 
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
         String bearerToken = "";
 
         if (authenticationNeeded && keycloakConfig == null) {
-            Fail.fail("Keycloak section is needed in the configuration file!");
+            throw new FatalException("Keycloak section is needed in the configuration file!");
         }
 
         if (authenticationNeeded && keycloakConfig != null) {
@@ -71,7 +67,7 @@ public class PncClientHelper {
             bearerToken = getBearerToken(keycloakConfig);
 
             if (bearerToken == null || bearerToken.isEmpty()) {
-                Fail.fail("Credentials don't seem to be valid");
+                throw new FatalException("Credentials don't seem to be valid");
             }
         }
 
@@ -98,15 +94,13 @@ public class PncClientHelper {
             return configuration;
 
         } catch (URISyntaxException e) {
-            Fail.fail(e.getMessage());
+            throw new FatalException("URI syntax issue", e);
         }
-        // if we're here it's game over
-        return null;
     }
 
     /**
      * Return null if it couldn't get the authentication token. This generally means that the credentials are not valid
-     * 
+     *
      * @param keycloakConfig
      * @return
      */
@@ -137,11 +131,7 @@ public class PncClientHelper {
             return credential.getAccessToken();
 
         } catch (KeycloakClientException e) {
-
-            log.error("Keycloak authentication failed!");
-            Fail.fail(e.getMessage());
-
-            return null;
+            throw new FatalException("Keycloak authentication failed!", e);
         }
     }
 
@@ -167,7 +157,7 @@ public class PncClientHelper {
     /**
      * Format must be: <yyyy>-<mm>-
      * <dd>
-     * 
+     *
      * @param date
      */
     public static Instant parseDateFormat(String date) {
@@ -176,8 +166,7 @@ public class PncClientHelper {
             Date ret = sdf.parse(date);
             return ret.toInstant();
         } catch (ParseException e) {
-            Fail.fail("Date is not in valid format");
-            return null;
+            throw new FatalException("Date is not in valid format", e);
         }
     }
 

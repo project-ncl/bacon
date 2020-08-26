@@ -41,6 +41,8 @@ import java.util.Optional;
 import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 @GroupCommandDefinition(
         name = "project",
         description = "Project",
@@ -165,10 +167,18 @@ public class ProjectCli extends AbstractCommand {
                 Project project = CREATOR.getClient().getSpecific(id);
                 Project.Builder updated = project.toBuilder();
 
-                ObjectHelper.executeIfNotNull(name, () -> updated.name(name));
-                ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
-                ObjectHelper.executeIfNotNull(projectUrl, () -> updated.projectUrl(projectUrl));
-                ObjectHelper.executeIfNotNull(issueTrackerUrl, () -> updated.issueTrackerUrl(issueTrackerUrl));
+                if (isNotEmpty(name)) {
+                    updated.name(name);
+                }
+                if (isNotEmpty(description)) {
+                    updated.description(description);
+                }
+                if (isNotEmpty(projectUrl)) {
+                    updated.projectUrl(projectUrl);
+                }
+                if (isNotEmpty(issueTrackerUrl)) {
+                    updated.issueTrackerUrl(issueTrackerUrl);
+                }
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
                 return 0;

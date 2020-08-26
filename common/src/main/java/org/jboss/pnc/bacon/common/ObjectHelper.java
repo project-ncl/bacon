@@ -10,12 +10,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ObjectHelper {
 
-    public static void executeIfNotNull(Object value, Runnable run) {
-        if (value != null) {
-            run.run();
-        }
-    }
-
     private static ObjectMapper getOutputMapper(boolean json) {
         ObjectMapper om = json ? new ObjectMapper(new JsonFactory()) : new ObjectMapper(new YAMLFactory());
         om.registerModule(new JavaTimeModule());

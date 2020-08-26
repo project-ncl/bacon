@@ -54,6 +54,8 @@ import org.aesh.command.option.OptionGroup;
 import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 @GroupCommandDefinition(
         name = "build-config",
         description = "Build Config",
@@ -126,11 +128,10 @@ public class BuildConfigCli extends AbstractCommand {
                         .buildType(BuildType.valueOf(buildType))
                         .parameters(parameters);
 
-                ObjectHelper.executeIfNotNull(
-                        productVersionId,
-                        () -> buildConfigurationBuilder
-                                .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build()));
-
+                if (isNotEmpty(productVersionId)) {
+                    buildConfigurationBuilder
+                            .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
                 ObjectHelper.print(
                         jsonOutput,
                         CREATOR.getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
@@ -272,35 +273,41 @@ public class BuildConfigCli extends AbstractCommand {
                 BuildConfiguration buildConfiguration = CREATOR.getClient().getSpecific(buildConfigId);
                 BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
 
-                ObjectHelper.executeIfNotNull(buildConfigName, () -> updated.name(buildConfigName));
-                ObjectHelper.executeIfNotNull(description, () -> updated.description(description));
-                ObjectHelper.executeIfNotNull(
-                        environmentId,
-                        () -> updated.environment(Environment.builder().id(environmentId).build()));
-                ObjectHelper.executeIfNotNull(buildScript, () -> updated.buildScript(buildScript));
-                ObjectHelper.executeIfNotNull(
-                        scmRepositoryId,
-                        () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
-                ObjectHelper.executeIfNotNull(scmRevision, () -> updated.scmRevision(scmRevision));
-                ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
-                ObjectHelper.executeIfNotNull(
-                        productVersionId,
-                        () -> updated.productVersion(ProductVersion.refBuilder().id(productVersionId).build()));
-
-                ObjectHelper.executeIfNotNull(parameters, () -> {
-
+                if (isNotEmpty(buildConfigName)) {
+                    updated.name(buildConfigName);
+                }
+                if (isNotEmpty(description)) {
+                    updated.description(description);
+                }
+                if (isNotEmpty(environmentId)) {
+                    updated.environment(Environment.builder().id(environmentId).build());
+                }
+                if (isNotEmpty(buildScript)) {
+                    updated.buildScript(buildScript);
+                }
+                if (isNotEmpty(scmRepositoryId)) {
+                    updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build());
+                }
+                if (isNotEmpty(scmRevision)) {
+                    updated.scmRevision(scmRevision);
+                }
+                if (isNotEmpty(buildType)) {
+                    updated.buildType(BuildType.valueOf(buildType));
+                }
+                if (isNotEmpty(productVersionId)) {
+                    updated.productVersion(ProductVersion.refBuilder().id(productVersionId).build());
+                }
+                if (parameters != null) {
                     // update the content of the existing parameters
                     Map<String, String> existing = buildConfiguration.getParameters();
                     parameters.forEach(existing::put);
                     updated.parameters(existing);
-                });
-
+                }
                 if (parametersToRemove != null && parametersToRemove.size() > 0) {
                     Map<String, String> existing = buildConfiguration.getParameters();
                     parametersToRemove.forEach(existing::remove);
                     updated.parameters(existing);
                 }
-
                 callUpdate(updated.build());
                 return 0;
             });

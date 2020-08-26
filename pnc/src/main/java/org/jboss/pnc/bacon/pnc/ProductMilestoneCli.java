@@ -25,11 +25,10 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
-import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
@@ -45,6 +44,7 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import java.time.Instant;
 import java.util.Optional;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
 import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
@@ -92,7 +92,7 @@ public class ProductMilestoneCli extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
 
                 if (!validateProductMilestoneVersion(productVersionId, productMilestoneVersion)) {
-                    Fail.fail("The version does not fit the proper format");
+                    throw new FatalException("The version does not fit the proper format");
                 }
 
                 if (startDate == null) {
@@ -152,30 +152,25 @@ public class ProductMilestoneCli extends AbstractCommand {
 
                 ProductMilestone.Builder updated = productMilestone.toBuilder();
 
-                ObjectHelper.executeIfNotNull(productMilestoneVersion, () -> {
-
-                    try {
-                        if (validateProductMilestoneVersion(
-                                productMilestone.getProductVersion().getId(),
-                                productMilestoneVersion)) {
-                            updated.version(productMilestoneVersion);
-                        } else {
-                            Fail.fail("The version does not fit the proper format");
-                        }
-                    } catch (Exception e) {
-                        Fail.fail(e.getMessage());
+                if (isNotEmpty(productMilestoneVersion)) {
+                    if (validateProductMilestoneVersion(
+                            productMilestone.getProductVersion().getId(),
+                            productMilestoneVersion)) {
+                        updated.version(productMilestoneVersion);
+                    } else {
+                        throw new FatalException(
+                                "The version ('{}') does not fit the proper format",
+                                productMilestoneVersion);
                     }
-                });
-
-                ObjectHelper.executeIfNotNull(startDate, () -> {
+                }
+                if (isNotEmpty(startDate)) {
                     Instant startDateInstant = parseDateFormat(startDate);
                     updated.startingDate(startDateInstant);
-                });
-
-                ObjectHelper.executeIfNotNull(endDate, () -> {
+                }
+                if (isNotEmpty(endDate)) {
                     Instant endDateInstant = parseDateFormat(endDate);
                     updated.plannedEndDate(endDateInstant);
-                });
+                }
 
                 CREATOR.getClientAuthenticated().update(productMilestoneId, updated.build());
                 return 0;

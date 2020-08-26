@@ -26,9 +26,9 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
@@ -116,7 +116,9 @@ public class Pig extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Fail.failIfNull(configDir, "You need to specify the configuration directory!");
+                if (configDir == null) {
+                    throw new FatalException("You need to specify the configuration directory!");
+                }
                 // validate the PiG config
                 PigConfig pig = Config.instance().getActiveProfile().getPig();
                 if (pig == null) {

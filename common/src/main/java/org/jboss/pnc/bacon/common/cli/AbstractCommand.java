@@ -212,10 +212,8 @@ public class AbstractCommand implements Command {
             return CommandResult.valueOf(callback.call());
         } catch (FatalException e) {
             throw e;
-        } catch (Exception e) {
-            log.error("Something wrong happened: ", e); // TODO rollback to print message only?
-            log.debug("Stacktrace", e);
-            throw new FatalException();
+        } catch (ClientException | JsonProcessingException e) {
+            throw new FatalException("Exception processing command", e);
             // Aesh doesnt take care of exit codes, thrown FatalException will be caught in App class and app will exit
             // with code 1
         }

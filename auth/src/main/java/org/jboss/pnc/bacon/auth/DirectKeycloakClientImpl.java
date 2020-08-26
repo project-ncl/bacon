@@ -9,7 +9,7 @@ import org.jboss.pnc.bacon.auth.model.CacheFile;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.model.KeycloakResponse;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
-import org.jboss.pnc.bacon.common.Fail;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 
 import java.io.Console;
 import java.io.IOException;
@@ -168,7 +168,7 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         Console console = System.console();
 
         if (console == null) {
-            Fail.fail("Couldn't get console instance");
+            throw new FatalException("Couldn't get console instance");
         }
         char[] passwordArray = console.readPassword("Enter your password: ");
         return new String(passwordArray);

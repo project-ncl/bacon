@@ -122,12 +122,12 @@ public class App extends AbstractCommand {
                             exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
                         }
                         throw e;
-                    } catch (InterruptedException ex) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         if (exec.getResultHandler() != null) {
-                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, ex);
+                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
                         }
-                        throw ex;
+                        throw e;
                     } catch (Exception e) {
                         if (exec.getResultHandler() != null) {
                             exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
@@ -136,23 +136,21 @@ public class App extends AbstractCommand {
                     }
                 }
                 return commandResult.getResultValue();
-            } catch (OptionParserException | RequiredOptionException ex) {
-                log.error("Missing argument/option: {}", ex.getMessage());
-                throw new FatalException();
-            } catch (CommandLineParserException ex) {
-                log.error("Wrong arguments: {}", ex.getMessage());
-                throw new FatalException();
-            } catch (RuntimeException ex) {
-                if (ex.getMessage().contains(FatalException.class.getCanonicalName())) {
-                    throw ex;
+            } catch (OptionParserException | RequiredOptionException e) {
+                throw new FatalException("Missing argument/option: {}", e.getMessage(), e);
+            } catch (CommandLineParserException e) {
+                throw new FatalException("Wrong arguments: {}", e.getMessage(), e);
+            } catch (RuntimeException e) {
+                if (e.getMessage().contains(FatalException.class.getCanonicalName())) {
+                    throw e;
                 }
                 // if stacktrace not thrown from aesh
-                if (!ex.getCause().getClass().getCanonicalName().contains("aesh")) {
-                    log.error("Stacktrace", ex);
+                if (!e.getCause().getClass().getCanonicalName().contains("aesh")) {
+                    log.error("Stacktrace", e);
                 }
 
                 // signal that an error has occurred
-                throw new FatalException();
+                throw new FatalException("Unknown RuntimeException", e);
             }
         }
     }
@@ -167,6 +165,8 @@ public class App extends AbstractCommand {
             App app = new App();
             System.exit(app.run(args));
         } catch (FatalException e) {
+            log.error(e.getMessage());
+            log.debug("Full trace", e);
             System.exit(1);
         }
     }
