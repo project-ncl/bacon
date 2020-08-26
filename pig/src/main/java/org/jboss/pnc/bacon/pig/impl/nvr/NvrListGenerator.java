@@ -28,7 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public final class NvrListGenerator {
     private static final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);
@@ -36,10 +38,10 @@ public final class NvrListGenerator {
     private NvrListGenerator() {
     }
 
-    public static boolean generateNvrList(String repoZipPath, String targetPath) {
-        log.info("Generating NVR list for {} and saving result to {}", repoZipPath, targetPath);
+    public static boolean generateNvrList(Map<String, Collection<String>> checksums, String targetPath) {
+        log.info("Generating NVR list for {} checksums and saving result to {}", checksums.size(), targetPath);
 
-        List<KojiBuild> builds = BuildFinderUtils.findBuilds(repoZipPath, true);
+        List<KojiBuild> builds = BuildFinderUtils.findBuilds(checksums, true);
         File outputDirectory = new File(FilenameUtils.getPath(targetPath));
         Report nvrReport = new NVRReport(outputDirectory, builds);
         String basename = nvrReport.getBaseFilename() + ".txt";

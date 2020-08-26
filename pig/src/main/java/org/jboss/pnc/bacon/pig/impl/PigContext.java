@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -82,6 +83,8 @@ public class PigContext {
     private String contextLocation;
 
     private String fullVersion; // version like 1.3.2.DR7
+
+    private Map<String, Collection<String>> checksums;
 
     public void initConfig(String configDirStr, Optional<String> releaseStorageUrl) {
         Path configDir = Paths.get(configDirStr);

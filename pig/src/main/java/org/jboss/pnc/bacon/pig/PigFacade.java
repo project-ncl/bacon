@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pig;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +46,7 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepoManager;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.script.ScriptGenerator;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
+import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
@@ -204,13 +206,13 @@ public final class PigFacade {
     }
 
     private static void generateNvrList() {
-        PigContext ctx = PigContext.get();
-        String repoZipPath = ctx.getRepositoryData().getRepositoryPath().toAbsolutePath().toString();
-        String targetPath = Paths.get(ctx.getReleasePath())
-                .resolve(ctx.getDeliverables().getNvrListName())
+        PigContext context = PigContext.get();
+        Map<String, Collection<String>> checksums = context.getChecksums();
+        String targetPath = Paths.get(context.getReleasePath())
+                .resolve(context.getDeliverables().getNvrListName())
                 .toAbsolutePath()
                 .toString();
-        NvrListGenerator.generateNvrList(repoZipPath, targetPath);
+        NvrListGenerator.generateNvrList(checksums, targetPath);
     }
 
     private static void pushToBrew(boolean reimport) {
@@ -349,12 +351,19 @@ public final class PigFacade {
         PigContext context = context();
         RepoManager repoManager = new RepoManager(
                 context.getPigConfiguration(),
-                context().getReleasePath(),
-                context().getDeliverables(),
-                context().getBuilds(),
+                context.getReleasePath(),
+                context.getDeliverables(),
+                context.getBuilds(),
                 Paths.get("."), // TODO!
                 removeGeneratedM2Dups);
-        return repoManager.prepare();
+
+        RepositoryData repositoryData = repoManager.prepare();
+        File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
+
+        context.setChecksums(BuildFinderUtils.findChecksums(repoZip));
+        context.storeContext();
+
+        return repositoryData;
     }
 
     /**
