@@ -47,7 +47,7 @@ class NvrListGeneratorTest {
 
             String nvrTxt = FileUtils.readFileToString(target.toFile(), StandardCharsets.UTF_8);
 
-            assertThat(nvrTxt).isEqualTo("org.apache.commons-commons-lang3-3.6.0.redhat_1-1");
+            assertThat(nvrTxt.trim()).isEqualTo("org.apache.commons-commons-lang3-3.6.0.redhat_1-1");
         }
     }
 }
