@@ -19,7 +19,7 @@ import java.util.function.Consumer;
  */
 public class BifrostClient {
 
-    private Logger logger = LoggerFactory.getLogger(BifrostClient.class);
+    private static final Logger log = LoggerFactory.getLogger(BifrostClient.class);
 
     private final URI baseUrl;
     private final HttpClient client;
@@ -40,7 +40,7 @@ public class BifrostClient {
         }
 
         URI logsUrl = baseUrl.resolve(URI.create("/text?" + query));
-        logger.debug("Reading logs from {}.", logsUrl.toString());
+        log.debug("Reading logs from {}", logsUrl);
 
         HttpGet httpGet = new HttpGet(logsUrl);
 
