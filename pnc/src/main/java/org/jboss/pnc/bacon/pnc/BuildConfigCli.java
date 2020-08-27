@@ -67,7 +67,8 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
                 BuildConfigCli.ListBuilds.class,
                 BuildConfigCli.Update.class,
                 BuildConfigCli.CreateRevision.class,
-                BuildConfigCli.AddDependency.class })
+                BuildConfigCli.AddDependency.class,
+                BuildConfigCli.RemoveDependency.class })
 @Slf4j
 public class BuildConfigCli extends AbstractCommand {
 
@@ -410,6 +411,25 @@ public class BuildConfigCli extends AbstractCommand {
                         .addDependency(
                                 buildConfigId,
                                 BuildConfigurationRef.refBuilder().id(dependencyConfigId).build());
+                return 0;
+            });
+        }
+    }
+
+    @CommandDefinition(name = "remove-dependency", description = "Removes a dependency from a BuildConfig")
+    public class RemoveDependency extends AbstractCommand {
+
+        @Argument(required = true, description = "Build config id")
+        private String buildConfigId;
+
+        @Option(name = "dependency-id", required = true, description = "ID of BuildConfig to remove as dependency")
+        private String dependencyConfigId;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+            return super.executeHelper(commandInvocation, () -> {
+                CREATOR.getClientAuthenticated().removeDependency(buildConfigId, dependencyConfigId);
                 return 0;
             });
         }
