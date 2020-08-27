@@ -101,8 +101,8 @@ public class PncClientHelper {
     /**
      * Return null if it couldn't get the authentication token. This generally means that the credentials are not valid
      *
-     * @param keycloakConfig
-     * @return
+     * @param keycloakConfig the keycloak config
+     * @return the token, or null if we couldn't get it
      */
     private static String getBearerToken(KeycloakConfig keycloakConfig) {
 
@@ -155,10 +155,9 @@ public class PncClientHelper {
     }
 
     /**
-     * Format must be: <yyyy>-<mm>-
-     * <dd>
+     * Format must be: &lt;yyyy&gt;-&lt;MM&gt;-&lt;dd&gt;
      *
-     * @param date
+     * @param date the date format
      */
     public static Instant parseDateFormat(String date) {
 

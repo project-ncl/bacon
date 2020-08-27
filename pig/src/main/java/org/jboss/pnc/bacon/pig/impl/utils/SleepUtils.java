@@ -52,7 +52,7 @@ public class SleepUtils {
     }
 
     /**
-     * Wait until the <code>condition</code> returns a non null value or time out is reached
+     * Wait until the {@code condition} returns a non null value or time out is reached
      *
      * @param condition the condition to evaluate
      * @param checkInterval [seconds] amount of time to wait before attempts
