@@ -225,12 +225,12 @@ public class AbstractCommand implements Command {
      *
      * Layout is:
      *
-     * <help text>
+     * &lt;help text&gt;
      *
      *
      * Example:
      *
-     * <exampleText stuff>
+     * &lt;exampleText stuff&gt;
      *
      * @return
      */
