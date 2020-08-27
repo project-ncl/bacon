@@ -36,6 +36,7 @@ import org.jboss.pnc.bacon.pig.impl.documents.DocumentGenerator;
 import org.jboss.pnc.bacon.pig.impl.javadoc.JavadocManager;
 import org.jboss.pnc.bacon.pig.impl.license.LicenseManager;
 import org.jboss.pnc.bacon.pig.impl.nvr.NvrListGenerator;
+import org.jboss.pnc.bacon.pig.impl.out.PigReleaseOutput;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -196,13 +197,19 @@ public final class PigFacade {
         return groupBuildInfo;
     }
 
-    public static void release() {
+    public static PigReleaseOutput release() {
         pushToBrew(false);
         generateNvrList();
 
         // generate upload to candidates script
         ScriptGenerator scriptGenerator = new ScriptGenerator(context().getPigConfiguration());
         scriptGenerator.generateReleaseScripts(Paths.get(context().getTargetPath()));
+
+        PigContext context = PigContext.get();
+        return new PigReleaseOutput(
+                context.getReleaseDirName(),
+                context.getReleasePath(),
+                context.getDeliverables().getNvrListName());
     }
 
     private static void generateNvrList() {
@@ -220,7 +227,9 @@ public final class PigFacade {
         String tagPrefix = getBrewTag(context().getPncImportResult().getVersion());
         List<PncBuild> buildsToPush = getBuildsToPush(builds);
         if (log.isInfoEnabled()) {
-            log.info("Pushing the following builds to brew: {}", buildsToPush.stream().map(PncBuild::getId));
+            log.info(
+                    "Pushing the following builds to brew: {}",
+                    buildsToPush.stream().map(PncBuild::getId).collect(Collectors.toList()));
         }
         try (AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration())) {
             for (PncBuild build : buildsToPush) {
