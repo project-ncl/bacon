@@ -85,7 +85,7 @@ public class FileDownloadUtils {
         try {
             downloadWithClient(safeHttpClient, downloadUrl, targetPath);
         } catch (Exception e) {
-            log.warn("Failed to download " + downloadUrl + ". Will reattempt without SSL certificate check");
+            log.warn("Failed to download {}. Will reattempt without SSL certificate check", downloadUrl);
             try {
                 downloadWithClient(unsafeHttpClient, downloadUrl, targetPath);
             } catch (Exception any) {

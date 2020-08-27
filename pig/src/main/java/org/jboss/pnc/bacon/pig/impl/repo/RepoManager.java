@@ -158,7 +158,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private RepositoryData buildGroup() {
-        log.info("Generating maven repo for build group [" + pigConfiguration.getGroup() + "]");
+        log.info("Generating maven repo for build group [{}]", pigConfiguration.getGroup());
         List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
         for (PncBuild build : builds.values()) {
             getRedhatArtifacts(artifactsToPack, build);
@@ -181,7 +181,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private RepositoryData milestone() {
-        log.info("Generating maven repo for milestone [" + PigContext.get().getFullVersion() + "]");
+        log.info("Generating maven repo for milestone [{}]", PigContext.get().getFullVersion());
         // TODO
         throw new FatalException("Not yet implemented");
     }

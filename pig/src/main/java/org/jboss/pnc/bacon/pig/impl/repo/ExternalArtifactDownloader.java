@@ -54,7 +54,7 @@ public class ExternalArtifactDownloader {
             FileDownloadUtils.downloadTo(downloadUrl, targetPath);
         } catch (RuntimeException any) {
             if (sourcesOptional && "sources".equals(gav.getClassifier()) || "javadoc".equals(gav.getClassifier())) {
-                log.warn("Unable to download sources for " + gav, any);
+                log.warn("Unable to download sources for {}", gav, any);
             } else {
                 throw any;
             }
