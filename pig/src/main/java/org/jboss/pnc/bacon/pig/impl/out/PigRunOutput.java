@@ -15,9 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.bacon.pig.impl.config;
+package org.jboss.pnc.bacon.pig.impl.out;
 
 import lombok.Data;
+import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.dto.GroupBuild;
 

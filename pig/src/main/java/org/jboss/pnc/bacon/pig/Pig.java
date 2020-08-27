@@ -34,7 +34,8 @@ import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
-import org.jboss.pnc.bacon.pig.impl.config.PigRunOutput;
+import org.jboss.pnc.bacon.pig.impl.out.PigReleaseOutput;
+import org.jboss.pnc.bacon.pig.impl.out.PigRunOutput;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
@@ -411,12 +412,11 @@ public class Pig extends AbstractCommand {
             name = "release",
             description = "Push builds to brew, generate the NVR list, "
                     + "close the PNC milestone, generate the upload to candidates script")
-    public class Release extends PigCommand<String> {
+    public class Release extends PigCommand<PigReleaseOutput> {
 
         @Override
-        public String doExecute() {
-            PigFacade.release();
-            return "Release tasks complete";
+        public PigReleaseOutput doExecute() {
+            return PigFacade.release();
         }
     }
 
