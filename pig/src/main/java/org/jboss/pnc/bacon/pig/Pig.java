@@ -127,10 +127,14 @@ public class Pig extends AbstractCommand {
                 pig.validate();
 
                 Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
-                PigContext.init(clean, configDir, releaseStorageUrl);
+                PigContext.init(clean || isStartingPoint(), configDir, releaseStorageUrl);
                 ObjectHelper.print(jsonOutput, doExecute());
                 return 0;
             });
+        }
+
+        boolean isStartingPoint() {
+            return false;
         }
 
         abstract T doExecute();
@@ -269,6 +273,11 @@ public class Pig extends AbstractCommand {
                     context.getReleaseDirName(),
                     context.getReleasePath());
         }
+
+        @Override
+        boolean isStartingPoint() {
+            return true;
+        }
     }
 
     @CommandDefinition(name = "configure", description = "Configure PNC entities")
@@ -288,6 +297,11 @@ public class Pig extends AbstractCommand {
             PigContext.get().setPncImportResult(importResult);
             PigContext.get().storeContext();
             return importResult;
+        }
+
+        @Override
+        boolean isStartingPoint() {
+            return true;
         }
     }
 

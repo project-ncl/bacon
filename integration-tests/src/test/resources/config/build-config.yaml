@@ -5,35 +5,33 @@
 # code.engineering.redhat.com
 
 product:
-  name: Product Foobar {{suffix}} # full product name
-  abbreviation: PFB-{{suffix}} # official product name abbreviation - used to create the brew tag name 
-  stage: Alpha1 # product phase, if we're targetting GA, should be GA, etc
+    name: Product Foobar {{suffix}} # full product name
+    abbreviation: PFB-{{suffix}} # official product name abbreviation - used to create the brew tag name
+    stage: Alpha1 # product phase, if we're targetting GA, should be GA, etc
 version: {{version}}
 
-# version of the product, PNC will use <major>.<minor> (in this case 7.1) as the product version 
+
+# version of the product, PNC will use <major>.<minor> (in this case 7.1) as the product version
 # and prepend the <micro> to the milestone name
 # Example values are DR1, ER2, CR1
-# It is also possible to use have an auto-incremented milestone number. 
+# It is also possible to use have an auto-incremented milestone number.
 # To achieve it, use an asterisk in the place of milestone number, e.g. ER*
-# The auto-incremented milestone requires -releaseStorageUrl option   
-milestone: {{milestone}}  
+# The auto-incremented milestone requires -releaseStorageUrl option
+milestone: {{milestone}}
 group: ProductA 7.1 all {{suffix}} # name of the PNC build group
 
 # build configurations. If there are some properties that are shared among most of the configurations
 # they can be defined in defaultBuildParameters. For a complete list of available properties, take a look at BuildConfig class.
 defaultBuildParameters:
-  project: my-project {{suffix}} # name of the project to assign the configuration to
-  environmentId: 42 # PNC environment ID. You can list available environments with pnc list-environments
-  buildScript: mvn clean deploy -DskipTests -B
+    project: my-project {{suffix}} # name of the project to assign the configuration to
+    environmentId: 42 # PNC environment ID. You can list available environments with pnc list-environments
+    buildScript: mvn clean deploy -DskipTests -B
 builds:
-  - name: my-app-a-7.1-{{suffix}}
-    buildScript: mvn -DskipTests clean deploy -Plicenses # overriden build script
-    scmUrl: git+ssh://{{scmHost}}/my-project/my-app-a.git
-    scmRevision: 7.1.x
-
-
- 
+    -   name: my-app-a-7.1-{{suffix}}
+        buildScript: mvn -DskipTests clean deploy -Plicenses # overriden build script
+        scmUrl: git+ssh://{{scmHost}}/my-project/my-app-a.git
+        scmRevision: 7.1.x
 outputPrefixes:
-  releaseFile: product-a # prefix for the deliverables. Version and milestone will be appended to it
-  releaseDir: product-a # prefix for a top level directory name inside the deliverables 
+    releaseDir: product-a # prefix for a top level directory name inside the deliverables
+    releaseFile: product-a # prefix for the deliverables. Version and milestone will be appended to it
 

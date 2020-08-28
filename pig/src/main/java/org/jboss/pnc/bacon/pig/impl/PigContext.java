@@ -17,6 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig.impl;
 
+import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
+import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.hashDirectory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,7 +33,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -41,12 +43,11 @@ import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
 
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed
@@ -78,6 +79,7 @@ public class PigContext {
     private String releaseDirName;
     private String releasePath;
     private String extrasPath;
+    private String configSha;
 
     private boolean tempBuild;
 
@@ -87,12 +89,12 @@ public class PigContext {
 
     private Map<String, Collection<String>> checksums;
 
-    public void initConfig(String configDirStr, Optional<String> releaseStorageUrl) {
-        Path configDir = Paths.get(configDirStr);
+    public void initConfig(Path configDir, Optional<String> releaseStorageUrl) {
         File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
-                setPigConfiguration(PigConfiguration.load(configStream), releaseStorageUrl);
+                PigConfiguration loadedConfig = PigConfiguration.load(configStream);
+                setPigConfiguration(loadedConfig, releaseStorageUrl);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
             }
@@ -179,13 +181,16 @@ public class PigContext {
         return instance;
     }
 
-    public static PigContext init(boolean clean, String configDir, Optional<String> releaseStorageUrl) {
-        instance = readContext(clean);
+    public static PigContext init(boolean clean, String configDirStr, Optional<String> releaseStorageUrl) {
+        Path configDir = Paths.get(configDirStr);
+        instance = readContext(clean, configDir);
         instance.initConfig(configDir, releaseStorageUrl);
         return instance;
     }
 
-    private static PigContext readContext(boolean clean) {
+    private static PigContext readContext(boolean clean, Path configDir) {
+        String sha = hashDirectory(configDir);
+
         PigContext result;
         String ctxLocationEnv = System.getenv(PIG_CONTEXT_DIR);
         Path contextDir = ctxLocationEnv == null ? Paths.get(".bacon") : Paths.get(ctxLocationEnv);
@@ -193,6 +198,10 @@ public class PigContext {
         if (!clean && Files.exists(contextJson)) {
             try (InputStream input = Files.newInputStream(contextJson)) {
                 result = jsonMapper.readerFor(PigContext.class).readValue(input);
+                if (!sha.equals(result.getConfigSha())) {
+                    log.info("the configuration has been changed since the last run, using clean pig context");
+                    result = new PigContext();
+                }
             } catch (IOException e) {
                 throw new RuntimeException("failed to read PigContext from " + contextDir.toAbsolutePath(), e);
             }
@@ -209,6 +218,7 @@ public class PigContext {
             }
         }
         result.setContextLocation(contextJson.toAbsolutePath().toString());
+        result.setConfigSha(sha);
 
         return result;
     }
