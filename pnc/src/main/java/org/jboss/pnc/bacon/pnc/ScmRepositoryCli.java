@@ -139,8 +139,13 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Argument(required = true, description = "SCM Repository Id")
         private String id;
 
-        @Option(name = "external-scm", description = "External SCM URL")
+        @Option(
+                name = "external-scm",
+                description = "External SCM URL: e.g --external-scm=\"https://github.com/project-ncl/bacon.git\"")
         private String externalScm;
+
+        @Option(name = "no-external-scm", description = "Specify no external scm", hasValue = false)
+        private boolean noExternalScmSpecified;
 
         @Option(name = "pre-build", description = "Enable / Disable pre-build")
         private Boolean preBuild;
@@ -153,12 +158,22 @@ public class ScmRepositoryCli extends AbstractCommand {
 
                 SCMRepository scmRepository = CREATOR.getClient().getSpecific(id);
                 SCMRepository.Builder updated = scmRepository.toBuilder();
-                if (isNotEmpty(externalScm)) {
-                    updated.externalUrl(externalScm);
-                }
+
                 if (preBuild != null) {
                     updated.preBuildSyncEnabled(preBuild);
                 }
+
+                if (noExternalScmSpecified && isNotEmpty(externalScm)) {
+                    throw new FatalException(
+                            "You cannot specify both the 'external-scm' and 'no-external-scm' options at the same time");
+                } else if (isNotEmpty(externalScm)) {
+                    updated.externalUrl(externalScm);
+                } else if (noExternalScmSpecified) {
+                    updated.externalUrl(null);
+                    log.debug("Since we're removing the external-scm, pre-build set to fals");
+                    updated.preBuildSyncEnabled(false);
+                }
+
                 log.debug("SCM Repository updated to: {}", updated);
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
