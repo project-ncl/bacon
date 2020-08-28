@@ -58,11 +58,11 @@ public class PncClientHelper {
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
         String bearerToken = "";
 
-        if (authenticationNeeded && keycloakConfig == null) {
-            throw new FatalException("Keycloak section is needed in the configuration file!");
-        }
+        if (authenticationNeeded) {
+            if (keycloakConfig == null) {
+                throw new FatalException("Keycloak section is needed in the configuration file!");
+            }
 
-        if (authenticationNeeded && keycloakConfig != null) {
             keycloakConfig.validate();
             bearerToken = getBearerToken(keycloakConfig);
 
@@ -138,8 +138,7 @@ public class PncClientHelper {
     private static void printBannerIfNecessary(Configuration configuration) {
 
         if (!bannerChecked) {
-            GenericSettingClient genericSettingClient = new GenericSettingClient(configuration);
-            try {
+            try (GenericSettingClient genericSettingClient = new GenericSettingClient(configuration)) {
                 String banner = genericSettingClient.getAnnouncementBanner().getBanner();
                 if (banner != null && !banner.isEmpty()) {
                     log.warn("***********************");

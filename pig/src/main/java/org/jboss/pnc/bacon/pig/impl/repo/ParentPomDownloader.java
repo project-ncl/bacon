@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * @author Ken Finnigan
@@ -56,12 +57,13 @@ public class ParentPomDownloader {
     }
 
     private void doProcess() throws IOException {
-        Files.walk(repoPath)
-                .filter(Files::isRegularFile)
-                .filter(ParentPomDownloader::isPom)
-                .map(Pom::new)
-                .filter(Pom::hasParent)
-                .forEach(p -> processPom(repoPath, p));
+        try (Stream<Path> stream = Files.walk(repoPath)) {
+            stream.filter(Files::isRegularFile)
+                    .filter(ParentPomDownloader::isPom)
+                    .map(Pom::new)
+                    .filter(Pom::hasParent)
+                    .forEach(p -> processPom(repoPath, p));
+        }
 
         toDownload.parallelStream().map(PomGAV::toGav).forEach(this::download);
     }
