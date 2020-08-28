@@ -143,13 +143,19 @@ class BaconInstall:
     """
     Object responsible with installing bacon
     """
-    def __init__(self, bacon_jar_location, shell_location, maven_url, snapshot=False):
+    def __init__(self, bacon_jar_location, shell_location, maven_url, version=None):
 
         self.bacon_jar_location = bacon_jar_location
         self.shell_location = shell_location
         self.maven_url = maven_url
         self.latest_version = None
-        self.snapshot = snapshot
+        self.version = version
+
+    def __is_snapshot(self):
+        if self.version and self.version == "snapshot":
+            return True
+
+        return False
 
     def run(self):
         """
@@ -157,31 +163,34 @@ class BaconInstall:
 
         Returns: None
         """
-        latest_version = self.__get_latest_version()
-
         create_folder_if_absent(self.bacon_jar_location)
         create_folder_if_absent(self.shell_location)
 
-        self.__download_latest_version()
+        self.latest_version = self.__get_latest_version()
+
+        self.__download_version()
         self.__create_bacon_shell_script()
 
         print("")
-        print("Installed version: {}!".format(latest_version))
+        print("Installed version: {}!".format(self.latest_version))
         print_mac_notice_if_required()
 
-    def __download_latest_version(self):
+    def __download_version(self):
         """
         Read the maven-metadata.xml of bacon and download the latest version
         """
-        latest_version = self.__get_latest_version()
 
-        if self.snapshot:
-            snapshot_version = self.__get_latest_snapshot_version()
-            url = self.maven_url + \
-                latest_version + "/cli-" + snapshot_version + "-shaded.jar"
+        if self.version:
+            if self.__is_snapshot():
+                snapshot_version = self.__get_latest_snapshot_version()
+                url = self.maven_url + \
+                    self.latest_version + "/cli-" + snapshot_version + "-shaded.jar"
+            else:
+                url = self.maven_url + \
+                    self.version + "/cli-" + self.version + "-shaded.jar"
         else:
             url = self.maven_url + \
-                latest_version + "/cli-" + latest_version + "-shaded.jar"
+                self.latest_version + "/cli-" + self.latest_version + "-shaded.jar"
 
         download_link(url, self.bacon_jar_location, "bacon.jar")
 
@@ -194,28 +203,23 @@ class BaconInstall:
         version
         """
 
-        if self.latest_version is None:
-            temp_folder = tempfile.mkdtemp()
-            download_maven_metadata_xml(self.maven_url, temp_folder)
-            root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
+        temp_folder = tempfile.mkdtemp()
+        download_maven_metadata_xml(self.maven_url, temp_folder)
+        root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
 
-            if self.snapshot:
-                latest_tags = root.findall("versioning/versions/version")
+        if self.__is_snapshot():
+            latest_tags = root.findall("versioning/versions/version")
 
-                # choose the one listed last. This might bite us in the future
-                latest_tag = latest_tags[-1]
-            else:
-                latest_tag = root.find("versioning/latest")
+            # choose the one listed last. This might bite us in the future
+            latest_tag = latest_tags[-1]
+        else:
+            latest_tag = root.find("versioning/latest")
 
-            self.latest_version = latest_tag.text
-
-        return self.latest_version
+        return latest_tag.text
 
     def __get_latest_snapshot_version(self):
 
-        latest_version = self.__get_latest_version()
-
-        url = self.maven_url + latest_version
+        url = self.maven_url + self.latest_version
         temp_folder = tempfile.mkdtemp()
         download_maven_metadata_xml(url, temp_folder)
 
@@ -254,12 +258,14 @@ def main():
     """
     Main entry point to the program
     """
-    if len(sys.argv) >= 2 and sys.argv[1] == 'snapshot':
-        maven_link = MAVEN_SNAPSHOT_LINK
-        snapshot = True
-    else:
-        maven_link = MAVEN_CENTRAL_LINK
-        snapshot = False
+    version = None
+    maven_link = MAVEN_CENTRAL_LINK
+
+    if len(sys.argv) >= 2:
+        version = sys.argv[1]
+
+        if sys.argv[1] == 'snapshot':
+            maven_link = MAVEN_SNAPSHOT_LINK
 
     bacon_jar_location = USER_BACON_JAR_FOLDER_LOCATION
     shell_location = USER_SHELL_FOLDER_LOCATION
@@ -272,7 +278,7 @@ def main():
             bacon_jar_location,
             shell_location,
             maven_link,
-            snapshot=snapshot)
+            version=version)
     try:
         bacon_install.run()
     except Exception as e:
