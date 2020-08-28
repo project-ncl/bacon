@@ -90,7 +90,6 @@ public class Pig extends AbstractCommand {
                 shortName = TEMP_BUILD_SHORT,
                 name = TEMP_BUILD,
                 hasValue = false,
-                overrideRequired = true,
                 defaultValue = TEMP_BUILD_DEFAULT,
                 description = TEMP_BUILD_DESC)
         boolean tempBuild;
@@ -146,28 +145,21 @@ public class Pig extends AbstractCommand {
 
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
-        // overrideRequired = true,
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
 
         @Option(
                 name = TEMP_BUILD_TIME_STAMP,
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
                 description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
 
-        @Option(
-                name = REBUILD_MODE,
-                overrideRequired = true,
-                defaultValue = REBUILD_MODE_DEFAULT,
-                description = REBUILD_MODE_DESC)
+        @Option(name = REBUILD_MODE, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
         private String rebuildMode;
 
         @Option(
                 name = "skipRepo",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip maven repository generation")
@@ -175,7 +167,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = "skipPncUpdate",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip updating PNC entities. Use only if you have all entities created properly.")
@@ -183,7 +174,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = "skipBuilds",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip PNC builds. Use when all your builds went fine, something failed later "
@@ -192,7 +182,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = "skipSources",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip sources generation.")
@@ -200,7 +189,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = "skipJavadoc",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip Javadoc generation.")
@@ -208,7 +196,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = "skipLicenses",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip Licenses generation.")
@@ -216,7 +203,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = "skipSharedContent",
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = "false",
                 description = "Skip generating shared content request input.")
@@ -224,7 +210,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = REMOVE_M2_DUPLICATES,
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
                 description = REMOVE_M2_DUPLICATES_DESC)
@@ -232,7 +217,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = SKIP_BRANCH_CHECK,
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
                 description = SKIP_BRANCH_CHECK_DESC)
@@ -241,7 +225,6 @@ public class Pig extends AbstractCommand {
         @Option(
                 shortName = 'r',
                 name = "repoZip",
-                overrideRequired = true,
                 description = "Repository zip. "
                         + "Might be used if you have already downloaded repository zip to speed up the process.")
         private String repoZipPath;
@@ -285,7 +268,6 @@ public class Pig extends AbstractCommand {
 
         @Option(
                 name = SKIP_BRANCH_CHECK,
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
                 description = SKIP_BRANCH_CHECK_DESC)
@@ -310,23 +292,17 @@ public class Pig extends AbstractCommand {
 
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
-        // overrideRequired = true,
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
 
         @Option(
                 name = TEMP_BUILD_TIME_STAMP,
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
                 description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
 
-        @Option(
-                name = REBUILD_MODE,
-                overrideRequired = true,
-                defaultValue = REBUILD_MODE_DEFAULT,
-                description = REBUILD_MODE_DESC)
+        @Option(name = REBUILD_MODE, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
         private String rebuildMode;
 
         @Override
@@ -349,7 +325,6 @@ public class Pig extends AbstractCommand {
     public class GenerateRepository extends PigCommand<RepositoryData> {
         @Option(
                 name = REMOVE_M2_DUPLICATES,
-                overrideRequired = true,
                 hasValue = false,
                 defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
                 description = REMOVE_M2_DUPLICATES_DESC)
