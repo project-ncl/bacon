@@ -38,7 +38,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 
-MAVEN_CENTRAL_LINK = "https://repo.maven.org/maven2/org/jboss/pnc/bacon/cli/"
+MAVEN_CENTRAL_LINK = "https://repo1.maven.org/maven2/org/jboss/pnc/bacon/cli/"
 MAVEN_SNAPSHOT_LINK = "https://repository.jboss.org/nexus/content/repositories/snapshots/org/jboss/pnc/bacon/cli/"
 
 USER_BACON_JAR_FOLDER_LOCATION = os.getenv("HOME") + "/.pnc-bacon/bin"
@@ -66,7 +66,12 @@ if [ "$1" == "update" ]; then
     curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - $2
 else
     check_if_java_installed
-    java -jar {0}/bacon.jar {1} "$@"
+
+    if [ "$OSTYPE" = "cygwin" ]; then
+        java -jar `cygpath -w {0}/bacon.jar` {1} "$@"
+    else
+        java -jar {0}/bacon.jar {1} "$@"
+    fi
 fi
 
 if [ -z "$1" ]; then
