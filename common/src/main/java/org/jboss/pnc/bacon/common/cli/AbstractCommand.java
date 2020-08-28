@@ -58,7 +58,7 @@ public class AbstractCommand implements Command {
     @Option(shortName = 'V', overrideRequired = true, hasValue = false, description = "print version")
     private boolean version = false;
 
-    @Option(shortName = 'v', overrideRequired = true, hasValue = false, description = "Verbose output")
+    @Option(shortName = 'v', hasValue = false, description = "Verbose output")
     private boolean verbose = false;
 
     @Option(shortName = 'p', description = "Path to PNC configuration folder")
