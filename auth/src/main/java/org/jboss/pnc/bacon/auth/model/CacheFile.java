@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.auth.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,10 +15,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,10 +27,10 @@ import java.util.Optional;
 public class CacheFile {
 
     private Map<String, Credential> cachedData;
-    private static com.fasterxml.jackson.databind.ObjectMapper mapper;
+    private static final ObjectMapper mapper;
 
     static {
-        mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
     }
 
@@ -85,15 +87,12 @@ public class CacheFile {
     }
 
     private static void setOwnerFilePermissions(String path) {
-        HashSet<PosixFilePermission> set = new HashSet<PosixFilePermission>();
-
-        set.add(PosixFilePermission.OWNER_READ);
-        set.add(PosixFilePermission.OWNER_WRITE);
+        Set<PosixFilePermission> set = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
 
         try {
-            Files.setPosixFilePermissions(Paths.get(getCacheFile()), set);
+            Files.setPosixFilePermissions(Paths.get(path), set);
         } catch (IOException e) {
-            log.error("Cache file doesn't exist!");
+            log.error("Could not set file permissions for path {}", path, e);
         }
     }
 
