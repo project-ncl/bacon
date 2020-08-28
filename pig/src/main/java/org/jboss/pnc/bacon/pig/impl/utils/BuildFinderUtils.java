@@ -124,7 +124,8 @@ public final class BuildFinderUtils {
 
         try {
             Map<ChecksumType, MultiValuedMap<String, String>> checksums = futureChecksums.get();
-            Map<String, Collection<String>> map = checksums.get(KojiChecksumType.md5).asMap();
+            MultiValuedMap<String, String> md5s = checksums.get(ChecksumType.md5);
+            Map<String, Collection<String>> map = md5s.asMap();
             return Collections.unmodifiableMap(map);
         } catch (InterruptedException e) {
             log.error("Failed to get checksums: {}", e.getMessage(), e);
