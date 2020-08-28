@@ -30,7 +30,6 @@ class NvrListGeneratorTest {
         try (MockedStatic<BuildFinderUtils> utilsMockedStatic = Mockito.mockStatic(BuildFinderUtils.class)) {
             String filename = "cpaas-1.0.0.ER1-nvr-list.txt";
             Path target = tempDir.resolve(filename).toAbsolutePath();
-            String targetPath = target.toString();
             URL url = NvrListGenerator.class.getClassLoader().getResource("builds.json");
 
             assertThat(url).isNotNull();
@@ -38,12 +37,11 @@ class NvrListGeneratorTest {
             File buildsJson = Paths.get(url.toURI()).toFile();
             List<KojiBuild> builds = Collections.unmodifiableList(
                     Arrays.asList(new BuildFinderObjectMapper().readValue(buildsJson, KojiBuild[].class)));
-            String repoZipPath = "cpaas-1.0.0.ER1-maven-repository.zip";
             Map<String, Collection<String>> checksums = Collections.emptyMap();
 
             utilsMockedStatic.when(() -> BuildFinderUtils.findBuilds(checksums, true)).thenReturn(builds);
 
-            assertThat(NvrListGenerator.generateNvrList(checksums, targetPath)).isTrue();
+            assertThat(NvrListGenerator.generateNvrList(checksums, target)).isTrue();
 
             String nvrTxt = FileUtils.readFileToString(target.toFile(), StandardCharsets.UTF_8);
 

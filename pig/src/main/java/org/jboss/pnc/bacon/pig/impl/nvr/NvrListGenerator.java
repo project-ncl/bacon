@@ -17,8 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.build.finder.report.NVRReport;
@@ -28,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,31 +37,31 @@ public final class NvrListGenerator {
     private NvrListGenerator() {
     }
 
-    public static boolean generateNvrList(Map<String, Collection<String>> checksums, String targetPath) {
+    public static boolean generateNvrList(Map<String, Collection<String>> checksums, Path targetPath) {
         log.info("Generating NVR list for {} checksums and saving result to {}", checksums.size(), targetPath);
 
         List<KojiBuild> builds = BuildFinderUtils.findBuilds(checksums, true);
-        File outputDirectory = new File(FilenameUtils.getPath(targetPath));
+        File outputDirectory = targetPath.normalize().getParent().toFile();
         Report nvrReport = new NVRReport(outputDirectory, builds);
-        String basename = nvrReport.getBaseFilename() + ".txt";
+        nvrReport.setBaseFilename(baseFileName(targetPath));
 
         try {
             nvrReport.outputText();
         } catch (IOException e) {
-            log.error("Failed to write file {} to {}: {}", basename, outputDirectory, e.getMessage(), e);
+            log.error("Failed to write file {} to {}: {}", targetPath, outputDirectory, e.getMessage(), e);
             return false;
         }
 
-        File srcFile = new File(outputDirectory, basename);
-        File destFile = new File(targetPath);
+        return true;
+    }
 
-        try {
-            FileUtils.copyFile(srcFile, destFile, true);
-        } catch (IOException e) {
-            log.error("Failed to copy file {} to {}: {}", srcFile, destFile, e.getMessage(), e);
-            return false;
+    private static String baseFileName(Path targetPath) {
+        String fileName = targetPath.getFileName().toString();
+        String txtExtension = ".txt";
+        if (!fileName.endsWith(txtExtension)) {
+            throw new RuntimeException(
+                    "target file for the NVR list has to finish with .txt, provided path: " + targetPath);
         }
-
-        return destFile.exists();
+        return fileName.replaceAll("\\.txt$", "");
     }
 }
