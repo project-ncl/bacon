@@ -1,0 +1,6 @@
+some file
+with    some content
+
+
+the original file for the HashUtilsTest
+
