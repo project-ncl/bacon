@@ -3,6 +3,7 @@ package org.jboss.pnc.bacon.pnc.client;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 /**
@@ -42,12 +44,12 @@ public class BifrostClient {
         URI logsUrl = baseUrl.resolve(URI.create("/text?" + query));
         log.debug("Reading logs from {}", logsUrl);
 
-        HttpGet httpGet = new HttpGet(logsUrl);
-
+        HttpUriRequest httpGet = new HttpGet(logsUrl);
         HttpResponse response = client.execute(httpGet);
-        try (InputStream inputStream = response.getEntity().getContent();
-                BufferedReader is = new BufferedReader(new InputStreamReader(inputStream));) {
-            is.lines().forEach(line -> onLine.accept(line));
+
+        try (InputStream is = response.getEntity().getContent();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            br.lines().forEach(onLine);
         }
     }
 }

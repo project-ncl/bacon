@@ -19,11 +19,8 @@ package org.jboss.pnc.bacon.pig.impl.script;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.jboss.pnc.bacon.config.Config;
-import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +54,7 @@ public class ScriptGenerator {
         generateUploadToCandidatesScript(targetDir, dataRoot);
     }
 
-    private void generateUploadToCandidatesScript(Path targetDir, ReleaseScriptData dataRoot) {
+    private static void generateUploadToCandidatesScript(Path targetDir, ReleaseScriptData dataRoot) {
         FileGenerator generator = new FileGenerator(Optional.empty());
 
         File uploadScriptLocation = targetDir.resolve("upload-to-candidates.sh").toFile();
@@ -67,7 +64,7 @@ public class ScriptGenerator {
         makeScriptExecutable(uploadScriptLocation.toPath());
     }
 
-    private void makeScriptExecutable(Path script) {
+    private static void makeScriptExecutable(Path script) {
         try {
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(script);
             permissions.add(PosixFilePermission.OWNER_EXECUTE);
