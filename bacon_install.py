@@ -58,8 +58,10 @@ function check_if_java_installed {{
 if [ "$1" == "update" ]; then
     if [ "$2" == "snapshot" ]; then
         echo "Updating to latest snapshot version..."
-    else
+    elif [ -z "$2" ]; then
         echo "Updating to latest released version..."
+    else
+        echo "Updating to version $2"
     fi
 
     # Script runs the bacon_install.py to update itself
@@ -78,6 +80,10 @@ if [ -z "$1" ]; then
     echo "To update to the latest released version of bacon/pnc/da/pig, run:"
     echo ""
     echo "    bacon update"
+    echo ""
+    echo "To update to a specific released version of bacon/pnc/da/pig, run:"
+    echo ""
+    echo "    bacon update <version>"
     echo ""
     echo "To update to a snapshot version of bacon, run:"
     echo ""

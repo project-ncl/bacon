@@ -18,7 +18,12 @@ java -jar cli/target/bacon.jar
 
 To install the latest ***released*** version:
 ```bash
-curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - 
+curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 -
+```
+
+To install a specific ***released*** version:
+```bash
+curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - 2.0.1
 ```
 
 To install the latest ***snapshot*** (no need to compile):
@@ -31,8 +36,11 @@ directory, which on Linux will make it available in your shell.
 
 To update the installed version:
 ```bash
-# released version
+# latest released version
 bacon update
+
+# specifc released version
+bacon update 2.0.1
 
 # snapshot version
 bacon update snapshot
