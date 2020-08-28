@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
@@ -215,10 +216,9 @@ public final class PigFacade {
     private static void generateNvrList() {
         PigContext context = PigContext.get();
         Map<String, Collection<String>> checksums = context.getChecksums();
-        String targetPath = Paths.get(context.getReleasePath())
+        Path targetPath = Paths.get(context.getReleasePath())
                 .resolve(context.getDeliverables().getNvrListName())
-                .toAbsolutePath()
-                .toString();
+                .toAbsolutePath();
         NvrListGenerator.generateNvrList(checksums, targetPath);
     }
 
