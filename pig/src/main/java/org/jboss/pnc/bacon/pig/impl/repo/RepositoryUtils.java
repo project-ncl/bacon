@@ -92,15 +92,16 @@ public class RepositoryUtils {
         for (String path : pomPaths) {
             ArtifactPathInfo artifactPathInfo = ArtifactPathInfo.parse(path);
             ProjectVersionRef gav = artifactPathInfo.getProjectId();
-            List<SingleVersion> singleVersions = new ArrayList<SingleVersion>();
+            List<SingleVersion> singleVersions = new ArrayList<>();
             if (!metas.isEmpty() && metas.containsKey(gav.asProjectRef())) {
                 singleVersions = metas.get(gav.asProjectRef());
             }
             singleVersions.add((SingleVersion) gav.getVersionSpec());
             metas.put(gav.asProjectRef(), singleVersions);
         }
-        for (ProjectRef ga : metas.keySet()) {
-            List<SingleVersion> singleVersions = metas.get(ga);
+        for (Map.Entry<ProjectRef, List<SingleVersion>> entry : metas.entrySet()) {
+            ProjectRef ga = entry.getKey();
+            List<SingleVersion> singleVersions = entry.getValue();
             Collections.sort(singleVersions);
 
             Metadata master = new Metadata();
