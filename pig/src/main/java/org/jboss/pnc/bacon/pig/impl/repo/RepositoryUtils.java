@@ -246,8 +246,8 @@ public class RepositoryUtils {
                                 final File directoryToBeDeleted = e.getKey();
 
                                 log.info(
-                                        "Deleting redhat artifact " + directoryToBeDeleted.getAbsolutePath()
-                                                + " which is redundant since a newer redhat version exists");
+                                        "Deleting redhat artifact {} which is redundant since a newer redhat version exists",
+                                        directoryToBeDeleted.getAbsolutePath());
 
                                 try {
                                     FileUtils.deleteDirectory(directoryToBeDeleted);

@@ -53,8 +53,8 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
             String latest_build = quarkusLatestBuild.select("a[href]").text().replace("/", "");
             String old_build = quarkusLatestBuild.nextElementSibling().select("a[href]").text().replace("/", "");
 
-            log.info("Latest build is " + latest_build);
-            log.info("Old build is " + old_build);
+            log.info("Latest build is {}", latest_build);
+            log.info("Old build is {}", old_build);
 
             FileDownloadUtils.downloadTo(
                     new URI(stagingPathToProduct + latest_build + communityDependenciesPath),
@@ -70,12 +70,12 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
                     + CollectionUtils.subtract(newDependencies, oldDependencies);
             String oldBuildInfo = "Community Dependencies present in old build which are not present in new build are "
                     + CollectionUtils.subtract(oldDependencies, newDependencies);
-            log.info("Build info for new build is " + newBuildInfo);
-            log.info("Build info for old build is " + oldBuildInfo);
+            log.info("Build info for new build is {}", newBuildInfo);
+            log.info("Build info for old build is {}", oldBuildInfo);
             List<String> fileContent = Arrays.asList(newBuildInfo, oldBuildInfo);
             Files.write(Paths.get("post-build-info.txt"), fileContent, StandardCharsets.UTF_8);
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Error during post build check", e);
         }
     }
 

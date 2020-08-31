@@ -75,9 +75,9 @@ public class PncBuilder {
     }
 
     private void waitForSuccessfulFinish(String groupBuildId) {
-        log.info("waiting for finish of group build {}", groupBuildId);
+        log.info("Waiting for finish of group build {}", groupBuildId);
         SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30, true);
-        log.info("group build finished successfully");
+        log.info("Group build finished successfully");
     }
 
     private Boolean isSuccessfullyFinished(String groupBuildId) {
@@ -94,7 +94,7 @@ public class PncBuilder {
                     throw new RuntimeException("Build group failed " + groupBuild);
             }
         } catch (ClientException e) {
-            log.warn("Failed to check if build is finished for " + groupBuildId + ", assuming it is not finished", e);
+            log.warn("Failed to check if build is finished for {}. Assuming it is not finished", groupBuildId, e);
             return false;
         }
     }

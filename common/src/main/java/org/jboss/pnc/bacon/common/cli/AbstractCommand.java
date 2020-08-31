@@ -132,7 +132,7 @@ public class AbstractCommand implements Command {
 
     private void setConfigLocation(String configLocation, String source) {
         Config.configure(configLocation, Constant.CONFIG_FILE_NAME, profile);
-        log.debug("Config file set from " + source + " to " + Config.getConfigFilePath());
+        log.debug("Config file set from {} to {}", source, Config.getConfigFilePath());
     }
 
     /**

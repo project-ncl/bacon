@@ -208,7 +208,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private void buildProject(Path projectPath, String settingsSelector) {
-        log.info("building the project " + projectPath.toAbsolutePath());
+        log.info("Building the project {}", projectPath.toAbsolutePath());
         OSCommandExecutor.runCommandIn("mvn -B clean package" + repoDefinition + settingsSelector, projectPath);
     }
 
@@ -219,8 +219,9 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 .collect(Collectors.toList());
         String command = String.format(
                 "mvn -X io.quarkus:quarkus-maven-plugin:%s:create -DprojectGroupId=tmp -DprojectArtifactId=tmp "
-                        + "-DplatformArtifactId=%s -DplatformVersion=%s -Dextensions=%s" + repoDefinition
-                        + settingsSelector,
+                        + "-DplatformArtifactId=%s -DplatformVersion=%s -Dextensions=%s%s%s",
+                repoDefinition,
+                settingsSelector,
                 quarkusVersion,
                 "quarkus-bom",
                 quarkusVersion,
