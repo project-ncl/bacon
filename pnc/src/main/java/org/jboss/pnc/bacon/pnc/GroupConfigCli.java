@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -35,15 +36,19 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
+import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 import org.aesh.command.option.OptionList;
 
+import static java.util.Optional.of;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
+@Slf4j
 @GroupCommandDefinition(
         name = "group-config",
         description = "Group config",
@@ -54,7 +59,8 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
                 GroupConfigCli.ListBuildConfig.class,
                 GroupConfigCli.Get.class,
                 GroupConfigCli.AddBuildConfig.class,
-                GroupConfigCli.RemoveBuildConfig.class })
+                GroupConfigCli.RemoveBuildConfig.class,
+                GroupConfigCli.ShowLatestBuild.class })
 public class GroupConfigCli extends AbstractCommand {
 
     private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(
@@ -244,5 +250,45 @@ public class GroupConfigCli extends AbstractCommand {
         }
 
         return buildConfigurationRefList;
+    }
+
+    @CommandDefinition(
+            name = "show-latest-build",
+            description = "Show the progress of the latest group build for the group config")
+    public class ShowLatestBuild extends AbstractCommand {
+
+        @Argument(required = true, description = "Group config id")
+        private String id;
+
+        @Option(
+                shortName = 'o',
+                overrideRequired = false,
+                hasValue = false,
+                description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
+        @Option(name = "temporary-build", description = "Build is temporary", hasValue = false)
+        private boolean temporaryBuild;
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation)
+                throws CommandException, InterruptedException {
+
+            return super.executeHelper(commandInvocation, () -> {
+
+                Collection<GroupBuild> groupBuilds = CREATOR.getClient()
+                        .getAllGroupBuilds(id, of("=desc=startTime"), Optional.of("temporaryBuild==" + temporaryBuild))
+                        .getAll();
+
+                Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
+                if (latest.isPresent()) {
+                    ObjectHelper.print(jsonOutput, latest.get());
+                    return 0;
+                } else {
+                    log.error("Couldn't find any group build from group config id: {}", id);
+                    return 1;
+                }
+            });
+        }
     }
 }
