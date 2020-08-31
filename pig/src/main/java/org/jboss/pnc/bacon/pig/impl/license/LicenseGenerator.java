@@ -72,14 +72,18 @@ public class LicenseGenerator {
             boolean isInvalidLicensesPresent = XmlUtils
                     .isValidNodePresent(xmlFile, "//license[not(url)] or //url[not(string(.))]");
             if (isInvalidLicensesPresent) {
-                log.error(
-                        "There are some invalid licenses in XML file generated. Following are the details of the invalid licenses:");
-                List<Node> nodes = XmlUtils.listNodes(xmlFile, "//license[not(url)]/parent::node()/parent::node()");
-                nodes.forEach(node -> {
+                if (log.isErrorEnabled()) {
                     log.error(
-                            "Group id is " + node.getChildNodes().item(1).getTextContent() + " Artifact id is "
-                                    + node.getChildNodes().item(3).getTextContent());
-                });
+                            "There are some invalid licenses in XML file generated. Following are the details of the invalid licenses:");
+                    List<Node> nodes = XmlUtils.listNodes(xmlFile, "//license[not(url)]/parent::node()/parent::node()");
+                    nodes.forEach(node -> {
+                        log.error(
+                                "Group id is {} and artifact id is {}",
+                                node.getChildNodes().item(1).getTextContent(),
+                                node.getChildNodes().item(3).getTextContent());
+                    });
+                }
+
                 throw new RuntimeException("Invalid licenses XML file");
             }
         } catch (LicensesGeneratorException e) {

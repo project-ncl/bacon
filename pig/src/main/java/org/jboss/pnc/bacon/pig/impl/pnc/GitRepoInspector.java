@@ -66,8 +66,10 @@ public class GitRepoInspector {
             boolean temporaryBuild) {
 
         log.info(
-                "Trying to check if branch '" + refSpec + "' in '" + internalUrl
-                        + "' has been modified, compared to latest build of build config '" + configId + "'");
+                "Trying to check if branch '{}' in '{}' has been modified, compared to latest build of build config '{}'",
+                refSpec,
+                internalUrl,
+                configId);
         File tempDir = FileUtils.mkTempDir("git");
         try (Git git = cloneRepo(internalUrl, tempDir)) {
             String latestCommit = headRevision(git, refSpec);

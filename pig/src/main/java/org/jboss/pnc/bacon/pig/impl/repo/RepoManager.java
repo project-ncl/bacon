@@ -101,7 +101,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     void getRedhatArtifacts(List<ArtifactWrapper> artifactsToPack, PncBuild build) {
-        log.info(" - getting all artifacts and dependencies for [" + build.getName() + "]");
+        log.info("Getting all artifacts and dependencies for [{}]", build.getName());
         buildInfoCollector.addDependencies(build, "identifier=like=%redhat%");
         artifactsToPack.addAll(build.getBuiltArtifacts());
         artifactsToPack.addAll(build.getDependencyArtifacts());

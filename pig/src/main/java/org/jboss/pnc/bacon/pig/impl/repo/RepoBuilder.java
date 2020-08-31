@@ -161,10 +161,13 @@ public class RepoBuilder {
         if (noFailure) {
             log.debug("Build finished successfully");
         } else {
-            log.error("Build failed");
-            log.error("Build of the generated project failed");
-            log.error("Build log: ");
-            log.error(StringUtils.join(output, "\n"));
+            if (log.isErrorEnabled()) {
+                log.error("Build failed");
+                log.error("Build of the generated project failed");
+                log.error("Build log: ");
+                log.error(StringUtils.join(output, System.lineSeparator()));
+            }
+
             throw new RuntimeException("Build of the generated project failed");
         }
     }

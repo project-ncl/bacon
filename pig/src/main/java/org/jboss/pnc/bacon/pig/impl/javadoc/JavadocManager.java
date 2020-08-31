@@ -177,10 +177,10 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private boolean cloneProject() {
         Git git = null;
         try {
-            log.debug("Cloning " + generationProject + " into " + topLevelDirectory);
+            log.debug("Cloning {} into {}", generationProject, topLevelDirectory);
             git = Git.cloneRepository().setURI(generationProject).setDirectory(topLevelDirectory).call();
             if (scmRevision != null && !scmRevision.isEmpty()) {
-                log.debug("Checkout version " + scmRevision);
+                log.debug("Checkout version {}", scmRevision);
                 git.checkout().setName(scmRevision).call();
             }
         } catch (GitAPIException e) {
