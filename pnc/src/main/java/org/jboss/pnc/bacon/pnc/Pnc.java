@@ -41,6 +41,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
                 ProductReleaseCli.class,
                 ProductVersionCli.class,
                 ProjectCli.class,
-                ScmRepositoryCli.class })
+                ScmRepositoryCli.class,
+                WhoAmICli.class })
 public class Pnc extends AbstractCommand {
 }
