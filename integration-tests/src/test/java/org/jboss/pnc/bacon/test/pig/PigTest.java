@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
@@ -144,9 +145,10 @@ public class PigTest extends AbstractTest {
     }
 
     private void replaceSuffixInConfigFile(Path configPath) throws IOException {
-        List<String> fileContent = Files.lines(configPath)
-                .map(l -> l.contains("#!suffix=") ? "#!suffix=" + SUFFIX : l)
-                .collect(Collectors.toList());
-        Files.write(configPath, fileContent);
+        try (Stream<String> stream = Files.lines(configPath)) {
+            List<String> fileContent = stream.map(l -> l.contains("#!suffix=") ? "#!suffix=" + SUFFIX : l)
+                    .collect(Collectors.toList());
+            Files.write(configPath, fileContent);
+        }
     }
 }

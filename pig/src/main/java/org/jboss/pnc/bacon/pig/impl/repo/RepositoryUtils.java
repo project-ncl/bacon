@@ -136,9 +136,8 @@ public class RepositoryUtils {
 
     public static void addCheckSums(File mavenRepositoryDirectory) {
         log.debug("Generating missing checksums");
-        try {
-            Files.walk(mavenRepositoryDirectory.toPath())
-                    .filter(p -> p.toFile().isFile())
+        try (Stream<Path> stream = Files.walk(mavenRepositoryDirectory.toPath())) {
+            stream.filter(p -> p.toFile().isFile())
                     .filter(RepositoryUtils::isNotCheckSumFile)
                     .forEach(RepositoryUtils::addCheckSums);
         } catch (IOException e) {

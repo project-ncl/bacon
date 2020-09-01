@@ -37,10 +37,12 @@ import org.w3c.dom.Node;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -97,11 +99,13 @@ public class LicenseGenerator {
 
         try {
             FileUtils.unzip(repoZip, topLevelDirectory, "^[^/]*/licenses/.*");
-            File repoDir = Files.list(topLevelDirectory.toPath()).iterator().next().toFile();
-            FileUtils.moveDirectoryContents(new File(repoDir, "licenses"), topLevelDirectory);
-            org.apache.commons.io.FileUtils.deleteDirectory(repoDir);
-            FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
-            log.info("Generated zip archive {}", archiveFile);
+            try (Stream<Path> stream = Files.list(topLevelDirectory.toPath())) {
+                File repoDir = stream.iterator().next().toFile();
+                FileUtils.moveDirectoryContents(new File(repoDir, "licenses"), topLevelDirectory);
+                org.apache.commons.io.FileUtils.deleteDirectory(repoDir);
+                FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
+                log.info("Generated zip archive {}", archiveFile);
+            }
         } catch (IOException ex) {
             throw new RuntimeException("Failed to extract licenses from zip", ex);
         }

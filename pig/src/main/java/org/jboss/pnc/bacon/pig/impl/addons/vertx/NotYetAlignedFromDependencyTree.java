@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,31 +56,23 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
     @Override
     public void trigger() {
         String filename = extrasPath + "DependencyTreeMissingAlignment.txt";
-        PrintWriter file = null;
         log.info("Running NotYetAlignedFromDependencyTree - report is {}", filename);
-        try {
-            file = new PrintWriter(filename);
+        try (PrintWriter file = new PrintWriter(filename, StandardCharsets.UTF_8.name())) {
             for (PncBuild build : builds.values()) {
                 // Make a unique list so we don't get multiples from
                 // sub-module's dependency tree list
                 List<String> bcLog = build.getBuildLog().stream().distinct().collect(Collectors.toList());
-                file.println("-------- [" + build.getId() + "] " + build.getName() + " --------");
+                file.print("-------- [" + build.getId() + "] " + build.getName() + " --------\n");
                 for (String bcLine : bcLog) {
                     if (bcLine.startsWith("[INFO] +") && (bcLine.endsWith(":runtime") || bcLine.endsWith(":compile"))
                             && !bcLine.contains("redhat-")) {
-                        file.println(bcLine);
+                        file.print(bcLine + "\n");
                     }
                 }
-                file.println();
+                file.print("\n");
             }
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Error while creating NotYetAlignedFromDependencyTree report", e);
-            return;
-        } finally {
-            if (file != null) {
-                file.flush();
-                file.close();
-            }
         }
     }
 }
