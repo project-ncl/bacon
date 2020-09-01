@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
     private boolean includeLicenses;
     private boolean includeMavenMetadata;
     private String buildScript;
-    private Set<String> ignored;
+    private Set<String> ignored = new HashSet<>();
     private String additionalRepo;
     private List<Map<String, String>> stages;
     private Map<String, String> parameters;
