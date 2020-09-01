@@ -21,6 +21,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.TagOpt;
@@ -94,9 +95,12 @@ public class GitRepoInspector {
 
     private static Git cloneRepo(String internalUrl, File targetDir) throws GitAPIException, IOException {
         Git git = Git.init().setDirectory(targetDir).call();
-        StoredConfig config = git.getRepository().getConfig();
-        config.setBoolean("http", null, "sslVerify", false);
-        config.save();
+
+        try (Repository repository = git.getRepository()) {
+            StoredConfig config = repository.getConfig();
+            config.setBoolean("http", null, "sslVerify", false);
+            config.save();
+        }
 
         git.remoteAdd().setName("prod").setUri(toAnonymous(internalUrl)).call();
 
@@ -105,16 +109,18 @@ public class GitRepoInspector {
     }
 
     private static String headRevision(Git git, String branch) throws GitAPIException, IOException {
-        Ref ref = git.getRepository().findRef("prod/" + branch);
-        if (ref == null) {
-            ref = git.getRepository().findRef(branch);
+        try (Repository repository = git.getRepository()) {
+            Ref ref = repository.findRef("prod/" + branch);
+            if (ref == null) {
+                ref = repository.findRef(branch);
+            }
+            ObjectId id = ref.getPeeledObjectId();
+            if (id == null) {
+                id = ref.getObjectId();
+            }
+            Iterable<RevCommit> commits = git.log().add(id).call();
+            return commits.iterator().next().getName();
         }
-        ObjectId id = ref.getPeeledObjectId();
-        if (id == null) {
-            id = ref.getObjectId();
-        }
-        Iterable<RevCommit> commits = git.log().add(id).call();
-        return commits.iterator().next().getName();
     }
 
     /**
@@ -124,17 +130,19 @@ public class GitRepoInspector {
     private static Set<String> getBaseCommitPossibilities(Git git, String tagName) throws GitAPIException, IOException {
         Set<String> result = new HashSet<>();
 
-        Ref ref = git.getRepository().findRef(tagName);
+        try (Repository repository = git.getRepository()) {
+            Ref ref = repository.findRef(tagName);
 
-        ObjectId id = ref.getPeeledObjectId() != null ? ref.getPeeledObjectId() : ref.getObjectId();
+            ObjectId id = ref.getPeeledObjectId() != null ? ref.getPeeledObjectId() : ref.getObjectId();
 
-        Iterator<RevCommit> log = git.log().add(id).call().iterator();
+            Iterator<RevCommit> log = git.log().add(id).call().iterator();
 
-        result.add(log.next().getName());
-        if (log.hasNext()) {
             result.add(log.next().getName());
+            if (log.hasNext()) {
+                result.add(log.next().getName());
+            }
+            return result;
         }
-        return result;
     }
 
     private static String getLatestBuiltRevision(String configId, boolean temporaryBuild) {

@@ -18,8 +18,8 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustAllStrategy;
@@ -54,39 +54,23 @@ public class FileDownloadUtils {
 
     private static final int MAX_RETRIES = 5;
 
-    private static final RequestConfig requestConfig;
-
-    private static final Supplier<CloseableHttpClient> safeHttpClient;
-    private static final Supplier<CloseableHttpClient> unsafeHttpClient;
-
-    static {
-        requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-                .setConnectTimeout(CONNECTION_TIMEOUT)
-                .setSocketTimeout(READ_TIMEOUT)
-                .build();
-        safeHttpClient = () -> HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
-        unsafeHttpClient = () -> {
-            try {
-                return HttpClients.custom()
-                        .setDefaultRequestConfig(requestConfig)
-                        .setSSLContext(
-                                new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
-                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                        .build();
-            } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-                throw new RuntimeException("Failed to initialize unsafe http client for file downloads", e);
-            }
-        };
-    }
+    private static final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
+            .setConnectTimeout(CONNECTION_TIMEOUT)
+            .setSocketTimeout(READ_TIMEOUT)
+            .build();
 
     public static void downloadTo(URI downloadUrl, File targetPath) {
         log.info("Downloading {} to {}", downloadUrl, targetPath);
 
-        try {
-            downloadWithClient(safeHttpClient, downloadUrl, targetPath);
+        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
+            downloadWithClient(httpClient, downloadUrl, targetPath);
         } catch (Exception e) {
             log.warn("Failed to download {}. Will reattempt without SSL certificate check", downloadUrl);
-            try {
+            try (CloseableHttpClient unsafeHttpClient = HttpClients.custom()
+                    .setDefaultRequestConfig(requestConfig)
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build()) {
                 downloadWithClient(unsafeHttpClient, downloadUrl, targetPath);
             } catch (Exception any) {
                 throw new RuntimeException(
@@ -98,13 +82,9 @@ public class FileDownloadUtils {
         log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
-    private static void downloadWithClient(
-            Supplier<CloseableHttpClient> httpClientSupplier,
-            URI downloadUrl,
-            File targetPath) throws Exception {
-        try (CloseableHttpClient httpClient = httpClientSupplier.get()) {
-            HttpResponse response = httpClient.execute(new HttpGet(downloadUrl));
-
+    private static void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath)
+            throws Exception {
+        try (CloseableHttpResponse response = httpClient.execute(new HttpGet(downloadUrl))) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode < 200 || statusCode > 299) {
                 throw new Exception("Invalid status code for download");

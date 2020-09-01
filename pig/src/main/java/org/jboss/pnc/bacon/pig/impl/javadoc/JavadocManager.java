@@ -47,6 +47,7 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -176,10 +177,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     private boolean cloneProject() {
-        Git git = null;
-        try {
-            log.debug("Cloning {} into {}", generationProject, topLevelDirectory);
-            git = Git.cloneRepository().setURI(generationProject).setDirectory(topLevelDirectory).call();
+        log.debug("Cloning {} into {}", generationProject, topLevelDirectory);
+        try (Git git = Git.cloneRepository().setURI(generationProject).setDirectory(topLevelDirectory).call()) {
             if (scmRevision != null && !scmRevision.isEmpty()) {
                 log.debug("Checkout version {}", scmRevision);
                 git.checkout().setName(scmRevision).call();
@@ -264,34 +263,32 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
      */
     private boolean runPME() {
         PrintStream stdout = System.out;
-        PrintStream outStream = null;
         String filePath = temporaryDestination.getPath() + File.separator + "pme-execution.log";
-        try {
-            outStream = new PrintStream(new File(filePath));
+        try (PrintStream outStream = new PrintStream(new File(filePath), StandardCharsets.UTF_8.name())) {
+            log.debug("Running PME to insert the dependencies into the project (see log {})", outStream);
+            StringBuilder cmd = new StringBuilder(
+                    "-f " + topLevelDirectory.getPath() + File.separator + "pom.xml" + " -DprofileInjection="
+                            + project_gid + ":" + project_aid + ":" + project_version + " -s " + settingsXml
+                            + " -Dmaven.repo.local=" + localRepo + " -t");
+            if (generationData.getAlignmentParameters() != null && !generationData.getAlignmentParameters().isEmpty()) {
+                for (String parameter : generationData.getAlignmentParameters()) {
+                    cmd.append(" " + parameter);
+                }
+            }
+            System.setOut(outStream);
+            log.info("PME Command run [{}]", cmd);
+            if (new Cli().run(cmd.toString().split("\\s+")) != 0) {
+                System.setOut(stdout);
+                log.error("Error running PME see {}", filePath);
+                dumpLog(filePath);
+                return false;
+            }
+            System.setOut(stdout);
+            return true;
         } catch (Exception e) {
             log.error("Error PME run - cannot open {}", filePath);
             return false;
         }
-        log.debug("Running PME to insert the dependencies into the project (see log {})", outStream);
-        StringBuilder cmd = new StringBuilder(
-                "-f " + topLevelDirectory.getPath() + File.separator + "pom.xml" + " -DprofileInjection=" + project_gid
-                        + ":" + project_aid + ":" + project_version + " -s " + settingsXml + " -Dmaven.repo.local="
-                        + localRepo + " -t");
-        if (generationData.getAlignmentParameters() != null && !generationData.getAlignmentParameters().isEmpty()) {
-            for (String parameter : generationData.getAlignmentParameters()) {
-                cmd.append(" " + parameter);
-            }
-        }
-        System.setOut(outStream);
-        log.info("PME Command run [{}]", cmd);
-        if (new Cli().run(cmd.toString().split("\\s+")) != 0) {
-            System.setOut(stdout);
-            log.error("Error running PME see {}", filePath);
-            dumpLog(filePath);
-            return false;
-        }
-        System.setOut(stdout);
-        return true;
     }
 
     /**
