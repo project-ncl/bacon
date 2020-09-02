@@ -29,6 +29,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
@@ -37,11 +38,10 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
+import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 

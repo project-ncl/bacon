@@ -17,9 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -45,7 +43,8 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @GroupCommandDefinition(
         name = "group-build",

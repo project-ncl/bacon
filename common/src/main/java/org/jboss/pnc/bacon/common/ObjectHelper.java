@@ -1,11 +1,11 @@
 package org.jboss.pnc.bacon.common;
 
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ObjectHelper {

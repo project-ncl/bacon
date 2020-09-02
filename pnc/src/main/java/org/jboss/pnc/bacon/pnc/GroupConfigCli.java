@@ -25,6 +25,7 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.aesh.command.option.OptionList;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -43,7 +44,6 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
-import org.aesh.command.option.OptionList;
 
 import static java.util.Optional.of;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;

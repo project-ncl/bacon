@@ -28,6 +28,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProjectClient;
@@ -36,10 +37,9 @@ import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Project;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import java.util.Optional;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
-import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 

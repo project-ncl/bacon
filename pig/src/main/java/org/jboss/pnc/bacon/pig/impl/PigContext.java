@@ -17,8 +17,19 @@
  */
 package org.jboss.pnc.bacon.pig.impl;
 
-import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
-import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.hashDirectory;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
+import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,21 +44,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
-import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
-import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
+import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.hashDirectory;
 
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed

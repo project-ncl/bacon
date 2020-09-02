@@ -1,11 +1,11 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HashUtilsTest {
     static final Path testDirs = Paths.get("src", "test", "resources", "hash");
