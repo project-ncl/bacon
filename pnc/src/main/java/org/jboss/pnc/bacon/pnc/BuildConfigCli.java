@@ -26,11 +26,13 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
+import org.aesh.command.option.OptionGroup;
 import org.aesh.command.option.OptionList;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
@@ -47,12 +49,10 @@ import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.BuildConfigWithSCMRequest;
 import org.jboss.pnc.enums.BuildType;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import java.util.Map;
 import java.util.Optional;
-import org.aesh.command.option.OptionGroup;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
-import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 

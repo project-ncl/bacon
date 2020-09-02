@@ -1,10 +1,10 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import java.io.File;
-
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.build.finder.core.BuildConfig;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

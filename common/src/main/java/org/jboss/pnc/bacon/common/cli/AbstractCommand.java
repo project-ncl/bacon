@@ -17,6 +17,9 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
+import ch.qos.logback.classic.Level;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -31,11 +34,6 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.client.ClientException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import ch.qos.logback.classic.Level;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Abstract command that implements Command

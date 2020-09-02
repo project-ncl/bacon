@@ -30,6 +30,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductMilestoneClient;
@@ -40,14 +41,13 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import java.time.Instant;
 import java.util.Optional;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
-import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 @Slf4j
 @GroupCommandDefinition(

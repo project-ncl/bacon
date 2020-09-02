@@ -17,13 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
-
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.auth.DirectKeycloakClientImpl;
 import org.jboss.pnc.bacon.auth.KeycloakClientException;
 import org.jboss.pnc.bacon.auth.model.Credential;
@@ -35,7 +29,12 @@ import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.GenericSettingClient;
 import org.jboss.pnc.client.RemoteResourceException;
 
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 
 @Slf4j
 public class PncClientHelper {

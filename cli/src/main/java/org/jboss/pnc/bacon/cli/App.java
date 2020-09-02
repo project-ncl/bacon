@@ -17,9 +17,7 @@
  */
 package org.jboss.pnc.bacon.cli;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.AeshCommandRuntimeBuilder;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -52,7 +50,8 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

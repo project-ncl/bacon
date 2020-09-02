@@ -1,5 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -7,9 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 
 /**
  * @author Harsh Madhani<harshmadhani@gmail.com> Date: 06-August-2020

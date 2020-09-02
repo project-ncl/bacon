@@ -1,6 +1,7 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
 import lombok.Data;
+
 import java.util.List;
 
 /**
