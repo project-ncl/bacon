@@ -88,8 +88,10 @@ public class ProjectCli extends AbstractCommand {
                         .issueTrackerUrl(issueTrackerUrl)
                         .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(project));
-                return 0;
+                try (ProjectClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createNew(project));
+                    return 0;
+                }
             });
         }
 
@@ -104,7 +106,9 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public Project getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (ProjectClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -113,7 +117,9 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProjectClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -125,8 +131,9 @@ public class ProjectCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient()
-                    .getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProjectClient client = CREATOR.newClient()) {
+                return client.getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -139,8 +146,9 @@ public class ProjectCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
-            return CREATOR.getClient()
-                    .getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProjectClient client = CREATOR.newClient()) {
+                return client.getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -164,24 +172,28 @@ public class ProjectCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                Project project = CREATOR.getClient().getSpecific(id);
-                Project.Builder updated = project.toBuilder();
+                try (ProjectClient client = CREATOR.newClient()) {
+                    Project project = client.getSpecific(id);
+                    Project.Builder updated = project.toBuilder();
 
-                if (isNotEmpty(name)) {
-                    updated.name(name);
-                }
-                if (isNotEmpty(description)) {
-                    updated.description(description);
-                }
-                if (isNotEmpty(projectUrl)) {
-                    updated.projectUrl(projectUrl);
-                }
-                if (isNotEmpty(issueTrackerUrl)) {
-                    updated.issueTrackerUrl(issueTrackerUrl);
-                }
+                    if (isNotEmpty(name)) {
+                        updated.name(name);
+                    }
+                    if (isNotEmpty(description)) {
+                        updated.description(description);
+                    }
+                    if (isNotEmpty(projectUrl)) {
+                        updated.projectUrl(projectUrl);
+                    }
+                    if (isNotEmpty(issueTrackerUrl)) {
+                        updated.issueTrackerUrl(issueTrackerUrl);
+                    }
 
-                CREATOR.getClientAuthenticated().update(id, updated.build());
-                return 0;
+                    try (ProjectClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                        clientAuthenticated.update(id, updated.build());
+                        return 0;
+                    }
+                }
             });
         }
 

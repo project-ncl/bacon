@@ -48,8 +48,10 @@ public class AnnouncementBannerCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().setAnnouncementBanner(announcement);
-                return 0;
+                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                    client.setAnnouncementBanner(announcement);
+                    return 0;
+                }
             });
         }
 
@@ -66,8 +68,10 @@ public class AnnouncementBannerCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().setAnnouncementBanner("");
-                return 0;
+                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                    client.setAnnouncementBanner("");
+                    return 0;
+                }
             });
         }
     }
@@ -79,8 +83,10 @@ public class AnnouncementBannerCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                System.out.println(CREATOR.getClient().getAnnouncementBanner().getBanner());
-                return 0;
+                try (GenericSettingClient client = CREATOR.newClient()) {
+                    System.out.println(client.getAnnouncementBanner().getBanner());
+                    return 0;
+                }
             });
         }
     }

@@ -8,56 +8,41 @@ import org.jboss.pnc.client.Configuration;
 import java.util.function.Function;
 
 /**
- * Helper class to create the PNC CLI client to use in the CLI objects. There are 2 variants, the unauthenticated one
- * and the authenticated one
- *
- * @param <T> : PNC client to initialize
+ * Helper class to create the PNC CLI client to use in the CLI objects. There are two variants, the unauthenticated one
+ * and the authenticated one.
  */
 @Slf4j
-public class ClientCreator<T extends ClientBase> {
-
-    private T client;
-    private T clientAuthenticated;
-
-    private Function<Configuration, T> constructor;
+public class ClientCreator<T extends ClientBase<?>> {
+    private final Function<Configuration, T> constructor;
 
     /**
-     * Example: ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
+     * Example: {@code ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);}
      *
-     * @param constructor: constructor of the client
+     * @param constructor Constructor of the client
      */
     public ClientCreator(Function<Configuration, T> constructor) {
         this.constructor = constructor;
     }
 
     /**
-     * Get the un-authenticated PNC Client object. If already created, object is cached
+     * Get a new unauthenticated PNC Client object.
      *
-     * @return Un-authenticated PNC Client
+     * @return Unauthenticated PNC Client
      */
-    public T getClient() {
-
-        if (client == null) {
-            client = getClientPrivate(false);
-        }
-        return client;
+    public T newClient() {
+        return newClientPrivate(false);
     }
 
     /**
-     * Get the authenticated PNC Client object. If already created, object is cached
+     * Get a new authenticated PNC Client object.
      *
      * @return Authenticated PNC Client
      */
-    public T getClientAuthenticated() {
-
-        if (clientAuthenticated == null) {
-            clientAuthenticated = getClientPrivate(true);
-        }
-        return clientAuthenticated;
+    public T newClientAuthenticated() {
+        return newClientPrivate(true);
     }
 
-    @SuppressWarnings("unchecked")
-    private T getClientPrivate(boolean authenticated) {
+    private T newClientPrivate(boolean authenticated) {
         return constructor.apply(PncClientHelper.getPncConfiguration(authenticated));
     }
 }

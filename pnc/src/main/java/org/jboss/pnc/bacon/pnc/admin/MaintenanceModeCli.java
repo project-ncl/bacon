@@ -48,8 +48,10 @@ public class MaintenanceModeCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().activateMaintenanceMode(reason);
-                return 0;
+                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                    client.activateMaintenanceMode(reason);
+                    return 0;
+                }
             });
         }
 
@@ -66,8 +68,10 @@ public class MaintenanceModeCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().deactivateMaintenanceMode();
-                return 0;
+                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                    client.deactivateMaintenanceMode();
+                    return 0;
+                }
             });
         }
     }
@@ -79,13 +83,15 @@ public class MaintenanceModeCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                if (CREATOR.getClient().isInMaintenanceMode()) {
-                    System.out.println("PNC is in maintenance mode");
-                    System.out.println(CREATOR.getClient().getAnnouncementBanner().getBanner());
-                } else {
-                    System.out.println("PNC is NOT in maintenance mode");
+                try (GenericSettingClient client = CREATOR.newClient()) {
+                    if (client.isInMaintenanceMode()) {
+                        System.out.println("PNC is in maintenance mode");
+                        System.out.println(client.getAnnouncementBanner().getBanner());
+                    } else {
+                        System.out.println("PNC is NOT in maintenance mode");
+                    }
+                    return 0;
                 }
-                return 0;
             });
         }
     }

@@ -84,8 +84,10 @@ public class ProductCli extends AbstractCommand {
                         .description(description)
                         .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(product));
-                return 0;
+                try (ProductClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createNew(product));
+                    return 0;
+                }
             });
         }
 
@@ -100,7 +102,9 @@ public class ProductCli extends AbstractCommand {
 
         @Override
         public Product getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (ProductClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -110,7 +114,9 @@ public class ProductCli extends AbstractCommand {
         @Override
         public RemoteCollection<Product> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -123,7 +129,9 @@ public class ProductCli extends AbstractCommand {
         @Override
         public RemoteCollection<ProductVersion> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getProductVersions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductClient client = CREATOR.newClient()) {
+                return client.getProductVersions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -148,21 +156,25 @@ public class ProductCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                Product product = CREATOR.getClient().getSpecific(id);
-                Product.Builder updated = product.toBuilder();
+                try (ProductClient client = CREATOR.newClient()) {
+                    Product product = client.getSpecific(id);
+                    Product.Builder updated = product.toBuilder();
 
-                if (isNotEmpty(name)) {
-                    updated.name(name);
-                }
-                if (isNotEmpty(abbreviation)) {
-                    updated.abbreviation(abbreviation);
-                }
-                if (isNotEmpty(description)) {
-                    updated.description(description);
-                }
+                    if (isNotEmpty(name)) {
+                        updated.name(name);
+                    }
+                    if (isNotEmpty(abbreviation)) {
+                        updated.abbreviation(abbreviation);
+                    }
+                    if (isNotEmpty(description)) {
+                        updated.description(description);
+                    }
 
-                CREATOR.getClientAuthenticated().update(id, updated.build());
-                return 0;
+                    try (ProductClient authenticatedClient = CREATOR.newClientAuthenticated()) {
+                        authenticatedClient.update(id, updated.build());
+                        return 0;
+                    }
+                }
             });
         }
 

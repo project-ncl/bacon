@@ -91,8 +91,8 @@ public class SourcesGenerator {
             URI url = gerritSnapshotDownloadUrl(build.getInternalScmUrl(), build.getScmRevision());
 
             File targetPath = new File(workDir, build.getName() + ".tar.gz");
-            try {
-                Response response = CREATOR.getClient().getInternalScmArchiveLink(build.getId());
+            try (BuildClient client = CREATOR.newClient();
+                    Response response = client.getInternalScmArchiveLink(build.getId())) {
                 InputStream in = (InputStream) response.getEntity();
                 Files.copy(in, targetPath.toPath());
             } catch (IOException | RemoteResourceException e) {

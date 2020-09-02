@@ -85,7 +85,7 @@ public class BrewPushCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                try (AdvancedBuildClient buildClient = BUILD_CREATOR.getClientAuthenticated()) {
+                try (AdvancedBuildClient buildClient = BUILD_CREATOR.newClientAuthenticated()) {
                     BuildPushParameters request = BuildPushParameters.builder()
                             .tagPrefix(tagPrefix)
                             .reimport(reimport)
@@ -136,8 +136,10 @@ public class BrewPushCli extends AbstractCommand {
             // TODO add wait option for GroupPush
             return super.executeHelper(commandInvocation, () -> {
                 GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
-                GROUP_BUILD_CREATOR.getClientAuthenticated().brewPush(id, request);
-                return 0;
+                try (GroupBuildClient client = GROUP_BUILD_CREATOR.newClientAuthenticated()) {
+                    client.brewPush(id, request);
+                    return 0;
+                }
             });
         }
 
@@ -168,9 +170,11 @@ public class BrewPushCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                BuildPushResult bpr = BUILD_CREATOR.getClient().getPushResult(id);
-                ObjectHelper.print(jsonOutput, bpr);
-                return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                try (AdvancedBuildClient client = BUILD_CREATOR.newClient()) {
+                    BuildPushResult bpr = client.getPushResult(id);
+                    ObjectHelper.print(jsonOutput, bpr);
+                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                }
             });
         }
 

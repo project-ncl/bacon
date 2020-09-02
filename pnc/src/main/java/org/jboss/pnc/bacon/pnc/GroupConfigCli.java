@@ -101,10 +101,10 @@ public class GroupConfigCli extends AbstractCommand {
                 if (isNotEmpty(buildConfigIds)) {
                     groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds));
                 }
-                ObjectHelper.print(
-                        jsonOutput,
-                        CREATOR.getClientAuthenticated().createNew(groupConfigurationBuilder.build()));
-                return 0;
+                try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createNew(groupConfigurationBuilder.build()));
+                    return 0;
+                }
             });
         }
 
@@ -135,20 +135,24 @@ public class GroupConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                GroupConfiguration groupConfiguration = CREATOR.getClient().getSpecific(groupConfigId);
-                GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
+                try (GroupConfigurationClient client = CREATOR.newClient()) {
+                    GroupConfiguration groupConfiguration = client.getSpecific(groupConfigId);
+                    GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
 
-                if (isNotEmpty(groupConfigName)) {
-                    updated.name(groupConfigName);
+                    if (isNotEmpty(groupConfigName)) {
+                        updated.name(groupConfigName);
+                    }
+                    if (isNotEmpty(productVersionId)) {
+                        updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                    }
+                    if (isNotEmpty(buildConfigIds)) {
+                        updated.buildConfigs(addBuildConfigs(buildConfigIds));
+                    }
+                    try (GroupConfigurationClient authenticatedClient = CREATOR.newClientAuthenticated()) {
+                        authenticatedClient.update(groupConfigId, updated.build());
+                        return 0;
+                    }
                 }
-                if (isNotEmpty(productVersionId)) {
-                    updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
-                }
-                if (isNotEmpty(buildConfigIds)) {
-                    updated.buildConfigs(addBuildConfigs(buildConfigIds));
-                }
-                CREATOR.getClientAuthenticated().update(groupConfigId, updated.build());
-                return 0;
             });
         }
 
@@ -163,7 +167,9 @@ public class GroupConfigCli extends AbstractCommand {
 
         @Override
         public GroupConfiguration getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -172,7 +178,9 @@ public class GroupConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -184,7 +192,9 @@ public class GroupConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -206,8 +216,9 @@ public class GroupConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 for (String bcid : attributes) {
-                    CREATOR.getClientAuthenticated()
-                            .addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
+                    try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                        client.addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
+                    }
                 }
                 return 0;
             });
@@ -231,10 +242,12 @@ public class GroupConfigCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                for (String bcid : attributes) {
-                    CREATOR.getClientAuthenticated().removeBuildConfig(id, bcid);
+                try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    for (String bcid : attributes) {
+                        client.removeBuildConfig(id, bcid);
+                    }
+                    return 0;
                 }
-                return 0;
             });
         }
     }
@@ -275,18 +288,21 @@ public class GroupConfigCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-
-                Collection<GroupBuild> groupBuilds = CREATOR.getClient()
-                        .getAllGroupBuilds(id, of("=desc=startTime"), Optional.of("temporaryBuild==" + temporaryBuild))
-                        .getAll();
-
-                Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
-                if (latest.isPresent()) {
-                    ObjectHelper.print(jsonOutput, latest.get());
-                    return 0;
-                } else {
-                    log.error("Couldn't find any group build from group config id: {}", id);
-                    return 1;
+                try (GroupConfigurationClient client = CREATOR.newClient()) {
+                    Collection<GroupBuild> groupBuilds = client
+                            .getAllGroupBuilds(
+                                    id,
+                                    of("=desc=startTime"),
+                                    Optional.of("temporaryBuild==" + temporaryBuild))
+                            .getAll();
+                    Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
+                    if (latest.isPresent()) {
+                        ObjectHelper.print(jsonOutput, latest.get());
+                        return 0;
+                    } else {
+                        log.error("Couldn't find any group build from group config id: {}", id);
+                        return 1;
+                    }
                 }
             });
         }
