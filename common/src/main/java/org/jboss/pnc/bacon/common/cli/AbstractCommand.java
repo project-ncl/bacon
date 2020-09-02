@@ -79,7 +79,8 @@ public class AbstractCommand implements Command {
             shell.writeln(commandInvocation.getHelpInfo());
             String exampleText = exampleText();
             if (exampleText != null) {
-                shell.writeln("Examples:\n");
+                shell.writeln("Examples:");
+                shell.writeln("");
                 shell.writeln(exampleText);
             }
             activated = true;
