@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class IndyTest {
 
     @BeforeAll
-    public static void setup() throws IOException {
+    static void setup() throws IOException {
         File file = new File(IndyTest.class.getClassLoader().getResource("config.yaml").getFile());
         Config.configure(file.getParent(), "config.yaml", "default");
         Config.initialize();

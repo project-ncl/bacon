@@ -32,9 +32,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/28/17
  */
-public class ConfigReaderTest {
+class ConfigReaderTest {
     @Test
-    public void shouldDeserializeJavadocGenerationStrategy() {
+    void shouldDeserializeJavadocGenerationStrategy() {
         PigConfiguration config = loadBuildConfig("/build-config-VarUsage.yaml");
         assertNotNull(config);
         JavadocGenerationStrategy strategy = config.getFlow().getJavadocGeneration().getStrategy();
@@ -51,7 +51,7 @@ public class ConfigReaderTest {
     }
 
     @Test
-    public void shouldExpandVariables() {
+    void shouldExpandVariables() {
         PigConfiguration config = loadBuildConfig("/build-config-VarUsage.yaml");
         assertNotNull(config);
         if (!config.getVersion().equals("3.5.1")) {
@@ -60,7 +60,7 @@ public class ConfigReaderTest {
     }
 
     @Test
-    public void shouldExpandAndOverrideVariables() {
+    void shouldExpandAndOverrideVariables() {
         PigConfiguration config = loadBuildConfig("/build-config-VarUsage.yaml", "productName=vertx, milestone=ER2");
         assertNotNull(config);
         if (!config.getVersion().equals("3.5.1")) {
@@ -77,7 +77,7 @@ public class ConfigReaderTest {
     }
 
     @Test
-    public void shouldFailOnUnkownVariable() {
+    void shouldFailOnUnkownVariable() {
         boolean thrown = false;
         try {
             loadBuildConfig("/build-config-UnknownVar.yaml");

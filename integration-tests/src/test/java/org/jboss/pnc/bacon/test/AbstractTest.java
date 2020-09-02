@@ -34,27 +34,27 @@ public class AbstractTest {
     protected PNCWiremockHelper wmock = new PNCWiremockHelper();
 
     @BeforeAll
-    public static void startWiremockServer() {
+    static void startWiremockServer() {
         wireMockServer = new WireMockServer(options().port(8080).notifier(new ConsoleNotifier(false)));
         wireMockServer.start();
     }
 
     @AfterAll
-    public static void stopWiremockServer() {
+    static void stopWiremockServer() {
         wireMockServer.stop();
     }
 
     @BeforeEach
-    public void stubBabnner() {
+    void stubBanner() {
         wmock.init();
     }
 
     @AfterAll
-    public void clearStubs() {
+    static void clearStubs() {
         wireMockServer.resetAll();
     }
 
-    public static String getRandomString() {
+    protected static String getRandomString() {
         byte[] bytes = new byte[6];
         generator.nextBytes(bytes);
         final String randomString = Base64.getEncoder().encodeToString(bytes);
