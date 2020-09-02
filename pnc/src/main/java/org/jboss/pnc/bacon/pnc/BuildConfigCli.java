@@ -43,7 +43,6 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
-import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
@@ -132,10 +131,10 @@ public class BuildConfigCli extends AbstractCommand {
                     buildConfigurationBuilder
                             .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
                 }
-                ObjectHelper.print(
-                        jsonOutput,
-                        CREATOR.getClientAuthenticated().createNew(buildConfigurationBuilder.build()));
-                return 0;
+                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createNew(buildConfigurationBuilder.build()));
+                    return 0;
+                }
             });
         }
 
@@ -215,8 +214,10 @@ public class BuildConfigCli extends AbstractCommand {
                         .preBuildSyncEnabled(!noPreBuildSync)
                         .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createWithSCM(request));
-                return 0;
+                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createWithSCM(request));
+                    return 0;
+                }
             });
         }
 
@@ -270,51 +271,54 @@ public class BuildConfigCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                BuildConfiguration buildConfiguration = CREATOR.getClient().getSpecific(buildConfigId);
-                BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
-
-                if (isNotEmpty(buildConfigName)) {
-                    updated.name(buildConfigName);
+                try (BuildConfigurationClient client = CREATOR.newClient()) {
+                    BuildConfiguration buildConfiguration = client.getSpecific(buildConfigId);
+                    BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
+                    if (isNotEmpty(buildConfigName)) {
+                        updated.name(buildConfigName);
+                    }
+                    if (isNotEmpty(description)) {
+                        updated.description(description);
+                    }
+                    if (isNotEmpty(environmentId)) {
+                        updated.environment(Environment.builder().id(environmentId).build());
+                    }
+                    if (isNotEmpty(buildScript)) {
+                        updated.buildScript(buildScript);
+                    }
+                    if (isNotEmpty(scmRepositoryId)) {
+                        updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build());
+                    }
+                    if (isNotEmpty(scmRevision)) {
+                        updated.scmRevision(scmRevision);
+                    }
+                    if (isNotEmpty(buildType)) {
+                        updated.buildType(BuildType.valueOf(buildType));
+                    }
+                    if (isNotEmpty(productVersionId)) {
+                        updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                    }
+                    if (parameters != null) {
+                        // update the content of the existing parameters
+                        Map<String, String> existing = buildConfiguration.getParameters();
+                        parameters.forEach(existing::put);
+                        updated.parameters(existing);
+                    }
+                    if (parametersToRemove != null && parametersToRemove.size() > 0) {
+                        Map<String, String> existing = buildConfiguration.getParameters();
+                        parametersToRemove.forEach(existing::remove);
+                        updated.parameters(existing);
+                    }
+                    callUpdate(updated.build());
+                    return 0;
                 }
-                if (isNotEmpty(description)) {
-                    updated.description(description);
-                }
-                if (isNotEmpty(environmentId)) {
-                    updated.environment(Environment.builder().id(environmentId).build());
-                }
-                if (isNotEmpty(buildScript)) {
-                    updated.buildScript(buildScript);
-                }
-                if (isNotEmpty(scmRepositoryId)) {
-                    updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build());
-                }
-                if (isNotEmpty(scmRevision)) {
-                    updated.scmRevision(scmRevision);
-                }
-                if (isNotEmpty(buildType)) {
-                    updated.buildType(BuildType.valueOf(buildType));
-                }
-                if (isNotEmpty(productVersionId)) {
-                    updated.productVersion(ProductVersion.refBuilder().id(productVersionId).build());
-                }
-                if (parameters != null) {
-                    // update the content of the existing parameters
-                    Map<String, String> existing = buildConfiguration.getParameters();
-                    parameters.forEach(existing::put);
-                    updated.parameters(existing);
-                }
-                if (parametersToRemove != null && parametersToRemove.size() > 0) {
-                    Map<String, String> existing = buildConfiguration.getParameters();
-                    parametersToRemove.forEach(existing::remove);
-                    updated.parameters(existing);
-                }
-                callUpdate(updated.build());
-                return 0;
             });
         }
 
         protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
-            CREATOR.getClientAuthenticated().update(buildConfigId, updated);
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                client.update(buildConfigId, updated);
+            }
         }
 
         @Override
@@ -335,7 +339,9 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
-            ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createRevision(buildConfigId, updated));
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                ObjectHelper.print(jsonOutput, client.createRevision(buildConfigId, updated));
+            }
         }
 
         @Override
@@ -349,7 +355,9 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public BuildConfiguration getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (BuildConfigurationClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -361,7 +369,9 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public BuildConfigurationRevision getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getRevision(id, revisionId);
+            try (BuildConfigurationClient client = CREATOR.newClient()) {
+                return client.getRevision(id, revisionId);
+            }
         }
     }
 
@@ -370,7 +380,9 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (BuildConfigurationClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -383,7 +395,9 @@ public class BuildConfigCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfigurationRevision> getAll(String sort, String query)
                 throws RemoteResourceException {
-            return CREATOR.getClient().getRevisions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (BuildConfigurationClient client = CREATOR.newClient()) {
+                return client.getRevisions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -396,8 +410,10 @@ public class BuildConfigCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
-            return CREATOR.getClient()
-                    .getBuilds(buildConfigId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (BuildConfigurationClient client = CREATOR.newClient()) {
+                return client
+                        .getBuilds(buildConfigId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -414,11 +430,12 @@ public class BuildConfigCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated()
-                        .addDependency(
-                                buildConfigId,
-                                BuildConfigurationRef.refBuilder().id(dependencyConfigId).build());
-                return 0;
+                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    client.addDependency(
+                            buildConfigId,
+                            BuildConfigurationRef.refBuilder().id(dependencyConfigId).build());
+                    return 0;
+                }
             });
         }
     }
@@ -436,8 +453,10 @@ public class BuildConfigCli extends AbstractCommand {
         public CommandResult execute(CommandInvocation commandInvocation)
                 throws CommandException, InterruptedException {
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().removeDependency(buildConfigId, dependencyConfigId);
-                return 0;
+                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    client.removeDependency(buildConfigId, dependencyConfigId);
+                    return 0;
+                }
             });
         }
     }

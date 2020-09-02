@@ -112,7 +112,7 @@ public class GroupBuildCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
-                        .getClientAuthenticated()) {
+                        .newClientAuthenticated()) {
                     if (timeout != null) {
                         GroupBuild gb = advancedGroupConfigurationClient.executeGroupBuild(
                                 groupBuildConfigId,
@@ -157,8 +157,10 @@ public class GroupBuildCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().cancel(groupBuildId);
-                return 0;
+                try (GroupBuildClient client = CREATOR.newClientAuthenticated()) {
+                    client.cancel(groupBuildId);
+                    return 0;
+                }
             });
         }
 
@@ -173,7 +175,9 @@ public class GroupBuildCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<GroupBuild> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (GroupBuildClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -186,8 +190,10 @@ public class GroupBuildCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
-            return CREATOR.getClient()
-                    .getBuilds(groupBuildId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (GroupBuildClient client = CREATOR.newClient()) {
+                return client
+                        .getBuilds(groupBuildId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -196,7 +202,9 @@ public class GroupBuildCli extends AbstractCommand {
 
         @Override
         public GroupBuild getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (GroupBuildClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 }

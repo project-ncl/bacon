@@ -96,18 +96,22 @@ public class ProductReleaseCli extends AbstractCommand {
                 }
 
                 // we have to specify the product version, otherwise PNC is not happy. Why though???
-                ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
+                try (ProductMilestoneClient client = MILESTONE_CREATOR.newClient()) {
+                    ProductMilestone productMilestone = client.getSpecific(productMilestoneId);
 
-                ProductRelease productRelease = ProductRelease.builder()
-                        .version(productReleaseVersion)
-                        .releaseDate(PncClientHelper.parseDateFormat(releaseDate))
-                        .productMilestone(productMilestone)
-                        .productVersion(productMilestone.getProductVersion())
-                        .supportLevel(SupportLevel.valueOf(supportLevel))
-                        .build();
+                    ProductRelease productRelease = ProductRelease.builder()
+                            .version(productReleaseVersion)
+                            .releaseDate(PncClientHelper.parseDateFormat(releaseDate))
+                            .productMilestone(productMilestone)
+                            .productVersion(productMilestone.getProductVersion())
+                            .supportLevel(SupportLevel.valueOf(supportLevel))
+                            .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productRelease));
-                return 0;
+                    try (ProductReleaseClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                        ObjectHelper.print(jsonOutput, clientAuthenticated.createNew(productRelease));
+                        return 0;
+                    }
+                }
             });
         }
 
@@ -138,25 +142,33 @@ public class ProductReleaseCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                ProductRelease productRelease = CREATOR.getClient().getSpecific(productReleaseId);
-                ProductRelease.Builder updated = productRelease.toBuilder();
+                try (ProductReleaseClient client = CREATOR.newClient()) {
+                    ProductRelease productRelease = client.getSpecific(productReleaseId);
+                    ProductRelease.Builder updated = productRelease.toBuilder();
 
-                if (isNotEmpty(productReleaseVersion)) {
-                    if (validateReleaseVersion(productRelease.getProductMilestone().getId(), productReleaseVersion)) {
-                        updated.version(productReleaseVersion);
-                    } else {
-                        throw new FatalException("Product Release Version ('{}') is not valid!", productReleaseVersion);
+                    if (isNotEmpty(productReleaseVersion)) {
+                        if (validateReleaseVersion(
+                                productRelease.getProductMilestone().getId(),
+                                productReleaseVersion)) {
+                            updated.version(productReleaseVersion);
+                        } else {
+                            throw new FatalException(
+                                    "Product Release Version ('{}') is not valid!",
+                                    productReleaseVersion);
+                        }
+                    }
+                    if (isNotEmpty(releaseDate)) {
+                        updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate));
+                    }
+                    if (isNotEmpty(supportLevel)) {
+                        updated.supportLevel(SupportLevel.valueOf(supportLevel));
+                    }
+
+                    try (ProductReleaseClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                        clientAuthenticated.update(productReleaseId, updated.build());
+                        return 0;
                     }
                 }
-                if (isNotEmpty(releaseDate)) {
-                    updated.releaseDate(PncClientHelper.parseDateFormat(releaseDate));
-                }
-                if (isNotEmpty(supportLevel)) {
-                    updated.supportLevel(SupportLevel.valueOf(supportLevel));
-                }
-
-                CREATOR.getClientAuthenticated().update(productReleaseId, updated.build());
-                return 0;
             });
         }
 
@@ -171,7 +183,9 @@ public class ProductReleaseCli extends AbstractCommand {
 
         @Override
         public ProductRelease getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (ProductReleaseClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -190,16 +204,20 @@ public class ProductReleaseCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                ObjectHelper.print(jsonOutput, CREATOR.getClient().getSupportLevels());
-                return 0;
+                try (ProductReleaseClient client = CREATOR.newClient()) {
+                    ObjectHelper.print(jsonOutput, client.getSupportLevels());
+                    return 0;
+                }
             });
         }
     }
 
     static boolean validateReleaseVersion(String productMilestoneId, String productVersion) throws ClientException {
-        ProductMilestone productMilestone = MILESTONE_CREATOR.getClient().getSpecific(productMilestoneId);
+        try (ProductMilestoneClient client = MILESTONE_CREATOR.newClient()) {
+            ProductMilestone productMilestone = client.getSpecific(productMilestoneId);
 
-        return ProductMilestoneCli
-                .validateProductMilestoneVersion(productMilestone.getProductVersion().getId(), productVersion);
+            return ProductMilestoneCli
+                    .validateProductMilestoneVersion(productMilestone.getProductVersion().getId(), productVersion);
+        }
     }
 }

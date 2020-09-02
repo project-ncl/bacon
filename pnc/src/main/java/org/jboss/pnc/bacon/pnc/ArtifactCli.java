@@ -29,7 +29,9 @@ public class ArtifactCli extends AbstractCommand {
 
         @Override
         public Artifact getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (ArtifactClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
 
         @Override
@@ -67,8 +69,10 @@ public class ArtifactCli extends AbstractCommand {
                     log.error("You need to use at least one hash option!");
                     return 1;
                 } else {
-                    ObjectHelper.print(jsonOutput, CREATOR.getClient().getAll(sha256, md5, sha1));
-                    return 0;
+                    try (ArtifactClient client = CREATOR.newClient()) {
+                        ObjectHelper.print(jsonOutput, client.getAll(sha256, md5, sha1));
+                        return 0;
+                    }
                 }
             });
         }

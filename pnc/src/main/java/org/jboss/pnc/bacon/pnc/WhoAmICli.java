@@ -43,7 +43,7 @@ public class WhoAmICli extends AbstractCommand {
     public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
 
         return super.executeHelper(commandInvocation, () -> {
-            try (UserClient client = CREATOR.getClientAuthenticated()) {
+            try (UserClient client = CREATOR.newClientAuthenticated()) {
                 ObjectHelper.print(jsonOutput, client.getCurrentUser());
                 return 0;
             }

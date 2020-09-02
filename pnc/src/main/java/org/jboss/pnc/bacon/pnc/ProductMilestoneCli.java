@@ -111,8 +111,10 @@ public class ProductMilestoneCli extends AbstractCommand {
                         .plannedEndDate(endDateInstant)
                         .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(milestone));
-                return 0;
+                try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createNew(milestone));
+                    return 0;
+                }
             });
         }
 
@@ -148,32 +150,36 @@ public class ProductMilestoneCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                ProductMilestone productMilestone = CREATOR.getClient().getSpecific(productMilestoneId);
+                try (ProductMilestoneClient client = CREATOR.newClient()) {
+                    ProductMilestone productMilestone = client.getSpecific(productMilestoneId);
 
-                ProductMilestone.Builder updated = productMilestone.toBuilder();
+                    ProductMilestone.Builder updated = productMilestone.toBuilder();
 
-                if (isNotEmpty(productMilestoneVersion)) {
-                    if (validateProductMilestoneVersion(
-                            productMilestone.getProductVersion().getId(),
-                            productMilestoneVersion)) {
-                        updated.version(productMilestoneVersion);
-                    } else {
-                        throw new FatalException(
-                                "The version ('{}') does not fit the proper format",
-                                productMilestoneVersion);
+                    if (isNotEmpty(productMilestoneVersion)) {
+                        if (validateProductMilestoneVersion(
+                                productMilestone.getProductVersion().getId(),
+                                productMilestoneVersion)) {
+                            updated.version(productMilestoneVersion);
+                        } else {
+                            throw new FatalException(
+                                    "The version ('{}') does not fit the proper format",
+                                    productMilestoneVersion);
+                        }
+                    }
+                    if (isNotEmpty(startDate)) {
+                        Instant startDateInstant = parseDateFormat(startDate);
+                        updated.startingDate(startDateInstant);
+                    }
+                    if (isNotEmpty(endDate)) {
+                        Instant endDateInstant = parseDateFormat(endDate);
+                        updated.plannedEndDate(endDateInstant);
+                    }
+
+                    try (ProductMilestoneClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                        clientAuthenticated.update(productMilestoneId, updated.build());
+                        return 0;
                     }
                 }
-                if (isNotEmpty(startDate)) {
-                    Instant startDateInstant = parseDateFormat(startDate);
-                    updated.startingDate(startDateInstant);
-                }
-                if (isNotEmpty(endDate)) {
-                    Instant endDateInstant = parseDateFormat(endDate);
-                    updated.plannedEndDate(endDateInstant);
-                }
-
-                CREATOR.getClientAuthenticated().update(productMilestoneId, updated.build());
-                return 0;
             });
         }
 
@@ -194,8 +200,10 @@ public class ProductMilestoneCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().closeMilestone(id);
-                return 0;
+                try (ProductMilestoneClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                    clientAuthenticated.closeMilestone(id);
+                    return 0;
+                }
             });
         }
     }
@@ -211,8 +219,10 @@ public class ProductMilestoneCli extends AbstractCommand {
                 throws CommandException, InterruptedException {
 
             return super.executeHelper(commandInvocation, () -> {
-                CREATOR.getClientAuthenticated().cancelMilestoneClose(id);
-                return 0;
+                try (ProductMilestoneClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                    clientAuthenticated.cancelMilestoneClose(id);
+                    return 0;
+                }
             });
         }
     }
@@ -222,7 +232,9 @@ public class ProductMilestoneCli extends AbstractCommand {
 
         @Override
         public ProductMilestone getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (ProductMilestoneClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -235,8 +247,9 @@ public class ProductMilestoneCli extends AbstractCommand {
         @Override
         public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
-            return CREATOR.getClient()
-                    .getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductMilestoneClient client = CREATOR.newClient()) {
+                return client.getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -250,21 +263,22 @@ public class ProductMilestoneCli extends AbstractCommand {
      */
     public static boolean validateProductMilestoneVersion(String productVersionId, String milestoneVersion)
             throws ClientException {
+        try (ProductVersionClient client = VERSION_CREATOR.newClient()) {
+            ProductVersion productVersionDTO = client.getSpecific(productVersionId);
 
-        ProductVersion productVersionDTO = VERSION_CREATOR.getClient().getSpecific(productVersionId);
+            String productVersion = productVersionDTO.getVersion();
 
-        String productVersion = productVersionDTO.getVersion();
+            if (!milestoneVersion.startsWith(productVersion)) {
+                return false;
+            }
 
-        if (!milestoneVersion.startsWith(productVersion)) {
-            return false;
+            String[] items = milestoneVersion.split("\\.");
+
+            if (items.length != 4) {
+                return false;
+            }
+
+            return items[2].matches("\\d+");
         }
-
-        String[] items = milestoneVersion.split("\\.");
-
-        if (items.length != 4) {
-            return false;
-        }
-
-        return items[2].matches("\\d+");
     }
 }

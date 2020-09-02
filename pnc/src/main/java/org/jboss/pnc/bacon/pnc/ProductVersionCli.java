@@ -95,8 +95,10 @@ public class ProductVersionCli extends AbstractCommand {
                         .version(this.productVersion)
                         .build();
 
-                ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productVersion));
-                return 0;
+                try (ProductVersionClient client = CREATOR.newClientAuthenticated()) {
+                    ObjectHelper.print(jsonOutput, client.createNew(productVersion));
+                    return 0;
+                }
             });
         }
 
@@ -111,7 +113,9 @@ public class ProductVersionCli extends AbstractCommand {
 
         @Override
         public ProductVersion getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (ProductVersionClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -124,7 +128,9 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductVersionClient client = CREATOR.newClient()) {
+                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -137,7 +143,9 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getGroupConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductVersionClient client = CREATOR.newClient()) {
+                return client.getGroupConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -151,7 +159,9 @@ public class ProductVersionCli extends AbstractCommand {
         public RemoteCollection<org.jboss.pnc.dto.ProductMilestone> getAll(String sort, String query)
                 throws RemoteResourceException {
 
-            return CREATOR.getClient().getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductVersionClient client = CREATOR.newClient()) {
+                return client.getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -164,7 +174,9 @@ public class ProductVersionCli extends AbstractCommand {
         @Override
         public RemoteCollection<ProductRelease> getAll(String sort, String query) throws RemoteResourceException {
 
-            return CREATOR.getClient().getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (ProductVersionClient client = CREATOR.newClient()) {
+                return client.getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
@@ -182,18 +194,22 @@ public class ProductVersionCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
 
-                ProductVersion pV = CREATOR.getClient().getSpecific(id);
-                ProductVersion.Builder updated = pV.toBuilder();
-                if (isNotEmpty(productVersion)) {
-                    if (!validateProductVersion(productVersion)) {
-                        throw new FatalException(
-                                "Version specified ('{}') is not valid! The version should consist of two numeric parts separated by a dot (e.g 7.0)",
-                                productVersion);
+                try (ProductVersionClient client = CREATOR.newClient()) {
+                    ProductVersion pV = client.getSpecific(id);
+                    ProductVersion.Builder updated = pV.toBuilder();
+                    if (isNotEmpty(productVersion)) {
+                        if (!validateProductVersion(productVersion)) {
+                            throw new FatalException(
+                                    "Version specified ('{}') is not valid! The version should consist of two numeric parts separated by a dot (e.g 7.0)",
+                                    productVersion);
+                        }
+                        updated.version(productVersion);
                     }
-                    updated.version(productVersion);
+                    try (ProductVersionClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                        clientAuthenticated.update(id, updated.build());
+                        return 0;
+                    }
                 }
-                CREATOR.getClientAuthenticated().update(id, updated.build());
-                return 0;
             });
         }
 

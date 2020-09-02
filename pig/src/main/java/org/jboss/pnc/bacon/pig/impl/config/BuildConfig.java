@@ -246,8 +246,8 @@ public class BuildConfig {
             return environmentId;
         } else if (systemImageId != null) {
 
-            try {
-                Optional<Environment> environment = CREATOR.getClient()
+            try (EnvironmentClient client = CREATOR.newClient()) {
+                Optional<Environment> environment = client
                         .getAll(Optional.empty(), Optional.of("systemImageId==" + systemImageId + ";deprecated==false"))
                         .getAll()
                         .stream()

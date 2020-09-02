@@ -44,7 +44,9 @@ public class EnvironmentCli extends AbstractCommand {
 
         @Override
         public Environment getSpecific(String id) throws ClientException {
-            return CREATOR.getClient().getSpecific(id);
+            try (EnvironmentClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
         }
     }
 
@@ -53,7 +55,9 @@ public class EnvironmentCli extends AbstractCommand {
 
         @Override
         public RemoteCollection<Environment> getAll(String sort, String query) throws RemoteResourceException {
-            return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            try (EnvironmentClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
         }
     }
 
