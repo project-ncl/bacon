@@ -109,7 +109,7 @@ bacon pig <phase> ...
 ```
 ## Configuration
 
-The application is configured via the `build-config.yaml` file. 
+The application is configured via the `build-config.yaml` file.
 
 A PiG `build-config.yaml` looks like this: https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml
 

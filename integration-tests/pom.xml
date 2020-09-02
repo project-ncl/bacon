@@ -27,13 +27,13 @@
             <groupId>org.jboss.pnc.bacon</groupId>
             <artifactId>common</artifactId>
         </dependency>
-        
+
         <!-- PNC deps -->
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>dto</artifactId>
         </dependency>
-        
+
         <!-- Object mapper -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -47,7 +47,7 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
-        
+
         <!-- Test framework -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

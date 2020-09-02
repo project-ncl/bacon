@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 /**
  * TODO: resurrect it
- * 
+ *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 3/5/18
  */
