@@ -38,13 +38,13 @@ import java.util.Map;
  * The execution is controlled by a Groovy snippet. The manager is injected to the script under 'gen'.
  * </p>
  * E.g. to download an artifact matching *license.zip from a build named WildFly-Swarm, one would use:
- * 
+ *
  * <pre>
  *     gen.downloadFrom 'WildFly-Swarm' matching '.*license\\.zip'
  * </pre>
  * <p>
  * If another method, <code>generate()</code> is added to a custom manager, it can be used as follows:
- * 
+ *
  * <pre>
  * gen.generate()
  * </pre>
