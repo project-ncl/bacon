@@ -94,6 +94,8 @@ public class GitRepoInspector {
     }
 
     private static Git cloneRepo(String internalUrl, File targetDir) throws GitAPIException, IOException {
+        log.debug("Cloning repository {} into {}", internalUrl, targetDir);
+
         Git git = Git.init().setDirectory(targetDir).call();
 
         try (Repository repository = git.getRepository()) {
@@ -128,6 +130,7 @@ public class GitRepoInspector {
      * (because we return here the tag commit and its parent)
      */
     private static Set<String> getBaseCommitPossibilities(Git git, String tagName) throws GitAPIException, IOException {
+        log.debug("Getting base commit possibilities for tag: {}", tagName);
         Set<String> result = new HashSet<>();
 
         try (Repository repository = git.getRepository()) {
@@ -146,6 +149,7 @@ public class GitRepoInspector {
     }
 
     private static String getLatestBuiltRevision(String configId, boolean temporaryBuild) {
+        log.debug("Getting latest built revision of config id {}, temporary: {}", configId, temporaryBuild);
         BuildInfoCollector.BuildSearchType searchType = temporaryBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
                 : BuildInfoCollector.BuildSearchType.PERMANENT;
         PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, searchType);
