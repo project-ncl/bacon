@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ParameterCheckerTest {
     @Test
-    public void verifyRebuildOption() {
+    void verifyRebuildOption() {
         try {
             ParameterChecker.checkRebuildModeOption("FOOBAR");
             fail("No exception thrown");

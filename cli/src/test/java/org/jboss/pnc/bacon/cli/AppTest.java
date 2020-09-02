@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AppTest {
 
     @Test
-    public void testHelp() throws Exception {
+    void testHelp() throws Exception {
         App app = new App();
         String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
         assertTrue(text.contains("Usage: bacon [<options>]"));

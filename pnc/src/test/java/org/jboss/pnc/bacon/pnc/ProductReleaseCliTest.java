@@ -19,8 +19,7 @@ import static org.mockito.Mockito.spy;
 
 class ProductReleaseCliTest {
     @Test
-    public void testCreateException()
-            throws CommandException, InterruptedException, IOException, IllegalAccessException {
+    void testCreateException() throws CommandException, InterruptedException, IOException, IllegalAccessException {
         ProductReleaseCli.Create create = spy((new ProductReleaseCli()).new Create());
         CommandInvocation commandInvocation = mock(CommandInvocation.class);
         File file = new File(ProductReleaseCliTest.class.getClassLoader().getResource("config.yaml").getFile());

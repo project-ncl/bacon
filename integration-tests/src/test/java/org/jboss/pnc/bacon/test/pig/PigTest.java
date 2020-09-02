@@ -48,7 +48,7 @@ import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class PigTest extends AbstractTest {
+class PigTest extends AbstractTest {
 
     private static final String UNIVERSAL_ID = "42";
     private static final String SUFFIX = getRandomString();
@@ -65,7 +65,7 @@ public class PigTest extends AbstractTest {
 
     @Test
     @Order(1)
-    public void shouldCreateProduct() throws IOException {
+    void shouldCreateProduct() throws IOException {
         final Path configFile = CONFIG_LOCATION;
         replaceSuffixInConfigFile(configFile.resolve("build-config.yaml"));
 

@@ -26,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ProductTest extends AbstractTest {
+class ProductTest extends AbstractTest {
     private static final String PRODUCT_NAME_PREFIX = "BT New Product Name ";
 
     private String productId;
 
     @Test
     @Order(1)
-    public void shouldCreateProduct() throws JsonProcessingException {
+    void shouldCreateProduct() throws JsonProcessingException {
 
         final String suffix = getRandomString();
         final String productName = PRODUCT_NAME_PREFIX + suffix;
@@ -67,7 +67,7 @@ public class ProductTest extends AbstractTest {
 
     @Test
     @Order(2)
-    public void shouldGetProduct() throws JsonProcessingException {
+    void shouldGetProduct() throws JsonProcessingException {
         Assumptions.assumeTrue(productId != null);
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + " suffix").build();
@@ -82,7 +82,7 @@ public class ProductTest extends AbstractTest {
 
     @Test
     @Order(2)
-    public void shouldListProducts() throws JsonProcessingException {
+    void shouldListProducts() throws JsonProcessingException {
         Assumptions.assumeTrue(productId != null);
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + "suffix").build();
@@ -96,7 +96,7 @@ public class ProductTest extends AbstractTest {
 
     @Test
     @Order(3)
-    public void shouldUpdateProduct() throws JsonProcessingException {
+    void shouldUpdateProduct() throws JsonProcessingException {
         Assumptions.assumeTrue(productId != null);
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + "suffix").build();
@@ -115,7 +115,7 @@ public class ProductTest extends AbstractTest {
     }
 
     @Test
-    public void shouldGetInvalidProduct() throws JsonProcessingException {
+    void shouldGetInvalidProduct() throws JsonProcessingException {
         productId = "000000";
 
         wmock.get(PRODUCT, productId);

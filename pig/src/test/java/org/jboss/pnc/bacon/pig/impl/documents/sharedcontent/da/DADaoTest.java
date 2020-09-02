@@ -52,7 +52,7 @@ class DADaoTest {
     }
 
     @Test
-    public void shouldLookupJunit412() {
+    void shouldLookupJunit412() {
         CommunityDependency dependency = new CommunityDependency("junit", "junit", "4.12", "jar");
         daDao.fillDaData(dependency);
         assertThat(dependency.getRecommendation()).isEqualTo("4.12.0.redhat-003");
@@ -60,7 +60,7 @@ class DADaoTest {
     }
 
     @Test
-    public void shouldLookupJunit456() {
+    void shouldLookupJunit456() {
         CommunityDependency dependency = new CommunityDependency("junit", "junit", "4.56", "jar");
         daDao.fillDaData(dependency);
         assertThat(dependency.getRecommendation()).isNull();
@@ -68,7 +68,7 @@ class DADaoTest {
     }
 
     @Test
-    public void shouldLookupJunity456() {
+    void shouldLookupJunity456() {
         CommunityDependency dependency = new CommunityDependency("junit", "junity", "4.56", "jar");
         daDao.fillDaData(dependency);
         assertThat(dependency.getRecommendation()).isNull();
