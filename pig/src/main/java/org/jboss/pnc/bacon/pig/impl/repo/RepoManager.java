@@ -24,6 +24,7 @@ import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.license.LicenseGenerator;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
@@ -93,7 +94,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             case BUILD_CONFIGS:
                 return buildConfigs();
             case IGNORE:
-                log.info("Ignoring repository zip generation");
+                log.info(
+                        "Ignoring repository zip generation because the config strategy is set to: {}",
+                        RepoGenerationStrategy.IGNORE);
                 return null;
             default:
                 throw new IllegalStateException("Unsupported repository generation strategy");
