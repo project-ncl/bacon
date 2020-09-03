@@ -47,6 +47,7 @@ import java.util.Set;
 public class GitRepoInspector {
 
     private static final Logger log = LoggerFactory.getLogger(GitRepoInspector.class);
+    private static final String GIT_REMOTE_NAME = "prod";
 
     private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
 
@@ -104,18 +105,15 @@ public class GitRepoInspector {
             config.save();
         }
 
-        git.remoteAdd().setName("prod").setUri(toAnonymous(internalUrl)).call();
+        git.remoteAdd().setName(GIT_REMOTE_NAME).setUri(toAnonymous(internalUrl)).call();
 
-        git.fetch().setRemote("prod").setTagOpt(TagOpt.FETCH_TAGS).call();
+        git.fetch().setRemote(GIT_REMOTE_NAME).setTagOpt(TagOpt.FETCH_TAGS).call();
         return git;
     }
 
     private static String headRevision(Git git, String branch) throws GitAPIException, IOException {
         try (Repository repository = git.getRepository()) {
-            Ref ref = repository.findRef("prod/" + branch);
-            if (ref == null) {
-                ref = repository.findRef(branch);
-            }
+            Ref ref = getRef(branch, repository);
             ObjectId id = ref.getPeeledObjectId();
             if (id == null) {
                 id = ref.getObjectId();
@@ -134,7 +132,7 @@ public class GitRepoInspector {
         Set<String> result = new HashSet<>();
 
         try (Repository repository = git.getRepository()) {
-            Ref ref = repository.findRef(tagName);
+            Ref ref = getRef(tagName, repository);
 
             ObjectId id = ref.getPeeledObjectId() != null ? ref.getPeeledObjectId() : ref.getObjectId();
 
@@ -164,6 +162,24 @@ public class GitRepoInspector {
             uriAsString = internalUrl;
         }
         return new URIish(URI.create(uriAsString).toURL());
+    }
+
+    /**
+     * Use this helper method to find the ref since we need to specify the GIT remote name to find it
+     *
+     * @param reference reference to find
+     * @param repository Repository
+     * @return the ref if found
+     * @throws IOException
+     */
+    private static Ref getRef(String reference, Repository repository) throws IOException {
+
+        Ref ref = repository.findRef(GIT_REMOTE_NAME + "/" + reference);
+
+        if (ref == null) {
+            ref = repository.findRef(reference);
+        }
+        return ref;
     }
 
     private GitRepoInspector() {
