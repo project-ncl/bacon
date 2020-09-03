@@ -105,17 +105,15 @@ public class BuildInfoCollector {
 
             PncBuild result = new PncBuild(build);
 
-            if (!build.getStatus().completedSuccessfully()) {
-                Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(build.getId());
+            Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(build.getId());
 
-                // only store logs if present and build failed: log not that useful if build successful
-                if (maybeBuildLogs.isPresent()) {
-                    try (InputStream inputStream = maybeBuildLogs.get()) {
-                        String log = readLog(inputStream);
-                        result.addBuildLog(log);
-                    }
+            if (maybeBuildLogs.isPresent()) {
+                try (InputStream inputStream = maybeBuildLogs.get()) {
+                    String log = readLog(inputStream);
+                    result.addBuildLog(log);
                 }
             }
+
             result.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
             return result;
         } catch (ClientException | IOException e) {
@@ -203,16 +201,14 @@ public class BuildInfoCollector {
                     pncBuild = new PncBuild(build);
                 }
 
-                // only get logs when build fail. Is that a good logic?
-                if (!pncBuild.getBuildStatus().completedSuccessfully()) {
-                    Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(pncBuild.getId());
-                    if (maybeBuildLogs.isPresent()) {
-                        try (InputStream inputStream = maybeBuildLogs.get()) {
-                            String log = readLog(inputStream);
-                            pncBuild.addBuildLog(log);
-                        }
+                Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(pncBuild.getId());
+                if (maybeBuildLogs.isPresent()) {
+                    try (InputStream inputStream = maybeBuildLogs.get()) {
+                        String log = readLog(inputStream);
+                        pncBuild.addBuildLog(log);
                     }
                 }
+
                 pncBuild.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(pncBuild.getId())));
                 result.put(pncBuild.getName(), pncBuild);
             }

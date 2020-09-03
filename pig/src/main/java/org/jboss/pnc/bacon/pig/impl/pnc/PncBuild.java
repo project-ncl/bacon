@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,6 +59,9 @@ public class PncBuild {
     private String name;
     private Map<String, String> attributes;
     private BuildStatus buildStatus;
+
+    // Don't print huge build logs in the user's output. It's usually not that useful
+    @JsonIgnore
     private List<String> buildLog;
     private List<ArtifactWrapper> builtArtifacts;
     private List<ArtifactWrapper> dependencyArtifacts;
