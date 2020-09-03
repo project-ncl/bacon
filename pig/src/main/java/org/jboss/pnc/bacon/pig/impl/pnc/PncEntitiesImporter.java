@@ -420,19 +420,33 @@ public class PncEntitiesImporter {
             List<BuildConfiguration> currentConfigs,
             List<BuildConfig> newConfigs) {
         Map<String, BuildConfig> newConfigsByName = BuildConfig.mapByName(newConfigs);
-        List<BuildConfiguration> configsToDrop = currentConfigs.stream()
-                .filter(config -> shouldBeDropped(config, newConfigsByName))
+
+        currentConfigs.stream().filter(config -> !newConfigsByName.containsKey(config.getName())).forEach(config -> {
+            try {
+                log.info("build config {} no longer defined, removing from build group", config.getId());
+                groupConfigClient.removeBuildConfig(buildGroup.getId(), config.getId());
+            } catch (RemoteResourceException e) {
+                throw new RuntimeException(
+                        "Failed to remove build config " + config.getId() + " from build group " + buildGroup.getId());
+            }
+        });
+
+        List<BuildConfiguration> incompatibleConfigs = currentConfigs.stream()
+                .filter(config -> newConfigsByName.containsKey(config.getName()))
+                .filter(config -> isModifiedInUnsupportedWay(config, newConfigsByName))
                 .collect(Collectors.toList());
-        if (!configsToDrop.isEmpty()) {
+        if (!incompatibleConfigs.isEmpty()) {
             throw new RuntimeException(
-                    "The following configurations should be dropped or updated "
-                            + "in an unsupported fashion, please drop or update them via PNC UI: " + configsToDrop
+                    "The following configurations should be updated "
+                            + "in an unsupported fashion, please drop or update them via PNC UI: " + incompatibleConfigs
                             + ". Look above for the cause");
         }
-        return configsToDrop;
+        return incompatibleConfigs;
     }
 
-    private boolean shouldBeDropped(BuildConfiguration oldConfig, Map<String, BuildConfig> newConfigsByName) {
+    private boolean isModifiedInUnsupportedWay(
+            BuildConfiguration oldConfig,
+            Map<String, BuildConfig> newConfigsByName) {
         String name = oldConfig.getName();
         BuildConfig newConfig = newConfigsByName.get(name);
         ProductVersionRef productVersion = oldConfig.getProductVersion();
@@ -442,7 +456,7 @@ public class PncEntitiesImporter {
                     "Product version in the old config is different than the one in the new config for config {}",
                     name);
         }
-        return configMismatch || newConfig == null || !newConfig.isUpgradableFrom(oldConfig);
+        return configMismatch || !newConfig.isUpgradableFrom(oldConfig);
     }
 
     private List<BuildConfiguration> getCurrentBuildConfigs() {
