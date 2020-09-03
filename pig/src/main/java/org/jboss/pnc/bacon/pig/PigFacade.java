@@ -367,10 +367,13 @@ public final class PigFacade {
                 removeGeneratedM2Dups);
 
         RepositoryData repositoryData = repoManager.prepare();
-        File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
 
-        context.setChecksums(BuildFinderUtils.findChecksums(repoZip));
-        context.storeContext();
+        if (repositoryData != null) {
+            File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
+
+            context.setChecksums(BuildFinderUtils.findChecksums(repoZip));
+            context.storeContext();
+        }
 
         return repositoryData;
     }
