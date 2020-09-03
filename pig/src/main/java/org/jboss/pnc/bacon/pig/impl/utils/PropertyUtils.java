@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -25,13 +27,15 @@ import java.util.regex.Pattern;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 9/29/17
  */
+@UtilityClass
 public class PropertyUtils {
-    public static String replaceProperties(String text, Properties properties) {
+    public String replaceProperties(String text, Properties properties) {
+        String theText = text;
         for (Map.Entry<Object, Object> property : properties.entrySet()) {
             String key = String.format("${%s}", property.getKey());
             key = Pattern.quote(key);
-            text = text.replaceAll(key, String.valueOf(property.getValue()));
+            theText = theText.replaceAll(key, String.valueOf(property.getValue()));
         }
-        return text;
+        return theText;
     }
 }

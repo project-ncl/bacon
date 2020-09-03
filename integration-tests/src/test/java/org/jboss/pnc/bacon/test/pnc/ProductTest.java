@@ -2,7 +2,9 @@ package org.jboss.pnc.bacon.test.pnc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.pnc.bacon.test.AbstractTest;
+import org.jboss.pnc.bacon.test.Endpoints;
 import org.jboss.pnc.bacon.test.ExecutionResult;
+import org.jboss.pnc.bacon.test.PNCWiremockHelper;
 import org.jboss.pnc.dto.Product;
 import org.jboss.pnc.dto.response.Page;
 import org.junit.jupiter.api.Assumptions;
@@ -16,7 +18,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,7 +47,7 @@ class ProductTest extends AbstractTest {
                 .abbreviation(abbreviation)
                 .description(description)
                 .build();
-        wmock.creation(PRODUCT, response);
+        PNCWiremockHelper.creation(Endpoints.PRODUCT, response);
 
         Product product = executeAndDeserialize(
                 Product.class,
@@ -72,7 +73,7 @@ class ProductTest extends AbstractTest {
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + " suffix").build();
 
-        wmock.get(PRODUCT, response);
+        PNCWiremockHelper.get(Endpoints.PRODUCT, response);
 
         Product product = executeAndDeserialize(Product.class, "pnc", "product", "get", productId);
 
@@ -87,7 +88,7 @@ class ProductTest extends AbstractTest {
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + "suffix").build();
         Page<Product> responsePage = new Page<>(0, 50, 1, Collections.singleton(response));
-        wmock.list(PRODUCT, responsePage);
+        PNCWiremockHelper.list(Endpoints.PRODUCT, responsePage);
 
         Product[] products = executeAndDeserialize(Product[].class, "pnc", "product", "list");
 
@@ -101,7 +102,8 @@ class ProductTest extends AbstractTest {
 
         Product response = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + "suffix").build();
         Product updatedResponse = Product.builder().id(productId).name(PRODUCT_NAME_PREFIX + "suffix updated").build();
-        wmock.update(PRODUCT, response, updatedResponse);
+
+        PNCWiremockHelper.update(Endpoints.PRODUCT, response, updatedResponse);
 
         Product originalProduct = executeAndDeserialize(Product.class, "pnc", "product", "get", productId);
 
@@ -118,11 +120,11 @@ class ProductTest extends AbstractTest {
     void shouldGetInvalidProduct() throws JsonProcessingException {
         productId = "000000";
 
-        wmock.get(PRODUCT, productId);
+        PNCWiremockHelper.get(Endpoints.PRODUCT, productId);
 
         ExecutionResult er = executeAndGetResult("pnc", "product", "get", productId);
 
-        assertEquals(er.getRetval(), 1);
+        assertEquals(1, er.getRetval());
         assertTrue(er.getError().contains("HTTP 404 Not Found"));
     }
 }

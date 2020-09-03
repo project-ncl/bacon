@@ -42,8 +42,6 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.jboss.pnc.bacon.pig.impl.utils.FileUtils.mkTempDir;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/08/2019
@@ -153,7 +151,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private void unpackRepository(Path repoZipPath) {
-        File unzippedRepo = mkTempDir("repoZipForDepAnalysis");
+        File unzippedRepo = FileUtils.mkTempDir("repoZipForDepAnalysis");
         repoZipContents = FileUtils.unzip(repoZipPath.toFile(), unzippedRepo);
 
         Optional<String> quarkusCore = repoZipContents.stream()
@@ -213,7 +211,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private Path generateQuarkusProject(Predicate<String> artifactIdSelector, String settingsSelector) {
-        Path tempProjectLocation = mkTempDir("q-dep-analysis-generated-project").toPath();
+        Path tempProjectLocation = FileUtils.mkTempDir("q-dep-analysis-generated-project").toPath();
         List<String> extensionArtifactIds = findProductizedExtensions().stream()
                 .filter(artifactIdSelector)
                 .collect(Collectors.toList());

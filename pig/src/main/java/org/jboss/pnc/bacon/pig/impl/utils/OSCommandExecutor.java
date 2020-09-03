@@ -46,10 +46,11 @@ import static org.apache.commons.lang3.StringUtils.join;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/2/17
  */
+// @UtilityClass
 public class OSCommandExecutor {
     private static final Logger log = LoggerFactory.getLogger(OSCommandExecutor.class);
 
-    public static List<String> runCommand(String s) {
+    public List<String> runCommand(String s) {
         return runCommandIn(s, null);
     }
 
@@ -222,8 +223,8 @@ public class OSCommandExecutor {
             }
         }
 
-        private static String[] unescape(String[] input) {
-            return (String[]) Stream.of(input).map(CommandExecutor::stripQuoteMarks).toArray(String[]::new);
+        private String[] unescape(String[] input) {
+            return Stream.of(input).map(CommandExecutor::stripQuoteMarks).toArray(String[]::new);
         }
 
         private static String stripQuoteMarks(String s) {
@@ -239,7 +240,7 @@ public class OSCommandExecutor {
             return s;
         }
 
-        private static void consumeInputStream(InputStream inputStream, Consumer<String> consumer) throws IOException {
+        private void consumeInputStream(InputStream inputStream, Consumer<String> consumer) throws IOException {
             try (InputStreamReader streamReader = new InputStreamReader(inputStream);
                     BufferedReader reader = new BufferedReader(streamReader)) {
                 String line;
@@ -249,11 +250,11 @@ public class OSCommandExecutor {
             }
         }
 
-        private static void writeToStdoutInOneLine(InputStream inputStream) throws IOException {
+        private void writeToStdoutInOneLine(InputStream inputStream) throws IOException {
             consumeInputStream(inputStream, l -> System.out.print(l + "\r"));
         }
 
-        private static void read(InputStream inputStream, List<String> out) throws IOException {
+        private void read(InputStream inputStream, List<String> out) throws IOException {
             consumeInputStream(inputStream, out::add);
         }
 
@@ -284,8 +285,5 @@ public class OSCommandExecutor {
         protected String prepareCommand(String command) {
             return command;
         }
-    }
-
-    private OSCommandExecutor() {
     }
 }

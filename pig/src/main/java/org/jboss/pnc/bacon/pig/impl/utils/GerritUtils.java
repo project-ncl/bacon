@@ -17,20 +17,19 @@
  */
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.net.URI;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 8/31/18
  */
+@UtilityClass
 public class GerritUtils {
+    public final String GERRIT = "gerrit";
 
-    private GerritUtils() {
-    }
-
-    public static final String GERRIT = "gerrit";
-
-    public static URI gerritSnapshotDownloadUrl(String scmUrl, String scmRevision) {
+    public URI gerritSnapshotDownloadUrl(String scmUrl, String scmRevision) {
         String uriString = String.format(
                 "https://%s/gitweb?p=%s;a=snapshot;h=%s;sf=tgz",
                 gerritUrl(scmUrl),
@@ -39,11 +38,11 @@ public class GerritUtils {
         return URI.create(uriString);
     }
 
-    public static String repository(String scmUrl) {
+    public String repository(String scmUrl) {
         return scmUrl.substring(scmUrl.indexOf(GERRIT) + GERRIT.length() + 1);
     }
 
-    public static String gerritUrl(String scmUrl) {
+    public String gerritUrl(String scmUrl) {
         String result = scmUrl.replaceAll("^.*://", "");
         result = result.substring(0, result.indexOf(GERRIT) + GERRIT.length());
         return result;

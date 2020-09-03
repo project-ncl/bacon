@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static org.jboss.pnc.bacon.pig.impl.utils.XmlUtils.listNodes;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -122,7 +121,7 @@ public class BomVerifierAddon extends AddOn {
         build.findArtifactByFileName(pigConfiguration.getFlow().getRepositoryGeneration().getSourceArtifact())
                 .downloadTo(bom);
 
-        List<Node> nodeList = listNodes(bom, "//dependencies/dependency");
+        List<Node> nodeList = XmlUtils.listNodes(bom, "//dependencies/dependency");
         Map<String, String> properties = XmlUtils.getProperties(bom);
         return nodeList.stream().map(node -> GAV.fromXml((Element) node, properties));
     }

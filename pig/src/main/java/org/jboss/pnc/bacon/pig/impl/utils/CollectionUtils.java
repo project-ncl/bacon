@@ -18,6 +18,8 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,12 +27,9 @@ import java.util.Set;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/7/17
  */
+@UtilityClass
 public class CollectionUtils {
-
-    private CollectionUtils() {
-    }
-
-    public static <T> Set<T> subtractSet(Set<T> minuend, Set<T> subtrahend) {
+    public <T> Set<T> subtractSet(Set<T> minuend, Set<T> subtrahend) {
         Set<T> resultSet = new HashSet<>(minuend);
         resultSet.removeAll(subtrahend);
         return resultSet;

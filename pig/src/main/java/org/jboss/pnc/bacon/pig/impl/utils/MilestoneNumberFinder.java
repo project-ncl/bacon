@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -33,8 +34,9 @@ import java.util.regex.Pattern;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 3/5/18
  */
+@UtilityClass
 public class MilestoneNumberFinder {
-    public static String getFirstUnused(String url, String version, String milestoneBase) {
+    public String getFirstUnused(String url, String version, String milestoneBase) {
         if (!milestoneBase.contains("*")) {
             return milestoneBase;
         }
@@ -50,11 +52,11 @@ public class MilestoneNumberFinder {
         return milestonePrefix + getOneAbove(used);
     }
 
-    private static Integer getOneAbove(List<Integer> used) {
+    private Integer getOneAbove(List<Integer> used) {
         return used.stream().max(Integer::compareTo).orElse(0) + 1;
     }
 
-    private static List<Integer> findUsedNumbers(String version, String milestonePrefix, String indexFile) {
+    private List<Integer> findUsedNumbers(String version, String milestonePrefix, String indexFile) {
         List<Integer> resultList = new ArrayList<>();
         String prefix = version + "." + milestonePrefix;
 
@@ -70,7 +72,7 @@ public class MilestoneNumberFinder {
         return resultList;
     }
 
-    private static String readIndexFile(String url) {
+    private String readIndexFile(String url) {
         try {
             File tempFile = File.createTempFile("uploadAreaIndex", "html");
             FileUtils.copyURLToFile(new URL(url), tempFile);
@@ -80,8 +82,5 @@ public class MilestoneNumberFinder {
         } catch (IOException e) {
             throw new RuntimeException("Failed to download index file from the upload location " + url, e);
         }
-    }
-
-    private MilestoneNumberFinder() {
     }
 }

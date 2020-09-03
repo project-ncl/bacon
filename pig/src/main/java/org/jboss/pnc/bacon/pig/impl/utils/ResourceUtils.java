@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Properties;
@@ -36,21 +39,17 @@ import static org.apache.commons.io.FileUtils.writeStringToFile;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/14/17
  */
+@UtilityClass
 public class ResourceUtils {
+    private final Logger log = LoggerFactory.getLogger(ResourceUtils.class);
 
-    private static final Logger log = LoggerFactory.getLogger(ResourceUtils.class);
+    public final Charset ENCODING = StandardCharsets.UTF_8;
 
-    public static final String ENCODING = "UTF-8";
-
-    public static File extractToTmpFile(String resource, String prefix, String suffix) {
+    public File extractToTmpFile(String resource, String prefix, String suffix) {
         return extractToTmpFileWithFiltering(resource, prefix, suffix, null);
     }
 
-    public static File extractToTmpFileWithFiltering(
-            String resource,
-            String prefix,
-            String suffix,
-            Properties properties) {
+    public File extractToTmpFileWithFiltering(String resource, String prefix, String suffix, Properties properties) {
         try {
             File tempFile = File.createTempFile(prefix, suffix);
             return extractToFileWithFiltering(resource, tempFile, properties);
@@ -59,11 +58,11 @@ public class ResourceUtils {
         }
     }
 
-    public static File extractToFile(String resource, File targetFile) {
+    public File extractToFile(String resource, File targetFile) {
         return extractToFileWithFiltering(resource, targetFile, null);
     }
 
-    public static File extractToFileWithFiltering(String resource, File targetFile, Properties properties) {
+    public File extractToFileWithFiltering(String resource, File targetFile, Properties properties) {
         try {
             String resourceAsString = extractToStringWithFiltering(resource, properties);
             FileUtils.write(targetFile, resourceAsString, ENCODING);
@@ -73,7 +72,7 @@ public class ResourceUtils {
         }
     }
 
-    public static String extractToStringWithFiltering(String resource, Properties properties) {
+    public String extractToStringWithFiltering(String resource, Properties properties) {
         String resourceAsString = getResourceAsString(resource);
         if (properties != null) {
             resourceAsString = PropertyUtils.replaceProperties(resourceAsString, properties);
@@ -81,7 +80,7 @@ public class ResourceUtils {
         return resourceAsString;
     }
 
-    public static void copyResourceWithFiltering(
+    public void copyResourceWithFiltering(
             String sourceFileName,
             String targetFileName,
             File targetDirectory,
@@ -98,7 +97,7 @@ public class ResourceUtils {
         }
     }
 
-    public static void copyOverridableResource(
+    public void copyOverridableResource(
             String sourceFileName,
             String targetFileName,
             File targetDirectory,
@@ -122,12 +121,12 @@ public class ResourceUtils {
      * @param configurationDirectory directory to check for the files
      * @return file content read to string
      */
-    public static String getOverridableResource(String fileName, Path configurationDirectory) {
+    public String getOverridableResource(String fileName, Path configurationDirectory) {
         Optional<String> maybeResult = getResourceFromDirectory(fileName, configurationDirectory);
         return maybeResult.orElseGet(() -> getResourceAsString(fileName));
     }
 
-    public static Optional<String> getResourceFromDirectory(String fileName, Path configurationDirectory) {
+    public Optional<String> getResourceFromDirectory(String fileName, Path configurationDirectory) {
         File file = new File(configurationDirectory.toFile(), fileName);
         if (file.exists()) {
             try {
@@ -139,7 +138,7 @@ public class ResourceUtils {
         return Optional.empty();
     }
 
-    public static String getResourceAsString(String resource) {
+    public String getResourceAsString(String resource) {
         InputStream resourceStream = ResourceUtils.class.getResourceAsStream(resource);
         if (resourceStream == null) {
             throw new IllegalArgumentException("Resource " + resource + " not found");
@@ -149,8 +148,5 @@ public class ResourceUtils {
         } catch (IOException e) {
             throw new IllegalArgumentException("Unable to read resource: " + resource);
         }
-    }
-
-    private ResourceUtils() {
     }
 }

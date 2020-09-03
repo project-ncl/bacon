@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.build.finder.report.NVRReport;
@@ -31,13 +32,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public final class NvrListGenerator {
-    private static final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);
+@UtilityClass
+public class NvrListGenerator {
+    private final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);
 
-    private NvrListGenerator() {
-    }
-
-    public static boolean generateNvrList(Map<String, Collection<String>> checksums, Path targetPath) {
+    public boolean generateNvrList(Map<String, Collection<String>> checksums, Path targetPath) {
         log.info("Generating NVR list for {} checksums and saving result to {}", checksums.size(), targetPath);
 
         List<KojiBuild> builds = BuildFinderUtils.findBuilds(checksums, true);

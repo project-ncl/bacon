@@ -63,8 +63,8 @@ public class RepoBuilder {
     private final RepoGenerationData repoGeneration;
     private final Map<String, PncBuild> builds;
     private final String additionalRepo;
-    String topLevelDirectoryName;
-    Path configurationDirectory;
+    private String topLevelDirectoryName;
+    private Path configurationDirectory;
 
     public RepoBuilder(
             PigConfiguration pigConfiguration,
@@ -117,7 +117,7 @@ public class RepoBuilder {
         buildProjectWithOverriddenM2(projectLocation, repoDir, settingsXml);
     }
 
-    private Properties settingsProps(boolean tempBuild, String additionalRepo) {
+    private static Properties settingsProps(boolean tempBuild, String additionalRepo) {
         Properties result = new Properties();
         if (tempBuild) {
             String repoDef = "--> <repository>\n" + "          <id>additional</id>\n" + "          <url>"
@@ -175,10 +175,10 @@ public class RepoBuilder {
     protected File createProject(File bomFile, Predicate<GAV> artifactSelector) throws IOException {
         log.debug("Generating a project with all libraries from BOM as dependencies");
         String dependencies = extractRedhatDependencies(bomFile, artifactSelector);
-        String bomVersion = XmlUtils.extract(bomFile, "/project/version").getContent();
+        String bomVersion = XmlUtils.extract(bomFile, "/project/version");
 
         if (bomVersion == null) {
-            bomVersion = XmlUtils.extract(bomFile, "/project/parent/version").getContent();
+            bomVersion = XmlUtils.extract(bomFile, "/project/parent/version");
         }
 
         if (bomVersion == null) {
@@ -219,7 +219,7 @@ public class RepoBuilder {
             return value;
         }
 
-        if (ArtifactVersion.prefix.startsWith(ArtifactVersion.prefix)) {
+        if (value.startsWith(ArtifactVersion.prefix)) {
             return ArtifactVersion.get(value, repoGeneration.getSourceBuild(), builds);
         }
 

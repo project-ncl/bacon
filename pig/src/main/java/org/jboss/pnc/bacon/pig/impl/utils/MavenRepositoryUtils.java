@@ -1,5 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
+import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,15 +11,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor.MAVEN_REPOSITORY;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 13/08/2019
  */
+@UtilityClass
 public class MavenRepositoryUtils {
-
-    public static Path getContentsDirPath(Path unzippedRepoPath) {
+    public Path getContentsDirPath(Path unzippedRepoPath) {
         try (Stream<Path> unzippedRepoStream = Files.list(unzippedRepoPath)) {
             List<Path> topLevelDirs = unzippedRepoStream.filter(Files::isDirectory).collect(Collectors.toList());
             if (topLevelDirs.size() != 1) {
@@ -25,8 +26,8 @@ public class MavenRepositoryUtils {
             }
 
             try (Stream<Path> topLevelDirsStream = Files.list(topLevelDirs.get(0))) {
-                Optional<Path> maybeContentsDir = topLevelDirsStream
-                        .filter(p -> p.getFileName().toString().equals(MAVEN_REPOSITORY.replace("/", "")))
+                Optional<Path> maybeContentsDir = topLevelDirsStream.filter(
+                        p -> p.getFileName().toString().equals(RepoDescriptor.MAVEN_REPOSITORY.replace("/", "")))
                         .findAny();
 
                 return maybeContentsDir.orElseThrow(
@@ -39,8 +40,5 @@ public class MavenRepositoryUtils {
                     "Failed to get the contents directory for maven repo unzipped to: " + unzippedRepoPath,
                     e);
         }
-    }
-
-    private MavenRepositoryUtils() {
     }
 }

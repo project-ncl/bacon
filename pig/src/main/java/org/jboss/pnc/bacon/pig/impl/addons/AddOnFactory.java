@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.addons.microprofile.MicroProfileSmallRyeCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
@@ -35,9 +36,9 @@ import java.util.Map;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/11/17
  */
+@UtilityClass
 public class AddOnFactory {
-
-    public static List<AddOn> listAddOns(
+    public List<AddOn> listAddOns(
             PigConfiguration pigConfiguration,
             Map<String, PncBuild> builds,
             String releasePath,
@@ -54,8 +55,5 @@ public class AddOnFactory {
         resultList.add(new MicroProfileSmallRyeCommunityDepAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new QuarkusPostBuildAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
         return resultList;
-    }
-
-    private AddOnFactory() {
     }
 }

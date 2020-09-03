@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -38,24 +39,20 @@ import java.net.URI;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 4/16/18
  */
+@UtilityClass
 public class FileDownloadUtils {
-    private FileDownloadUtils() {
-    }
+    private final Logger log = LoggerFactory.getLogger(FileDownloadUtils.class);
 
-    private static final Logger log = LoggerFactory.getLogger(FileDownloadUtils.class);
+    private final int CONNECTION_TIMEOUT = 300000;
 
-    private static final int CONNECTION_TIMEOUT = 300000;
-
-    private static final int READ_TIMEOUT = 900000;
-
-    private static final int MAX_RETRIES = 5;
+    private final int READ_TIMEOUT = 900000;
 
     private static final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
             .setConnectTimeout(CONNECTION_TIMEOUT)
             .setSocketTimeout(READ_TIMEOUT)
             .build();
 
-    public static void downloadTo(URI downloadUrl, File targetPath) {
+    public void downloadTo(URI downloadUrl, File targetPath) {
         log.info("Downloading {} to {}", downloadUrl, targetPath);
 
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
@@ -78,8 +75,7 @@ public class FileDownloadUtils {
         log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
-    private static void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath)
-            throws Exception {
+    private void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath) throws Exception {
         try (CloseableHttpResponse response = httpClient.execute(new HttpGet(downloadUrl))) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode < 200 || statusCode > 299) {

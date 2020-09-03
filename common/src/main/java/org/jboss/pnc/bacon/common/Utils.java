@@ -17,11 +17,13 @@
  */
 package org.jboss.pnc.bacon.common;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * Utils class shared among all apps
  */
+@UtilityClass
 public class Utils {
-
     /**
      * Handle picky case where sourceUrl may end with "/" in the config file, and combine it gracefully with the path
      *
@@ -29,8 +31,7 @@ public class Utils {
      * @param path remaining part of url
      * @return beautifully assembled url
      */
-    public static String generateUrlPath(String sourceUrl, String path) {
-
+    public String generateUrlPath(String sourceUrl, String path) {
         if (sourceUrl.endsWith("/")) {
             return sourceUrl.substring(0, sourceUrl.length() - 2) + path;
         } else {

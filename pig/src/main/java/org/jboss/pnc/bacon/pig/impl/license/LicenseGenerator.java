@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.license;
 
+import lombok.experimental.UtilityClass;
 import me.snowdrop.licenses.LicensesGenerator;
 import me.snowdrop.licenses.LicensesGeneratorException;
 import me.snowdrop.licenses.properties.GeneratorProperties;
@@ -48,13 +49,11 @@ import java.util.stream.Stream;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 8/24/17
  */
+@UtilityClass
 public class LicenseGenerator {
-    private static final Logger log = LoggerFactory.getLogger(LicenseGenerator.class);
+    private final Logger log = LoggerFactory.getLogger(LicenseGenerator.class);
 
-    private LicenseGenerator() {
-    }
-
-    public static void generateLicenses(Collection<GAV> gavs, File archiveFile, String topLevelDirectoryName) {
+    public void generateLicenses(Collection<GAV> gavs, File archiveFile, String topLevelDirectoryName) {
         File temporaryDestination = FileUtils.mkTempDir("licenses");
         File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
 
@@ -63,7 +62,7 @@ public class LicenseGenerator {
         log.debug("Generated zip archive {}", archiveFile);
     }
 
-    public static void generateLicenses(Collection<GAV> gavs, File licensesDirectory, boolean useTempBuilds) {
+    public void generateLicenses(Collection<GAV> gavs, File licensesDirectory, boolean useTempBuilds) {
         try {
             LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties(useTempBuilds));
 
@@ -93,7 +92,7 @@ public class LicenseGenerator {
         }
     }
 
-    public static void extractLicenses(File repoZip, File archiveFile, String topLevelDirectoryName) {
+    public void extractLicenses(File repoZip, File archiveFile, String topLevelDirectoryName) {
         File temporaryDestination = FileUtils.mkTempDir("licenses");
         File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
 
@@ -112,13 +111,13 @@ public class LicenseGenerator {
 
     }
 
-    private static List<Gav> gavsToLicenseGeneratorGavs(Collection<GAV> gavs) {
+    private List<Gav> gavsToLicenseGeneratorGavs(Collection<GAV> gavs) {
         return gavs.stream()
                 .map(gav -> new Gav(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getPackaging()))
                 .collect(Collectors.toList());
     }
 
-    private static GeneratorProperties prepareGeneratorProperties(boolean useTempBuilds) {
+    private GeneratorProperties prepareGeneratorProperties(boolean useTempBuilds) {
         Properties props = new Properties();
         PigConfig pig = Config.instance().getActiveProfile().getPig();
         String licenseServiceUrl = pig.getLicenseServiceUrl();

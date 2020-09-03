@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
@@ -29,11 +30,9 @@ public class AbstractTest {
 
     private static WireMockServer wireMockServer;
 
-    private static Random generator = new Random();
+    private static final Random generator = new Random();
 
     protected CLIExecutor executor = new CLIExecutor();
-
-    protected PNCWiremockHelper wmock = new PNCWiremockHelper();
 
     @BeforeAll
     static void startWiremockServer() {
@@ -48,11 +47,11 @@ public class AbstractTest {
 
     @BeforeEach
     void stubBanner() {
-        wmock.init();
+        PNCWiremockHelper.init();
     }
 
-    @AfterAll
-    static void clearStubs() {
+    @AfterEach
+    void clearStubs() {
         wireMockServer.resetAll();
     }
 

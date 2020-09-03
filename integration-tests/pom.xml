@@ -17,6 +17,7 @@
         <pnc-url>http://localhost:8080</pnc-url>
         <scm-host>example.com</scm-host>
     </properties>
+
     <dependencies>
         <!-- Project deps -->
         <dependency>
@@ -65,6 +66,11 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
@@ -72,24 +73,21 @@ import java.util.stream.Collectors;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
  */
-public final class PigFacade {
+@UtilityClass
+public class PigFacade {
+    private final Logger log = LoggerFactory.getLogger(PigFacade.class);
 
-    private static final Logger log = LoggerFactory.getLogger(PigFacade.class);
-
-    private PigFacade() {
-    }
-
-    public static ImportResult configure(boolean skipBranchCheck, boolean temporaryBuild) {
+    public ImportResult configure(boolean skipBranchCheck, boolean temporaryBuild) {
         PncEntitiesImporter pncImporter = new PncEntitiesImporter();
         return pncImporter.performImport(skipBranchCheck, temporaryBuild);
     }
 
-    public static ImportResult readPncEntities() {
+    public ImportResult readPncEntities() {
         PncEntitiesImporter pncImporter = new PncEntitiesImporter();
         return pncImporter.readCurrentPncEntities();
     }
 
-    public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+    public GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
         context().setTempBuild(tempBuild);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
@@ -105,7 +103,7 @@ public final class PigFacade {
         return new BuildInfoCollector().getBuildsFromGroupBuild(groupBuild);
     }
 
-    public static GroupBuildInfo run(
+    public GroupBuildInfo run(
             boolean skipRepo,
             boolean skipPncUpdate,
             boolean skipBuilds,
@@ -198,7 +196,7 @@ public final class PigFacade {
         return groupBuildInfo;
     }
 
-    public static PigReleaseOutput release() {
+    public PigReleaseOutput release() {
         pushToBrew(false);
         generateNvrList();
 
@@ -213,7 +211,7 @@ public final class PigFacade {
                 context.getDeliverables().getNvrListName());
     }
 
-    private static void generateNvrList() {
+    private void generateNvrList() {
         PigContext context = PigContext.get();
         Map<String, Collection<String>> checksums = context.getChecksums();
         Path targetPath = Paths.get(context.getReleasePath())
@@ -222,7 +220,7 @@ public final class PigFacade {
         NvrListGenerator.generateNvrList(checksums, targetPath);
     }
 
-    private static void pushToBrew(boolean reimport) {
+    private void pushToBrew(boolean reimport) {
         Map<String, PncBuild> builds = PigContext.get().getBuilds();
         String tagPrefix = getBrewTag(context().getPncImportResult().getVersion());
         List<PncBuild> buildsToPush = getBuildsToPush(builds);
@@ -254,7 +252,7 @@ public final class PigFacade {
         }
     }
 
-    public static void generateDocuments() {
+    public void generateDocuments() {
         if (context().getRepositoryData() == null) {
             throw new RuntimeException(
                     "No repository data available for document generation. Please make sure to run `pig repo` before `pig docs`");
@@ -267,7 +265,7 @@ public final class PigFacade {
         docGenerator.generateDocuments(context().getBuilds(), context().getRepositoryData());
     }
 
-    public static void prepareSharedContentAnalysis() {
+    public void prepareSharedContentAnalysis() {
         try {
             DocumentGenerator docGenerator = new DocumentGenerator(
                     context().getPigConfiguration(),
@@ -280,7 +278,7 @@ public final class PigFacade {
         }
     }
 
-    public static void generateSources() {
+    public void generateSources() {
         PigConfiguration pigConfiguration = context().getPigConfiguration();
         Map<String, PncBuild> builds = context().getBuilds();
         RepositoryData repo = context().getRepositoryData();
@@ -291,11 +289,11 @@ public final class PigFacade {
         sourcesGenerator.generateSources(builds, repo);
     }
 
-    private static PigContext context() {
+    private PigContext context() {
         return PigContext.get();
     }
 
-    private static String getBrewTag(ProductVersionRef versionRef) {
+    private String getBrewTag(ProductVersionRef versionRef) {
         try (ProductVersionClient productVersionClient = new ProductVersionClient(
                 PncClientHelper.getPncConfiguration())) {
             String versionId = versionRef.getId();
@@ -310,11 +308,11 @@ public final class PigFacade {
         }
     }
 
-    private static List<PncBuild> getBuildsToPush(Map<String, PncBuild> builds) {
+    private List<PncBuild> getBuildsToPush(Map<String, PncBuild> builds) {
         return builds.values().stream().filter(PigFacade::notPushedToBrew).collect(Collectors.toList());
     }
 
-    private static boolean notPushedToBrew(PncBuild build) {
+    private boolean notPushedToBrew(PncBuild build) {
         try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration())) { // todo factory or sth
             BuildPushResult pushResult;
             try {
@@ -331,7 +329,7 @@ public final class PigFacade {
         }
     }
 
-    private static RepositoryData parseRepository(File repositoryZipPath) {
+    private RepositoryData parseRepository(File repositoryZipPath) {
         File extracted = FileUtils.mkTempDir("extractedRepo");
 
         FileUtils.unzip(repositoryZipPath, extracted);
@@ -343,7 +341,7 @@ public final class PigFacade {
         return result;
     }
 
-    public static void triggerAddOns() {
+    public void triggerAddOns() {
         AddOnFactory
                 .listAddOns(
                         context().getPigConfiguration(),
@@ -356,7 +354,7 @@ public final class PigFacade {
                 .forEach(AddOn::trigger);
     }
 
-    public static RepositoryData generateRepo(boolean removeGeneratedM2Dups) {
+    public RepositoryData generateRepo(boolean removeGeneratedM2Dups) {
         PigContext context = context();
         RepoManager repoManager = new RepoManager(
                 context.getPigConfiguration(),
@@ -388,14 +386,14 @@ public final class PigFacade {
      *
      * @return GroupBuildInfo that contains the group build, and the map of 'build config name' to PncBuild
      */
-    private static GroupBuildInfo getBuilds(ImportResult importResult, boolean tempBuild) {
+    private GroupBuildInfo getBuilds(ImportResult importResult, boolean tempBuild) {
 
         BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
         return buildInfoCollector
                 .getBuildsFromLatestGroupConfiguration(importResult.getBuildGroup().getId(), tempBuild);
     }
 
-    public static void generateLicenses() {
+    public void generateLicenses() {
         PigContext context = context();
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
@@ -404,7 +402,7 @@ public final class PigFacade {
                 .prepare();
     }
 
-    public static void generateJavadoc() {
+    public void generateJavadoc() {
         PigConfiguration pigConfiguration = context().getPigConfiguration();
         Map<String, PncBuild> builds = context().getBuilds();
         new JavadocManager(pigConfiguration, context().getReleasePath(), context().getDeliverables(), builds).prepare();

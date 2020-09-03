@@ -1,6 +1,7 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
 import com.redhat.red.build.koji.KojiClientException;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.jboss.pnc.bacon.config.Config;
@@ -30,20 +31,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public final class BuildFinderUtils {
-    private static final Logger log = LoggerFactory.getLogger(BuildFinderUtils.class);
+@UtilityClass
+public class BuildFinderUtils {
+    private final Logger log = LoggerFactory.getLogger(BuildFinderUtils.class);
 
-    private BuildFinderUtils() {
+    private final String KOJI_BUILD_FINDER_CONFIG_ENV = "KOJI_BUILD_FINDER_CONFIG";
 
-    }
+    private final String KOJI_BUILD_FINDER_CONFIG_PROP = "koji.build.finder.config";
 
-    private static final String KOJI_BUILD_FINDER_CONFIG_ENV = "KOJI_BUILD_FINDER_CONFIG";
+    private final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "/koji-build-finder/config.json";
 
-    private static final String KOJI_BUILD_FINDER_CONFIG_PROP = "koji.build.finder.config";
-
-    private static final String KOJI_BUILD_FINDER_CONFIG_TEMPLATE = "/koji-build-finder/config.json";
-
-    private static Map<Checksum, Collection<String>> mapToMultiMap(Map<String, Collection<String>> checksums) {
+    private Map<Checksum, Collection<String>> mapToMultiMap(Map<String, Collection<String>> checksums) {
         Set<Map.Entry<String, Collection<String>>> entries = checksums.entrySet();
         MultiValuedMap<Checksum, String> multiMap = new ArrayListValuedHashMap<>(entries.size());
 
@@ -60,7 +58,7 @@ public final class BuildFinderUtils {
         return Collections.unmodifiableMap(multiMap.asMap());
     }
 
-    public static BuildConfig getKojiBuildFinderConfigFromFile(File file) {
+    public BuildConfig getKojiBuildFinderConfigFromFile(File file) {
         try {
             return BuildConfig.load(file);
         } catch (IOException e) {
@@ -70,11 +68,11 @@ public final class BuildFinderUtils {
         }
     }
 
-    public static BuildConfig getKojiBuildFinderConfigFromFile(String filename) {
+    public BuildConfig getKojiBuildFinderConfigFromFile(String filename) {
         return getKojiBuildFinderConfigFromFile(new File(filename));
     }
 
-    public static BuildConfig getKojiBuildFinderConfigFromResource(String resourceName) {
+    public BuildConfig getKojiBuildFinderConfigFromResource(String resourceName) {
         Properties props = new Properties();
         props.setProperty("KOJI_URL", Config.instance().getActiveProfile().getPig().getKojiHubUrl());
 
@@ -83,7 +81,7 @@ public final class BuildFinderUtils {
         return getKojiBuildFinderConfigFromJson(json);
     }
 
-    public static BuildConfig getKojiBuildFinderConfigFromJson(String json) {
+    public BuildConfig getKojiBuildFinderConfigFromJson(String json) {
         try {
             return BuildConfig.load(json);
         } catch (IOException e) {
@@ -91,7 +89,7 @@ public final class BuildFinderUtils {
         }
     }
 
-    public static BuildConfig getKojiBuildFinderConfig() {
+    public BuildConfig getKojiBuildFinderConfig() {
         String propFilename = System.getProperty(KOJI_BUILD_FINDER_CONFIG_PROP);
 
         if (propFilename != null) {
@@ -113,7 +111,7 @@ public final class BuildFinderUtils {
      * @param file the file
      * @return the checksums
      */
-    public static Map<String, Collection<String>> findChecksums(File file) {
+    public Map<String, Collection<String>> findChecksums(File file) {
         BuildConfig config = getKojiBuildFinderConfig();
         List<String> inputs = Collections.singletonList(file.getPath());
         ExecutorService pool = Executors.newSingleThreadExecutor();
@@ -144,7 +142,7 @@ public final class BuildFinderUtils {
      * @param includeNotFound whether or not to include not found files as build index 0
      * @return the builds, including not found files if includeNotFound is true, or the found builds otherwise
      */
-    public static List<KojiBuild> findBuilds(Map<String, Collection<String>> checksums, boolean includeNotFound) {
+    public List<KojiBuild> findBuilds(Map<String, Collection<String>> checksums, boolean includeNotFound) {
         BuildConfig config = getKojiBuildFinderConfig();
 
         try (KojiClientSession session = new KojiClientSession(config.getKojiHubURL())) {
@@ -168,7 +166,7 @@ public final class BuildFinderUtils {
      * @param includeNotFound whether or not to include not found files as build index 0
      * @return the builds, including not found files if includeNotFound is true, or the found builds otherwise
      */
-    public static List<KojiBuild> findBuilds(File file, boolean includeNotFound) {
+    public List<KojiBuild> findBuilds(File file, boolean includeNotFound) {
         BuildConfig config = getKojiBuildFinderConfig();
         List<String> inputs = Collections.singletonList(file.getPath());
         ExecutorService pool = Executors.newFixedThreadPool(2);
@@ -217,7 +215,7 @@ public final class BuildFinderUtils {
      * @param includeNotFound whether or not to include not found files as build index 0
      * @return the builds, including not found files if includeNotFound is true, or the found builds otherwise
      */
-    public static List<KojiBuild> findBuilds(Path path, boolean includeNotFound) {
+    public List<KojiBuild> findBuilds(Path path, boolean includeNotFound) {
         return findBuilds(path.toFile(), includeNotFound);
     }
 
@@ -228,7 +226,7 @@ public final class BuildFinderUtils {
      * @param includeNotFound whether or not to include not found files as build index 0
      * @return the builds, including not found files if includeNotFound is true, or the found builds otherwise
      */
-    public static List<KojiBuild> findBuilds(String filename, boolean includeNotFound) {
+    public List<KojiBuild> findBuilds(String filename, boolean includeNotFound) {
         return findBuilds(new File(filename), includeNotFound);
     }
 }

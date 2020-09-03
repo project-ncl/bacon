@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
+import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
@@ -45,10 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.of;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/3/17
@@ -63,7 +60,8 @@ public class BuildInfoCollector {
     public void addDependencies(PncBuild bd, String filter) {
         List<Artifact> artifacts;
         try {
-            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
+            artifacts = PncClientUtils
+                    .toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
         }
@@ -78,15 +76,15 @@ public class BuildInfoCollector {
             Optional<String> queryParam;
             switch (searchType) {
                 case ANY:
-                    queryParam = query("status==%s", BuildStatus.SUCCESS);
+                    queryParam = PncClientUtils.query("status==%s", BuildStatus.SUCCESS);
                     break;
                 case PERMANENT:
-                    queryParam = query("status==%s;temporaryBuild==%s", BuildStatus.SUCCESS, false);
+                    queryParam = PncClientUtils.query("status==%s;temporaryBuild==%s", BuildStatus.SUCCESS, false);
                     break;
                 case TEMPORARY:
                     // NCL-5943 Cannot ignore permanent(regular) builds because they cause NO_REBUILD_REQUIRED even for
                     // temporary builds. That means "latest build" for a temporary build can be permanent(regular).
-                    queryParam = query("status==%s", BuildStatus.SUCCESS);
+                    queryParam = PncClientUtils.query("status==%s", BuildStatus.SUCCESS);
                     break;
                 default:
                     queryParam = Optional.empty();
@@ -94,7 +92,7 @@ public class BuildInfoCollector {
 
             // Note: sort by id not allowed
             Iterator<Build> buildIterator = buildConfigClient
-                    .getBuilds(configId, filter, of("=desc=submitTime"), queryParam)
+                    .getBuilds(configId, filter, Optional.of("=desc=submitTime"), queryParam)
                     .iterator();
 
             if (!buildIterator.hasNext()) {
@@ -114,7 +112,7 @@ public class BuildInfoCollector {
                 }
             }
 
-            result.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
+            result.addBuiltArtifacts(PncClientUtils.toList(buildClient.getBuiltArtifacts(build.getId())));
             return result;
         } catch (ClientException | IOException e) {
             throw new RuntimeException("Failed to get latest successful build for " + configId, e);
@@ -151,8 +149,8 @@ public class BuildInfoCollector {
             Collection<GroupBuild> groupBuilds = groupConfigurationClient
                     .getAllGroupBuilds(
                             groupConfigurationId,
-                            of("=desc=startTime"),
-                            query("temporaryBuild==%s", temporaryBuild))
+                            Optional.of("=desc=startTime"),
+                            PncClientUtils.query("temporaryBuild==%s", temporaryBuild))
                     .getAll();
 
             Optional<GroupBuild> latest = groupBuilds.stream().filter(gb -> gb.getStatus().isFinal()).findFirst();
@@ -209,7 +207,7 @@ public class BuildInfoCollector {
                     }
                 }
 
-                pncBuild.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(pncBuild.getId())));
+                pncBuild.addBuiltArtifacts(PncClientUtils.toList(buildClient.getBuiltArtifacts(pncBuild.getId())));
                 result.put(pncBuild.getName(), pncBuild);
             }
             return new GroupBuildInfo(groupBuild, result);

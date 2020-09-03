@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.client.RemoteCollection;
 
 import java.util.List;
@@ -29,24 +30,25 @@ import java.util.stream.StreamSupport;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 28/06/2019
  */
+@UtilityClass
 public class PncClientUtils {
-    public static <T> List<T> toList(RemoteCollection<T> collection) {
+    public <T> List<T> toList(RemoteCollection<T> collection) {
         return toStream(collection).collect(Collectors.toList());
     }
 
-    public static <T> Stream<T> toStream(RemoteCollection<T> collection) {
+    public <T> Stream<T> toStream(RemoteCollection<T> collection) {
         return StreamSupport.stream(collection.spliterator(), false);
     }
 
-    public static Optional<String> findByNameQuery(String name) {
+    public Optional<String> findByNameQuery(String name) {
         return query("name=='%s'", name);
     }
 
-    public static Optional<String> query(String format, Object... values) {
+    public Optional<String> query(String format, Object... values) {
         return Optional.of(String.format(format, values));
     }
 
-    public static <T> Optional<T> maybeSingle(RemoteCollection<T> collection) {
+    public <T> Optional<T> maybeSingle(RemoteCollection<T> collection) {
         List<T> list = toList(collection);
         switch (list.size()) {
             case 0:
@@ -56,8 +58,5 @@ public class PncClientUtils {
             default:
                 throw new RuntimeException("Expecting single result got " + list.size());
         }
-    }
-
-    private PncClientUtils() {
     }
 }

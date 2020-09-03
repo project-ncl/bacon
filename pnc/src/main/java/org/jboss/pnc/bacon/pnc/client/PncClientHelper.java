@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc.client;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.auth.DirectKeycloakClientImpl;
 import org.jboss.pnc.bacon.auth.KeycloakClientException;
@@ -37,21 +38,21 @@ import java.time.Instant;
 import java.util.Date;
 
 @Slf4j
+@UtilityClass
 public class PncClientHelper {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private boolean bannerChecked = false;
 
-    private static boolean bannerChecked = false;
-
-    public static Configuration getPncConfiguration(boolean authenticationNeeded) {
+    public Configuration getPncConfiguration(boolean authenticationNeeded) {
         return setup(authenticationNeeded);
     }
 
-    public static Configuration getPncConfiguration() {
+    public Configuration getPncConfiguration() {
         return getPncConfiguration(true);
     }
 
-    public static Configuration setup(boolean authenticationNeeded) {
+    public Configuration setup(boolean authenticationNeeded) {
         Config config = Config.instance();
 
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
@@ -103,7 +104,7 @@ public class PncClientHelper {
      * @param keycloakConfig the keycloak config
      * @return the token, or null if we couldn't get it
      */
-    private static String getBearerToken(KeycloakConfig keycloakConfig) {
+    private String getBearerToken(KeycloakConfig keycloakConfig) {
 
         log.debug("Authenticating to keycloak");
 
@@ -134,7 +135,7 @@ public class PncClientHelper {
         }
     }
 
-    private static void printBannerIfNecessary(Configuration configuration) {
+    private void printBannerIfNecessary(Configuration configuration) {
 
         if (!bannerChecked) {
             try (GenericSettingClient genericSettingClient = new GenericSettingClient(configuration)) {
@@ -157,8 +158,7 @@ public class PncClientHelper {
      *
      * @param date the date format
      */
-    public static Instant parseDateFormat(String date) {
-
+    public Instant parseDateFormat(String date) {
         try {
             Date ret = sdf.parse(date);
             return ret.toInstant();
@@ -167,7 +167,7 @@ public class PncClientHelper {
         }
     }
 
-    public static String getTodayDayInYYYYMMDDFormat() {
+    public String getTodayDayInYYYYMMDDFormat() {
         return sdf.format(new Date());
     }
 }

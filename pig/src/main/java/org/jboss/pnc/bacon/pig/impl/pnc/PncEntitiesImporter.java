@@ -61,10 +61,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.empty;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.findByNameQuery;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.maybeSingle;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -165,7 +161,8 @@ public class PncEntitiesImporter {
 
     private Set<String> getCurrentDependencies(String buildConfigId) {
         try {
-            return toStream(buildConfigClient.getDependencies(buildConfigId)).map(BuildConfigurationRef::getId)
+            return PncClientUtils.toStream(buildConfigClient.getDependencies(buildConfigId))
+                    .map(BuildConfigurationRef::getId)
                     .collect(Collectors.toSet());
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get dependencies for build config " + buildConfigId, e);
@@ -198,7 +195,8 @@ public class PncEntitiesImporter {
 
     private Set<String> getExistingGroupConstituents() {
         try {
-            return toStream(groupConfigClient.getBuildConfigs(buildGroup.getId())).map(BuildConfiguration::getId)
+            return PncClientUtils.toStream(groupConfigClient.getBuildConfigs(buildGroup.getId()))
+                    .map(BuildConfiguration::getId)
                     .collect(Collectors.toSet());
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get configs from the group", e);
@@ -230,7 +228,7 @@ public class PncEntitiesImporter {
 
     private Optional<BuildConfiguration> getBuildConfigFromName(String name) {
         try {
-            return maybeSingle(buildConfigClient.getAll(empty(), findByNameQuery(name)));
+            return PncClientUtils.maybeSingle(buildConfigClient.getAll(empty(), PncClientUtils.findByNameQuery(name)));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get build configuration " + name, e);
         }
@@ -344,7 +342,7 @@ public class PncEntitiesImporter {
         }
 
         try {
-            List<SCMRepository> foundRepository = toStream(repoClient.getAll(matchUrl, null))
+            List<SCMRepository> foundRepository = PncClientUtils.toStream(repoClient.getAll(matchUrl, null))
                     .collect(Collectors.toList());
             if (foundRepository.isEmpty()) {
                 return Optional.empty();
@@ -400,11 +398,11 @@ public class PncEntitiesImporter {
     private Project getOrGenerateProject(String projectName) {
         RemoteCollection<Project> query = null;
         try {
-            query = projectClient.getAll(empty(), findByNameQuery(projectName));
+            query = projectClient.getAll(empty(), PncClientUtils.findByNameQuery(projectName));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to search for project " + projectName, e);
         }
-        return maybeSingle(query).orElseGet(() -> generateProject(projectName));
+        return PncClientUtils.maybeSingle(query).orElseGet(() -> generateProject(projectName));
     }
 
     private Project generateProject(String projectName) {
@@ -460,9 +458,9 @@ public class PncEntitiesImporter {
 
     private Optional<GroupConfiguration> getBuildGroup() {
         try {
-            return toStream(
+            return PncClientUtils.toStream(
                     groupConfigClient.getAll(empty(), Optional.of("name=='" + pigConfiguration.getGroup() + "'")))
-                            .findAny();
+                    .findAny();
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to check if build group exists");
         }
@@ -479,7 +477,8 @@ public class PncEntitiesImporter {
     private Optional<Product> getProduct() {
         String productName = pigConfiguration.getProduct().getName();
         try {
-            return maybeSingle(productClient.getAll(empty(), findByNameQuery(productName)));
+            return PncClientUtils
+                    .maybeSingle(productClient.getAll(empty(), PncClientUtils.findByNameQuery(productName)));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get product data", e);
         }
@@ -581,8 +580,8 @@ public class PncEntitiesImporter {
 
     private Optional<ProductVersion> getVersion() {
         try {
-            Optional<String> byName = query("version=='%s'", pigConfiguration.getMajorMinor());
-            return maybeSingle(productClient.getProductVersions(product.getId(), empty(), byName));
+            Optional<String> byName = PncClientUtils.query("version=='%s'", pigConfiguration.getMajorMinor());
+            return PncClientUtils.maybeSingle(productClient.getProductVersions(product.getId(), empty(), byName));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to query for version", e);
         }

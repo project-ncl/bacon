@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
@@ -31,20 +32,17 @@ import java.nio.file.Path;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 5/10/18
  */
+@UtilityClass
 public class ExternalArtifactDownloader {
+    private final Logger log = LoggerFactory.getLogger(ExternalArtifactDownloader.class);
 
-    private static final Logger log = LoggerFactory.getLogger(ExternalArtifactDownloader.class);
-
-    private ExternalArtifactDownloader() {
-    }
-
-    public static File downloadExternalArtifact(GAV gav, Path targetRepoContents, boolean sourcesOptional) {
+    public File downloadExternalArtifact(GAV gav, Path targetRepoContents, boolean sourcesOptional) {
         File targetPath = targetPath(gav, targetRepoContents);
 
         return downloadExternalArtifact(gav, targetPath, sourcesOptional);
     }
 
-    public static File downloadExternalArtifact(GAV gav, File targetPath, boolean sourcesOptional) {
+    public File downloadExternalArtifact(GAV gav, File targetPath, boolean sourcesOptional) {
         targetPath.toPath().getParent().toFile().mkdirs();
 
         String indyUrl = gav.isTemporary() ? Indy.getIndyTempUrl() : Indy.getIndyUrl();
@@ -63,7 +61,7 @@ public class ExternalArtifactDownloader {
         return targetPath;
     }
 
-    public static File targetPath(GAV gav, Path targetRepoContents) {
+    public File targetPath(GAV gav, Path targetRepoContents) {
         Path versionPath = targetRepoContents.resolve(gav.toVersionPath());
         return versionPath.resolve(gav.toFileName()).toFile();
     }

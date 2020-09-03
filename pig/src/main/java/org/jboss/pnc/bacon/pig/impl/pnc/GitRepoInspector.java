@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import lombok.experimental.UtilityClass;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -44,12 +45,13 @@ import java.util.Set;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 3/4/19
  */
+@UtilityClass
 public class GitRepoInspector {
+    private final Logger log = LoggerFactory.getLogger(GitRepoInspector.class);
 
-    private static final Logger log = LoggerFactory.getLogger(GitRepoInspector.class);
-    private static final String GIT_REMOTE_NAME = "prod";
+    private final String GIT_REMOTE_NAME = "prod";
 
-    private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
+    private final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
 
     /**
      * Check if branch 'refSpec' is different from the branch used in the last successful build (either temporary or
@@ -61,11 +63,7 @@ public class GitRepoInspector {
      * @param temporaryBuild
      * @return
      */
-    public static boolean isModifiedBranch(
-            String configId,
-            String internalUrl,
-            String refSpec,
-            boolean temporaryBuild) {
+    public boolean isModifiedBranch(String configId, String internalUrl, String refSpec, boolean temporaryBuild) {
 
         log.info(
                 "Trying to check if branch '{}' in '{}' has been modified, compared to latest build of build config '{}'",
@@ -94,9 +92,7 @@ public class GitRepoInspector {
         return false;
     }
 
-    private static Git cloneRepo(String internalUrl, File targetDir) throws GitAPIException, IOException {
-        log.debug("Cloning repository {} into {}", internalUrl, targetDir);
-
+    private Git cloneRepo(String internalUrl, File targetDir) throws GitAPIException, IOException {
         Git git = Git.init().setDirectory(targetDir).call();
 
         try (Repository repository = git.getRepository()) {
@@ -111,7 +107,7 @@ public class GitRepoInspector {
         return git;
     }
 
-    private static String headRevision(Git git, String branch) throws GitAPIException, IOException {
+    private String headRevision(Git git, String branch) throws GitAPIException, IOException {
         try (Repository repository = git.getRepository()) {
             Ref ref = getRef(branch, repository);
             ObjectId id = ref.getPeeledObjectId();
@@ -127,7 +123,7 @@ public class GitRepoInspector {
      * TODO: smarter check is required, here if a repour tag is on an "upstream" commit TODO: we may miss modifications
      * (because we return here the tag commit and its parent)
      */
-    private static Set<String> getBaseCommitPossibilities(Git git, String tagName) throws GitAPIException, IOException {
+    private Set<String> getBaseCommitPossibilities(Git git, String tagName) throws GitAPIException, IOException {
         log.debug("Getting base commit possibilities for tag: {}", tagName);
         Set<String> result = new HashSet<>();
 
@@ -146,7 +142,7 @@ public class GitRepoInspector {
         }
     }
 
-    private static String getLatestBuiltRevision(String configId, boolean temporaryBuild) {
+    private String getLatestBuiltRevision(String configId, boolean temporaryBuild) {
         log.debug("Getting latest built revision of config id {}, temporary: {}", configId, temporaryBuild);
         BuildInfoCollector.BuildSearchType searchType = temporaryBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
                 : BuildInfoCollector.BuildSearchType.PERMANENT;
@@ -154,7 +150,7 @@ public class GitRepoInspector {
         return latestBuild.getScmRevision();
     }
 
-    private static URIish toAnonymous(String internalUrl) throws MalformedURLException {
+    private URIish toAnonymous(String internalUrl) throws MalformedURLException {
         String uriAsString;
         if (internalUrl.startsWith("git+ssh")) {
             uriAsString = internalUrl.replace("git+ssh", "https").replace(".redhat.com/", ".redhat.com/gerrit/");
@@ -172,7 +168,7 @@ public class GitRepoInspector {
      * @return the ref if found
      * @throws IOException
      */
-    private static Ref getRef(String reference, Repository repository) throws IOException {
+    private Ref getRef(String reference, Repository repository) throws IOException {
 
         Ref ref = repository.findRef(GIT_REMOTE_NAME + "/" + reference);
 
@@ -180,8 +176,5 @@ public class GitRepoInspector {
             ref = repository.findRef(reference);
         }
         return ref;
-    }
-
-    private GitRepoInspector() {
     }
 }

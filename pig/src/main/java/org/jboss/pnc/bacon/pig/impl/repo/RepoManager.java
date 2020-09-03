@@ -183,21 +183,21 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return repackage(sourceDir);
     }
 
-    private RepositoryData milestone() {
+    private static RepositoryData milestone() {
         log.info("Generating maven repo for milestone [{}]", PigContext.get().getFullVersion());
         // TODO
         throw new FatalException("Not yet implemented");
     }
 
-    private boolean areSourcesMissing(Set<GAV> list, GAV gav) {
+    private static boolean areSourcesMissing(Set<GAV> list, GAV gav) {
         return list.stream().noneMatch(a -> a.equals(gav) && "sources".equals(a.getClassifier()));
     }
 
-    private boolean isPomMissing(Set<GAV> list, GAV gav) {
+    private static boolean isPomMissing(Set<GAV> list, GAV gav) {
         return list.stream().noneMatch(a -> a.equals(gav) && "pom".equals(a.getPackaging()));
     }
 
-    private boolean areJavadocsMissing(Set<GAV> list, GAV gav) {
+    private static boolean areJavadocsMissing(Set<GAV> list, GAV gav) {
         return list.stream().noneMatch(a -> a.equals(gav) && "javadoc".equals(a.getClassifier()));
     }
 
@@ -211,6 +211,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return false;
     }
 
+    @Override
     protected RepositoryData downloadAndRepackage() {
         log.info("downloading and repackaging maven repository");
         File sourceTopLevelDirectory = download();
@@ -320,7 +321,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return repackage(new File(repoParentDir, "maven-repository"));
     }
 
-    private Predicate<GAV> predicate(Map<String, String> stage) {
+    private static Predicate<GAV> predicate(Map<String, String> stage) {
         String matching = stage.getOrDefault("matching", ".*");
         String notMatching = stage.getOrDefault("not-matching", "^$");
         return gav -> {
@@ -337,7 +338,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return pigConfiguration.getTopLevelDirectoryPrefix() + "maven-repository";
     }
 
-    private RepositoryData result(File targetTopLevelDirectory, Path targetZipPath) {
+    private static RepositoryData result(File targetTopLevelDirectory, Path targetZipPath) {
         RepositoryData result = new RepositoryData();
         File contentsDirectory = new File(targetTopLevelDirectory, "maven-repository");
         result.setFiles(RepoDescriptor.listFiles(contentsDirectory));

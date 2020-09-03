@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -45,27 +46,25 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/11/17
  */
+@UtilityClass
 public class XmlUtils {
-
-    public static XmlToString extract(File xmlFile, String xpathLocator) {
+    public String extract(File xmlFile, String xpathLocator) {
         try {
             NodeList nodeList = extractNodes(xmlFile, xpathLocator);
-            return new XmlToString(nodeList);
+            return XmlToString.getContent(nodeList);
         } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
             throw new RuntimeException("Error extracting dependencies from xmlFile: " + xmlFile, e);
         }
     }
 
-    private static NodeList extractNodes(File xmlFile, String xpathLocator)
+    private NodeList extractNodes(File xmlFile, String xpathLocator)
             throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -76,7 +75,7 @@ public class XmlUtils {
         return (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
     }
 
-    public static List<Node> listNodes(File file, String xpathString) {
+    public List<Node> listNodes(File file, String xpathString) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -98,7 +97,7 @@ public class XmlUtils {
         }
     }
 
-    public static String getValue(Element parent, String tagName, Map<String, String> properties) {
+    public String getValue(Element parent, String tagName, Map<String, String> properties) {
         List<Element> children = getChildrenWithTagName(parent, tagName);
         int length = children.size();
         if (children.size() > 1) {
@@ -111,7 +110,7 @@ public class XmlUtils {
             return null;
         }
 
-        Element child = (Element) children.get(0);
+        Element child = children.get(0);
         String value = child.getTextContent();
 
         for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -121,7 +120,7 @@ public class XmlUtils {
         return value.trim();
     }
 
-    public static List<Element> getChildrenWithTagName(Element parent, String tagName) {
+    public List<Element> getChildrenWithTagName(Element parent, String tagName) {
         List<Element> elements = new ArrayList<>();
         NodeList descendants = parent.getElementsByTagName(tagName);
         for (int i = 0; i < descendants.getLength(); i++) {
@@ -133,7 +132,7 @@ public class XmlUtils {
         return elements;
     }
 
-    private static void printPathTo(Node node, StringBuilder output) {
+    private void printPathTo(Node node, StringBuilder output) {
         Node parent = node.getParentNode();
         if (parent != null) {
             printPathTo(parent, output);
@@ -145,7 +144,7 @@ public class XmlUtils {
         }
     }
 
-    private static int indexIn(Node element) {
+    private int indexIn(Node element) {
         int count = 0;
         while ((element = element.getPreviousSibling()) != null) {
             count++;
@@ -153,14 +152,14 @@ public class XmlUtils {
         return count;
     }
 
-    private static String describe(Element element) {
+    private String describe(Element element) {
         StringBuilder description = new StringBuilder();
         printPathTo(element, description);
         printChildrenTo(element, description);
         return description.toString();
     }
 
-    private static void printChildrenTo(Element element, StringBuilder description) {
+    private void printChildrenTo(Element element, StringBuilder description) {
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
@@ -171,7 +170,7 @@ public class XmlUtils {
         }
     }
 
-    public static Map<String, String> getProperties(File file) {
+    public Map<String, String> getProperties(File file) {
         Map<String, String> result = new HashMap<>();
         listNodes(file, "/project/properties/*").stream()
                 .filter(n -> n instanceof Element)
@@ -180,20 +179,9 @@ public class XmlUtils {
         return result;
     }
 
-    public static class XmlToString {
-        private final NodeList nodeList;
-        private final Set<String> expressionsToSkip = new HashSet<>();
-
-        public XmlToString(NodeList nodeList) {
-            this.nodeList = nodeList;
-        }
-
-        public XmlToString skipping(String... expression) {
-            expressionsToSkip.addAll(Arrays.asList(expression));
-            return this;
-        }
-
-        public String getContent() {
+    @UtilityClass
+    public class XmlToString {
+        public String getContent(NodeList nodeList) {
             if (nodeList.getLength() != 1) {
                 return null;
             }
@@ -201,7 +189,7 @@ public class XmlUtils {
             return item.getTextContent();
         }
 
-        public String asString() throws TransformerException {
+        public String asString(NodeList nodeList, String... expressionsToSkip) throws TransformerException {
             StringBuilder result = new StringBuilder();
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -213,7 +201,7 @@ public class XmlUtils {
                 source.setNode(nodeList.item(i));
                 transformer.transform(source, streamResult);
                 String element = writer.toString();
-                if (expressionsToSkip.stream().noneMatch(element::contains)) {
+                if (Arrays.stream(expressionsToSkip).noneMatch(element::contains)) {
                     result.append(element).append("\n");
                 }
             }
@@ -222,7 +210,7 @@ public class XmlUtils {
         }
     }
 
-    public static boolean isValidNodePresent(File file, String xpathString) {
+    public boolean isValidNodePresent(File file, String xpathString) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -230,15 +218,11 @@ public class XmlUtils {
             XPathFactory xPathfactory = XPathFactory.newInstance();
             XPath xpath = xPathfactory.newXPath();
             XPathExpression expr = xpath.compile(xpathString);
-            boolean isValidNodePresent = (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
-            return isValidNodePresent;
+            return (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
         } catch (Exception any) {
             throw new RuntimeException(
                     "Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(),
                     any);
         }
-    }
-
-    private XmlUtils() {
     }
 }

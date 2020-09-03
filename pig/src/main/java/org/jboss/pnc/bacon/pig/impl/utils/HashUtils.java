@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jboss.resteasy.util.Hex;
 
@@ -9,11 +10,9 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.stream.Stream;
 
+@UtilityClass
 public class HashUtils {
-    private HashUtils() {
-    }
-
-    public static String hashDirectory(Path directory) {
+    public String hashDirectory(Path directory) {
         MessageDigest sha = DigestUtils.getSha512Digest();
         try (Stream<Path> stream = Files.walk(directory)) {
             stream.filter(Files::isRegularFile).sorted().forEach(path -> {
@@ -29,5 +28,4 @@ public class HashUtils {
         }
         return Hex.encodeHex(sha.digest());
     }
-
 }

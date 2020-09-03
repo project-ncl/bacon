@@ -61,14 +61,15 @@ import static java.util.Comparator.comparingInt;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 1/18/18
  */
+// @UtilityClass
 public class RepositoryUtils {
     private static final Logger log = LoggerFactory.getLogger(RepositoryUtils.class);
 
     public static void generateMavenMetadata(File mavenRepositoryDirectory) {
         log.debug("Generating maven-metadata.xml files");
         Set<String> pomPaths = new HashSet<>();
-        RepositoryUtils.searchForPomPaths(mavenRepositoryDirectory, mavenRepositoryDirectory, pomPaths);
-        RepositoryUtils.generateMetadata(mavenRepositoryDirectory, pomPaths);
+        searchForPomPaths(mavenRepositoryDirectory, mavenRepositoryDirectory, pomPaths);
+        generateMetadata(mavenRepositoryDirectory, pomPaths);
     }
 
     private static void searchForPomPaths(File root, File mavenRepositoryDirectory, Set<String> pomPaths) {
@@ -197,7 +198,7 @@ public class RepositoryUtils {
         removeMatchingCondition(element, RepositoryUtils::isCommunity);
     }
 
-    private static boolean isCommunity(File f) {
+    static boolean isCommunity(File f) {
         String absolutePath = f.getAbsolutePath();
         return !absolutePath.contains("redhat-") && !absolutePath.contains("eap-runtime-artifacts");
     }
@@ -223,7 +224,7 @@ public class RepositoryUtils {
                 }
 
                 final List<File> redHatFiles = Stream.of(children)
-                        .filter(f -> !isCommunity(f))
+                        .filter(RepositoryUtils::isCommunity)
                         .collect(Collectors.toList());
 
                 if (redHatFiles.isEmpty()) {
@@ -241,7 +242,7 @@ public class RepositoryUtils {
                             matchingRHArtifactVersions.sort(comparingInt(e -> e.getValue().getRedhatBuildNumber()));
                             Collections.reverse(matchingRHArtifactVersions);
 
-                            matchingRHArtifactVersions.stream().skip(1).forEach(e -> {
+                            matchingRHArtifactVersions.stream().skip(1L).forEach(e -> {
                                 final File directoryToBeDeleted = e.getKey();
 
                                 log.info(
@@ -261,7 +262,7 @@ public class RepositoryUtils {
         });
     }
 
-    private static class RedHatArtifactVersion {
+    private static final class RedHatArtifactVersion {
         private final String upstreamVersion;
         private final int redhatBuildNumber;
 
@@ -309,8 +310,5 @@ public class RepositoryUtils {
         public int hashCode() {
             return Objects.hash(upstreamVersion, redhatBuildNumber);
         }
-    }
-
-    private RepositoryUtils() {
     }
 }

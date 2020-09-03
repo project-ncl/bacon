@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +28,11 @@ import java.util.function.Supplier;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/7/17
  */
+@UtilityClass
 public class SleepUtils {
+    private final Logger log = LoggerFactory.getLogger(SleepUtils.class);
 
-    private static final Logger log = LoggerFactory.getLogger(SleepUtils.class);
-
-    public static void sleep(int seconds) {
+    public void sleep(int seconds) {
         try {
             Thread.sleep(seconds * 1000L);
         } catch (InterruptedException e) {
@@ -39,7 +40,7 @@ public class SleepUtils {
         }
     }
 
-    public static void waitFor(Supplier<Boolean> condition, int checkInterval, boolean printDot) {
+    public void waitFor(Supplier<Boolean> condition, int checkInterval, boolean printDot) {
         if (condition.get()) {
             return;
         }
@@ -65,7 +66,7 @@ public class SleepUtils {
      *
      * @throws RuntimeException if the timeout is reached
      */
-    public static <T> T waitFor(
+    public <T> T waitFor(
             Supplier<T> condition,
             int checkInterval,
             long timeout,
@@ -89,7 +90,7 @@ public class SleepUtils {
         }
     }
 
-    private static <T> T tryGet(Supplier<T> condition, boolean ignoreException) {
+    private <T> T tryGet(Supplier<T> condition, boolean ignoreException) {
         try {
             return condition.get();
         } catch (RuntimeException e) {
@@ -100,8 +101,5 @@ public class SleepUtils {
                 throw e;
             }
         }
-    }
-
-    private SleepUtils() {
     }
 }

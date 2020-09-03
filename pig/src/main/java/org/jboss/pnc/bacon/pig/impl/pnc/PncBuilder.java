@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
@@ -29,8 +30,6 @@ import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/14/17
@@ -41,8 +40,8 @@ public class PncBuilder {
     private final GroupConfigurationClient groupConfigClient;
 
     public PncBuilder() {
-        groupBuildClient = new GroupBuildClient(getPncConfiguration());
-        groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
+        groupBuildClient = new GroupBuildClient(PncClientHelper.getPncConfiguration());
+        groupConfigClient = new GroupConfigurationClient(PncClientHelper.getPncConfiguration());
     }
 
     public GroupBuild buildAndWait(

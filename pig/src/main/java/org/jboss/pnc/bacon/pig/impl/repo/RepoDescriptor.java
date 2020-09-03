@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 import java.io.File;
@@ -32,12 +33,13 @@ import java.util.stream.Stream;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/14/17
  */
+@UtilityClass
 public class RepoDescriptor {
 
-    public static final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1", "maven-metadata.xml" };
-    public static final String MAVEN_REPOSITORY = "maven-repository/";
+    public final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1", "maven-metadata.xml" };
+    public final String MAVEN_REPOSITORY = "maven-repository/";
 
-    public static Collection<GAV> listGavs(File m2RepoDirectory) {
+    public Collection<GAV> listGavs(File m2RepoDirectory) {
         List<GAV> allGavs = listFiles(m2RepoDirectory).stream()
                 .filter(f -> Stream.of(CHECKSUM_EXTENSIONS).noneMatch(ext -> f.getName().endsWith(ext)))
                 .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY))
@@ -47,10 +49,7 @@ public class RepoDescriptor {
         return resultSet;
     }
 
-    public static Collection<File> listFiles(File m2RepoDirectory) {
+    public Collection<File> listFiles(File m2RepoDirectory) {
         return org.apache.commons.io.FileUtils.listFiles(m2RepoDirectory, null, true);
-    }
-
-    private RepoDescriptor() {
     }
 }

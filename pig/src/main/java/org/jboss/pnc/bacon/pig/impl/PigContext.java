@@ -24,11 +24,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.bacon.pig.impl.utils.HashUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 
 import java.io.File;
@@ -43,9 +45,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
-import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.hashDirectory;
 
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed
@@ -187,10 +186,10 @@ public class PigContext {
     }
 
     private static PigContext readContext(boolean clean, Path configDir) {
-        String sha = hashDirectory(configDir);
+        String sha = HashUtils.hashDirectory(configDir);
 
         PigContext result;
-        String ctxLocationEnv = System.getenv(PIG_CONTEXT_DIR);
+        String ctxLocationEnv = System.getenv(Constant.PIG_CONTEXT_DIR);
         Path contextDir = ctxLocationEnv == null ? Paths.get(".bacon") : Paths.get(ctxLocationEnv);
         Path contextJson = contextDir.resolve("pig-context.json");
         if (!clean && Files.exists(contextJson)) {

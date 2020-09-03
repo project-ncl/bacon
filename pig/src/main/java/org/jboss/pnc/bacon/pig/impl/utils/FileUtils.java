@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -73,14 +74,11 @@ import static java.nio.file.Files.createTempDirectory;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 7/28/17
  */
-public final class FileUtils {
-    private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
+@UtilityClass
+public class FileUtils {
+    private final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
-    private FileUtils() {
-
-    }
-
-    public static File mkTempDir(final String prefix) {
+    public File mkTempDir(final String prefix) {
         try {
             return createTempDirectory(prefix).toFile();
         } catch (IOException e) {
@@ -88,7 +86,7 @@ public final class FileUtils {
         }
     }
 
-    public static String getCompressorType(final File file) {
+    public String getCompressorType(final File file) {
         try (final InputStream is = Files.newInputStream(file.toPath());
                 final BufferedInputStream bis = new BufferedInputStream(is)) {
             return CompressorStreamFactory.detect(bis);
@@ -97,7 +95,7 @@ public final class FileUtils {
         }
     }
 
-    public static String getCompressorType(final String filename) {
+    public String getCompressorType(final String filename) {
         if (BZip2Utils.isCompressedFilename(filename)) {
             return CompressorStreamFactory.BZIP2;
         } else if (GzipUtils.isCompressedFilename(filename)) {
@@ -111,7 +109,7 @@ public final class FileUtils {
         }
     }
 
-    public static void setModeAndLastModifiedTime(Path path, ArchiveEntry entry) throws IOException {
+    public void setModeAndLastModifiedTime(Path path, ArchiveEntry entry) throws IOException {
         final FileSystem fileSystem = path.getFileSystem();
         final Set<String> attributeViews = fileSystem.supportedFileAttributeViews();
 
@@ -162,8 +160,7 @@ public final class FileUtils {
     // FIXME: Setting the mode on a directory before extracting its files can cause problems
     // FIXME: We should not set the mode until all files in that directory are extracted
     // FIXME: See <https://www.gnu.org/software/tar/manual/tar.html#SEC85>.
-    public static void setModeAndLastModifiedTime(final Path path, final int mode, final FileTime time)
-            throws IOException {
+    public void setModeAndLastModifiedTime(final Path path, final int mode, final FileTime time) throws IOException {
         final FileSystem fileSystem = path.getFileSystem();
         final Set<String> attributeViews = fileSystem.supportedFileAttributeViews();
 
@@ -200,7 +197,7 @@ public final class FileUtils {
         }
     }
 
-    public static Collection<String> untar(final File input, final File directory) {
+    public Collection<String> untar(final File input, final File directory) {
         log.debug("tar -xf {} -C {}", input, directory);
 
         final String compressorType = getCompressorType(input);
@@ -273,7 +270,7 @@ public final class FileUtils {
         return Collections.unmodifiableCollection(entries);
     }
 
-    public static Collection<String> tar(final File output, final File workingDirectory, final File directoryToTar) {
+    public Collection<String> tar(final File output, final File workingDirectory, final File directoryToTar) {
         final Path directory = directoryToTar.toPath();
 
         log.debug("tar -cf {} {}", output, directory);
@@ -340,7 +337,7 @@ public final class FileUtils {
         return Collections.unmodifiableCollection(entries);
     }
 
-    public static Collection<String> listZipContents(final File input) {
+    public Collection<String> listZipContents(final File input) {
         log.debug("Listing contents of {}", input);
 
         try (final InputStream is = Files.newInputStream(input.toPath());
@@ -359,11 +356,11 @@ public final class FileUtils {
         }
     }
 
-    public static Collection<String> unzip(final File input, final File directory) {
+    public Collection<String> unzip(final File input, final File directory) {
         return unzip(input, directory, null);
     }
 
-    public static Collection<String> unzip(final File input, final File directory, final String extraction) {
+    public Collection<String> unzip(final File input, final File directory, final String extraction) {
         log.debug("unzip -o {} -d {}", input, directory);
 
         Pattern extractionPattern = null;
@@ -440,7 +437,7 @@ public final class FileUtils {
         return Collections.unmodifiableCollection(entries);
     }
 
-    public static Collection<String> zip(final File output, final File workingDirectory, final File directoryToZip) {
+    public Collection<String> zip(final File output, final File workingDirectory, final File directoryToZip) {
         final Path directory = directoryToZip.toPath();
 
         log.debug("zip -r {} {}", output, directory);
@@ -497,7 +494,7 @@ public final class FileUtils {
         return Collections.unmodifiableCollection(entries);
     }
 
-    public static void copy(final File srcFile, final File destFile) {
+    public void copy(final File srcFile, final File destFile) {
         try {
             if (srcFile.isFile()) {
                 if (destFile.isFile()) {
@@ -524,7 +521,7 @@ public final class FileUtils {
      * @param srcDir the path to the directory to move
      * @param destDir the path to the target directory
      */
-    public static boolean moveDirectoryContents(final File srcDir, final File destDir) throws IOException {
+    public boolean moveDirectoryContents(final File srcDir, final File destDir) throws IOException {
         if (!srcDir.isDirectory() || !destDir.isDirectory()) {
             return false;
         }

@@ -19,6 +19,7 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.slf4j.Logger;
@@ -34,10 +35,11 @@ import java.util.stream.Collectors;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
+@UtilityClass
 public class BrewSearcher {
-    private static final Logger log = LoggerFactory.getLogger(BrewSearcher.class);
+    private final Logger log = LoggerFactory.getLogger(BrewSearcher.class);
 
-    public static void fillBrewData(SharedContentReportRow row) {
+    public void fillBrewData(SharedContentReportRow row) {
         log.debug("Asking for {}\n", row.toGapv());
         List<KojiBuild> builds = getBuilds(row);
         builds.forEach(build -> {
@@ -55,16 +57,16 @@ public class BrewSearcher {
         });
     }
 
-    private static List<KojiBuild> getBuilds(SharedContentReportRow row) {
+    private List<KojiBuild> getBuilds(SharedContentReportRow row) {
         Path filePath = row.getFilePath();
         return getBuilds(filePath);
     }
 
-    public static List<KojiBuild> getBuilds(final Path filePath) {
+    public List<KojiBuild> getBuilds(final Path filePath) {
         return BuildFinderUtils.findBuilds(filePath, false);
     }
 
-    private static void fillBuiltBy(SharedContentReportRow row, KojiBuild build) {
+    private void fillBuiltBy(SharedContentReportRow row, KojiBuild build) {
         if (build.getBuildInfo() == null || build.getBuildInfo().getOwnerName() == null) {
             return;
         }
@@ -78,7 +80,7 @@ public class BrewSearcher {
         row.setBuildAuthor(value);
     }
 
-    private static void fillTags(SharedContentReportRow row, KojiBuild build) {
+    private void fillTags(SharedContentReportRow row, KojiBuild build) {
         if (build.getTags() == null) {
             return;
         }
@@ -90,8 +92,5 @@ public class BrewSearcher {
         } else {
             row.setBuildTags(tags);
         }
-    }
-
-    private BrewSearcher() {
     }
 }

@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductMilestoneClient;
@@ -34,8 +35,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Optional;
-
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -83,7 +82,7 @@ public class PncConfigurator {
             throw new RuntimeException("Error getting milestone for milestoneName: " + milestoneName, e);
         }
 
-        return toStream(milestones).findAny();
+        return PncClientUtils.toStream(milestones).findAny();
     }
 
     private ProductMilestone createMilestone(ProductVersionRef version, String milestoneName) {

@@ -1,7 +1,10 @@
 package org.jboss.pnc.bacon.test.pig;
 
 import org.jboss.pnc.bacon.test.AbstractTest;
+import org.jboss.pnc.bacon.test.CLIExecutor;
+import org.jboss.pnc.bacon.test.Endpoints;
 import org.jboss.pnc.bacon.test.ExecutionResult;
+import org.jboss.pnc.bacon.test.PNCWiremockHelper;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.GroupConfiguration;
@@ -28,19 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
-import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG;
-import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG_DEPENDENCIES;
-import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG;
-import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG_BUILD_CONFIGS;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_MILESTONE;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSIONS;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION_MILESTONES;
-import static org.jboss.pnc.bacon.test.Endpoints.PROJECT;
-import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY;
-import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
 
 /**
  *
@@ -49,7 +39,6 @@ import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PigTest extends AbstractTest {
-
     private static final String UNIVERSAL_ID = "42";
     private static final String SUFFIX = getRandomString();
     private static final String PRODUCT_NAME = "Product Foobar " + SUFFIX;
@@ -66,7 +55,7 @@ class PigTest extends AbstractTest {
     @Test
     @Order(1)
     void shouldCreateProduct() throws IOException {
-        final Path configFile = CONFIG_LOCATION;
+        final Path configFile = CLIExecutor.CONFIG_LOCATION;
         replaceSuffixInConfigFile(configFile.resolve("build-config.yaml"));
 
         final Product product = Product.builder()
@@ -114,32 +103,35 @@ class PigTest extends AbstractTest {
                 .buildConfigs(Collections.singletonMap(UNIVERSAL_ID, buildConfig))
                 .build();
 
-        wmock.list(PRODUCT, new Page<Product>());
-        wmock.creation(PRODUCT, product);
-        wmock.list(PRODUCT_VERSIONS.apply(UNIVERSAL_ID), new Page<ProductVersion>());
-        wmock.creation(PRODUCT_VERSION, productVersion);
-        wmock.list(PRODUCT_VERSION_MILESTONES.apply(UNIVERSAL_ID), new Page<ProductMilestone>());
-        wmock.creation(PRODUCT_MILESTONE, productMilestone);
-        wmock.update(PRODUCT_VERSION, productVersion, productVersionWithCurrentMilestone);
-        wmock.list(GROUP_CONFIG, new Page<GroupConfiguration>());
-        wmock.creation(GROUP_CONFIG, groupConfig);
-        wmock.list(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID), new Page<BuildConfiguration>());
-        wmock.list(BUILD_CONFIG, new Page<BuildConfiguration>());
-        wmock.list(PROJECT, new Page<Project>());
-        wmock.creation(PROJECT, project);
-        wmock.list(SCM_REPOSITORY, new Page<SCMRepository>());
-        wmock.creation(SCM_REPOSITORY_CREATE, RepositoryCreationResponse.builder().repository(scmRepository).build());
-        wmock.creation(BUILD_CONFIG, buildConfig);
-        wmock.list(BUILD_CONFIG_DEPENDENCIES.apply(UNIVERSAL_ID), new Page<BuildConfiguration>());
-        wmock.get(BUILD_CONFIG, buildConfig);
-        wmock.creation(BUILD_CONFIG, buildConfig);
+        PNCWiremockHelper.list(Endpoints.PRODUCT, new Page<Product>());
+        PNCWiremockHelper.creation(Endpoints.PRODUCT, product);
+        PNCWiremockHelper.list(Endpoints.PRODUCT_VERSIONS.apply(UNIVERSAL_ID), new Page<ProductVersion>());
+        PNCWiremockHelper.creation(Endpoints.PRODUCT_VERSION, productVersion);
+        PNCWiremockHelper.list(Endpoints.PRODUCT_VERSION_MILESTONES.apply(UNIVERSAL_ID), new Page<ProductMilestone>());
+        PNCWiremockHelper.creation(Endpoints.PRODUCT_MILESTONE, productMilestone);
+        PNCWiremockHelper.update(Endpoints.PRODUCT_VERSION, productVersion, productVersionWithCurrentMilestone);
+        PNCWiremockHelper.list(Endpoints.GROUP_CONFIG, new Page<GroupConfiguration>());
+        PNCWiremockHelper.creation(Endpoints.GROUP_CONFIG, groupConfig);
+        PNCWiremockHelper
+                .list(Endpoints.GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID), new Page<BuildConfiguration>());
+        PNCWiremockHelper.list(Endpoints.BUILD_CONFIG, new Page<BuildConfiguration>());
+        PNCWiremockHelper.list(Endpoints.PROJECT, new Page<Project>());
+        PNCWiremockHelper.creation(Endpoints.PROJECT, project);
+        PNCWiremockHelper.list(Endpoints.SCM_REPOSITORY, new Page<SCMRepository>());
+        PNCWiremockHelper.creation(
+                Endpoints.SCM_REPOSITORY_CREATE,
+                RepositoryCreationResponse.builder().repository(scmRepository).build());
+        PNCWiremockHelper.creation(Endpoints.BUILD_CONFIG, buildConfig);
+        PNCWiremockHelper.list(Endpoints.BUILD_CONFIG_DEPENDENCIES.apply(UNIVERSAL_ID), new Page<BuildConfiguration>());
+        PNCWiremockHelper.get(Endpoints.BUILD_CONFIG, buildConfig);
+        PNCWiremockHelper.creation(Endpoints.BUILD_CONFIG, buildConfig);
 
-        wmock.scenario("add BC to GC")
-                .getEntity(GROUP_CONFIG, groupConfig)
+        PNCWiremockHelper.scenario("add BC to GC")
+                .getEntity(Endpoints.GROUP_CONFIG, groupConfig)
                 .when()
-                .post(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID))
+                .post(Endpoints.GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID))
                 .then()
-                .getEntity(GROUP_CONFIG, groupConfigWithBuildConfig);
+                .getEntity(Endpoints.GROUP_CONFIG, groupConfigWithBuildConfig);
         ExecutionResult output = executeAndGetResult("pig", "configure", configFile.toString());
         assertThat(output.getOutput()).contains("name: \"Product Foobar " + SUFFIX + "\"");
     }

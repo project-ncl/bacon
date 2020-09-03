@@ -47,7 +47,6 @@ import java.time.Instant;
 import java.util.Optional;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
 
 @Slf4j
 @GroupCommandDefinition(
@@ -99,10 +98,9 @@ public class ProductMilestoneCli extends AbstractCommand {
                     startDate = PncClientHelper.getTodayDayInYYYYMMDDFormat();
                 }
 
-                Instant startDateInstant = parseDateFormat(startDate);
-                Instant endDateInstant = parseDateFormat(endDate);
-
                 ProductVersionRef productVersionRef = ProductVersionRef.refBuilder().id(productVersionId).build();
+                Instant startDateInstant = PncClientHelper.parseDateFormat(startDate);
+                Instant endDateInstant = PncClientHelper.parseDateFormat(endDate);
 
                 ProductMilestone milestone = ProductMilestone.builder()
                         .version(productMilestoneVersion)
@@ -167,11 +165,11 @@ public class ProductMilestoneCli extends AbstractCommand {
                         }
                     }
                     if (isNotEmpty(startDate)) {
-                        Instant startDateInstant = parseDateFormat(startDate);
+                        Instant startDateInstant = PncClientHelper.parseDateFormat(startDate);
                         updated.startingDate(startDateInstant);
                     }
                     if (isNotEmpty(endDate)) {
-                        Instant endDateInstant = parseDateFormat(endDate);
+                        Instant endDateInstant = PncClientHelper.parseDateFormat(endDate);
                         updated.plannedEndDate(endDateInstant);
                     }
 
@@ -254,8 +252,8 @@ public class ProductMilestoneCli extends AbstractCommand {
     }
 
     /**
-     * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product
-     * version
+     * Product Milestone version format is: {@literal <d>.<d>.<d>.<word>} The first 2 digits must match the digit for
+     * the product version.
      *
      * @param productVersionId
      * @param milestoneVersion

@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import lombok.experimental.UtilityClass;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
@@ -10,17 +11,15 @@ import java.util.Optional;
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com 2020-06-05
  */
+@UtilityClass
 public class ArtifactVersion {
-    public static String prefix = "artifactVersion://";
-
-    private ArtifactVersion() {
-    }
+    public String prefix = "artifactVersion://";
 
     /*
      * gets artifact coordinates from a location of a form artifactVersion://groupId:artifactId[@buildName] and gets a
      * version of the artifact from the build
      */
-    public static String get(String location, String defaultBuildName, Map<String, PncBuild> builds) {
+    public String get(String location, String defaultBuildName, Map<String, PncBuild> builds) {
         if (!location.startsWith(ArtifactVersion.prefix)) {
             throw new RuntimeException("location: " + location + " is not a proper artifactVersion location");
         }
