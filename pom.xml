@@ -18,21 +18,20 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
         <version>37</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>org.jboss.pnc.bacon</groupId>
     <artifactId>parent</artifactId>
-    <packaging>pom</packaging>
     <version>2.0.2-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>bacon</name>
     <description>PNC 2.0 CLI</description>
@@ -42,17 +41,10 @@
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
-            <distribution>repo</distribution>
             <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
-
-    <scm>
-        <connection>scm:git:http://github.com/project-ncl/bacon.git</connection>
-        <developerConnection>scm:git:git@github.com:project-ncl/bacon.git</developerConnection>
-        <url>http://github.com/project-ncl/bacon</url>
-        <tag>HEAD</tag>
-    </scm>
 
     <developers>
         <developer>
@@ -73,18 +65,25 @@
         <module>integration-tests</module>
     </modules>
 
+    <scm>
+        <connection>scm:git:http://github.com/project-ncl/bacon.git</connection>
+        <developerConnection>scm:git:git@github.com:project-ncl/bacon.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>http://github.com/project-ncl/bacon</url>
+    </scm>
+
     <properties>
         <aesh.version>2.6</aesh.version>
+
+        <compiler.plugin.version>3.8.1</compiler.plugin.version>
         <jaxb.version>2.2.11</jaxb.version>
         <junit.version>5.6.2</junit.version>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <tagSuffix/>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <compiler.plugin.version>3.8.1</compiler.plugin.version>
+        <tagSuffix />
     </properties>
 
     <dependencyManagement>
@@ -104,12 +103,6 @@
                 <groupId>org.jboss.pnc.bacon</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.pnc.bacon</groupId>
-                <artifactId>test-common</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.bacon</groupId>
@@ -154,12 +147,6 @@
                 <groupId>org.aesh</groupId>
                 <artifactId>aesh</artifactId>
                 <version>${aesh.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.12</version>
-                <scope>provided</scope>
             </dependency>
             <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
             <dependency>
@@ -332,6 +319,18 @@
                 <artifactId>jaxb-core</artifactId>
                 <version>${jaxb.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.12</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.bacon</groupId>
+                <artifactId>test-common</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!--tests-->
             <dependency>
@@ -369,8 +368,8 @@
                 <groupId>org.jboss.shrinkwrap.resolver</groupId>
                 <artifactId>shrinkwrap-resolver-depchain</artifactId>
                 <version>3.1.4</version>
-                <scope>test</scope>
                 <type>pom</type>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
@@ -386,6 +385,28 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <!--TODO: remove once PNC 2.0 hits central -->
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>jboss-nexus</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
+
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>Nexus Staging</id>
+            <url>https://oss.sonatype.org/content/groups/staging</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>
@@ -410,6 +431,33 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>com.github.ekryd.sortpom</groupId>
+                <artifactId>sortpom-maven-plugin</artifactId>
+                <version>2.12.0</version>
+                <configuration>
+                    <createBackupFile>false</createBackupFile>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <expandEmptyElements>false</expandEmptyElements>
+                    <keepBlankLines>true</keepBlankLines>
+                    <lineSeparator>\n</lineSeparator>
+                    <nrOfIndentSpace>4</nrOfIndentSpace>
+                    <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+                    <sortDependencies>scope</sortDependencies>
+                    <sortModules>false</sortModules>
+                    <sortPlugins>scope</sortPlugins>
+                    <sortProperties>true</sortProperties>
+                    <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sort-pom</id>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <dependencies>
@@ -429,15 +477,14 @@
                         <phase>initialize</phase>
                         <configuration>
                             <rules>
-                                <requireManagedDeps
-                                    implementation="org.commonjava.maven.enforcer.rule.EnforceManagedDepsRule">
+                                <requireManagedDeps implementation="org.commonjava.maven.enforcer.rule.EnforceManagedDepsRule">
                                     <checkProfiles>true</checkProfiles>
                                     <failOnViolation>true</failOnViolation>
                                     <regexIgnored>
                                         <regexIgnored>[{]</regexIgnored>
                                     </regexIgnored>
                                 </requireManagedDeps>
-                                <banDuplicatePomDependencyVersions/>
+                                <banDuplicatePomDependencyVersions />
                             </rules>
                         </configuration>
                     </execution>
@@ -521,36 +568,15 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <phase>test</phase>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>jboss-nexus</id> <!--TODO: remove once PNC 2.0 hits central -->
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-        </repository>
-
-        <repository>
-            <id>Nexus Staging</id>
-            <url>https://oss.sonatype.org/content/groups/staging</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <profiles>
         <profile>
@@ -577,10 +603,10 @@
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
-                                <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <phase>verify</phase>
                             </execution>
                         </executions>
                     </plugin>
