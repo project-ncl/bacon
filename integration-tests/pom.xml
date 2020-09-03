@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>parent</artifactId>
         <groupId>org.jboss.pnc.bacon</groupId>
+        <artifactId>parent</artifactId>
         <version>2.0.2-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>integration-tests</artifactId>
 
     <properties>
-        <pnc-url>http://localhost:8080</pnc-url>
-        <keycloak-url>http://localhost:8080</keycloak-url>
         <keycloak-realm>example</keycloak-realm>
         <keycloak-secret>secret-code</keycloak-secret>
+        <keycloak-url>http://localhost:8080</keycloak-url>
         <keycloak-user>user</keycloak-user>
+        <pnc-url>http://localhost:8080</pnc-url>
         <scm-host>example.com</scm-host>
     </properties>
     <dependencies>
@@ -76,11 +76,11 @@
                 <executions>
                     <execution>
                         <id>copy-config</id>
-                        <!-- here the phase you need -->
-                        <phase>process-test-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
+                        <!-- here the phase you need -->
+                        <phase>process-test-resources</phase>
                         <configuration>
                             <outputDirectory>${basedir}/target/test-config</outputDirectory>
                             <resources>
