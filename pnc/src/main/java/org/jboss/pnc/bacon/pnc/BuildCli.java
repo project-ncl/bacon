@@ -313,8 +313,8 @@ public class BuildCli extends AbstractCommand {
                 if (buildLogs.isPresent()) {
                     try (InputStream inputStream = buildLogs.get();
                             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                            BufferedReader reader = new BufferedReader(inputStreamReader);) {
-                        reader.lines().forEach(l -> shell.writeln(l));
+                            BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                        reader.lines().forEach(shell::writeln);
                     } catch (IOException e) {
                         throw new ClientException("Cannot read log stream.", e);
                     }
@@ -323,7 +323,7 @@ public class BuildCli extends AbstractCommand {
                     String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
                     URI bifrostUri = URI.create(bifrostBase);
                     BifrostClient logProcessor = new BifrostClient(bifrostUri);
-                    logProcessor.writeLog(buildId, follow, line -> shell.writeln(line));
+                    logProcessor.writeLog(buildId, follow, shell::writeln);
                 }
             } catch (RemoteResourceException | IOException e) {
                 throw new ClientException("Cannot read remote resource.", e);

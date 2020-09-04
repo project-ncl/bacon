@@ -111,7 +111,7 @@ public class XmlUtils {
             return null;
         }
 
-        Element child = (Element) children.get(0);
+        Element child = children.get(0);
         String value = child.getTextContent();
 
         for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -166,7 +166,10 @@ public class XmlUtils {
             Node child = children.item(i);
             if (child instanceof Element) {
                 Element childElement = (Element) child;
-                description.append(childElement.getTagName() + ":" + childElement.getTextContent() + ", ");
+                description.append(childElement.getTagName())
+                        .append(":")
+                        .append(childElement.getTextContent())
+                        .append(", ");
             }
         }
     }
@@ -230,8 +233,7 @@ public class XmlUtils {
             XPathFactory xPathfactory = XPathFactory.newInstance();
             XPath xpath = xPathfactory.newXPath();
             XPathExpression expr = xpath.compile(xpathString);
-            boolean isValidNodePresent = (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
-            return isValidNodePresent;
+            return (boolean) expr.evaluate(doc, XPathConstants.BOOLEAN);
         } catch (Exception any) {
             throw new RuntimeException(
                     "Error searching for matches of " + xpathString + " in " + file.getAbsolutePath(),

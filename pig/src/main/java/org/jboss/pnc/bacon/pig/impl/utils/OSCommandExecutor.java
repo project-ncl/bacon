@@ -191,7 +191,7 @@ public class OSCommandExecutor {
         }
 
         private CompletableFuture<Boolean> waitFor(Process process) {
-            return CompletableFuture.<Boolean> supplyAsync(() -> {
+            return CompletableFuture.supplyAsync(() -> {
                 try {
                     if (timeout != null) {
                         boolean finishedOnTime = process.waitFor(timeout, TimeUnit.SECONDS);
@@ -223,7 +223,7 @@ public class OSCommandExecutor {
         }
 
         private static String[] unescape(String[] input) {
-            return (String[]) Stream.of(input).map(CommandExecutor::stripQuoteMarks).toArray(String[]::new);
+            return Stream.of(input).map(CommandExecutor::stripQuoteMarks).toArray(String[]::new);
         }
 
         private static String stripQuoteMarks(String s) {

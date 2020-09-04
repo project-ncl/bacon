@@ -370,7 +370,7 @@ public class PncEntitiesImporter {
                     .createNewAndWait(createRepoRequest);
 
             log.info("Waiting for repository creation of '{}'", scmUrl);
-            SleepUtils.waitFor(() -> response.isDone(), 10, true);
+            SleepUtils.waitFor(response::isDone, 10, true);
             AdvancedSCMRepositoryClient.SCMCreationResult result = response.join();
             log.info("{}", result.toString());
 
@@ -398,7 +398,7 @@ public class PncEntitiesImporter {
     }
 
     private Project getOrGenerateProject(String projectName) {
-        RemoteCollection<Project> query = null;
+        RemoteCollection<Project> query;
         try {
             query = projectClient.getAll(empty(), findByNameQuery(projectName));
         } catch (RemoteResourceException e) {

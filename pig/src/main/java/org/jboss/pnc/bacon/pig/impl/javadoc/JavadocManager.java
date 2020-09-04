@@ -165,7 +165,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     private Collection<GAV> findSourceBuilds() {
-        Collection<GAV> srcBuilds = builds.values()
+        return builds.values()
                 .stream()
                 .filter(build -> sourceBuilds.contains(build.getName()))
                 .map(PncBuild::getBuiltArtifacts)
@@ -173,7 +173,6 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                 .map(ArtifactWrapper::toGAV)
                 .filter(g -> g.getClassifier() != null && g.getClassifier().equals("sources"))
                 .collect(Collectors.toList());
-        return srcBuilds;
     }
 
     private boolean cloneProject() {
@@ -270,7 +269,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                             + " -Dmaven.repo.local=" + localRepo + " -t");
             if (generationData.getAlignmentParameters() != null && !generationData.getAlignmentParameters().isEmpty()) {
                 for (String parameter : generationData.getAlignmentParameters()) {
-                    cmd.append(" " + parameter);
+                    cmd.append(" ").append(parameter);
                 }
             }
             System.setOut(outStream);
@@ -329,7 +328,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     private boolean executeMavenBuild() {
         log.debug("Executing Javadoc generation maven project");
         String command = generationData.getBuildScript();
-        Process process = null;
+        Process process;
         if (command == null || command.isEmpty()) {
             // Use a default mvn command on project
             command = "mvn package -B";

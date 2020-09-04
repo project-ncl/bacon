@@ -78,12 +78,11 @@ public class LicenseGenerator {
                     log.error(
                             "There are some invalid licenses in XML file generated. Following are the details of the invalid licenses:");
                     List<Node> nodes = XmlUtils.listNodes(xmlFile, "//license[not(url)]/parent::node()/parent::node()");
-                    nodes.forEach(node -> {
-                        log.error(
-                                "Group id is {} and artifact id is {}",
-                                node.getChildNodes().item(1).getTextContent(),
-                                node.getChildNodes().item(3).getTextContent());
-                    });
+                    nodes.forEach(
+                            node -> log.error(
+                                    "Group id is {} and artifact id is {}",
+                                    node.getChildNodes().item(1).getTextContent(),
+                                    node.getChildNodes().item(3).getTextContent()));
                 }
 
                 throw new RuntimeException("Invalid licenses XML file");

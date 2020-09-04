@@ -187,9 +187,7 @@ public class PigConfiguration {
             }
         }
 
-        InputStream stream = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
-
-        return stream;
+        return new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
     }
 
     public static PigConfiguration load(File buildConfigFile, String buildVarsOverrides) {
@@ -212,7 +210,7 @@ public class PigConfiguration {
         Yaml yaml = new Yaml(new Constructor(PigConfiguration.class));
 
         try (InputStream in = preProcess(configStream, buildVarsOverrides)) {
-            PigConfiguration pigConfiguration = (PigConfiguration) yaml.load(in);
+            PigConfiguration pigConfiguration = yaml.load(in);
             pigConfiguration.init();
             return pigConfiguration;
         } catch (IOException e) {

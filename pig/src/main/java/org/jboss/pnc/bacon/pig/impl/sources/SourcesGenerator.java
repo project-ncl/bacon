@@ -188,13 +188,14 @@ public class SourcesGenerator {
                         buildInfo.getVersion(),
                         buildInfo.getRelease()));
         sb.append("/maven");
-        sb.append(
-                "/" + String.format(
-                        "%s/%s/%s",
-                        archiveInfo.getGroupId().replace('.', '/'),
-                        archiveInfo.getArtifactId(),
-                        archiveInfo.getVersion()));
-        sb.append("/" + archiveInfo.getFilename());
+        sb.append("/")
+                .append(
+                        String.format(
+                                "%s/%s/%s",
+                                archiveInfo.getGroupId().replace('.', '/'),
+                                archiveInfo.getArtifactId(),
+                                archiveInfo.getVersion()));
+        sb.append("/").append(archiveInfo.getFilename());
 
         final String str = sb.toString();
 

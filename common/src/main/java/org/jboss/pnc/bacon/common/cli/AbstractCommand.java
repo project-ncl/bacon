@@ -209,8 +209,6 @@ public class AbstractCommand implements Command {
         setConfigurationFileLocation();
         try {
             return CommandResult.valueOf(callback.call());
-        } catch (FatalException e) {
-            throw e;
         } catch (ClientException | JsonProcessingException e) {
             throw new FatalException("Exception processing command", e);
             // Aesh doesnt take care of exit codes, thrown FatalException will be caught in App class and app will exit

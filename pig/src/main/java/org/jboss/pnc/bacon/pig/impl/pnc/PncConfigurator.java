@@ -74,13 +74,12 @@ public class PncConfigurator {
     }
 
     public Optional<ProductMilestone> getExistingMilestone(ProductVersionRef version, String milestone) {
-        String milestoneName = milestone;
-        RemoteCollection<ProductMilestone> milestones = null;
+        RemoteCollection<ProductMilestone> milestones;
         try {
             milestones = versionClient
-                    .getMilestones(version.getId(), Optional.empty(), Optional.of("version==" + milestoneName));
+                    .getMilestones(version.getId(), Optional.empty(), Optional.of("version==" + milestone));
         } catch (RemoteResourceException e) {
-            throw new RuntimeException("Error getting milestone for milestoneName: " + milestoneName, e);
+            throw new RuntimeException("Error getting milestone for milestoneName: " + milestone, e);
         }
 
         return toStream(milestones).findAny();
