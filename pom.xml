@@ -9,7 +9,7 @@
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
@@ -498,6 +498,44 @@
                 <configuration>
                     <shortRevisionLength>8</shortRevisionLength>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.0.rc2</version>
+                <configuration>
+                    <excludes>
+                        <exclude>.cache/</exclude>
+                    </excludes>
+                    <!-- XXX: <https://github.com/mycila/license-maven-plugin/issues/83> -->
+                    <inlineHeader><![CDATA[JBoss, Home of Professional Open Source.
+Copyright 2017 Red Hat, Inc., and individual contributors
+as indicated by the @author tags.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.]]></inlineHeader>
+                    <mapping>
+                        <gitattributes>SCRIPT_STYLE</gitattributes>
+                        <java>SLASHSTAR_STYLE</java>
+                        <Makefile>SCRIPT_STYLE</Makefile>
+                    </mapping>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>net.revelc.code</groupId>
