@@ -69,10 +69,7 @@ public class ProductVersionCli extends AbstractCommand {
         private String productVersion;
         @Option(required = true, name = "product-id", description = "Product ID of product version")
         private String productId;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

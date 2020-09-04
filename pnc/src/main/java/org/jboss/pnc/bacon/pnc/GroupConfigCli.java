@@ -78,10 +78,7 @@ public class GroupConfigCli extends AbstractCommand {
         @Option(name = "build-config-ids", description = "Build config ids in Group Config. Comma separated")
         private String buildConfigIds;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
@@ -272,10 +269,7 @@ public class GroupConfigCli extends AbstractCommand {
         @Argument(required = true, description = "Group config id")
         private String id;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Option(name = "temporary-build", description = "Build is temporary", hasValue = false)

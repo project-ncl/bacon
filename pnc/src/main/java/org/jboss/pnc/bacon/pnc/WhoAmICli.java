@@ -32,10 +32,7 @@ public class WhoAmICli extends AbstractCommand {
 
     private static final ClientCreator<UserClient> CREATOR = new ClientCreator<>(UserClient::new);
 
-    @Option(
-            shortName = 'o',
-            hasValue = false,
-            description = "use json for output (default to yaml)")
+    @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
     @Override

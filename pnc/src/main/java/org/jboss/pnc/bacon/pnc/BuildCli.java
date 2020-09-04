@@ -105,20 +105,14 @@ public class BuildCli extends AbstractCommand {
         private boolean temporaryBuild = false;
         @Option(name = "wait", hasValue = false, description = "Wait for build to complete")
         private boolean wait = false;
-        @Option(
-                name = "no-build-dependencies",
-                hasValue = false,
-                description = "Skip building of dependencies")
+        @Option(name = "no-build-dependencies", hasValue = false, description = "Skip building of dependencies")
         private boolean noBuildDependencies = false;
 
         @Option(name = "timeout", description = "Time in minutes the command waits for Build completion")
         private Integer timeout;
         @Option(name = "revision", description = "Build Config revision to build.")
         private Integer revision;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

@@ -65,10 +65,7 @@ public class ProductCli extends AbstractCommand {
         @Option(name = "description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

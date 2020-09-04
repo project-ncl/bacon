@@ -68,10 +68,7 @@ public class ProjectCli extends AbstractCommand {
         private String projectUrl;
         @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project", defaultValue = "")
         private String issueTrackerUrl;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

@@ -38,10 +38,7 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
     @Argument(required = true, description = "Id of item")
     private String id;
 
-    @Option(
-            shortName = 'o',
-            hasValue = false,
-            description = "use json for output (default to yaml)")
+    @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
     @Override

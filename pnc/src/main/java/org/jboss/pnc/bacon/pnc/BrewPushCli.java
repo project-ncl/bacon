@@ -61,19 +61,13 @@ public class BrewPushCli extends AbstractCommand {
                 hasValue = false)
         private boolean reimport = false;
 
-        @Option(
-                name = "wait",
-                hasValue = false,
-                description = "Wait for BrewPush to complete")
+        @Option(name = "wait", hasValue = false, description = "Wait for BrewPush to complete")
         private boolean wait = false;
 
         @Option(name = "timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
@@ -155,10 +149,7 @@ public class BrewPushCli extends AbstractCommand {
         @Argument(required = true, description = "Brew Push ID")
         private String id;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

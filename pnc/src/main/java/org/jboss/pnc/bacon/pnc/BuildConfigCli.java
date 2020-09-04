@@ -103,10 +103,7 @@ public class BuildConfigCli extends AbstractCommand {
                 description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
@@ -184,10 +181,7 @@ public class BuildConfigCli extends AbstractCommand {
                 hasValue = false)
         private boolean noPreBuildSync = false;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
@@ -328,10 +322,7 @@ public class BuildConfigCli extends AbstractCommand {
     @CommandDefinition(name = "create-revision", description = "Create a new revision for a build configuration")
     public class CreateRevision extends Update {
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

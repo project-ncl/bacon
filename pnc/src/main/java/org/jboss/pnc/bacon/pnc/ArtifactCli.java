@@ -52,10 +52,7 @@ public class ArtifactCli extends AbstractCommand {
         @Option
         private String sha256;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

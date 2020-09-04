@@ -79,17 +79,11 @@ public class GroupBuildCli extends AbstractCommand {
         private boolean timestampAlignment = false;
         @Option(name = "temporary-build", description = "Perform temporary builds", hasValue = false)
         private boolean temporaryBuild = false;
-        @Option(
-                name = "wait",
-                hasValue = false,
-                description = "Wait for group build to complete")
+        @Option(name = "wait", hasValue = false, description = "Wait for group build to complete")
         private boolean wait = false;
         @Option(name = "timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

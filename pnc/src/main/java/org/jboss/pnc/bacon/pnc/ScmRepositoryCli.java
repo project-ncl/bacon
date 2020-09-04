@@ -75,10 +75,7 @@ public class ScmRepositoryCli extends AbstractCommand {
                 hasValue = false)
         private boolean noPreBuildSync = false;
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

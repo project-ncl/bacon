@@ -71,10 +71,7 @@ public class ProductReleaseCli extends AbstractCommand {
                 name = "support-level",
                 description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
@@ -191,10 +188,7 @@ public class ProductReleaseCli extends AbstractCommand {
     @CommandDefinition(name = "list-support-levels", description = "List supported levels")
     public class ListSupportLevel extends AbstractCommand {
 
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override

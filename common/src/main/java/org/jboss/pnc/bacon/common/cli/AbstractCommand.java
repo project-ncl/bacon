@@ -62,10 +62,7 @@ public class AbstractCommand implements Command {
     @Option(shortName = 'p', description = "Path to PNC configuration folder")
     private String configPath = null;
 
-    @Option(
-            name = "profile",
-            defaultValue = { "default" },
-            description = "PNC Configuration profile")
+    @Option(name = "profile", defaultValue = { "default" }, description = "PNC Configuration profile")
     private String profile;
 
     public boolean printHelpOrVersionIfPresent(CommandInvocation commandInvocation) {

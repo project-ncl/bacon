@@ -78,10 +78,7 @@ public class ProductMilestoneCli extends AbstractCommand {
         private String startDate;
         @Option(required = true, name = "end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
-        @Option(
-                shortName = 'o',
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(shortName = 'o', hasValue = false, description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
