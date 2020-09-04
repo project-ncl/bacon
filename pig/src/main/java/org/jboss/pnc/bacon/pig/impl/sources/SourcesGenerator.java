@@ -33,8 +33,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.jboss.pnc.bacon.pig.impl.utils.GerritUtils.gerritSnapshotDownloadUrl;
-
 public class SourcesGenerator {
     private static final Logger log = LoggerFactory.getLogger(SourcesGenerator.class);
 
@@ -88,7 +86,6 @@ public class SourcesGenerator {
 
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
         builds.values().forEach(build -> {
-            URI url = gerritSnapshotDownloadUrl(build.getInternalScmUrl(), build.getScmRevision());
 
             File targetPath = new File(workDir, build.getName() + ".tar.gz");
             try (BuildClient client = CREATOR.newClient();

@@ -88,7 +88,7 @@ public class GitRepoInspector {
             try {
                 org.apache.commons.io.FileUtils.deleteDirectory(tempDir);
             } catch (IOException e) {
-                // not important enough to log
+                log.debug("Could not delete temporary dir: {}", tempDir);
             }
         }
         return false;

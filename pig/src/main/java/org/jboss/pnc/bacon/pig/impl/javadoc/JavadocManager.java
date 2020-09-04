@@ -234,11 +234,9 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             File dir = new File(
                     localRepo.getPath() + File.separator + project_gid.replace('.', File.separatorChar) + File.separator
                             + project_aid + File.separator + project_version);
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    log.error("Error while creating directory {}", dir);
-                    return false;
-                }
+            if (!dir.exists() && !dir.mkdirs()) {
+                log.error("Error while creating directory {}", dir);
+                return false;
             }
             File file = new File(dir.getPath() + File.separator + project_aid + "-" + project_version + ".pom");
             JAXBContext jaxbContext = JAXBContext.newInstance(Project.class);

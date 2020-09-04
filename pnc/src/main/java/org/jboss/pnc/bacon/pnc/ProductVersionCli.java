@@ -156,8 +156,7 @@ public class ProductVersionCli extends AbstractCommand {
         private String id;
 
         @Override
-        public RemoteCollection<org.jboss.pnc.dto.ProductMilestone> getAll(String sort, String query)
-                throws RemoteResourceException {
+        public RemoteCollection<ProductMilestone> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductVersionClient client = CREATOR.newClient()) {
                 return client.getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));

@@ -48,8 +48,6 @@ public class FileDownloadUtils {
 
     private static final int READ_TIMEOUT = 900000;
 
-    private static final int MAX_RETRIES = 5;
-
     private static final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
             .setConnectTimeout(CONNECTION_TIMEOUT)
             .setSocketTimeout(READ_TIMEOUT)

@@ -63,7 +63,7 @@ public class BuildInfoCollector {
     public void addDependencies(PncBuild bd, String filter) {
         List<Artifact> artifacts;
         try {
-            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
+            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), of(filter)));
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
         }

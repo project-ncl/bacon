@@ -347,7 +347,7 @@ public class PncEntitiesImporter {
             List<SCMRepository> foundRepository = toStream(repoClient.getAll(matchUrl, null))
                     .collect(Collectors.toList());
             if (foundRepository.isEmpty()) {
-                return Optional.empty();
+                return empty();
             } else if (foundRepository.size() == 1) {
                 return Optional.of(foundRepository.get(0));
             } else {

@@ -290,10 +290,7 @@ public class GroupConfigCli extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
                 try (GroupConfigurationClient client = CREATOR.newClient()) {
                     Collection<GroupBuild> groupBuilds = client
-                            .getAllGroupBuilds(
-                                    id,
-                                    of("=desc=startTime"),
-                                    Optional.of("temporaryBuild==" + temporaryBuild))
+                            .getAllGroupBuilds(id, of("=desc=startTime"), of("temporaryBuild==" + temporaryBuild))
                             .getAll();
                     Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
                     if (latest.isPresent()) {

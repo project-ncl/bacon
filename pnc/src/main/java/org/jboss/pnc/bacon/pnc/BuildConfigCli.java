@@ -120,7 +120,7 @@ public class BuildConfigCli extends AbstractCommand {
                         .name(buildConfigName)
                         .description(description)
                         .environment(Environment.builder().id(environmentId).build())
-                        .project((ProjectRef.refBuilder().id(projectId).build()))
+                        .project(ProjectRef.refBuilder().id(projectId).build())
                         .buildScript(buildScript)
                         .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
                         .scmRevision(scmRevision)
