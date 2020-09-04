@@ -105,7 +105,6 @@ public class BuildConfigCli extends AbstractCommand {
         private String buildType;
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
@@ -187,7 +186,6 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
@@ -332,7 +330,6 @@ public class BuildConfigCli extends AbstractCommand {
 
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;

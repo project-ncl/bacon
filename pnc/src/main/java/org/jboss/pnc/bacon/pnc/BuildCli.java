@@ -103,11 +103,10 @@ public class BuildCli extends AbstractCommand {
         private boolean timestampAlignment = false;
         @Option(name = "temporary-build", description = "Perform a temporary build.", hasValue = false)
         private boolean temporaryBuild = false;
-        @Option(name = "wait", overrideRequired = false, hasValue = false, description = "Wait for build to complete")
+        @Option(name = "wait", hasValue = false, description = "Wait for build to complete")
         private boolean wait = false;
         @Option(
                 name = "no-build-dependencies",
-                overrideRequired = false,
                 hasValue = false,
                 description = "Skip building of dependencies")
         private boolean noBuildDependencies = false;
@@ -118,7 +117,6 @@ public class BuildCli extends AbstractCommand {
         private Integer revision;
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;

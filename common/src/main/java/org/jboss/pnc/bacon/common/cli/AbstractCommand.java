@@ -64,7 +64,6 @@ public class AbstractCommand implements Command {
 
     @Option(
             name = "profile",
-            overrideRequired = false,
             defaultValue = { "default" },
             description = "PNC Configuration profile")
     private String profile;

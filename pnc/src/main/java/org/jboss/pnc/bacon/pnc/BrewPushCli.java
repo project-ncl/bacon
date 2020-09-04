@@ -58,13 +58,11 @@ public class BrewPushCli extends AbstractCommand {
         @Option(
                 name = "reimport",
                 description = "Re-import the build in case it was already imported",
-                overrideRequired = false,
                 hasValue = false)
         private boolean reimport = false;
 
         @Option(
                 name = "wait",
-                overrideRequired = false,
                 hasValue = false,
                 description = "Wait for BrewPush to complete")
         private boolean wait = false;
@@ -74,7 +72,6 @@ public class BrewPushCli extends AbstractCommand {
 
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
@@ -160,7 +157,6 @@ public class BrewPushCli extends AbstractCommand {
 
         @Option(
                 shortName = 'o',
-                overrideRequired = false,
                 hasValue = false,
                 description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;

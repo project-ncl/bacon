@@ -44,7 +44,6 @@ public abstract class AbstractListCommand<T> extends AbstractCommand {
 
     @Option(
             shortName = 'o',
-            overrideRequired = false,
             hasValue = false,
             description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
