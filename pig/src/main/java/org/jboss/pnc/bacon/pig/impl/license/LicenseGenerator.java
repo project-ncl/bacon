@@ -18,10 +18,16 @@
 
 package org.jboss.pnc.bacon.pig.impl.license;
 
-import me.snowdrop.licenses.LicensesGenerator;
-import me.snowdrop.licenses.LicensesGeneratorException;
-import me.snowdrop.licenses.properties.GeneratorProperties;
-import me.snowdrop.licenses.utils.Gav;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
@@ -34,15 +40,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import me.snowdrop.licenses.LicensesGenerator;
+import me.snowdrop.licenses.LicensesGeneratorException;
+import me.snowdrop.licenses.properties.GeneratorProperties;
+import me.snowdrop.licenses.utils.Gav;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -54,16 +55,24 @@ public class LicenseGenerator {
     private LicenseGenerator() {
     }
 
-    public static void generateLicenses(Collection<GAV> gavs, File archiveFile, String topLevelDirectoryName) {
+    public static void generateLicenses(
+            Collection<GAV> gavs,
+            File archiveFile,
+            String topLevelDirectoryName,
+            boolean strict) {
         File temporaryDestination = FileUtils.mkTempDir("licenses");
         File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
 
-        generateLicenses(gavs, topLevelDirectory, PigContext.get().isTempBuild());
+        generateLicenses(gavs, topLevelDirectory, PigContext.get().isTempBuild(), strict);
         FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
         log.debug("Generated zip archive {}", archiveFile);
     }
 
-    public static void generateLicenses(Collection<GAV> gavs, File licensesDirectory, boolean useTempBuilds) {
+    public static void generateLicenses(
+            Collection<GAV> gavs,
+            File licensesDirectory,
+            boolean useTempBuilds,
+            boolean strict) {
         try {
             LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties(useTempBuilds));
 
@@ -78,15 +87,17 @@ public class LicenseGenerator {
                     log.error(
                             "There are some invalid licenses in XML file generated. Following are the details of the invalid licenses:");
                     List<Node> nodes = XmlUtils.listNodes(xmlFile, "//license[not(url)]/parent::node()/parent::node()");
-                    nodes.forEach(node -> {
-                        log.error(
-                                "Group id is {} and artifact id is {}",
-                                node.getChildNodes().item(1).getTextContent(),
-                                node.getChildNodes().item(3).getTextContent());
-                    });
+                    nodes.forEach(
+                            node -> log.error(
+                                    "License url missing for {}:{}:{}",
+                                    node.getChildNodes().item(1).getTextContent(),
+                                    node.getChildNodes().item(3).getTextContent(),
+                                    node.getChildNodes().item(5).getTextContent()));
                 }
 
-                throw new RuntimeException("Invalid licenses XML file");
+                if (strict) {
+                    throw new RuntimeException("Invalid licenses XML file");
+                }
             }
         } catch (LicensesGeneratorException e) {
             throw new RuntimeException("Failed to generate licenses", e);

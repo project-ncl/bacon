@@ -17,6 +17,17 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.NotFoundException;
+
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
@@ -54,17 +65,6 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.NotFoundException;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * TODO: javadoc
@@ -118,7 +118,8 @@ public final class PigFacade {
             boolean tempBuild,
             boolean tempBuildTS,
             RebuildMode rebuildMode,
-            boolean skipBranchCheck) {
+            boolean skipBranchCheck,
+            boolean strictLicenseCheck) {
 
         PigContext context = context();
 
@@ -156,7 +157,7 @@ public final class PigFacade {
             if (repoZipPath != null) {
                 repo = parseRepository(new File(repoZipPath));
             } else {
-                repo = generateRepo(removeGeneratedM2Dups);
+                repo = generateRepo(removeGeneratedM2Dups, strictLicenseCheck);
             }
             context.setRepositoryData(repo);
             context.storeContext();
@@ -178,7 +179,7 @@ public final class PigFacade {
         }
 
         if (!skipLicenses && repo != null) {
-            generateLicenses();
+            generateLicenses(strictLicenseCheck);
         } else {
             log.info("Skipping License Generation");
         }
@@ -356,7 +357,7 @@ public final class PigFacade {
                 .forEach(AddOn::trigger);
     }
 
-    public static RepositoryData generateRepo(boolean removeGeneratedM2Dups) {
+    public static RepositoryData generateRepo(boolean removeGeneratedM2Dups, boolean strictLicenseCheck) {
         PigContext context = context();
         RepoManager repoManager = new RepoManager(
                 context.getPigConfiguration(),
@@ -364,7 +365,8 @@ public final class PigFacade {
                 context.getDeliverables(),
                 context.getBuilds(),
                 Paths.get("."), // TODO!
-                removeGeneratedM2Dups);
+                removeGeneratedM2Dups,
+                strictLicenseCheck);
 
         RepositoryData repositoryData = repoManager.prepare();
         File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
@@ -392,12 +394,12 @@ public final class PigFacade {
                 .getBuildsFromLatestGroupConfiguration(importResult.getBuildGroup().getId(), tempBuild);
     }
 
-    public static void generateLicenses() {
+    public static void generateLicenses(boolean strict) {
         PigContext context = context();
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
         Map<String, PncBuild> builds = context.getBuilds();
-        new LicenseManager(pigConfiguration, context.getReleasePath(), context.getDeliverables(), builds, repo)
+        new LicenseManager(pigConfiguration, context.getReleasePath(), strict, context.getDeliverables(), builds, repo)
                 .prepare();
     }
 
