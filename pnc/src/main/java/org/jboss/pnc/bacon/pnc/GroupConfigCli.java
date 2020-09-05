@@ -18,16 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
-import org.aesh.command.option.OptionList;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -40,19 +31,23 @@ import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static java.util.Optional.of;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @Slf4j
-@GroupCommandDefinition(
+@Command(
         name = "group-config",
         description = "Group config",
-        groupCommands = {
+        subcommands = {
                 GroupConfigCli.Create.class,
                 GroupConfigCli.Update.class,
                 GroupConfigCli.List.class,
@@ -61,196 +56,10 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
                 GroupConfigCli.AddBuildConfig.class,
                 GroupConfigCli.RemoveBuildConfig.class,
                 GroupConfigCli.ShowLatestBuild.class })
-public class GroupConfigCli extends AbstractCommand {
+public class GroupConfigCli {
 
     private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(
             GroupConfigurationClient::new);
-
-    @CommandDefinition(name = "create", description = "Create a group config")
-    public class Create extends AbstractCommand {
-
-        @Argument(required = true, description = "Name of group config")
-        private String groupConfigName;
-
-        @Option(name = "product-version-id", description = "Product Version ID")
-        private String productVersionId;
-
-        @Option(name = "build-config-ids", description = "Build config ids in Group Config. Comma separated")
-        private String buildConfigIds;
-
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
-
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-
-                GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder()
-                        .name(groupConfigName);
-
-                if (isNotEmpty(productVersionId)) {
-                    groupConfigurationBuilder
-                            .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
-                }
-                if (isNotEmpty(buildConfigIds)) {
-                    groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds));
-                }
-                try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                    ObjectHelper.print(jsonOutput, client.createNew(groupConfigurationBuilder.build()));
-                    return 0;
-                }
-            });
-        }
-
-        @Override
-        public String exampleText() {
-            return "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name";
-        }
-    }
-
-    @CommandDefinition(name = "update", description = "Update a group config")
-    public class Update extends AbstractCommand {
-
-        @Argument(required = true, description = "Group Config ID")
-        private String groupConfigId;
-
-        @Option(name = "name", description = "Name of group config")
-        private String groupConfigName;
-
-        @Option(name = "product-version-id", description = "Product Version ID")
-        private String productVersionId;
-
-        @Option(name = "build-config-ids", description = "Build config ids in Group Config. Comma separated")
-        private String buildConfigIds;
-
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-
-                try (GroupConfigurationClient client = CREATOR.newClient()) {
-                    GroupConfiguration groupConfiguration = client.getSpecific(groupConfigId);
-                    GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
-
-                    if (isNotEmpty(groupConfigName)) {
-                        updated.name(groupConfigName);
-                    }
-                    if (isNotEmpty(productVersionId)) {
-                        updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
-                    }
-                    if (isNotEmpty(buildConfigIds)) {
-                        updated.buildConfigs(addBuildConfigs(buildConfigIds));
-                    }
-                    try (GroupConfigurationClient authenticatedClient = CREATOR.newClientAuthenticated()) {
-                        authenticatedClient.update(groupConfigId, updated.build());
-                        return 0;
-                    }
-                }
-            });
-        }
-
-        @Override
-        public String exampleText() {
-            return "$ bacon pnc group-config update --name group-config-updated 503";
-        }
-    }
-
-    @CommandDefinition(name = "get", description = "Get a group config by its id")
-    public class Get extends AbstractGetSpecificCommand<GroupConfiguration> {
-
-        @Override
-        public GroupConfiguration getSpecific(String id) throws ClientException {
-            try (GroupConfigurationClient client = CREATOR.newClient()) {
-                return client.getSpecific(id);
-            }
-        }
-    }
-
-    @CommandDefinition(name = "list", description = "List group configs")
-    public class List extends AbstractListCommand<GroupConfiguration> {
-
-        @Override
-        public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            try (GroupConfigurationClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
-            }
-        }
-    }
-
-    @CommandDefinition(name = "list-build-configs", description = "List build configs of group config")
-    public class ListBuildConfig extends AbstractListCommand<BuildConfiguration> {
-
-        @Argument(required = true, description = "Group Config id")
-        private String id;
-
-        @Override
-        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-            try (GroupConfigurationClient client = CREATOR.newClient()) {
-                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
-            }
-        }
-    }
-
-    @CommandDefinition(name = "add-build-config", description = "Add build config to group config")
-    public class AddBuildConfig extends AbstractCommand {
-
-        @Argument(required = true, description = "Group config id")
-        private String id;
-
-        @OptionList(
-                name = "bc-id",
-                required = true,
-                description = "ID of the build configuration to add. You cen enter multiple ids separated by comma.")
-        private java.util.List<String> attributes;
-
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-                for (String bcid : attributes) {
-                    try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                        client.addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
-                    }
-                }
-                return 0;
-            });
-        }
-    }
-
-    @CommandDefinition(name = "remove-build-config", description = "Remove build config from group config")
-    public class RemoveBuildConfig extends AbstractCommand {
-
-        @Argument(required = true, description = "Group config id")
-        private String id;
-
-        @OptionList(
-                name = "bc-id",
-                required = true,
-                description = "ID of the build configuration to remove. You cen enter multiple ids separated by comma.")
-        private java.util.List<String> attributes;
-
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-                try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                    for (String bcid : attributes) {
-                        client.removeBuildConfig(id, bcid);
-                    }
-                    return 0;
-                }
-            });
-        }
-    }
 
     private static java.util.Map<String, BuildConfigurationRef> addBuildConfigs(String buildConfigIds) {
 
@@ -265,46 +74,227 @@ public class GroupConfigCli extends AbstractCommand {
         return buildConfigurationRefList;
     }
 
-    @CommandDefinition(
-            name = "show-latest-build",
-            description = "Show the progress of the latest group build for the group config")
-    public class ShowLatestBuild extends AbstractCommand {
+    @Command(name = "create", description = "Create a group config")
+    public static class Create implements Callable<Integer> {
 
-        @Argument(required = true, description = "Group config id")
+        @Parameters(description = "Name of group config")
+        private String groupConfigName;
+
+        @Option(names = "--product-version-id", description = "Product Version ID")
+        private String productVersionId;
+
+        @Option(names = "--build-config-ids", description = "Build config ids in Group Config. Comma separated")
+        private String buildConfigIds;
+
+        @Option(names = "-o", description = "use json for output (default to yaml)")
+        private boolean jsonOutput = false;
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder().name(groupConfigName);
+
+            if (isNotEmpty(productVersionId)) {
+                groupConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+            }
+            if (isNotEmpty(buildConfigIds)) {
+                groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds));
+            }
+            try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                ObjectHelper.print(jsonOutput, client.createNew(groupConfigurationBuilder.build()));
+                return 0;
+            }
+        }
+
+        // TODO: @Override
+        public String exampleText() {
+            return "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name";
+        }
+    }
+
+    @Command(name = "update", description = "Update a group config")
+    public static class Update implements Callable<Integer> {
+
+        @Parameters(description = "Group Config ID")
+        private String groupConfigId;
+
+        @Option(names = "--name", description = "Name of group config")
+        private String groupConfigName;
+
+        @Option(names = "--product-version-id", description = "Product Version ID")
+        private String productVersionId;
+
+        @Option(names = "--build-config-ids", description = "Build config ids in Group Config. Comma separated")
+        private String buildConfigIds;
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                GroupConfiguration groupConfiguration = client.getSpecific(groupConfigId);
+                GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
+
+                if (isNotEmpty(groupConfigName)) {
+                    updated.name(groupConfigName);
+                }
+                if (isNotEmpty(productVersionId)) {
+                    updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
+                if (isNotEmpty(buildConfigIds)) {
+                    updated.buildConfigs(addBuildConfigs(buildConfigIds));
+                }
+                try (GroupConfigurationClient authenticatedClient = CREATOR.newClientAuthenticated()) {
+                    authenticatedClient.update(groupConfigId, updated.build());
+                    return 0;
+                }
+            }
+        }
+
+        // TODO: @Override
+        public String exampleText() {
+            return "$ bacon pnc group-config update --name group-config-updated 503";
+        }
+    }
+
+    @Command(name = "get", description = "Get a group config by its id")
+    public static class Get extends AbstractGetSpecificCommand<GroupConfiguration> {
+
+        @Override
+        public GroupConfiguration getSpecific(String id) throws ClientException {
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                return client.getSpecific(id);
+            }
+        }
+    }
+
+    @Command(name = "list", description = "List group configs")
+    public static class List extends AbstractListCommand<GroupConfiguration> {
+
+        @Override
+        public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
+        }
+    }
+
+    @Command(name = "list-build-configs", description = "List build configs of group config")
+    public static class ListBuildConfig extends AbstractListCommand<BuildConfiguration> {
+
+        @Parameters(description = "Group Config id")
+        private String id;
+
+        @Override
+        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+            }
+        }
+    }
+
+    @Command(name = "add-build-config", description = "Add build config to group config")
+    public static class AddBuildConfig implements Callable<Integer> {
+
+        @Parameters(description = "Group config id")
         private String id;
 
         @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+                names = "--bc-id",
+                required = true,
+                description = "ID of the build configuration to add. You cen enter multiple ids separated by comma.")
+        private java.util.List<String> attributes;
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            for (String bcid : attributes) {
+                try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                    client.addBuildConfig(id, BuildConfigurationRef.refBuilder().id(bcid).build());
+                }
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "remove-build-config", description = "Remove build config from group config")
+    public static class RemoveBuildConfig implements Callable<Integer> {
+
+        @Parameters(description = "Group config id")
+        private String id;
+
+        @Option(
+                names = "--bc-id",
+                required = true,
+                description = "ID of the build configuration to remove. You cen enter multiple ids separated by comma.")
+        private java.util.List<String> attributes;
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                for (String bcid : attributes) {
+                    client.removeBuildConfig(id, bcid);
+                }
+                return 0;
+            }
+        }
+    }
+
+    @Command(
+            name = "show-latest-build",
+            description = "Show the progress of the latest group build for the group config")
+    public static class ShowLatestBuild implements Callable<Integer> {
+
+        @Parameters(description = "Group config id")
+        private String id;
+
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
-        @Option(name = "temporary-build", description = "Build is temporary", hasValue = false)
+        @Option(names = "--temporary-build", description = "Build is temporary")
         private boolean temporaryBuild;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-                try (GroupConfigurationClient client = CREATOR.newClient()) {
-                    Collection<GroupBuild> groupBuilds = client
-                            .getAllGroupBuilds(
-                                    id,
-                                    of("=desc=startTime"),
-                                    Optional.of("temporaryBuild==" + temporaryBuild))
-                            .getAll();
-                    Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
-                    if (latest.isPresent()) {
-                        ObjectHelper.print(jsonOutput, latest.get());
-                        return 0;
-                    } else {
-                        log.error("Couldn't find any group build from group config id: {}", id);
-                        return 1;
-                    }
+        public Integer call() throws Exception {
+            try (GroupConfigurationClient client = CREATOR.newClient()) {
+                Collection<GroupBuild> groupBuilds = client
+                        .getAllGroupBuilds(id, of("=desc=startTime"), Optional.of("temporaryBuild==" + temporaryBuild))
+                        .getAll();
+                Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
+                if (latest.isPresent()) {
+                    ObjectHelper.print(jsonOutput, latest.get());
+                    return 0;
+                } else {
+                    log.error("Couldn't find any group build from group config id: {}", id);
+                    return 1;
                 }
-            });
+            }
         }
     }
 }

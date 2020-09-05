@@ -18,15 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -40,98 +32,94 @@ import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-@GroupCommandDefinition(
+@Command(
         name = "scm-repository",
         description = "Scm repository",
-        groupCommands = {
+        subcommands = {
                 ScmRepositoryCli.CreateAndSync.class,
                 ScmRepositoryCli.Get.class,
                 ScmRepositoryCli.List.class,
                 ScmRepositoryCli.Update.class,
                 ScmRepositoryCli.ListBuildConfigs.class, })
 @Slf4j
-public class ScmRepositoryCli extends AbstractCommand {
+public class ScmRepositoryCli {
 
     private static final ClientCreator<AdvancedSCMRepositoryClient> CREATOR = new ClientCreator<>(
             AdvancedSCMRepositoryClient::new);
 
-    @CommandDefinition(
+    @Command(
             name = "create-and-sync",
             description = "Create a repository, and wait for PNC to give us the status of creation")
-    public class CreateAndSync extends AbstractCommand {
-
-        @Argument(required = true, description = "SCM URL")
+    public static class CreateAndSync implements Callable<Integer> {
+        @Parameters(description = "SCM URL")
         private String scmUrl;
 
-        @Option(
-                name = "no-pre-build-sync",
-                description = "Disable the pre-build sync of external repo.",
-                hasValue = false)
+        @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            try (SCMRepositoryClient client = CREATOR.newClient()) {
+                RemoteCollection<SCMRepository> existing = client.getAll(scmUrl, null);
 
-            // TODO: do the same for pig side
-            return super.executeHelper(commandInvocation, () -> {
+                // if already exists, don't try to create!
+                if (existing != null && existing.size() > 0) {
 
-                try (SCMRepositoryClient client = CREATOR.newClient()) {
-                    RemoteCollection<SCMRepository> existing = client.getAll(scmUrl, null);
-
-                    // if already exists, don't try to create!
-                    if (existing != null && existing.size() > 0) {
-
-                        log.warn("Repository already exists on PNC! No creation needed");
-                        ObjectHelper.print(jsonOutput, existing.getAll().iterator());
-                        return 0;
-                    }
-                    CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
-                            .preBuildSyncEnabled(!noPreBuildSync)
-                            .scmUrl(scmUrl)
-                            .build();
-
-                    try (AdvancedSCMRepositoryClient clientAdvanced = CREATOR.newClientAuthenticated()) {
-                        CompletableFuture<SCMCreationResult> futureResult = clientAdvanced
-                                .createNewAndWait(createAndSyncSCMRequest);
-                        if (!futureResult.isDone()) {
-                            log.info("Waiting for repository '{}' to be created on PNC...", scmUrl);
-                        }
-                        final SCMCreationResult result = futureResult.join();
-                        if (result.isSuccess()) {
-                            ObjectHelper.print(jsonOutput, result.getScmRepositoryCreationSuccess().getScmRepository());
-                        } else {
-                            throw new FatalException(
-                                    "Failure while creating repository: {}",
-                                    result.getRepositoryCreationFailure());
-                        }
-                        return 0;
-                    }
+                    log.warn("Repository already exists on PNC! No creation needed");
+                    ObjectHelper.print(jsonOutput, existing.getAll().iterator());
+                    return 0;
                 }
-            });
+                CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
+                        .preBuildSyncEnabled(!noPreBuildSync)
+                        .scmUrl(scmUrl)
+                        .build();
+
+                try (AdvancedSCMRepositoryClient clientAdvanced = CREATOR.newClientAuthenticated()) {
+                    CompletableFuture<SCMCreationResult> futureResult = clientAdvanced
+                            .createNewAndWait(createAndSyncSCMRequest);
+                    if (!futureResult.isDone()) {
+                        log.info("Waiting for repository '{}' to be created on PNC...", scmUrl);
+                    }
+                    final SCMCreationResult result = futureResult.join();
+                    if (result.isSuccess()) {
+                        ObjectHelper.print(jsonOutput, result.getScmRepositoryCreationSuccess().getScmRepository());
+                    } else {
+                        throw new FatalException(
+                                "Failure while creating repository: {}",
+                                result.getRepositoryCreationFailure());
+                    }
+                    return 0;
+                }
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc scm-repository create-and-sync --no-pre-build-sync http://github.com/project-ncl/pnc.git";
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a repository by its id")
-    public class Get extends AbstractGetSpecificCommand<SCMRepository> {
+    @Command(name = "get", description = "Get a repository by its id")
+    public static class Get extends AbstractGetSpecificCommand<SCMRepository> {
 
         @Override
         public SCMRepository getSpecific(String id) throws ClientException {
@@ -141,70 +129,71 @@ public class ScmRepositoryCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update an SCM Repository")
-    public class Update extends AbstractCommand {
-        @Argument(required = true, description = "SCM Repository Id")
+    @Command(name = "update", description = "Update an SCM Repository")
+    public static class Update implements Callable<Integer> {
+        @Parameters(description = "SCM Repository Id")
         private String id;
 
         @Option(
-                name = "external-scm",
+                names = "--external-scm",
                 description = "External SCM URL: e.g --external-scm=\"https://github.com/project-ncl/bacon.git\"")
         private String externalScm;
 
-        @Option(name = "no-external-scm", description = "Specify no external scm", hasValue = false)
+        @Option(names = "--no-external-scm", description = "Specify no external scm")
         private boolean noExternalScmSpecified;
 
-        @Option(name = "pre-build", description = "Enable / Disable pre-build")
+        @Option(names = "--pre-build", description = "Enable / Disable pre-build")
         private Boolean preBuild;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            try (SCMRepositoryClient client = CREATOR.newClient()) {
+                SCMRepository scmRepository = client.getSpecific(id);
+                SCMRepository.Builder updated = scmRepository.toBuilder();
 
-            return super.executeHelper(commandInvocation, () -> {
-
-                try (SCMRepositoryClient client = CREATOR.newClient()) {
-                    SCMRepository scmRepository = client.getSpecific(id);
-                    SCMRepository.Builder updated = scmRepository.toBuilder();
-
-                    if (preBuild != null) {
-                        updated.preBuildSyncEnabled(preBuild);
-                    }
-
-                    if (noExternalScmSpecified && isNotEmpty(externalScm)) {
-                        throw new FatalException(
-                                "You cannot specify both the 'external-scm' and 'no-external-scm' options at the same time");
-                    } else if (isNotEmpty(externalScm)) {
-                        updated.externalUrl(externalScm);
-                    } else if (noExternalScmSpecified) {
-                        updated.externalUrl(null);
-                        log.debug("Since we're removing the external-scm, pre-build set to fals");
-                        updated.preBuildSyncEnabled(false);
-                    }
-
-                    log.debug("SCM Repository updated to: {}", updated);
-
-                    try (AdvancedSCMRepositoryClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
-                        clientAuthenticated.update(id, updated.build());
-                        return 0;
-                    }
+                if (preBuild != null) {
+                    updated.preBuildSyncEnabled(preBuild);
                 }
-            });
+
+                if (noExternalScmSpecified && isNotEmpty(externalScm)) {
+                    throw new FatalException(
+                            "You cannot specify both the 'external-scm' and 'no-external-scm' options at the same time");
+                } else if (isNotEmpty(externalScm)) {
+                    updated.externalUrl(externalScm);
+                } else if (noExternalScmSpecified) {
+                    updated.externalUrl(null);
+                    log.debug("Since we're removing the external-scm, pre-build set to fals");
+                    updated.preBuildSyncEnabled(false);
+                }
+
+                log.debug("SCM Repository updated to: {}", updated);
+
+                try (AdvancedSCMRepositoryClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                    clientAuthenticated.update(id, updated.build());
+                    return 0;
+                }
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "bacon pnc scm-repository update 5 --pre-build=false --external-scm=\"http://hello.com/test.git\"";
         }
     }
 
-    @CommandDefinition(name = "list", description = "List repositories")
-    public class List extends AbstractListCommand<SCMRepository> {
+    @Command(name = "list", description = "List repositories")
+    public static class List extends AbstractListCommand<SCMRepository> {
 
-        @Option(name = "match-url", description = "Exact URL to search")
+        @Option(names = "--match-url", description = "Exact URL to search")
         private String matchUrl;
 
-        @Option(name = "search-url", description = "Part of the URL to search")
+        @Option(names = "--search-url", description = "Part of the URL to search")
         private String searchUrl;
 
         @Override
@@ -215,12 +204,10 @@ public class ScmRepositoryCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(
-            name = "list-build-configs",
-            description = "List build configs that use a particular SCM repository")
+    @Command(name = "list-build-configs", description = "List build configs that use a particular SCM repository")
     public class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
 
-        @Argument(description = "SCM Repository ID")
+        @Parameters(description = "SCM Repository ID")
         private String scmRepositoryId;
 
         @Override

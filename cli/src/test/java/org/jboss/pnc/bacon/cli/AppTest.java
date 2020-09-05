@@ -12,6 +12,6 @@ class AppTest {
     void testHelp() throws Exception {
         App app = new App();
         String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
-        assertTrue(text.contains("Usage: bacon [<options>]"));
+        assertTrue(text.contains("Usage: bacon.jar [-hvV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
     }
 }

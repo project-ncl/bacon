@@ -18,22 +18,12 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
-import org.aesh.command.option.OptionList;
-import org.aesh.command.shell.Shell;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.BuildClient;
@@ -47,6 +37,9 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import javax.ws.rs.core.Response;
 
@@ -59,12 +52,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-@GroupCommandDefinition(
+@Command(
         name = "build",
         description = "build",
-        groupCommands = {
+        subcommands = {
                 BuildCli.Start.class,
                 BuildCli.Cancel.class,
                 BuildCli.List.class,
@@ -75,58 +69,48 @@ import java.util.concurrent.TimeUnit;
                 BuildCli.GetLog.class,
                 BuildCli.DownloadSources.class })
 @Slf4j
-public class BuildCli extends AbstractCommand {
+public class BuildCli {
 
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
     private static final ClientCreator<AdvancedBuildConfigurationClient> BC_CREATOR = new ClientCreator<>(
             AdvancedBuildConfigurationClient::new);
 
-    @CommandDefinition(name = "start", description = "Start a new build")
-    public class Start extends AbstractCommand {
+    @Command(name = "start", description = "Start a new build")
+    public static class Start implements Callable<Integer> {
 
-        @Argument(required = true, description = "Build Config ID")
+        @Parameters(description = "Build Config ID")
         private String buildConfigId;
 
         @Option(
-                name = "rebuild-mode",
+                names = "--rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(
-                name = "keep-pod-on-failure",
-                description = "Keep the builder pod online after the build fails.",
-                hasValue = false)
+        @Option(names = "--keep-pod-on-failure", description = "Keep the builder pod online after the build fails.")
         private boolean keepPodOnFailure = false;
-        @Option(
-                name = "timestamp-alignment",
-                description = "Do timestamp alignment with temprary build.",
-                hasValue = false)
+        @Option(names = "--timestamp-alignment", description = "Do timestamp alignment with temprary build.")
         private boolean timestampAlignment = false;
-        @Option(name = "temporary-build", description = "Perform a temporary build.", hasValue = false)
+        @Option(names = "--temporary-build", description = "Perform a temporary build.")
         private boolean temporaryBuild = false;
-        @Option(name = "wait", overrideRequired = false, hasValue = false, description = "Wait for build to complete")
+        @Option(names = "--wait", description = "Wait for build to complete")
         private boolean wait = false;
-        @Option(
-                name = "no-build-dependencies",
-                overrideRequired = false,
-                hasValue = false,
-                description = "Skip building of dependencies")
+        @Option(names = "--no-build-dependencies", description = "Skip building of dependencies")
         private boolean noBuildDependencies = false;
 
-        @Option(name = "timeout", description = "Time in minutes the command waits for Build completion")
+        @Option(names = "--timeout", description = "Time in minutes the command waits for Build completion")
         private Integer timeout;
-        @Option(name = "revision", description = "Build Config revision to build.")
+        @Option(names = "--revision", description = "Build Config revision to build.")
         private Integer revision;
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
+        public Integer call() throws Exception {
             BuildParameters buildParams = new BuildParameters();
             if (rebuildMode == null) {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
@@ -138,35 +122,32 @@ public class BuildCli extends AbstractCommand {
             buildParams.setTemporaryBuild(temporaryBuild);
             buildParams.setBuildDependencies(!noBuildDependencies);
 
-            return super.executeHelper(commandInvocation, () -> {
-                try (AdvancedBuildConfigurationClient client = BC_CREATOR.newClientAuthenticated()) {
+            try (AdvancedBuildConfigurationClient client = BC_CREATOR.newClientAuthenticated()) {
 
-                    final Build build;
-                    if (revision == null) {
-                        if (timeout != null) {
-                            build = client.executeBuild(buildConfigId, buildParams, timeout, TimeUnit.MINUTES);
-                        } else if (wait) {
-                            build = client.executeBuild(buildConfigId, buildParams).join();
-                        } else {
-                            build = client.trigger(buildConfigId, buildParams);
-                        }
+                final Build build;
+                if (revision == null) {
+                    if (timeout != null) {
+                        build = client.executeBuild(buildConfigId, buildParams, timeout, TimeUnit.MINUTES);
+                    } else if (wait) {
+                        build = client.executeBuild(buildConfigId, buildParams).join();
                     } else {
-                        if (timeout != null) {
-                            build = client
-                                    .executeBuild(buildConfigId, revision, buildParams, timeout, TimeUnit.MINUTES);
-                        } else if (wait) {
-                            build = client.executeBuild(buildConfigId, revision, buildParams).join();
-                        } else {
-                            build = client.triggerRevision(buildConfigId, revision, buildParams);
-                        }
+                        build = client.trigger(buildConfigId, buildParams);
                     }
-                    ObjectHelper.print(jsonOutput, build);
-                    return build.getStatus().completedSuccessfully() ? 0 : build.getStatus().ordinal();
+                } else {
+                    if (timeout != null) {
+                        build = client.executeBuild(buildConfigId, revision, buildParams, timeout, TimeUnit.MINUTES);
+                    } else if (wait) {
+                        build = client.executeBuild(buildConfigId, revision, buildParams).join();
+                    } else {
+                        build = client.triggerRevision(buildConfigId, revision, buildParams);
+                    }
                 }
-            });
+                ObjectHelper.print(jsonOutput, build);
+                return build.getStatus().completedSuccessfully() ? 0 : build.getStatus().ordinal();
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
 
             StringBuilder command = new StringBuilder();
@@ -175,35 +156,37 @@ public class BuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "cancel", description = "Cancel build")
-    public class Cancel extends AbstractCommand {
+    @Command(name = "cancel", description = "Cancel build")
+    public static class Cancel implements Callable<Integer> {
 
-        @Argument(required = true, description = "Build ID")
+        @Parameters(description = "Build ID")
         private String buildId;
 
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-                try (BuildClient client = CREATOR.newClientAuthenticated()) {
-                    client.cancel(buildId);
-                    return 0;
-                }
-            });
-        }
-
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc build cancel 10000";
         }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            try (BuildClient client = CREATOR.newClientAuthenticated()) {
+                client.cancel(buildId);
+                return 0;
+            }
+        }
     }
 
-    @CommandDefinition(name = "list", description = "List builds")
+    @Command(name = "list", description = "List builds")
     public class List extends AbstractBuildListCommand {
 
-        @OptionList(
-                name = "attributes",
+        @Option(
+                names = "--attributes",
                 description = "Get only builds with given attributes. Format: KEY=VALUE,KEY=VALUE")
         private java.util.List<String> attributes;
 
@@ -223,10 +206,10 @@ public class BuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-built-artifacts", description = "List built artifacts")
+    @Command(name = "list-built-artifacts", description = "List built artifacts")
     public class ListBuildArtifacts extends AbstractListCommand<Artifact> {
 
-        @Argument(required = true, description = "Build ID")
+        @Parameters(description = "Build ID")
         private String buildId;
 
         @Override
@@ -236,16 +219,16 @@ public class BuildCli extends AbstractCommand {
             }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc build list-built-artifacts 10000";
         }
     }
 
-    @CommandDefinition(name = "list-dependencies", description = "List dependencies")
+    @Command(name = "list-dependencies", description = "List dependencies")
     public class ListDependencies extends AbstractListCommand<Artifact> {
 
-        @Argument(required = true, description = "Build ID")
+        @Parameters(description = "Build ID")
         private String buildId;
 
         @Override
@@ -255,13 +238,13 @@ public class BuildCli extends AbstractCommand {
             }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc build list-dependencies 10000";
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a build by its id")
+    @Command(name = "get", description = "Get a build by its id")
     public class Get extends AbstractGetSpecificCommand<Build> {
 
         @Override
@@ -272,7 +255,7 @@ public class BuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get-revision", description = "Get build-config revision of build")
+    @Command(name = "get-revision", description = "Get build-config revision of build")
     public class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
 
         @Override
@@ -283,24 +266,22 @@ public class BuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get-log", description = "Get build log.")
-    public class GetLog extends AbstractCommand {
-        @Argument(required = true, description = "Build id.")
+    @Command(name = "get-log", description = "Get build log.")
+    public class GetLog implements Callable<Integer> {
+        @Parameters(description = "Build id.")
         private String buildId;
 
-        @Option(name = "follow", description = "Follow the live log.")
+        @Option(names = "--follow", description = "Follow the live log.")
         private boolean follow;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                printLog(commandInvocation.getShell());
-                return 0;
-            });
-        }
-
-        private void printLog(Shell shell) throws ClientException {
+        public Integer call() throws Exception {
             try {
                 Optional<InputStream> buildLogs;
                 try (BuildClient client = CREATOR.newClient()) {
@@ -314,7 +295,9 @@ public class BuildCli extends AbstractCommand {
                     try (InputStream inputStream = buildLogs.get();
                             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                             BufferedReader reader = new BufferedReader(inputStreamReader);) {
-                        reader.lines().forEach(l -> shell.writeln(l));
+                        // TODO: Output?
+                        // reader.lines().forEach( l -> shell.writeln( l ) );
+                        reader.lines().forEach(log::info);
                     } catch (IOException e) {
                         throw new ClientException("Cannot read log stream.", e);
                     }
@@ -323,42 +306,45 @@ public class BuildCli extends AbstractCommand {
                     String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
                     URI bifrostUri = URI.create(bifrostBase);
                     BifrostClient logProcessor = new BifrostClient(bifrostUri);
-                    logProcessor.writeLog(buildId, follow, line -> shell.writeln(line));
+                    // TODO: Output?
+                    // logProcessor.writeLog( buildId, follow, line -> shell.writeln( line ) );
+                    logProcessor.writeLog(buildId, follow, log::info);
                 }
             } catch (RemoteResourceException | IOException e) {
                 throw new ClientException("Cannot read remote resource.", e);
             }
+            return 0;
         }
     }
 
-    @CommandDefinition(name = "download-sources", description = "Download SCM sources used for the build")
-    public class DownloadSources extends AbstractCommand {
+    @Command(name = "download-sources", description = "Download SCM sources used for the build")
+    public class DownloadSources implements Callable<Integer> {
 
-        @Argument(required = true, description = "Id of build")
+        @Parameters(description = "Id of build")
         private String id;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            String filename = id + "-sources.tar.gz";
 
-            return super.executeHelper(commandInvocation, () -> {
+            try (BuildClient client = CREATOR.newClient(); Response response = client.getInternalScmArchiveLink(id)) {
+                InputStream in = (InputStream) response.getEntity();
 
-                String filename = id + "-sources.tar.gz";
+                Path path = Paths.get(filename);
 
-                try (BuildClient client = CREATOR.newClient();
-                        Response response = client.getInternalScmArchiveLink(id)) {
-                    InputStream in = (InputStream) response.getEntity();
-
-                    Path path = Paths.get(filename);
-
-                    try {
-                        Files.copy(in, path);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return response.getStatus();
+                try {
+                    Files.copy(in, path);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            });
+                return response.getStatus();
+            }
         }
     }
 }

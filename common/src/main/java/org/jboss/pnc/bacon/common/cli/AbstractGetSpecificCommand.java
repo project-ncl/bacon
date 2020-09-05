@@ -17,14 +17,15 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+
+import java.util.concurrent.Callable;
 
 /**
  * Class used to get specific item from PNC. The subclass only has to implement 'getSpecific' to teach it how to
@@ -33,25 +34,21 @@ import org.jboss.pnc.client.ClientException;
  * @param <T>
  */
 @Slf4j
-public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
-
-    @Argument(required = true, description = "Id of item")
+public abstract class AbstractGetSpecificCommand<T> implements Callable<Integer> {
+    @Parameters(description = "Id of item")
     private String id;
 
-    @Option(
-            shortName = 'o',
-            overrideRequired = false,
-            hasValue = false,
-            description = "use json for output (default to yaml)")
+    @Option(names = "-o", description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
     @Override
-    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
-
-        return super.executeHelper(commandInvocation, () -> {
+    public Integer call() {
+        try {
             ObjectHelper.print(jsonOutput, getSpecific(id));
-            return 0;
-        });
+        } catch (JsonProcessingException | ClientException e) {
+            throw new FatalException("Caught exception", e);
+        }
+        return 0;
     }
 
     public abstract T getSpecific(String id) throws ClientException;

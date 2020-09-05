@@ -17,41 +17,21 @@
  */
 package org.jboss.pnc.bacon.cli;
 
+import ch.qos.logback.classic.Level;
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.AeshCommandRuntimeBuilder;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.CommandRuntime;
-import org.aesh.command.Execution;
-import org.aesh.command.Executor;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.activator.CommandActivator;
-import org.aesh.command.activator.OptionActivator;
-import org.aesh.command.builder.CommandBuilder;
-import org.aesh.command.completer.CompleterInvocation;
-import org.aesh.command.converter.ConverterInvocation;
-import org.aesh.command.impl.registry.AeshCommandRegistryBuilder;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.parser.CommandLineParserException;
-import org.aesh.command.parser.OptionParserException;
-import org.aesh.command.parser.RequiredOptionException;
-import org.aesh.command.registry.CommandRegistry;
-import org.aesh.command.settings.SettingsBuilder;
-import org.aesh.command.validator.CommandValidatorException;
-import org.aesh.command.validator.ValidatorInvocation;
-import org.aesh.readline.Prompt;
-import org.aesh.readline.ReadlineConsole;
-import org.aesh.readline.terminal.formatting.Color;
-import org.aesh.readline.terminal.formatting.TerminalColor;
-import org.aesh.readline.terminal.formatting.TerminalString;
 import org.jboss.bacon.da.Da;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.cli.VersionProvider;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import static picocli.CommandLine.ScopeType.INHERIT;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -59,114 +39,116 @@ import java.util.stream.Collectors;
  */
 
 @Slf4j
-@GroupCommandDefinition(name = "bacon", description = "Bacon CLI", groupCommands = { Pnc.class, Da.class, Pig.class })
-public class App extends AbstractCommand {
+@Command(name = "bacon.jar", versionProvider = VersionProvider.class, subcommands = { Da.class, Pig.class, Pnc.class })
+public class App {
 
-    public int run(String[] args) throws Exception {
+    private String configPath = null;
 
-        CommandRegistry registry;
+    private String profile = "default";
 
+    public int run(String[] args) {
         if (args.length == 0) {
-            registry = AeshCommandRegistryBuilder.builder()
-                    .command(Pnc.class)
-                    .command(Da.class)
-                    .command(Pig.class)
-                    .command(CommandBuilder.builder().name("exit").command(commandInvocation -> {
-                        commandInvocation.stop();
-                        return CommandResult.SUCCESS;
-                    }).create())
-                    .create();
-            SettingsBuilder<CommandInvocation, ConverterInvocation, CompleterInvocation, ValidatorInvocation, OptionActivator, CommandActivator> builder = SettingsBuilder
-                    .builder()
-                    .logging(true)
-                    .enableAlias(false)
-                    .enableExport(false)
-                    .enableMan(true)
-                    .enableSearchInPaging(true)
-                    .readInputrc(false)
-                    .commandRegistry(registry);
 
-            ReadlineConsole console = new ReadlineConsole(builder.build());
-            console.setPrompt(
-                    new Prompt(
-                            new TerminalString(
-                                    "[bacon@console]$ ",
-                                    new TerminalColor(Color.DEFAULT, Color.DEFAULT, Color.Intensity.BRIGHT))));
+            // TODO: Implement
 
-            console.start();
-
-            return 0;
+            // registry = AeshCommandRegistryBuilder.builder()
+            // .command(Pnc.class)
+            // .command(Da.class)
+            // .command(Pig.class)
+            // .command(CommandBuilder.builder().name("exit").command(commandInvocation -> {
+            // commandInvocation.stop();
+            // return CommandResult.SUCCESS;
+            // }).create())
+            // .create();
+            // SettingsBuilder<CommandInvocation, ConverterInvocation, CompleterInvocation, ValidatorInvocation,
+            // OptionActivator, CommandActivator> builder = SettingsBuilder
+            // .builder()
+            // .logging(true)
+            // .enableAlias(false)
+            // .enableExport(false)
+            // .enableMan(true)
+            // .enableSearchInPaging(true)
+            // .readInputrc(false)
+            // .commandRegistry(registry);
+            //
+            // ReadlineConsole console = new ReadlineConsole(builder.build());
+            // console.setPrompt(
+            // new Prompt(
+            // new TerminalString(
+            // "[bacon@console]$ ",
+            // new TerminalColor(Color.DEFAULT, Color.DEFAULT, Color.Intensity.BRIGHT))));
+            //
+            // console.start();
+            //
+            // return 0;
+            throw new FatalException("NYI");
         } else {
-            registry = AeshCommandRegistryBuilder.builder().command(this.getClass()).create();
-
-            CommandRuntime runtime = AeshCommandRuntimeBuilder.builder().commandRegistry(registry).build();
-            try {
-                // Code below copied directly from 'executeCommand' - instead of running:
-                // runtime.executeCommand(buildCLIOutput(args));
-                // which allows us to grab the CommandResult and thereby get the return code.
-                // TODO : Remove once https://github.com/aeshell/aesh/issues/323 is fixed and released.
-                Executor executor = runtime.buildExecutor(buildCLIOutput(args));
-                Execution exec;
-                CommandResult commandResult = null;
-                while ((exec = executor.getNextExecution()) != null) {
-                    try {
-                        commandResult = exec.execute();
-                    } catch (CommandException cmd) {
-                        if (exec.getResultHandler() != null) {
-                            exec.getResultHandler().onExecutionFailure(CommandResult.FAILURE, cmd);
-                        }
-                        throw cmd;
-                    } catch (CommandValidatorException | CommandLineParserException e) {
-                        if (exec.getResultHandler() != null) {
-                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
-                        }
-                        throw e;
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        if (exec.getResultHandler() != null) {
-                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
-                        }
-                        throw e;
-                    } catch (Exception e) {
-                        if (exec.getResultHandler() != null) {
-                            exec.getResultHandler().onValidationFailure(CommandResult.FAILURE, e);
-                        }
-                        throw new RuntimeException(e);
-                    }
-                }
-                return commandResult.getResultValue();
-            } catch (OptionParserException | RequiredOptionException e) {
-                throw new FatalException("Missing argument/option: {}", e.getMessage(), e);
-            } catch (CommandLineParserException e) {
-                throw new FatalException("Wrong arguments: {}", e.getMessage(), e);
-            } catch (RuntimeException e) {
-                if (e.getMessage().contains(FatalException.class.getCanonicalName())) {
-                    throw e;
-                }
-                // if stacktrace not thrown from aesh
-                if (!e.getCause().getClass().getCanonicalName().contains("aesh")) {
-                    log.error("Stacktrace", e);
-                }
-
-                // signal that an error has occurred
-                throw new FatalException("Unknown RuntimeException", e);
-            }
+            return new CommandLine(this).setExecutionStrategy(this::executionStrategy).execute(args);
         }
     }
 
-    private static String buildCLIOutput(String[] args) {
-        return "bacon "
-                + Arrays.stream(args).map(s -> s.replaceAll("([\"' \\\\])", "\\\\$1")).collect(Collectors.joining(" "));
-    }
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
-            App app = new App();
-            System.exit(app.run(args));
+            System.exit(new App().run(args));
         } catch (FatalException e) {
             log.error(e.getMessage());
             log.debug("Full trace", e);
             System.exit(1);
         }
+    }
+
+    /**
+     * Set the verbosity of logback if the verbosity flag is set
+     */
+    @Option(names = "-v", description = "Verbose output", scope = INHERIT)
+    public void setVerbosityIfPresent(boolean verbose) {
+
+        if (verbose) {
+            ObjectHelper.setRootLoggingLevel(Level.DEBUG);
+
+            // Add more loggers that you want to switch to DEBUG here
+            ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.DEBUG);
+
+            log.debug("Log level set to DEBUG");
+        }
+    }
+
+    @Option(names = "--profile", defaultValue = "default", description = "PNC Configuration profile", scope = INHERIT)
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+
+    /**
+     * Set the path to config file if the configPath flag or environment variable is set
+     */
+    @Option(names = "-p", description = "Path to PNC configuration folder", scope = INHERIT)
+    public void setConfigurationFileLocation(String configPath) {
+        if (configPath != null) {
+            setConfigLocation(configPath, "flag");
+        }
+    }
+
+    @Option(names = { "-h", "--help" }, usageHelp = true, description = "display this help message", scope = INHERIT)
+    boolean usageHelpRequested;
+
+    @Option(names = { "-V", "--version" }, versionHelp = true, description = "display version info")
+    boolean versionInfoRequested;
+
+    private void init() {
+        if (System.getenv(Constant.CONFIG_ENV) != null) {
+            setConfigLocation(System.getenv(Constant.CONFIG_ENV), "environment variable");
+        } else {
+            setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "Constant");
+        }
+    }
+
+    private void setConfigLocation(String configLocation, String source) {
+        Config.configure(configLocation, Constant.CONFIG_FILE_NAME, profile);
+        log.debug("Config file set from {} to {}", source, Config.getConfigFilePath());
+    }
+
+    private int executionStrategy(CommandLine.ParseResult parseResult) {
+        init(); // custom initialization to be done before executing any command or subcommand
+        return new CommandLine.RunLast().execute(parseResult); // default execution strategy
     }
 }

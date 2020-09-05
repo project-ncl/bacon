@@ -17,15 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.dto.BuildPushResult;
@@ -33,85 +25,78 @@ import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
 import org.jboss.pnc.enums.BuildPushStatus;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-@GroupCommandDefinition(
+@Command(
         name = "brew-push",
         description = "brew-push",
-        groupCommands = { BrewPushCli.Build.class, BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
-public class BrewPushCli extends AbstractCommand {
+        subcommands = { BrewPushCli.Build.class, BrewPushCli.GroupBuild.class, BrewPushCli.Status.class, })
+public class BrewPushCli {
 
     private static final ClientCreator<AdvancedBuildClient> BUILD_CREATOR = new ClientCreator<>(
             AdvancedBuildClient::new);
     private static final ClientCreator<GroupBuildClient> GROUP_BUILD_CREATOR = new ClientCreator<>(
             GroupBuildClient::new);
 
-    @CommandDefinition(name = "build", description = "Push build to Brew")
-    public class Build extends AbstractCommand {
+    @Command(name = "build", description = "Push build to Brew")
+    public static class Build implements Callable<Integer> {
 
-        @Argument(required = true, description = "Id of build")
+        @Parameters(description = "Id of build")
         private String id;
-        @Option(required = true, name = "tag-prefix", description = "Brew Tag Prefix")
+        @Option(required = true, names = "--tag-prefix", description = "Brew Tag Prefix")
         private String tagPrefix;
 
-        @Option(
-                name = "reimport",
-                description = "Re-import the build in case it was already imported",
-                overrideRequired = false,
-                hasValue = false)
+        @Option(names = "--reimport", description = "Re-import the build in case it was already imported")
         private boolean reimport = false;
 
-        @Option(
-                name = "wait",
-                overrideRequired = false,
-                hasValue = false,
-                description = "Wait for BrewPush to complete")
+        @Option(names = "--wait", description = "Wait for BrewPush to complete")
         private boolean wait = false;
 
-        @Option(name = "timeout", description = "Time in minutes the command waits for Group Build completion")
+        @Option(names = "--timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            try (AdvancedBuildClient buildClient = BUILD_CREATOR.newClientAuthenticated()) {
+                BuildPushParameters request = BuildPushParameters.builder()
+                        .tagPrefix(tagPrefix)
+                        .reimport(reimport)
+                        .build();
 
-            return super.executeHelper(commandInvocation, () -> {
-
-                try (AdvancedBuildClient buildClient = BUILD_CREATOR.newClientAuthenticated()) {
-                    BuildPushParameters request = BuildPushParameters.builder()
-                            .tagPrefix(tagPrefix)
-                            .reimport(reimport)
-                            .build();
-
-                    if (timeout != null) {
-                        BuildPushResult bpr = buildClient
-                                .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES);
-                        ObjectHelper.print(jsonOutput, bpr);
-                        return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
-                    }
-
-                    if (wait) {
-                        BuildPushResult bpr = buildClient.executeBrewPush(id, request).join();
-                        ObjectHelper.print(jsonOutput, bpr);
-                        return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
-                    } else {
-                        BuildPushResult bpr = buildClient.push(id, request);
-                        ObjectHelper.print(jsonOutput, bpr);
-                        return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
-                    }
+                if (timeout != null) {
+                    BuildPushResult bpr = buildClient
+                            .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES);
+                    ObjectHelper.print(jsonOutput, bpr);
+                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
                 }
-            });
+
+                if (wait) {
+                    BuildPushResult bpr = buildClient.executeBrewPush(id, request).join();
+                    ObjectHelper.print(jsonOutput, bpr);
+                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                } else {
+                    BuildPushResult bpr = buildClient.push(id, request);
+                    ObjectHelper.print(jsonOutput, bpr);
+                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                }
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             StringBuilder commands = new StringBuilder();
             commands.append("$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"\n")
@@ -122,28 +107,31 @@ public class BrewPushCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "group-build", description = "Push group build to Brew")
-    public class GroupBuild extends AbstractCommand {
+    @Command(name = "group-build", description = "Push group build to Brew")
+    public class GroupBuild implements Callable<Integer> {
 
-        @Argument(required = true, description = "Id of group-build")
+        @Parameters(description = "Id of group-build")
         private String id;
-        @Option(required = true, name = "tag-prefix", description = "Brew Tag Prefix")
+        @Option(required = true, names = "--tag-prefix", description = "Brew Tag Prefix")
         private String tagPrefix;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
             // TODO add wait option for GroupPush
-            return super.executeHelper(commandInvocation, () -> {
-                GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
-                try (GroupBuildClient client = GROUP_BUILD_CREATOR.newClientAuthenticated()) {
-                    client.brewPush(id, request);
-                    return 0;
-                }
-            });
+            GroupBuildPushRequest request = GroupBuildPushRequest.builder().tagPrefix(tagPrefix).build();
+            try (GroupBuildClient client = GROUP_BUILD_CREATOR.newClientAuthenticated()) {
+                client.brewPush(id, request);
+                return 0;
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             StringBuilder commands = new StringBuilder();
             commands.append("$ bacon pnc brew-push group-build 8 --tag-prefix=\"1.0-pnc\"\n");
@@ -152,33 +140,31 @@ public class BrewPushCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "status", description = "Brew Push Status")
-    public class Status extends AbstractCommand {
+    @Command(name = "status", description = "Brew Push Status")
+    public static class Status implements Callable<Integer> {
 
-        @Argument(required = true, description = "Brew Push ID")
+        @Parameters(description = "Brew Push ID")
         private String id;
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-                try (AdvancedBuildClient client = BUILD_CREATOR.newClient()) {
-                    BuildPushResult bpr = client.getPushResult(id);
-                    ObjectHelper.print(jsonOutput, bpr);
-                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
-                }
-            });
+        public Integer call() throws Exception {
+            try (AdvancedBuildClient client = BUILD_CREATOR.newClient()) {
+                BuildPushResult bpr = client.getPushResult(id);
+                ObjectHelper.print(jsonOutput, bpr);
+                return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc brew-push status 10";
         }

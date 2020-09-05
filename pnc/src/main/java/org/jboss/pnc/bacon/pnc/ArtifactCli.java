@@ -1,31 +1,28 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
+import java.util.concurrent.Callable;
 
 @Slf4j
-@GroupCommandDefinition(
+@Command(
         name = "artifact",
         description = "Artifact",
-        groupCommands = { ArtifactCli.Get.class, ArtifactCli.ListFromHash.class })
-public class ArtifactCli extends AbstractCommand {
+        subcommands = { ArtifactCli.Get.class, ArtifactCli.ListFromHash.class })
+public class ArtifactCli {
 
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
 
-    @CommandDefinition(name = "get", description = "Get an artifact by its id")
-    public class Get extends AbstractGetSpecificCommand<Artifact> {
+    @Command(name = "get", description = "Get an artifact by its id")
+    public static class Get extends AbstractGetSpecificCommand<Artifact> {
 
         @Override
         public Artifact getSpecific(String id) throws ClientException {
@@ -34,50 +31,46 @@ public class ArtifactCli extends AbstractCommand {
             }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc artifact get 10";
         }
     }
 
-    @CommandDefinition(name = "list-from-hash", description = "List artifacts based on hash")
-    public class ListFromHash extends AbstractCommand {
-
-        @Option
+    @Command(name = "list-from-hash", description = "List artifacts based on hash")
+    public static class ListFromHash implements Callable<Integer> {
+        @Option(names = "--md5")
         private String md5;
 
-        @Option
+        @Option(names = "--sha1")
         private String sha1;
 
-        @Option
+        @Option(names = "--sha256")
         private String sha256;
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-
-                if (md5 == null && sha1 == null && sha256 == null) {
-                    log.error("You need to use at least one hash option!");
-                    return 1;
-                } else {
-                    try (ArtifactClient client = CREATOR.newClient()) {
-                        ObjectHelper.print(jsonOutput, client.getAll(sha256, md5, sha1));
-                        return 0;
-                    }
+        public Integer call() throws Exception {
+            if (md5 == null && sha1 == null && sha256 == null) {
+                log.error("You need to use at least one hash option!");
+                return 1;
+            } else {
+                try (ArtifactClient client = CREATOR.newClient()) {
+                    ObjectHelper.print(jsonOutput, client.getAll(sha256, md5, sha1));
+                    return 0;
                 }
-            });
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc artifact list-from-hash --md5 stiritup";
         }

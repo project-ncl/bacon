@@ -17,18 +17,10 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProjectClient;
@@ -38,71 +30,72 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Project;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-@GroupCommandDefinition(
+@Command(
         name = "project",
         description = "Project",
-        groupCommands = {
+        subcommands = {
                 ProjectCli.Create.class,
                 ProjectCli.Get.class,
                 ProjectCli.List.class,
                 ProjectCli.ListBuildConfigurations.class,
                 ProjectCli.ListBuilds.class,
                 ProjectCli.Update.class, })
-public class ProjectCli extends AbstractCommand {
+public class ProjectCli {
 
     private static final ClientCreator<ProjectClient> CREATOR = new ClientCreator<>(ProjectClient::new);
 
-    @CommandDefinition(name = "create", description = "Create a project")
-    public class Create extends AbstractCommand {
+    @Command(name = "create", description = "Create a project")
+    public static class Create implements Callable<Integer> {
 
-        @Argument(required = true, description = "Name of project")
+        @Parameters(description = "Name of project")
         private String name;
-        @Option(name = "description", description = "Description of project", defaultValue = "")
+        @Option(names = "--description", description = "Description of project", defaultValue = "")
         private String description;
-        @Option(name = "project-url", description = "Project-URL of project", defaultValue = "")
+        @Option(names = "--project-url", description = "Project-URL of project", defaultValue = "")
         private String projectUrl;
-        @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project", defaultValue = "")
+        @Option(names = "--issue-tracker-url", description = "Issue-Tracker-URL of project", defaultValue = "")
         private String issueTrackerUrl;
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            Project project = Project.builder()
+                    .name(name)
+                    .description(description)
+                    .projectUrl(projectUrl)
+                    .issueTrackerUrl(issueTrackerUrl)
+                    .build();
 
-            return super.executeHelper(commandInvocation, () -> {
-
-                Project project = Project.builder()
-                        .name(name)
-                        .description(description)
-                        .projectUrl(projectUrl)
-                        .issueTrackerUrl(issueTrackerUrl)
-                        .build();
-
-                try (ProjectClient client = CREATOR.newClientAuthenticated()) {
-                    ObjectHelper.print(jsonOutput, client.createNew(project));
-                    return 0;
-                }
-            });
+            try (ProjectClient client = CREATOR.newClientAuthenticated()) {
+                ObjectHelper.print(jsonOutput, client.createNew(project));
+                return 0;
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc project create --description \"Morning sunshine\" best-project-ever";
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a project by its id")
-    public class Get extends AbstractGetSpecificCommand<Project> {
+    @Command(name = "get", description = "Get a project by its id")
+    public static class Get extends AbstractGetSpecificCommand<Project> {
 
         @Override
         public Project getSpecific(String id) throws ClientException {
@@ -112,8 +105,8 @@ public class ProjectCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list", description = "List projects")
-    public class List extends AbstractListCommand<Project> {
+    @Command(name = "list", description = "List projects")
+    public static class List extends AbstractListCommand<Project> {
 
         @Override
         public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
@@ -123,10 +116,10 @@ public class ProjectCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-build-configs", description = "List build configs for a project")
-    public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
+    @Command(name = "list-build-configs", description = "List build configs for a project")
+    public static class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
-        @Argument(required = true, description = "Project id")
+        @Parameters(description = "Project id")
         private String id;
 
         @Override
@@ -137,10 +130,10 @@ public class ProjectCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-builds", description = "List builds for a project")
-    public class ListBuilds extends AbstractBuildListCommand {
+    @Command(name = "list-builds", description = "List builds for a project")
+    public static class ListBuilds extends AbstractBuildListCommand {
 
-        @Argument(required = true, description = "Project id")
+        @Parameters(description = "Project id")
         private String id;
 
         @Override
@@ -152,52 +145,54 @@ public class ProjectCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a project")
-    public class Update extends AbstractCommand {
+    @Command(name = "update", description = "Update a project")
+    public static class Update implements Callable<Integer> {
 
-        @Argument(required = true, description = "Project id")
+        @Parameters(description = "Project id")
         private String id;
 
-        @Option(name = "name", description = "Name of project")
+        @Option(names = "--name", description = "Name of project")
         private String name;
-        @Option(name = "description", description = "Description of project")
+        @Option(names = "--description", description = "Description of project")
         private String description;
-        @Option(name = "project-url", description = "Project-URL of project")
+        @Option(names = "--project-url", description = "Project-URL of project")
         private String projectUrl;
-        @Option(name = "issue-tracker-url", description = "Issue-Tracker-URL of project")
+        @Option(names = "--issue-tracker-url", description = "Issue-Tracker-URL of project")
         private String issueTrackerUrl;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            try (ProjectClient client = CREATOR.newClient()) {
+                Project project = client.getSpecific(id);
+                Project.Builder updated = project.toBuilder();
 
-            return super.executeHelper(commandInvocation, () -> {
-                try (ProjectClient client = CREATOR.newClient()) {
-                    Project project = client.getSpecific(id);
-                    Project.Builder updated = project.toBuilder();
-
-                    if (isNotEmpty(name)) {
-                        updated.name(name);
-                    }
-                    if (isNotEmpty(description)) {
-                        updated.description(description);
-                    }
-                    if (isNotEmpty(projectUrl)) {
-                        updated.projectUrl(projectUrl);
-                    }
-                    if (isNotEmpty(issueTrackerUrl)) {
-                        updated.issueTrackerUrl(issueTrackerUrl);
-                    }
-
-                    try (ProjectClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
-                        clientAuthenticated.update(id, updated.build());
-                        return 0;
-                    }
+                if (isNotEmpty(name)) {
+                    updated.name(name);
                 }
-            });
+                if (isNotEmpty(description)) {
+                    updated.description(description);
+                }
+                if (isNotEmpty(projectUrl)) {
+                    updated.projectUrl(projectUrl);
+                }
+                if (isNotEmpty(issueTrackerUrl)) {
+                    updated.issueTrackerUrl(issueTrackerUrl);
+                }
+
+                try (ProjectClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
+                    clientAuthenticated.update(id, updated.build());
+                    return 0;
+                }
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "bacon pnc project update --name \"bad-guy\" 1";
         }

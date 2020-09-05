@@ -17,25 +17,35 @@
  */
 package org.jboss.bacon.da;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.option.Argument;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
+
+import java.util.concurrent.Callable;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-@GroupCommandDefinition(
-        name = "da",
-        description = "Dependency Analysis related commands",
-        groupCommands = { Da.Lookup.class })
-public class Da extends AbstractCommand {
+@Command(name = "da", description = "Dependency Analysis related commands", subcommands = { Da.Lookup.class })
+@Slf4j
+public class Da {
+    @Command(name = "lookup", description = "lookup available productized artifact version for an artifact")
+    public static class Lookup implements Callable<Integer> {
 
-    @CommandDefinition(name = "lookup", description = "lookup available productized artifact version for an artifact")
-    public class Lookup extends AbstractCommand {
-
-        @Argument(required = true, description = "groupId:artifactId:version of the artifact to lookup")
+        @Parameters(description = "groupId:artifactId:version of the artifact to lookup")
         private String gav = "";
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         */
+        @Override
+        public Integer call() {
+            log.error("DA is not yet implemented");
+            throw new FatalException("NYI");
+        }
     }
 }

@@ -18,18 +18,10 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.ClientException;
@@ -42,62 +34,59 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-@GroupCommandDefinition(
+@Command(
         name = "group-build",
         description = "Group builds",
-        groupCommands = {
+        subcommands = {
                 GroupBuildCli.Start.class,
                 GroupBuildCli.Cancel.class,
                 GroupBuildCli.List.class,
                 GroupBuildCli.ListBuilds.class,
                 GroupBuildCli.Get.class })
 @Slf4j
-public class GroupBuildCli extends AbstractCommand {
+public class GroupBuildCli {
 
     private static final ClientCreator<GroupBuildClient> CREATOR = new ClientCreator<>(GroupBuildClient::new);
     private static final ClientCreator<AdvancedGroupConfigurationClient> GC_CREATOR = new ClientCreator<>(
             AdvancedGroupConfigurationClient::new);
 
-    @CommandDefinition(name = "start", description = "Start a new Group build")
-    public class Start extends AbstractCommand {
+    @Command(name = "start", description = "Start a new Group build")
+    public static class Start implements Callable<Integer> {
 
-        @Argument(required = true, description = "Group Build Config ID")
+        @Parameters(description = "Group Build Config ID")
         private String groupBuildConfigId;
 
         @Option(
-                name = "rebuild-mode",
+                names = "--rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(
-                name = "timestamp-alignment",
-                description = "Do timestamp alignment with temporary builds",
-                hasValue = false)
+        @Option(names = "--timestamp-alignment", description = "Do timestamp alignment with temporary builds")
         private boolean timestampAlignment = false;
-        @Option(name = "temporary-build", description = "Perform temporary builds", hasValue = false)
+        @Option(names = "--temporary-build", description = "Perform temporary builds")
         private boolean temporaryBuild = false;
-        @Option(
-                name = "wait",
-                overrideRequired = false,
-                hasValue = false,
-                description = "Wait for group build to complete")
+        @Option(names = "--wait", description = "Wait for group build to complete")
         private boolean wait = false;
-        @Option(name = "timeout", description = "Time in minutes the command waits for Group Build completion")
+        @Option(names = "--timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
+        public Integer call() throws Exception {
             GroupBuildParameters groupBuildParams = new GroupBuildParameters();
             if (rebuildMode == null) {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
@@ -109,69 +98,67 @@ public class GroupBuildCli extends AbstractCommand {
             groupBuildParams.setTemporaryBuild(temporaryBuild);
 
             // TODO add GroupBuildRequest with an option to specify BC revisions
-
-            return super.executeHelper(commandInvocation, () -> {
-                try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
-                        .newClientAuthenticated()) {
-                    if (timeout != null) {
-                        GroupBuild gb = advancedGroupConfigurationClient.executeGroupBuild(
-                                groupBuildConfigId,
-                                groupBuildParams,
-                                Long.parseLong(timeout),
-                                TimeUnit.MINUTES);
-                        ObjectHelper.print(jsonOutput, gb);
-                        return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
-                    }
-
-                    if (wait) {
-                        GroupBuild gb = advancedGroupConfigurationClient
-                                .executeGroupBuild(groupBuildConfigId, groupBuildParams)
-                                .join();
-                        ObjectHelper.print(jsonOutput, gb);
-                        return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
-                    } else {
-                        GroupBuild gb = advancedGroupConfigurationClient
-                                .trigger(groupBuildConfigId, groupBuildParams, null);
-                        ObjectHelper.print(jsonOutput, gb);
-                        return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
-                    }
+            try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
+                    .newClientAuthenticated()) {
+                if (timeout != null) {
+                    GroupBuild gb = advancedGroupConfigurationClient.executeGroupBuild(
+                            groupBuildConfigId,
+                            groupBuildParams,
+                            Long.parseLong(timeout),
+                            TimeUnit.MINUTES);
+                    ObjectHelper.print(jsonOutput, gb);
+                    return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                 }
-            });
+
+                if (wait) {
+                    GroupBuild gb = advancedGroupConfigurationClient
+                            .executeGroupBuild(groupBuildConfigId, groupBuildParams)
+                            .join();
+                    ObjectHelper.print(jsonOutput, gb);
+                    return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
+                } else {
+                    GroupBuild gb = advancedGroupConfigurationClient
+                            .trigger(groupBuildConfigId, groupBuildParams, null);
+                    ObjectHelper.print(jsonOutput, gb);
+                    return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
+                }
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc group-build start --temporary-build 23";
         }
-
     }
 
-    @CommandDefinition(name = "cancel", description = "Cancel a group build")
-    public class Cancel extends AbstractCommand {
+    @Command(name = "cancel", description = "Cancel a group build")
+    public static class Cancel implements Callable<Integer> {
 
-        @Argument(required = true, description = "Group Build ID")
+        @Parameters(description = "Group Build ID")
         private String groupBuildId;
 
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-                try (GroupBuildClient client = CREATOR.newClientAuthenticated()) {
-                    client.cancel(groupBuildId);
-                    return 0;
-                }
-            });
-        }
-
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc group-build cancel 42";
         }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            try (GroupBuildClient client = CREATOR.newClientAuthenticated()) {
+                client.cancel(groupBuildId);
+                return 0;
+            }
+        }
     }
 
-    @CommandDefinition(name = "list", description = "List group builds")
-    public class List extends AbstractListCommand<GroupBuild> {
+    @Command(name = "list", description = "List group builds")
+    public static class List extends AbstractListCommand<GroupBuild> {
 
         @Override
         public RemoteCollection<GroupBuild> getAll(String sort, String query) throws RemoteResourceException {
@@ -181,10 +168,10 @@ public class GroupBuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-builds", description = "List builds associated with the group build")
-    public class ListBuilds extends AbstractBuildListCommand {
+    @Command(name = "list-builds", description = "List builds associated with the group build")
+    public static class ListBuilds extends AbstractBuildListCommand {
 
-        @Argument(required = true, description = "Group Build ID")
+        @Parameters(description = "Group Build ID")
         private String groupBuildId;
 
         @Override
@@ -197,8 +184,8 @@ public class GroupBuildCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a group build by its id")
-    public class Get extends AbstractGetSpecificCommand<GroupBuild> {
+    @Command(name = "get", description = "Get a group build by its id")
+    public static class Get extends AbstractGetSpecificCommand<GroupBuild> {
 
         @Override
         public GroupBuild getSpecific(String id) throws ClientException {
