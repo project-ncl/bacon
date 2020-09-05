@@ -17,7 +17,11 @@
  */
 package org.jboss.pnc.bacon.pig.impl.license;
 
-import lombok.Getter;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
@@ -31,10 +35,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
+import lombok.Getter;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -48,15 +49,18 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
     private final GenerationData<LicenseGenerationStrategy> generationData;
 
     private final boolean useTempBuilds;
+    private final boolean strict;
 
     public LicenseManager(
             PigConfiguration pigConfiguration,
             String releasePath,
+            boolean strict,
             Deliverables deliverables,
             Map<String, PncBuild> builds,
             RepositoryData repositoryData) {
         super(pigConfiguration, releasePath, deliverables, builds);
         this.repositoryData = repositoryData;
+        this.strict = strict;
 
         generationData = pigConfiguration.getFlow().getLicensesGeneration();
         useTempBuilds = PigContext.get().isTempBuild();
@@ -107,7 +111,8 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
             LicenseGenerator.generateLicenses(
                     repositoryData.getGavs(),
                     getTargetZipPath().toFile(),
-                    getTargetTopLevelDirectoryName());
+                    getTargetTopLevelDirectoryName(),
+                    strict);
         }
     }
 }

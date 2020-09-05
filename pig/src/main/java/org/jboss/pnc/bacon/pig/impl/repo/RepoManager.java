@@ -17,7 +17,20 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import lombok.Getter;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
@@ -36,19 +49,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import lombok.Getter;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -63,6 +64,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private File targetRepoContentsDir;
     private final boolean removeGeneratedM2Dups;
     private final Path configurationDirectory;
+    private final boolean strictLicenseCheck;
 
     public RepoManager(
             PigConfiguration pigConfiguration,
@@ -70,11 +72,13 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             Deliverables deliverables,
             Map<String, PncBuild> builds,
             Path configurationDirectory,
-            boolean removeGeneratedM2Dups) {
+            boolean removeGeneratedM2Dups,
+            boolean strictLicenseCheck) {
         super(pigConfiguration, releasePath, deliverables, builds);
         generationData = pigConfiguration.getFlow().getRepositoryGeneration();
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
         this.configurationDirectory = configurationDirectory;
+        this.strictLicenseCheck = strictLicenseCheck;
         buildInfoCollector = new BuildInfoCollector();
     }
 
@@ -375,7 +379,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             LicenseGenerator.generateLicenses(
                     RepoDescriptor.listGavs(new File(m2Repo, RepoDescriptor.MAVEN_REPOSITORY)),
                     new File(m2Repo, "licenses"),
-                    PigContext.get().isTempBuild());
+                    PigContext.get().isTempBuild(),
+                    strictLicenseCheck);
         }
     }
 }

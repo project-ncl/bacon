@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import java.util.Optional;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -38,8 +40,6 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
-
-import java.util.Optional;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -75,7 +75,6 @@ public class Pig extends AbstractCommand {
     public static final String REMOVE_M2_DUPLICATES_DESC = "If enabled, only the newest versions of each of the dependencies (groupId:artifactId) "
             + "are kept in the generated repository zip";
     public static final String REMOVE_M2_DUPLICATES = "removeGeneratedM2Dups";
-    public static final String REMOVE_M2_DUPLICATES_DEFAULT = "false";
 
     public static final String SKIP_BRANCH_CHECK = "skipBranchCheck";
     public static final String SKIP_BRANCH_CHECK_DEFAULT = "false";
@@ -208,11 +207,7 @@ public class Pig extends AbstractCommand {
                 description = "Skip generating shared content request input.")
         private boolean skipSharedContent;
 
-        @Option(
-                name = REMOVE_M2_DUPLICATES,
-                hasValue = false,
-                defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
-                description = REMOVE_M2_DUPLICATES_DESC)
+        @Option(name = REMOVE_M2_DUPLICATES, hasValue = false, description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
 
         @Option(
@@ -228,6 +223,13 @@ public class Pig extends AbstractCommand {
                 description = "Repository zip. "
                         + "Might be used if you have already downloaded repository zip to speed up the process.")
         private String repoZipPath;
+
+        @Option(
+                name = "strictLicenseCheck",
+                hasValue = true,
+                defaultValue = "true",
+                description = "if set to true will fail on license zip with missing/invalid entries")
+        private boolean strictLicenseCheck;
 
         @Override
         public PigRunOutput doExecute() {
@@ -247,7 +249,8 @@ public class Pig extends AbstractCommand {
                     tempBuild,
                     tempBuildTS,
                     RebuildMode.valueOf(rebuildMode),
-                    skipBranchCheck);
+                    skipBranchCheck,
+                    strictLicenseCheck);
 
             PigContext context = PigContext.get();
             return new PigRunOutput(
@@ -323,16 +326,18 @@ public class Pig extends AbstractCommand {
 
     @CommandDefinition(name = "repo", description = "GenerateRepository")
     public class GenerateRepository extends PigCommand<RepositoryData> {
-        @Option(
-                name = REMOVE_M2_DUPLICATES,
-                hasValue = false,
-                defaultValue = REMOVE_M2_DUPLICATES_DEFAULT,
-                description = REMOVE_M2_DUPLICATES_DESC)
+        @Option(name = REMOVE_M2_DUPLICATES, hasValue = false, description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
+        @Option(
+                name = "strictLicenseCheck",
+                hasValue = true,
+                defaultValue = "true",
+                description = "if set to true will fail on license zip with missing/invalid entries")
+        private boolean strictLicenseCheck;
 
         @Override
         public RepositoryData doExecute() {
-            RepositoryData result = PigFacade.generateRepo(removeGeneratedM2Dups);
+            RepositoryData result = PigFacade.generateRepo(removeGeneratedM2Dups, strictLicenseCheck);
             PigContext.get().setRepositoryData(result);
             PigContext.get().storeContext();
             return result;
@@ -341,10 +346,16 @@ public class Pig extends AbstractCommand {
 
     @CommandDefinition(name = "licenses", description = "GenerateLicenses")
     public class GenerateLicenses extends PigCommand<String> {
+        @Option(
+                name = "strictLicenseCheck",
+                hasValue = true,
+                defaultValue = "true",
+                description = "if set to true will fail on license zip with missing/invalid entries")
+        private boolean strictLicenseCheck;
 
         @Override
         public String doExecute() {
-            PigFacade.generateLicenses();
+            PigFacade.generateLicenses(strictLicenseCheck);
             return "Licenses generated successfully"; // TODO: better output
         }
     }

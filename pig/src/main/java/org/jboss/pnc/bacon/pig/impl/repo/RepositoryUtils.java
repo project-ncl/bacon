@@ -17,17 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.maven.artifact.repository.metadata.Metadata;
-import org.apache.maven.artifact.repository.metadata.Versioning;
-import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.util.ArtifactPathInfo;
-import org.commonjava.maven.atlas.ident.version.SingleVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Comparator.comparingInt;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -55,7 +45,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Comparator.comparingInt;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.repository.metadata.Metadata;
+import org.apache.maven.artifact.repository.metadata.Versioning;
+import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.util.ArtifactPathInfo;
+import org.commonjava.maven.atlas.ident.version.SingleVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -205,6 +205,9 @@ public class RepositoryUtils {
     private static void removeMatchingCondition(File element, Function<File, Boolean> condition) {
         if (element.isDirectory()) {
             Stream.of(element.listFiles()).forEach(file -> removeMatchingCondition(file, condition));
+            if (element.list().length == 0) {
+                element.delete();
+            }
         } else {
             if (condition.apply(element)) {
                 element.delete();
