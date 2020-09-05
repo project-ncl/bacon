@@ -50,6 +50,7 @@ class ProductTest extends AbstractTest {
 
         Product product = executeAndDeserialize(
                 Product.class,
+                "-v",
                 "pnc",
                 "product",
                 "create",

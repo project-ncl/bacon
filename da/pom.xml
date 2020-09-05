@@ -23,10 +23,6 @@
             <artifactId>reports-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.aesh</groupId>
-            <artifactId>aesh</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

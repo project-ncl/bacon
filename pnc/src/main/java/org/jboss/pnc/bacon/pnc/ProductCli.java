@@ -17,15 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -35,70 +27,67 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Product;
 import org.jboss.pnc.dto.ProductVersion;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-@GroupCommandDefinition(
+@Command(
         name = "product",
         description = "Product",
-        groupCommands = {
+        subcommands = {
                 ProductCli.Create.class,
                 ProductCli.Get.class,
                 ProductCli.List.class,
                 ProductCli.ListVersions.class,
                 ProductCli.Update.class })
-public class ProductCli extends AbstractCommand {
+public class ProductCli {
 
     private static final ClientCreator<ProductClient> CREATOR = new ClientCreator<>(ProductClient::new);
 
-    @CommandDefinition(name = "create", description = "Create a product")
-    public class Create extends AbstractCommand {
+    @Command(name = "create", description = "Create a product")
+    public static class Create implements Callable<Integer> {
 
-        @Argument(required = true, description = "Name of product")
+        @Parameters(description = "Name of product")
         private String name;
 
-        @Option(required = true, name = "abbreviation", description = "Abbreviation of product")
+        @Option(required = true, names = "--abbreviation", description = "Abbreviation of product")
         private String abbreviation;
 
-        @Option(name = "description", description = "Description of product", defaultValue = "")
+        @Option(names = "--description", description = "Description of product", defaultValue = "")
         private String description;
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            Product product = Product.builder().name(name).abbreviation(abbreviation).description(description).build();
 
-            return super.executeHelper(commandInvocation, () -> {
-
-                Product product = Product.builder()
-                        .name(name)
-                        .abbreviation(abbreviation)
-                        .description(description)
-                        .build();
-
-                try (ProductClient client = CREATOR.newClientAuthenticated()) {
-                    ObjectHelper.print(jsonOutput, client.createNew(product));
-                    return 0;
-                }
-            });
+            try (ProductClient client = CREATOR.newClientAuthenticated()) {
+                ObjectHelper.print(jsonOutput, client.createNew(product));
+                return 0;
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc product create --abbreviation testing Testing";
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a product by its id")
-    public class Get extends AbstractGetSpecificCommand<Product> {
+    @Command(name = "get", description = "Get a product by its id")
+    public static class Get extends AbstractGetSpecificCommand<Product> {
 
         @Override
         public Product getSpecific(String id) throws ClientException {
@@ -108,8 +97,8 @@ public class ProductCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list", description = "List products")
-    public class List extends AbstractListCommand<Product> {
+    @Command(name = "list", description = "List products")
+    public static class List extends AbstractListCommand<Product> {
 
         @Override
         public RemoteCollection<Product> getAll(String sort, String query) throws RemoteResourceException {
@@ -120,10 +109,10 @@ public class ProductCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-versions", description = "List versions of product")
-    public class ListVersions extends AbstractListCommand<ProductVersion> {
+    @Command(name = "list-versions", description = "List versions of product")
+    public static class ListVersions extends AbstractListCommand<ProductVersion> {
 
-        @Argument(required = true, description = "Product Id")
+        @Parameters(description = "Product Id")
         private String id;
 
         @Override
@@ -135,50 +124,51 @@ public class ProductCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a product")
-    public class Update extends AbstractCommand {
+    @Command(name = "update", description = "Update a product")
+    public static class Update implements Callable<Integer> {
 
-        @Argument(required = true, description = "Product Id")
+        @Parameters(description = "Product Id")
         private String id;
 
-        @Option(name = "name", description = "Name of product")
+        @Option(names = "--name", description = "Name of product")
         private String name;
 
-        @Option(name = "abbreviation", description = "Abbreviation of product")
+        @Option(names = "--abbreviation", description = "Abbreviation of product")
         private String abbreviation;
 
-        @Option(name = "description", description = "Description of product", defaultValue = "")
+        @Option(names = "--description", description = "Description of product", defaultValue = "")
         private String description;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            try (ProductClient client = CREATOR.newClient()) {
+                Product product = client.getSpecific(id);
+                Product.Builder updated = product.toBuilder();
 
-            return super.executeHelper(commandInvocation, () -> {
-
-                try (ProductClient client = CREATOR.newClient()) {
-                    Product product = client.getSpecific(id);
-                    Product.Builder updated = product.toBuilder();
-
-                    if (isNotEmpty(name)) {
-                        updated.name(name);
-                    }
-                    if (isNotEmpty(abbreviation)) {
-                        updated.abbreviation(abbreviation);
-                    }
-                    if (isNotEmpty(description)) {
-                        updated.description(description);
-                    }
-
-                    try (ProductClient authenticatedClient = CREATOR.newClientAuthenticated()) {
-                        authenticatedClient.update(id, updated.build());
-                        return 0;
-                    }
+                if (isNotEmpty(name)) {
+                    updated.name(name);
                 }
-            });
+                if (isNotEmpty(abbreviation)) {
+                    updated.abbreviation(abbreviation);
+                }
+                if (isNotEmpty(description)) {
+                    updated.description(description);
+                }
+
+                try (ProductClient authenticatedClient = CREATOR.newClientAuthenticated()) {
+                    authenticatedClient.update(id, updated.build());
+                    return 0;
+                }
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc product update --abbreviation testingme2 42";
         }

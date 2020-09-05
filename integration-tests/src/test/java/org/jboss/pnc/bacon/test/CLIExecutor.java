@@ -36,7 +36,8 @@ public class CLIExecutor {
             String[] env = { Constant.CONFIG_ENV + "=" + CONFIG_LOCATION };
 
             System.out.println(
-                    "Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'")));
+                    "Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'"))
+                            + "\n\twith env " + Arrays.toString(env));
             Process process = Runtime.getRuntime().exec(cmdarray, env);
 
             CompletableFuture<String> output = CompletableFuture

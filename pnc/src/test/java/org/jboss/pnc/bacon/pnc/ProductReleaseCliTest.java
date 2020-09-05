@@ -1,9 +1,6 @@
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandException;
-import org.aesh.command.invocation.CommandInvocation;
 import org.apache.commons.lang.reflect.FieldUtils;
-import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -14,14 +11,12 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 class ProductReleaseCliTest {
     @Test
-    void testCreateException() throws CommandException, InterruptedException, IOException, IllegalAccessException {
-        ProductReleaseCli.Create create = spy((new ProductReleaseCli()).new Create());
-        CommandInvocation commandInvocation = mock(CommandInvocation.class);
+    void testCreateException() throws InterruptedException, IOException, IllegalAccessException {
+        ProductReleaseCli.Create create = spy(new ProductReleaseCli.Create());
         File file = new File(ProductReleaseCliTest.class.getClassLoader().getResource("config.yaml").getFile());
         Config.configure(file.getParent(), "config.yaml", "default");
         Config.initialize();
@@ -34,9 +29,9 @@ class ProductReleaseCliTest {
         try (MockedStatic<ProductReleaseCli> mockedStatic = Mockito.mockStatic(ProductReleaseCli.class)) {
             mockedStatic.when(() -> ProductReleaseCli.validateReleaseVersion(milestone, version)).thenReturn(false);
             try {
-                create.execute(commandInvocation);
+                create.call();
                 fail("No exception thrown");
-            } catch (FatalException e) {
+            } catch (Exception e) {
                 assertTrue(e.getMessage().contains("Product Release version ('1') and milestone ('M') is not valid!"));
             }
         }

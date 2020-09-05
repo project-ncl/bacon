@@ -73,8 +73,6 @@
     </scm>
 
     <properties>
-        <aesh.version>2.6</aesh.version>
-
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
         <jaxb.version>2.2.11</jaxb.version>
         <junit.version>5.6.2</junit.version>
@@ -144,9 +142,9 @@
                 <version>2.0.0</version>
             </dependency>
             <dependency>
-                <groupId>org.aesh</groupId>
-                <artifactId>aesh</artifactId>
-                <version>${aesh.version}</version>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>4.5.1</version>
             </dependency>
             <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
             <dependency>

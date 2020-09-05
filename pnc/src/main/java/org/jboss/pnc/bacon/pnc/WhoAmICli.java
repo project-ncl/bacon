@@ -17,36 +17,33 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.UserClient;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-@CommandDefinition(name = "whoami", description = "Returns identity of current user")
-public class WhoAmICli extends AbstractCommand {
+import java.util.concurrent.Callable;
+
+@Command(name = "whoami", description = "Returns identity of current user")
+public class WhoAmICli implements Callable<Integer> {
 
     private static final ClientCreator<UserClient> CREATOR = new ClientCreator<>(UserClient::new);
 
-    @Option(
-            shortName = 'o',
-            overrideRequired = false,
-            hasValue = false,
-            description = "use json for output (default to yaml)")
+    @Option(names = "o", description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
+    /**
+     * Computes a result, or throws an exception if unable to do so.
+     *
+     * @return computed result
+     * @throws Exception if unable to compute a result
+     */
     @Override
-    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
-
-        return super.executeHelper(commandInvocation, () -> {
-            try (UserClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.getCurrentUser());
-                return 0;
-            }
-        });
+    public Integer call() throws Exception {
+        try (UserClient client = CREATOR.newClientAuthenticated()) {
+            ObjectHelper.print(jsonOutput, client.getCurrentUser());
+            return 0;
+        }
     }
 }

@@ -17,82 +17,88 @@
  */
 package org.jboss.pnc.bacon.pnc.admin;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GenericSettingClient;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 
-@GroupCommandDefinition(
+import java.util.concurrent.Callable;
+
+@Command(
         name = "maintenance-mode",
         description = "Maintenance mode related tasks",
-        groupCommands = {
+        subcommands = {
                 MaintenanceModeCli.ActivateMaintenanceMode.class,
                 MaintenanceModeCli.DeactivateMaintenanceMode.class,
                 MaintenanceModeCli.StatusMaintenanceMode.class })
-public class MaintenanceModeCli extends AbstractCommand {
+public class MaintenanceModeCli {
 
     private static final ClientCreator<GenericSettingClient> CREATOR = new ClientCreator<>(GenericSettingClient::new);
 
-    @CommandDefinition(name = "activate", description = "This will disable any new builds from being accepted")
-    public class ActivateMaintenanceMode extends AbstractCommand {
+    @Command(name = "activate", description = "This will disable any new builds from being accepted")
+    public static class ActivateMaintenanceMode implements Callable<Integer> {
 
-        @Argument(required = true, description = "Reason")
+        @Parameters(description = "Reason")
         private String reason;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
-                    client.activateMaintenanceMode(reason);
-                    return 0;
-                }
-            });
+        public Integer call() throws Exception {
+            try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                client.activateMaintenanceMode(reason);
+                return 0;
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for upcoming migration\"";
         }
+
     }
 
-    @CommandDefinition(name = "deactivate", description = "Deactivate maintenance mode and accept new builds")
-    public class DeactivateMaintenanceMode extends AbstractCommand {
+    @Command(name = "deactivate", description = "Deactivate maintenance mode and accept new builds")
+    public static class DeactivateMaintenanceMode implements Callable<Integer> {
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
-                    client.deactivateMaintenanceMode();
-                    return 0;
-                }
-            });
+        public Integer call() throws Exception {
+            try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                client.deactivateMaintenanceMode();
+                return 0;
+            }
         }
     }
 
-    @CommandDefinition(name = "status", description = "Know whether we are in maintenance mode or not")
-    public class StatusMaintenanceMode extends AbstractCommand {
-
+    @Command(name = "status", description = "Know whether we are in maintenance mode or not")
+    public static class StatusMaintenanceMode implements Callable<Integer> {
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (GenericSettingClient client = CREATOR.newClient()) {
-                    if (client.isInMaintenanceMode()) {
-                        System.out.println("PNC is in maintenance mode");
-                        System.out.println(client.getAnnouncementBanner().getBanner());
-                    } else {
-                        System.out.println("PNC is NOT in maintenance mode");
-                    }
-                    return 0;
+        public Integer call() throws Exception {
+            try (GenericSettingClient client = CREATOR.newClient()) {
+                if (client.isInMaintenanceMode()) {
+                    System.out.println("PNC is in maintenance mode");
+                    System.out.println(client.getAnnouncementBanner().getBanner());
+                } else {
+                    System.out.println("PNC is NOT in maintenance mode");
                 }
-            });
+                return 0;
+            }
         }
     }
 }

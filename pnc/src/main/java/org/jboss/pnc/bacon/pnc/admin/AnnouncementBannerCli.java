@@ -17,77 +17,78 @@
  */
 package org.jboss.pnc.bacon.pnc.admin;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GenericSettingClient;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 
-@GroupCommandDefinition(
+import java.util.concurrent.Callable;
+
+@Command(
         name = "announcement-banner",
         description = "Announcement banner related tasks",
-        groupCommands = {
+        subcommands = {
                 AnnouncementBannerCli.SetAnnouncementBanner.class,
                 AnnouncementBannerCli.UnsetAnnouncementBanner.class,
                 AnnouncementBannerCli.GetAnnouncementBanner.class })
-public class AnnouncementBannerCli extends AbstractCommand {
+public class AnnouncementBannerCli {
 
     private static final ClientCreator<GenericSettingClient> CREATOR = new ClientCreator<>(GenericSettingClient::new);
 
-    @CommandDefinition(name = "set", description = "This will set the announcement banner")
-    public class SetAnnouncementBanner extends AbstractCommand {
-
-        @Argument(required = true, description = "Announcement")
+    @Command(
+            name = "set",
+            description = "This will set the announcement banner",
+            footer = "$ bacon pnc admin announcement-banner set \"Wash your hands!")
+    public static class SetAnnouncementBanner implements Callable<Integer> {
+        @Parameters(description = "Announcement")
         private String announcement;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
-                    client.setAnnouncementBanner(announcement);
-                    return 0;
-                }
-            });
-        }
-
-        @Override
-        public String exampleText() {
-            return "$ bacon pnc admin announcement-banner set \"Wash your hands!\"";
+        public Integer call() throws Exception {
+            try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                client.setAnnouncementBanner(announcement);
+                return 0;
+            }
         }
     }
 
-    @CommandDefinition(name = "unset", description = "This will unset the announcement banner")
-    public class UnsetAnnouncementBanner extends AbstractCommand {
-
+    @Command(name = "unset", description = "This will unset the announcement banner")
+    public static class UnsetAnnouncementBanner implements Callable<Integer> {
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
-                    client.setAnnouncementBanner("");
-                    return 0;
-                }
-            });
+        public Integer call() throws Exception {
+            try (GenericSettingClient client = CREATOR.newClientAuthenticated()) {
+                client.setAnnouncementBanner("");
+                return 0;
+            }
         }
     }
 
-    @CommandDefinition(name = "get", description = "This will get the announcement banner, if any set")
-    public class GetAnnouncementBanner extends AbstractCommand {
-
+    @Command(name = "get", description = "This will get the announcement banner, if any set")
+    public static class GetAnnouncementBanner implements Callable<Integer> {
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (GenericSettingClient client = CREATOR.newClient()) {
-                    System.out.println(client.getAnnouncementBanner().getBanner());
-                    return 0;
-                }
-            });
+        public Integer call() throws Exception {
+            try (GenericSettingClient client = CREATOR.newClient()) {
+                System.out.println(client.getAnnouncementBanner().getBanner());
+                return 0;
+            }
         }
     }
 }

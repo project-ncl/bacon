@@ -17,14 +17,13 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.pnc.admin.AnnouncementBannerCli;
 import org.jboss.pnc.bacon.pnc.admin.MaintenanceModeCli;
+import picocli.CommandLine.Command;
 
-@GroupCommandDefinition(
+@Command(
         name = "admin",
         description = "Admin related tasks",
-        groupCommands = { AnnouncementBannerCli.class, MaintenanceModeCli.class })
-public class AdminCli extends AbstractCommand {
+        subcommands = { AnnouncementBannerCli.class, MaintenanceModeCli.class })
+public class AdminCli {
 }

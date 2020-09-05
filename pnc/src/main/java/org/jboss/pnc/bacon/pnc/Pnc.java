@@ -17,17 +17,16 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import picocli.CommandLine.Command;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-@GroupCommandDefinition(
+@Command(
         name = "pnc",
         description = "PNC sub-command",
-        groupCommands = {
+        subcommands = {
                 AdminCli.class,
                 ArtifactCli.class,
                 BrewPushCli.class,
@@ -43,5 +42,5 @@ import org.jboss.pnc.bacon.common.cli.AbstractCommand;
                 ProjectCli.class,
                 ScmRepositoryCli.class,
                 WhoAmICli.class })
-public class Pnc extends AbstractCommand {
+public class Pnc {
 }

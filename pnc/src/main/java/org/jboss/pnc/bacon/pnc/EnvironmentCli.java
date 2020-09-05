@@ -17,9 +17,6 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.GroupCommandDefinition;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -28,19 +25,20 @@ import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
+import picocli.CommandLine.Command;
 
 import java.util.Optional;
 
-@GroupCommandDefinition(
+@Command(
         name = "environment",
         description = "environment",
-        groupCommands = { EnvironmentCli.Get.class, EnvironmentCli.List.class })
-public class EnvironmentCli extends AbstractCommand {
+        subcommands = { EnvironmentCli.Get.class, EnvironmentCli.List.class })
+public class EnvironmentCli {
 
     private static final ClientCreator<EnvironmentClient> CREATOR = new ClientCreator<>(EnvironmentClient::new);
 
-    @CommandDefinition(name = "get", description = "Get an environment by its id")
-    public class Get extends AbstractGetSpecificCommand<Environment> {
+    @Command(name = "get", description = "Get an environment by its id")
+    public static class Get extends AbstractGetSpecificCommand<Environment> {
 
         @Override
         public Environment getSpecific(String id) throws ClientException {
@@ -50,8 +48,8 @@ public class EnvironmentCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list", description = "List environments")
-    public class List extends AbstractListCommand<Environment> {
+    @Command(name = "list", description = "List environments")
+    public static class List extends AbstractListCommand<Environment> {
 
         @Override
         public RemoteCollection<Environment> getAll(String sort, String query) throws RemoteResourceException {

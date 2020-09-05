@@ -19,20 +19,10 @@ package org.jboss.pnc.bacon.pnc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandDefinition;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.GroupCommandDefinition;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Argument;
-import org.aesh.command.option.Option;
-import org.aesh.command.option.OptionGroup;
-import org.aesh.command.option.OptionList;
 import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.AbstractCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
-import org.jboss.pnc.bacon.pnc.common.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
@@ -49,16 +39,20 @@ import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.BuildConfigWithSCMRequest;
 import org.jboss.pnc.enums.BuildType;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-@GroupCommandDefinition(
+@Command(
         name = "build-config",
         description = "Build Config",
-        groupCommands = {
+        subcommands = {
                 BuildConfigCli.Create.class,
                 BuildConfigCli.CreateWithSCM.class,
                 BuildConfigCli.Get.class,
@@ -71,74 +65,70 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
                 BuildConfigCli.AddDependency.class,
                 BuildConfigCli.RemoveDependency.class })
 @Slf4j
-public class BuildConfigCli extends AbstractCommand {
+public class BuildConfigCli {
 
     private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(
             BuildConfigurationClient::new);
 
-    @CommandDefinition(name = "create", description = "Create a build config")
-    public class Create extends AbstractCommand {
+    @Command(name = "create", description = "Create a build config")
+    public static class Create implements Callable<Integer> {
 
-        @Argument(required = true, description = "Name of build config")
+        @Parameters(description = "Name of build config")
         private String buildConfigName;
 
-        @Option(name = "description", description = "Description of build config")
+        @Option(names = "--description", description = "Description of build config")
         private String description;
-        @Option(required = true, name = "environment-id", description = "Environment ID of build config")
+        @Option(required = true, names = "--environment-id", description = "Environment ID of build config")
         private String environmentId;
-        @Option(required = true, name = "project-id", description = "Project ID of build config")
+        @Option(required = true, names = "--project-id", description = "Project ID of build config")
         private String projectId;
-        @Option(required = true, name = "build-script", description = "Build Script to build project")
+        @Option(required = true, names = "--build-script", description = "Build Script to build project")
         private String buildScript;
-        @Option(required = true, name = "scm-repository-id", description = "SCM Repository ID to use")
+        @Option(required = true, names = "--scm-repository-id", description = "SCM Repository ID to use")
         private String scmRepositoryId;
-        @Option(required = true, name = "scm-revision", description = "SCM Revision")
+        @Option(required = true, names = "--scm-revision", description = "SCM Revision")
         private String scmRevision;
-        @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE")
+        @Option(names = { "-P,--parameter" }, description = "Parameter. Format: -PKEY=VALUE")
         private Map<String, String> parameters;
-        @Option(name = "product-version-id", description = "Product Version ID")
+        @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
         @Option(
-                name = "build-type",
+                names = "--build-type",
                 description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder()
+                    .name(buildConfigName)
+                    .description(description)
+                    .environment(Environment.builder().id(environmentId).build())
+                    .project((ProjectRef.refBuilder().id(projectId).build()))
+                    .buildScript(buildScript)
+                    .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
+                    .scmRevision(scmRevision)
+                    .buildType(BuildType.valueOf(buildType))
+                    .parameters(parameters);
 
-            return super.executeHelper(commandInvocation, () -> {
-
-                BuildConfiguration.Builder buildConfigurationBuilder = BuildConfiguration.builder()
-                        .name(buildConfigName)
-                        .description(description)
-                        .environment(Environment.builder().id(environmentId).build())
-                        .project((ProjectRef.refBuilder().id(projectId).build()))
-                        .buildScript(buildScript)
-                        .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
-                        .scmRevision(scmRevision)
-                        .buildType(BuildType.valueOf(buildType))
-                        .parameters(parameters);
-
-                if (isNotEmpty(productVersionId)) {
-                    buildConfigurationBuilder
-                            .productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
-                }
-                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                    ObjectHelper.print(jsonOutput, client.createNew(buildConfigurationBuilder.build()));
-                    return 0;
-                }
-            });
+            if (isNotEmpty(productVersionId)) {
+                buildConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+            }
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                ObjectHelper.print(jsonOutput, client.createNew(buildConfigurationBuilder.build()));
+                return 0;
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             StringBuilder builder = new StringBuilder();
             builder.append("$ bacon pnc build-config create \\ \n")
@@ -150,78 +140,73 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "create-with-scm", description = "Create BC with SCM")
-    public class CreateWithSCM extends AbstractCommand {
+    @Command(name = "create-with-scm", description = "Create BC with SCM")
+    public static class CreateWithSCM implements Callable<Integer> {
 
-        @Argument(required = true, description = "Name of build config")
+        @Parameters(description = "Name of build config")
         private String buildConfigName;
 
-        @Option(name = "description", description = "Description of build config")
+        @Option(names = "--description", description = "Description of build config")
         private String description;
-        @Option(required = true, name = "environment-id", description = "Environment ID of build config")
+        @Option(required = true, names = "--environment-id", description = "Environment ID of build config")
         private String environmentId;
-        @Option(required = true, name = "project-id", description = "Project ID of build config")
+        @Option(required = true, names = "--project-id", description = "Project ID of build config")
         private String projectId;
-        @Option(required = true, name = "build-script", description = "Build Script to build project")
+        @Option(required = true, names = "--build-script", description = "Build Script to build project")
         private String buildScript;
-        @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE")
+        @Option(names = { "-P", "--parameter" }, description = "Parameter. Format: -PKEY=VALUE")
         private Map<String, String> parameters;
-        @Option(name = "product-version-id", description = "Product Version ID")
+        @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
         @Option(
-                name = "build-type",
+                names = "--build-type",
                 description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
 
-        @Option(required = true, name = "scm-url", description = "SCM URL")
+        @Option(required = true, names = "--scm-url", description = "SCM URL")
         private String scmUrl;
-        @Option(required = true, name = "scm-revision", description = "SCM Revision")
+        @Option(required = true, names = "--scm-revision", description = "SCM Revision")
         private String scmRevision;
 
-        @Option(
-                name = "no-pre-build-sync",
-                description = "Disable the pre-build sync of external repo.",
-                hasValue = false)
+        @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
+        public Integer call() throws Exception {
+            BuildConfiguration buildConfiguration = BuildConfiguration.builder()
+                    .name(buildConfigName)
+                    .description(description)
+                    .environment(Environment.builder().id(environmentId).build())
+                    .project((ProjectRef.refBuilder().id(projectId).build()))
+                    .scmRevision(scmRevision)
+                    .buildScript(buildScript)
+                    .buildType(BuildType.valueOf(buildType))
+                    .parameters(parameters)
+                    .build();
 
-            return super.executeHelper(commandInvocation, () -> {
-                BuildConfiguration buildConfiguration = BuildConfiguration.builder()
-                        .name(buildConfigName)
-                        .description(description)
-                        .environment(Environment.builder().id(environmentId).build())
-                        .project((ProjectRef.refBuilder().id(projectId).build()))
-                        .scmRevision(scmRevision)
-                        .buildScript(buildScript)
-                        .buildType(BuildType.valueOf(buildType))
-                        .parameters(parameters)
-                        .build();
+            BuildConfigWithSCMRequest request = BuildConfigWithSCMRequest.builder()
+                    .scmUrl(scmUrl)
+                    .buildConfig(buildConfiguration)
+                    .preBuildSyncEnabled(!noPreBuildSync)
+                    .build();
 
-                BuildConfigWithSCMRequest request = BuildConfigWithSCMRequest.builder()
-                        .scmUrl(scmUrl)
-                        .buildConfig(buildConfiguration)
-                        .preBuildSyncEnabled(!noPreBuildSync)
-                        .build();
-
-                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                    ObjectHelper.print(jsonOutput, client.createWithSCM(request));
-                    return 0;
-                }
-            });
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                ObjectHelper.print(jsonOutput, client.createWithSCM(request));
+                return 0;
+            }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             StringBuilder builder = new StringBuilder();
             builder.append("$ bacon pnc build-config create-with-scm \\ \n")
@@ -235,84 +220,85 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "update", description = "Update a build config")
-    public class Update extends AbstractCommand {
+    @Command(name = "update", description = "Update a build config")
+    public static class Update implements Callable<Integer> {
 
-        @Argument(required = true, description = "Build config ID")
+        @Parameters(description = "Build config ID")
         protected String buildConfigId;
 
-        @Option(description = "Build config name")
+        @Option(names = "--buildConfigName", description = "Build config name")
         private String buildConfigName;
 
-        @Option(name = "description", description = "Description of build config")
+        @Option(names = "--description", description = "Description of build config")
         private String description;
-        @Option(name = "environment-id", description = "Environment ID of build config")
+        @Option(names = "--environment-id", description = "Environment ID of build config")
         private String environmentId;
-        @Option(name = "build-script", description = "Build Script to build project")
+        @Option(names = "--build-script", description = "Build Script to build project")
         private String buildScript;
-        @Option(name = "scm-repository-id", description = "SCM Repository ID to use")
+        @Option(names = "--scm-repository-id", description = "SCM Repository ID to use")
         private String scmRepositoryId;
-        @Option(name = "scm-revision", description = "SCM Revision")
+        @Option(names = "--scm-revision", description = "SCM Revision")
         private String scmRevision;
-        @OptionGroup(shortName = 'P', name = "parameter", description = "Parameter. Format: -PKEY=VALUE -PKEY1=VALUE1")
+        @Option(names = { "-P", "--parameter" }, description = "Parameter. Format: -PKEY=VALUE -PKEY1=VALUE1")
         private Map<String, String> parameters;
-        @OptionList(
-                name = "remove-parameters",
+        @Option(
+                names = "--remove-parameters",
                 description = "Parameters to remove. Format: --remove-parameters=key1,key2,key3")
         private java.util.List<String> parametersToRemove;
-        @Option(name = "build-type", description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN")
+        @Option(names = "--build-type", description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN")
         private String buildType;
-        @Option(name = "product-version-id", description = "Product Version ID")
+        @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-
-            return super.executeHelper(commandInvocation, () -> {
-
-                try (BuildConfigurationClient client = CREATOR.newClient()) {
-                    BuildConfiguration buildConfiguration = client.getSpecific(buildConfigId);
-                    BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
-                    if (isNotEmpty(buildConfigName)) {
-                        updated.name(buildConfigName);
-                    }
-                    if (isNotEmpty(description)) {
-                        updated.description(description);
-                    }
-                    if (isNotEmpty(environmentId)) {
-                        updated.environment(Environment.builder().id(environmentId).build());
-                    }
-                    if (isNotEmpty(buildScript)) {
-                        updated.buildScript(buildScript);
-                    }
-                    if (isNotEmpty(scmRepositoryId)) {
-                        updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build());
-                    }
-                    if (isNotEmpty(scmRevision)) {
-                        updated.scmRevision(scmRevision);
-                    }
-                    if (isNotEmpty(buildType)) {
-                        updated.buildType(BuildType.valueOf(buildType));
-                    }
-                    if (isNotEmpty(productVersionId)) {
-                        updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
-                    }
-                    if (parameters != null) {
-                        // update the content of the existing parameters
-                        Map<String, String> existing = buildConfiguration.getParameters();
-                        parameters.forEach(existing::put);
-                        updated.parameters(existing);
-                    }
-                    if (parametersToRemove != null && parametersToRemove.size() > 0) {
-                        Map<String, String> existing = buildConfiguration.getParameters();
-                        parametersToRemove.forEach(existing::remove);
-                        updated.parameters(existing);
-                    }
-                    callUpdate(updated.build());
-                    return 0;
+        public Integer call() throws Exception {
+            try (BuildConfigurationClient client = CREATOR.newClient()) {
+                BuildConfiguration buildConfiguration = client.getSpecific(buildConfigId);
+                BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
+                if (isNotEmpty(buildConfigName)) {
+                    updated.name(buildConfigName);
                 }
-            });
+                if (isNotEmpty(description)) {
+                    updated.description(description);
+                }
+                if (isNotEmpty(environmentId)) {
+                    updated.environment(Environment.builder().id(environmentId).build());
+                }
+                if (isNotEmpty(buildScript)) {
+                    updated.buildScript(buildScript);
+                }
+                if (isNotEmpty(scmRepositoryId)) {
+                    updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build());
+                }
+                if (isNotEmpty(scmRevision)) {
+                    updated.scmRevision(scmRevision);
+                }
+                if (isNotEmpty(buildType)) {
+                    updated.buildType(BuildType.valueOf(buildType));
+                }
+                if (isNotEmpty(productVersionId)) {
+                    updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
+                if (parameters != null) {
+                    // update the content of the existing parameters
+                    Map<String, String> existing = buildConfiguration.getParameters();
+                    parameters.forEach(existing::put);
+                    updated.parameters(existing);
+                }
+                if (parametersToRemove != null && parametersToRemove.size() > 0) {
+                    Map<String, String> existing = buildConfiguration.getParameters();
+                    parametersToRemove.forEach(existing::remove);
+                    updated.parameters(existing);
+                }
+                callUpdate(updated.build());
+                return 0;
+            }
         }
 
         protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
@@ -321,20 +307,16 @@ public class BuildConfigCli extends AbstractCommand {
             }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc build-config update --description \"new me new description\" 50";
         }
     }
 
-    @CommandDefinition(name = "create-revision", description = "Create a new revision for a build configuration")
-    public class CreateRevision extends Update {
+    @Command(name = "create-revision", description = "Create a new revision for a build configuration")
+    public static class CreateRevision extends Update implements Callable<Integer> {
 
-        @Option(
-                shortName = 'o',
-                overrideRequired = false,
-                hasValue = false,
-                description = "use json for output (default to yaml)")
+        @Option(names = "-o", description = "use json for output (default to yaml)")
         private boolean jsonOutput = false;
 
         @Override
@@ -344,14 +326,14 @@ public class BuildConfigCli extends AbstractCommand {
             }
         }
 
-        @Override
+        // TODO: @Override
         public String exampleText() {
             return "$ bacon pnc build-config create-revision --description \"new me new description\" 50";
         }
     }
 
-    @CommandDefinition(name = "get", description = "Get a build config by its id")
-    public class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
+    @Command(name = "get", description = "Get a build config by its id")
+    public static class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
 
         @Override
         public BuildConfiguration getSpecific(String id) throws ClientException {
@@ -361,10 +343,10 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "get-revision", description = "Get build config revision")
-    public class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
+    @Command(name = "get-revision", description = "Get build config revision")
+    public static class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
 
-        @Option(required = true, description = "Revision Id of build configuration")
+        @Option(names = "--revisionId", description = "Revision Id of build configuration")
         private int revisionId;
 
         @Override
@@ -375,8 +357,8 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list", description = "List build configs")
-    public class List extends AbstractListCommand<BuildConfiguration> {
+    @Command(name = "list", description = "List build configs")
+    public static class List extends AbstractListCommand<BuildConfiguration> {
 
         @Override
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
@@ -386,10 +368,10 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-revisions", description = "List revisions of build config")
-    public class ListRevision extends AbstractListCommand<BuildConfigurationRevision> {
+    @Command(name = "list-revisions", description = "List revisions of build config")
+    public static class ListRevision extends AbstractListCommand<BuildConfigurationRevision> {
 
-        @Argument(required = true, description = "Build configuration id")
+        @Parameters(description = "Build configuration id")
         private String id;
 
         @Override
@@ -401,10 +383,10 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "list-builds", description = "List builds of build configs")
-    public class ListBuilds extends AbstractBuildListCommand {
+    @Command(name = "list-builds", description = "List builds of build configs")
+    public static class ListBuilds extends AbstractBuildListCommand {
 
-        @Argument(required = true, description = "Build config id")
+        @Parameters(description = "Build config id")
         private String buildConfigId;
 
         @Override
@@ -417,47 +399,51 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    @CommandDefinition(name = "add-dependency", description = "Adds a dependency to a BuildConfig")
-    public class AddDependency extends AbstractCommand {
+    @Command(name = "add-dependency", description = "Adds a dependency to a BuildConfig")
+    public static class AddDependency implements Callable<Integer> {
 
-        @Argument(required = true, description = "Build config id")
+        @Parameters(description = "Build config id")
         private String buildConfigId;
 
-        @Option(name = "dependency-id", required = true, description = "ID of BuildConfig to add as dependency")
+        @Option(names = "--dependency-id", required = true, description = "ID of BuildConfig to add as dependency")
         private String dependencyConfigId;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                    client.addDependency(
-                            buildConfigId,
-                            BuildConfigurationRef.refBuilder().id(dependencyConfigId).build());
-                    return 0;
-                }
-            });
+        public Integer call() throws Exception {
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                client.addDependency(buildConfigId, BuildConfigurationRef.refBuilder().id(dependencyConfigId).build());
+                return 0;
+            }
         }
     }
 
-    @CommandDefinition(name = "remove-dependency", description = "Removes a dependency from a BuildConfig")
-    public class RemoveDependency extends AbstractCommand {
+    @Command(name = "remove-dependency", description = "Removes a dependency from a BuildConfig")
+    public static class RemoveDependency implements Callable<Integer> {
 
-        @Argument(required = true, description = "Build config id")
+        @Parameters(description = "Build config id")
         private String buildConfigId;
 
-        @Option(name = "dependency-id", required = true, description = "ID of BuildConfig to remove as dependency")
+        @Option(names = "--dependency-id", required = true, description = "ID of BuildConfig to remove as dependency")
         private String dependencyConfigId;
 
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
         @Override
-        public CommandResult execute(CommandInvocation commandInvocation)
-                throws CommandException, InterruptedException {
-            return super.executeHelper(commandInvocation, () -> {
-                try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                    client.removeDependency(buildConfigId, dependencyConfigId);
-                    return 0;
-                }
-            });
+        public Integer call() throws Exception {
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                client.removeDependency(buildConfigId, dependencyConfigId);
+                return 0;
+            }
         }
     }
 

@@ -17,14 +17,16 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.aesh.command.CommandException;
-import org.aesh.command.CommandResult;
-import org.aesh.command.invocation.CommandInvocation;
-import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import picocli.CommandLine.Option;
+
+import java.util.concurrent.Callable;
 
 /**
  * Class used to provide a default implementation for List* type commands.
@@ -34,28 +36,25 @@ import org.jboss.pnc.client.RemoteResourceException;
  * @param <T>
  */
 @Slf4j
-public abstract class AbstractListCommand<T> extends AbstractCommand {
+public abstract class AbstractListCommand<T> implements Callable<Integer> {
 
-    @Option(description = "Sort order (using RSQL)")
+    @Option(names = "--sort", description = "Sort order (using RSQL)")
     private String sort;
 
-    @Option(description = "Query parameter (using RSQL)")
+    @Option(names = "--query", description = "Query parameter (using RSQL)")
     private String query;
 
-    @Option(
-            shortName = 'o',
-            overrideRequired = false,
-            hasValue = false,
-            description = "use json for output (default to yaml)")
+    @Option(names = "-o", description = "use json for output (default to yaml)")
     private boolean jsonOutput = false;
 
     @Override
-    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
-
-        return super.executeHelper(commandInvocation, () -> {
+    public Integer call() {
+        try {
             ObjectHelper.print(jsonOutput, getAll(sort, query).getAll());
-            return 0;
-        });
+        } catch (JsonProcessingException | ClientException e) {
+            throw new FatalException("Caught exception", e);
+        }
+        return 0;
     }
 
     public abstract RemoteCollection<T> getAll(String sort, String query) throws RemoteResourceException;
