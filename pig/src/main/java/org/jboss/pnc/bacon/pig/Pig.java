@@ -17,8 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig;
 
-import java.util.Optional;
-
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -40,6 +38,8 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
+
+import java.util.Optional;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

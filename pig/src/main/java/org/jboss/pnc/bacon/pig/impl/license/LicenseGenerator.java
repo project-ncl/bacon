@@ -18,16 +18,10 @@
 
 package org.jboss.pnc.bacon.pig.impl.license;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import me.snowdrop.licenses.LicensesGenerator;
+import me.snowdrop.licenses.LicensesGeneratorException;
+import me.snowdrop.licenses.properties.GeneratorProperties;
+import me.snowdrop.licenses.utils.Gav;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
@@ -40,10 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
-import me.snowdrop.licenses.LicensesGenerator;
-import me.snowdrop.licenses.LicensesGeneratorException;
-import me.snowdrop.licenses.properties.GeneratorProperties;
-import me.snowdrop.licenses.utils.Gav;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
