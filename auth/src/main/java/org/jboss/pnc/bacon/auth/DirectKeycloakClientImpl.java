@@ -60,7 +60,33 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
             Credential cred = cachedCredential.get();
             if (cred.isValid()) {
                 log.debug("Using cached credential details");
-                return refreshCredentialIfNeededAndReturnNewCredential(keycloakBaseUrl, realm, username, cred);
+                Credential refreshed = refreshCredentialIfNeededAndReturnNewCredential(
+                        keycloakBaseUrl,
+                        realm,
+                        username,
+                        cred);
+
+                if (!refreshed.needsNewAccessToken()) {
+                    return refreshed;
+                } else {
+                    /*
+                     * This section handles the following case:
+                     *
+                     * When we refresh an access token, we usually also get a new refresh token. However the lifetime of
+                     * the new refresh token has the same expiry date as the original refresh token.
+                     *
+                     * Even when we get a new access token with a refresh token, if the particular refresh token
+                     * lifetime is less than the normal lifetime of an access token, the new access token will get the
+                     * lifetime of the refresh token.
+                     *
+                     * Those 2 combinations mean that the access token lifetime, even after refreshing it to get new
+                     * ones, is the lifetime of a refresh token.
+                     *
+                     * If the refreshed access token expires in fewer hours than we'd like, we should instead get a new
+                     * set of access / refresh token by asking her password again
+                     */
+                    log.info("Refresh token is close to expiry or has expired. Will request new access token");
+                }
             }
         }
 
