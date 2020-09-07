@@ -79,8 +79,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <picocli.version>4.5.1</picocli.version>
 
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tagSuffix />
     </properties>
 
@@ -150,7 +151,12 @@
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>4.5.1</version>
+                <version>${picocli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli-shell-jline3</artifactId>
+                <version>${picocli.version}</version>
             </dependency>
             <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
             <dependency>
