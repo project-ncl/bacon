@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.dto.BuildPushResult;
@@ -50,7 +51,7 @@ public class BrewPushCli {
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"\n\n"
                     + "# To wait for the push to finish, use the '--wait' flag. See the '--timeout' flag also\n"
                     + "$ bacon pnc brew-push build 100 --tag-prefix=\"music-1\" --wait")
-    public static class Build implements Callable<Integer> {
+    public static class Build extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Id of build")
         private String id;
@@ -65,9 +66,6 @@ public class BrewPushCli {
 
         @Option(names = "--timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -86,17 +84,17 @@ public class BrewPushCli {
                 if (timeout != null) {
                     BuildPushResult bpr = buildClient
                             .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES);
-                    ObjectHelper.print(jsonOutput, bpr);
+                    ObjectHelper.print(getJsonOutput(), bpr);
                     return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
                 }
 
                 if (wait) {
                     BuildPushResult bpr = buildClient.executeBrewPush(id, request).join();
-                    ObjectHelper.print(jsonOutput, bpr);
+                    ObjectHelper.print(getJsonOutput(), bpr);
                     return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
                 } else {
                     BuildPushResult bpr = buildClient.push(id, request);
-                    ObjectHelper.print(jsonOutput, bpr);
+                    ObjectHelper.print(getJsonOutput(), bpr);
                     return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
                 }
             }
@@ -135,13 +133,10 @@ public class BrewPushCli {
             name = "status",
             description = "Brew Push Status",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push status 10")
-    public static class Status implements Callable<Integer> {
+    public static class Status extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Brew Push ID")
         private String id;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -153,7 +148,7 @@ public class BrewPushCli {
         public Integer call() throws Exception {
             try (AdvancedBuildClient client = BUILD_CREATOR.newClient()) {
                 BuildPushResult bpr = client.getPushResult(id);
-                ObjectHelper.print(jsonOutput, bpr);
+                ObjectHelper.print(getJsonOutput(), bpr);
                 return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
             }
         }

@@ -21,6 +21,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductClient;
@@ -54,7 +55,7 @@ public class ProductCli {
             name = "create",
             description = "Create a product",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product create --abbreviation testing Testing")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Name of product")
         private String name;
@@ -64,9 +65,6 @@ public class ProductCli {
 
         @Option(names = "--description", description = "Description of product", defaultValue = "")
         private String description;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -79,7 +77,7 @@ public class ProductCli {
             Product product = Product.builder().name(name).abbreviation(abbreviation).description(description).build();
 
             try (ProductClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createNew(product));
+                ObjectHelper.print(getJsonOutput(), client.createNew(product));
                 return 0;
             }
         }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
@@ -40,7 +41,7 @@ public class ArtifactCli {
             name = "list-from-hash",
             description = "List artifacts based on hash",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact list-from-hash --md5 stiritup")
-    public static class ListFromHash implements Callable<Integer> {
+    public static class ListFromHash extends JSONCommandHandler implements Callable<Integer> {
         @Option(names = "--md5")
         private String md5;
 
@@ -49,9 +50,6 @@ public class ArtifactCli {
 
         @Option(names = "--sha256")
         private String sha256;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -66,7 +64,7 @@ public class ArtifactCli {
                 return 1;
             } else {
                 try (ArtifactClient client = CREATOR.newClient()) {
-                    ObjectHelper.print(jsonOutput, client.getAll(sha256, md5, sha1));
+                    ObjectHelper.print(getJsonOutput(), client.getAll(sha256, md5, sha1));
                     return 0;
                 }
             }

@@ -36,7 +36,7 @@ import java.util.concurrent.Callable;
  * @param <T>
  */
 @Slf4j
-public abstract class AbstractListCommand<T> implements Callable<Integer> {
+public abstract class AbstractListCommand<T> extends JSONCommandHandler implements Callable<Integer> {
 
     @Option(names = "--sort", description = "Sort order (using RSQL)")
     private String sort;
@@ -44,13 +44,10 @@ public abstract class AbstractListCommand<T> implements Callable<Integer> {
     @Option(names = "--query", description = "Query parameter (using RSQL)")
     private String query;
 
-    @Option(names = "-o", description = "use json for output (default to yaml)")
-    private boolean jsonOutput = false;
-
     @Override
     public Integer call() {
         try {
-            ObjectHelper.print(jsonOutput, getAll(sort, query).getAll());
+            ObjectHelper.print(getJsonOutput(), getAll(sort, query).getAll());
         } catch (JsonProcessingException | ClientException e) {
             throw new FatalException("Caught exception", e);
         }

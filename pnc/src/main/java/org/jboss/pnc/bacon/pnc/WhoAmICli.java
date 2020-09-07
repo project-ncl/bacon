@@ -18,20 +18,17 @@
 package org.jboss.pnc.bacon.pnc;
 
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.UserClient;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
 import java.util.concurrent.Callable;
 
 @Command(name = "whoami", description = "Returns identity of current user")
-public class WhoAmICli implements Callable<Integer> {
+public class WhoAmICli extends JSONCommandHandler implements Callable<Integer> {
 
     private static final ClientCreator<UserClient> CREATOR = new ClientCreator<>(UserClient::new);
-
-    @Option(names = "o", description = "use json for output (default to yaml)")
-    private boolean jsonOutput = false;
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -42,7 +39,7 @@ public class WhoAmICli implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         try (UserClient client = CREATOR.newClientAuthenticated()) {
-            ObjectHelper.print(jsonOutput, client.getCurrentUser());
+            ObjectHelper.print(getJsonOutput(), client.getCurrentUser());
             return 0;
         }
     }

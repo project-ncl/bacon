@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.util.concurrent.Callable;
@@ -34,17 +33,14 @@ import java.util.concurrent.Callable;
  * @param <T>
  */
 @Slf4j
-public abstract class AbstractGetSpecificCommand<T> implements Callable<Integer> {
+public abstract class AbstractGetSpecificCommand<T> extends JSONCommandHandler implements Callable<Integer> {
     @Parameters(description = "Id of item")
     private String id;
-
-    @Option(names = "-o", description = "use json for output (default to yaml)")
-    private boolean jsonOutput = false;
 
     @Override
     public Integer call() {
         try {
-            ObjectHelper.print(jsonOutput, getSpecific(id));
+            ObjectHelper.print(getJsonOutput(), getSpecific(id));
         } catch (JsonProcessingException | ClientException e) {
             throw new FatalException("Caught exception", e);
         }

@@ -23,6 +23,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.ClientException;
@@ -63,7 +64,7 @@ public class GroupBuildCli {
             name = "start",
             description = "Start a new Group build",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-build start --temporary-build 23")
-    public static class Start implements Callable<Integer> {
+    public static class Start extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Group Build Config ID")
         private String groupBuildConfigId;
@@ -80,8 +81,6 @@ public class GroupBuildCli {
         private boolean wait = false;
         @Option(names = "--timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -110,7 +109,7 @@ public class GroupBuildCli {
                             groupBuildParams,
                             Long.parseLong(timeout),
                             TimeUnit.MINUTES);
-                    ObjectHelper.print(jsonOutput, gb);
+                    ObjectHelper.print(getJsonOutput(), gb);
                     return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                 }
 
@@ -118,12 +117,12 @@ public class GroupBuildCli {
                     GroupBuild gb = advancedGroupConfigurationClient
                             .executeGroupBuild(groupBuildConfigId, groupBuildParams)
                             .join();
-                    ObjectHelper.print(jsonOutput, gb);
+                    ObjectHelper.print(getJsonOutput(), gb);
                     return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                 } else {
                     GroupBuild gb = advancedGroupConfigurationClient
                             .trigger(groupBuildConfigId, groupBuildParams, null);
-                    ObjectHelper.print(jsonOutput, gb);
+                    ObjectHelper.print(getJsonOutput(), gb);
                     return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                 }
             }

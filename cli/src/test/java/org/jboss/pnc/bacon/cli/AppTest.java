@@ -13,7 +13,7 @@ class AppTest {
         App app = new App();
         app.run(new String[] { "-h" });
         String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
-        assertTrue(text.contains("Usage: bacon [-hvV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
+        assertTrue(text.contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
     }
 
     @Test

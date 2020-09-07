@@ -1,6 +1,12 @@
 
 # Developers Guide
 
+## Adding JSON Output
+
+The JSON option (`-o`) is defined as an inherited option in the top level App. In order for implementations to retrieve its value they should extend `JSONCommandHandler` which provides a function to return the value:
+```
+    protected boolean getJsonOutput()
+```
 
 ## Adding Example Usage Messages
 

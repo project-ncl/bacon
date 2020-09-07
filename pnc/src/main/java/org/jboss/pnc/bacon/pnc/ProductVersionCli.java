@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
@@ -85,14 +86,12 @@ public class ProductVersionCli {
             name = "create",
             description = "Create a product version",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-version create --product-id 20 2.1")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Version of product version")
         private String productVersion;
         @Option(required = true, names = "--product-id", description = "Product ID of product version")
         private String productId;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -116,7 +115,7 @@ public class ProductVersionCli {
                     .build();
 
             try (ProductVersionClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createNew(productVersion));
+                ObjectHelper.print(getJsonOutput(), client.createNew(productVersion));
                 return 0;
             }
         }
