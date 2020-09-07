@@ -92,7 +92,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         Path repoZipPath = Paths.get(releasePath + deliverables.getRepositoryZipName());
         unpackRepository(repoZipPath);
 
-        String additionalRepository = (String) getPigConfiguration().get("additionalRepository");
+        String additionalRepository = (String) getAddOnConfiguration().get("additionalRepository");
         String settingsSelector = "";
         if (additionalRepository != null) {
             try {
@@ -148,7 +148,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     private Collection<String> skippedExtensions() {
         // noinspection unchecked
-        Collection<String> skipped = (Collection<String>) getPigConfiguration().get("skippedExtensions");
+        Collection<String> skipped = (Collection<String>) getAddOnConfiguration().get("skippedExtensions");
         return skipped == null ? Collections.emptyList() : skipped;
     }
 
@@ -209,7 +209,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     private void buildProject(Path projectPath, String settingsSelector) {
         log.info("Building the project {}", projectPath.toAbsolutePath());
-        OSCommandExecutor.runCommandIn("mvn -B clean package" + repoDefinition + settingsSelector, projectPath);
+        OSCommandExecutor.runCommandIn("mvn -B clean package " + repoDefinition + settingsSelector, projectPath);
     }
 
     private Path generateQuarkusProject(Predicate<String> artifactIdSelector, String settingsSelector) {
@@ -220,12 +220,12 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         String command = String.format(
                 "mvn -X io.quarkus:quarkus-maven-plugin:%s:create -DprojectGroupId=tmp -DprojectArtifactId=tmp "
                         + "-DplatformArtifactId=%s -DplatformVersion=%s -Dextensions=%s%s%s",
-                repoDefinition,
-                settingsSelector,
                 quarkusVersion,
                 "quarkus-bom",
                 quarkusVersion,
-                String.join(",", extensionArtifactIds));
+                String.join(",", extensionArtifactIds),
+                repoDefinition,
+                settingsSelector);
         log.info("will create project with {}", command);
         OSCommandExecutor.runCommandIn(command, tempProjectLocation);
 
@@ -300,9 +300,12 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     private Set<String> gatherProblematicDeps() {
         Set<String> problemmaticDeps = new TreeSet<>();
         problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom/.*\\.pom"));
-        problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom-deployment/.*\\.pom"));
         problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom/.*\\.pom"));
-        problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom-deployment/.*\\.pom"));
+
+        if (Boolean.TRUE.equals(getAddOnConfiguration().get("checkDeploymentBoms"))) {
+            problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom-deployment/.*\\.pom"));
+            problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom-deployment/.*\\.pom"));
+        }
         return problemmaticDeps;
     }
 

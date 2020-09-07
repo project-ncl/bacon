@@ -119,7 +119,8 @@ public final class PigFacade {
             boolean tempBuildTS,
             RebuildMode rebuildMode,
             boolean skipBranchCheck,
-            boolean strictLicenseCheck) {
+            boolean strictLicenseCheck,
+            Path configurationDirectory) {
 
         PigContext context = context();
 
@@ -157,7 +158,7 @@ public final class PigFacade {
             if (repoZipPath != null) {
                 repo = parseRepository(new File(repoZipPath));
             } else {
-                repo = generateRepo(removeGeneratedM2Dups, strictLicenseCheck);
+                repo = generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
             }
             context.setRepositoryData(repo);
             context.storeContext();
@@ -357,14 +358,17 @@ public final class PigFacade {
                 .forEach(AddOn::trigger);
     }
 
-    public static RepositoryData generateRepo(boolean removeGeneratedM2Dups, boolean strictLicenseCheck) {
+    public static RepositoryData generateRepo(
+            boolean removeGeneratedM2Dups,
+            Path configurationDirectory,
+            boolean strictLicenseCheck) {
         PigContext context = context();
         RepoManager repoManager = new RepoManager(
                 context.getPigConfiguration(),
                 context.getReleasePath(),
                 context.getDeliverables(),
                 context.getBuilds(),
-                Paths.get("."), // TODO!
+                configurationDirectory,
                 removeGeneratedM2Dups,
                 strictLicenseCheck);
 
@@ -381,8 +385,8 @@ public final class PigFacade {
     }
 
     /**
-     * From the group configuration defined in the import result, get the latest group build and return the builds done
-     * in it
+     * From the group configuration defined in the import result, get the latest successful builds in it Used only in
+     * with --skipBuilds
      *
      * @param importResult Data from the 'configuration' part. Will contain information about the group configuration
      *        used to trigger the builds

@@ -49,7 +49,7 @@ public class ExtraDeliverableDownloader extends AddOn {
     @SuppressWarnings("unchecked")
     @Override
     public void trigger() {
-        getPigConfiguration()
+        getAddOnConfiguration()
                 .forEach((key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts));
     }
 

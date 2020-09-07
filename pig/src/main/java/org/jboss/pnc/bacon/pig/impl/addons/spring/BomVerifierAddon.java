@@ -82,7 +82,7 @@ public class BomVerifierAddon extends AddOn {
     @SuppressWarnings("unchecked")
     private List<String> getListFromConfig() {
         try {
-            Map<String, ?> config = getPigConfiguration();
+            Map<String, ?> config = getAddOnConfiguration();
             if (config != null) {
                 List<String> result = (List<String>) config.get("allowUnreleased");
                 return result == null ? emptyList() : result;

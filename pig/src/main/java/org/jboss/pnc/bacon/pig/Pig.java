@@ -39,6 +39,8 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -235,6 +237,7 @@ public class Pig extends AbstractCommand {
         public PigRunOutput doExecute() {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
+            Path configurationDirectory = Paths.get(configDir);
 
             GroupBuildInfo groupBuildInfo = PigFacade.run(
                     skipRepo,
@@ -250,7 +253,8 @@ public class Pig extends AbstractCommand {
                     tempBuildTS,
                     RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck,
-                    strictLicenseCheck);
+                    strictLicenseCheck,
+                    configurationDirectory);
 
             PigContext context = PigContext.get();
             return new PigRunOutput(
@@ -337,7 +341,9 @@ public class Pig extends AbstractCommand {
 
         @Override
         public RepositoryData doExecute() {
-            RepositoryData result = PigFacade.generateRepo(removeGeneratedM2Dups, strictLicenseCheck);
+            Path configurationDirectory = Paths.get(configDir);
+            RepositoryData result = PigFacade
+                    .generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
             PigContext.get().setRepositoryData(result);
             PigContext.get().storeContext();
             return result;
