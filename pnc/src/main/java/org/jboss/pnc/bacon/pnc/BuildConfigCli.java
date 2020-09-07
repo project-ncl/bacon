@@ -24,6 +24,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
@@ -79,7 +80,7 @@ public class BuildConfigCli {
                     + "\t--scm-repository-id 176 --scm-revision master \\ \n"
                     + "\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n"
                     + "\t--build-type MVN buildconfigname")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Name of build config")
         private String buildConfigName;
@@ -105,8 +106,6 @@ public class BuildConfigCli {
                 description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -131,7 +130,7 @@ public class BuildConfigCli {
                 buildConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
             }
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createNew(buildConfigurationBuilder.build()));
+                ObjectHelper.print(getJsonOutput(), client.createNew(buildConfigurationBuilder.build()));
                 return 0;
             }
         }
@@ -146,7 +145,7 @@ public class BuildConfigCli {
                     + "\t--build-type MVN buildconfigname \\ \n"
                     + "\t--scm-url=http://github.com/project-ncl/pnc.git \\ \n\t--scm-revision=master"
                     + "\t--no-prebuild-sync")
-    public static class CreateWithSCM implements Callable<Integer> {
+    public static class CreateWithSCM extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Name of build config")
         private String buildConfigName;
@@ -177,9 +176,6 @@ public class BuildConfigCli {
         @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
 
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
-
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -206,7 +202,7 @@ public class BuildConfigCli {
                     .build();
 
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createWithSCM(request));
+                ObjectHelper.print(getJsonOutput(), client.createWithSCM(request));
                 return 0;
             }
         }
@@ -217,7 +213,7 @@ public class BuildConfigCli {
             description = "Update a build config",
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc build-config update --description \"new me new description\" 50")
-    public static class Update implements Callable<Integer> {
+    public static class Update extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Build config ID")
         protected String buildConfigId;
@@ -311,13 +307,10 @@ public class BuildConfigCli {
                     + "$ bacon pnc build-config create-revision --description \"new me new description\" 50")
     public static class CreateRevision extends Update implements Callable<Integer> {
 
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
-
         @Override
         protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createRevision(buildConfigId, updated));
+                ObjectHelper.print(getJsonOutput(), client.createRevision(buildConfigId, updated));
             }
         }
     }

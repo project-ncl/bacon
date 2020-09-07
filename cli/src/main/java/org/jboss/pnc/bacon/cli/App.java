@@ -100,6 +100,9 @@ public class App {
         }
     }
 
+    @Option(names = Constant.JSON_OUTPUT, description = "use json for output (default to yaml)", scope = INHERIT)
+    private boolean jsonOutput = false;
+
     /**
      * Set the verbosity of logback if the verbosity flag is set
      */

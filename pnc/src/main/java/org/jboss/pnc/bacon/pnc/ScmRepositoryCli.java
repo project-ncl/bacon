@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
@@ -63,15 +64,12 @@ public class ScmRepositoryCli {
             description = "Create a repository, and wait for PNC to give us the status of creation",
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc scm-repository create-and-sync --no-pre-build-sync http://github.com/project-ncl/pnc.git")
-    public static class CreateAndSync implements Callable<Integer> {
+    public static class CreateAndSync extends JSONCommandHandler implements Callable<Integer> {
         @Parameters(description = "SCM URL")
         private String scmUrl;
 
         @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -88,7 +86,7 @@ public class ScmRepositoryCli {
                 if (existing != null && existing.size() > 0) {
 
                     log.warn("Repository already exists on PNC! No creation needed");
-                    ObjectHelper.print(jsonOutput, existing.getAll().iterator());
+                    ObjectHelper.print(getJsonOutput(), existing.getAll().iterator());
                     return 0;
                 }
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
@@ -104,7 +102,8 @@ public class ScmRepositoryCli {
                     }
                     final SCMCreationResult result = futureResult.join();
                     if (result.isSuccess()) {
-                        ObjectHelper.print(jsonOutput, result.getScmRepositoryCreationSuccess().getScmRepository());
+                        ObjectHelper
+                                .print(getJsonOutput(), result.getScmRepositoryCreationSuccess().getScmRepository());
                     } else {
                         throw new FatalException(
                                 "Failure while creating repository: {}",
@@ -202,7 +201,7 @@ public class ScmRepositoryCli {
     }
 
     @Command(name = "list-build-configs", description = "List build configs that use a particular SCM repository")
-    public class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
+    public static class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
 
         @Parameters(description = "SCM Repository ID")
         private String scmRepositoryId;

@@ -17,12 +17,26 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -38,23 +52,11 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
+
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import javax.ws.rs.core.Response;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 @Command(
         name = "build",
@@ -81,7 +83,7 @@ public class BuildCli {
             description = "Start a new build",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build start \\\n"
                     + "\t--rebuild-mode=FORCE --temporary-build --wait 27")
-    public static class Start implements Callable<Integer> {
+    public static class Start extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Build Config ID")
         private String buildConfigId;
@@ -105,8 +107,6 @@ public class BuildCli {
         private Integer timeout;
         @Option(names = "--revision", description = "Build Config revision to build.")
         private Integer revision;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -147,7 +147,7 @@ public class BuildCli {
                         build = client.triggerRevision(buildConfigId, revision, buildParams);
                     }
                 }
-                ObjectHelper.print(jsonOutput, build);
+                ObjectHelper.print(getJsonOutput(), build);
                 return build.getStatus().completedSuccessfully() ? 0 : build.getStatus().ordinal();
             }
         }
@@ -285,9 +285,7 @@ public class BuildCli {
                 if (buildLogs.isPresent()) {
                     try (InputStream inputStream = buildLogs.get();
                             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                            BufferedReader reader = new BufferedReader(inputStreamReader);) {
-                        // TODO: Output?
-                        // reader.lines().forEach( l -> shell.writeln( l ) );
+                            BufferedReader reader = new BufferedReader(inputStreamReader)) {
                         reader.lines().forEach(log::info);
                     } catch (IOException e) {
                         throw new ClientException("Cannot read log stream.", e);
@@ -297,8 +295,6 @@ public class BuildCli {
                     String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
                     URI bifrostUri = URI.create(bifrostBase);
                     BifrostClient logProcessor = new BifrostClient(bifrostUri);
-                    // TODO: Output?
-                    // logProcessor.writeLog( buildId, follow, line -> shell.writeln( line ) );
                     logProcessor.writeLog(buildId, follow, log::info);
                 }
             } catch (RemoteResourceException | IOException e) {

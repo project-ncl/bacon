@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProjectClient;
@@ -59,7 +60,7 @@ public class ProjectCli {
             description = "Create a project",
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc project create --description \"Morning sunshine\" best-project-ever")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Name of project")
         private String name;
@@ -69,8 +70,6 @@ public class ProjectCli {
         private String projectUrl;
         @Option(names = "--issue-tracker-url", description = "Issue-Tracker-URL of project", defaultValue = "")
         private String issueTrackerUrl;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -88,7 +87,7 @@ public class ProjectCli {
                     .build();
 
             try (ProjectClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createNew(project));
+                ObjectHelper.print(getJsonOutput(), client.createNew(project));
                 return 0;
             }
         }

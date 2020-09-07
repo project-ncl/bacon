@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupConfigurationClient;
@@ -80,7 +81,7 @@ public class GroupConfigCli {
             description = "Create a group config",
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Name of group config")
         private String groupConfigName;
@@ -90,9 +91,6 @@ public class GroupConfigCli {
 
         @Option(names = "--build-config-ids", description = "Build config ids in Group Config. Comma separated")
         private String buildConfigIds;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -111,7 +109,7 @@ public class GroupConfigCli {
                 groupConfigurationBuilder.buildConfigs(addBuildConfigs(buildConfigIds));
             }
             try (GroupConfigurationClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createNew(groupConfigurationBuilder.build()));
+                ObjectHelper.print(getJsonOutput(), client.createNew(groupConfigurationBuilder.build()));
                 return 0;
             }
         }
@@ -261,13 +259,10 @@ public class GroupConfigCli {
     @Command(
             name = "show-latest-build",
             description = "Show the progress of the latest group build for the group config")
-    public static class ShowLatestBuild implements Callable<Integer> {
+    public static class ShowLatestBuild extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Group config id")
         private String id;
-
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         @Option(names = "--temporary-build", description = "Build is temporary")
         private boolean temporaryBuild;
@@ -286,7 +281,7 @@ public class GroupConfigCli {
                         .getAll();
                 Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
                 if (latest.isPresent()) {
-                    ObjectHelper.print(jsonOutput, latest.get());
+                    ObjectHelper.print(getJsonOutput(), latest.get());
                     return 0;
                 } else {
                     log.error("Couldn't find any group build from group config id: {}", id);

@@ -17,6 +17,8 @@ public class Constant {
 
     public static final String EXAMPLE_TEXT = "%n@|bold Example:|@%n";
 
+    public static final String JSON_OUTPUT = "-o";
+
     private Constant() {
     }
 }

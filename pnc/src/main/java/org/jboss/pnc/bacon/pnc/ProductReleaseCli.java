@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pnc;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -65,7 +66,7 @@ public class ProductReleaseCli {
             description = "Create a product release",
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc product-release create --milestone-id 32 --support-level EOL 2.1.0.GA")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Product Release Version. Format: <d>.<d>.<d>.<word>")
         private String productReleaseVersion;
@@ -82,8 +83,6 @@ public class ProductReleaseCli {
                 names = "--support-level",
                 description = "Support level: potential values: UNRELEASED, EARLYACCESS, SUPPORTED, EXTENDED_SUPPORT, EOL")
         private String supportLevel;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -117,7 +116,7 @@ public class ProductReleaseCli {
                         .build();
 
                 try (ProductReleaseClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
-                    ObjectHelper.print(jsonOutput, clientAuthenticated.createNew(productRelease));
+                    ObjectHelper.print(getJsonOutput(), clientAuthenticated.createNew(productRelease));
                     return 0;
                 }
             }
@@ -190,10 +189,7 @@ public class ProductReleaseCli {
     }
 
     @Command(name = "list-support-levels", description = "List supported levels")
-    public static class ListSupportLevel implements Callable<Integer> {
-
-        @Option(names = "o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
+    public static class ListSupportLevel extends JSONCommandHandler implements Callable<Integer> {
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -204,7 +200,7 @@ public class ProductReleaseCli {
         @Override
         public Integer call() throws Exception {
             try (ProductReleaseClient client = CREATOR.newClient()) {
-                ObjectHelper.print(jsonOutput, client.getSupportLevels());
+                ObjectHelper.print(getJsonOutput(), client.getSupportLevels());
                 return 0;
             }
         }

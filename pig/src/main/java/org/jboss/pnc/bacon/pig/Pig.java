@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig;
 
 import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
@@ -79,7 +80,7 @@ public class Pig {
     public static final String SKIP_BRANCH_CHECK_DESC = "If set to true, pig won't try to determine if the branch that is used to build from is modified. "
             + "Branch modification check takes a lot of time, if you use tag, this switch can speed up the build.";
 
-    public abstract static class PigCommand<T> implements Callable<Integer> {
+    public abstract static class PigCommand<T> extends JSONCommandHandler implements Callable<Integer> {
         @Parameters(description = "Directory containing the Pig configuration file")
         String configDir;
 
@@ -88,9 +89,6 @@ public class Pig {
                 defaultValue = TEMP_BUILD_DEFAULT,
                 description = TEMP_BUILD_DESC)
         boolean tempBuild;
-
-        @Option(names = "o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         @Option(
                 names = "--releaseStorageUrl",
@@ -123,7 +121,7 @@ public class Pig {
 
             Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
             PigContext.init(clean || isStartingPoint(), configDir, releaseStorageUrl);
-            ObjectHelper.print(jsonOutput, doExecute());
+            ObjectHelper.print(getJsonOutput(), doExecute());
             return 0;
         }
 
@@ -319,7 +317,7 @@ public class Pig {
     }
 
     @Command(name = "licenses", description = "GenerateLicenses")
-    public class GenerateLicenses extends PigCommand<String> {
+    public static class GenerateLicenses extends PigCommand<String> {
         @Option(
                 names = "--strictLicenseCheck",
                 defaultValue = "true",
@@ -334,7 +332,7 @@ public class Pig {
     }
 
     @Command(name = "javadocs", description = "GenerateJavadocs")
-    public class GenerateJavadocs extends PigCommand<String> {
+    public static class GenerateJavadocs extends PigCommand<String> {
 
         @Override
         public String doExecute() {
@@ -344,7 +342,7 @@ public class Pig {
     }
 
     @Command(name = "sources", description = "GenerateSources")
-    public class GenerateSources extends PigCommand<String> {
+    public static class GenerateSources extends PigCommand<String> {
 
         @Override
         public String doExecute() {
@@ -354,7 +352,7 @@ public class Pig {
     }
 
     @Command(name = "shared-content", description = "GenerateSharedContentAnalysis")
-    public class GenerateSharedContentAnalysis extends PigCommand<String> {
+    public static class GenerateSharedContentAnalysis extends PigCommand<String> {
 
         @Override
         public String doExecute() {
@@ -364,7 +362,7 @@ public class Pig {
     }
 
     @Command(name = "docs", description = "GenerateDocuments")
-    public class GenerateDocuments extends PigCommand<String> {
+    public static class GenerateDocuments extends PigCommand<String> {
 
         @Override
         public String doExecute() {
@@ -374,7 +372,7 @@ public class Pig {
     }
 
     @Command(name = "addons", description = "Addons")
-    public class TriggerAddOns extends PigCommand<String> {
+    public static class TriggerAddOns extends PigCommand<String> {
 
         @Override
         public String doExecute() {
@@ -387,7 +385,7 @@ public class Pig {
             name = "release",
             description = "Push builds to brew, generate the NVR list, "
                     + "close the PNC milestone, generate the upload to candidates script")
-    public class Release extends PigCommand<PigReleaseOutput> {
+    public static class Release extends PigCommand<PigReleaseOutput> {
 
         @Override
         public PigReleaseOutput doExecute() {

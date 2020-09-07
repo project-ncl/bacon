@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -99,7 +100,7 @@ public class ProductMilestoneCli {
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-milestone create \\\n"
                     + "\t--product-version-id 3 \\\n" + "\t--issue-tracker-url http://example.com \\\n"
                     + "\t--end-date 2030-12-26 1.2.0.CR1")
-    public static class Create implements Callable<Integer> {
+    public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Version of product milestone: Format: <d>.<d>.<d>.<word>")
         private String productMilestoneVersion;
@@ -109,8 +110,6 @@ public class ProductMilestoneCli {
         private String startDate;
         @Option(required = true, names = "--end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
-        @Option(names = "-o", description = "use json for output (default to yaml)")
-        private boolean jsonOutput = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -141,7 +140,7 @@ public class ProductMilestoneCli {
                     .build();
 
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(jsonOutput, client.createNew(milestone));
+                ObjectHelper.print(getJsonOutput(), client.createNew(milestone));
                 return 0;
             }
         }
