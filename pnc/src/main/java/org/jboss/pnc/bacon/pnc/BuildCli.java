@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -75,7 +76,11 @@ public class BuildCli {
     private static final ClientCreator<AdvancedBuildConfigurationClient> BC_CREATOR = new ClientCreator<>(
             AdvancedBuildConfigurationClient::new);
 
-    @Command(name = "start", description = "Start a new build")
+    @Command(
+            name = "start",
+            description = "Start a new build",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build start \\\n"
+                    + "\t--rebuild-mode=FORCE --temporary-build --wait 27")
     public static class Start implements Callable<Integer> {
 
         @Parameters(description = "Build Config ID")
@@ -146,26 +151,16 @@ public class BuildCli {
                 return build.getStatus().completedSuccessfully() ? 0 : build.getStatus().ordinal();
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-
-            StringBuilder command = new StringBuilder();
-            command.append("$ bacon pnc build start \\\n").append("\t--rebuild-mode=FORCE --temporary-build --wait 27");
-            return command.toString();
-        }
     }
 
-    @Command(name = "cancel", description = "Cancel build")
+    @Command(
+            name = "cancel",
+            description = "Cancel build",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build cancel 10000")
     public static class Cancel implements Callable<Integer> {
 
         @Parameters(description = "Build ID")
         private String buildId;
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc build cancel 10000";
-        }
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -183,7 +178,7 @@ public class BuildCli {
     }
 
     @Command(name = "list", description = "List builds")
-    public class List extends AbstractBuildListCommand {
+    public static class List extends AbstractBuildListCommand {
 
         @Option(
                 names = "--attributes",
@@ -206,8 +201,11 @@ public class BuildCli {
         }
     }
 
-    @Command(name = "list-built-artifacts", description = "List built artifacts")
-    public class ListBuildArtifacts extends AbstractListCommand<Artifact> {
+    @Command(
+            name = "list-built-artifacts",
+            description = "List built artifacts",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build list-built-artifacts 10000")
+    public static class ListBuildArtifacts extends AbstractListCommand<Artifact> {
 
         @Parameters(description = "Build ID")
         private String buildId;
@@ -218,15 +216,13 @@ public class BuildCli {
                 return client.getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc build list-built-artifacts 10000";
-        }
     }
 
-    @Command(name = "list-dependencies", description = "List dependencies")
-    public class ListDependencies extends AbstractListCommand<Artifact> {
+    @Command(
+            name = "list-dependencies",
+            description = "List dependencies",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build list-dependencies 10000")
+    public static class ListDependencies extends AbstractListCommand<Artifact> {
 
         @Parameters(description = "Build ID")
         private String buildId;
@@ -237,15 +233,10 @@ public class BuildCli {
                 return client.getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc build list-dependencies 10000";
-        }
     }
 
     @Command(name = "get", description = "Get a build by its id")
-    public class Get extends AbstractGetSpecificCommand<Build> {
+    public static class Get extends AbstractGetSpecificCommand<Build> {
 
         @Override
         public Build getSpecific(String id) throws ClientException {
@@ -256,7 +247,7 @@ public class BuildCli {
     }
 
     @Command(name = "get-revision", description = "Get build-config revision of build")
-    public class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
+    public static class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
 
         @Override
         public BuildConfigurationRevision getSpecific(String id) throws ClientException {
@@ -267,7 +258,7 @@ public class BuildCli {
     }
 
     @Command(name = "get-log", description = "Get build log.")
-    public class GetLog implements Callable<Integer> {
+    public static class GetLog implements Callable<Integer> {
         @Parameters(description = "Build id.")
         private String buildId;
 
@@ -318,7 +309,7 @@ public class BuildCli {
     }
 
     @Command(name = "download-sources", description = "Download SCM sources used for the build")
-    public class DownloadSources implements Callable<Integer> {
+    public static class DownloadSources implements Callable<Integer> {
 
         @Parameters(description = "Id of build")
         private String id;

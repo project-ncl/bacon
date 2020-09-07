@@ -15,6 +15,8 @@ public class Constant {
 
     public static final String CACHE_FILE = "saved-user.json";
 
+    public static final String EXAMPLE_TEXT = "%n@|bold Example:|@%n";
+
     private Constant() {
     }
 }

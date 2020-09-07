@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -58,7 +59,10 @@ public class GroupBuildCli {
     private static final ClientCreator<AdvancedGroupConfigurationClient> GC_CREATOR = new ClientCreator<>(
             AdvancedGroupConfigurationClient::new);
 
-    @Command(name = "start", description = "Start a new Group build")
+    @Command(
+            name = "start",
+            description = "Start a new Group build",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-build start --temporary-build 23")
     public static class Start implements Callable<Integer> {
 
         @Parameters(description = "Group Build Config ID")
@@ -124,23 +128,16 @@ public class GroupBuildCli {
                 }
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc group-build start --temporary-build 23";
-        }
     }
 
-    @Command(name = "cancel", description = "Cancel a group build")
+    @Command(
+            name = "cancel",
+            description = "Cancel a group build",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-build cancel 42")
     public static class Cancel implements Callable<Integer> {
 
         @Parameters(description = "Group Build ID")
         private String groupBuildId;
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc group-build cancel 42";
-        }
 
         /**
          * Computes a result, or throws an exception if unable to do so.

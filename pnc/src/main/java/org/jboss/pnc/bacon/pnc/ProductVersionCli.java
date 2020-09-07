@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -80,7 +81,10 @@ public class ProductVersionCli {
         return true;
     }
 
-    @Command(name = "create", description = "Create a product version")
+    @Command(
+            name = "create",
+            description = "Create a product version",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-version create --product-id 20 2.1")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Version of product version")
@@ -115,11 +119,6 @@ public class ProductVersionCli {
                 ObjectHelper.print(jsonOutput, client.createNew(productVersion));
                 return 0;
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product-version create --product-id 20 2.1";
         }
     }
 
@@ -195,7 +194,10 @@ public class ProductVersionCli {
         }
     }
 
-    @Command(name = "update", description = "Update a particular product version")
+    @Command(
+            name = "update",
+            description = "Update a particular product version",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-version update --product-version 2.2 42")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Product Version ID to update")
@@ -228,11 +230,6 @@ public class ProductVersionCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product-version update --product-version 2.2 42";
         }
     }
 }

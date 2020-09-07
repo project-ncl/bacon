@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
@@ -43,7 +44,12 @@ public class BrewPushCli {
     private static final ClientCreator<GroupBuildClient> GROUP_BUILD_CREATOR = new ClientCreator<>(
             GroupBuildClient::new);
 
-    @Command(name = "build", description = "Push build to Brew")
+    @Command(
+            name = "build",
+            description = "Push build to Brew",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"\n\n"
+                    + "# To wait for the push to finish, use the '--wait' flag. See the '--timeout' flag also\n"
+                    + "$ bacon pnc brew-push build 100 --tag-prefix=\"music-1\" --wait")
     public static class Build implements Callable<Integer> {
 
         @Parameters(description = "Id of build")
@@ -95,20 +101,13 @@ public class BrewPushCli {
                 }
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            StringBuilder commands = new StringBuilder();
-            commands.append("$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"\n")
-                    .append("\n")
-                    .append("# To wait for the push to finish, use the '--wait' flag. See the '--timeout' flag also\n")
-                    .append("$ bacon pnc brew-push build 100 --tag-prefix=\"music-1\" --wait");
-            return commands.toString();
-        }
     }
 
-    @Command(name = "group-build", description = "Push group build to Brew")
-    public class GroupBuild implements Callable<Integer> {
+    @Command(
+            name = "group-build",
+            description = "Push group build to Brew",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push group-build 8 --tag-prefix=\"1.0-pnc\"\n")
+    public static class GroupBuild implements Callable<Integer> {
 
         @Parameters(description = "Id of group-build")
         private String id;
@@ -130,17 +129,12 @@ public class BrewPushCli {
                 return 0;
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            StringBuilder commands = new StringBuilder();
-            commands.append("$ bacon pnc brew-push group-build 8 --tag-prefix=\"1.0-pnc\"\n");
-
-            return commands.toString();
-        }
     }
 
-    @Command(name = "status", description = "Brew Push Status")
+    @Command(
+            name = "status",
+            description = "Brew Push Status",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push status 10")
     public static class Status implements Callable<Integer> {
 
         @Parameters(description = "Brew Push ID")
@@ -162,11 +156,6 @@ public class BrewPushCli {
                 ObjectHelper.print(jsonOutput, bpr);
                 return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc brew-push status 10";
         }
     }
 }

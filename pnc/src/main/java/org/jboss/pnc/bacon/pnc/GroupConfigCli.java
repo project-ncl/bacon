@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -74,7 +75,11 @@ public class GroupConfigCli {
         return buildConfigurationRefList;
     }
 
-    @Command(name = "create", description = "Create a group config")
+    @Command(
+            name = "create",
+            description = "Create a group config",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Name of group config")
@@ -110,14 +115,12 @@ public class GroupConfigCli {
                 return 0;
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name";
-        }
     }
 
-    @Command(name = "update", description = "Update a group config")
+    @Command(
+            name = "update",
+            description = "Update a group config",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-config update --name group-config-updated 503")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Group Config ID")
@@ -158,11 +161,6 @@ public class GroupConfigCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc group-config update --name group-config-updated 503";
         }
     }
 
