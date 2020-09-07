@@ -87,13 +87,17 @@ public class BuildConfig {
     private Double buildPodMemory;
     private String pigYamlMetadata;
 
+    /** deprecated: use alignmentParameters instead */
     private Set<String> customPmeParameters = new TreeSet<>();
+    private Set<String> alignmentParameters = new TreeSet<>();
+
     private Set<String> extraRepositories = new TreeSet<>();
     private Boolean branchModified;
     private String buildType;
-    private String executionRoot;
 
-    private Set<String> alignmentParameters = new TreeSet<>();
+    /** deprecated: use brewBuildName instead */
+    private String executionRoot;
+    private String brewBuildName;
 
     /**
      * Set the defaults of buildConfig if not explicitly specified
@@ -210,8 +214,13 @@ public class BuildConfig {
             result.put("PIG_YAML_METADATA", metadata);
         }
 
-        if (executionRoot != null) {
-            result.put("EXECUTION_ROOT_NAME", executionRoot);
+        if (executionRoot != null && brewBuildName == null) {
+            log.warn("[Deprecated] Please rename 'executionRoot' section to 'brewBuildName'");
+            brewBuildName = executionRoot;
+        }
+
+        if (brewBuildName != null) {
+            result.put("BREW_BUILD_NAME", brewBuildName);
         }
 
         if (!extraRepositories.isEmpty()) {
