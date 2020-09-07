@@ -88,6 +88,10 @@ public class PncBuild {
         buildLog = log == null ? Collections.emptyList() : asList(log.split("\\r?\\n"));
     }
 
+    public void addBuildLog(List<String> log) {
+        buildLog = log == null ? Collections.emptyList() : log;
+    }
+
     public void addDependencyArtifacts(List<Artifact> artifacts) {
         dependencyArtifacts = artifacts.stream().map(ArtifactWrapper::new).collect(Collectors.toList());
     }
