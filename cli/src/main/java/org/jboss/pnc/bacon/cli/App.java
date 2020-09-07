@@ -83,7 +83,10 @@ public class App {
             // return 0;
             throw new FatalException("NYI");
         } else {
-            return new CommandLine(this).setExecutionStrategy(this::executionStrategy).execute(args);
+            CommandLine commandLine = new CommandLine(this);
+            commandLine.setUsageHelpAutoWidth(true);
+            commandLine.setCommandName("bacon");
+            return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
         }
     }
 

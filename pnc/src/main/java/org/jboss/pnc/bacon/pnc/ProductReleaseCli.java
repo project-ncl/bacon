@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -59,7 +60,11 @@ public class ProductReleaseCli {
         }
     }
 
-    @Command(name = "create", description = "Create a product release")
+    @Command(
+            name = "create",
+            description = "Create a product release",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc product-release create --milestone-id 32 --support-level EOL 2.1.0.GA")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Product Release Version. Format: <d>.<d>.<d>.<word>")
@@ -117,14 +122,12 @@ public class ProductReleaseCli {
                 }
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product-release create --milestone-id 32 --support-level EOL 2.1.0.GA";
-        }
     }
 
-    @Command(name = "update", description = "Update product release")
+    @Command(
+            name = "update",
+            description = "Update product release",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-release update --support-level UNRELEASED 14")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Product Release ID")
@@ -173,15 +176,10 @@ public class ProductReleaseCli {
                 }
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product-release update --support-level UNRELEASED 14";
-        }
     }
 
     @Command(name = "--get", description = "Get a product release by its id")
-    public class Get extends AbstractGetSpecificCommand<ProductRelease> {
+    public static class Get extends AbstractGetSpecificCommand<ProductRelease> {
 
         @Override
         public ProductRelease getSpecific(String id) throws ClientException {

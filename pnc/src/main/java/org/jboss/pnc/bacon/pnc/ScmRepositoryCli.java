@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -59,7 +60,9 @@ public class ScmRepositoryCli {
 
     @Command(
             name = "create-and-sync",
-            description = "Create a repository, and wait for PNC to give us the status of creation")
+            description = "Create a repository, and wait for PNC to give us the status of creation",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc scm-repository create-and-sync --no-pre-build-sync http://github.com/project-ncl/pnc.git")
     public static class CreateAndSync implements Callable<Integer> {
         @Parameters(description = "SCM URL")
         private String scmUrl;
@@ -111,11 +114,6 @@ public class ScmRepositoryCli {
                 }
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc scm-repository create-and-sync --no-pre-build-sync http://github.com/project-ncl/pnc.git";
-        }
     }
 
     @Command(name = "get", description = "Get a repository by its id")
@@ -129,7 +127,11 @@ public class ScmRepositoryCli {
         }
     }
 
-    @Command(name = "update", description = "Update an SCM Repository")
+    @Command(
+            name = "update",
+            description = "Update an SCM Repository",
+            footer = Constant.EXAMPLE_TEXT
+                    + "bacon pnc scm-repository update 5 --pre-build=false --external-scm=\"http://hello.com/test.git\"")
     public static class Update implements Callable<Integer> {
         @Parameters(description = "SCM Repository Id")
         private String id;
@@ -179,11 +181,6 @@ public class ScmRepositoryCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "bacon pnc scm-repository update 5 --pre-build=false --external-scm=\"http://hello.com/test.git\"";
         }
     }
 

@@ -15,7 +15,7 @@ import static org.mockito.Mockito.spy;
 
 class ProductReleaseCliTest {
     @Test
-    void testCreateException() throws InterruptedException, IOException, IllegalAccessException {
+    void testCreateException() throws IOException, IllegalAccessException {
         ProductReleaseCli.Create create = spy(new ProductReleaseCli.Create());
         File file = new File(ProductReleaseCliTest.class.getClassLoader().getResource("config.yaml").getFile());
         Config.configure(file.getParent(), "config.yaml", "default");

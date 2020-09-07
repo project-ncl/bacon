@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -70,7 +71,14 @@ public class BuildConfigCli {
     private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(
             BuildConfigurationClient::new);
 
-    @Command(name = "create", description = "Create a build config")
+    @Command(
+            name = "create",
+            description = "Create a build config",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build-config create \\ \n"
+                    + "\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n"
+                    + "\t--scm-repository-id 176 --scm-revision master \\ \n"
+                    + "\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n"
+                    + "\t--build-type MVN buildconfigname")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Name of build config")
@@ -127,20 +135,17 @@ public class BuildConfigCli {
                 return 0;
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("$ bacon pnc build-config create \\ \n")
-                    .append("\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n")
-                    .append("\t--scm-repository-id 176 --scm-revision master \\ \n")
-                    .append("\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n")
-                    .append("\t--build-type MVN buildconfigname");
-            return builder.toString();
-        }
     }
 
-    @Command(name = "create-with-scm", description = "Create BC with SCM")
+    @Command(
+            name = "create-with-scm",
+            description = "Create BC with SCM",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build-config create-with-scm \\ \n"
+                    + "\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n"
+                    + "\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n"
+                    + "\t--build-type MVN buildconfigname \\ \n"
+                    + "\t--scm-url=http://github.com/project-ncl/pnc.git \\ \n\t--scm-revision=master"
+                    + "\t--no-prebuild-sync")
     public static class CreateWithSCM implements Callable<Integer> {
 
         @Parameters(description = "Name of build config")
@@ -205,22 +210,13 @@ public class BuildConfigCli {
                 return 0;
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("$ bacon pnc build-config create-with-scm \\ \n")
-                    .append("\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n")
-                    .append("\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\ \n")
-                    .append("\t--build-type MVN buildconfigname \\ \n")
-                    .append("\t--scm-url=http://github.com/project-ncl/pnc.git \\ \n")
-                    .append("\t--scm-revision=master")
-                    .append("\t--no-prebuild-sync");
-            return builder.toString();
-        }
     }
 
-    @Command(name = "update", description = "Update a build config")
+    @Command(
+            name = "update",
+            description = "Update a build config",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc build-config update --description \"new me new description\" 50")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Build config ID")
@@ -306,14 +302,13 @@ public class BuildConfigCli {
                 client.update(buildConfigId, updated);
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc build-config update --description \"new me new description\" 50";
-        }
     }
 
-    @Command(name = "create-revision", description = "Create a new revision for a build configuration")
+    @Command(
+            name = "create-revision",
+            description = "Create a new revision for a build configuration",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc build-config create-revision --description \"new me new description\" 50")
     public static class CreateRevision extends Update implements Callable<Integer> {
 
         @Option(names = "-o", description = "use json for output (default to yaml)")
@@ -324,11 +319,6 @@ public class BuildConfigCli {
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
                 ObjectHelper.print(jsonOutput, client.createRevision(buildConfigId, updated));
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc build-config create-revision --description \"new me new description\" 50";
         }
     }
 
@@ -446,5 +436,4 @@ public class BuildConfigCli {
             }
         }
     }
-
 }

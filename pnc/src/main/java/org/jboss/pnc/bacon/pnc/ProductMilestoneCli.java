@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -92,7 +93,12 @@ public class ProductMilestoneCli {
         }
     }
 
-    @Command(name = "create", description = "Create product milestone")
+    @Command(
+            name = "create",
+            description = "Create product milestone",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-milestone create \\\n"
+                    + "\t--product-version-id 3 \\\n" + "\t--issue-tracker-url http://example.com \\\n"
+                    + "\t--end-date 2030-12-26 1.2.0.CR1")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Version of product milestone: Format: <d>.<d>.<d>.<word>")
@@ -139,21 +145,13 @@ public class ProductMilestoneCli {
                 return 0;
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-
-            StringBuilder command = new StringBuilder();
-            command.append("$ bacon pnc product-milestone create \\\n")
-                    .append("\t--product-version-id 3 \\\n")
-                    .append("\t--issue-tracker-url http://example.com \\\n")
-                    .append("\t--end-date 2030-12-26 1.2.0.CR1");
-
-            return command.toString();
-        }
     }
 
-    @Command(name = "update", description = "Update product milestone")
+    @Command(
+            name = "update",
+            description = "Update product milestone",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc product-milestone update --issue-tracker-url http://lakaz.org 5")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Product Milestone ID")
@@ -204,11 +202,6 @@ public class ProductMilestoneCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product-milestone update --issue-tracker-url http://lakaz.org 5";
         }
     }
 

@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
@@ -49,7 +50,10 @@ public class ProductCli {
 
     private static final ClientCreator<ProductClient> CREATOR = new ClientCreator<>(ProductClient::new);
 
-    @Command(name = "create", description = "Create a product")
+    @Command(
+            name = "create",
+            description = "Create a product",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product create --abbreviation testing Testing")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Name of product")
@@ -78,11 +82,6 @@ public class ProductCli {
                 ObjectHelper.print(jsonOutput, client.createNew(product));
                 return 0;
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product create --abbreviation testing Testing";
         }
     }
 
@@ -124,7 +123,10 @@ public class ProductCli {
         }
     }
 
-    @Command(name = "update", description = "Update a product")
+    @Command(
+            name = "update",
+            description = "Update a product",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product update --abbreviation testingme2 42")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Product Id")
@@ -166,11 +168,6 @@ public class ProductCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc product update --abbreviation testingme2 42";
         }
     }
 }

@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc.admin;
 
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GenericSettingClient;
 import picocli.CommandLine.Command;
@@ -35,7 +36,11 @@ public class MaintenanceModeCli {
 
     private static final ClientCreator<GenericSettingClient> CREATOR = new ClientCreator<>(GenericSettingClient::new);
 
-    @Command(name = "activate", description = "This will disable any new builds from being accepted")
+    @Command(
+            name = "activate",
+            description = "This will disable any new builds from being accepted",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for upcoming migration\"")
     public static class ActivateMaintenanceMode implements Callable<Integer> {
 
         @Parameters(description = "Reason")
@@ -54,12 +59,6 @@ public class MaintenanceModeCli {
                 return 0;
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for upcoming migration\"";
-        }
-
     }
 
     @Command(name = "deactivate", description = "Deactivate maintenance mode and accept new builds")

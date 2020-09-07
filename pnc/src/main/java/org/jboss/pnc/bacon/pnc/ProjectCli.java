@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -53,7 +54,11 @@ public class ProjectCli {
 
     private static final ClientCreator<ProjectClient> CREATOR = new ClientCreator<>(ProjectClient::new);
 
-    @Command(name = "create", description = "Create a project")
+    @Command(
+            name = "create",
+            description = "Create a project",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc project create --description \"Morning sunshine\" best-project-ever")
     public static class Create implements Callable<Integer> {
 
         @Parameters(description = "Name of project")
@@ -86,11 +91,6 @@ public class ProjectCli {
                 ObjectHelper.print(jsonOutput, client.createNew(project));
                 return 0;
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc project create --description \"Morning sunshine\" best-project-ever";
         }
     }
 
@@ -145,7 +145,10 @@ public class ProjectCli {
         }
     }
 
-    @Command(name = "update", description = "Update a project")
+    @Command(
+            name = "update",
+            description = "Update a project",
+            footer = Constant.EXAMPLE_TEXT + "bacon pnc project update --name \"bad-guy\" 1")
     public static class Update implements Callable<Integer> {
 
         @Parameters(description = "Project id")
@@ -190,11 +193,6 @@ public class ProjectCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "bacon pnc project update --name \"bad-guy\" 1";
         }
     }
 }

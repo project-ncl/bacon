@@ -1,6 +1,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -21,7 +22,10 @@ public class ArtifactCli {
 
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
 
-    @Command(name = "get", description = "Get an artifact by its id")
+    @Command(
+            name = "get",
+            description = "Get an artifact by its id",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact get 10")
     public static class Get extends AbstractGetSpecificCommand<Artifact> {
 
         @Override
@@ -30,14 +34,12 @@ public class ArtifactCli {
                 return client.getSpecific(id);
             }
         }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc artifact get 10";
-        }
     }
 
-    @Command(name = "list-from-hash", description = "List artifacts based on hash")
+    @Command(
+            name = "list-from-hash",
+            description = "List artifacts based on hash",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact list-from-hash --md5 stiritup")
     public static class ListFromHash implements Callable<Integer> {
         @Option(names = "--md5")
         private String md5;
@@ -68,11 +70,6 @@ public class ArtifactCli {
                     return 0;
                 }
             }
-        }
-
-        // TODO: @Override
-        public String exampleText() {
-            return "$ bacon pnc artifact list-from-hash --md5 stiritup";
         }
     }
 }
