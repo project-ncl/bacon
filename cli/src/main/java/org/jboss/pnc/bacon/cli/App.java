@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.cli;
 
 import ch.qos.logback.classic.Level;
 import lombok.extern.slf4j.Slf4j;
+import org.fusesource.jansi.AnsiConsole;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
@@ -27,9 +28,30 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
+import org.jline.builtins.Builtins;
+import org.jline.builtins.SystemRegistry;
+import org.jline.builtins.SystemRegistryImpl;
+import org.jline.builtins.Widgets;
+import org.jline.keymap.KeyMap;
+import org.jline.reader.Binding;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.MaskingCallback;
+import org.jline.reader.Parser;
+import org.jline.reader.Reference;
+import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.DefaultParser;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.shell.jline3.PicocliCommands;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static picocli.CommandLine.ScopeType.INHERIT;
 
@@ -42,53 +64,7 @@ import static picocli.CommandLine.ScopeType.INHERIT;
 @Command(name = "bacon.jar", versionProvider = VersionProvider.class, subcommands = { Da.class, Pig.class, Pnc.class })
 public class App {
 
-    private String configPath = null;
-
     private String profile = "default";
-
-    public int run(String[] args) {
-        if (args.length == 0) {
-
-            // TODO: Implement
-
-            // registry = AeshCommandRegistryBuilder.builder()
-            // .command(Pnc.class)
-            // .command(Da.class)
-            // .command(Pig.class)
-            // .command(CommandBuilder.builder().name("exit").command(commandInvocation -> {
-            // commandInvocation.stop();
-            // return CommandResult.SUCCESS;
-            // }).create())
-            // .create();
-            // SettingsBuilder<CommandInvocation, ConverterInvocation, CompleterInvocation, ValidatorInvocation,
-            // OptionActivator, CommandActivator> builder = SettingsBuilder
-            // .builder()
-            // .logging(true)
-            // .enableAlias(false)
-            // .enableExport(false)
-            // .enableMan(true)
-            // .enableSearchInPaging(true)
-            // .readInputrc(false)
-            // .commandRegistry(registry);
-            //
-            // ReadlineConsole console = new ReadlineConsole(builder.build());
-            // console.setPrompt(
-            // new Prompt(
-            // new TerminalString(
-            // "[bacon@console]$ ",
-            // new TerminalColor(Color.DEFAULT, Color.DEFAULT, Color.Intensity.BRIGHT))));
-            //
-            // console.start();
-            //
-            // return 0;
-            throw new FatalException("NYI");
-        } else {
-            CommandLine commandLine = new CommandLine(this);
-            commandLine.setUsageHelpAutoWidth(true);
-            commandLine.setCommandName("bacon");
-            return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
-        }
-    }
 
     public static void main(String[] args) {
         try {
@@ -100,6 +76,7 @@ public class App {
         }
     }
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(names = Constant.JSON_OUTPUT, description = "use json for output (default to yaml)", scope = INHERIT)
     private boolean jsonOutput = false;
 
@@ -140,6 +117,71 @@ public class App {
     @Option(names = { "-V", "--version" }, versionHelp = true, description = "display version info")
     boolean versionInfoRequested;
 
+    public int run(String[] args) {
+        CommandLine commandLine = new CommandLine(this);
+        commandLine.setUsageHelpAutoWidth(true);
+        commandLine.setCommandName("bacon");
+
+        if (args.length == 0) {
+            // From https://github.com/remkop/picocli/wiki/JLine-3-Examples and https://github.com/remkop/picocli/tree/master/picocli-shell-jline3
+            AnsiConsole.systemInstall();
+            // set up JLine built-in commands
+            Builtins builtins = new Builtins(App::workDir, null, null);
+            builtins.rename(org.jline.builtins.Builtins.Command.TTOP, "top");
+            builtins.alias("zle", "widget");
+            builtins.alias("bindkey", "keymap");
+
+            PicocliCommands picocliCommands = new PicocliCommands(App::workDir, commandLine);
+            init();
+
+            Parser parser = new DefaultParser();
+            Terminal terminal;
+            try {
+                terminal = TerminalBuilder.builder().build();
+            } catch (IOException e) {
+                throw new FatalException("Unable to construct terminal console", e);
+            }
+
+            SystemRegistry systemRegistry = new SystemRegistryImpl(parser, terminal, App::workDir, null);
+            systemRegistry.setCommandRegistries(builtins, picocliCommands);
+
+            LineReader reader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .completer(systemRegistry.completer())
+                    .parser(parser)
+                    .variable(LineReader.LIST_MAX, 50) // max tab completion candidates
+                    .build();
+            builtins.setLineReader(reader);
+            new Widgets.TailTipWidgets(
+                    reader,
+                    systemRegistry::commandDescription,
+                    5,
+                    Widgets.TailTipWidgets.TipType.COMPLETER);
+            KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
+            keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
+
+            String prompt = "prompt> ";
+
+            // start the shell and process input until the user quits with Ctrl-D
+            String line;
+            while (true) {
+                try {
+                    systemRegistry.cleanUp();
+                    line = reader.readLine(prompt, null, (MaskingCallback) null, null);
+                    systemRegistry.execute(line);
+                } catch (UserInterruptException e) {
+                    // Ignore
+                } catch (EndOfFileException e) {
+                    return 0;
+                } catch (Exception e) {
+                    systemRegistry.trace(e);
+                }
+            }
+        } else {
+            return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
+        }
+    }
+
     private void init() {
         if (System.getenv(Constant.CONFIG_ENV) != null) {
             setConfigLocation(System.getenv(Constant.CONFIG_ENV), "environment variable");
@@ -156,5 +198,9 @@ public class App {
     private int executionStrategy(CommandLine.ParseResult parseResult) {
         init(); // custom initialization to be done before executing any command or subcommand
         return new CommandLine.RunLast().execute(parseResult); // default execution strategy
+    }
+
+    private static Path workDir() {
+        return Paths.get(System.getProperty("user.dir"));
     }
 }
