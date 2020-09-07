@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -109,8 +110,7 @@ public class BuildInfoCollector {
 
             if (maybeBuildLogs.isPresent()) {
                 try (InputStream inputStream = maybeBuildLogs.get()) {
-                    String log = readLog(inputStream);
-                    result.addBuildLog(log);
+                    result.addBuildLog(readLog(inputStream));
                 }
             }
 
@@ -121,12 +121,12 @@ public class BuildInfoCollector {
         }
     }
 
-    private String readLog(InputStream inputStream) throws IOException {
-        StringBuilder logBuilder = new StringBuilder();
+    private List<String> readLog(InputStream inputStream) throws IOException {
+        List<String> log = new ArrayList<>();
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            reader.lines().forEach(logBuilder::append);
-            return logBuilder.toString();
+            reader.lines().forEach(log::add);
+            return log;
         }
     }
 
@@ -204,8 +204,7 @@ public class BuildInfoCollector {
                 Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(pncBuild.getId());
                 if (maybeBuildLogs.isPresent()) {
                     try (InputStream inputStream = maybeBuildLogs.get()) {
-                        String log = readLog(inputStream);
-                        pncBuild.addBuildLog(log);
+                        pncBuild.addBuildLog(readLog(inputStream));
                     }
                 }
 
