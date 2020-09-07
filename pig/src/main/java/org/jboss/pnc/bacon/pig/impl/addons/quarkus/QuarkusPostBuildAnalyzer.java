@@ -87,8 +87,8 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
     @Override
     public void trigger() {
         log.info("releasePath: {}, extrasPath: {}, config: {}", releasePath, extrasPath, pigConfiguration);
-        String stagingPath = (String) getPigConfiguration().get("stagingPath");
-        String productName = (String) getPigConfiguration().get("productName");
+        String stagingPath = (String) getAddOnConfiguration().get("stagingPath");
+        String productName = (String) getAddOnConfiguration().get("productName");
         postBuildCheck(stagingPath, productName);
     }
 }

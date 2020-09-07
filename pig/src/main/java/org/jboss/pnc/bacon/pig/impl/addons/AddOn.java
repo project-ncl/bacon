@@ -47,7 +47,7 @@ public abstract class AddOn {
         return pigConfiguration.getAddons().containsKey(getName());
     }
 
-    public Map<String, ?> getPigConfiguration() {
+    public Map<String, ?> getAddOnConfiguration() {
         return pigConfiguration.getAddons().get(getName());
     }
 

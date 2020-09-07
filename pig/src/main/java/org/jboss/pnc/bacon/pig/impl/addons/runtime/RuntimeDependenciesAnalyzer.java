@@ -59,9 +59,9 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
         log.info("Running RuntimeDependenciesAnalyzer");
         File workDir = FileUtils.mkTempDir("runtimeDepAnalyzer");
 
-        String buildName = (String) getPigConfiguration().get("downloadFrom");
-        String regex = (String) getPigConfiguration().get("matching");
-        String referenceBuildName = (String) getPigConfiguration().get("referenceBuild");
+        String buildName = (String) getAddOnConfiguration().get("downloadFrom");
+        String regex = (String) getAddOnConfiguration().get("matching");
+        String referenceBuildName = (String) getAddOnConfiguration().get("referenceBuild");
         File dependencyListPath = new File(workDir, "runtime-dependency-list.txt");
 
         builds.get(buildName).downloadArtifact(regex, dependencyListPath);

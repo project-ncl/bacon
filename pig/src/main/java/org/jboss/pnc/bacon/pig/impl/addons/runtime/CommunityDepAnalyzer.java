@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class CommunityDepAnalyzer {
     private static final Logger log = LoggerFactory.getLogger(CommunityDepAnalyzer.class);
 
-    private final DADao daDao;
+    private final DADao daDao = DADao.getInstance();
 
     private final List<CommunityDependency> dependencies;
     private final Function<List<CommunityDependency>, List<? extends CsvExportable>> enricher;
@@ -48,14 +48,12 @@ public class CommunityDepAnalyzer {
     public CommunityDepAnalyzer(
             List<String> dependencyLines,
             Function<List<CommunityDependency>, List<? extends CsvExportable>> enricher) {
-        daDao = DADao.getInstance();
         dependencies = dependencyLines.stream().map(CommunityDependency::new).collect(Collectors.toList());
         this.enricher = enricher;
     }
 
     public CommunityDepAnalyzer(Collection<GAV> gavs) {
         dependencies = gavs.stream().map(CommunityDependency::new).collect(Collectors.toList());
-        daDao = null;
         enricher = null;
     }
 
