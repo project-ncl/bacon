@@ -61,7 +61,7 @@ import static picocli.CommandLine.ScopeType.INHERIT;
  */
 
 @Slf4j
-@Command(name = "bacon.jar", versionProvider = VersionProvider.class, subcommands = { Da.class, Pig.class, Pnc.class })
+@Command(name = "bacon", versionProvider = VersionProvider.class, subcommands = { Da.class, Pig.class, Pnc.class })
 public class App {
 
     private String profile = "default";
@@ -120,10 +120,10 @@ public class App {
     public int run(String[] args) {
         CommandLine commandLine = new CommandLine(this);
         commandLine.setUsageHelpAutoWidth(true);
-        commandLine.setCommandName("bacon");
 
         if (args.length == 0) {
-            // From https://github.com/remkop/picocli/wiki/JLine-3-Examples and https://github.com/remkop/picocli/tree/master/picocli-shell-jline3
+            // From https://github.com/remkop/picocli/wiki/JLine-3-Examples and
+            // https://github.com/remkop/picocli/tree/master/picocli-shell-jline3
             AnsiConsole.systemInstall();
             // set up JLine built-in commands
             Builtins builtins = new Builtins(App::workDir, null, null);
