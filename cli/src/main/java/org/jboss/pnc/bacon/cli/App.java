@@ -66,6 +66,8 @@ public class App {
 
     private String profile = "default";
 
+    private String configPath = null;
+
     public static void main(String[] args) {
         try {
             System.exit(new App().run(args));
@@ -106,11 +108,11 @@ public class App {
      */
     @Option(names = "-p", description = "Path to PNC configuration folder", scope = INHERIT)
     public void setConfigurationFileLocation(String configPath) {
-        if (configPath != null) {
-            setConfigLocation(configPath, "flag");
-        }
+        this.configPath = configPath;
     }
 
+    // Both help/version commands could use standard mixin but in order to propagate the help via inheritance it is
+    // explicitly defined here. These could be removed once https://github.com/remkop/picocli/issues/1164 is complete.
     @Option(names = { "-h", "--help" }, usageHelp = true, description = "display this help message", scope = INHERIT)
     boolean usageHelpRequested;
 
@@ -172,6 +174,7 @@ public class App {
                 } catch (UserInterruptException e) {
                     // Ignore
                 } catch (EndOfFileException e) {
+                    AnsiConsole.systemUninstall();
                     return 0;
                 } catch (Exception e) {
                     systemRegistry.trace(e);
@@ -183,7 +186,9 @@ public class App {
     }
 
     private void init() {
-        if (System.getenv(Constant.CONFIG_ENV) != null) {
+        if (configPath != null) {
+            setConfigLocation(configPath, "flag");
+        } else if (System.getenv(Constant.CONFIG_ENV) != null) {
             setConfigLocation(System.getenv(Constant.CONFIG_ENV), "environment variable");
         } else {
             setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "Constant");
