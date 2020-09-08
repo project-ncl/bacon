@@ -55,6 +55,7 @@ public class PncBuild {
 
     private String internalScmUrl;
     private String scmRevision;
+    private String scmTag;
     private String id;
     private String name;
     private Map<String, String> attributes;
@@ -76,6 +77,7 @@ public class PncBuild {
         id = build.getId();
         internalScmUrl = build.getScmRepository().getInternalUrl();
         scmRevision = build.getScmRevision();
+        scmTag = build.getScmTag();
         buildStatus = build.getStatus();
         attributes = build.getAttributes();
     }

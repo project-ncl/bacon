@@ -34,8 +34,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -74,12 +76,19 @@ public class GitRepoInspector {
                 configId);
         File tempDir = FileUtils.mkTempDir("git");
         try (Git git = cloneRepo(internalUrl, tempDir)) {
-            String latestCommit = headRevision(git, refSpec);
+            Optional<String> latestCommit = headRevision(git, refSpec);
 
-            String tagName = getLatestBuiltRevision(configId, temporaryBuild);
+            if (!latestCommit.isPresent()) {
+                log.info(
+                        "Couldn't find the head of revision for {}. We assume that it is a commit id instead",
+                        refSpec);
+                latestCommit = Optional.of(refSpec);
+            }
+
+            String tagName = getLatestBuiltTag(configId, temporaryBuild);
             Set<String> baseCommitPosibilities = getBaseCommitPossibilities(git, tagName);
 
-            return !baseCommitPosibilities.contains(latestCommit);
+            return !baseCommitPosibilities.contains(latestCommit.get());
         } catch (NoSuccessfulBuildException e) {
             log.info(e.getMessage());
         } catch (Exception e) {
@@ -111,15 +120,21 @@ public class GitRepoInspector {
         return git;
     }
 
-    private static String headRevision(Git git, String branch) throws GitAPIException, IOException {
+    private static Optional<String> headRevision(Git git, String branch) throws GitAPIException, IOException {
+
         try (Repository repository = git.getRepository()) {
-            Ref ref = getRef(branch, repository);
-            ObjectId id = ref.getPeeledObjectId();
-            if (id == null) {
-                id = ref.getObjectId();
+
+            Optional<Ref> ref = getRef(branch, repository);
+            if (ref.isPresent()) {
+                ObjectId id = ref.get().getPeeledObjectId();
+                if (id == null) {
+                    id = ref.get().getObjectId();
+                }
+                Iterable<RevCommit> commits = git.log().add(id).call();
+                return Optional.of(commits.iterator().next().getName());
+            } else {
+                return Optional.empty();
             }
-            Iterable<RevCommit> commits = git.log().add(id).call();
-            return commits.iterator().next().getName();
         }
     }
 
@@ -132,26 +147,32 @@ public class GitRepoInspector {
         Set<String> result = new HashSet<>();
 
         try (Repository repository = git.getRepository()) {
-            Ref ref = getRef(tagName, repository);
+            Optional<Ref> ref = getRef(tagName, repository);
 
-            ObjectId id = ref.getPeeledObjectId() != null ? ref.getPeeledObjectId() : ref.getObjectId();
+            if (ref.isPresent()) {
+                ObjectId id = ref.get().getPeeledObjectId() != null ? ref.get().getPeeledObjectId()
+                        : ref.get().getObjectId();
 
-            Iterator<RevCommit> log = git.log().add(id).call().iterator();
+                Iterator<RevCommit> log = git.log().add(id).call().iterator();
 
-            result.add(log.next().getName());
-            if (log.hasNext()) {
                 result.add(log.next().getName());
+                if (log.hasNext()) {
+                    result.add(log.next().getName());
+                }
+                return result;
+            } else {
+                log.warn("Couldn't find the tag '{}' in the repository", tagName);
+                return Collections.emptySet();
             }
-            return result;
         }
     }
 
-    private static String getLatestBuiltRevision(String configId, boolean temporaryBuild) {
-        log.debug("Getting latest built revision of config id {}, temporary: {}", configId, temporaryBuild);
+    private static String getLatestBuiltTag(String configId, boolean temporaryBuild) {
+        log.debug("Getting latest built tag of config id {}, temporary: {}", configId, temporaryBuild);
         BuildInfoCollector.BuildSearchType searchType = temporaryBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
                 : BuildInfoCollector.BuildSearchType.PERMANENT;
         PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, searchType);
-        return latestBuild.getScmRevision();
+        return latestBuild.getScmTag();
     }
 
     private static URIish toAnonymous(String internalUrl) throws MalformedURLException {
@@ -169,17 +190,17 @@ public class GitRepoInspector {
      *
      * @param reference reference to find
      * @param repository Repository
-     * @return the ref if found
+     * @return Optional<Ref>: if not found it is empty
      * @throws IOException
      */
-    private static Ref getRef(String reference, Repository repository) throws IOException {
+    private static Optional<Ref> getRef(String reference, Repository repository) throws IOException {
 
         Ref ref = repository.findRef(GIT_REMOTE_NAME + "/" + reference);
 
         if (ref == null) {
             ref = repository.findRef(reference);
         }
-        return ref;
+        return Optional.ofNullable(ref);
     }
 
     private GitRepoInspector() {
