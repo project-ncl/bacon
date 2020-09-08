@@ -1,17 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.CSVUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -23,6 +11,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.CSVUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Harsh Madhani<harshmadhani@gmail.com> Date: 06-August-2020
@@ -48,13 +48,13 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
         Set<String> newDependencies;
         try {
             Document document = Jsoup.connect(stagingPathToProduct + "?C=M;O=D").get();
-            Element quarkusLatestBuild = document.select("a[href~=" + productName + "*]").first().parent().parent();
+            Elements quarkusBuilds = document.select("a[href~=" + productName + "*]");
 
-            String latest_build = quarkusLatestBuild.select("a[href]").text().replace("/", "");
-            String old_build = quarkusLatestBuild.nextElementSibling().select("a[href]").text().replace("/", "");
+            String latest_build = quarkusBuilds.first().select("a[href]").text().replace("/", "");
+            String old_build = quarkusBuilds.get(1).select("a[href]").text().replace("/", "");
 
-            log.info("Latest build is {}", latest_build);
-            log.info("Old build is {}", old_build);
+            log.info("Latest build is " + latest_build);
+            log.info("Old build is " + old_build);
 
             FileDownloadUtils.downloadTo(
                     new URI(stagingPathToProduct + latest_build + communityDependenciesPath),
@@ -70,8 +70,8 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
                     + CollectionUtils.subtract(newDependencies, oldDependencies);
             String oldBuildInfo = "Community Dependencies present in old build which are not present in new build are "
                     + CollectionUtils.subtract(oldDependencies, newDependencies);
-            log.info("Build info for new build is {}", newBuildInfo);
-            log.info("Build info for old build is {}", oldBuildInfo);
+            log.info("Build info for new build is " + newBuildInfo);
+            log.info("Build info for old build is " + oldBuildInfo);
             List<String> fileContent = Arrays.asList(newBuildInfo, oldBuildInfo);
             Files.write(Paths.get("post-build-info.txt"), fileContent, StandardCharsets.UTF_8);
         } catch (IOException | URISyntaxException e) {
