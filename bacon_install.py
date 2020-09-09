@@ -137,8 +137,8 @@ def download_link(link, folder, filename):
 
         with open(folder + "/" + filename, "wb") as f:
             f.write(r)
-    except Exception:
-        raise Exception("Something wrong happened while downloading the link: " + link)
+    except Exception as error:
+        raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
 
 
 def create_folder_if_absent(folder):
