@@ -67,10 +67,7 @@ public class Pig {
     public static final String TEMP_BUILD_TIME_STAMP = "--tempBuildTimeStamp";
     public static final String TEMP_BUILD_TIME_STAMP_DEFAULT = "false";
     public static final String TEMP_BUILD_TIME_STAMP_DESC = "If specified, artifacts from temporary builds will have timestamp in versions";
-    public static final String TEMP_BUILD_DESC = "If specified, PNC will perform temporary builds";
-    public static final String TEMP_BUILD_DEFAULT = "false";
-    public static final String TEMP_BUILD = "tempBuild";
-    public static final String TEMP_BUILD_SHORT = "t";
+
     public static final String REMOVE_M2_DUPLICATES_DESC = "If enabled, only the newest versions of each of the dependencies (groupId:artifactId) "
             + "are kept in the generated repository zip";
     public static final String REMOVE_M2_DUPLICATES = "--removeGeneratedM2Dups";
@@ -85,9 +82,9 @@ public class Pig {
         String configDir;
 
         @Option(
-                names = { TEMP_BUILD_SHORT, TEMP_BUILD },
-                defaultValue = TEMP_BUILD_DEFAULT,
-                description = TEMP_BUILD_DESC)
+                names = { "-t", "--tempBuild" },
+                defaultValue = "false",
+                description = "If specified, PNC will perform temporary builds")
         boolean tempBuild;
 
         @Option(

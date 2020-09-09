@@ -85,7 +85,7 @@ public class App {
     /**
      * Set the verbosity of logback if the verbosity flag is set
      */
-    @Option(names = "-v", description = "Verbose output", scope = INHERIT)
+    @Option(names = { "-v", "--verbose" }, description = "Verbose output", scope = INHERIT)
     public void setVerbosityIfPresent(boolean verbose) {
 
         if (verbose) {
@@ -98,7 +98,7 @@ public class App {
         }
     }
 
-    @Option(names = "--profile", defaultValue = "default", description = "PNC Configuration profile", scope = INHERIT)
+    @Option(names = "--profile", description = "PNC Configuration profile", scope = INHERIT)
     public void setProfile(String profile) {
         this.profile = profile;
     }
@@ -106,7 +106,7 @@ public class App {
     /**
      * Set the path to config file if the configPath flag or environment variable is set
      */
-    @Option(names = "-p", description = "Path to PNC configuration folder", scope = INHERIT)
+    @Option(names = { "-p", "--configPath" }, description = "Path to PNC configuration folder", scope = INHERIT)
     public void setConfigurationFileLocation(String configPath) {
         this.configPath = configPath;
     }
@@ -191,13 +191,13 @@ public class App {
         } else if (System.getenv(Constant.CONFIG_ENV) != null) {
             setConfigLocation(System.getenv(Constant.CONFIG_ENV), "environment variable");
         } else {
-            setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "Constant");
+            setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "constant");
         }
     }
 
     private void setConfigLocation(String configLocation, String source) {
         Config.configure(configLocation, Constant.CONFIG_FILE_NAME, profile);
-        log.debug("Config file set from {} to {}", source, Config.getConfigFilePath());
+        log.debug("Config file set from {} with profile {} to {}", source, profile, Config.getConfigFilePath());
     }
 
     private int executionStrategy(CommandLine.ParseResult parseResult) {

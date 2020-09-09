@@ -9,3 +9,8 @@ profile:
       licenseServiceUrl: "http://license.com"
       indyUrl: "http://indy.com"
       kojiHubUrl: "http://koji.com"
+  keycloak:
+      url: "http://keycloak.com"
+      realm: "example"
+      username: "user"
+      clientId: "pass"
