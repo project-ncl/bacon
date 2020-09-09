@@ -26,6 +26,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -92,5 +93,20 @@ public class SharedContentReportRow {
 
     public static int byProductAndGav(SharedContentReportRow row1, SharedContentReportRow row2) {
         return row1.toComparableString().compareTo(row2.toComparableString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        SharedContentReportRow that = (SharedContentReportRow) o;
+        return Objects.equals(gav, that.gav);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gav);
     }
 }

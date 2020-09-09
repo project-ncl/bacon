@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -108,6 +109,10 @@ public class GAV {
 
     public static GAV fromDaGav(RestArtifact gav) {
         return new GAV(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), null);
+    }
+
+    public static GAV fromKojiArchive(KojiArchiveInfo archive) {
+        return new GAV(archive.getGroupId(), archive.getArtifactId(), archive.getVersion(), archive.getExtension());
     }
 
     public String toGav() {

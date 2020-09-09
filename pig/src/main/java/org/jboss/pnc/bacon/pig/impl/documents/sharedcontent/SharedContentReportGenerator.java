@@ -79,37 +79,27 @@ public class SharedContentReportGenerator {
                 .filter(f -> Stream.of(IGNORED).noneMatch(f.getAbsolutePath()::contains))
                 .map(f -> new SharedContentReportRow(f, RepoDescriptor.MAVEN_REPOSITORY))
                 .filter(r -> !projectsArtifacts.contains(r.getGav()))
+                .distinct()
                 .collect(Collectors.toList());
         if (limit == null) {
             limit = rows.size();
         }
         rows = rows.subList(0, limit);
         log.info("Gathering data for shared content report");
-        rows.parallelStream().forEach(this::fill);
+        rows.parallelStream().forEach(this::fillDaData);
+        List<SharedContentReportRow> toFillBrewData = rows.stream()
+                .filter(row -> row.getProductName() == null || row.getProductVersion() == null)
+                .collect(Collectors.toList());
+
+        BrewSearcher.fillBrewData(toFillBrewData);
+
         rows.stream().sorted(SharedContentReportRow::byProductAndGav).forEach(r -> r.printTo(output));
         return output;
     }
 
-    private void fill(SharedContentReportRow row) {
+    private void fillDaData(SharedContentReportRow row) {
         log.debug("Will fill {}", row.toGapv());
         daSearcher.fillDAData(row);
-        if (row.getProductName() == null || row.getProductVersion() == null) {
-            int attempts = 3;
-            for (int i = 0; i < attempts; i++) {
-                try {
-                    BrewSearcher.fillBrewData(row);
-                    break;
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(
-                                "Failed to fill Brew data to shared content report row, attempt {} out of {}",
-                                i + 1,
-                                attempts,
-                                e);
-                    }
-                }
-            }
-        }
         MRRCSearcher.getInstance().fillMRRCData(row);
         if (log.isDebugEnabled()) {
             log.debug("Analyzed {}/{}", analyzed.incrementAndGet(), limit);
