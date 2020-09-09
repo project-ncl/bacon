@@ -53,8 +53,8 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
             String latest_build = quarkusBuilds.first().select("a[href]").text().replace("/", "");
             String old_build = quarkusBuilds.get(1).select("a[href]").text().replace("/", "");
 
-            log.info("Latest build is " + latest_build);
-            log.info("Old build is " + old_build);
+            log.info("Latest build is {}", latest_build);
+            log.info("Old build is {}", old_build);
 
             FileDownloadUtils.downloadTo(
                     new URI(stagingPathToProduct + latest_build + communityDependenciesPath),
