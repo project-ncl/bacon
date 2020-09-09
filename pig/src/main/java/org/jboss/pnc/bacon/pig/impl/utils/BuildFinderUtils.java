@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -169,10 +170,14 @@ public final class BuildFinderUtils {
      * @return the builds, including not found files if includeNotFound is true, or the found builds otherwise
      */
     public static List<KojiBuild> findBuilds(File file, boolean includeNotFound) {
-        BuildConfig config = getKojiBuildFinderConfig();
         List<String> inputs = Collections.singletonList(file.getPath());
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config);
+        return findBuilds(includeNotFound, inputs, 2);
+    }
+
+    public static List<KojiBuild> findBuilds(boolean includeNotFound, Collection<String> inputs, int poolSize) {
+        BuildConfig config = getKojiBuildFinderConfig();
+        ExecutorService pool = Executors.newFixedThreadPool(poolSize);
+        DistributionAnalyzer analyzer = new DistributionAnalyzer(new ArrayList<>(inputs), config);
         Future<Map<ChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
 
         try (KojiClientSession session = new KojiClientSession(config.getKojiHubURL())) {
