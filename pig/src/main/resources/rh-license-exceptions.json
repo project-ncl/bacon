@@ -1109,5 +1109,27 @@
         "url": "http://repository.jboss.org/licenses/epl-1.0.txt"
       }
     ]
+  },
+  {
+    "groupId": "io.agroal",
+    "artifactId": "agroal-api",
+    "version-regexp": "1.8*",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "io.agroal",
+    "artifactId": "agroal-pool",
+    "version-regexp": "1.8*",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ]
   }
 ]
