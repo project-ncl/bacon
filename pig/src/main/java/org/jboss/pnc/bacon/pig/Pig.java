@@ -29,6 +29,7 @@ import org.jboss.pnc.bacon.pig.impl.out.PigReleaseOutput;
 import org.jboss.pnc.bacon.pig.impl.out.PigRunOutput;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
 import picocli.CommandLine.Command;
@@ -98,6 +99,12 @@ public class Pig {
                 description = "If enabled, the pig execution will not attempt to continue the previous execution")
         private boolean clean;
 
+        @Option(
+                names = "--downloadAttempts",
+                defaultValue = "1",
+                description = "How many times should attempts to download files (e.g. from Indy to repo zip) be made")
+        private int downloadAttempts;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -116,8 +123,10 @@ public class Pig {
             }
             pig.validate();
 
+            FileDownloadUtils.setAttempts(downloadAttempts);
+
             Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
-            PigContext.init(clean || isStartingPoint(), configDir, releaseStorageUrl);
+            PigContext.init(clean || isStartingPoint(), Paths.get(configDir), releaseStorageUrl);
             ObjectHelper.print(getJsonOutput(), doExecute());
             return 0;
         }

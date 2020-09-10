@@ -21,11 +21,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +45,9 @@ public class FileDownloadUtils {
 
     private static final int READ_TIMEOUT = 900000;
 
-    private static final int MAX_RETRIES = 5;
+    private static final int MAX_ATTEMPTS = 5;
+
+    private static int attempts = 1;
 
     private static final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
             .setConnectTimeout(CONNECTION_TIMEOUT)
@@ -57,25 +56,24 @@ public class FileDownloadUtils {
 
     public static void downloadTo(URI downloadUrl, File targetPath) {
         log.info("Downloading {} to {}", downloadUrl, targetPath);
+        doDownload(downloadUrl, targetPath, attempts);
+        log.info("Downloaded {} to {}", downloadUrl, targetPath);
+    }
 
+    private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft) {
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
             downloadWithClient(httpClient, downloadUrl, targetPath);
         } catch (Exception e) {
-            log.warn("Failed to download {}. Will reattempt without SSL certificate check", downloadUrl);
-            try (CloseableHttpClient unsafeHttpClient = HttpClients.custom()
-                    .setDefaultRequestConfig(requestConfig)
-                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                    .build()) {
-                downloadWithClient(unsafeHttpClient, downloadUrl, targetPath);
-            } catch (Exception any) {
+            attemptsLeft--;
+            if (attemptsLeft == 0) {
                 throw new RuntimeException(
                         "failed to download " + downloadUrl + " to " + targetPath.getAbsolutePath(),
-                        any);
+                        e);
+            } else {
+                log.warn("Failed to download {}. Will reattempt at most {} times", downloadUrl, attemptsLeft);
+                doDownload(downloadUrl, targetPath, attemptsLeft);
             }
         }
-
-        log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
     private static void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath)
@@ -90,5 +88,17 @@ public class FileDownloadUtils {
                 IOUtils.copy(input, output);
             }
         }
+    }
+
+    public static void setAttempts(int attempts) {
+        if (attempts > MAX_ATTEMPTS) {
+            log.warn(
+                    "Maximum number of download attempts is {}. The attempts have been set to {}",
+                    MAX_ATTEMPTS,
+                    MAX_ATTEMPTS);
+            attempts = MAX_ATTEMPTS;
+        }
+
+        FileDownloadUtils.attempts = attempts;
     }
 }
