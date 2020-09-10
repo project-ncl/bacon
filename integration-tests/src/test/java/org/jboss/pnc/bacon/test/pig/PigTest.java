@@ -2,6 +2,7 @@ package org.jboss.pnc.bacon.test.pig;
 
 import org.jboss.pnc.bacon.test.AbstractTest;
 import org.jboss.pnc.bacon.test.ExecutionResult;
+import org.jboss.pnc.bacon.test.TestType;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.GroupConfiguration;
@@ -14,6 +15,7 @@ import org.jboss.pnc.dto.response.Page;
 import org.jboss.pnc.dto.response.RepositoryCreationResponse;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -48,6 +50,7 @@ import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag(TestType.MOCK_ONLY)
 class PigTest extends AbstractTest {
 
     private static final String UNIVERSAL_ID = "42";

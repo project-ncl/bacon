@@ -3,11 +3,13 @@ package org.jboss.pnc.bacon.test.pnc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.pnc.bacon.test.AbstractTest;
 import org.jboss.pnc.bacon.test.ExecutionResult;
+import org.jboss.pnc.bacon.test.TestType;
 import org.jboss.pnc.dto.Product;
 import org.jboss.pnc.dto.response.Page;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -26,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag(TestType.MOCK_ONLY)
 class ProductTest extends AbstractTest {
     private static final String PRODUCT_NAME_PREFIX = "BT New Product Name ";
 

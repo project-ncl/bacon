@@ -16,25 +16,28 @@
 # PNC details
 #
 # ******************************************************************************
- profile:
-    -  name: "default"
-       pnc:
-           url: "${pnc-url}/pnc-rest/v2/"
-           bifrostBaseurl: "http://example.com"
+profile:
+    -   name: "default"
+        pnc:
+            url: "${pnc-url}/pnc-rest/v2/"
+            bifrostBaseurl: "http://example.com"
 
-# ******************************************************************************
-# Authentication information
-#
-# Uncomment this section if you want to create / update / delete
-# ******************************************************************************
+        # ******************************************************************************
+        # Authentication information
+        #
+        # Uncomment this section if you want to create / update / delete
+        # ******************************************************************************
 
-       keycloak:
-          url: "${keycloak-url}"
-          realm: "${keycloak-realm}"
-          username: "${keycloak-user}"
-          clientSecret: "${keycloak-secret}"
+        keycloak:
+            url: "${keycloak-url}"
+            realm: "${keycloak-realm}"
+            username: "${keycloak-user}"
+            clientSecret: "${keycloak-secret}"
 
-       pig:
-          kojiHubUrl: "http://koji.url"
-          licenseServiceUrl: "http://license.url"
-          indyUrl: "http://indy.url"
+        pig:
+            kojiHubUrl: "http://koji.url"
+            licenseServiceUrl: "http://license.url"
+            indyUrl: "http://indy.url"
+        da:
+            url: "da.url"
+

@@ -145,6 +145,14 @@ public class PigConfiguration {
 
         Map<String, String> result = new HashMap<>(variablesFromFile);
         variableOverrides.forEach((k, v) -> result.merge(k, v, (v1, v2) -> v2));
+
+        for (String key : result.keySet()) {
+            String propertyOverride = System.getProperty(key);
+            if (propertyOverride != null) {
+                result.put(key, propertyOverride);
+            }
+        }
+
         return result;
     }
 

@@ -62,6 +62,9 @@ import java.util.concurrent.Callable;
                 Pig.TriggerAddOns.class })
 public class Pig {
 
+    private Pig() {
+    }
+
     public static final String REBUILD_MODE_DESC = "The build mode EXPLICIT_DEPENDENCY_CHECK, IMPLICIT_DEPENDENCY_CHECK, FORCE. Defaults to EXPLICIT";
     public static final String REBUILD_MODE_DEFAULT = "EXPLICIT_DEPENDENCY_CHECK";
     public static final String REBUILD_MODE = "--mode";
@@ -105,6 +108,12 @@ public class Pig {
                 description = "How many times should attempts to download files (e.g. from Indy to repo zip) be made")
         private int downloadAttempts;
 
+        @Option(
+                names = "--targetPath",
+                defaultValue = "target",
+                description = "The directory where the deliverables will be put")
+        private String targetPath;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -126,7 +135,7 @@ public class Pig {
             FileDownloadUtils.setAttempts(downloadAttempts);
 
             Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
-            PigContext.init(clean || isStartingPoint(), Paths.get(configDir), releaseStorageUrl);
+            PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl);
             ObjectHelper.print(getJsonOutput(), doExecute());
             return 0;
         }
