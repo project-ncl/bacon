@@ -36,8 +36,6 @@ import java.net.URI;
  *         Date: 4/16/18
  */
 public class FileDownloadUtils {
-    private FileDownloadUtils() {
-    }
 
     private static final Logger log = LoggerFactory.getLogger(FileDownloadUtils.class);
 
@@ -45,9 +43,11 @@ public class FileDownloadUtils {
 
     private static final int READ_TIMEOUT = 900000;
 
+    private static final int DEFAULT_ATTEMPTS = 1;
     private static final int MAX_ATTEMPTS = 5;
 
-    private static int attempts = 1;
+    // TODO move it out from here and add it as a method parameter
+    private static int attempts = DEFAULT_ATTEMPTS;
 
     private static final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
             .setConnectTimeout(CONNECTION_TIMEOUT)
@@ -99,6 +99,14 @@ public class FileDownloadUtils {
             attempts = MAX_ATTEMPTS;
         }
 
+        if (attempts <= 0) {
+            log.warn("Number of download attempts has to be a positive integer. Setting to {}", DEFAULT_ATTEMPTS);
+            attempts = DEFAULT_ATTEMPTS;
+        }
+
         FileDownloadUtils.attempts = attempts;
+    }
+
+    private FileDownloadUtils() {
     }
 }
