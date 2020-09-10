@@ -562,6 +562,26 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.ec4j.maven</groupId>
+                <artifactId>editorconfig-maven-plugin</artifactId>
+                <version>0.1.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>.bacon/</exclude>
+                        <exclude>.cache/</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>editorconfig-format</id>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
