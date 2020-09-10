@@ -121,9 +121,12 @@ def download_maven_metadata_xml(url, folder):
     download_link(link, folder, "maven-metadata.xml")
 
 
-def download_link(link, folder, filename):
+def download_link(link, folder, filename, retries=7):
     """
     Download the link into the folder with name 'filename'
+
+    Add retries in case the download fails due to stale server content issue on
+    repositories.jboss.org
     """
 
     print("Downloading: " + link)
@@ -138,7 +141,11 @@ def download_link(link, folder, filename):
         with open(folder + "/" + filename, "wb") as f:
             f.write(r)
     except Exception as error:
-        raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
+        if retries > 0:
+            print("Something went wrong while downloading the link. Retrying...")
+            download_link(link, folder, filename, retries=retries - 1)
+        else:
+            raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
 
 
 def create_folder_if_absent(folder):
