@@ -1,30 +1,30 @@
+#!suffix=should-be-overriden
 # at the moment not used in code, used for manual testing
-# TODO: create a functional tests module and move this file there
 product:
-    name: Empty Product with Thorntail abbreviation
-    abbreviation: thorn
+    name: FTProduct {{suffix}}
+    abbreviation: empty-{{suffix}}
     stage: GA
 version: 2.2.0
-milestone: DR*
+milestone: DR4
 #releaseStorageUrl: http://rcm-guest.app.eng.bos.redhat.com/rcm-guest/staging/quarkus/tmp/empty
-group: empty-tt-all
+group: test-{{suffix}}
 defaultBuildParameters:
     environmentId: 3
     buildScript: mvn clean deploy -DskipTests
 builds:
-    -   name: michalszynkiewicz-et
+    -   name: michalszynkiewicz-et-{{suffix}}
         project: Empty
         buildScript: mvn clean deploy
         externalScmUrl: https://github.com/michalszynkiewicz/empty.git
         scmRevision: 1.0.11
 
-    -   name: michalszynkiewicz-et2
+    -   name: michalszynkiewicz-et2-{{suffix}}
         project: Empty
         buildScript: mvn clean deploy -DskipTests -B
         externalScmUrl: https://github.com/michalszynkiewicz/empty2.git
         scmRevision: 1.0.11
         dependencies:
-            - michalszynkiewicz-et
+            - michalszynkiewicz-et-{{suffix}}
 outputPrefixes:
     releaseFile: rhoar-empty
     releaseDir: empty
@@ -34,6 +34,6 @@ flow:
     repositoryGeneration:
         strategy: BUILD_CONFIGS
         sourceBuilds:
-            - michalszynkiewicz-et
+            - michalszynkiewicz-et-{{suffix}}
     javadocGeneration:
         strategy: IGNORE

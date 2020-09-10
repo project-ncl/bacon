@@ -16,6 +16,7 @@
         <keycloak-user>user</keycloak-user>
         <pnc-url>http://localhost:8080</pnc-url>
         <scm-host>example.com</scm-host>
+        <testTags>!RealServiceOnly</testTags>
     </properties>
     <dependencies>
         <!-- Project deps -->
@@ -93,7 +94,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <groups>${testTags}</groups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>functionalTests</id>
+            <activation>
+                <property>
+                    <name>functionalTests</name>
+                </property>
+            </activation>
+            <properties>
+                <testTags>!MockOnly</testTags>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

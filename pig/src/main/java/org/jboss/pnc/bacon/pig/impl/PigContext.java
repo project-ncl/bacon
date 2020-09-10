@@ -87,12 +87,12 @@ public class PigContext {
 
     private Map<String, Collection<String>> checksums;
 
-    public void initConfig(Path configDir, Optional<String> releaseStorageUrl) {
+    public void initConfig(Path configDir, String targetPath, Optional<String> releaseStorageUrl) {
         File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
                 PigConfiguration loadedConfig = PigConfiguration.load(configStream);
-                setPigConfiguration(loadedConfig, releaseStorageUrl);
+                setPigConfiguration(loadedConfig, targetPath, releaseStorageUrl);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
             }
@@ -102,7 +102,10 @@ public class PigContext {
         }
     }
 
-    private void setPigConfiguration(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
+    private void setPigConfiguration(
+            PigConfiguration pigConfiguration,
+            String targetPath,
+            Optional<String> releaseStorageUrl) {
         this.pigConfiguration = pigConfiguration;
         initFullVersion(pigConfiguration, releaseStorageUrl);
 
@@ -118,7 +121,7 @@ public class PigContext {
             deliverables.setNvrListName(prefix + "-nvr-list.txt");
         }
 
-        configureTargetDirectories(pigConfiguration);
+        configureTargetDirectories(pigConfiguration, targetPath);
     }
 
     private void initFullVersion(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
@@ -141,9 +144,9 @@ public class PigContext {
         setFullVersion(version + "." + milestone);
     }
 
-    private void configureTargetDirectories(PigConfiguration pigConfiguration) {
+    private void configureTargetDirectories(PigConfiguration pigConfiguration, String targetPath) {
         String productPrefix = pigConfiguration.getProduct().prefix();
-        targetPath = "target"; // TODO: a way to customize it
+        this.targetPath = targetPath;
         releaseDirName = productPrefix + "-" + fullVersion;
         releasePath = targetPath + File.separator + releaseDirName + File.separator;
 
@@ -179,9 +182,13 @@ public class PigContext {
         return instance;
     }
 
-    public static PigContext init(boolean clean, Path configDir, Optional<String> releaseStorageUrl) {
+    public static PigContext init(
+            boolean clean,
+            Path configDir,
+            String targetPath,
+            Optional<String> releaseStorageUrl) {
         instance = readContext(clean, configDir);
-        instance.initConfig(configDir, releaseStorageUrl);
+        instance.initConfig(configDir, targetPath, releaseStorageUrl);
         return instance;
     }
 
