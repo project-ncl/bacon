@@ -215,13 +215,23 @@ public final class PigFacade {
                 context.getDeliverables().getNvrListName());
     }
 
+    /**
+     * Generate the nvr list from the information gathered during repository generation. If the latter was ignored, then
+     * nothing happens
+     */
     private static void generateNvrList() {
         PigContext context = PigContext.get();
         Map<String, Collection<String>> checksums = context.getChecksums();
-        Path targetPath = Paths.get(context.getReleasePath())
-                .resolve(context.getDeliverables().getNvrListName())
-                .toAbsolutePath();
-        NvrListGenerator.generateNvrList(checksums, targetPath);
+
+        if (checksums == null) {
+            // checksums populated only when repository generation is switched on
+            log.warn("No nvr list generated since repository generation may have been ignored");
+        } else {
+            Path targetPath = Paths.get(context.getReleasePath())
+                    .resolve(context.getDeliverables().getNvrListName())
+                    .toAbsolutePath();
+            NvrListGenerator.generateNvrList(checksums, targetPath);
+        }
     }
 
     private static void pushToBrew(boolean reimport) {
