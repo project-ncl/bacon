@@ -101,7 +101,7 @@ public class Pig {
 
         @Option(
                 names = "--downloadAttempts",
-                defaultValue = "1",
+                defaultValue = "2",
                 description = "How many times should attempts to download files (e.g. from Indy to repo zip) be made")
         private int downloadAttempts;
 
