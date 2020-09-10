@@ -179,8 +179,7 @@ public class PigContext {
         return instance;
     }
 
-    public static PigContext init(boolean clean, String configDirStr, Optional<String> releaseStorageUrl) {
-        Path configDir = Paths.get(configDirStr);
+    public static PigContext init(boolean clean, Path configDir, Optional<String> releaseStorageUrl) {
         instance = readContext(clean, configDir);
         instance.initConfig(configDir, releaseStorageUrl);
         return instance;
