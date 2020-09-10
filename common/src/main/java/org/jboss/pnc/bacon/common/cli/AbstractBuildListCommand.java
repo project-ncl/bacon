@@ -17,11 +17,12 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import picocli.CommandLine.Option;
+
+import java.util.Collection;
 
 /**
  * Class used to provide a default implementation for List* type commands.
@@ -38,13 +39,13 @@ public abstract class AbstractBuildListCommand extends AbstractListCommand<Build
     @Option(names = "--running-only", description = "Get only running builds.")
     private boolean running;
 
-    public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
+    public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
         BuildsFilterParameters filter = new BuildsFilterParameters();
         filter.setLatest(latest);
         filter.setRunning(running);
         return getAll(filter, sort, query);
     }
 
-    public abstract RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+    public abstract Collection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
             throws RemoteResourceException;
 }

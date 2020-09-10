@@ -27,7 +27,6 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductVersionClient;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.GroupConfiguration;
@@ -39,6 +38,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -139,10 +139,10 @@ public class ProductVersionCli {
         private String id;
 
         @Override
-        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductVersionClient client = CREATOR.newClient()) {
-                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -154,10 +154,10 @@ public class ProductVersionCli {
         private String id;
 
         @Override
-        public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductVersionClient client = CREATOR.newClient()) {
-                return client.getGroupConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getGroupConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -169,11 +169,10 @@ public class ProductVersionCli {
         private String id;
 
         @Override
-        public RemoteCollection<org.jboss.pnc.dto.ProductMilestone> getAll(String sort, String query)
-                throws RemoteResourceException {
+        public Collection<ProductMilestone> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductVersionClient client = CREATOR.newClient()) {
-                return client.getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -185,10 +184,10 @@ public class ProductVersionCli {
         private String id;
 
         @Override
-        public RemoteCollection<ProductRelease> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<ProductRelease> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductVersionClient client = CREATOR.newClient()) {
-                return client.getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }

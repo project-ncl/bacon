@@ -28,7 +28,6 @@ import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
@@ -40,6 +39,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -157,9 +157,9 @@ public class GroupBuildCli {
     public static class List extends AbstractListCommand<GroupBuild> {
 
         @Override
-        public RemoteCollection<GroupBuild> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<GroupBuild> getAll(String sort, String query) throws RemoteResourceException {
             try (GroupBuildClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -171,11 +171,12 @@ public class GroupBuildCli {
         private String groupBuildId;
 
         @Override
-        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+        public Collection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
             try (GroupBuildClient client = CREATOR.newClient()) {
                 return client
-                        .getBuilds(groupBuildId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+                        .getBuilds(groupBuildId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }

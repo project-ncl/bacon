@@ -25,7 +25,6 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductClient;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Product;
 import org.jboss.pnc.dto.ProductVersion;
@@ -33,6 +32,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -98,10 +98,10 @@ public class ProductCli {
     public static class List extends AbstractListCommand<Product> {
 
         @Override
-        public RemoteCollection<Product> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<Product> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -113,10 +113,10 @@ public class ProductCli {
         private String id;
 
         @Override
-        public RemoteCollection<ProductVersion> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<ProductVersion> getAll(String sort, String query) throws RemoteResourceException {
 
             try (ProductClient client = CREATOR.newClient()) {
-                return client.getProductVersions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getProductVersions(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }

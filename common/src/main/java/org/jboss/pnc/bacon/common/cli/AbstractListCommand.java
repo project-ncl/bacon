@@ -22,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import picocli.CommandLine.Option;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
 
 /**
@@ -47,12 +47,12 @@ public abstract class AbstractListCommand<T> extends JSONCommandHandler implemen
     @Override
     public Integer call() {
         try {
-            ObjectHelper.print(getJsonOutput(), getAll(sort, query).getAll());
+            ObjectHelper.print(getJsonOutput(), getAll(sort, query));
         } catch (JsonProcessingException | ClientException e) {
             throw new FatalException("Caught exception", e);
         }
         return 0;
     }
 
-    public abstract RemoteCollection<T> getAll(String sort, String query) throws RemoteResourceException;
+    public abstract Collection<T> getAll(String sort, String query) throws RemoteResourceException;
 }

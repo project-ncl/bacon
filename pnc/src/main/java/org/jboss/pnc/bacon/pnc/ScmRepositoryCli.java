@@ -38,6 +38,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -193,9 +194,10 @@ public class ScmRepositoryCli {
         private String searchUrl;
 
         @Override
-        public RemoteCollection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
             try (SCMRepositoryClient client = CREATOR.newClient()) {
-                return client.getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
@@ -207,9 +209,10 @@ public class ScmRepositoryCli {
         private String scmRepositoryId;
 
         @Override
-        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (SCMRepositoryClient client = CREATOR.newClient()) {
-                return client.getBuildConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getBuildConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
