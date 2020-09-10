@@ -26,7 +26,6 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProjectClient;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
@@ -36,6 +35,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -108,9 +108,9 @@ public class ProjectCli {
     public static class List extends AbstractListCommand<Project> {
 
         @Override
-        public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<Project> getAll(String sort, String query) throws RemoteResourceException {
             try (ProjectClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -122,9 +122,10 @@ public class ProjectCli {
         private String id;
 
         @Override
-        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (ProjectClient client = CREATOR.newClient()) {
-                return client.getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
@@ -136,10 +137,11 @@ public class ProjectCli {
         private String id;
 
         @Override
-        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+        public Collection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
             try (ProjectClient client = CREATOR.newClient()) {
-                return client.getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }

@@ -26,7 +26,6 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupConfigurationClient;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
@@ -177,9 +176,9 @@ public class GroupConfigCli {
     public static class List extends AbstractListCommand<GroupConfiguration> {
 
         @Override
-        public RemoteCollection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -191,9 +190,9 @@ public class GroupConfigCli {
         private String id;
 
         @Override
-        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
-                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }

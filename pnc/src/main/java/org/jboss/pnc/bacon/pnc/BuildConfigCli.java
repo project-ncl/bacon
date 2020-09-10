@@ -28,7 +28,6 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
@@ -45,6 +44,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -344,9 +344,9 @@ public class BuildConfigCli {
     public static class List extends AbstractListCommand<BuildConfiguration> {
 
         @Override
-        public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -358,10 +358,9 @@ public class BuildConfigCli {
         private String id;
 
         @Override
-        public RemoteCollection<BuildConfigurationRevision> getAll(String sort, String query)
-                throws RemoteResourceException {
+        public Collection<BuildConfigurationRevision> getAll(String sort, String query) throws RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClient()) {
-                return client.getRevisions(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getRevisions(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -373,11 +372,12 @@ public class BuildConfigCli {
         private String buildConfigId;
 
         @Override
-        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+        public Collection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClient()) {
                 return client
-                        .getBuilds(buildConfigId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query));
+                        .getBuilds(buildConfigId, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }

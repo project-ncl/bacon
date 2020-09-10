@@ -30,7 +30,6 @@ import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
@@ -53,6 +52,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -185,17 +185,18 @@ public class BuildCli {
         private java.util.List<String> attributes;
 
         @Override
-        public RemoteCollection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
+        public Collection<Build> getAll(BuildsFilterParameters buildsFilter, String sort, String query)
                 throws RemoteResourceException {
             try (BuildClient client = CREATOR.newClient()) {
-                return client.getAll(buildsFilter, attributes, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(buildsFilter, attributes, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
 
         @Override
-        public RemoteCollection<Build> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
             try (BuildClient client = CREATOR.newClient()) {
-                return client.getAll(null, null, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(null, null, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
@@ -210,9 +211,10 @@ public class BuildCli {
         private String buildId;
 
         @Override
-        public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
             try (BuildClient client = CREATOR.newClient()) {
-                return client.getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getBuiltArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
@@ -227,9 +229,10 @@ public class BuildCli {
         private String buildId;
 
         @Override
-        public RemoteCollection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
             try (BuildClient client = CREATOR.newClient()) {
-                return client.getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getDependencyArtifacts(buildId, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }

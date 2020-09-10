@@ -22,11 +22,11 @@ import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.EnvironmentClient;
-import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
 import picocli.CommandLine.Command;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Command(
@@ -52,9 +52,9 @@ public class EnvironmentCli {
     public static class List extends AbstractListCommand<Environment> {
 
         @Override
-        public RemoteCollection<Environment> getAll(String sort, String query) throws RemoteResourceException {
+        public Collection<Environment> getAll(String sort, String query) throws RemoteResourceException {
             try (EnvironmentClient client = CREATOR.newClient()) {
-                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
+                return client.getAll(Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
