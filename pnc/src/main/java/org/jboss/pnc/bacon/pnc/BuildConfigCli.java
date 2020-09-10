@@ -97,7 +97,7 @@ public class BuildConfigCli {
         private String scmRepositoryId;
         @Option(required = true, names = "--scm-revision", description = "SCM Revision")
         private String scmRevision;
-        @Option(names = { "-P,--parameter" }, description = "Parameter. Format: -PKEY=VALUE")
+        @Option(names = { "-P", "--parameter" }, description = "Parameter. Format: -PKEY=VALUE")
         private Map<String, String> parameters;
         @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
