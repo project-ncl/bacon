@@ -1,9 +1,16 @@
 # Bacon
 Bacon is a new Java CLI for PNC 2.0 combining features of old PNC, DA CLI and PiG tooling.
 
+## Documentation
+The [Developer's guide](https://github.com/project-ncl/bacon/blob/master/DEVELOPING.md) is a good start on how to get up and running with developing in Bacon.
+
+The [PiG `build-config.yaml` guide](https://github.com/project-ncl/bacon/wiki/Anatomy-of-a-build-config.yaml) provides information on how to build your own `build-config.yaml` file for PiG.
+
+Finally, our [changelog](https://github.com/project-ncl/bacon/wiki/Changelog) lists the changes that happened in releases.
+
 ---
 # Reporting an issue
-To report an issue, please use the internal JIRA instance. The Github issues usage is now deprecated, and will be closed in the future.
+To report an issue, please use the internal JIRA instance. The Github issues usage is now disabled.
 
 # Common Usages
 Compile:
@@ -111,7 +118,7 @@ bacon pig <phase> ...
 
 The application is configured via the `build-config.yaml` file.
 
-A PiG `build-config.yaml` looks like this: https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml
+A PiG `build-config.yaml` looks like [this](https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml). See [this](https://github.com/project-ncl/bacon/wiki/Anatomy-of-a-build-config.yaml) detailed guide of `build-config.yaml`
 
 TODO: add a command that allows users to specify variables via cli
 
