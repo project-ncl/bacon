@@ -1,8 +1,9 @@
 package org.jboss.pnc.bacon.cli;
 
+import ch.qos.logback.classic.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -23,6 +24,17 @@ class AppTest {
         app.run(new String[] { "-h" });
         String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
         assertTrue(text.contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
+    }
+
+    @Test
+    void testVerbose() throws Exception {
+        ObjectHelper.setRootLoggingLevel(Level.INFO);
+        ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.WARN);
+
+        String text = tapSystemErr(() -> assertEquals(0, new App().run(new String[] { "pnc", "admin", "-h" })));
+        assertFalse(text.contains("Log level set to DEBUG"));
+        text = tapSystemErr(() -> assertEquals(0, new App().run(new String[] { "pnc", "-v", "-h" })));
+        assertTrue(text.contains("Log level set to DEBUG"));
     }
 
     @Test
@@ -86,27 +98,50 @@ class AppTest {
     void testPigTempBuild() throws Exception {
         File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
         File root = pncClasses.getParentFile().getParentFile().getParentFile();
-        File buildConfig = new File(root, FilenameUtils.separatorsToSystem("pig/src/test/resources/empty"));
+        File buildConfig = new File(
+                root,
+                FilenameUtils.separatorsToSystem("integration-tests/src/test/resources/empty"));
 
         File configYaml = new File(root, PNC_TEST_CLASSES);
 
-        String text = "";
-        try {
-            text = tapSystemErr(
-                    () -> new App().run(
-                            new String[] {
-                                    "-p",
-                                    configYaml.toString(),
-                                    "-v",
-                                    "pig",
-                                    "configure",
-                                    "--releaseStorageUrl",
-                                    "http://www.example.com",
-                                    "--tempBuild",
-                                    buildConfig.toString() }));
-        } catch (FatalException e) {
-            assertTrue(e.getMessage().contains("Keycloak authentication failed"));
-        }
+        ObjectHelper.setRootLoggingLevel(Level.INFO);
+        ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.WARN);
+
+        String text;
+        text = tapSystemErr(
+                () -> assertEquals(
+                        1,
+                        new App().run(
+                                new String[] {
+                                        "-p",
+                                        configYaml.toString(),
+                                        "pig",
+                                        "configure",
+                                        "--releaseStorageUrl",
+                                        "http://www.example.com",
+                                        "--tempBuild",
+                                        buildConfig.toString() })));
+
+        assertTrue(text.contains("Keycloak authentication failed!"));
+        assertFalse(text.contains("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken"));
+        assertFalse(text.contains("Unknown option: '--tempBuild'"));
+
+        text = tapSystemErr(
+                () -> assertEquals(
+                        1,
+                        new App().run(
+                                new String[] {
+                                        "-p",
+                                        configYaml.toString(),
+                                        "-v",
+                                        "pig",
+                                        "configure",
+                                        "--releaseStorageUrl",
+                                        "http://www.example.com",
+                                        "--tempBuild",
+                                        buildConfig.toString() })));
+        assertTrue(text.contains("Keycloak authentication failed!"));
+        assertTrue(text.contains("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken"));
         assertFalse(text.contains("Unknown option: '--tempBuild'"));
     }
 

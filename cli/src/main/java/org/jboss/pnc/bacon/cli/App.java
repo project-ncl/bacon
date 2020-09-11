@@ -46,6 +46,7 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.IExecutionExceptionHandler;
 import picocli.CommandLine.Option;
 import picocli.shell.jline3.PicocliCommands;
 
@@ -69,13 +70,7 @@ public class App {
     private String configPath = null;
 
     public static void main(String[] args) {
-        try {
-            System.exit(new App().run(args));
-        } catch (FatalException e) {
-            log.error(e.getMessage());
-            log.debug("Full trace", e);
-            System.exit(1);
-        }
+        System.exit(new App().run(args));
     }
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -120,7 +115,9 @@ public class App {
     boolean versionInfoRequested;
 
     public int run(String[] args) {
+
         CommandLine commandLine = new CommandLine(this);
+        commandLine.setExecutionExceptionHandler(new ExceptionMessageHandler());
         commandLine.setUsageHelpAutoWidth(true);
 
         if (args.length == 0) {
@@ -207,5 +204,27 @@ public class App {
 
     private static Path workDir() {
         return Paths.get(System.getProperty("user.dir"));
+    }
+
+    private static class ExceptionMessageHandler implements IExecutionExceptionHandler {
+
+        /**
+         * Handles an {@code Exception} that occurred while executing the {@code Runnable} or {@code Callable} command
+         * and returns an exit code suitable for returning from {@link picocli.CommandLine#execute(String...)}.
+         *
+         * @param ex the Exception thrown by the {@code Runnable}, {@code Callable} or {@code Method} user object of the
+         *        command
+         * @param cmd the CommandLine representing the command or subcommand where the exception occurred
+         * @param parseResult the result of parsing the command line arguments
+         * @return an exit code
+         */
+        @Override
+        public int handleExecutionException(Exception ex, CommandLine cmd, CommandLine.ParseResult parseResult) {
+            log.error(ex.getMessage());
+            log.debug("Full trace", ex);
+
+            return cmd.getExitCodeExceptionMapper() != null ? cmd.getExitCodeExceptionMapper().getExitCode(ex)
+                    : cmd.getCommandSpec().exitCodeOnExecutionException();
+        }
     }
 }
