@@ -4,54 +4,41 @@ import ch.qos.logback.classic.Level;
 import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ObjectHelperTest {
 
     @Test
     void printJson() throws Exception {
-        PrintStream old = System.out;
+        String actual = tapSystemOut(() -> {
+            Map<String, String> testSubject = Maps.newHashMap();
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(stream, false, StandardCharsets.UTF_8.name());
-        System.setOut(ps);
-        Map<String, String> testSubject = Maps.newHashMap();
-        testSubject.put("test", "subject");
+            testSubject.put("test", "subject");
 
-        ObjectHelper.print(true, testSubject);
-        System.out.flush();
-        System.setOut(old);
+            ObjectHelper.print(true, testSubject);
+        });
 
-        // FIXME: Ideally, we wouldn't need to trim, but we may get a different final newline
-        // FIXME: See <https://github.com/project-ncl/bacon/issues/349> for details
-        String output = stream.toString().trim();
-        assertEquals("{\"test\":\"subject\"}", output);
+        String expected = String.format("{\"test\":\"subject\"}%n");
+
+        assertEquals(expected, actual);
     }
 
     @Test
     void printYaml() throws Exception {
-        PrintStream old = System.out;
+        String actual = tapSystemOut(() -> {
+            Map<String, String> testSubject = Maps.newHashMap();
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(stream, false, StandardCharsets.UTF_8.name());
-        System.setOut(ps);
-        Map<String, String> testSubject = Maps.newHashMap();
-        testSubject.put("test", "subject");
+            testSubject.put("test", "subject");
 
-        ObjectHelper.print(false, testSubject);
+            ObjectHelper.print(false, testSubject);
+        });
 
-        System.out.flush();
-        System.setOut(old);
+        String expected = String.format("---%ntest: \"subject\"%n%n");
 
-        // FIXME: Ideally, we wouldn't need to trim, but we may get a different final newline
-        // FIXME: See <https://github.com/project-ncl/bacon/issues/349> for details
-        String output = stream.toString().trim();
-        assertEquals("---\ntest: \"subject\"", output);
+        assertEquals(expected, actual);
     }
 
     @Test
