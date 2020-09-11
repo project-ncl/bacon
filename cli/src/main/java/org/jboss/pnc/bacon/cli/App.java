@@ -134,48 +134,46 @@ public class App {
             init();
 
             Parser parser = new DefaultParser();
-            Terminal terminal;
-            try {
-                terminal = TerminalBuilder.builder().build();
+
+            try (Terminal terminal = TerminalBuilder.builder().build()) {
+                SystemRegistry systemRegistry = new SystemRegistryImpl(parser, terminal, App::workDir, null);
+                systemRegistry.setCommandRegistries(builtins, picocliCommands);
+
+                LineReader reader = LineReaderBuilder.builder()
+                        .terminal(terminal)
+                        .completer(systemRegistry.completer())
+                        .parser(parser)
+                        .variable(LineReader.LIST_MAX, 50) // max tab completion candidates
+                        .build();
+                builtins.setLineReader(reader);
+                new Widgets.TailTipWidgets(
+                        reader,
+                        systemRegistry::commandDescription,
+                        5,
+                        Widgets.TailTipWidgets.TipType.COMPLETER);
+                KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
+                keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
+
+                String prompt = "prompt> ";
+
+                // start the shell and process input until the user quits with Ctrl-D
+                String line;
+                while (true) {
+                    try {
+                        systemRegistry.cleanUp();
+                        line = reader.readLine(prompt, null, (MaskingCallback) null, null);
+                        systemRegistry.execute(line);
+                    } catch (UserInterruptException e) {
+                        // Ignore
+                    } catch (EndOfFileException e) {
+                        AnsiConsole.systemUninstall();
+                        return 0;
+                    } catch (Exception e) {
+                        systemRegistry.trace(e);
+                    }
+                }
             } catch (IOException e) {
                 throw new FatalException("Unable to construct terminal console", e);
-            }
-
-            SystemRegistry systemRegistry = new SystemRegistryImpl(parser, terminal, App::workDir, null);
-            systemRegistry.setCommandRegistries(builtins, picocliCommands);
-
-            LineReader reader = LineReaderBuilder.builder()
-                    .terminal(terminal)
-                    .completer(systemRegistry.completer())
-                    .parser(parser)
-                    .variable(LineReader.LIST_MAX, 50) // max tab completion candidates
-                    .build();
-            builtins.setLineReader(reader);
-            new Widgets.TailTipWidgets(
-                    reader,
-                    systemRegistry::commandDescription,
-                    5,
-                    Widgets.TailTipWidgets.TipType.COMPLETER);
-            KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
-            keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
-
-            String prompt = "prompt> ";
-
-            // start the shell and process input until the user quits with Ctrl-D
-            String line;
-            while (true) {
-                try {
-                    systemRegistry.cleanUp();
-                    line = reader.readLine(prompt, null, (MaskingCallback) null, null);
-                    systemRegistry.execute(line);
-                } catch (UserInterruptException e) {
-                    // Ignore
-                } catch (EndOfFileException e) {
-                    AnsiConsole.systemUninstall();
-                    return 0;
-                } catch (Exception e) {
-                    systemRegistry.trace(e);
-                }
             }
         } else {
             return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
