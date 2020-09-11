@@ -26,9 +26,11 @@ import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
+import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildRef;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.enums.BuildStatus;
@@ -147,28 +149,44 @@ public class BuildInfoCollector {
      */
     public GroupBuildInfo getBuildsFromLatestGroupConfiguration(String groupConfigurationId, boolean temporaryBuild) {
         try {
-            // we have to sort by startTime since group builds with 'NO_REBUILD_REQUIRED' don't have the endTime set
-            Collection<GroupBuild> groupBuilds = groupConfigurationClient
-                    .getAllGroupBuilds(
-                            groupConfigurationId,
-                            of("=desc=startTime"),
-                            query("temporaryBuild==%s", temporaryBuild))
-                    .getAll();
+            RemoteCollection<BuildConfiguration> configs = groupConfigurationClient
+                    .getBuildConfigs(groupConfigurationId);
 
-            Optional<GroupBuild> latest = groupBuilds.stream().filter(gb -> gb.getStatus().isFinal()).findFirst();
-            if (latest.isPresent()) {
-                // first one will be the latest build
-                return getBuildsFromGroupBuild(latest.get());
-            } else {
-                // no builds!
-                throw new RuntimeException(
-                        "There are no group builds for group configuration id" + groupConfigurationId);
+            Map<String, PncBuild> builds = new HashMap<>();
+            for (BuildConfiguration config : configs) {
+                PncBuild build = getLatestBuild(
+                        config.getId(),
+                        temporaryBuild ? BuildSearchType.ANY : BuildSearchType.PERMANENT);
+
+                builds.put(config.getName(), build);
             }
+
+            // TODO: builds should be enough, getting latest build group to satisfy the current API
+            return new GroupBuildInfo(getLatestGroupBuild(groupConfigurationId, temporaryBuild), builds);
         } catch (RemoteResourceException e) {
             throw new RuntimeException(
                     "Cannot get list of group builds for group configuration " + groupConfigurationId);
         }
+    }
 
+    private GroupBuild getLatestGroupBuild(String groupConfigurationId, boolean temporaryBuild)
+            throws RemoteResourceException {
+        // we have to sort by startTime since group builds with 'NO_REBUILD_REQUIRED' don't have the endTime set
+        Collection<GroupBuild> groupBuilds = groupConfigurationClient
+                .getAllGroupBuilds(
+                        groupConfigurationId,
+                        of("=desc=startTime"),
+                        query("temporaryBuild==%s", temporaryBuild))
+                .getAll();
+
+        Optional<GroupBuild> latest = groupBuilds.stream().filter(gb -> gb.getStatus().isFinal()).findFirst();
+        if (latest.isPresent()) {
+            // first one will be the latest build
+            return latest.get();
+        } else {
+            // no builds!
+            throw new RuntimeException("There are no group builds for group configuration id" + groupConfigurationId);
+        }
     }
 
     /**
