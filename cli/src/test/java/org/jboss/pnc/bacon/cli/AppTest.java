@@ -8,8 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemProperties;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErr;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
+import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOutNormalized;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,9 +23,12 @@ class AppTest {
     @Test
     void testHelp() throws Exception {
         App app = new App();
-        app.run(new String[] { "-h" });
-        String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
-        assertTrue(text.contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
+        restoreSystemProperties(() -> {
+            System.setProperty("picocli.ansi", "false");
+            app.run(new String[] { "-h" });
+            String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
+            assertTrue(text.contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
+        });
     }
 
     @Test
@@ -49,11 +54,13 @@ class AppTest {
 
     @Test
     void testConfigPath() throws Exception {
+        String configPath = FilenameUtils.separatorsToSystem("/tmp/123456789");
+        String configFile = FilenameUtils.separatorsToSystem(configPath + "/config.yaml");
         String text = tapSystemErr(
                 () -> assertEquals(
                         0,
-                        new App().run(new String[] { "-p", "/tmp/123456789", "-v", "pnc", "-o", "build", "-h" })));
-        assertTrue(text.contains("Config file set from flag with profile default to /tmp/123456789/config.yaml"));
+                        new App().run(new String[] { "-p", configPath, "-v", "pnc", "-o", "build", "-h" })));
+        assertTrue(text.contains("Config file set from flag with profile default to " + configFile));
     }
 
     @Test
@@ -149,38 +156,41 @@ class AppTest {
     void testProfile() throws Exception {
         File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
         File configYaml = new File(pncClasses.getParentFile().getParentFile().getParentFile(), PNC_TEST_CLASSES);
-
         App app = new App();
-        String text = tapSystemOut(
-                () -> assertEquals(
-                        0,
-                        app.run(
-                                new String[] {
-                                        "--verbose",
-                                        "pnc",
-                                        "--profile",
-                                        "foobar",
-                                        "admin",
-                                        "maintenance-mode",
-                                        "activate",
-                                        "-h" })));
 
-        assertEquals(
-                "Usage: bacon pnc admin maintenance-mode activate [-hov]\n"
-                        + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>\n"
-                        + "This will disable any new builds from being accepted\n"
-                        + "      <reason>              Reason\n"
-                        + "  -h, --help                display this help message\n"
-                        + "  -o                        use json for output (default to yaml)\n"
-                        + "  -p, --configPath=<configurationFileLocation>\n"
-                        + "                            Path to PNC configuration folder\n"
-                        + "      --profile=<profile>   PNC Configuration profile\n"
-                        + "  -v, --verbose             Verbose output\n" + "\n" + "Example:\n"
-                        + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for\n"
-                        + "upcoming migration\"\n",
-                text);
+        restoreSystemProperties(() -> {
+            System.setProperty("picocli.ansi", "false");
+            String text = tapSystemOutNormalized(
+                    () -> assertEquals(
+                            0,
+                            app.run(
+                                    new String[] {
+                                            "--verbose",
+                                            "pnc",
+                                            "--profile",
+                                            "foobar",
+                                            "admin",
+                                            "maintenance-mode",
+                                            "activate",
+                                            "-h" })));
 
-        text = tapSystemErr(
+            assertEquals(
+                    "Usage: bacon pnc admin maintenance-mode activate [-hov]\n"
+                            + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>\n"
+                            + "This will disable any new builds from being accepted\n"
+                            + "      <reason>              Reason\n"
+                            + "  -h, --help                display this help message\n"
+                            + "  -o                        use json for output (default to yaml)\n"
+                            + "  -p, --configPath=<configurationFileLocation>\n"
+                            + "                            Path to PNC configuration folder\n"
+                            + "      --profile=<profile>   PNC Configuration profile\n"
+                            + "  -v, --verbose             Verbose output\n" + "\n" + "Example:\n"
+                            + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for\n"
+                            + "upcoming migration\"\n",
+                    text);
+        });
+
+        String text2 = tapSystemErr(
                 () -> assertEquals(
                         0,
                         app.run(
@@ -195,6 +205,6 @@ class AppTest {
                                         "maintenance-mode",
                                         "activate",
                                         "-h" })));
-        assertEquals(StringUtils.countMatches(text, "Config file set from flag with profile foobar to"), 1);
+        assertEquals(StringUtils.countMatches(text2, "Config file set from flag with profile foobar to"), 1);
     }
 }
