@@ -42,7 +42,7 @@ public abstract class AbstractGetSpecificCommand<T> extends JSONCommandHandler i
         try {
             ObjectHelper.print(getJsonOutput(), getSpecific(id));
         } catch (JsonProcessingException | ClientException e) {
-            throw new FatalException("Caught exception", e);
+            throw new FatalException("Caught exception " + e.getMessage(), e);
         }
         return 0;
     }
