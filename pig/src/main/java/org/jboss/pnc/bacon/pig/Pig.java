@@ -136,6 +136,7 @@ public class Pig {
 
             Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
             PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl);
+            PigContext.get().setTempBuild(tempBuild);
             ObjectHelper.print(getJsonOutput(), doExecute());
             return 0;
         }

@@ -90,7 +90,6 @@ public final class PigFacade {
     }
 
     public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
-        context().setTempBuild(tempBuild);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
