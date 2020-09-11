@@ -35,6 +35,7 @@ import os
 import platform
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 
 
@@ -142,7 +143,11 @@ def download_link(link, folder, filename, retries=7):
             f.write(r)
     except Exception as error:
         if retries > 0:
-            print("Something went wrong while downloading the link. Retrying...")
+            # exponential backoff time based on 1/retries
+            # max time to sleep is 30 seconds
+            time_to_sleep = 30 ** (1 / retries)
+            print("Something went wrong while downloading the link. Waiting {:.1f} seconds before retrying...".format(time_to_sleep))
+            time.sleep(time_to_sleep)
             download_link(link, folder, filename, retries=retries - 1)
         else:
             raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
