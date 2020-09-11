@@ -2,7 +2,6 @@ package org.jboss.pnc.bacon.cli;
 
 import ch.qos.logback.classic.Level;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.junit.jupiter.api.Test;
 
@@ -12,9 +11,8 @@ import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemPr
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErr;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOutNormalized;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AppTest {
 
@@ -27,7 +25,7 @@ class AppTest {
             System.setProperty("picocli.ansi", "false");
             app.run(new String[] { "-h" });
             String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
-            assertTrue(text.contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]"));
+            assertThat(text).contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]");
         });
     }
 
@@ -37,9 +35,9 @@ class AppTest {
         ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.WARN);
 
         String text = tapSystemErr(() -> assertEquals(0, new App().run(new String[] { "pnc", "admin", "-h" })));
-        assertFalse(text.contains("Log level set to DEBUG"));
+        assertThat(text).doesNotContain("Log level set to DEBUG");
         text = tapSystemErr(() -> assertEquals(0, new App().run(new String[] { "pnc", "-v", "-h" })));
-        assertTrue(text.contains("Log level set to DEBUG"));
+        assertThat(text).contains("Log level set to DEBUG");
     }
 
     @Test
@@ -49,7 +47,7 @@ class AppTest {
                 () -> assertEquals(
                         0,
                         app.run(new String[] { "--verbose", "pnc", "admin", "maintenance-mode", "activate", "-h" })));
-        assertTrue(text.contains("bacon pnc admin maintenance-mode activate \"Switching"));
+        assertThat(text).contains("bacon pnc admin maintenance-mode activate \"Switching");
     }
 
     @Test
@@ -60,7 +58,7 @@ class AppTest {
                 () -> assertEquals(
                         0,
                         new App().run(new String[] { "-p", configPath, "-v", "pnc", "-o", "build", "-h" })));
-        assertTrue(text.contains("Config file set from flag with profile default to " + configFile));
+        assertThat(text).contains("Config file set from flag with profile default to " + configFile);
     }
 
     @Test
@@ -73,7 +71,7 @@ class AppTest {
                         1,
                         new App().run(
                                 new String[] { "-p", configYaml.toString(), "-v", "pnc", "-o", "build", "get", "0" })));
-        assertTrue(text.contains("JSON command is enabled: true"));
+        assertThat(text).contains("JSON command is enabled: true");
     }
 
     @Test
@@ -86,7 +84,7 @@ class AppTest {
                         1,
                         new App().run(
                                 new String[] { "-o", "-p", configYaml.toString(), "-v", "pnc", "build", "get", "0" })));
-        assertTrue(text.contains("JSON command is enabled: true"));
+        assertThat(text).contains("JSON command is enabled: true");
     }
 
     @Test
@@ -98,7 +96,7 @@ class AppTest {
                 () -> assertEquals(
                         1,
                         new App().run(new String[] { "-p", configYaml.toString(), "-v", "pnc", "build", "get", "0" })));
-        assertTrue(text.contains("JSON command is enabled: false"));
+        assertThat(text).contains("JSON command is enabled: false");
     }
 
     @Test
@@ -129,9 +127,9 @@ class AppTest {
                                         "--tempBuild",
                                         buildConfig.toString() })));
 
-        assertTrue(text.contains("Keycloak authentication failed!"));
-        assertFalse(text.contains("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken"));
-        assertFalse(text.contains("Unknown option: '--tempBuild'"));
+        assertThat(text).contains("Keycloak authentication failed!");
+        assertThat(text).doesNotContain("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken");
+        assertThat(text).doesNotContain("Unknown option: '--tempBuild'");
 
         text = tapSystemErr(
                 () -> assertEquals(
@@ -147,9 +145,9 @@ class AppTest {
                                         "http://www.example.com",
                                         "--tempBuild",
                                         buildConfig.toString() })));
-        assertTrue(text.contains("Keycloak authentication failed!"));
-        assertTrue(text.contains("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken"));
-        assertFalse(text.contains("Unknown option: '--tempBuild'"));
+        assertThat(text).contains("Keycloak authentication failed!");
+        assertThat(text).contains("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken");
+        assertThat(text).doesNotContain("Unknown option: '--tempBuild'");
     }
 
     @Test
@@ -205,6 +203,6 @@ class AppTest {
                                         "maintenance-mode",
                                         "activate",
                                         "-h" })));
-        assertEquals(StringUtils.countMatches(text2, "Config file set from flag with profile foobar to"), 1);
+        assertThat(text2).containsOnlyOnce("Config file set from flag with profile foobar to");
     }
 }
