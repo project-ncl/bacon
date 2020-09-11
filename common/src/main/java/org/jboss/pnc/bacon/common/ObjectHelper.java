@@ -6,20 +6,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ObjectHelper {
 
     private static ObjectMapper getOutputMapper(boolean json) {
-        ObjectMapper om = json ? new ObjectMapper(new JsonFactory()) : new ObjectMapper(new YAMLFactory());
+        ObjectMapper om = json ? new ObjectMapper(new JsonFactory())
+                : new ObjectMapper(new YAMLFactory().configure(YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS, true));
         om.registerModule(new JavaTimeModule());
         om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return om;
     }
 
     public static void print(boolean json, Object o) throws JsonProcessingException {
-        // FIXME: System.out.println uses system line feed, but writeValueAsString may not
-        // FIXME: See <https://github.com/project-ncl/bacon/issues/349> for details
         System.out.println(getOutputMapper(json).writeValueAsString(o));
     }
 
