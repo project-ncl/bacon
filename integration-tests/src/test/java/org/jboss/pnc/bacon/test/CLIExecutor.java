@@ -3,6 +3,7 @@ package org.jboss.pnc.bacon.test;
 import org.jboss.pnc.bacon.common.Constant;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,9 +23,9 @@ import java.util.stream.Collectors;
  */
 public class CLIExecutor {
     private static final Path BACON_JAR = Paths.get("..", "cli", "target", "bacon.jar").toAbsolutePath().normalize();
-    public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
+    public static final Path CONFIG_LOCATION = Paths.get("target", "test-config").toAbsolutePath().normalize();
 
-    public ExecutionResult runCommand(String... args) {
+    public ExecutionResult runCommand(Path workingDirectory, String... args) {
         try {
             checkExecutable();
 
@@ -38,7 +39,8 @@ public class CLIExecutor {
             System.out.println(
                     "Running command: " + Arrays.stream(cmdarray).collect(Collectors.joining("' '", "'", "'"))
                             + "\n\twith env " + Arrays.toString(env));
-            Process process = Runtime.getRuntime().exec(cmdarray, env);
+            File workingDirectoryFile = workingDirectory != null ? workingDirectory.toFile() : null;
+            Process process = Runtime.getRuntime().exec(cmdarray, env, workingDirectoryFile);
 
             CompletableFuture<String> output = CompletableFuture
                     .supplyAsync(() -> readInputStream(process.getInputStream()));

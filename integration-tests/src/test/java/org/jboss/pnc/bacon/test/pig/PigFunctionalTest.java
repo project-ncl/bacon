@@ -2,7 +2,6 @@ package org.jboss.pnc.bacon.test.pig;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.pnc.bacon.common.Constant;
-import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
@@ -14,6 +13,8 @@ import org.junit.jupiter.api.Tag;
 
 import java.nio.file.Path;
 import java.util.Optional;
+
+import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
 
 @Tag(TestType.REAL_SERVICE_ONLY)
 public abstract class PigFunctionalTest {
@@ -29,13 +30,15 @@ public abstract class PigFunctionalTest {
         String suffix = prepareSuffix();
         // todo release storage url mocking
         if (configDir == null) {
-            throw new FatalException("You need to specify the configuration directory!");
+            throw new RuntimeException("You need to specify the configuration directory!");
         }
+        System.setProperty(PIG_CONTEXT_DIR, targetDirectory.toString());
         // validate the PiG config
         PigConfig pig = Config.instance().getActiveProfile().getPig();
         if (pig == null) {
             throw new Validate.ConfigMissingException("Pig configuration missing");
         }
+
         pig.validate();
 
         PigContext.init(clean, configDir, targetDirectory.toAbsolutePath().toString(), releaseStorageUrl);

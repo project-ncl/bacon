@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Random;
 
@@ -64,28 +65,33 @@ public class AbstractTest {
     }
 
     protected void execute(String... args) {
-        ExecutionResult result = executor.runCommand(args);
+        ExecutionResult result = executor.runCommand(null, args);
         assertThat(result.getOutput()).isEmpty();
         assertThat(result.getError()).isEmpty();
         assertThat(result.getRetval()).isZero();
     }
 
     protected <T> T executeAndDeserialize(Class<T> clazz, String... args) throws JsonProcessingException {
-        ExecutionResult result = executor.runCommand(args);
+        ExecutionResult result = executor.runCommand(null, args);
         log.debug("stderr:{}{}", System.lineSeparator(), result.getError());
         assertThat(result.getRetval()).isZero();
         return result.fromYAML(clazz);
     }
 
-    protected <T> T executeAndDeserializeJSON(Class<T> clazz, String... args) throws JsonProcessingException {
-        ExecutionResult result = executor.runCommand(args);
+    protected <T> T executeAndDeserializeJSON(Class<T> clazz, Path workingDir, String... args)
+            throws JsonProcessingException {
+        ExecutionResult result = executor.runCommand(workingDir, args);
         log.debug("stderr:{}{}", System.lineSeparator(), result.getError());
         assertThat(result.getRetval()).isZero();
         return result.fromYAML(clazz);
     }
 
     protected ExecutionResult executeAndGetResult(String... args) {
-        return executor.runCommand(args);
+        return executor.runCommand(null, args);
+    }
+
+    protected ExecutionResult executeAndGetResult(Path workingDir, String... args) {
+        return executor.runCommand(workingDir, args);
     }
 
 }

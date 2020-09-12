@@ -196,7 +196,7 @@ public class PigContext {
         String sha = hashDirectory(configDir);
 
         PigContext result;
-        String ctxLocationEnv = System.getenv(PIG_CONTEXT_DIR);
+        String ctxLocationEnv = System.getProperty(PIG_CONTEXT_DIR, System.getenv(PIG_CONTEXT_DIR));
         Path contextDir = ctxLocationEnv == null ? Paths.get(".bacon") : Paths.get(ctxLocationEnv);
         Path contextJson = contextDir.resolve("pig-context.json");
         if (!clean && Files.exists(contextJson)) {
