@@ -21,13 +21,17 @@ import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
+import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.requests.GroupBuildRequest;
 import org.jboss.pnc.enums.RebuildMode;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
 
@@ -80,7 +84,9 @@ public class PncBuilder {
         log.info("Group build finished successfully");
     }
 
-    private Boolean isSuccessfullyFinished(String groupBuildId) {
+    private boolean isSuccessfullyFinished(String groupBuildId) {
+
+        log.debug("Checking if group build {} is successfully finished", groupBuildId);
         try {
             GroupBuild groupBuild = groupBuildClient.getSpecific(groupBuildId);
             switch (groupBuild.getStatus()) {
@@ -89,7 +95,7 @@ public class PncBuilder {
                 case REJECTED: // PNC has already built the project
                 case NO_REBUILD_REQUIRED:
                 case SUCCESS:
-                    return true;
+                    return verifyAllBuildsInGroupBuildInFinalStateWithProperCount(groupBuildId);
                 default:
                     throw new RuntimeException("Build group failed " + groupBuild);
             }
@@ -99,4 +105,59 @@ public class PncBuilder {
         }
     }
 
+    /**
+     * This check makes sure that even when a group build is marked as done, we also need to make sure all its builds
+     * are also done (NCL-6044). We also make sure that the number of builds done is the same as the number of build
+     * configs in the group build's group config (NCL-6041)
+     *
+     * This is done to handle a weird timing error which happens when a group build finishes, the group build status is
+     * updated before the last individual build status is updated to their final state. This may cause inconsistency in
+     * the last build data.
+     *
+     * This is especially true when the Group build status is NO_REBUILD_REQUIRED, where it is also essential that all
+     * the individual builds are also in their final state (and logically NO_REBUILD_REQUIRED status) so that we can get
+     * the no rebuild cause.
+     *
+     * @param groupBuildId the group build id
+     * @return whether all the builds have a final status or not
+     */
+    private boolean verifyAllBuildsInGroupBuildInFinalStateWithProperCount(String groupBuildId) {
+
+        log.debug(
+                "Checking if all builds in group build {} are in final state with proper count of builds",
+                groupBuildId);
+        BuildsFilterParameters filter = new BuildsFilterParameters();
+        filter.setLatest(false);
+        filter.setRunning(false);
+
+        try {
+            Collection<Build> builds = groupBuildClient.getBuilds(groupBuildId, filter).getAll();
+            boolean allFinal = builds.stream().allMatch(b -> b.getStatus().isFinal());
+            return allFinal && getCountOfBuildConfigsForGroupBuild(groupBuildId) == builds.size();
+        } catch (ClientException e) {
+            log.warn(
+                    "Failed to check if all builds in group build {} have a final status. Assuming it is not finished",
+                    groupBuildId,
+                    e);
+            return false;
+        }
+    }
+
+    /**
+     * Try to get the count of build configs for a group build's group config. Returns -1 if it couldn't do the request
+     *
+     * @param groupBuildId
+     * @return count, -1 if an error happened
+     */
+    private int getCountOfBuildConfigsForGroupBuild(String groupBuildId) {
+
+        try {
+            GroupBuild gb = groupBuildClient.getSpecific(groupBuildId);
+            GroupConfigurationRef gc = gb.getGroupConfig();
+            return groupConfigClient.getBuildConfigs(gc.getId()).size();
+        } catch (ClientException e) {
+            log.warn("Failed to get count of build configs in the group build {}", groupBuildId, e);
+            return -1;
+        }
+    }
 }
