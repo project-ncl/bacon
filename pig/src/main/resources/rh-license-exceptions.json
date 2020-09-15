@@ -1131,5 +1131,27 @@
         "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
       }
     ]
-  }
+  },
+    {
+        "groupId": "io.reactivex.rxjava2",
+        "artifactId": "rxjava",
+        "version-regexp": "2.2.19.*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.kafka",
+        "artifactId": "kafka-clients",
+        "version-regexp": "2.5.0.*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    }
 ]
