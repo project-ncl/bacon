@@ -105,7 +105,6 @@ public final class PigFacade {
     }
 
     public static GroupBuildInfo run(
-            boolean skipRepo,
             boolean skipPncUpdate,
             boolean skipBuilds,
             boolean skipSources,
@@ -153,17 +152,13 @@ public final class PigFacade {
 
         RepositoryData repo = null;
 
-        if (!skipRepo) {
-            if (repoZipPath != null) {
-                repo = parseRepository(new File(repoZipPath));
-            } else {
-                repo = generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
-            }
-            context.setRepositoryData(repo);
-            context.storeContext();
+        if (repoZipPath != null) {
+            repo = parseRepository(new File(repoZipPath));
         } else {
-            log.info("Skipping Maven Repository Generation");
+            repo = generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
         }
+        context.setRepositoryData(repo);
+        context.storeContext();
 
         if (!skipSources) {
             generateSources();
