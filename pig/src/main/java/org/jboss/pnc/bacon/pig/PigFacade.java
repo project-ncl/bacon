@@ -350,7 +350,7 @@ public final class PigFacade {
         RepositoryData result = new RepositoryData();
         result.setFiles(RepoDescriptor.listFiles(extracted));
         result.setGavs(RepoDescriptor.listGavs(extracted));
-        result.setRepositoryPath(extracted.toPath());
+        result.setRepositoryPath(repositoryZipPath.toPath());
         return result;
     }
 
