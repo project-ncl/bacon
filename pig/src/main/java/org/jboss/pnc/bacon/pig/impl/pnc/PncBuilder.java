@@ -49,6 +49,17 @@ public class PncBuilder {
         groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
     }
 
+    /**
+     * Created to inject mocks for testing
+     *
+     * @param gb
+     * @param gc
+     */
+    PncBuilder(GroupBuildClient gb, GroupConfigurationClient gc) {
+        groupBuildClient = gb;
+        groupConfigClient = gc;
+    }
+
     public GroupBuild buildAndWait(
             GroupConfigurationRef group,
             boolean tempBuild,
@@ -78,13 +89,13 @@ public class PncBuilder {
         }
     }
 
-    private void waitForSuccessfulFinish(String groupBuildId) {
+    void waitForSuccessfulFinish(String groupBuildId) {
         log.info("Waiting for finish of group build {}", groupBuildId);
         SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30, true);
         log.info("Group build finished successfully");
     }
 
-    private boolean isSuccessfullyFinished(String groupBuildId) {
+    boolean isSuccessfullyFinished(String groupBuildId) {
 
         log.debug("Checking if group build {} is successfully finished", groupBuildId);
         try {
@@ -121,7 +132,7 @@ public class PncBuilder {
      * @param groupBuildId the group build id
      * @return whether all the builds have a final status or not
      */
-    private boolean verifyAllBuildsInGroupBuildInFinalStateWithProperCount(String groupBuildId) {
+    boolean verifyAllBuildsInGroupBuildInFinalStateWithProperCount(String groupBuildId) {
 
         log.debug(
                 "Checking if all builds in group build {} are in final state with proper count of builds",
@@ -149,7 +160,7 @@ public class PncBuilder {
      * @param groupBuildId
      * @return count, -1 if an error happened
      */
-    private int getCountOfBuildConfigsForGroupBuild(String groupBuildId) {
+    int getCountOfBuildConfigsForGroupBuild(String groupBuildId) {
 
         try {
             GroupBuild gb = groupBuildClient.getSpecific(groupBuildId);
