@@ -166,9 +166,6 @@ public class Pig {
         @Option(names = REBUILD_MODE, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
         private String rebuildMode;
 
-        @Option(names = "--skipRepo", defaultValue = "false", description = "Skip maven repository generation")
-        private boolean skipRepo;
-
         @Option(
                 names = "--skipPncUpdate",
                 defaultValue = "false",
@@ -225,7 +222,6 @@ public class Pig {
             Path configurationDirectory = Paths.get(configDir);
 
             GroupBuildInfo groupBuildInfo = PigFacade.run(
-                    skipRepo,
                     skipPncUpdate,
                     skipBuilds,
                     skipSources,
