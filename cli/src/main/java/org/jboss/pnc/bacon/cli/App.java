@@ -148,7 +148,12 @@ public class App {
                         .variable(LineReader.LIST_MAX, 50) // max tab completion candidates
                         .build();
                 builtins.setLineReader(reader);
-                new TailTipWidgets(reader, systemRegistry::commandDescription, 5, TailTipWidgets.TipType.COMPLETER);
+                TailTipWidgets tailTipWidgets = new TailTipWidgets(
+                        reader,
+                        systemRegistry::commandDescription,
+                        5,
+                        TailTipWidgets.TipType.COMPLETER);
+                tailTipWidgets.enable();
                 KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
                 keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
 
