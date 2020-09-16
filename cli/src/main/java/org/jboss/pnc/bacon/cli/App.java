@@ -31,7 +31,7 @@ import org.jboss.pnc.bacon.pnc.Pnc;
 import org.jline.builtins.Builtins;
 import org.jline.builtins.SystemRegistry;
 import org.jline.builtins.SystemRegistryImpl;
-import org.jline.builtins.Widgets;
+import org.jline.builtins.Widgets.TailTipWidgets;
 import org.jline.keymap.KeyMap;
 import org.jline.reader.Binding;
 import org.jline.reader.EndOfFileException;
@@ -143,17 +143,16 @@ public class App {
                         .terminal(terminal)
                         .completer(systemRegistry.completer())
                         .parser(parser)
+                        .variable(LineReader.HISTORY_FILE, Constant.HISTORY)
+                        .variable(LineReader.HISTORY_FILE_SIZE, 50)
                         .variable(LineReader.LIST_MAX, 50) // max tab completion candidates
                         .build();
                 builtins.setLineReader(reader);
-                new Widgets.TailTipWidgets(
-                        reader,
-                        systemRegistry::commandDescription,
-                        5,
-                        Widgets.TailTipWidgets.TipType.COMPLETER);
+                new TailTipWidgets(reader, systemRegistry::commandDescription, 5, TailTipWidgets.TipType.COMPLETER);
                 KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
                 keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
 
+                log.info("Tooltips disabled ; press Alt-s to enable");
                 String prompt = "prompt> ";
 
                 // start the shell and process input until the user quits with Ctrl-D
