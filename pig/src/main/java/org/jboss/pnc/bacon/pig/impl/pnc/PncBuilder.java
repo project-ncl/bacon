@@ -60,13 +60,16 @@ public class PncBuilder {
         groupConfigClient = gc;
     }
 
-    public GroupBuild buildAndWait(
+    public GroupBuild build(
             GroupConfigurationRef group,
             boolean tempBuild,
             boolean tempBuildTS,
-            RebuildMode rebuildMode) {
+            RebuildMode rebuildMode,
+            boolean wait) {
         GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode);
-        waitForSuccessfulFinish(groupBuild.getId());
+        if (wait) {
+            waitForSuccessfulFinish(groupBuild.getId());
+        }
         return groupBuild;
     }
 

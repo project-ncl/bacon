@@ -25,6 +25,7 @@ import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
+import org.jboss.pnc.bacon.pig.impl.out.PigBuildOutput;
 import org.jboss.pnc.bacon.pig.impl.out.PigReleaseOutput;
 import org.jboss.pnc.bacon.pig.impl.out.PigRunOutput;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -275,7 +276,7 @@ public class Pig {
     }
 
     @Command(name = "build", description = "Build")
-    public static class Build extends PigCommand<PigRunOutput> {
+    public static class Build extends PigCommand<PigBuildOutput> {
 
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
@@ -291,19 +292,29 @@ public class Pig {
         @Option(names = REBUILD_MODE, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
         private String rebuildMode;
 
+        @Option(names = "--noWait", defaultValue = "true", description = "Start build and don't wait for result.")
+        private boolean wait;
+
         @Override
-        public PigRunOutput doExecute() {
+        public PigBuildOutput doExecute() {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
-            GroupBuildInfo groupBuildInfo = PigFacade.build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode));
-            PigContext context = PigContext.get();
-            context.setBuilds(groupBuildInfo.getBuilds());
-            context.storeContext();
-            return new PigRunOutput(
-                    context.getFullVersion(),
-                    groupBuildInfo,
-                    context.getReleaseDirName(),
-                    context.getReleasePath());
+            GroupBuildInfo groupBuildInfo = PigFacade
+                    .build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode), wait);
+            if (wait) {
+                PigContext context = PigContext.get();
+                context.setBuilds(groupBuildInfo.getBuilds());
+                context.storeContext();
+
+                return new PigBuildOutput(
+                        "Build started, waited for result.",
+                        new PigRunOutput(
+                                context.getFullVersion(),
+                                groupBuildInfo,
+                                context.getReleaseDirName(),
+                                context.getReleasePath()));
+            }
+            return new PigBuildOutput("Builds started, not waiting for result.", null);
         }
     }
 
