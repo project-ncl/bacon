@@ -39,7 +39,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
         String suffix = init(Paths.get("src", "test", "resources", "empty"), true, Optional.empty(), targetDir);
 
         PigFacade.configure(true, false);
-        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK);
+        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true);
         assertThat(build.getBuilds()).isNotEmpty();
 
         assertThat(build.getBuilds().keySet()).contains(format(emptyNameBase1, suffix), format(emptyNameBase2, suffix));
@@ -52,7 +52,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
         String suffix = init(Paths.get("src", "test", "resources", "empty"), true, Optional.empty(), targetDir);
 
         PigFacade.configure(true, false);
-        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK);
+        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true);
 
         Map<String, PncBuild> builds = build.getBuilds();
         assertThat(builds).isNotEmpty();
@@ -62,7 +62,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
         assertThat(builds.values().stream()).allMatch(b -> b.getBuildStatus() == BuildStatus.SUCCESS);
         List<String> successfulBuilds = buildIds(build);
 
-        GroupBuildInfo rebuild = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK);
+        GroupBuildInfo rebuild = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true);
         assertThat(buildIds(rebuild)).containsAll(successfulBuilds);
     }
 

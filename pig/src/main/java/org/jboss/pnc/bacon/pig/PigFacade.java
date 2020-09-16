@@ -89,7 +89,7 @@ public final class PigFacade {
         return pncImporter.readCurrentPncEntities();
     }
 
-    public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode) {
+    public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode, boolean wait) {
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -100,8 +100,12 @@ public final class PigFacade {
         }
 
         GroupBuild groupBuild = new PncBuilder()
-                .buildAndWait(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode);
-        return new BuildInfoCollector().getBuildsFromGroupBuild(groupBuild);
+                .build(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode, wait);
+        if (wait) {
+            return new BuildInfoCollector().getBuildsFromGroupBuild(groupBuild);
+        }
+        log.info("Not waiting for build to finish.");
+        return null;
     }
 
     public static GroupBuildInfo run(
@@ -140,7 +144,7 @@ public final class PigFacade {
             if (tempBuild) {
                 log.info("Temporary build");
             }
-            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode);
+            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode, true);
         }
 
         context.setBuilds(groupBuildInfo.getBuilds());
