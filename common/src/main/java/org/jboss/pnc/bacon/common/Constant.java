@@ -19,6 +19,8 @@ public class Constant {
 
     public static final String JSON_OUTPUT = "-o";
 
+    public static final String HISTORY = System.getProperty("user.home") + File.separator + ".pnc-bacon-history.txt";
+
     private Constant() {
     }
 }
