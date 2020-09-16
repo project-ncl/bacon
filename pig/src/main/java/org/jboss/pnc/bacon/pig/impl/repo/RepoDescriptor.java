@@ -52,7 +52,8 @@ public class RepoDescriptor {
         if (file == null) {
             return false;
         } else {
-            return file.getName().equals(MAVEN_REPOSITORY) || isInRepoDir(file.getParentFile());
+            return file.getName().equals(MAVEN_REPOSITORY.substring(0, MAVEN_REPOSITORY.length() - 1))
+                    || isInRepoDir(file.getParentFile());
         }
     }
 
