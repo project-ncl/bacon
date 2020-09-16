@@ -39,12 +39,22 @@ public class RepoDescriptor {
 
     public static Collection<GAV> listGavs(File m2RepoDirectory) {
         List<GAV> allGavs = listFiles(m2RepoDirectory).stream()
+                .filter(RepoDescriptor::isInRepoDir)
                 .filter(f -> Stream.of(CHECKSUM_EXTENSIONS).noneMatch(ext -> f.getName().endsWith(ext)))
                 .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY))
                 .collect(Collectors.toList());
         Set<GAV> resultSet = new TreeSet<>(Comparator.comparing(GAV::toGav));
         resultSet.addAll(allGavs);
         return resultSet;
+    }
+
+    private static boolean isInRepoDir(File file) {
+        if (file == null) {
+            return false;
+        } else {
+            return file.getName().equals(MAVEN_REPOSITORY.substring(0, MAVEN_REPOSITORY.length() - 1))
+                    || isInRepoDir(file.getParentFile());
+        }
     }
 
     public static Collection<File> listFiles(File m2RepoDirectory) {

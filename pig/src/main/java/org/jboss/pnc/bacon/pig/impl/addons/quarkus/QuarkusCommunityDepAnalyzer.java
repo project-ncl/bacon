@@ -10,6 +10,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.CommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -89,8 +90,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         log.info("releasePath: {}, extrasPath: {}, deliverables: {}", releasePath, extrasPath, deliverables);
         skipped.addAll(skippedExtensions());
 
-        Path repoZipPath = Paths.get(releasePath + deliverables.getRepositoryZipName());
-        unpackRepository(repoZipPath);
+        unpackRepository(PigContext.get().getRepositoryData().getRepositoryPath());
 
         String additionalRepository = (String) getAddOnConfiguration().get("additionalRepository");
         String settingsSelector = "";
@@ -256,7 +256,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private String devtoolsJarName() {
-        return "quarkus-bom-descriptor-json-" + quarkusVersion + ".json";
+        return "quarkus-product-bom-" + quarkusVersion + ".json";
     }
 
     private Set<String> unpackArtifactIdsFrom(Path extensionsPath) {
