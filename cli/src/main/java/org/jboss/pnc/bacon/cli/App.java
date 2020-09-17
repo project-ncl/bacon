@@ -74,7 +74,10 @@ public class App {
     }
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(names = Constant.JSON_OUTPUT, description = "use json for output (default to yaml)", scope = INHERIT)
+    @Option(
+            names = { Constant.JSON_OUTPUT, "--jsonOutput" },
+            description = "use json for output (default to yaml)",
+            scope = INHERIT)
     private boolean jsonOutput = false;
 
     /**
