@@ -158,6 +158,16 @@
                 <artifactId>picocli-shell-jline3</artifactId>
                 <version>${picocli.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
+                <artifactId>jline</artifactId>
+                <version>3.16.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
+                <artifactId>jline-console</artifactId>
+                <version>3.16.0</version>
+            </dependency>
             <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
