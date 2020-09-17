@@ -88,6 +88,27 @@ class AppTest {
     }
 
     @Test
+    void testJSONEnabled3() throws Exception {
+        File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
+        File configYaml = new File(pncClasses.getParentFile().getParentFile().getParentFile(), PNC_TEST_CLASSES);
+
+        String text = tapSystemErr(
+                () -> assertEquals(
+                        1,
+                        new App().run(
+                                new String[] {
+                                        "--jsonOutput",
+                                        "-p",
+                                        configYaml.toString(),
+                                        "-v",
+                                        "pnc",
+                                        "build",
+                                        "get",
+                                        "0" })));
+        assertThat(text).contains("JSON command is enabled: true");
+    }
+
+    @Test
     void testJSONDisabled() throws Exception {
         File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
         File configYaml = new File(pncClasses.getParentFile().getParentFile().getParentFile(), PNC_TEST_CLASSES);
@@ -178,7 +199,7 @@ class AppTest {
                             + "This will disable any new builds from being accepted\n"
                             + "      <reason>              Reason\n"
                             + "  -h, --help                display this help message\n"
-                            + "  -o                        use json for output (default to yaml)\n"
+                            + "  -o, --jsonOutput          use json for output (default to yaml)\n"
                             + "  -p, --configPath=<configurationFileLocation>\n"
                             + "                            Path to PNC configuration folder\n"
                             + "      --profile=<profile>   PNC Configuration profile\n"
