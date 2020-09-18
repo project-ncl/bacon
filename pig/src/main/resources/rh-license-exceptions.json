@@ -1153,5 +1153,108 @@
                 "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         ]
-    }
+    },
+  {
+    "groupId": "aopalliance",
+    "artifactId": "aopalliance",
+    "version": "1.0.0.redhat-2",
+    "licenses": [
+      {
+        "name": "Public Domain",
+        "url": "http://www.gnu.org/licenses/license-list.html#PublicDomain"
+      }
+    ]
+  },
+  {
+    "groupId": "org.fusesource",
+    "artifactId": "camel-sap",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name":"Apache License 2.0",
+        "url":"http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "org.fusesource",
+    "artifactId": "org.fusesource.camel.component.sap.test",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name":"Apache License 2.0",
+        "url":"http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "jline",
+    "artifactId": "jline",
+    "version-regexp": "0.9.94.redhat-3",
+    "licenses": [
+      {
+        "name": "BSD 3-clause \"New\" or \"Revised\" License",
+        "url": "https://opensource.org/licenses/BSD-3-Clause"
+      }
+    ]
+  },
+  {
+    "groupId": "net.iharder",
+    "artifactId": "base64",
+    "version-regexp": "2.3.8.redhat-7",
+    "licenses": [
+      {
+        "name": "Public Domain",
+        "url": "http://www.gnu.org/licenses/license-list.html#PublicDomain"
+      }
+    ]
+  },
+  {
+    "groupId": "org.eclipse.jgit",
+    "artifactId": "org.eclipse.jgit",
+    "version-regexp": "5.0.2.201807311906-r-redhat-00001",
+    "licenses": [
+      {
+        "name": "Eclipse Distribution License (New BSD License)",
+        "url": "https://www.eclipse.org/org/documents/edl-v10.html"
+      }
+    ]
+  },
+  {
+    "groupId": "org.eclipse.jgit",
+    "artifactId": "org.eclipse.jgit-parent",
+    "version-regexp": "5.0.2.201807311906-r-redhat-00001",
+    "licenses": [
+      {
+        "name": "Eclipse Distribution License (New BSD License)",
+        "url": "https://www.eclipse.org/org/documents/edl-v10.html"
+      }
+    ]
+  },
+  {
+    "groupId": "jaxen",
+    "artifactId": "jaxen",
+    "version-regexp": "1.1.6.redhat-2",
+    "licenses": [
+      {
+        "name": "BSD License 2.0",
+        "url": "https://opensource.org/licenses/BSD-3-Clause"
+      }
+    ]
+  },
+  {
+    "groupId": "javax.jws",
+    "artifactId": "jsr181-api",
+    "version": "1.0.0.MR1-redhat-8",
+    "licenses": [
+      {
+        "name": "Common Development and Distribution License 1.0",
+        "url": "http://repository.jboss.org/licenses/cddl.txt"
+      },
+      {
+        "name": "GNU General Public License v2.0 only, with Classpath exception",
+        "url": "http://repository.jboss.org/licenses/gpl-2.0-ce.txt"
+      }
+    ]
+  }
 ]
