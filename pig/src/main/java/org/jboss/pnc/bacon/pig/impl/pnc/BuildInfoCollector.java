@@ -36,11 +36,6 @@ import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -107,28 +102,10 @@ public class BuildInfoCollector {
             Build build = buildIterator.next();
 
             PncBuild result = new PncBuild(build);
-
-            Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(build.getId());
-
-            if (maybeBuildLogs.isPresent()) {
-                try (InputStream inputStream = maybeBuildLogs.get()) {
-                    result.addBuildLog(readLog(inputStream));
-                }
-            }
-
             result.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(build.getId())));
             return result;
-        } catch (ClientException | IOException e) {
+        } catch (ClientException e) {
             throw new RuntimeException("Failed to get latest successful build for " + configId, e);
-        }
-    }
-
-    private List<String> readLog(InputStream inputStream) throws IOException {
-        List<String> log = new ArrayList<>();
-        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            reader.lines().forEach(log::add);
-            return log;
         }
     }
 
@@ -219,18 +196,11 @@ public class BuildInfoCollector {
                     pncBuild = new PncBuild(build);
                 }
 
-                Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(pncBuild.getId());
-                if (maybeBuildLogs.isPresent()) {
-                    try (InputStream inputStream = maybeBuildLogs.get()) {
-                        pncBuild.addBuildLog(readLog(inputStream));
-                    }
-                }
-
                 pncBuild.addBuiltArtifacts(toList(buildClient.getBuiltArtifacts(pncBuild.getId())));
                 result.put(pncBuild.getName(), pncBuild);
             }
             return new GroupBuildInfo(groupBuild, result);
-        } catch (IOException | RemoteResourceException e) {
+        } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get group build info for " + groupBuild.getId(), e);
         }
     }
