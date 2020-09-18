@@ -199,6 +199,8 @@ public final class PigFacade {
     }
 
     public static PigReleaseOutput release() {
+        abortIfContextDataAbsent();
+
         pushToBrew(false);
         generateNvrList();
 
@@ -233,6 +235,7 @@ public final class PigFacade {
     }
 
     private static void pushToBrew(boolean reimport) {
+        abortIfBuildDataAbsentFromContext();
         Map<String, PncBuild> builds = PigContext.get().getBuilds();
         String tagPrefix = getBrewTag(context().getPncImportResult().getVersion());
         List<PncBuild> buildsToPush = getBuildsToPush(builds);
@@ -265,10 +268,7 @@ public final class PigFacade {
     }
 
     public static void generateDocuments() {
-        if (context().getRepositoryData() == null) {
-            throw new RuntimeException(
-                    "No repository data available for document generation. Please make sure to run `pig repo` before `pig docs`");
-        }
+        abortIfContextDataAbsent();
         DocumentGenerator docGenerator = new DocumentGenerator(
                 context().getPigConfiguration(),
                 context().getReleasePath(),
@@ -278,6 +278,7 @@ public final class PigFacade {
     }
 
     public static void prepareSharedContentAnalysis() {
+        abortIfContextDataAbsent();
         try {
             DocumentGenerator docGenerator = new DocumentGenerator(
                     context().getPigConfiguration(),
@@ -291,6 +292,7 @@ public final class PigFacade {
     }
 
     public static void generateSources() {
+        abortIfContextDataAbsent();
         PigConfiguration pigConfiguration = context().getPigConfiguration();
         Map<String, PncBuild> builds = context().getBuilds();
         RepositoryData repo = context().getRepositoryData();
@@ -354,6 +356,7 @@ public final class PigFacade {
     }
 
     public static void triggerAddOns() {
+        abortIfBuildDataAbsentFromContext();
         AddOnFactory
                 .listAddOns(
                         context().getPigConfiguration(),
@@ -370,6 +373,7 @@ public final class PigFacade {
             boolean removeGeneratedM2Dups,
             Path configurationDirectory,
             boolean strictLicenseCheck) {
+        abortIfBuildDataAbsentFromContext();
         PigContext context = context();
         RepoManager repoManager = new RepoManager(
                 context.getPigConfiguration(),
@@ -399,7 +403,6 @@ public final class PigFacade {
      * @param importResult Data from the 'configuration' part. Will contain information about the group configuration
      *        used to trigger the builds
      * @param tempBuild whether the build performed was temporary or not
-     *
      * @return GroupBuildInfo that contains the group build, and the map of 'build config name' to PncBuild
      */
     private static GroupBuildInfo getBuilds(ImportResult importResult, boolean tempBuild) {
@@ -410,9 +413,11 @@ public final class PigFacade {
     }
 
     public static void generateLicenses(boolean strict) {
+        abortIfContextDataAbsent();
         PigContext context = context();
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
+
         Map<String, PncBuild> builds = context.getBuilds();
         new LicenseManager(pigConfiguration, context.getReleasePath(), strict, context.getDeliverables(), builds, repo)
                 .prepare();
@@ -423,4 +428,26 @@ public final class PigFacade {
         Map<String, PncBuild> builds = context().getBuilds();
         new JavadocManager(pigConfiguration, context().getReleasePath(), context().getDeliverables(), builds).prepare();
     }
+
+    /**
+     * Throws RuntimeException if the build or repository data is not present
+     */
+    private static void abortIfContextDataAbsent() {
+        abortIfBuildDataAbsentFromContext();
+        abortIfRepositoryDataAbsentFromContext();
+    }
+
+    private static void abortIfBuildDataAbsentFromContext() {
+        if (context().getBuilds() == null) {
+            throw new RuntimeException("No build data available. Please make sure to run `pig run` before");
+        }
+    }
+
+    private static void abortIfRepositoryDataAbsentFromContext() {
+        if (context().getRepositoryData() == null) {
+            throw new RuntimeException(
+                    "No repository data available for document generation. Please make sure to run `pig repo` before");
+        }
+    }
+
 }

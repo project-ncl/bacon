@@ -90,6 +90,11 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         log.info("releasePath: {}, extrasPath: {}, deliverables: {}", releasePath, extrasPath, deliverables);
         skipped.addAll(skippedExtensions());
 
+        if (PigContext.get().getRepositoryData() == null) {
+            throw new RuntimeException(
+                    "No repository data available for document generation. Please make sure to run `pig repo` before");
+        }
+
         unpackRepository(PigContext.get().getRepositoryData().getRepositoryPath());
 
         String additionalRepository = (String) getAddOnConfiguration().get("additionalRepository");
