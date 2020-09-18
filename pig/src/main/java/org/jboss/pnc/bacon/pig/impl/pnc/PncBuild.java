@@ -24,16 +24,25 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -52,6 +61,9 @@ public class PncBuild {
     private static final Logger log = LoggerFactory.getLogger(PncBuild.class);
 
     public static final String SUCCESSFUL_STATUS = "DONE";
+
+    @JsonIgnore
+    private static final BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
 
     private String internalScmUrl;
     private String scmRevision;
@@ -128,6 +140,48 @@ public class PncBuild {
 
         ArtifactWrapper artifact = artifacts.get(0);
         artifact.downloadTo(downloadedZip);
+    }
+
+    /**
+     * Get the build log of the build on demand and result if cached. If the method is called again, the cached content
+     * will be served if not null
+     *
+     * @return the logs of the build
+     */
+    public List<String> getBuildLog() {
+
+        // use cached buildLog if present
+        if (buildLog != null) {
+            return buildLog;
+        }
+
+        try {
+            Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(id);
+
+            if (maybeBuildLogs.isPresent()) {
+                try (InputStream inputStream = maybeBuildLogs.get()) {
+                    buildLog = readLog(inputStream);
+                }
+            } else {
+                log.debug("Couldn't find logs for build id: {}", id);
+                buildLog = Collections.emptyList();
+            }
+
+            return buildLog;
+        } catch (ClientException | IOException e) {
+            throw new RuntimeException("Failed to get build log for " + id, e);
+        }
+    }
+
+    private List<String> readLog(InputStream inputStream) throws IOException {
+
+        List<String> log = new ArrayList<>();
+
+        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader reader = new BufferedReader(inputStreamReader)) {
+            reader.lines().forEach(log::add);
+            return log;
+        }
     }
 
     private List<ArtifactWrapper> findArtifactsMatching(Predicate<ArtifactWrapper> query) {
