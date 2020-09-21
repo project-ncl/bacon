@@ -43,6 +43,7 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +102,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             case BUILD_CONFIGS:
                 return buildConfigs();
             case OFFLINER_ONLY:
+                log.info("Generating only the offline manifest");
                 generateOfflinerManifest();
                 return null;
             case IGNORE:
