@@ -33,15 +33,19 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.enums.RepositoryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -97,6 +101,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
+            case OFFLINER_ONLY:
+                log.info("Generating only the offliner manifest");
+                generateOfflinerManifest();
+                return null;
             case IGNORE:
                 log.info(
                         "Ignoring repository zip generation because the config strategy is set to: {}",
@@ -172,6 +180,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
         File sourceDir = createMavenGenerationDir();
         filterAndDownload(artifactsToPack, sourceDir);
+        if (generationData.isIncludeOffliner()) {
+            generateOfflinerManifest();
+        }
         return repackage(sourceDir);
     }
 
@@ -184,6 +195,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
         File sourceDir = createMavenGenerationDir();
         filterAndDownload(artifactsToPack, sourceDir);
+        if (generationData.isIncludeOffliner()) {
+            generateOfflinerManifest();
+        }
         return repackage(sourceDir);
     }
 
@@ -391,5 +405,61 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     @Override
     public void close() {
         buildInfoCollector.close();
+    }
+
+    private void generateOfflinerManifest() {
+        log.info("Will generate the offliner");
+        RepositoryData result = new RepositoryData();
+        List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
+        for (PncBuild build : builds.values()) {
+            artifactsToListRaw.addAll(build.getBuiltArtifacts());
+            // TODO: Add filter, basing on the targetRepository.repositoryType, when
+            // https://projects.engineering.redhat.com/browse/NCL-6079 is done
+            buildInfoCollector.addDependencies(build, "");
+            artifactsToListRaw.addAll(build.getDependencyArtifacts());
+            log.info("Dependencies for build " + build.getId() + ": " + build.getDependencyArtifacts().size());
+        }
+        log.info("Number of collected artifacts for offliner: " + artifactsToListRaw.size());
+
+        artifactsToListRaw.removeIf(artifact -> isArtifactExcluded(artifact.getGapv()));
+        log.info("Number of collected artifacts after exclusion: " + artifactsToListRaw.size());
+        Map<String, ArtifactWrapper> artifactsToList = new HashMap<>();
+        for (ArtifactWrapper artifact : artifactsToListRaw) {
+            artifactsToList.put(artifact.getGapv(), artifact);
+        }
+        log.info("Number of collected artifacts without duplicates: " + artifactsToList.size());
+
+        PrintWriter file = null;
+        String filename = releasePath + getGenerationData().getOfflinerManifest();
+        try {
+            file = new PrintWriter(filename);
+            for (Map.Entry<String, ArtifactWrapper> artifactEntry : artifactsToList.entrySet()) {
+                ArtifactWrapper artifact = artifactEntry.getValue();
+                // TODO: Remove the check, when https://projects.engineering.redhat.com/browse/NCL-6079 is done
+                if (artifact.getRepositoryType().equals(RepositoryType.MAVEN)) {
+                    file.println(artifact.getSha256() + "," + artifact.toGAV().toVersionPath());
+                }
+
+            }
+            List<String> extraGavs = generationData.getExternalAdditionalArtifacts()
+                    .stream()
+                    .map(GAV::fromColonSeparatedGAPV)
+                    .map(GAV::toVersionPath)
+                    .collect(Collectors.toList());
+            for (String extraGav : extraGavs) {
+                file.println(extraGav);
+            }
+            result.setFiles(
+                    Arrays.asList(
+                            new File(getTargetTopLevelDirectoryName() + getGenerationData().getOfflinerManifest())));
+
+        } catch (Exception e) {
+            log.error("Error generating the offliner manifest", e);
+        } finally {
+            if (file != null) {
+                file.flush();
+                file.close();
+            }
+        }
     }
 }

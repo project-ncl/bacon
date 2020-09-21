@@ -22,5 +22,6 @@ package org.jboss.pnc.bacon.pig.impl.config;
  *         Date: 5/23/18
  */
 public enum RepoGenerationStrategy {
-    GENERATE, DOWNLOAD, BUILD_CONFIGS, BUILD_GROUP, MILESTONE, IGNORE, PACK_ALL // DEPRECATED replaced by BUILD_CONFIGS
+    GENERATE, DOWNLOAD, BUILD_CONFIGS, BUILD_GROUP, MILESTONE, OFFLINER_ONLY, IGNORE, PACK_ALL // DEPRECATED replaced by
+                                                                                               // BUILD_CONFIGS
 }
