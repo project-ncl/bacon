@@ -317,8 +317,6 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         return checkReferencesInRepo(quarkusRuntimeBom);
     }
 
-    // mstodo store the result properly
-    // mstodo add it add on trigger
     private Collection<String> checkReferencesInRepo(String quarkusRuntimeBom) {
         try {
             String str = "/maven-repository/";
@@ -333,10 +331,11 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                     .filter(dep -> isRHAndMissing(dep, model))
                     .map(
                             dep -> String.format(
-                                    "'%s:%s:%s',",
+                                    "'%s:%s:%s:%s',",
                                     dep.getGroupId(),
                                     dep.getArtifactId(),
-                                    deVar(model, dep.getVersion())))
+                                    deVar(model, dep.getVersion()),
+                                    dep.getClassifier() != null ? dep.getClassifier() : ""))
                     .collect(Collectors.toSet());
         } catch (XmlPullParserException | IOException e) {
             log.error("Parsing error when generating quarkus artifact references", e);
@@ -354,7 +353,8 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 dependency.getGroupId(),
                 dependency.getArtifactId(),
                 version,
-                dependency.getType() != null && dependency.getType().equals("jar") ? dependency.getType() : "jar");
+                dependency.getType() != null && dependency.getType().equals("jar") ? dependency.getType() : "jar",
+                dependency.getClassifier() != null ? dependency.getClassifier() : null);
         Path filePath = repoPath.resolve(gav.toVersionPath()).resolve(gav.toFileName());
         return !filePath.toFile().exists();
     }
