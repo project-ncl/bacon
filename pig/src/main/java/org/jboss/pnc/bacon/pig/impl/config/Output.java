@@ -19,6 +19,8 @@ package org.jboss.pnc.bacon.pig.impl.config;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -26,6 +28,7 @@ import lombok.Data;
  */
 @Data
 public class Output {
-    private String releaseFile;
-    private String releaseDir;
+
+    private @NotBlank String releaseFile;
+    private @NotBlank String releaseDir;
 }

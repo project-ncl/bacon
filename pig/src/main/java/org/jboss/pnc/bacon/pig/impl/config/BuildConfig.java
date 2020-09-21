@@ -32,6 +32,8 @@ import org.jboss.pnc.enums.BuildType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
@@ -65,12 +67,12 @@ public class BuildConfig {
     private static final Logger log = LoggerFactory.getLogger(BuildConfig.class);
     private static final ClientCreator<EnvironmentClient> CREATOR = new ClientCreator<>(EnvironmentClient::new);
 
-    private String name;
-    private String project;
-    private String buildScript;
+    private @NotBlank String name;
+    private @NotBlank String project;
+    private @NotBlank String buildScript;
     private String scmUrl;
     private String externalScmUrl;
-    private String scmRevision;
+    private @NotBlank String scmRevision;
     private String description;
     private String environmentId;
 
@@ -93,7 +95,7 @@ public class BuildConfig {
 
     private Set<String> extraRepositories = new TreeSet<>();
     private Boolean branchModified;
-    private String buildType;
+    private @NotBlank String buildType;
 
     /** deprecated: use brewBuildName instead */
     private String executionRoot;
@@ -231,10 +233,6 @@ public class BuildConfig {
         return result;
     }
 
-    public void validate(List<String> errors) {
-        // TODO!
-    }
-
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
         String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
         if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
@@ -271,8 +269,9 @@ public class BuildConfig {
             } catch (RemoteResourceException e) {
                 throw new FatalException("Exception while talking to PNC", e);
             }
-        } else {
-            throw new FatalException("No environmentId / environmentSystemImageId defined for the build config");
         }
+
+        // if we're here, no environmentId could be found
+        return null;
     }
 }
