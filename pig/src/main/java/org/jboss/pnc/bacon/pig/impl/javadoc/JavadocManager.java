@@ -94,7 +94,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
     }
 
     public void prepare() {
-        JavadocGenerationStrategy strategy = generationData.getStrategy();
+        JavadocGenerationStrategy strategy = generationData == null ? JavadocGenerationStrategy.IGNORE
+                : generationData.getStrategy();
         switch (strategy) {
             case DOWNLOAD:
                 downloadAndRepackage();
