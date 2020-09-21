@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pig.impl.config;
 
 import lombok.Data;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerationData;
+import org.jboss.pnc.bacon.pig.impl.validation.GenerationDataCheck;
 
 /**
  *
@@ -27,9 +28,11 @@ import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerationData;
  */
 @Data
 public class Flow {
-    private LicenseGenerationData licensesGeneration;
-    private RepoGenerationData repositoryGeneration;
-    private JavadocGenerationData javadocGeneration;
+    private @GenerationDataCheck LicenseGenerationData licensesGeneration;
+
+    private @GenerationDataCheck RepoGenerationData repositoryGeneration;
+
+    private @GenerationDataCheck JavadocGenerationData javadocGeneration;
 
     /**
      * Add defaults to avoid having existing configurations having to define a sourceGeneration object in the flow

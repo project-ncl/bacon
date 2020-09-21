@@ -18,11 +18,19 @@
 package org.jboss.pnc.bacon.pig.impl.config;
 
 import lombok.Data;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Validate;
+import org.jboss.pnc.bacon.pig.impl.validation.ListBuildConfigCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -46,24 +54,24 @@ import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/28/17
  */
 @Data
-public class PigConfiguration {
+public class PigConfiguration implements Validate {
     private static final Logger log = LoggerFactory.getLogger(PigConfiguration.class);
 
-    private @NotBlank ProductConfig product;
+    private @NotNull @Valid ProductConfig product;
     private @NotBlank String version;
     private @NotBlank String milestone;
     private @NotBlank String group;
-    private BuildConfig defaultBuildParameters = new BuildConfig();
-    private @NotEmpty List<BuildConfig> builds = new ArrayList<>();
-    private @NotBlank Output outputPrefixes;
-    private @NotNull Flow flow;
+    private @NotNull BuildConfig defaultBuildParameters = new BuildConfig();
+    private @NotEmpty @ListBuildConfigCheck @Valid List<BuildConfig> builds = new ArrayList<>();
+    private @NotNull @Valid Output outputPrefixes;
+
+    private @NotNull @Valid Flow flow;
     private String majorMinor;
     private String micro;
     private Map<String, Map<String, ?>> addons = new HashMap<>();
@@ -85,18 +93,20 @@ public class PigConfiguration {
 
         builds.forEach(config -> config.setDefaults(defaultBuildParameters));
         builds.forEach(BuildConfig::sanitizebuildScript);
-        List<String> errors = validate();
-        if (!errors.isEmpty()) {
-            throw new RuntimeException("The build configuration file is invalid. Errors:\n" + join(errors, "\n"));
-        }
+        validate();
     }
 
-    private List<String> validate() {
-        List<String> errors = new ArrayList<>();
-        checkForDuplicateConfigNames(errors);
-        builds.forEach(b -> b.validate(errors));
-        // TODO!
-        return errors;
+    @Override
+    public void validate() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<PigConfiguration>> violations = validator.validate(this);
+
+        if (!violations.isEmpty()) {
+            throw new FatalException(
+                    "Errors while validating the build-config.yaml:\n"
+                            + Validate.<PigConfiguration> prettifyConstraintViolation(violations));
+        }
     }
 
     private void checkForDuplicateConfigNames(List<String> errors) {

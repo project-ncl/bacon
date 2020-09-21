@@ -1,7 +1,12 @@
 package org.jboss.pnc.bacon.config;
 
+import javax.validation.ConstraintViolation;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public interface Validate {
 
@@ -40,6 +45,17 @@ public interface Validate {
 
     static void fail(String reason) {
         checkIfNull(null, reason);
+    }
+
+    static <T> String prettifyConstraintViolation(Set<ConstraintViolation<T>> violations) {
+
+        List<String> errorMsgs = new ArrayList<>();
+
+        for (ConstraintViolation violation : violations) {
+            errorMsgs.add("Field: " + violation.getPropertyPath() + " " + violation.getMessage());
+        }
+        return String.join("\n", errorMsgs);
+
     }
 
     class ConfigMissingException extends RuntimeException {

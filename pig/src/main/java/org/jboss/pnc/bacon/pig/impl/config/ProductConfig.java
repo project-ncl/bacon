@@ -19,14 +19,16 @@ package org.jboss.pnc.bacon.pig.impl.config;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/28/17
  */
 @Data
 public class ProductConfig {
-    private String name;
-    private String abbreviation;
+    private @NotBlank String name;
+    private @NotBlank String abbreviation;
     private String stage;
     private String issueTrackerUrl;
 
