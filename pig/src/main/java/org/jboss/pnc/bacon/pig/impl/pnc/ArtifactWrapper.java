@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.enums.RepositoryType;
 
 import java.io.File;
 import java.net.URI;
@@ -45,6 +46,8 @@ public class ArtifactWrapper {
     private String md5;
     private String sha1;
     private String sha256;
+    // TODO: Remove when https://projects.engineering.redhat.com/browse/NCL-6079 is done.
+    private RepositoryType repositoryType;
 
     public ArtifactWrapper(Artifact artifact) {
         id = artifact.getId();
@@ -54,6 +57,7 @@ public class ArtifactWrapper {
         md5 = artifact.getMd5();
         sha1 = artifact.getSha1();
         sha256 = artifact.getSha256();
+        repositoryType = artifact.getTargetRepository().getRepositoryType();
     }
 
     public GAV toGAV() {

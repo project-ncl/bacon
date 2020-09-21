@@ -40,4 +40,5 @@ public class Deliverables {
     private final String duplicateArtifactListName = "repository-duplicate-artifact-list.txt";
     private String nvrListName;
     private String sharedContentReport = "shared-content-report.csv";
+    private String offlinerFile;
 }
