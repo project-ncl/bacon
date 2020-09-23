@@ -1256,5 +1256,49 @@
         "url": "http://repository.jboss.org/licenses/gpl-2.0-ce.txt"
       }
     ]
-  }
+  },
+    {
+        "groupId": "io.reactivex.rxjava3",
+        "artifactId": "rxjava",
+        "version-regexp": "3.0.*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.kafka",
+        "artifactId": "connect-json",
+        "version-regexp": "2.5.*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.kafka",
+        "artifactId": "connect-api",
+        "version-regexp": "2.5.*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.kafka",
+        "artifactId": "kafka-streams",
+        "version-regexp": "2.5.*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    }
 ]
