@@ -35,3 +35,10 @@ outputPrefixes:
     releaseDir: product-a # prefix for a top level directory name inside the deliverables
     releaseFile: product-a # prefix for the deliverables. Version and milestone will be appended to it
 
+flow:
+    licensesGeneration:
+        strategy: IGNORE
+    repositoryGeneration:
+        strategy: IGNORE
+    javadocGeneration:
+        strategy: IGNORE
