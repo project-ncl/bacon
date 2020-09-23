@@ -32,3 +32,15 @@ builds:
       - 'versionSuffix={{redhatSuffix}}'
       - 'groovyManipulatorPrecedence=FIRST'
       - 'groovyScripts=org.jboss.vertx.component.management:vertx-component-management-aggregation:groovy:3.5.1.redhat-003'
+
+outputPrefixes:
+    releaseDir: release-dir
+    releaseFile: release-file
+flow:
+    # licensesGeneration: gen.downloadFrom 'WildFly-Swarm' matching '.*license\.zip'
+    licensesGeneration:
+        strategy: IGNORE
+    repositoryGeneration:
+        strategy: IGNORE
+    javadocGeneration:
+        strategy: IGNORE
