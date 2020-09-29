@@ -102,7 +102,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             case BUILD_CONFIGS:
                 return buildConfigs();
             case OFFLINER_ONLY:
-                log.info("Generating only the offliner manifest");
                 generateOfflinerManifest();
                 return null;
             case IGNORE:
@@ -408,7 +407,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private void generateOfflinerManifest() {
-        log.info("Will generate the offliner");
+        log.info("Will generate the Offline manifest");
         RepositoryData result = new RepositoryData();
         List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
         for (PncBuild build : builds.values()) {
@@ -417,17 +416,17 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             // https://projects.engineering.redhat.com/browse/NCL-6079 is done
             buildInfoCollector.addDependencies(build, "");
             artifactsToListRaw.addAll(build.getDependencyArtifacts());
-            log.info("Dependencies for build " + build.getId() + ": " + build.getDependencyArtifacts().size());
+            log.debug("Dependencies for build {}: {}" + build.getId(), build.getDependencyArtifacts().size());
         }
-        log.info("Number of collected artifacts for offliner: " + artifactsToListRaw.size());
+        log.debug("Number of collected artifacts for the Offline manifest: {}", artifactsToListRaw.size());
 
         artifactsToListRaw.removeIf(artifact -> isArtifactExcluded(artifact.getGapv()));
-        log.info("Number of collected artifacts after exclusion: " + artifactsToListRaw.size());
+        log.debug("Number of collected artifacts after exclusion: {}", artifactsToListRaw.size());
         Map<String, ArtifactWrapper> artifactsToList = new HashMap<>();
         for (ArtifactWrapper artifact : artifactsToListRaw) {
             artifactsToList.put(artifact.getGapv(), artifact);
         }
-        log.info("Number of collected artifacts without duplicates: " + artifactsToList.size());
+        log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
         PrintWriter file = null;
         String filename = releasePath + getGenerationData().getOfflinerManifest();
@@ -454,7 +453,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                             new File(getTargetTopLevelDirectoryName() + getGenerationData().getOfflinerManifest())));
 
         } catch (Exception e) {
-            log.error("Error generating the offliner manifest", e);
+            log.error("Error generating the Offline manifest", e);
         } finally {
             if (file != null) {
                 file.flush();
