@@ -43,7 +43,6 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -401,6 +400,15 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     strictLicenseCheck);
         }
     }
+
+    /**
+     * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
+     * dependencies. First, it adds the build artifacts for all the builds. Then, it executes a query to PNC, requesting
+     * the third party dependencies for each build. Finally, the method generates a file, containing version paths and
+     * checksums, where we can get it, for all build and dependency attributes. The offline manifest file in combination
+     * with the offliner tool (https://repo1.maven.org/maven2/com/redhat/red/offliner/offliner) are used to download all
+     * the attributes to a local maven repository.
+     */
 
     /**
      * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
