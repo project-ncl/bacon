@@ -90,12 +90,14 @@ public class CacheFile {
     }
 
     private static void setOwnerFilePermissions(String path) {
-        Set<PosixFilePermission> set = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
-
-        try {
-            Files.setPosixFilePermissions(Paths.get(path), set);
-        } catch (IOException e) {
-            log.error("Could not set file permissions for path {}", path, e);
+        Path p = Paths.get(path);
+        if (p.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+            Set<PosixFilePermission> set = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+            try {
+                Files.setPosixFilePermissions(p, set);
+            } catch (IOException e) {
+                log.error("Could not set file permissions for path {}", p, e);
+            }
         }
     }
 
