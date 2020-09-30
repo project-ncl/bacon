@@ -42,7 +42,9 @@ public class CacheFile {
 
         createConfigFolderIfAbsent();
 
-        log.debug("Writing credential to cache file");
+        File file = new File(getCacheFile());
+
+        log.debug("Writing credential to cache file {}", file);
 
         try {
             Map<String, Credential> data = new HashMap<>();
@@ -50,15 +52,14 @@ public class CacheFile {
 
             CacheFile cacheFile = new CacheFile();
             cacheFile.setCachedData(data);
-            mapper.writeValue(new File(getCacheFile()), cacheFile);
+            mapper.writeValue(file, cacheFile);
             setOwnerFilePermissions(getCacheFile());
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error("Error saving credential to file {}", file, e);
         }
     }
 
     public static Optional<Credential> getCredentialFromCacheFile(String keycloakUrl, String realm, String username) {
-
         String key = generateUsernameMd5(keycloakUrl, realm, username);
 
         if (!fileExists(getCacheFile())) {
@@ -67,22 +68,24 @@ public class CacheFile {
 
         try {
             CacheFile cacheFile = mapper.readValue(new File(getCacheFile()), CacheFile.class);
+            Map<String, Credential> data = cacheFile.getCachedData();
 
-            if (cacheFile.getCachedData() != null && cacheFile.getCachedData().containsKey(key)) {
-                return Optional.of(cacheFile.getCachedData().get(key));
+            if (data != null) {
+                return Optional.ofNullable(data.get(key));
             } else {
                 return Optional.empty();
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error("Error getting credential", e);
             return Optional.empty();
         }
     }
 
     private static void createConfigFolderIfAbsent() {
         if (!fileExists(Config.getConfigLocation())) {
-            log.debug("Creating config folder...");
-            new File(Config.getConfigLocation()).mkdirs();
+            String configFolder = Config.getConfigLocation();
+            log.debug("Creating config folder {}", configFolder);
+            new File(configFolder).mkdirs();
         }
     }
 
@@ -101,7 +104,6 @@ public class CacheFile {
     }
 
     private static boolean fileExists(String pathString) {
-
         Path path = Paths.get(pathString);
         return Files.exists(path);
     }
