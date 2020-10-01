@@ -15,8 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -47,9 +47,8 @@ public class CacheFile {
         log.debug("Writing credential to cache file {}", file);
 
         try {
-            Map<String, Credential> data = new HashMap<>();
-            data.put(generateUsernameMd5(keycloakUrl, realm, username), credential);
-
+            Map<String, Credential> data = Collections
+                    .singletonMap(generateUsernameMd5(keycloakUrl, realm, username), credential);
             CacheFile cacheFile = new CacheFile();
             cacheFile.setCachedData(data);
             mapper.writeValue(file, cacheFile);
