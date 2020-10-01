@@ -77,8 +77,8 @@ public class BrewSearcher {
                 GAV gav = GAV.fromKojiArchive(archive.getArchive());
                 SharedContentReportRow row = rowsByGav.get(gav);
                 if (row == null) {
-                    throw new RuntimeException(
-                            "sth weird happened in shared content generation, unexpected gav: " + gav);
+                    log.warn("Found indirect dependency {} ({})", archive.getArchive().asGAV(), archive.getFilenames());
+                    continue;
                 }
                 int buildId = build.getBuildInfo().getId();
                 log.debug("Got build id {} for artifact {}", buildId, row.toGapv());
