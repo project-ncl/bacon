@@ -80,7 +80,7 @@ public class BuildCli {
     @Command(
             name = "start",
             description = "Start a new build",
-            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build start \\\n"
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build start \\%n"
                     + "\t--rebuild-mode=FORCE --temporary-build --wait 27")
     public static class Start extends JSONCommandHandler implements Callable<Integer> {
 

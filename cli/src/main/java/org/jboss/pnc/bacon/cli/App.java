@@ -89,7 +89,6 @@ public class App {
         System.exit(new App().run(args));
     }
 
-    @SuppressWarnings("FieldMayBeFinal")
     @Option(
             names = { Constant.JSON_OUTPUT, "--jsonOutput" },
             description = "use json for output (default to yaml)",
@@ -100,7 +99,7 @@ public class App {
      * Set the verbosity of logback if the verbosity flag is set
      */
     @Option(names = { "-v", "--verbose" }, description = "Verbose output", scope = INHERIT)
-    public void setVerbosityIfPresent(boolean verbose) {
+    public static void setVerbosityIfPresent(boolean verbose) {
 
         if (verbose) {
             ObjectHelper.setRootLoggingLevel(Level.DEBUG);
@@ -287,10 +286,12 @@ public class App {
          * @param command
          * @return true if PicocliCommands contains command
          */
+        @Override
         public boolean hasCommand(String command) {
             return commands.contains(command) || aliasCommand.containsKey(command);
         }
 
+        @Override
         public SystemCompleter compileCompleters() {
             SystemCompleter out = new SystemCompleter();
             List<String> all = new ArrayList<>();
@@ -384,7 +385,7 @@ public class App {
             return out;
         }
 
-        private CommandLine findSubcommandLine(CommandLine cmdline, String command) {
+        private static CommandLine findSubcommandLine(CommandLine cmdline, String command) {
             for (CommandLine s : cmdline.getSubcommands().values()) {
                 if (s.getCommandName().equals(command)
                         || Arrays.asList(s.getCommandSpec().aliases()).contains(command)) {
@@ -435,8 +436,8 @@ public class App {
             CommandLine.Model.CommandSpec spec = cmd.getSubcommands().get(command).getCommandSpec();
             CommandLine.Help cmdhelp = new picocli.CommandLine.Help(spec);
             String description = AttributedString
-                    .stripAnsi(spec.usageMessage().sectionMap().get("description").render(cmdhelp).toString());
-            out.addAll(Arrays.asList(description.split("\\r?\\n")));
+                    .stripAnsi(spec.usageMessage().sectionMap().get("description").render(cmdhelp));
+            out.addAll(Arrays.asList(description.split(System.lineSeparator())));
             return out;
         }
 

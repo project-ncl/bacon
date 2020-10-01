@@ -48,8 +48,8 @@ public class BrewPushCli {
     @Command(
             name = "build",
             description = "Push build to Brew",
-            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"\n\n"
-                    + "# To wait for the push to finish, use the '--wait' flag. See the '--timeout' flag also\n"
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push build 8 --tag-prefix=\"1.0-pnc\"%n%n"
+                    + "# To wait for the push to finish, use the '--wait' flag. See the '--timeout' flag also%n"
                     + "$ bacon pnc brew-push build 100 --tag-prefix=\"music-1\" --wait")
     public static class Build extends JSONCommandHandler implements Callable<Integer> {
 
@@ -104,7 +104,7 @@ public class BrewPushCli {
     @Command(
             name = "group-build",
             description = "Push group build to Brew",
-            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push group-build 8 --tag-prefix=\"1.0-pnc\"\n")
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc brew-push group-build 8 --tag-prefix=\"1.0-pnc\"%n")
     public static class GroupBuild implements Callable<Integer> {
 
         @Parameters(description = "Id of group-build")
