@@ -110,6 +110,8 @@ public class ProductMilestoneCli {
         private String startDate;
         @Option(required = true, names = "--end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
+        @Option(names = "--set-current", defaultValue = "false", description = "Set created milestone as current")
+        private boolean current;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -139,10 +141,20 @@ public class ProductMilestoneCli {
                     .plannedEndDate(endDateInstant)
                     .build();
 
+            ProductMilestone createdMilestone = null;
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
-                ObjectHelper.print(getJsonOutput(), client.createNew(milestone));
-                return 0;
+                createdMilestone = client.createNew(milestone);
             }
+            if (current) {
+                try (ProductVersionClient versionClient = VERSION_CREATOR.newClientAuthenticated()) {
+                    ProductVersion productVersion = versionClient.getSpecific(productVersionId);
+                    ProductVersion.Builder updateVersion = productVersion.toBuilder()
+                            .currentProductMilestone(createdMilestone);
+                    versionClient.update(productVersionId, updateVersion.build());
+                }
+            }
+            ObjectHelper.print(getJsonOutput(), createdMilestone);
+            return 0;
         }
     }
 
@@ -162,6 +174,8 @@ public class ProductMilestoneCli {
         private String startDate;
         @Option(names = "--end-date", description = "End date: Format: <yyyy>-<mm>-<dd>")
         private String endDate;
+        @Option(names = "--set-current", defaultValue = "false", description = "Set created milestone as current")
+        private boolean current;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -173,7 +187,6 @@ public class ProductMilestoneCli {
         public Integer call() throws Exception {
             try (ProductMilestoneClient client = CREATOR.newClient()) {
                 ProductMilestone productMilestone = client.getSpecific(productMilestoneId);
-
                 ProductMilestone.Builder updated = productMilestone.toBuilder();
 
                 if (isNotEmpty(productMilestoneVersion)) {
@@ -198,8 +211,18 @@ public class ProductMilestoneCli {
 
                 try (ProductMilestoneClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
                     clientAuthenticated.update(productMilestoneId, updated.build());
-                    return 0;
                 }
+                if (current) {
+                    try (ProductVersionClient versionClient = VERSION_CREATOR.newClientAuthenticated()) {
+                        String productVersionId = productMilestone.getProductVersion().getId();
+                        ProductMilestone updatedMilestone = client.getSpecific(productMilestoneId);
+                        ProductVersion productVersion = versionClient.getSpecific(productVersionId);
+                        ProductVersion.Builder updateVersion = productVersion.toBuilder()
+                                .currentProductMilestone(updatedMilestone);
+                        versionClient.update(productVersionId, updateVersion.build());
+                    }
+                }
+                return 0;
             }
         }
     }
