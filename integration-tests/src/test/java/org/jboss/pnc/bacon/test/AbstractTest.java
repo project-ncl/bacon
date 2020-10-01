@@ -31,8 +31,6 @@ public class AbstractTest {
 
     private static Random generator = new Random();
 
-    protected CLIExecutor executor = new CLIExecutor();
-
     protected PNCWiremockHelper wmock = new PNCWiremockHelper();
 
     @BeforeAll
@@ -64,28 +62,28 @@ public class AbstractTest {
     }
 
     protected void execute(String... args) {
-        ExecutionResult result = executor.runCommand(args);
+        ExecutionResult result = CLIExecutor.runCommand(args);
         assertThat(result.getOutput()).isEmpty();
         assertThat(result.getError()).isEmpty();
         assertThat(result.getRetval()).isZero();
     }
 
     protected <T> T executeAndDeserialize(Class<T> clazz, String... args) throws JsonProcessingException {
-        ExecutionResult result = executor.runCommand(args);
+        ExecutionResult result = CLIExecutor.runCommand(args);
         log.debug("stderr:{}{}", System.lineSeparator(), result.getError());
         assertThat(result.getRetval()).isZero();
         return result.fromYAML(clazz);
     }
 
     protected <T> T executeAndDeserializeJSON(Class<T> clazz, String... args) throws JsonProcessingException {
-        ExecutionResult result = executor.runCommand(args);
+        ExecutionResult result = CLIExecutor.runCommand(args);
         log.debug("stderr:{}{}", System.lineSeparator(), result.getError());
         assertThat(result.getRetval()).isZero();
         return result.fromYAML(clazz);
     }
 
     protected ExecutionResult executeAndGetResult(String... args) {
-        return executor.runCommand(args);
+        return CLIExecutor.runCommand(args);
     }
 
 }
