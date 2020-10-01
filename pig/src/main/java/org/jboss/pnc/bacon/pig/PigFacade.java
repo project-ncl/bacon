@@ -244,25 +244,20 @@ public final class PigFacade {
                     "Pushing the following builds to brew: {}",
                     buildsToPush.stream().map(PncBuild::getId).collect(Collectors.toList()));
         }
-        try (AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration())) {
-            for (PncBuild build : buildsToPush) {
-                BuildPushParameters request = BuildPushParameters.builder()
-                        .tagPrefix(tagPrefix)
-                        .reimport(reimport)
-                        .build();
+        for (PncBuild build : buildsToPush) {
+            BuildPushParameters request = BuildPushParameters.builder().tagPrefix(tagPrefix).reimport(reimport).build();
 
-                // TODO: customize the timeout
-                try {
-                    BuildPushResult pushResult = pushingClient
-                            .executeBrewPush(build.getId(), request, 15L, TimeUnit.MINUTES);
-                    if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
-                        throw new RuntimeException(
-                                "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
-                    }
-                    log.info("{} pushed to brew", build.getId());
-                } catch (RemoteResourceException e) {
-                    throw new RuntimeException("Failed to push build " + build.getId() + " to brew", e);
+            // TODO: customize the timeout
+            try (AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration())) {
+                BuildPushResult pushResult = pushingClient
+                        .executeBrewPush(build.getId(), request, 15L, TimeUnit.MINUTES);
+                if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
+                    throw new RuntimeException(
+                            "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
                 }
+                log.info("{} pushed to brew", build.getId());
+            } catch (RemoteResourceException e) {
+                throw new RuntimeException("Failed to push build " + build.getId() + " to brew", e);
             }
         }
     }
