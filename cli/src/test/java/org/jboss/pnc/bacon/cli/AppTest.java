@@ -10,7 +10,6 @@ import java.io.File;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemProperties;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErr;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
-import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOutNormalized;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -179,7 +178,7 @@ class AppTest {
 
         restoreSystemProperties(() -> {
             System.setProperty("picocli.ansi", "false");
-            String text = tapSystemOutNormalized(
+            String text = tapSystemOut(
                     () -> assertEquals(
                             0,
                             app.run(
@@ -193,20 +192,20 @@ class AppTest {
                                             "activate",
                                             "-h" })));
 
-            assertEquals(
-                    "Usage: bacon pnc admin maintenance-mode activate [-hov]\n"
-                            + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>\n"
-                            + "This will disable any new builds from being accepted\n"
-                            + "      <reason>              Reason\n"
-                            + "  -h, --help                display this help message\n"
-                            + "  -o, --jsonOutput          use json for output (default to yaml)\n"
-                            + "  -p, --configPath=<configurationFileLocation>\n"
-                            + "                            Path to PNC configuration folder\n"
-                            + "      --profile=<profile>   PNC Configuration profile\n"
-                            + "  -v, --verbose             Verbose output\n" + "\n" + "Example:\n"
-                            + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for\n"
-                            + "upcoming migration\"\n",
-                    text);
+            String expected = String.format(
+                    "Usage: bacon pnc admin maintenance-mode activate [-hov]%n"
+                            + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>%n"
+                            + "This will disable any new builds from being accepted%n"
+                            + "      <reason>              Reason%n"
+                            + "  -h, --help                display this help message%n"
+                            + "  -o, --jsonOutput          use json for output (default to yaml)%n"
+                            + "  -p, --configPath=<configurationFileLocation>%n"
+                            + "                            Path to PNC configuration folder%n"
+                            + "      --profile=<profile>   PNC Configuration profile%n"
+                            + "  -v, --verbose             Verbose output%n" + "%n" + "Example:%n"
+                            + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for%n"
+                            + "upcoming migration\"%n");
+            assertThat(text).contains(expected);
         });
 
         String text2 = tapSystemErr(

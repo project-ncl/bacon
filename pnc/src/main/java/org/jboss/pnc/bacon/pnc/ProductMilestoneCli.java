@@ -97,8 +97,8 @@ public class ProductMilestoneCli {
     @Command(
             name = "create",
             description = "Create product milestone",
-            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-milestone create \\\n"
-                    + "\t--product-version-id 3 \\\n" + "\t--issue-tracker-url http://example.com \\\n"
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-milestone create \\%n"
+                    + "\t--product-version-id 3 \\%n" + "\t--issue-tracker-url http://example.com \\%n"
                     + "\t--end-date 2030-12-26 1.2.0.CR1")
     public static class Create extends JSONCommandHandler implements Callable<Integer> {
 
