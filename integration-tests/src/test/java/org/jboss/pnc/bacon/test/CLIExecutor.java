@@ -1,6 +1,8 @@
 package org.jboss.pnc.bacon.test;
 
 import org.jboss.pnc.bacon.common.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,11 +22,18 @@ import java.util.stream.Collectors;
  *
  * @author jbrazdil
  */
-public class CLIExecutor {
+public final class CLIExecutor {
+    private static final Logger log = LoggerFactory.getLogger(CLIExecutor.class);
+
     private static final Path BACON_JAR = Paths.get("..", "cli", "target", "bacon.jar").toAbsolutePath().normalize();
+
     public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
 
-    public ExecutionResult runCommand(String... args) {
+    private CLIExecutor() {
+
+    }
+
+    public static ExecutionResult runCommand(String... args) {
         try {
             checkExecutable();
 
@@ -52,9 +61,9 @@ public class CLIExecutor {
         }
     }
 
-    private void checkExecutable() {
-        if (!Files.exists(BACON_JAR) || !Files.isReadable(BACON_JAR)) {
-            throw new IllegalStateException("Can't find bacon executable at " + BACON_JAR);
+    private static void checkExecutable() {
+        if (!Files.isReadable(BACON_JAR)) {
+            throw new IllegalStateException("Can't find or read bacon jar at " + BACON_JAR);
         }
     }
 
