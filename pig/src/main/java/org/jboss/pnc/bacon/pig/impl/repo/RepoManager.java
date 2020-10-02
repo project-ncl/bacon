@@ -444,17 +444,20 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 ArtifactWrapper artifact = artifactEntry.getValue();
                 // TODO: Remove the check, when https://projects.engineering.redhat.com/browse/NCL-6079 is done
                 if (artifact.getRepositoryType().equals(RepositoryType.MAVEN)) {
-                    file.println(artifact.getSha256() + "," + artifact.toGAV().toVersionPath());
+                    GAV gav = artifact.toGAV();
+                    String offlinerString = String
+                            .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
+                    file.println(offlinerString);
                 }
 
             }
-            List<String> extraGavs = generationData.getExternalAdditionalArtifacts()
+            List<GAV> extraGavs = generationData.getExternalAdditionalArtifacts()
                     .stream()
                     .map(GAV::fromColonSeparatedGAPV)
-                    .map(GAV::toVersionPath)
                     .collect(Collectors.toList());
-            for (String extraGav : extraGavs) {
-                file.println(extraGav);
+            for (GAV extraGav : extraGavs) {
+                String offlinerString = String.format("%s/%s", extraGav.toVersionPath(), extraGav.toFileName());
+                file.println(offlinerString);
             }
 
         } catch (Exception e) {
