@@ -22,7 +22,8 @@ public class JSONCommandHandler {
         if (option == null) {
             throw new FatalException("Unable to locate JSON parameter in root");
         }
-        log.debug("JSON command is enabled: " + option.getValue());
-        return option.getValue();
+        Boolean value = option.<Boolean> getValue();
+        log.debug("JSON command is enabled: {}", value);
+        return value;
     }
 }
