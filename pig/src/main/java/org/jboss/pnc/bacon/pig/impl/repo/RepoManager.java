@@ -410,15 +410,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
      * the attributes to a local maven repository.
      */
 
-    /**
-     * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
-     * dependencies. First, it adds the build artifacts for all the builds. Then, it executes a query to PNC, requesting
-     * the third party dependencies for each build. Finally, the method generates a file, containing version paths and
-     * checksums, where we can get it, for all build and dependency attributes. The offline manifest file in combination
-     * with the offliner tool (https://repo1.maven.org/maven2/com/redhat/red/offliner/offliner) are used to download all
-     * the attributes to a local maven repository.
-     */
-
     @Override
     public void close() {
         buildInfoCollector.close();
@@ -446,10 +437,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
-        PrintWriter file = null;
         String filename = releasePath + getGenerationData().getOfflinerManifest();
-        try {
-            file = new PrintWriter(filename);
+        try (PrintWriter file = new PrintWriter(filename)){
             for (Map.Entry<String, ArtifactWrapper> artifactEntry : artifactsToList.entrySet()) {
                 ArtifactWrapper artifact = artifactEntry.getValue();
                 // TODO: Remove the check, when https://projects.engineering.redhat.com/browse/NCL-6079 is done
@@ -472,11 +461,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         } catch (Exception e) {
             log.error("Error generating the Offline manifest", e);
-        } finally {
-            if (file != null) {
-                file.flush();
-                file.close();
-            }
         }
     }
 }
