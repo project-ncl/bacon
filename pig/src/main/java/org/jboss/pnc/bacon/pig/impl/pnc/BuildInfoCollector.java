@@ -36,6 +36,7 @@ import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,21 +53,20 @@ import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toList;
  *         Date: 6/3/17
  */
 @Slf4j
-public class BuildInfoCollector {
+public class BuildInfoCollector implements Closeable {
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
     private final GroupBuildClient groupBuildClient;
     private final GroupConfigurationClient groupConfigurationClient;
 
     public void addDependencies(PncBuild bd, String filter) {
-        List<Artifact> artifacts;
         try {
-            artifacts = toList(buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
+            List<Artifact> artifacts = toList(
+                    buildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
+            bd.addDependencyArtifacts(artifacts);
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
         }
-
-        bd.addDependencyArtifacts(artifacts);
     }
 
     public PncBuild getLatestBuild(String configId, BuildSearchType searchType) {
@@ -203,6 +203,14 @@ public class BuildInfoCollector {
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get group build info for " + groupBuild.getId(), e);
         }
+    }
+
+    @Override
+    public void close() {
+        buildClient.close();
+        buildConfigClient.close();
+        groupBuildClient.close();
+        groupConfigurationClient.close();
     }
 
     /**

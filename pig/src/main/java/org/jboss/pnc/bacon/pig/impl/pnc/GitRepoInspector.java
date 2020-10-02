@@ -51,8 +51,6 @@ public class GitRepoInspector {
     private static final Logger log = LoggerFactory.getLogger(GitRepoInspector.class);
     private static final String GIT_REMOTE_NAME = "prod";
 
-    private static final BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
-
     /**
      * Check if branch 'refSpec' is different from the branch used in the last successful build (either temporary or
      * permanent).
@@ -171,8 +169,10 @@ public class GitRepoInspector {
         log.debug("Getting latest built tag of config id {}, temporary: {}", configId, temporaryBuild);
         BuildInfoCollector.BuildSearchType searchType = temporaryBuild ? BuildInfoCollector.BuildSearchType.TEMPORARY
                 : BuildInfoCollector.BuildSearchType.PERMANENT;
-        PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, searchType);
-        return latestBuild.getScmTag();
+        try (BuildInfoCollector buildInfoCollector = new BuildInfoCollector()) {
+            PncBuild latestBuild = buildInfoCollector.getLatestBuild(configId, searchType);
+            return latestBuild.getScmTag();
+        }
     }
 
     private static URIish toAnonymous(String internalUrl) throws MalformedURLException {

@@ -72,7 +72,8 @@ class PncBuilderTest {
                     }
                 });
 
-        PncBuilder builder = new PncBuilder(groupBuildClient, groupConfigurationClient);
-        assertEquals(buildConfigurations.size(), builder.getCountOfBuildConfigsForGroupBuild(groupBuildId));
+        try (PncBuilder builder = new PncBuilder(groupBuildClient, groupConfigurationClient)) {
+            assertEquals(buildConfigurations.size(), builder.getCountOfBuildConfigsForGroupBuild(groupBuildId));
+        }
     }
 }

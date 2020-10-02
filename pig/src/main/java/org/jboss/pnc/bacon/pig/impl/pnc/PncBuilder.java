@@ -31,6 +31,7 @@ import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.util.Collection;
 
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
@@ -39,7 +40,7 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/14/17
  */
-public class PncBuilder {
+public class PncBuilder implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(PncBuilder.class);
     private final GroupBuildClient groupBuildClient;
     private final GroupConfigurationClient groupConfigClient;
@@ -173,5 +174,11 @@ public class PncBuilder {
             log.warn("Failed to get count of build configs in the group build {}", groupBuildId, e);
             return -1;
         }
+    }
+
+    @Override
+    public void close() {
+        groupBuildClient.close();
+        groupConfigClient.close();
     }
 }

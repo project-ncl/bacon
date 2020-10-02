@@ -62,9 +62,6 @@ public class PncBuild {
 
     public static final String SUCCESSFUL_STATUS = "DONE";
 
-    @JsonIgnore
-    private static final BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration());
-
     private String internalScmUrl;
     private String scmRevision;
     private String scmTag;
@@ -155,7 +152,7 @@ public class PncBuild {
             return buildLog;
         }
 
-        try {
+        try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration())) {
             Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(id);
 
             if (maybeBuildLogs.isPresent()) {
@@ -173,14 +170,13 @@ public class PncBuild {
         }
     }
 
-    private List<String> readLog(InputStream inputStream) throws IOException {
-
-        List<String> log = new ArrayList<>();
+    private static List<String> readLog(InputStream inputStream) throws IOException {
+        List<String> lines = new ArrayList<>();
 
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            reader.lines().forEach(log::add);
-            return log;
+            reader.lines().forEach(lines::add);
+            return lines;
         }
     }
 
