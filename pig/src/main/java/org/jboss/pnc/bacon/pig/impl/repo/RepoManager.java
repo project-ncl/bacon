@@ -36,6 +36,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +55,7 @@ import java.util.stream.Collectors;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/23/17
  */
-public class RepoManager extends DeliverableManager<RepoGenerationData, RepositoryData> {
+public class RepoManager extends DeliverableManager<RepoGenerationData, RepositoryData> implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(RepoManager.class);
 
     private final BuildInfoCollector buildInfoCollector;
@@ -186,21 +187,21 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return repackage(sourceDir);
     }
 
-    private RepositoryData milestone() {
+    private static RepositoryData milestone() {
         log.info("Generating maven repo for milestone [{}]", PigContext.get().getFullVersion());
         // TODO
         throw new FatalException("Not yet implemented");
     }
 
-    private boolean areSourcesMissing(Set<GAV> list, GAV gav) {
+    private static boolean areSourcesMissing(Set<GAV> list, GAV gav) {
         return list.stream().noneMatch(a -> a.equals(gav) && "sources".equals(a.getClassifier()));
     }
 
-    private boolean isPomMissing(Set<GAV> list, GAV gav) {
+    private static boolean isPomMissing(Set<GAV> list, GAV gav) {
         return list.stream().noneMatch(a -> a.equals(gav) && "pom".equals(a.getPackaging()));
     }
 
-    private boolean areJavadocsMissing(Set<GAV> list, GAV gav) {
+    private static boolean areJavadocsMissing(Set<GAV> list, GAV gav) {
         return list.stream().noneMatch(a -> a.equals(gav) && "javadoc".equals(a.getClassifier()));
     }
 
@@ -214,6 +215,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return false;
     }
 
+    @Override
     protected RepositoryData downloadAndRepackage() {
         log.info("downloading and repackaging maven repository");
         File sourceTopLevelDirectory = download();
@@ -323,7 +325,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return repackage(new File(repoParentDir, "maven-repository"));
     }
 
-    private Predicate<GAV> predicate(Map<String, String> stage) {
+    private static Predicate<GAV> predicate(Map<String, String> stage) {
         String matching = stage.getOrDefault("matching", ".*");
         String notMatching = stage.getOrDefault("not-matching", "^$");
         return gav -> {
@@ -332,15 +334,17 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         };
     }
 
+    @Override
     protected Path getTargetZipPath() {
         return Paths.get(releasePath, deliverables.getRepositoryZipName());
     }
 
+    @Override
     protected String getTargetTopLevelDirectoryName() {
         return pigConfiguration.getTopLevelDirectoryPrefix() + "maven-repository";
     }
 
-    private RepositoryData result(File targetTopLevelDirectory, Path targetZipPath) {
+    private static RepositoryData result(File targetTopLevelDirectory, Path targetZipPath) {
         RepositoryData result = new RepositoryData();
         File contentsDirectory = new File(targetTopLevelDirectory, "maven-repository");
         result.setFiles(RepoDescriptor.listFiles(contentsDirectory));
@@ -350,6 +354,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return result;
     }
 
+    @Override
     protected void repackage(File contentsDirectory, File targetTopLevelDirectory) {
         targetRepoContentsDir = new File(targetTopLevelDirectory, RepoDescriptor.MAVEN_REPOSITORY);
         FileUtils.copy(contentsDirectory, targetRepoContentsDir);
@@ -381,5 +386,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     PigContext.get().isTempBuild(),
                     strictLicenseCheck);
         }
+    }
+
+    @Override
+    public void close() {
+        buildInfoCollector.close();
     }
 }

@@ -30,6 +30,7 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -41,7 +42,7 @@ import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/14/17
  */
-public class PncConfigurator {
+public class PncConfigurator implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(PncConfigurator.class);
 
@@ -99,5 +100,11 @@ public class PncConfigurator {
         } catch (ClientException e) {
             throw new RuntimeException("Error creating milestone " + milestoneName, e);
         }
+    }
+
+    @Override
+    public void close() {
+        milestoneClient.close();
+        versionClient.close();
     }
 }

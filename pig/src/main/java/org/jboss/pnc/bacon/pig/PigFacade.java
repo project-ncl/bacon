@@ -80,13 +80,15 @@ public final class PigFacade {
     }
 
     public static ImportResult configure(boolean skipBranchCheck, boolean temporaryBuild) {
-        PncEntitiesImporter pncImporter = new PncEntitiesImporter();
-        return pncImporter.performImport(skipBranchCheck, temporaryBuild);
+        try (PncEntitiesImporter pncImporter = new PncEntitiesImporter()) {
+            return pncImporter.performImport(skipBranchCheck, temporaryBuild);
+        }
     }
 
     public static ImportResult readPncEntities() {
-        PncEntitiesImporter pncImporter = new PncEntitiesImporter();
-        return pncImporter.readCurrentPncEntities();
+        try (PncEntitiesImporter pncImporter = new PncEntitiesImporter()) {
+            return pncImporter.readCurrentPncEntities();
+        }
     }
 
     public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode, boolean wait) {
@@ -99,13 +101,17 @@ public final class PigFacade {
             log.info("Temporary build");
         }
 
-        GroupBuild groupBuild = new PncBuilder()
-                .build(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode, wait);
-        if (wait) {
-            return new BuildInfoCollector().getBuildsFromGroupBuild(groupBuild);
+        try (PncBuilder pncBuilder = new PncBuilder()) {
+            GroupBuild groupBuild = pncBuilder
+                    .build(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode, wait);
+            if (wait) {
+                try (BuildInfoCollector buildInfoCollector = new BuildInfoCollector()) {
+                    return buildInfoCollector.getBuildsFromGroupBuild(groupBuild);
+                }
+            }
+            log.info("Not waiting for build to finish.");
+            return null;
         }
-        log.info("Not waiting for build to finish.");
-        return null;
     }
 
     public static GroupBuildInfo run(
@@ -370,25 +376,26 @@ public final class PigFacade {
             boolean strictLicenseCheck) {
         abortIfBuildDataAbsentFromContext();
         PigContext context = context();
-        RepoManager repoManager = new RepoManager(
+        try (RepoManager repoManager = new RepoManager(
                 context.getPigConfiguration(),
                 context.getReleasePath(),
                 context.getDeliverables(),
                 context.getBuilds(),
                 configurationDirectory,
                 removeGeneratedM2Dups,
-                strictLicenseCheck);
+                strictLicenseCheck)) {
 
-        RepositoryData repositoryData = repoManager.prepare();
+            RepositoryData repositoryData = repoManager.prepare();
 
-        if (repositoryData != null) {
-            File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
+            if (repositoryData != null) {
+                File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
 
-            context.setChecksums(BuildFinderUtils.findChecksums(repoZip));
-            context.storeContext();
+                context.setChecksums(BuildFinderUtils.findChecksums(repoZip));
+                context.storeContext();
+            }
+
+            return repositoryData;
         }
-
-        return repositoryData;
     }
 
     /**
@@ -401,10 +408,10 @@ public final class PigFacade {
      * @return GroupBuildInfo that contains the group build, and the map of 'build config name' to PncBuild
      */
     private static GroupBuildInfo getBuilds(ImportResult importResult, boolean tempBuild) {
-
-        BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
-        return buildInfoCollector
-                .getBuildsFromLatestGroupConfiguration(importResult.getBuildGroup().getId(), tempBuild);
+        try (BuildInfoCollector buildInfoCollector = new BuildInfoCollector()) {
+            return buildInfoCollector
+                    .getBuildsFromLatestGroupConfiguration(importResult.getBuildGroup().getId(), tempBuild);
+        }
     }
 
     public static void generateLicenses(boolean strict) {

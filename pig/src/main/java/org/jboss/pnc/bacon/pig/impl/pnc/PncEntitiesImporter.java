@@ -52,6 +52,7 @@ import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 11/28/17
  */
-public class PncEntitiesImporter {
+public class PncEntitiesImporter implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(PncEntitiesImporter.class);
 
     private final BuildConfigurationClient buildConfigClient;
@@ -87,7 +88,7 @@ public class PncEntitiesImporter {
     private List<BuildConfigData> configs;
     private final PigConfiguration pigConfiguration = PigContext.get().getPigConfiguration();
 
-    private final PncConfigurator pncConfigurator = new PncConfigurator();
+    private final PncConfigurator pncConfigurator;
 
     public PncEntitiesImporter() {
         buildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration());
@@ -96,6 +97,7 @@ public class PncEntitiesImporter {
         projectClient = new ProjectClient(PncClientHelper.getPncConfiguration());
         repoClient = new AdvancedSCMRepositoryClient(PncClientHelper.getPncConfiguration());
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+        pncConfigurator = new PncConfigurator();
     }
 
     public ImportResult performImport(boolean skipBranchCheck, boolean temporaryBuild) {
@@ -370,7 +372,7 @@ public class PncEntitiesImporter {
                     .createNewAndWait(createRepoRequest);
 
             log.info("Waiting for repository creation of '{}'", scmUrl);
-            SleepUtils.waitFor(() -> response.isDone(), 10, true);
+            SleepUtils.waitFor(response::isDone, 10, true);
             AdvancedSCMRepositoryClient.SCMCreationResult result = response.join();
             log.info("{}", result.toString());
 
@@ -398,7 +400,7 @@ public class PncEntitiesImporter {
     }
 
     private Project getOrGenerateProject(String projectName) {
-        RemoteCollection<Project> query = null;
+        RemoteCollection<Project> query;
         try {
             query = projectClient.getAll(empty(), findByNameQuery(projectName));
         } catch (RemoteResourceException e) {
@@ -600,5 +602,16 @@ public class PncEntitiesImporter {
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to query for version", e);
         }
+    }
+
+    @Override
+    public void close() {
+        buildConfigClient.close();
+        groupConfigClient.close();
+        productClient.close();
+        projectClient.close();
+        repoClient.close();
+        versionClient.close();
+        pncConfigurator.close();
     }
 }
