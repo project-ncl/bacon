@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.auth.model.CacheFile;
 import org.jboss.pnc.bacon.auth.model.Credential;
@@ -31,6 +32,7 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         Unirest.setObjectMapper(new ObjectMapper() {
             private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
+            @Override
             public <T> T readValue(String value, Class<T> valueType) {
                 try {
                     return jacksonObjectMapper.readValue(value, valueType);
@@ -39,6 +41,7 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
                 }
             }
 
+            @Override
             public String writeValue(Object value) {
                 try {
                     return jacksonObjectMapper.writeValueAsString(value);
@@ -60,11 +63,12 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
             Credential cred = cachedCredential.get();
             if (cred.isValid()) {
                 log.debug("Using cached credential details");
-                Credential refreshed = refreshCredentialIfNeededAndReturnNewCredential(
-                        keycloakBaseUrl,
-                        realm,
-                        username,
-                        cred);
+                Credential refreshed = null;
+                try {
+                    refreshed = refreshCredentialIfNeededAndReturnNewCredential(keycloakBaseUrl, realm, username, cred);
+                } catch (UnirestException e) {
+                    throw new KeycloakClientException(e);
+                }
 
                 if (!refreshed.needsNewAccessToken()) {
                     return refreshed;
@@ -94,7 +98,6 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         String keycloakEndpoint = keycloakEndpoint(keycloakBaseUrl, realm);
 
         try {
-
             log.debug("Getting token via username/password");
 
             HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint)
@@ -120,7 +123,6 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
 
             CacheFile.writeCredentialToCacheFile(keycloakBaseUrl, realm, username, credential);
             return credential;
-
         } catch (Exception e) {
             throw new KeycloakClientException(e);
         }
@@ -163,30 +165,23 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         }
     }
 
-    private Credential refreshToken(Credential credential) {
+    private Credential refreshToken(Credential credential) throws UnirestException {
+        String keycloakEndpoint = keycloakEndpoint(credential.getKeycloakBaseUrl(), credential.getRealm());
+        HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint)
+                .field("grant_type", "refresh_token")
+                .field("client_id", credential.getClient())
+                .field("refresh_token", credential.getRefreshToken())
+                .asObject(KeycloakResponse.class);
 
-        try {
-            String keycloakEndpoint = keycloakEndpoint(credential.getKeycloakBaseUrl(), credential.getRealm());
-            HttpResponse<KeycloakResponse> postResponse = Unirest.post(keycloakEndpoint)
-                    .field("grant_type", "refresh_token")
-                    .field("client_id", credential.getClient())
-                    .field("refresh_token", credential.getRefreshToken())
-                    .asObject(KeycloakResponse.class);
+        KeycloakResponse response = postResponse.getBody();
+        Instant now = Instant.now();
 
-            KeycloakResponse response = postResponse.getBody();
-            Instant now = Instant.now();
-
-            return credential.toBuilder()
-                    .accessToken(response.getAccessToken())
-                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
-                    .refreshToken(response.getRefreshToken())
-                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
-                    .build();
-
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
+        return credential.toBuilder()
+                .accessToken(response.getAccessToken())
+                .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
+                .refreshToken(response.getRefreshToken())
+                .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
+                .build();
     }
 
     private static String askForPassword() {
@@ -204,7 +199,7 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
             String keycloakUrl,
             String realm,
             String username,
-            Credential cred) {
+            Credential cred) throws UnirestException {
 
         if (cred.needsNewAccessToken()) {
             // if needs a refresh
