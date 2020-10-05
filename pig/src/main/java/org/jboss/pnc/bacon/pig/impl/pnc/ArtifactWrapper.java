@@ -46,7 +46,7 @@ public class ArtifactWrapper {
     private String md5;
     private String sha1;
     private String sha256;
-    // TODO: Remove when https://projects.engineering.redhat.com/browse/NCL-6079 is done.
+    // TODO: Remove when NCL-6079 is done.
     private RepositoryType repositoryType;
 
     public ArtifactWrapper(Artifact artifact) {
