@@ -39,7 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -101,6 +104,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             case BUILD_CONFIGS:
                 return buildConfigs();
             case OFFLINER_ONLY:
+                // TODO move code to an add-on. Check BXMSPROD-1026
                 log.info("Generating only the offline manifest");
                 generateOfflinerManifest();
                 return null;
@@ -415,17 +419,16 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         buildInfoCollector.close();
     }
 
+    // TODO move code to an add-on. Check BXMSPROD-1026
     private void generateOfflinerManifest() {
         log.info("Will generate the Offline manifest");
-        RepositoryData result = new RepositoryData();
         List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
         for (PncBuild build : builds.values()) {
             artifactsToListRaw.addAll(build.getBuiltArtifacts());
-            // TODO: Add filter, basing on the targetRepository.repositoryType, when
-            // https://projects.engineering.redhat.com/browse/NCL-6079 is done
+            // TODO: Add filter, basing on the targetRepository.repositoryType, when NCL-6079 is done
             buildInfoCollector.addDependencies(build, "");
             artifactsToListRaw.addAll(build.getDependencyArtifacts());
-            log.debug("Dependencies for build {}: {}" + build.getId(), build.getDependencyArtifacts().size());
+            log.debug("Dependencies for build {}: {}", build.getId(), build.getDependencyArtifacts().size());
         }
         log.debug("Number of collected artifacts for the Offline manifest: {}", artifactsToListRaw.size());
 
@@ -437,12 +440,12 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
-        String filename = releasePath + getGenerationData().getOfflinerManifest();
-        try (PrintWriter file = new PrintWriter(filename)){
+        String filename = releasePath + getGenerationData().getOfflineManifestFilename();
+        try (PrintWriter file = new PrintWriter(StandardCharsets.UTF_8.name(), filename)) {
             for (Map.Entry<String, ArtifactWrapper> artifactEntry : artifactsToList.entrySet()) {
                 ArtifactWrapper artifact = artifactEntry.getValue();
-                // TODO: Remove the check, when https://projects.engineering.redhat.com/browse/NCL-6079 is done
-                if (artifact.getRepositoryType().equals(RepositoryType.MAVEN)) {
+                // TODO: Remove the check, when NCL-6079 is done
+                if (artifact.getRepositoryType() == RepositoryType.MAVEN) {
                     GAV gav = artifact.toGAV();
                     String offlinerString = String
                             .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
@@ -459,8 +462,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 file.println(offlinerString);
             }
 
-        } catch (Exception e) {
-            log.error("Error generating the Offline manifest", e);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            log.error("Error generating the Offline manifest", e.getMessage());
         }
     }
 }
