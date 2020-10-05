@@ -405,6 +405,11 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
+    @Override
+    public void close() {
+        buildInfoCollector.close();
+    }
+
     /**
      * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
      * dependencies. First, it adds the build artifacts for all the builds. Then, it executes a query to PNC, requesting
@@ -413,15 +418,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
      * with the offliner tool (https://repo1.maven.org/maven2/com/redhat/red/offliner/offliner) are used to download all
      * the attributes to a local maven repository.
      */
-
-    @Override
-    public void close() {
-        buildInfoCollector.close();
-    }
-
     // TODO move code to an add-on. Check BXMSPROD-1026
     private void generateOfflinerManifest() {
-        log.info("Will generate the Offline manifest");
+        log.info("Will generate the offline manifest");
         List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
         for (PncBuild build : builds.values()) {
             artifactsToListRaw.addAll(build.getBuiltArtifacts());
@@ -463,7 +462,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
 
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            log.error("Error generating the Offline manifest", e.getMessage());
+            log.error("Error generating the Offline manifest", e);
         }
     }
 }
