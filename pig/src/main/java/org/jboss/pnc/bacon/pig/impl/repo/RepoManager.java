@@ -177,6 +177,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
     private RepositoryData buildGroup() {
         log.info("Generating maven repo for build group [{}]", pigConfiguration.getGroup());
+        if (builds.isEmpty()) {
+            throw new RuntimeException("There are no builds captured for the build group. Aborting!");
+        }
         List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
         for (PncBuild build : builds.values()) {
             getRedhatArtifacts(artifactsToPack, build);
@@ -192,11 +195,16 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private RepositoryData buildConfigs() {
         log.info("Generating maven repo for named build configs");
         List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
+
+        if (generationData.getSourceBuilds().isEmpty()) {
+            throw new RuntimeException("There are no build configs defined for maven repository generation. Aborting!");
+        }
         for (String buildConfigName : generationData.getSourceBuilds()) {
             PncBuild build = getBuild(buildConfigName);
             getRedhatArtifacts(artifactsToPack, build);
         }
         File sourceDir = createMavenGenerationDir();
+
         filterAndDownload(artifactsToPack, sourceDir);
         if (generationData.isIncludeOffliner()) {
             generateOfflinerManifest();
