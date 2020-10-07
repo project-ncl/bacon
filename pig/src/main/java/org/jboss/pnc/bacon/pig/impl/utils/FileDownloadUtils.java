@@ -71,6 +71,10 @@ public class FileDownloadUtils {
                         e);
             } else {
                 log.warn("Failed to download {}. Will reattempt at most {} times", downloadUrl, attemptsLeft);
+                // sleep with exponential backoff up to a maximum of 60 seconds
+                int sleepTimeInSeconds = (int) Math.ceil(Math.pow(60, (double) 1 / attemptsLeft));
+                log.debug("Sleeping for : {}", sleepTimeInSeconds);
+                SleepUtils.sleep(sleepTimeInSeconds);
                 doDownload(downloadUrl, targetPath, attemptsLeft);
             }
         }
