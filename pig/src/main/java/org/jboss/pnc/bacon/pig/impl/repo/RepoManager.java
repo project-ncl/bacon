@@ -440,7 +440,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
         String filename = releasePath + getGenerationData().getOfflineManifestFilename();
-        try (PrintWriter file = new PrintWriter(StandardCharsets.UTF_8.name(), filename)) {
+        try (PrintWriter file = new PrintWriter(filename, StandardCharsets.UTF_8.name())) {
             for (Map.Entry<String, ArtifactWrapper> artifactEntry : artifactsToList.entrySet()) {
                 ArtifactWrapper artifact = artifactEntry.getValue();
                 // TODO: Remove the check, when NCL-6079 is done
