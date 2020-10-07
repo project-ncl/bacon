@@ -44,7 +44,7 @@ public class FileDownloadUtils {
     private static final int READ_TIMEOUT = 900000;
 
     private static final int DEFAULT_ATTEMPTS = 1;
-    private static final int MAX_ATTEMPTS = 5;
+    private static final int MAX_ATTEMPTS = 20;
 
     // TODO move it out from here and add it as a method parameter
     private static int attempts = DEFAULT_ATTEMPTS;
