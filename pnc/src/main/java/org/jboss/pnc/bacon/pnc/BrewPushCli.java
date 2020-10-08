@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
+import org.jboss.pnc.client.RemoteResourceNotFoundException;
 import org.jboss.pnc.dto.BuildPushResult;
 import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
@@ -31,6 +32,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -150,6 +152,10 @@ public class BrewPushCli {
                 BuildPushResult bpr = client.getPushResult(id);
                 ObjectHelper.print(getJsonOutput(), bpr);
                 return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+            } catch (RemoteResourceNotFoundException e) {
+                // NCL-6110: print status that there are no brew push records
+                ObjectHelper.print(getJsonOutput(), Collections.singletonMap("status", "NO_BREW-PUSH_RECORDS"));
+                throw e;
             }
         }
     }
