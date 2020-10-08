@@ -109,13 +109,6 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
                                 </filter>
-                                <filter>
-                                    <artifact>org.commonjava.maven.ext:pom-manipulation-cli</artifact>
-                                    <excludes>
-                                        <!--brought in also by KBF, KBF needs a newer version-->
-                                        <exclude>org/commonjava/util/jhttpc/**</exclude>
-                                    </excludes>
-                                </filter>
                             </filters>
                         </configuration>
                     </execution>
