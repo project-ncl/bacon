@@ -31,6 +31,7 @@ The Bash script also supports update:
 'bacon update' just re-downloads this script from Github to download the
 relevant bacon jar and the new bacon Bash script
 """
+import argparse
 import os
 import platform
 import sys
@@ -55,29 +56,7 @@ set -e
 function check_if_java_installed {{
     command -v java > /dev/null 2>&1 || {{ echo >&2 "java is required to run this command... Aborting!"; exit 1; }}
 }}
-
-if [ "$1" == "update" ]; then
-    if [ "$2" == "snapshot" ]; then
-        echo "Updating to latest snapshot version..."
-    elif [ -z "$2" ]; then
-        echo "Updating to latest released version..."
-    else
-        echo "Updating to version $2"
-    fi
-
-    # Script runs the bacon_install.py to update itself
-    curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - $2
-else
-    check_if_java_installed
-
-    if [ "$OSTYPE" = "cygwin" ]; then
-        java -jar `cygpath -w {0}/bacon.jar` {1} "$@"
-    else
-        java -jar {0}/bacon.jar {1} "$@"
-    fi
-fi
-
-if [ -z "$1" ]; then
+function usage {{
     echo "To update to the latest released version of bacon/pnc/da/pig, run:"
     echo ""
     echo "    bacon update"
@@ -90,6 +69,28 @@ if [ -z "$1" ]; then
     echo ""
     echo "    bacon update snapshot"
     echo ""
+    echo "All update commands support an optional '--location <directory>' argument"
+}}
+if [ "$1" == "update" ]; then
+    # Script runs the bacon_install.py to update itself
+    shift
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        usage
+    else
+        curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 - "$@"
+    fi
+else
+    check_if_java_installed
+
+    if [ "$OSTYPE" = "cygwin" ]; then
+        java -jar `cygpath -w {0}/bacon.jar` {1} "$@"
+    else
+        java -jar {0}/bacon.jar {1} "$@"
+    fi
+fi
+
+if [ -z "$1" ]; then
+    usage
 fi
 """.strip()
 
@@ -156,6 +157,7 @@ def download_link(link, folder, filename, retries=7):
 def create_folder_if_absent(folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
+
 
 class BaconInstall:
     """
@@ -276,27 +278,33 @@ def main():
     """
     Main entry point to the program
     """
-    version = None
     maven_link = MAVEN_CENTRAL_LINK
 
-    if len(sys.argv) >= 2:
-        version = sys.argv[1]
+    parser = argparse.ArgumentParser("Bacon installation tool")
+    parser.add_argument('--location', required=False, help="Specify a directory root to install to")
+    parser.add_argument("version", help="An optional version (or 'snapshot')", default=None, nargs='?')
+    args = parser.parse_args()
 
-        if sys.argv[1] == 'snapshot':
-            maven_link = MAVEN_SNAPSHOT_LINK
+    if args.version == 'snapshot':
+        maven_link = MAVEN_SNAPSHOT_LINK
+    if args.location:
+        bacon_jar_location = args.location + "/.pnc-bacon/bin"
+        shell_location = args.location + "/bin"
+    else:
+        bacon_jar_location = USER_BACON_JAR_FOLDER_LOCATION
+        shell_location = USER_SHELL_FOLDER_LOCATION
+        if is_root():
+            bacon_jar_location = ROOT_BACON_JAR_FOLDER_LOCATION
+            shell_location = ROOT_SHELL_FOLDER_LOCATION
 
-    bacon_jar_location = USER_BACON_JAR_FOLDER_LOCATION
-    shell_location = USER_SHELL_FOLDER_LOCATION
-
-    if is_root():
-        bacon_jar_location = ROOT_BACON_JAR_FOLDER_LOCATION
-        shell_location = ROOT_SHELL_FOLDER_LOCATION
+    print("Using version '{}' with maven location of {} and installing to {}".format(
+        args.version or 'latest', maven_link, os.path.dirname(bacon_jar_location)))
 
     bacon_install = BaconInstall(
-            bacon_jar_location,
-            shell_location,
-            maven_link,
-            version=version)
+        bacon_jar_location,
+        shell_location,
+        maven_link,
+        version=args.version)
     try:
         bacon_install.run()
     except Exception as e:
