@@ -103,11 +103,11 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
-            case OFFLINER_ONLY:
-                // TODO move code to an add-on. Check BXMSPROD-1026
-                log.info("Generating only the offline manifest");
-                generateOfflinerManifest();
-                return null;
+            // case OFFLINER_ONLY:
+            // // TODO move code to an add-on. Check BXMSPROD-1026
+            // log.info("Generating only the offline manifest");
+            // generateOfflinerManifest();
+            // return null;
             case IGNORE:
                 log.info(
                         "Ignoring repository zip generation because the config strategy is set to: {}",
