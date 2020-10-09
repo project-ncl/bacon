@@ -200,7 +200,7 @@ class BaconInstall:
         Read the maven-metadata.xml of bacon and download the latest version
         """
 
-        if self.version:
+        if self.version and "latest" != self.version:
             if self.__is_snapshot():
                 snapshot_version = self.__get_latest_snapshot_version()
                 url = self.maven_url + \
