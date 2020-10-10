@@ -198,7 +198,8 @@ public class App {
                 throw new FatalException("Unable to construct terminal console", e);
             }
         } else {
-            return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
+            return commandLine.setExecutionStrategy(parseResult -> executionStrategy(commandLine, parseResult))
+                    .execute(args);
         }
     }
 
@@ -217,7 +218,10 @@ public class App {
         log.debug("Config file set from {} with profile {} to {}", source, profile, Config.getConfigFilePath());
     }
 
-    private int executionStrategy(CommandLine.ParseResult parseResult) {
+    private int executionStrategy(CommandLine commandLine, CommandLine.ParseResult parseResult) {
+        if (!versionInfoRequested) { // Don't print version information if we are outputting version explicitly
+            commandLine.printVersionHelp(System.err);
+        }
         init(); // custom initialization to be done before executing any command or subcommand
         return new CommandLine.RunLast().execute(parseResult); // default execution strategy
     }

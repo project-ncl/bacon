@@ -12,6 +12,6 @@ public class VersionProvider implements CommandLine.IVersionProvider {
      */
     @Override
     public String[] getVersion() throws Exception {
-        return new String[] { ManifestUtils.getManifestInformation(VersionProvider.class) };
+        return new String[] { "Bacon version " + ManifestUtils.getManifestInformation(VersionProvider.class) };
     }
 }
