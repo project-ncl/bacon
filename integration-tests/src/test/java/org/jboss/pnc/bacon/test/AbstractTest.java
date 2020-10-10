@@ -66,7 +66,7 @@ public class AbstractTest {
     protected void execute(String... args) {
         ExecutionResult result = executor.runCommand(args);
         assertThat(result.getOutput()).isEmpty();
-        assertThat(result.getError()).isEmpty();
+        assertThat(result.getError().replaceAll("Bacon version.*\\)[\\n]*", "")).isEmpty();
         assertThat(result.getRetval()).isZero();
     }
 
