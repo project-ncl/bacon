@@ -192,13 +192,6 @@ public class BuildCli {
                         .getAll();
             }
         }
-
-        @Override
-        public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
-            try (BuildClient client = CREATOR.newClient()) {
-                return client.getAll(null, null, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
-            }
-        }
     }
 
     @Command(
