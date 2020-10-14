@@ -1,0 +1,5 @@
+Community dependencies;;Productized counterpart;Other productized versions;Additional info
+com.google.code.findbugs:jsr305:3.0.2;REVERSION_POSSIBLE;null;2.0.1
+io.netty:netty-transport-native-unix-common:4.1.49.Final;MATCH_FOUND;4.1.49.Final;4.1.49.Final
+com.google.api.grpc:proto-google-common-protos:1.17.0;NO_MATCH;null;None
+com.google.j2objc:j2objc-annotations:1.1;MATCH_FOUND;1.1.0;1.1.0,0.9.8

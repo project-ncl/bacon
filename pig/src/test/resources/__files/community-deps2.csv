@@ -1,0 +1,6 @@
+Community dependencies;;Productized counterpart;Other productized versions;Additional info
+com.google.code.findbugs:jsr305:3.0.2; REVERSION_POSSIBLE; null; 2.0.1
+org.codehaus.mojo:animal-sniffer-annotations:1.18; REVERSION_POSSIBLE; null; 1.17.0,1.14.0
+com.google.api.grpc:proto-google-common-protos:1.17.0; NO_MATCH; null; None
+com.google.j2objc:j2objc-annotations:1.1; MATCH_FOUND; 1.1.0; 1.1.0,0.9.8
+com.google.android:annotations:4.1.1.4; NO_MATCH; null; None
