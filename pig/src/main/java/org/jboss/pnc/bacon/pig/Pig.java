@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
@@ -137,8 +138,7 @@ public class Pig {
             Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
             PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl);
             PigContext.get().setTempBuild(tempBuild);
-            // ObjectHelper.print(getJsonOutput(), doExecute());
-            doExecute();
+            ObjectHelper.print(getJsonOutput(), doExecute());
             return 0;
         }
 

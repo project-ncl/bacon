@@ -15,7 +15,6 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -56,7 +55,6 @@ public class OfflineManifestGenerator extends AddOn {
         artifactsToListRaw.removeIf(artifact -> {
             for (String exclusion : exclusions) {
                 if (Pattern.matches(exclusion, artifact.getGapv())) {
-                    log.info("Excluded " + artifact);
                     return true;
                 }
             }
@@ -64,15 +62,17 @@ public class OfflineManifestGenerator extends AddOn {
         });
 
         log.debug("Number of collected artifacts after exclusion: {}", artifactsToListRaw.size());
-        Map<String, ArtifactWrapper> artifactsToList = new HashMap<>();
-        for (ArtifactWrapper artifact : artifactsToListRaw) {
-            artifactsToList.put(artifact.getGapv(), artifact);
-        }
+        // Map<String, ArtifactWrapper> artifactsToList = new HashMap<>();
+        // for (ArtifactWrapper artifact : artifactsToListRaw) {
+        // artifactsToList.put(artifact.getGapv(), artifact);
+        // }
+
+        List<ArtifactWrapper> artifactsToList = artifactsToListRaw.stream().distinct().collect(Collectors.toList());
+
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
         try (PrintWriter file = new PrintWriter(releasePath + "offliner.txt", StandardCharsets.UTF_8.name())) {
-            for (Map.Entry<String, ArtifactWrapper> artifactEntry : artifactsToList.entrySet()) {
-                ArtifactWrapper artifact = artifactEntry.getValue();
+            for (ArtifactWrapper artifact : artifactsToList) {
                 // TODO: Remove the check, when NCL-6079 is done
                 if (artifact.getRepositoryType() == RepositoryType.MAVEN) {
                     GAV gav = artifact.toGAV();
