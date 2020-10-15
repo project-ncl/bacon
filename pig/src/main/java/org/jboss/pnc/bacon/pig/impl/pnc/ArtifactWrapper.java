@@ -18,6 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ import java.nio.file.Path;
 @Getter
 @Slf4j
 @NoArgsConstructor
+@EqualsAndHashCode(of = "gapv")
 public class ArtifactWrapper {
 
     private String id;
