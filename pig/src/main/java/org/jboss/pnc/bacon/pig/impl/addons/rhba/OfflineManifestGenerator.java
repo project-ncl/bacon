@@ -80,7 +80,6 @@ public class OfflineManifestGenerator extends AddOn {
         }
         List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
         for (PncBuild build : builds.values()) {
-            log.info("An Artifact: " + build.getBuiltArtifacts().get(0).toString());
             artifactsToListRaw.addAll(build.getBuiltArtifacts());
             // TODO: Add filter, basing on the targetRepository.repositoryType, when NCL-6079 is done
             buildInfoCollector.addDependencies(build, "");
@@ -94,6 +93,7 @@ public class OfflineManifestGenerator extends AddOn {
         artifactsToListRaw.removeIf(artifact -> {
             for (String exclusion : exclusions) {
                 if (Pattern.matches(exclusion, artifact.getGapv())) {
+                    log.info("Excluded " + artifact);
                     return true;
                 }
             }
