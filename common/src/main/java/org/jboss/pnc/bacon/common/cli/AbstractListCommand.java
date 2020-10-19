@@ -44,8 +44,13 @@ public abstract class AbstractListCommand<T> extends JSONCommandHandler implemen
     @Option(names = "--query", description = "Query parameter (using RSQL)")
     private String query;
 
+    protected boolean print = true;
+
     @Override
     public Integer call() {
+        if (query == null && sort == null && print == true) {
+            log.warn("Listing entities without filters may take some time, please be patient.");
+        }
         try {
             ObjectHelper.print(getJsonOutput(), getAll(sort, query));
         } catch (JsonProcessingException | ClientException e) {

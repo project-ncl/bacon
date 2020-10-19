@@ -33,6 +33,14 @@ import java.util.Collection;
  */
 public abstract class AbstractBuildListCommand extends AbstractListCommand<Build> {
 
+    @Override
+    public Integer call() {
+        if (latest == true || running == true) {
+            super.print = false;
+        }
+        return super.call();
+    }
+
     @Option(names = "--latest", description = "Get only the latest build.")
     private boolean latest;
 
