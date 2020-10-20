@@ -1,0 +1,18 @@
+safe: true
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: "slate"
+      author: "Red Hat"
+
+siteTitle: "Red Hat"
+projectTitle: "Bacon"
+title: "Bacon CLI"
+tagline: "CLI for ProjectNCL"
+owner: "Red Hat"
+
+markdown: kramdown
+redcarpet:
+  extensions: ["tables", "autolink", "strikethrough", "space_after_headers", "with_toc_data", "fenced_code_blocks"]
