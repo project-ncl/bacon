@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.addons.rhba;
 
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
@@ -20,6 +21,14 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
+ * dependencies. First, it adds the build artifacts for all the builds. Then, it executes a query to PNC, requesting the
+ * third party dependencies for each build. Finally, the method generates a file, containing version paths and
+ * checksums, where we can get it, for all build and dependency attributes. The offline manifest file in combination
+ * with the offliner tool (https://repo1.maven.org/maven2/com/redhat/red/offliner/offliner) are used to download all the
+ * attributes to a local maven repository.
+ */
 public class OfflineManifestGenerator extends AddOn {
 
     private static final String ADDON_NAME = "offlineManifestGenerator";
@@ -62,16 +71,14 @@ public class OfflineManifestGenerator extends AddOn {
         });
 
         log.debug("Number of collected artifacts after exclusion: {}", artifactsToListRaw.size());
-        // Map<String, ArtifactWrapper> artifactsToList = new HashMap<>();
-        // for (ArtifactWrapper artifact : artifactsToListRaw) {
-        // artifactsToList.put(artifact.getGapv(), artifact);
-        // }
 
         List<ArtifactWrapper> artifactsToList = artifactsToListRaw.stream().distinct().collect(Collectors.toList());
 
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
-        try (PrintWriter file = new PrintWriter(releasePath + "offliner.txt", StandardCharsets.UTF_8.name())) {
+        String offlineManifestFileName = (String) getAddOnConfiguration().get("offlineManifestFileName");
+
+        try (PrintWriter file = new PrintWriter(releasePath + offlineManifestFileName, StandardCharsets.UTF_8.name())) {
             for (ArtifactWrapper artifact : artifactsToList) {
                 // TODO: Remove the check, when NCL-6079 is done
                 if (artifact.getRepositoryType() == RepositoryType.MAVEN) {
@@ -95,9 +102,7 @@ public class OfflineManifestGenerator extends AddOn {
             }
 
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            log.error("Error generating the Offline manifest", e);
+            throw new FatalException("Failed to generate the offline manfest");
         }
-
     }
-
 }
