@@ -33,21 +33,15 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.pnc.enums.RepositoryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -103,11 +97,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
-            // case OFFLINER_ONLY:
-            // // TODO move code to an add-on. Check BXMSPROD-1026
-            // log.info("Generating only the offline manifest");
-            // generateOfflinerManifest();
-            // return null;
             case IGNORE:
                 log.info(
                         "Ignoring repository zip generation because the config strategy is set to: {}",
@@ -186,9 +175,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
         File sourceDir = createMavenGenerationDir();
         filterAndDownload(artifactsToPack, sourceDir);
-        if (generationData.isIncludeOffliner()) {
-            generateOfflinerManifest();
-        }
         return repackage(sourceDir);
     }
 
@@ -206,9 +192,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         File sourceDir = createMavenGenerationDir();
 
         filterAndDownload(artifactsToPack, sourceDir);
-        if (generationData.isIncludeOffliner()) {
-            generateOfflinerManifest();
-        }
         return repackage(sourceDir);
     }
 
@@ -416,61 +399,5 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     @Override
     public void close() {
         buildInfoCollector.close();
-    }
-
-    /**
-     * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
-     * dependencies. First, it adds the build artifacts for all the builds. Then, it executes a query to PNC, requesting
-     * the third party dependencies for each build. Finally, the method generates a file, containing version paths and
-     * checksums, where we can get it, for all build and dependency attributes. The offline manifest file in combination
-     * with the offliner tool (https://repo1.maven.org/maven2/com/redhat/red/offliner/offliner) are used to download all
-     * the attributes to a local maven repository.
-     */
-    // TODO move code to an add-on. Check BXMSPROD-1026
-    private void generateOfflinerManifest() {
-        log.info("Will generate the offline manifest");
-        List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
-        for (PncBuild build : builds.values()) {
-            artifactsToListRaw.addAll(build.getBuiltArtifacts());
-            // TODO: Add filter, basing on the targetRepository.repositoryType, when NCL-6079 is done
-            buildInfoCollector.addDependencies(build, "");
-            artifactsToListRaw.addAll(build.getDependencyArtifacts());
-            log.debug("Dependencies for build {}: {}", build.getId(), build.getDependencyArtifacts().size());
-        }
-        log.debug("Number of collected artifacts for the Offline manifest: {}", artifactsToListRaw.size());
-
-        artifactsToListRaw.removeIf(artifact -> isArtifactExcluded(artifact.getGapv()));
-        log.debug("Number of collected artifacts after exclusion: {}", artifactsToListRaw.size());
-        Map<String, ArtifactWrapper> artifactsToList = new HashMap<>();
-        for (ArtifactWrapper artifact : artifactsToListRaw) {
-            artifactsToList.put(artifact.getGapv(), artifact);
-        }
-        log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
-
-        String filename = releasePath + getGenerationData().getOfflineManifestFilename();
-        try (PrintWriter file = new PrintWriter(filename, StandardCharsets.UTF_8.name())) {
-            for (Map.Entry<String, ArtifactWrapper> artifactEntry : artifactsToList.entrySet()) {
-                ArtifactWrapper artifact = artifactEntry.getValue();
-                // TODO: Remove the check, when NCL-6079 is done
-                if (artifact.getRepositoryType() == RepositoryType.MAVEN) {
-                    GAV gav = artifact.toGAV();
-                    String offlinerString = String
-                            .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
-                    file.println(offlinerString);
-                }
-
-            }
-            List<GAV> extraGavs = generationData.getExternalAdditionalArtifacts()
-                    .stream()
-                    .map(GAV::fromColonSeparatedGAPV)
-                    .collect(Collectors.toList());
-            for (GAV extraGav : extraGavs) {
-                String offlinerString = String.format("%s/%s", extraGav.toVersionPath(), extraGav.toFileName());
-                file.println(offlinerString);
-            }
-
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            log.error("Error generating the Offline manifest", e);
-        }
     }
 }
