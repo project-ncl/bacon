@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -68,7 +69,7 @@ class PigTest extends AbstractTest {
 
     @Test
     @Order(1)
-    void shouldCreateProduct() throws IOException {
+    void shouldCreateProduct(@TempDir Path workingDir) throws IOException {
         final Path configFile = CONFIG_LOCATION;
         replaceSuffixInConfigFile(configFile.resolve("build-config.yaml"));
 
@@ -143,7 +144,7 @@ class PigTest extends AbstractTest {
                 .post(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID))
                 .then()
                 .getEntity(GROUP_CONFIG, groupConfigWithBuildConfig);
-        ExecutionResult output = executeAndGetResult("pig", "configure", configFile.toString());
+        ExecutionResult output = executeAndGetResult(workingDir, "pig", "configure", configFile.toString());
         assertThat(output.getOutput()).contains("name: \"Product Foobar " + SUFFIX + "\"");
     }
 
