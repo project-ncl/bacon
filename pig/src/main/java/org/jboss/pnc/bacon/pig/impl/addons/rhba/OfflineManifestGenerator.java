@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,11 @@ public class OfflineManifestGenerator extends AddOn {
 
     private static final String ADDON_NAME = "offlineManifestGenerator";
 
+    private static final String OFFLINE_MANIFEST_DEFAULT_NAME = "offliner.txt";
+
     private static final Logger log = LoggerFactory.getLogger(OfflineManifestGenerator.class);
+
+    private BuildInfoCollector buildInfoCollector;
 
     public OfflineManifestGenerator(
             PigConfiguration pigConfiguration,
@@ -43,20 +48,45 @@ public class OfflineManifestGenerator extends AddOn {
         super(pigConfiguration, builds, releasePath, extrasPath);
     }
 
+    /**
+     * Use only for unit test purposes.
+     *
+     * @param pigConfiguration
+     * @param builds
+     * @param releasePath
+     * @param extrasPath
+     * @param buildInfoCollector
+     * @deprecated
+     */
+    @Deprecated
+    public OfflineManifestGenerator(
+            PigConfiguration pigConfiguration,
+            Map<String, PncBuild> builds,
+            String releasePath,
+            String extrasPath,
+            BuildInfoCollector buildInfoCollector) {
+        super(pigConfiguration, builds, releasePath, extrasPath);
+        this.buildInfoCollector = buildInfoCollector;
+    }
+
     public String getName() {
         return ADDON_NAME;
     }
 
     public void trigger() {
         log.info("Will generate the offline manifest");
-        BuildInfoCollector buildInfoCollector = new BuildInfoCollector();
+        if (buildInfoCollector == null) {
+            buildInfoCollector = new BuildInfoCollector();
+        }
         List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
         for (PncBuild build : builds.values()) {
+            log.info("An Artifact: " + build.getBuiltArtifacts().get(0).toString());
             artifactsToListRaw.addAll(build.getBuiltArtifacts());
             // TODO: Add filter, basing on the targetRepository.repositoryType, when NCL-6079 is done
             buildInfoCollector.addDependencies(build, "");
-            artifactsToListRaw.addAll(build.getDependencyArtifacts());
-            log.debug("Dependencies for build {}: {}", build.getId(), build.getDependencyArtifacts().size());
+            if (build.getDependencyArtifacts() != null) {
+                artifactsToListRaw.addAll(build.getDependencyArtifacts());
+            }
         }
         log.debug("Number of collected artifacts for the Offline manifest: {}", artifactsToListRaw.size());
 
@@ -76,7 +106,13 @@ public class OfflineManifestGenerator extends AddOn {
 
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
-        String offlineManifestFileName = (String) getAddOnConfiguration().get("offlineManifestFileName");
+        String offlineManifestFileName;
+        if(getAddOnConfiguration() != null) {
+            offlineManifestFileName = Optional.of((String) getAddOnConfiguration().get("offlineManifestFileName"))
+                .orElse(OFFLINE_MANIFEST_DEFAULT_NAME);
+        } else {
+            offlineManifestFileName = OFFLINE_MANIFEST_DEFAULT_NAME;
+        }
 
         try (PrintWriter file = new PrintWriter(releasePath + offlineManifestFileName, StandardCharsets.UTF_8.name())) {
             for (ArtifactWrapper artifact : artifactsToList) {
@@ -102,7 +138,7 @@ public class OfflineManifestGenerator extends AddOn {
             }
 
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            throw new FatalException("Failed to generate the offline manfest");
+            throw new FatalException("Failed to generate the offline manifest", e.getMessage());
         }
     }
 }
