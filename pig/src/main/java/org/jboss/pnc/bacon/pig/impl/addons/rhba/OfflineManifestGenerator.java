@@ -107,9 +107,9 @@ public class OfflineManifestGenerator extends AddOn {
         log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
         String offlineManifestFileName;
-        if(getAddOnConfiguration() != null) {
+        if (getAddOnConfiguration() != null) {
             offlineManifestFileName = Optional.of((String) getAddOnConfiguration().get("offlineManifestFileName"))
-                .orElse(OFFLINE_MANIFEST_DEFAULT_NAME);
+                    .orElse(OFFLINE_MANIFEST_DEFAULT_NAME);
         } else {
             offlineManifestFileName = OFFLINE_MANIFEST_DEFAULT_NAME;
         }

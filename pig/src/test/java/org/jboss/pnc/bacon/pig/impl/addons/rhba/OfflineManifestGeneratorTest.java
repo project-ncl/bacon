@@ -62,7 +62,8 @@ public class OfflineManifestGeneratorTest {
         String offlinerAsString = offlinerContent.toString();
         ArtifactWrapper artifactWrapper = new ArtifactWrapper(artifact);
         GAV gav = artifactWrapper.toGAV();
-        String artifactAsOfflinerEntry = String.format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
+        String artifactAsOfflinerEntry = String
+                .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
         assertTrue(offlinerAsString.contains(artifactAsOfflinerEntry));
     }
 
