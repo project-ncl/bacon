@@ -39,29 +39,29 @@ public class CacheFile {
             String realm,
             String username,
             Credential credential) {
-
-        createConfigFolderIfAbsent();
-
         File file = new File(getCacheFile());
 
         log.debug("Writing credential to cache file {}", file);
 
         try {
+            createConfigFolderIfAbsent();
+
             Map<String, Credential> data = Collections
                     .singletonMap(generateUsernameMd5(keycloakUrl, realm, username), credential);
             CacheFile cacheFile = new CacheFile();
             cacheFile.setCachedData(data);
             mapper.writeValue(file, cacheFile);
-            setOwnerFilePermissions(getCacheFile());
+            setOwnerFilePermissions(file.toPath());
         } catch (IOException e) {
             log.error("Error saving credential to file {}", file, e);
         }
     }
 
     public static Optional<Credential> getCredentialFromCacheFile(String keycloakUrl, String realm, String username) {
-        String key = generateUsernameMd5(keycloakUrl, realm, username);
+        Path path = Paths.get(getCacheFile());
 
-        if (!fileExists(getCacheFile())) {
+        if (!Files.isRegularFile(path)) {
+            log.debug("Cache file {} does not exist", path);
             return Optional.empty();
         }
 
@@ -70,6 +70,7 @@ public class CacheFile {
             Map<String, Credential> data = cacheFile.getCachedData();
 
             if (data != null) {
+                String key = generateUsernameMd5(keycloakUrl, realm, username);
                 return Optional.ofNullable(data.get(key));
             } else {
                 return Optional.empty();
@@ -80,22 +81,23 @@ public class CacheFile {
         }
     }
 
-    private static void createConfigFolderIfAbsent() {
-        if (!fileExists(Config.getConfigLocation())) {
-            String configFolder = Config.getConfigLocation();
-            log.debug("Creating config folder {}", configFolder);
-            new File(configFolder).mkdirs();
+    private static void createConfigFolderIfAbsent() throws IOException {
+        Path path = Paths.get(Config.getConfigLocation());
+
+        if (!Files.isDirectory(path)) {
+            log.debug("Creating config folder {}", path);
+            Files.createDirectories(path);
         }
     }
 
-    private static void setOwnerFilePermissions(String path) {
-        Path p = Paths.get(path);
-        if (p.getFileSystem().supportedFileAttributeViews().contains("posix")) {
-            Set<PosixFilePermission> set = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+    private static void setOwnerFilePermissions(Path path) {
+        if (path.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+            Set<PosixFilePermission> permissions = EnumSet
+                    .of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
             try {
-                Files.setPosixFilePermissions(p, set);
+                Files.setPosixFilePermissions(path, permissions);
             } catch (IOException e) {
-                log.error("Could not set file permissions for path {}", p, e);
+                log.error("Could not set file permissions for path {}", path, e);
             }
         }
     }
@@ -104,13 +106,7 @@ public class CacheFile {
         return DigestUtils.md5Hex(keycloakUrl + ":" + realm + ":" + username);
     }
 
-    private static boolean fileExists(String pathString) {
-        Path path = Paths.get(pathString);
-        return Files.exists(path);
-    }
-
     private static String getCacheFile() {
         return Config.getConfigLocation() + File.separator + Constant.CACHE_FILE;
     }
-
 }
