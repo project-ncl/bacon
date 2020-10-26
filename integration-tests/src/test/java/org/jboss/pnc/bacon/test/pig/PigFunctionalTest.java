@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Optional;
 
 @Tag(TestType.REAL_SERVICE_ONLY)
@@ -38,7 +39,12 @@ public abstract class PigFunctionalTest {
         }
         pig.validate();
 
-        PigContext.init(clean, configDir, targetDirectory.toAbsolutePath().toString(), releaseStorageUrl);
+        PigContext.init(
+                clean,
+                configDir,
+                targetDirectory.toAbsolutePath().toString(),
+                releaseStorageUrl,
+                Collections.emptyMap());
         return suffix;
     }
 

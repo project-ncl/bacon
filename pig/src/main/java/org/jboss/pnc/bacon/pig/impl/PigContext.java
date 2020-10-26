@@ -87,11 +87,15 @@ public class PigContext {
 
     private Map<String, Collection<String>> checksums;
 
-    public void initConfig(Path configDir, String targetPath, Optional<String> releaseStorageUrl) {
+    public void initConfig(
+            Path configDir,
+            String targetPath,
+            Optional<String> releaseStorageUrl,
+            Map<String, String> overrides) {
         File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
-                PigConfiguration loadedConfig = PigConfiguration.load(configStream);
+                PigConfiguration loadedConfig = PigConfiguration.load(configStream, overrides);
                 setPigConfiguration(loadedConfig, targetPath, releaseStorageUrl);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read config file: " + configFile.getAbsolutePath(), e);
@@ -186,9 +190,10 @@ public class PigContext {
             boolean clean,
             Path configDir,
             String targetPath,
-            Optional<String> releaseStorageUrl) {
+            Optional<String> releaseStorageUrl,
+            Map<String, String> overrides) {
         instance = readContext(clean, configDir);
-        instance.initConfig(configDir, targetPath, releaseStorageUrl);
+        instance.initConfig(configDir, targetPath, releaseStorageUrl, overrides);
         return instance;
     }
 

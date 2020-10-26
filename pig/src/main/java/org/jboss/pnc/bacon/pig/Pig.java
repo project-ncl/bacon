@@ -39,6 +39,8 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -115,6 +117,11 @@ public class Pig {
                 description = "The directory where the deliverables will be put")
         private String targetPath;
 
+        @Option(
+                names = { "-e", "--env" },
+                description = "Override the variables in the build-config.yaml. e.g -eVariable1=value1 -e Variable2=value2 --env=Variable3=value3")
+        private Map<String, String> overrides = Collections.emptyMap();
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -136,7 +143,7 @@ public class Pig {
             FileDownloadUtils.setAttempts(downloadAttempts);
 
             Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
-            PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl);
+            PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl, overrides);
             PigContext.get().setTempBuild(tempBuild);
             ObjectHelper.print(getJsonOutput(), doExecute());
             return 0;
