@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -25,6 +26,7 @@ import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.out.PigBuildOutput;
 import org.jboss.pnc.bacon.pig.impl.out.PigReleaseOutput;
 import org.jboss.pnc.bacon.pig.impl.out.PigRunOutput;
@@ -37,11 +39,16 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 
 /**
@@ -62,6 +69,7 @@ import java.util.concurrent.Callable;
                 Pig.GenerateSharedContentAnalysis.class,
                 Pig.GenerateDocuments.class,
                 Pig.Release.class,
+                Pig.PreProcessYaml.class,
                 Pig.TriggerAddOns.class })
 public class Pig {
 
@@ -120,7 +128,7 @@ public class Pig {
         @Option(
                 names = { "-e", "--env" },
                 description = "Override the variables in the build-config.yaml. e.g -eVariable1=value1 -e Variable2=value2 --env=Variable3=value3")
-        private Map<String, String> overrides = Collections.emptyMap();
+        Map<String, String> overrides = Collections.emptyMap();
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -423,4 +431,30 @@ public class Pig {
         }
     }
 
+    @Command(name = "pre-process-yaml", description = "Show the final YAML content with variables injected")
+    @Slf4j
+    public static class PreProcessYaml extends PigCommand<String> {
+
+        @Override
+        public String doExecute() {
+            try {
+                File configFile = Paths.get(configDir).resolve("build-config.yaml").toFile();
+                InputStream preProcessed = PigConfiguration.preProcess(new FileInputStream(configFile), overrides);
+
+                String contents = "";
+                Scanner s = new Scanner(preProcessed);
+                s.useDelimiter("\\A");
+
+                if (s.hasNext()) {
+                    contents = s.next();
+                }
+
+                // Yeah we'll violate the normal rules and just print to stdout. The JSON/YAML output has no effect here
+                System.out.println(contents);
+            } catch (FileNotFoundException e) {
+                log.error("Config file {}{}build-config.yaml does not exist", configDir, File.separator);
+            }
+            return "";
+        }
+    }
 }
