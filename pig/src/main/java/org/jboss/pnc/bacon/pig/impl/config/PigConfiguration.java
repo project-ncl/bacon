@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -149,9 +150,10 @@ public class PigConfiguration implements Validate {
                 .collect(toMap((a) -> a[0].trim(), (a) -> a[1].trim()));
     }
 
-    private static Map<String, String> readVariables(String contents, String buildVarsOverrides) {
+    private static Map<String, String> readVariables(String contents, Map<String, String> buildVarsOverrides) {
         Map<String, String> variablesFromFile = readVariablesFromFile(contents);
-        Map<String, String> variableOverrides = convertbuildVarsOverridesStringToMap(buildVarsOverrides);
+        // shallow copy
+        Map<String, String> variableOverrides = new HashMap<>(buildVarsOverrides);
 
         Map<String, String> result = new HashMap<>(variablesFromFile);
         variableOverrides.forEach((k, v) -> result.merge(k, v, (v1, v2) -> v2));
@@ -166,11 +168,12 @@ public class PigConfiguration implements Validate {
         return result;
     }
 
-    public static InputStream preProcess(InputStream buildConfig, String buildVarsOverrides) {
+    public static InputStream preProcess(InputStream buildConfig, Map<String, String> buildVarsOverrides) {
         String contents = "";
         @SuppressWarnings("resource")
         Scanner s = new Scanner(buildConfig);
 
+        // start of string
         s.useDelimiter("\\A");
 
         if (s.hasNext()) {
@@ -210,7 +213,7 @@ public class PigConfiguration implements Validate {
         return stream;
     }
 
-    public static PigConfiguration load(File buildConfigFile, String buildVarsOverrides) {
+    public static PigConfiguration load(File buildConfigFile, Map<String, String> buildVarsOverrides) {
         try (InputStream configStream = new FileInputStream(buildConfigFile)) {
             return load(configStream, buildVarsOverrides);
         } catch (IOException e) {
@@ -219,12 +222,12 @@ public class PigConfiguration implements Validate {
     }
 
     public static PigConfiguration load(InputStream configStream) {
-        return load(configStream, "");
+        return load(configStream, Collections.emptyMap());
     }
 
-    public static PigConfiguration load(InputStream configStream, String buildVarsOverrides) {
+    public static PigConfiguration load(InputStream configStream, Map<String, String> buildVarsOverrides) {
         if (buildVarsOverrides == null) {
-            buildVarsOverrides = "";
+            buildVarsOverrides = Collections.emptyMap();
         }
 
         Yaml yaml = new Yaml(new Constructor(PigConfiguration.class));

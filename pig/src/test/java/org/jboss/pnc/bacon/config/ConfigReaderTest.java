@@ -17,11 +17,14 @@
  */
 package org.jboss.pnc.bacon.config;
 
+import com.google.common.collect.ImmutableMap;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,10 +45,10 @@ class ConfigReaderTest {
     }
 
     private PigConfiguration loadBuildConfig(String buildConfig) {
-        return loadBuildConfig(buildConfig, "");
+        return loadBuildConfig(buildConfig, Collections.emptyMap());
     }
 
-    private PigConfiguration loadBuildConfig(String buildConfig, String buildVarOverrides) {
+    private PigConfiguration loadBuildConfig(String buildConfig, Map<String, String> buildVarOverrides) {
         InputStream configStream = PigConfiguration.class.getResourceAsStream(buildConfig);
         return PigConfiguration.load(configStream, buildVarOverrides);
     }
@@ -61,7 +64,8 @@ class ConfigReaderTest {
 
     @Test
     void shouldExpandAndOverrideVariables() {
-        PigConfiguration config = loadBuildConfig("/build-config-VarUsage.yaml", "productName=vertx, milestone=ER2");
+        Map<String, String> overrides = ImmutableMap.of("productName", "vertx", "milestone", "ER2");
+        PigConfiguration config = loadBuildConfig("/build-config-VarUsage.yaml", overrides);
         assertNotNull(config);
         if (!config.getVersion().equals("3.5.1")) {
             fail("Version does not match predefined variable");
