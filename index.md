@@ -10,7 +10,7 @@ Bacon is a new Java CLI for [ProjectNCL](https://github.com/project-ncl/pnc) 2.0
 
 ### Release Notes
 
-For a list of changes please see [here](changelog.html)
+For a list of changes please see [here](https://github.com/project-ncl/bacon/wiki/Changelog)
 
 ### Installation and Usage
 
