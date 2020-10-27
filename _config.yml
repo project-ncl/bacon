@@ -12,6 +12,7 @@ projectTitle: "Bacon"
 title: "Bacon CLI"
 tagline: "CLI for ProjectNCL"
 owner: "Red Hat"
+baseurl: "/bacon"
 
 markdown: kramdown
 redcarpet:
