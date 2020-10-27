@@ -261,7 +261,8 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private String devtoolsJarName() {
-        return "quarkus-product-bom-" + quarkusVersion + ".json";
+        return PigContext.get().getPigConfiguration().getFlow().getRepositoryGeneration().getBomArtifactId() + "-"
+                + quarkusVersion + ".json";
     }
 
     private Set<String> unpackArtifactIdsFrom(Path extensionsPath) {
