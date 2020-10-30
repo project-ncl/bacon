@@ -33,7 +33,6 @@ keycloak:
 
     # if regular user
     clientId: ""
-    password: ""
 
     # if service account
     # clientSecret: ""
