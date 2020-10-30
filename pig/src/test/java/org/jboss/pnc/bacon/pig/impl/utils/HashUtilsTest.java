@@ -59,4 +59,13 @@ class HashUtilsTest {
         assertThat(originalHash).isNotEqualTo(exactCopyHash);
     }
 
+    @Test
+    void shouldIgnoreSomePaths() {
+
+        String originalHash = HashUtils.hashDirectory(testDirs.resolve("original"));
+        String copyIgnoreFileHash = HashUtils.hashDirectory(testDirs.resolve("copy-with-file-to-be-ignored"), path -> {
+            return path.normalize().endsWith("ignore-me");
+        });
+    }
+
 }
