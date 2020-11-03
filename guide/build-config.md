@@ -232,4 +232,20 @@ Strategy options are:
 - GENERATE_SELECTED
 
 ## Usage of YAML variables
-TODO
+You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:
+```yaml
+#!variable=value
+#!variable_next={{variable}} value2
+#milestone=ER5
+...
+group: product-x-all
+milestone: {{milestone}}
+...
+```
+From the above, we can also define the variable `variable_next` using another variable. To use the variable in the file, put in your yaml: `{{variable}}`.
+
+You can also define or override the value of the variable in the YAML by using the `bacon pig` option '-e' or '--env'.
+
+```bash
+bacon pig run -e variable="alternate value"  --env variable2=value3 ...
+```
