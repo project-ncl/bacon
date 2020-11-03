@@ -44,6 +44,23 @@ public class QuarkusPostBuildAnalyzerTest {
                 get(urlEqualTo("/quarkus/quarkus-1.0.0/extras/repository-artifact-list.txt")).willReturn(
                         aResponse().withHeader("Content-type", "text/plain; charset=UTF-8")
                                 .withBodyFile("repository-artifact-list1.txt")));
+        // stubbing license files
+        stubFor(
+                get(urlEqualTo("/quarkus/quarkus-1.0.1/")).willReturn(
+                        aResponse().withHeader("Content-type", "text/html;charset=UTF-8")
+                                .withBodyFile("new-prod-deliverable-stub.html")));
+        stubFor(
+                get(urlEqualTo("/quarkus/quarkus-1.0.0/")).willReturn(
+                        aResponse().withHeader("Content-type", "text/html;charset=UTF-8")
+                                .withBodyFile("old-prod-deliverable-stub.html")));
+        stubFor(
+                get(urlEqualTo("/quarkus/quarkus-1.0.1/quarkus-1.0.1-license.zip")).willReturn(
+                        aResponse().withHeader("Content-type", "application/zip")
+                                .withBodyFile("quarkus-1.0.1-licenses.zip")));
+        stubFor(
+                get(urlEqualTo("/quarkus/quarkus-1.0.0/quarkus-1.0.0-license.zip")).willReturn(
+                        aResponse().withHeader("Content-type", "application/zip")
+                                .withBodyFile("quarkus-1.0.0-licenses.zip")));
         quarkusPostBuildAnalyzer.trigger();
         wireMockServer.stop();
         if (!verifyResults()) {

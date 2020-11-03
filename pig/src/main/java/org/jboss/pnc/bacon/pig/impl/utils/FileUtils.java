@@ -40,12 +40,7 @@ import org.apache.tools.ant.util.PermissionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
@@ -56,16 +51,12 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import static java.nio.file.Files.createTempDirectory;
 
@@ -542,6 +533,37 @@ public final class FileUtils {
             });
 
             return true;
+        }
+    }
+
+    /**
+     * Extracts a specific fileName from the zip
+     *
+     * @param zipName name of the zip
+     * @param fileName the name of specific file to be extracted
+     * @param extractedFileName the desired name of the extracted file
+     */
+    public static void getFileFromZip(String zipName, String fileName, String extractedFileName) {
+        try {
+            ZipFile zipFile = new ZipFile(zipName);
+            int fileLength;
+            byte[] buffer = new byte[1024];
+            OutputStream outputStream = new FileOutputStream(extractedFileName);
+            Enumeration<? extends ZipEntry> zipFiles = zipFile.entries();
+            while (zipFiles.hasMoreElements()) {
+                String zipFileName = zipFiles.nextElement().getName();
+                if (zipFileName.contains(fileName)) {
+                    fileName = zipFileName;
+                }
+            }
+            InputStream zipStream = zipFile.getInputStream(zipFile.getEntry(fileName));
+            while ((fileLength = zipStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, fileLength);
+            }
+            outputStream.close();
+            zipStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Unzip of " + fileName + " from " + zipName + " failed", e);
         }
     }
 }
