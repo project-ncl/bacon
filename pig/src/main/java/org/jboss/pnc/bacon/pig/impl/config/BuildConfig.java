@@ -77,7 +77,13 @@ public class BuildConfig {
     private String environmentId;
 
     /**
-     * If environmentId is not specified, use 'environmentSystemImageId' to find the environmentId
+     * If environmentId is not specified, use 'environmentName' to find the environmentId (takes precedence before
+     * systemImageId)
+     */
+    private String environmentName;
+
+    /**
+     * If environmentId and environmentName are not specified, use 'environmentSystemImageId' to find the environmentId
      */
     private String systemImageId;
 
@@ -243,19 +249,28 @@ public class BuildConfig {
     }
 
     /**
-     * Get the environmentId either as defined in the build-config.yaml or find it via environmentSystemImageId.
+     * Get the environmentId either as defined in the build-config.yaml or find it via environmentName or
+     * environmentSystemImageId.
      *
-     * @return
+     * @return environmentId
      */
     public String getEnvironmentId() {
 
         if (environmentId != null) {
             return environmentId;
-        } else if (systemImageId != null) {
+        } else if (environmentName != null || systemImageId != null) {
+            String query;
+            String exceptionMessage;
+            if (environmentName != null) {
+                query = "name==\"" + environmentName + "\";deprecated==false";
+                exceptionMessage = " an environment with name of: " + environmentName;
+            } else {
+                query = "systemImageId==" + systemImageId + ";deprecated==false";
+                exceptionMessage = " an environment with systemImageId of: " + systemImageId;
+            }
 
             try (EnvironmentClient client = CREATOR.newClient()) {
-                Optional<Environment> environment = client
-                        .getAll(Optional.empty(), Optional.of("systemImageId==" + systemImageId + ";deprecated==false"))
+                Optional<Environment> environment = client.getAll(Optional.empty(), Optional.of(query))
                         .getAll()
                         .stream()
                         .findFirst();
@@ -264,7 +279,7 @@ public class BuildConfig {
                     environmentId = environment.get().getId();
                     return environment.get().getId();
                 } else {
-                    throw new FatalException("Cannot find the environment in PNC for {}", systemImageId);
+                    throw new FatalException("Cannot find the environment in PNC for {}", exceptionMessage);
                 }
             } catch (RemoteResourceException e) {
                 throw new FatalException("Exception while talking to PNC", e);

@@ -34,10 +34,11 @@ public class ListBuildConfigValidator implements ConstraintValidator<ListBuildCo
                 errors.add(
                         "Build config " + value.getName()
                                 + " has both scmUrl and externalScmUrl not specified. Specify at least one of the keys with a value");
-            } else if (value.getEnvironmentId() == null && value.getSystemImageId() == null) {
+            } else if (value.getEnvironmentId() == null && value.getSystemImageId() == null
+                    && value.getEnvironmentName() == null) {
                 errors.add(
                         "Build config " + value.getName()
-                                + " has environmentId and systemImageId not specified. Specify one of the keys with a value");
+                                + " has neither environmentId, environmentName nor systemImageId specified. Specify one of the keys with a value");
             } else {
                 try {
                     BuildType.valueOf(value.getBuildType());
