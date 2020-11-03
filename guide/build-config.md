@@ -92,8 +92,9 @@ builds:
 
   scmRevision: <scm revision>
 
-  environmentId: <id> # Either specify environmentId or systemImageId
-  systemImageId: <system image id> # Either specify environmentId or systemImageId
+  environmentId: <id> # Either specify environmentId, environmentName or systemImageId
+  environmentName: <env-name> # Either specify environmentId, environmentName or systemImageId
+  systemImageId: <system image id> # Either specify environmentId, environmentName or systemImageId
 
   dependencies: # Optional: specify which builds need to be done before this one. The build must also be part of the 'builds' list in the YAML
   - <dependency 1 by name>
@@ -138,13 +139,17 @@ builds:
   scmUrl: https://<external git server>/<repo>.git
 ```
 
-#### environmentId v/s systemImageId
+#### environmentId v/s environmentName v/s systemImageId
 
-The build environment used for builds has a unique id and system image id.
+The build environment used for builds has a unique id, name and system image id.
 
-We allow the user to specify the build environment using either `environmentId` or the `systemImageId`. `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what we traditionally use, but it is problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable between PNC servers.
+We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`. `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what we traditionally use, but it is problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable between PNC servers.
 
-The `systemImageId` in contrast, is the same between different PNC servers and should be used if portability is a concern. To get the `environmentId` or the `systemImageId` of the build image, simply run:
+The `environmentName` in contrast, is the same between different PNC servers and should be used if portability is a concern. Environments specified by `environmentName` are always using **the latest updates**, therefore, this is the **preferred** way to specify environments. 
+
+The `systemImageId` is mostly the same between different PNC servers, the difference to `environmentName` is that the `systemImageId` **preserves** the docker-image version of the environment, which means that after some time, the version may become deprecated. (**NOTE**: `systemImageIds` with `:latest` suffix will **no longer be available** in PNC)  
+
+To get the `environmentId`, `environmentName` or the `systemImageId` of the build image, simply run:
 
 ```
 bacon pnc environment list
