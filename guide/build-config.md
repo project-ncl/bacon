@@ -249,3 +249,11 @@ You can also define or override the value of the variable in the YAML by using t
 ```bash
 bacon pig run -e variable="alternate value"  --env variable2=value3 ...
 ```
+
+To test if the variables are being substituted / overridden properly, `bacon pig` provides a command to print the final build-config.yaml. The command is:
+```
+bacon pig pre-process-yaml <folder to build-config.yaml>
+
+// if you are defining the variable value in the CLI options:
+bacon pig pre-process-yaml -e variable1=value1 <folder to build-config.yaml>
+```
