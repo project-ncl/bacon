@@ -85,6 +85,14 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         return NAME;
     }
 
+    private String getBomArtifactId() {
+        return PigContext.get().getPigConfiguration().getFlow().getRepositoryGeneration().getBomArtifactId();
+    }
+
+    private boolean isProductBom(String bomArtifactId) {
+        return bomArtifactId.equals("quarkus-product-bom");
+    }
+
     @Override
     public void trigger() {
         log.info("releasePath: {}, extrasPath: {}, deliverables: {}", releasePath, extrasPath, deliverables);
@@ -261,12 +269,8 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private String devtoolsJarName() {
-        String bomArtifactId = PigContext.get()
-                .getPigConfiguration()
-                .getFlow()
-                .getRepositoryGeneration()
-                .getBomArtifactId();
-        if (bomArtifactId.equals("quarkus-bom")) {
+        String bomArtifactId = getBomArtifactId();
+        if (!isProductBom(bomArtifactId)) {
             return "quarkus-bom-descriptor-json-" + quarkusVersion + ".json";
         } else {
             return bomArtifactId + "-" + quarkusVersion + ".json";
@@ -314,11 +318,16 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     private Set<String> gatherProblematicDeps() {
         Set<String> problemmaticDeps = new TreeSet<>();
         problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom/.*\\.pom"));
-        problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom/.*\\.pom"));
+        if (isProductBom(getBomArtifactId())) {
+            problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom/.*\\.pom"));
+        }
 
         if (Boolean.TRUE.equals(getAddOnConfiguration().get("checkDeploymentBoms"))) {
             problemmaticDeps.addAll(checkBomContents(".*/io/quarkus/quarkus-bom-deployment/.*\\.pom"));
-            problemmaticDeps.addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom-deployment/.*\\.pom"));
+            if (isProductBom(getBomArtifactId())) {
+                problemmaticDeps
+                        .addAll(checkBomContents(".*/com/redhat/quarkus/quarkus-product-bom-deployment/.*\\.pom"));
+            }
         }
         return problemmaticDeps;
     }
