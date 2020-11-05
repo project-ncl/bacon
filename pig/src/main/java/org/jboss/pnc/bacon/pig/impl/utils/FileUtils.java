@@ -255,7 +255,11 @@ public final class FileUtils {
                 final long value = modTime.getTime();
                 final FileTime time = FileTime.fromMillis(value);
 
-                setModeAndLastModifiedTime(path, mode, time);
+                if (!entry.isSymbolicLink()) {
+                    setModeAndLastModifiedTime(path, mode, time);
+                } else {
+                    log.debug("Skipping setting of permission for symlink: {}", path);
+                }
             }
         } catch (IOException | ArchiveException | CompressorException e) {
             throw new RuntimeException("Untar of " + input + " to " + directory + " failed", e);
