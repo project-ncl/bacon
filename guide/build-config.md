@@ -91,10 +91,12 @@ builds:
   externalScmUrl: <external Scm URL> # Either specify scmUrl or externalScmUrl
 
   scmRevision: <scm revision>
-
-  environmentId: <id> # Either specify environmentId, environmentName or systemImageId
-  environmentName: <env-name> # Either specify environmentId, environmentName or systemImageId
-  systemImageId: <system image id> # Either specify environmentId, environmentName or systemImageId
+  
+  # Either specify environmentId, environmentName or systemImageId. 
+  # If more than one is specified, the priority will be: environmentId, environmentName, systemImageId
+  environmentId: <id> # The specific id of a build environment, e.g. 20
+  environmentName: <env-name> # The name of the builder image, e.g. OpenJDK 1.8; Mvn 3.6.0. As this will pick the latest up-to-date version of the image, it's the recommended option
+  systemImageId: <system image id> # TThe specific builder image name associated with a build environment, e.g. builder-rhel-7-j8-mvn3.6.0:1.0.0
 
   dependencies: # Optional: specify which builds need to be done before this one. The build must also be part of the 'builds' list in the YAML
   - <dependency 1 by name>
@@ -143,7 +145,7 @@ builds:
 
 The build environment used for builds has a unique id, name and system image id.
 
-We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`. `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what we traditionally use, but it is problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable between PNC servers.
+We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`. `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what has been traditionally used, but it is problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable between PNC servers. Moreover, an environment may become deprecated over time, thus the environmentId should be kept up-to-date, which is not optimal.
 
 The `environmentName` in contrast, is the same between different PNC servers and should be used if portability is a concern. Environments specified by `environmentName` are always using **the latest updates**, therefore, this is the **preferred** way to specify environments. 
 
