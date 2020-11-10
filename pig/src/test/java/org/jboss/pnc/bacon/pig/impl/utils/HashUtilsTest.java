@@ -66,6 +66,6 @@ class HashUtilsTest {
         String copyIgnoreFileHash = HashUtils.hashDirectory(testDirs.resolve("copy-with-file-to-be-ignored"), path -> {
             return path.normalize().endsWith("ignore-me");
         });
+        assertThat(originalHash).isEqualTo(copyIgnoreFileHash);
     }
-
 }
