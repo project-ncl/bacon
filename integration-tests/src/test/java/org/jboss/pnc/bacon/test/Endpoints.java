@@ -14,6 +14,7 @@ public class Endpoints {
     public static final String SCM_REPOSITORY = "/scm-repositories";
     public static final String SCM_REPOSITORY_CREATE = "/scm-repositories/create-and-sync";
     public static final String PROJECT = "/projects";
+    public static final String ENVIRONMENT = "/environments";
     public static final String BUILD_CONFIG = "/build-configs";
     public static final Function<String, String> BUILD_CONFIG_DEPENDENCIES = id -> BUILD_CONFIG + "/" + id
             + "/dependencies";

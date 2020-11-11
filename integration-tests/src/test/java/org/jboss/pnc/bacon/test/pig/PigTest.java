@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
 import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG;
 import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG_DEPENDENCIES;
+import static org.jboss.pnc.bacon.test.Endpoints.ENVIRONMENT;
 import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG;
 import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG_BUILD_CONFIGS;
 import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
@@ -101,6 +102,7 @@ class PigTest extends AbstractTest {
                 .internalUrl(SCM_URL)
                 .preBuildSyncEnabled(true)
                 .build();
+        final Environment environment = Environment.builder().id(UNIVERSAL_ID).deprecated(false).build();
         final BuildConfiguration buildConfig = BuildConfiguration.builder()
                 .id(UNIVERSAL_ID)
                 .name(BC_NAME)
@@ -109,7 +111,7 @@ class PigTest extends AbstractTest {
                 .creationTime(Instant.now())
                 .modificationTime(Instant.now())
                 .scmRepository(scmRepository)
-                .environment(Environment.builder().id(UNIVERSAL_ID).build())
+                .environment(environment)
                 .project(project)
                 .productVersion(productVersionWithCurrentMilestone)
                 .build();
@@ -132,6 +134,7 @@ class PigTest extends AbstractTest {
         wmock.creation(PROJECT, project);
         wmock.list(SCM_REPOSITORY, new Page<SCMRepository>());
         wmock.creation(SCM_REPOSITORY_CREATE, RepositoryCreationResponse.builder().repository(scmRepository).build());
+        wmock.get(ENVIRONMENT, environment);
         wmock.creation(BUILD_CONFIG, buildConfig);
         wmock.list(BUILD_CONFIG_DEPENDENCIES.apply(UNIVERSAL_ID), new Page<BuildConfiguration>());
         wmock.get(BUILD_CONFIG, buildConfig);
