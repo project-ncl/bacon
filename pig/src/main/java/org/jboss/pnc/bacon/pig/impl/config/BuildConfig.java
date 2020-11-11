@@ -262,7 +262,7 @@ public class BuildConfig {
             String query;
             String exceptionMessage;
             if (systemImageId != null) {
-                query = "systemImageId==" + systemImageId + ";deprecated==false";
+                query = "systemImageId==" + systemImageId;
                 exceptionMessage = " an environment with systemImageId of: " + systemImageId;
             } else {
                 query = "name==\"" + environmentName + "\";deprecated==false";
