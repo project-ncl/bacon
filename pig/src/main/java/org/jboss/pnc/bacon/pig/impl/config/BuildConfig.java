@@ -58,7 +58,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
  * DTO representing the build-config field in build-config.yaml
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
- *         Date: 11/28/17
+ * Date: 11/28/17
  */
 @Data
 public class BuildConfig {
@@ -77,13 +77,13 @@ public class BuildConfig {
     private String environmentId;
 
     /**
-     * If environmentId is not specified, use 'environmentName' to find the environmentId (takes precedence before
-     * systemImageId)
+     * If environmentId and systemImageId are not specified, use 'environmentName' to find the environmentId
      */
     private String environmentName;
 
     /**
-     * If environmentId and environmentName are not specified, use 'environmentSystemImageId' to find the environmentId
+     * If environmentId is not specified, use 'environmentSystemImageId' to find the environmentId (takes precedence before
+     * environmentName)
      */
     private String systemImageId;
 
@@ -258,15 +258,15 @@ public class BuildConfig {
 
         if (environmentId != null) {
             return environmentId;
-        } else if (environmentName != null || systemImageId != null) {
+        } else if (systemImageId != null || environmentName != null) {
             String query;
             String exceptionMessage;
-            if (environmentName != null) {
-                query = "name==\"" + environmentName + "\";deprecated==false";
-                exceptionMessage = " an environment with name of: " + environmentName;
-            } else {
+            if (systemImageId != null) {
                 query = "systemImageId==" + systemImageId + ";deprecated==false";
                 exceptionMessage = " an environment with systemImageId of: " + systemImageId;
+            } else {
+                query = "name==\"" + environmentName + "\";deprecated==false";
+                exceptionMessage = " an environment with name of: " + environmentName;
             }
 
             try (EnvironmentClient client = CREATOR.newClient()) {
