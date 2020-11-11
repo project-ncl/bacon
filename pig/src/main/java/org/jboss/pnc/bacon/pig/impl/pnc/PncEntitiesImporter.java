@@ -27,6 +27,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.ProductClient;
 import org.jboss.pnc.client.ProductVersionClient;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,6 +82,7 @@ public class PncEntitiesImporter implements Closeable {
     private final ProjectClient projectClient;
     private final AdvancedSCMRepositoryClient repoClient;
     private final ProductVersionClient versionClient;
+    private final EnvironmentClient environmentClient;
 
     private ProductRef product;
     private ProductVersion version;
@@ -97,6 +100,7 @@ public class PncEntitiesImporter implements Closeable {
         projectClient = new ProjectClient(PncClientHelper.getPncConfiguration());
         repoClient = new AdvancedSCMRepositoryClient(PncClientHelper.getPncConfiguration());
         versionClient = new ProductVersionClient(PncClientHelper.getPncConfiguration());
+        environmentClient = new EnvironmentClient(PncClientHelper.getPncConfiguration());
         pncConfigurator = new PncConfigurator();
     }
 
@@ -110,12 +114,50 @@ public class PncEntitiesImporter implements Closeable {
         buildGroup = getOrGenerateBuildGroup();
 
         configs = getAddOrUpdateBuildConfigs(skipBranchCheck, temporaryBuild);
+        checkForDeprecatedEnvironments(configs);
         log.debug("Setting up build dependencies");
         setUpBuildDependencies();
 
         log.debug("Adding builds to group");
         addBuildConfigIdsToGroup();
         return new ImportResult(milestone, buildGroup, version, configs);
+    }
+
+    private void checkForDeprecatedEnvironments(List<BuildConfigData> configs) {
+        log.debug("Checking for deprecated environments");
+        Set<String> fetched = new HashSet<>();
+        Set<String> deprecated = new HashSet<>();
+
+        for (BuildConfigData config : configs) {
+            String envId = config.getEnvironmentId();
+
+            // skip if we already downloaded the environment
+            if (fetched.contains(envId)) {
+                if (deprecated.contains(envId)) {
+                    log.warn(
+                            "BuildConfig with the name: " + config.getName()
+                                    + " is using deprecated environment. (NOTE: changing to updated environment may cause rebuilds)");
+                }
+                continue;
+            }
+
+            Environment env = getEnvironment(envId);
+            fetched.add(envId);
+            if (env.isDeprecated()) {
+                log.warn(
+                        "BuildConfig with the name: " + config.getName()
+                                + " is using deprecated environment. (NOTE: changing to updated environment may cause rebuilds)");
+                deprecated.add(envId);
+            }
+        }
+    }
+
+    private Environment getEnvironment(String envId) {
+        try {
+            return environmentClient.getSpecific(envId);
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to download the environment with id " + envId, e);
+        }
     }
 
     private void setUpBuildDependencies() {
@@ -578,6 +620,8 @@ public class PncEntitiesImporter implements Closeable {
 
         configs = getBuildConfigs();
 
+        checkForDeprecatedEnvironments(configs);
+
         return new ImportResult(milestone, buildGroup, version, configs);
     }
 
@@ -612,6 +656,7 @@ public class PncEntitiesImporter implements Closeable {
         projectClient.close();
         repoClient.close();
         versionClient.close();
+        environmentClient.close();
         pncConfigurator.close();
     }
 }
