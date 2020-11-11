@@ -58,7 +58,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
  * DTO representing the build-config field in build-config.yaml
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
- * Date: 11/28/17
+ *         Date: 11/28/17
  */
 @Data
 public class BuildConfig {
@@ -82,8 +82,8 @@ public class BuildConfig {
     private String environmentName;
 
     /**
-     * If environmentId is not specified, use 'environmentSystemImageId' to find the environmentId (takes precedence before
-     * environmentName)
+     * If environmentId is not specified, use 'environmentSystemImageId' to find the environmentId (takes precedence
+     * before environmentName)
      */
     private String systemImageId;
 
