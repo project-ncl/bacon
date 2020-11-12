@@ -145,11 +145,13 @@ builds:
 
 The build environment used for builds has a unique id, name and system image id.
 
-We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`. `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what has been traditionally used, but it is problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable between PNC servers. Moreover, an environment may become deprecated over time, thus the environmentId should be kept up-to-date, which is not optimal.
+We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`. 
 
-The `environmentName` in contrast, is the same between different PNC servers and should be used if portability is a concern. Environments specified by `environmentName` are always using **the latest updates**. This is important because there will be changes to your build configurations in PNC, therefore, they may be **rebuilt**. 
+The `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what has been traditionally used, but it can be problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable. 
 
-The `systemImageId` is also the same between different PNC servers, the difference to `environmentName` is that the `systemImageId` **preserves** the docker-image version of the environment, which means that after some time, the version may become deprecated, and you may need to update from time to time. (**NOTE**: `systemImageIds` with `:latest` suffix will **no longer be available** in PNC)  
+To overcome the portability issue, it is possible to specify the `systemImageId` instead, which is the same across different PNC servers. Both `environmentId` and `systemImageId` **preserve the docker-image version** of the environment, which means that after some time the version may become deprecated and users may need to update the value every once in a while. (**NOTE**: `systemImageIds` with `:latest` suffix will **no longer be available** in PNC).
+
+The `environmentName` is as well the same between different PNC servers and thus portability across different PNC servers is not a concern. However, the big difference is that environments specified by `environmentName` are always using **the latest docker-image version**. This is important because there will be changes to your build configurations in PNC from time to time, which will cause **rebuilds** of the affected components.
 
 To get the `environmentId`, `environmentName` or the `systemImageId` of the build image, simply run:
 
