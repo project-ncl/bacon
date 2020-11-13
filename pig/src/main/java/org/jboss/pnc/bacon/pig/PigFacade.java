@@ -21,7 +21,10 @@ import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
+import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
+import org.jboss.pnc.bacon.pig.impl.config.LicenseGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.documents.DocumentGenerator;
 import org.jboss.pnc.bacon.pig.impl.javadoc.JavadocManager;
 import org.jboss.pnc.bacon.pig.impl.license.LicenseManager;
@@ -36,6 +39,7 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
 import org.jboss.pnc.bacon.pig.impl.repo.RepoManager;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.script.ScriptGenerator;
+import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
@@ -162,28 +166,44 @@ public final class PigFacade {
 
         RepositoryData repo = null;
 
-        if (repoZipPath != null) {
-            repo = parseRepository(new File(repoZipPath));
+        if (repoZipPath != null || context.getPigConfiguration()
+                .getFlow()
+                .getRepositoryGeneration()
+                .getStrategy() != RepoGenerationStrategy.IGNORE) {
+            if (repoZipPath != null) {
+                repo = parseRepository(new File(repoZipPath));
+            } else {
+                repo = generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
+            }
+            context.setRepositoryData(repo);
+            context.storeContext();
         } else {
-            repo = generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
+            log.info("Skipping Repo Generation");
         }
-        context.setRepositoryData(repo);
-        context.storeContext();
 
-        if (!skipSources) {
+        if (!(skipSources || context().getPigConfiguration()
+                .getFlow()
+                .getSourcesGeneration()
+                .getStrategy() == SourcesGenerationStrategy.IGNORE)) {
             generateSources();
 
         } else {
             log.info("Skipping Source Generation");
         }
 
-        if (!skipJavadoc) {
+        if (!(skipJavadoc || context.getPigConfiguration()
+                .getFlow()
+                .getJavadocGeneration()
+                .getStrategy() == JavadocGenerationStrategy.IGNORE)) {
             generateJavadoc();
         } else {
             log.info("Skipping Javadoc Generation");
         }
 
-        if (!skipLicenses && repo != null) {
+        if (!(skipLicenses || context.getPigConfiguration()
+                .getFlow()
+                .getLicensesGeneration()
+                .getStrategy() == LicenseGenerationStrategy.IGNORE)) {
             generateLicenses(strictLicenseCheck);
         } else {
             log.info("Skipping License Generation");
@@ -426,6 +446,7 @@ public final class PigFacade {
     }
 
     public static void generateJavadoc() {
+        abortIfContextDataAbsent();
         PigConfiguration pigConfiguration = context().getPigConfiguration();
         Map<String, PncBuild> builds = context().getBuilds();
         new JavadocManager(pigConfiguration, context().getReleasePath(), context().getDeliverables(), builds).prepare();
