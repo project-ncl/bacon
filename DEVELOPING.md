@@ -3,6 +3,7 @@
 
 <!-- TocDown Begin -->
   * [Prerequisites](#prerequisites)
+  * [Contribution Requirements](#contribution-requirements)
   * [Coding](#coding)
     * [Exception Handling](#exception-handling)
     * [Adding JSON Output](#adding-json-output)
@@ -14,6 +15,12 @@
 
 * Java 1.8 or later
 * Maven 3.3.9 or later
+
+## Contribution Requirements
+
+When contributing new features to Bacon, it is required to also provide tests, javadoc documentation and a description of the features to our Feature Guide in our [website](https://project-ncl.github.io/bacon/) (see the [Documentation](#documentation) section for more information).
+
+This helps the core developers have a better idea of what the new features are to maintain the project.
 
 ## Coding
 
