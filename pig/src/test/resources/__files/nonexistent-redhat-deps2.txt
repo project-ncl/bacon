@@ -1,0 +1,1 @@
+'io.quarkus:quarkus-bom:1.3.4.Final',

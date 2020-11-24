@@ -54,7 +54,18 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
             log.info("Old build path is {}", old_build_path);
 
             fileContent.addAll(diffDepsCsv(latest_build_path, old_build_path));
-            fileContent.add(diffArtifactsList(latest_build_path, old_build_path));
+            fileContent.add(
+                    diffTextFiles(
+                            latest_build_path,
+                            old_build_path,
+                            "extras/repository-artifact-list.txt",
+                            "artifacts"));
+            fileContent.add(
+                    diffTextFiles(
+                            latest_build_path,
+                            old_build_path,
+                            "extras/nonexistent-redhat-deps.txt",
+                            "nonexistent-redhat-deps"));
             fileContent.add(diffLicenseXml(latest_build_path, old_build_path));
             Files.write(Paths.get("post-build-info.txt"), fileContent, StandardCharsets.UTF_8);
         } catch (IOException | URISyntaxException e) {
@@ -75,25 +86,27 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
         postBuildCheck(stagingPath, productName);
     }
 
-    private static String diffArtifactsList(String latestBuildPath, String oldBuildPath)
-            throws IOException, URISyntaxException {
-        String artifactFilesPath = "extras/repository-artifact-list.txt";
-        String latestFilePath = latestBuildPath + artifactFilesPath;
-        String oldFilePath = oldBuildPath + artifactFilesPath;
-        File latestBuildFile = new File("latest_artifacts.txt");
-        File oldBuildFile = new File("old_artifacts.txt");
+    private static String diffTextFiles(
+            String latestBuildPath,
+            String oldBuildPath,
+            String filePath,
+            String deliverableType) throws IOException, URISyntaxException {
+        String latestFilePath = latestBuildPath + filePath;
+        String oldFilePath = oldBuildPath + filePath;
+        File latestBuildFile = new File("latest_" + deliverableType + ".txt");
+        File oldBuildFile = new File("old_" + deliverableType + ".txt");
 
         FileDownloadUtils.downloadTo(new URI(latestFilePath), latestBuildFile);
         FileDownloadUtils.downloadTo(new URI(oldFilePath), oldBuildFile);
 
         boolean areFilesEqual = FileUtils.contentEquals(latestBuildFile, oldBuildFile);
         log.info("Files are {}", (areFilesEqual == true ? "equal" : "not equal"));
-        String diff = "The artifact files are equal";
+        String diff = "The " + deliverableType + " files are equal";
         if (!(areFilesEqual)) {
             Set<String> latestFileContents = new HashSet<>(
                     FileUtils.readLines(latestBuildFile, StandardCharsets.UTF_8));
             Set<String> oldFileContents = new HashSet<>(FileUtils.readLines(oldBuildFile, StandardCharsets.UTF_8));
-            diff = "Artifacts present in new build and not present in old build are "
+            diff = deliverableType + " present in new build and not present in old build are "
                     + CollectionUtils.subtract(latestFileContents, oldFileContents);
         }
         return diff;
