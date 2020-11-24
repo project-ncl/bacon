@@ -35,7 +35,7 @@ public class QuarkusPostBuildAnalyzerTest {
         stubFor(
                 get(urlEqualTo("/quarkus/quarkus-1.0.0/extras/community-dependencies.csv")).willReturn(
                         aResponse().withHeader("Content-type", "text/csv").withBodyFile("community-deps1.csv")));
-        // stubbing text files
+        // stubbing artifact text files
         stubFor(
                 get(urlEqualTo("/quarkus/quarkus-1.0.1/extras/repository-artifact-list.txt")).willReturn(
                         aResponse().withHeader("Content-type", "text/plain; charset=UTF-8")
@@ -44,6 +44,15 @@ public class QuarkusPostBuildAnalyzerTest {
                 get(urlEqualTo("/quarkus/quarkus-1.0.0/extras/repository-artifact-list.txt")).willReturn(
                         aResponse().withHeader("Content-type", "text/plain; charset=UTF-8")
                                 .withBodyFile("repository-artifact-list1.txt")));
+        // stubbing nonexistent-redhat-deps files
+        stubFor(
+                get(urlEqualTo("/quarkus/quarkus-1.0.1/extras/nonexistent-redhat-deps.txt")).willReturn(
+                        aResponse().withHeader("Content-type", "text/plain; charset=UTF-8")
+                                .withBodyFile("nonexistent-redhat-deps2.txt")));
+        stubFor(
+                get(urlEqualTo("/quarkus/quarkus-1.0.0/extras/nonexistent-redhat-deps.txt")).willReturn(
+                        aResponse().withHeader("Content-type", "text/plain; charset=UTF-8")
+                                .withBodyFile("nonexistent-redhat-deps1.txt")));
         // stubbing license files
         stubFor(
                 get(urlEqualTo("/quarkus/quarkus-1.0.1/")).willReturn(
