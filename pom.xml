@@ -80,7 +80,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <picocli.version>4.5.2</picocli.version>
-        <pme.version>4.1</pme.version>
+        <pme.version>4.2</pme.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tagSuffix />
