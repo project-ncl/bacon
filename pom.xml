@@ -74,7 +74,7 @@
 
     <properties>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
-        <jaxb.version>2.2.11</jaxb.version>
+        <jaxb.version>3.0.0</jaxb.version>
         <junit.version>5.7.0</junit.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
