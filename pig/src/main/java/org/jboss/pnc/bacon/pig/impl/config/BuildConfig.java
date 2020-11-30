@@ -74,17 +74,21 @@ public class BuildConfig {
     private String externalScmUrl;
     private @NotBlank String scmRevision;
     private String description;
+
+    @FieldGroup("environment")
     private String environmentId;
 
     /**
      * If environmentId and systemImageId are not specified, use 'environmentName' to find the environmentId
      */
+    @FieldGroup("environment")
     private String environmentName;
 
     /**
      * If environmentId is not specified, use 'environmentSystemImageId' to find the environmentId (takes precedence
      * before environmentName)
      */
+    @FieldGroup("environment")
     private String systemImageId;
 
     private List<String> dependencies = new ArrayList<>();
@@ -124,6 +128,15 @@ public class BuildConfig {
                     // noinspection unchecked
                     ((Collection) f.get(this)).addAll(defaultValues);
                 } else {
+                    // don't override with defaults if there is any field in a group that has a value
+                    if (f.getAnnotation(FieldGroup.class) != null) {
+                        String group = f.getAnnotation(FieldGroup.class).value();
+                        Collection<Field> fieldsInSameGroup = getFellowFieldsInGroup(group);
+
+                        if (fieldsInSameGroup.stream().anyMatch(this::isNotNull)) {
+                            continue;
+                        }
+                    }
                     if (f.get(this) == null) {
                         f.set(this, f.get(defaults));
                     }
@@ -137,6 +150,27 @@ public class BuildConfig {
         if (buildType == null) {
             buildType = BuildType.MVN.toString();
         }
+    }
+
+    private boolean isNotNull(Field field) {
+        try {
+            return field.get(this) != null;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Unable to set default values for " + this);
+        }
+    }
+
+    public Collection<Field> getFellowFieldsInGroup(String group) {
+        Collection<Field> fields = new HashSet<>();
+        for (Field field : BuildConfig.class.getDeclaredFields()) {
+            FieldGroup groupAnnotation = field.getAnnotation(FieldGroup.class);
+
+            if (groupAnnotation != null && group.equals(groupAnnotation.value())) {
+                fields.add(field);
+            }
+        }
+
+        return fields;
     }
 
     public static Map<String, BuildConfig> mapByName(List<BuildConfig> newConfigs) {
@@ -288,5 +322,9 @@ public class BuildConfig {
 
         // if we're here, no environmentId could be found
         return null;
+    }
+
+    public String getRawEnvironmentId() {
+        return environmentId;
     }
 }

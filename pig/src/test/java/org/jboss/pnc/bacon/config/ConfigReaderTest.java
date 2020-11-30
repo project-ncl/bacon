@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.config;
 
 import com.google.common.collect.ImmutableMap;
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,19 @@ class ConfigReaderTest {
         assertNotNull(config);
         if (!config.getVersion().equals("3.5.1")) {
             fail("Version does not match predefined variable");
+        }
+    }
+
+    @Test
+    void shouldNotOverrideEnvironmentNameWithId() {
+        PigConfiguration config = loadBuildConfig("/build-config-environment-override.yaml");
+        assertNotNull(config);
+        for (BuildConfig build : config.getBuilds()) {
+            if (build.getName().equals("profile-injection-1.0.0")) {
+                if (build.getRawEnvironmentId() != null && build.getEnvironmentName().equals("OpenJDK 1.8")) {
+                    fail("The envId from defaultBuildParameters should not override if environmentName is declared");
+                }
+            }
         }
     }
 
