@@ -122,7 +122,14 @@ public class BuildConfig {
                 if (Collection.class.isAssignableFrom(f.getType())) {
                     Collection<?> defaultValues = (Collection<?>) f.get(defaults);
                     // noinspection unchecked
-                    ((Collection) f.get(this)).addAll(defaultValues);
+                    if (f.get(this) != null) {
+                        ((Collection) f.get(this)).addAll(defaultValues);
+                    } else {
+                        log.warn(
+                                "Your build-config.yaml '" + f.getName()
+                                        + "' field is null instead of empty array [].");
+                        f.set(this, defaultValues);
+                    }
                 } else {
                     if (f.get(this) == null) {
                         f.set(this, f.get(defaults));
