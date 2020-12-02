@@ -119,7 +119,7 @@ public class RepoBuilder {
 
     private Properties settingsProps(boolean tempBuild, String additionalRepo) {
         Properties result = new Properties();
-        if (tempBuild) {
+        if (tempBuild && additionalRepo != null) {
             String repoDef = "--> <repository>\n" + "          <id>additional</id>\n" + "          <url>"
                     + additionalRepo + "</url>\n" + "        </repository> <!--";
             result.put("ADDITIONAL_REPOS", repoDef);
