@@ -51,6 +51,8 @@ A PiG `build-config.yaml` looks like [this](https://github.com/project-ncl/bacon
 
 # Operation
 
+In all of the operations above, you can override the variables in your `build-config.yaml` by specifying the `-e` or `--env` flag. More details [here](build-config.html#usage-of-yaml-variables)
+
 ## Configure PNC Entities
 
 Usage:
@@ -62,7 +64,7 @@ bacon pig configure <directrory containing build-config.yaml>
 
 Usage:
 ```bash
-bacon pig configure <directrory containing build-config.yaml>
+bacon pig build <directrory containing build-config.yaml>
 ```
 
 You can specify if you want temporary builds or not with the `-t` flag.
