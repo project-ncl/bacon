@@ -664,7 +664,7 @@
   {
     "groupId": "com.github.fge",
     "artifactId": "btf",
-    "version": "1.2.0.redhat-00006",
+    "version-regexp": "1.2.0.*",
     "licenses": [
       {
         "name": "GNU Lesser General Public License v3.0 or later",
@@ -679,7 +679,7 @@
   {
     "groupId": "com.github.fge",
     "artifactId": "jackson-coreutils",
-    "version": "1.6.0.redhat-00006",
+    "version-regexp": "1.6.0.*",
     "licenses": [
       {
         "name": "GNU Lesser General Public License v3.0 or later",
@@ -694,7 +694,7 @@
   {
     "groupId": "com.github.fge",
     "artifactId": "msg-simple",
-    "version": "1.1.0.redhat-00005",
+    "version-regexp": "1.1.0.*",
     "licenses": [
       {
         "name": "GNU Lesser General Public License v3.0 or later",
