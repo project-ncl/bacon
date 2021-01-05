@@ -62,7 +62,12 @@ import static picocli.CommandLine.ScopeType.INHERIT;
  */
 
 @Slf4j
-@Command(name = "bacon", versionProvider = VersionProvider.class, subcommands = { Da.class, Pig.class, Pnc.class })
+@Command(
+        name = "bacon",
+        scope = INHERIT,
+        mixinStandardHelpOptions = true,
+        versionProvider = VersionProvider.class,
+        subcommands = { Da.class, Pig.class, Pnc.class })
 public class App {
 
     private String profile = "default";
@@ -107,14 +112,6 @@ public class App {
     public void setConfigurationFileLocation(String configPath) {
         this.configPath = configPath;
     }
-
-    // Both help/version commands could use standard mixin but in order to propagate the help via inheritance it is
-    // explicitly defined here. These could be removed once https://github.com/remkop/picocli/issues/1164 is complete.
-    @Option(names = { "-h", "--help" }, usageHelp = true, description = "display this help message", scope = INHERIT)
-    boolean usageHelpRequested;
-
-    @Option(names = { "-V", "--version" }, versionHelp = true, description = "display version info")
-    boolean versionInfoRequested;
 
     public int run(String[] args) {
 
@@ -203,9 +200,6 @@ public class App {
     }
 
     private int executionStrategy(CommandLine commandLine, CommandLine.ParseResult parseResult) {
-        if (!versionInfoRequested) { // Don't print version information if we are outputting version explicitly
-            commandLine.printVersionHelp(System.err);
-        }
         init(); // custom initialization to be done before executing any command or subcommand
         return new CommandLine.RunLast().execute(parseResult); // default execution strategy
     }

@@ -193,16 +193,17 @@ class AppTest {
                                             "-h" })));
 
             String expected = String.format(
-                    "Usage: bacon pnc admin maintenance-mode activate [-hov]%n"
+                    "Usage: bacon pnc admin maintenance-mode activate [-hovV]%n"
                             + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>%n"
                             + "This will disable any new builds from being accepted%n"
                             + "      <reason>              Reason%n"
-                            + "  -h, --help                display this help message%n"
+                            + "  -h, --help                Show this help message and exit.%n"
                             + "  -o, --jsonOutput          use json for output (default to yaml)%n"
                             + "  -p, --configPath=<configurationFileLocation>%n"
                             + "                            Path to PNC configuration folder%n"
                             + "      --profile=<profile>   PNC Configuration profile%n"
-                            + "  -v, --verbose             Verbose output%n" + "%n" + "Example:%n"
+                            + "  -v, --verbose             Verbose output%n"
+                            + "  -V, --version             Print version information and exit.%n" + "%n" + "Example:%n"
                             + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for%n"
                             + "upcoming migration\"%n");
             assertThat(text).contains(expected);
