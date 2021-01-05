@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -67,6 +68,8 @@ public class BuildConfig {
     private static final Logger log = LoggerFactory.getLogger(BuildConfig.class);
     private static final ClientCreator<EnvironmentClient> CREATOR = new ClientCreator<>(EnvironmentClient::new);
 
+    // Name can contain only alpha-numeric characters, hyphens, underscores and periods and cannot start with a hyphen
+    @Pattern(regexp = "^[a-zA-Z0-9\\._][a-zA-Z0-9\\._-]*$")
     private @NotBlank String name;
     private @NotBlank String project;
     private @NotBlank String buildScript;
