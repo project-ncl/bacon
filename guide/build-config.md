@@ -204,6 +204,28 @@ Strategy options are:
 - BUILD_GROUP
 - MILESTONE
 
+The `IGNORE` strategy won't produce any repository
+
+The `GENERATE` strategy generates repository based on build. You need to specify `sourceArtifact` and `sourceBuild`. `sourceArtifact` is a regular expression pattern for the file name of a BOM that is used for repository generation, `sourceBuild` is name of build configuration with build for BOM.
+
+`Optional parameters:`
+- `additionalRepo` - used to specify additonal maven repositories, e.g. for Quarkus build from master where we do a fake release to repository.engineering.redhat.com; used only for temp builds
+- `ignored` - set of artifact ids (dependencies in the BOM) to ignore, i.e. not copy from BOM to the generated project's pom
+
+
+The `DOWNLOAD` strategy generates repository based on artifact. You need to specify `sourceArtifact` and `sourceBuild`. Specified artifact is downloaded and repackaged.
+
+The `BUILD_CONFIGS` strategy generates repository based on specified build configurations. You need to specify `sourceBuilds`. Redhat artifacts are exctracted from last successful build of specified build configurations, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
+
+The `BUILD_GROUP` strategy generates repository for builds included in pnc build group. You need to specify `group`. Redhat artifacts are then sorted from builds included in `group`, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
+
+The `MILESTONE` - not implemented yet
+
+`Parameters available in all strategies:` 
+- `additionalArtifacts` - artifacts to be specifically added to the repository from specific builds. Should use regular expressions to match any incremental suffixes.
+- `externalAdditionalArtifacts` - artifacts from other builds, not within this product's build group. This list should contain artifact identifiers, as shown in the PNC UI.
+
+
 #### licenses generation
 Strategy options are:
 - IGNORE (default)
@@ -231,6 +253,10 @@ Strategy options are:
 - GENERATE
 - DOWNLOAD
 
+The `IGNORE` strategy won't produce any javadoc
+
+The `GENERATE` strategy generates javadocs based on sources artifact in the builds. It requires that the repository generation is **not** ignored.
+
 The `DOWNLOAD` strategy is identical to that of the license generation, except that we specify the artifact which contains all the javadocs.
 
 #### Sources generation
@@ -239,6 +265,17 @@ Strategy options are:
 - GENERATE (default)
 - GENERATE_EXTENDED
 - GENERATE_SELECTED
+
+The `IGNORE` strategy won't produce any sources zip.
+
+The `GENERATE` strategy get sources from builds. 
+
+The `GENERATE_EXTENDED` strategy get same result as `GENERATE` and add sources of unreleased dependencies. 
+
+The `GENERATE_SELECTED` strategy get sources from selected `sourceBuild`. 
+
+All `GENERATE*` strategies require that the repository generation is **not** ignored.
+
 
 ## Usage of YAML variables
 You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:
