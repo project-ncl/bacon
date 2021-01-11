@@ -270,11 +270,10 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     private String devtoolsJarName() {
         String bomArtifactId = getBomArtifactId();
-        String jsonSuffix = "quarkus-platform-descriptor-" + quarkusVersion + "-" + quarkusVersion + ".json";
         if (!isProductBom(bomArtifactId)) {
-            return "quarkus-bom-" + jsonSuffix;
+            return "quarkus-bom-descriptor-json-" + quarkusVersion + ".json";
         } else {
-            return bomArtifactId + "-" + jsonSuffix;
+            return bomArtifactId + "-" + quarkusVersion + ".json";
         }
     }
 
