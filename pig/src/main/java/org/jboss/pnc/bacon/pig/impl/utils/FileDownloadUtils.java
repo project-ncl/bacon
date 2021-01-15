@@ -60,6 +60,12 @@ public class FileDownloadUtils {
         log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
+    public static void downloadTo(URI downloadUrl, File targetPath, int attempts) {
+        log.info("Downloading {} to {}", downloadUrl, targetPath);
+        doDownload(downloadUrl, targetPath, attempts);
+        log.info("Downloaded {} to {}", downloadUrl, targetPath);
+    }
+
     private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft) {
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
             downloadWithClient(httpClient, downloadUrl, targetPath);
