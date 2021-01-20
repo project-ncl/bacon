@@ -86,12 +86,73 @@ This section covers the required deliverables for a product release:
 </tr>
 </table>
 
-## Add ons
+### Maven Repository
+
+You can generate a repository by adding a `repositoryGeneration` section to your `build-config.yaml`. The intended generation behaviour can be configured using the appropriate strategy. You can also optionally explicitly include or exclude artifacts based on a pattern.
+
+A simple example configuration is:
+
+```
+repositoryGeneration:
+  strategy: BUILD_GROUP
+```
+
+The above will build a repository based on the PNC build group.
+
+#### Strategies
+
 
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>TODO</b>
+    <b>TODO</b> Add details about additional strategies and options.
 </td>
 </tr>
 </table>
+
+PiG supports various strategies for generating a maven repository:
+
+- **BUILD_GROUP**
+You can use the `BUILD_GROUP` strategy to generate a repository based on the PNC group config. This produces a repository with build and runtime dependencies that are based on an amalgamated list of dependencies retrieved from the builds in a group build.
+
+- **IGNORE**
+Setting the strategy to `IGNORE` will disable repository generation. This is particularly useful to temporarily disable generation as you can leave the rest of your configuration in place.
+
+#### Excluding Artifacts
+
+You can exclude artifacts based on a pattern added to an `excludeArtifacts` section, an example configuration utilising this to exclude war and zip artifacts:
+
+```
+repositoryGeneration:
+  strategy: BUILD_GROUP
+  excludeArtifacts:
+    - '.*:war:.*'
+    - '.*:zip.*'
+```
+
+#### Including Additional Artifacts
+
+You can include artifacts by adding an `externalAdditionalArtifacts` section and specifying them in the format of `groupId:artifact:artifactId:type:classifier`, an example configuration to add an additional artifact:
+
+```
+repositoryGeneration:
+  strategy: BUILD_GROUP
+  externalAdditionalArtifacts:
+    - 'com.google.guava:guava-parent:pom:18.0.0.redhat-1'
+```
+
+
+## Add ons
+
+### Offliner Manifest
+
+PiG is able to generate an offliner manifest in plain text compatible with the offliner tool. You can find more information about the tool [here](https://release-engineering.github.io/offliner/). This also takes into account any explicit inclusions or exclusions you may have specified as part of your `repositoryGeneration` step.
+
+Adding the following to the bottom of your `build-config.yaml` will generate `offliner.txt` inside the target directory.
+
+```
+addons:
+  offlineManifestGenerator:
+    offlineManifestFileName: offliner.txt
+
+```
