@@ -225,9 +225,16 @@ public final class PigFacade {
     }
 
     public static PigReleaseOutput release() {
-        abortIfContextDataAbsent();
 
+        abortIfBuildDataAbsentFromContext();
         pushToBrew(false);
+
+        // if repository data not present, skip generation of nvr list and upload script
+        if (context().getRepositoryData() == null) {
+            log.info("Skipping generation of nvr list and upload script since repository has not been generated");
+            return new PigReleaseOutput("", "", "");
+        }
+
         generateNvrList();
 
         // generate upload to candidates script
