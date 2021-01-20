@@ -165,7 +165,7 @@ public class Pig {
     }
 
     /* System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "10"); */
-    @Command(name = "run", description = "Run all the steps")
+    @Command(name = "run", description = "Run all the steps, except the release & pre-process-yaml phases")
     public static class Run extends PigCommand<PigRunOutput> {
 
         // TODO: it is doable to do this step with build group id only, add this functionality
@@ -422,7 +422,7 @@ public class Pig {
     @Command(
             name = "release",
             description = "Push builds to brew, generate the NVR list, "
-                    + "close the PNC milestone, generate the upload to candidates script")
+                    + "close the PNC milestone, generate the upload to candidates script if repository generated")
     public static class Release extends PigCommand<PigReleaseOutput> {
 
         @Override
