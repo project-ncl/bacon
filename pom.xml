@@ -74,6 +74,7 @@
 
     <properties>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
+        <jackson.version>2.12.1</jackson.version>
         <jaxb.version>2.2.11</jaxb.version>
         <junit.version>5.7.0</junit.version>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -81,7 +82,6 @@
 
         <picocli.version>4.6.1</picocli.version>
         <pme.version>4.2</pme.version>
-        <jackson.version>2.12.1</jackson.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tagSuffix />
