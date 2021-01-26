@@ -204,7 +204,7 @@ Strategy options are:
 - BUILD_GROUP
 - MILESTONE
 
-The `IGNORE` strategy won't produce any repository
+The `IGNORE` strategy won't produce any repository. This is particularly useful to temporarily disable generation as you can leave the rest of your configuration in place.
 
 The `GENERATE` strategy generates repository based on build. You need to specify `sourceArtifact` and `sourceBuild`. `sourceArtifact` is a regular expression pattern for the file name of a BOM that is used for repository generation, `sourceBuild` is name of build configuration with build for BOM.
 
@@ -217,14 +217,37 @@ The `DOWNLOAD` strategy generates repository based on artifact. You need to spec
 
 The `BUILD_CONFIGS` strategy generates repository based on specified build configurations. You need to specify `sourceBuilds`. Redhat artifacts are exctracted from last successful build of specified build configurations, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
 
-The `BUILD_GROUP` strategy generates repository for builds included in pnc build group. You need to specify `group`. Redhat artifacts are then sorted from builds included in `group`, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
+The `BUILD_GROUP` strategy generates repository for builds included in pnc build group. This produces a repository with build and runtime dependencies that are based on an amalgamated list of dependencies retrieved from the builds in a group build.
+
+You need to specify `group`. Redhat artifacts are then sorted from builds included in `group`, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
 
 The `MILESTONE` - not implemented yet
 
-`Parameters available in all strategies:` 
+##### Parameters available in all strategies
+
 - `additionalArtifacts` - artifacts to be specifically added to the repository from specific builds. Should use regular expressions to match any incremental suffixes.
 - `externalAdditionalArtifacts` - artifacts from other builds, not within this product's build group. This list should contain artifact identifiers, as shown in the PNC UI.
 
+  Example:
+  ```
+  repositoryGeneration:
+    strategy: BUILD_GROUP
+    externalAdditionalArtifacts:
+      - 'com.google.guava:guava-parent:pom:18.0.0.redhat-1'
+  ```
+
+- `excludeArtifacts` - exclude artifacts based on a pattern
+
+  Example:
+  ```
+  repositoryGeneration:
+    strategy: BUILD_GROUP
+    excludeArtifacts:
+      - '.*:war:.*'
+      - '.*:zip.*'
+  ```
+
+The artifact information is specified in the format of `groupId:artifact:artifactId:type:classifier`
 
 #### licenses generation
 Strategy options are:
@@ -275,7 +298,6 @@ The `GENERATE_EXTENDED` strategy get same result as `GENERATE` and add sources o
 The `GENERATE_SELECTED` strategy get sources from selected `sourceBuild`. 
 
 All `GENERATE*` strategies require that the repository generation is **not** ignored.
-
 
 ## Usage of YAML variables
 You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:
