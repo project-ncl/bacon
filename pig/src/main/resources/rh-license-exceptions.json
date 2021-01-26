@@ -43,7 +43,7 @@
   {
     "groupId": "antlr",
     "artifactId": "antlr",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "The Antlr 2.7.7 License",
@@ -54,7 +54,7 @@
   {
     "groupId": "dom4j",
     "artifactId": "dom4j",
-    "version-regexp": "1.6.*",
+    "version-regexp": "1\\.6\\..+",
     "licenses": [
       {
         "name": "Plexus Classworlds License",
@@ -297,7 +297,7 @@
   {
     "groupId": "org.scala-lang",
     "artifactId": "scala",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -308,7 +308,7 @@
   {
     "groupId": "org.scala-lang",
     "artifactId": "scala-library",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -319,7 +319,7 @@
   {
     "groupId": "org.scala-lang",
     "artifactId": "scala-reflect",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -330,7 +330,7 @@
   {
     "groupId": "org.scala-lang",
     "artifactId": "scala-compiler",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -554,7 +554,7 @@
   {
     "groupId": "org.apache.kafka",
     "artifactId": "kafka_2.12",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -565,7 +565,7 @@
   {
     "groupId": "org.apache.kafka",
     "artifactId": "kafka-clients",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -576,7 +576,7 @@
   {
     "groupId": "org.apache.kafka",
     "artifactId": "connect-json",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -587,7 +587,7 @@
   {
     "groupId": "org.apache.kafka",
     "artifactId": "connect-api",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -598,7 +598,7 @@
   {
     "groupId": "org.apache.kafka",
     "artifactId": "kafka-streams",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -620,7 +620,7 @@
   {
     "groupId": "com.fasterxml.jackson.module",
     "artifactId": "jackson-module-scala_2.12",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -664,7 +664,7 @@
   {
     "groupId": "com.github.fge",
     "artifactId": "btf",
-    "version-regexp": "1.2.0.*",
+    "version-regexp": "1\\.2\\.0\\..+",
     "licenses": [
       {
         "name": "GNU Lesser General Public License v3.0 or later",
@@ -679,7 +679,7 @@
   {
     "groupId": "com.github.fge",
     "artifactId": "jackson-coreutils",
-    "version-regexp": "1.6.0.*",
+    "version-regexp": "1\\.6\\.0\\..+",
     "licenses": [
       {
         "name": "GNU Lesser General Public License v3.0 or later",
@@ -694,7 +694,7 @@
   {
     "groupId": "com.github.fge",
     "artifactId": "msg-simple",
-    "version-regexp": "1.1.0.*",
+    "version-regexp": "1\\.1\\.0\\..+",
     "licenses": [
       {
         "name": "GNU Lesser General Public License v3.0 or later",
@@ -724,7 +724,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-client",
-    "version-regexp": "1.1.*",
+    "version-regexp": "1\\.1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -735,7 +735,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-core",
-    "version-regexp": "1.1.*",
+    "version-regexp": "1\\.1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -746,7 +746,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-thrift",
-    "version-regexp": "1.1.*",
+    "version-regexp": "1\\.1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -757,7 +757,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-tracerresolver",
-    "version-regexp": "1.1.*",
+    "version-regexp": "1\\.1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -794,7 +794,7 @@
   {
     "groupId": "io.agroal",
     "artifactId": "agroal-api",
-    "version-regexp": "1.8*",
+    "version-regexp": "1\\.8.*",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -805,7 +805,7 @@
   {
     "groupId": "io.agroal",
     "artifactId": "agroal-pool",
-    "version-regexp": "1.8*",
+    "version-regexp": "1\\.8.*",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -816,7 +816,7 @@
   {
     "groupId": "io.reactivex",
     "artifactId": "rxjava",
-    "version-regexp": "1.*",
+    "version-regexp": "1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -827,7 +827,7 @@
   {
     "groupId": "io.reactivex.rxjava2",
     "artifactId": "rxjava",
-    "version-regexp": "2.*",
+    "version-regexp": "2\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -838,7 +838,7 @@
   {
     "groupId": "io.reactivex.rxjava3",
     "artifactId": "rxjava",
-    "version-regexp": "3.*",
+    "version-regexp": "3\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -882,7 +882,7 @@
   {
     "groupId": "jline",
     "artifactId": "jline",
-    "version-regexp": "0.9.94.redhat-3",
+    "version-regexp": "0\\.9\\.94\\.redhat-3",
     "licenses": [
       {
         "name": "BSD 3-clause \"New\" or \"Revised\" License",
@@ -893,7 +893,7 @@
   {
     "groupId": "net.iharder",
     "artifactId": "base64",
-    "version-regexp": "2.3.8.redhat-7",
+    "version-regexp": "2\\.3\\.8\\.redhat-7",
     "licenses": [
       {
         "name": "Public Domain",
@@ -904,7 +904,7 @@
   {
     "groupId": "org.eclipse.jgit",
     "artifactId": "org.eclipse.jgit",
-    "version-regexp": "5.0.2.201807311906-r-redhat-00001",
+    "version-regexp": "5\\.0\\.2\\.201807311906-r-redhat-00001",
     "licenses": [
       {
         "name": "Eclipse Distribution License (New BSD License)",
@@ -915,7 +915,7 @@
   {
     "groupId": "org.eclipse.jgit",
     "artifactId": "org.eclipse.jgit-parent",
-    "version-regexp": "5.0.2.201807311906-r-redhat-00001",
+    "version-regexp": "5\\.0\\.2\\.201807311906-r-redhat-00001",
     "licenses": [
       {
         "name": "Eclipse Distribution License (New BSD License)",
@@ -926,7 +926,7 @@
   {
     "groupId": "jaxen",
     "artifactId": "jaxen",
-    "version-regexp": "1.1.6.redhat-2",
+    "version-regexp": "1\\.1\\.6\\.redhat-2",
     "licenses": [
       {
         "name": "BSD License 2.0",
