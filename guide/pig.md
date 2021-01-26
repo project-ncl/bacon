@@ -40,15 +40,6 @@ The application is configured via the `build-config.yaml` file.
 
 A PiG `build-config.yaml` looks like [this](https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml). See [this](build-config.html) for a detailed guide of `build-config.yaml`
 
-<table bgcolor="#ffff00">
-<tr>
-<td>
-    <b>TODO</b> add a command that allows users to specify variables via cli
-</td>
-</tr>
-</table>
-
-
 # Operation
 
 In all of the operations above, you can override the variables in your `build-config.yaml` by specifying the `-e` or `--env` flag. More details [here](build-config.html#usage-of-yaml-variables)
