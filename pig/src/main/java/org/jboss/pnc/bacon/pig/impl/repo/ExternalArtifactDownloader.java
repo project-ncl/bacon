@@ -50,23 +50,14 @@ public class ExternalArtifactDownloader {
         String indyUrl = gav.isTemporary() ? Indy.getIndyTempUrl() : Indy.getIndyUrl();
 
         URI downloadUrl = URI.create(String.format("%s/%s", indyUrl, gav.toUri()));
-        if ("sources".equals(gav.getClassifier()) || "javadoc".equals(gav.getClassifier())) {
-            try {
-                FileDownloadUtils.downloadTo(downloadUrl, targetPath, 1);
-            } catch (RuntimeException any) {
-                if (sourcesOptional && "sources".equals(gav.getClassifier()) || "javadoc".equals(gav.getClassifier())) {
-                    log.warn("Unable to download sources for {}", gav, any);
-                } else {
-                    throw any;
-                }
-            }
-        } else {
-            try {
-                FileDownloadUtils.downloadTo(downloadUrl, targetPath);
-            } catch (RuntimeException any) {
+        try {
+            FileDownloadUtils.downloadTo(downloadUrl, targetPath);
+        } catch (RuntimeException any) {
+            if (sourcesOptional && "sources".equals(gav.getClassifier()) || "javadoc".equals(gav.getClassifier())) {
+                log.warn("Unable to download sources for {}", gav, any);
+            } else {
                 throw any;
             }
-
         }
 
         return targetPath;
