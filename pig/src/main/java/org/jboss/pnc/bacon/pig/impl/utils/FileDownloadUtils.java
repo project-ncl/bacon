@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -26,8 +27,11 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.NotFoundException;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -63,6 +67,8 @@ public class FileDownloadUtils {
     private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft) {
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
             downloadWithClient(httpClient, downloadUrl, targetPath);
+        } catch (NotFoundException nfe) {
+            throw new RuntimeException("URL " + downloadUrl + " returns status 404: Not Found", nfe);
         } catch (Exception e) {
             attemptsLeft--;
             if (attemptsLeft == 0) {
@@ -81,11 +87,14 @@ public class FileDownloadUtils {
     }
 
     private static void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath)
-            throws Exception {
+            throws NotFoundException, HttpException, IOException {
         try (CloseableHttpResponse response = httpClient.execute(new HttpGet(downloadUrl))) {
             int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 404) {
+                throw new NotFoundException();
+            }
             if (statusCode < 200 || statusCode > 299) {
-                throw new Exception("Invalid status code for download");
+                throw new HttpException("Invalid status code for download");
             }
             try (InputStream input = response.getEntity().getContent();
                     FileOutputStream output = new FileOutputStream(targetPath)) {
