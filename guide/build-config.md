@@ -221,6 +221,9 @@ The `BUILD_GROUP` strategy generates repository for builds included in pnc build
 
 You need to specify `group`. Redhat artifacts are then sorted from builds included in `group`, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
 
+`Optional parameters:`
+- `excludeSourceBuilds` - used to specify the list of build configurations that you don't want to be included in the generated repository.
+
 The `MILESTONE` - not implemented yet
 
 ##### Parameters available in all strategies
