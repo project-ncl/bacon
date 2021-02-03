@@ -170,9 +170,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             throw new RuntimeException("There are no builds captured for the build group. Aborting!");
         }
         List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
-        for (PncBuild build : builds.values()) {
-            getRedhatArtifacts(artifactsToPack, build);
-        }
+        builds.values()
+                .stream()
+                .filter(b -> !generationData.getExcludeSourceBuilds().contains(b.getName()))
+                .forEach(b -> getRedhatArtifacts(artifactsToPack, b));
         File sourceDir = createMavenGenerationDir();
         filterAndDownload(artifactsToPack, sourceDir);
         return repackage(sourceDir);
