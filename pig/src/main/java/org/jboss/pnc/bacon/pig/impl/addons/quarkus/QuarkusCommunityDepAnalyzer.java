@@ -148,13 +148,20 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     private Path buildReactiveProject(String settingsSelector) {
-        Path projectPath = generateQuarkusProject(artifactId -> artifactId.contains("reactive"), settingsSelector);
+        Path projectPath = generateQuarkusProject(
+                artifactId -> artifactId.contains("micrometer"),
+                artifactId -> !artifactId.contains("metrics"),
+                settingsSelector);
         buildProject(projectPath, settingsSelector);
         return projectPath;
     }
 
     private Path buildNonReactiveProject(String settingsSelector) {
-        Path projectPath = generateQuarkusProject(artifactId -> !artifactId.contains("reactive"), settingsSelector);
+        Path projectPath = generateQuarkusProject(
+                artifactId -> !artifactId.contains("micrometer"),
+                artifactId -> artifactId.contains("metrics"),
+                settingsSelector);
+        buildProject(projectPath, settingsSelector);
         buildProject(projectPath, settingsSelector);
         return projectPath;
     }
@@ -222,13 +229,18 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
     private void buildProject(Path projectPath, String settingsSelector) {
         log.info("Building the project {}", projectPath.toAbsolutePath());
-        OSCommandExecutor.runCommandIn("mvn -B clean package " + repoDefinition + settingsSelector, projectPath);
+        OSCommandExecutor.runCommandIn(
+                "mvn -Dmaven.test.skip=true -B clean package " + repoDefinition + settingsSelector,
+                projectPath);
     }
 
-    private Path generateQuarkusProject(Predicate<String> artifactIdSelector, String settingsSelector) {
+    private Path generateQuarkusProject(
+            Predicate<String> artifactsAllowed,
+            Predicate<String> artifactsNotAllowed,
+            String settingsSelector) {
         Path tempProjectLocation = mkTempDir("q-dep-analysis-generated-project").toPath();
         List<String> extensionArtifactIds = findProductizedExtensions().stream()
-                .filter(artifactIdSelector)
+                .filter(artifactsAllowed.and(artifactsNotAllowed))
                 .collect(Collectors.toList());
         String command = String.format(
                 "mvn -X io.quarkus:quarkus-maven-plugin:%s:create -DprojectGroupId=tmp -DprojectArtifactId=tmp "
@@ -271,7 +283,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     private String devtoolsJarName() {
         String bomArtifactId = getBomArtifactId();
         if (!isProductBom(bomArtifactId)) {
-            return "quarkus-bom-descriptor-json-" + quarkusVersion + ".json";
+            return "quarkus-bom-quarkus-platform-descriptor-" + quarkusVersion + "-" + quarkusVersion + ".json";
         } else {
             return bomArtifactId + "-" + quarkusVersion + ".json";
         }
