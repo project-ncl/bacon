@@ -285,7 +285,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         if (!isProductBom(bomArtifactId)) {
             return "quarkus-bom-quarkus-platform-descriptor-" + quarkusVersion + "-" + quarkusVersion + ".json";
         } else {
-            return bomArtifactId + "-" + quarkusVersion + ".json";
+            return "quarkus-product-bom-quarkus-platform-descriptor-" + quarkusVersion + "-" + quarkusVersion + ".json";
         }
     }
 
