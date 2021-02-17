@@ -691,6 +691,36 @@
       }
     ]
   },
+    {
+        "groupId": "com.github.java-json-tools",
+        "artifactId": "json-patch",
+        "version-regexp": "1\\.13\\.0\\..+",
+        "licenses": [
+            {
+                "name": "GNU Lesser General Public License v3.0 or later",
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
+            },
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "com.github.java-json-tools",
+        "artifactId": "jackson-coreutils",
+        "version-regexp": "2\\.0\\.0\\..+",
+        "licenses": [
+            {
+                "name": "GNU Lesser General Public License v3.0 or later",
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
+            },
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
   {
     "groupId": "com.github.fge",
     "artifactId": "msg-simple",
