@@ -93,7 +93,6 @@ public class OfflineManifestGenerator extends AddOn {
         artifactsToListRaw.removeIf(artifact -> {
             for (String exclusion : exclusions) {
                 if (Pattern.matches(exclusion, artifact.getGapv())) {
-                    log.info("Excluded " + artifact);
                     return true;
                 }
             }
