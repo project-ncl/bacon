@@ -152,42 +152,22 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 "quarkus-integration-test-neo4j",
                 "quarkus-integration-test-smallrye-metrics ");
 
-        Path nonReactiveExcludingQuarkusMicrometerProject = buildNonReactiveProject(
+        Path excludingQuarkusMicrometerProject = buildProjectExcludingSelectedExtensions(
                 settingsSelector,
                 extensionsContainingQuarkusMicrometer);
-        Path nonReactiveExcludingQuarkusSmallryeMetricsProject = buildNonReactiveProject(
-                settingsSelector,
-                extensionsContainingQuarkusSmallryeMetrics);
-        Path reactiveProjectExcludingQuarkusMicrometer = buildReactiveProject(
-                settingsSelector,
-                extensionsContainingQuarkusMicrometer);
-        Path reactiveProjectExcludingQuarkusSmallRye = buildReactiveProject(
+
+        Path excludingQuarkusSmallryeMetricsProject = buildProjectExcludingSelectedExtensions(
                 settingsSelector,
                 extensionsContainingQuarkusSmallryeMetrics);
 
         Set<GAV> gavs = listDependencies(
-                nonReactiveExcludingQuarkusMicrometerProject,
-                Paths.get(extrasPath, "community-analysis-non-reactive-excluding-quarkus-micrometer-tree.txt"),
+                excludingQuarkusMicrometerProject,
+                Paths.get(extrasPath, "community-analysis-excluding-quarkus-micrometer-tree.txt"),
                 settingsSelector);
         gavs.addAll(
                 listDependencies(
-                        nonReactiveExcludingQuarkusSmallryeMetricsProject,
-                        Paths.get(
-                                extrasPath,
-                                "community-analysis-non-reactive-excluding-quarkus-smallrye-metrics-tree.txt"),
-                        settingsSelector));
-        gavs.addAll(
-                listDependencies(
-                        reactiveProjectExcludingQuarkusMicrometer,
-                        Paths.get(extrasPath, "community-analysis-reactive-excluding-quarkus-micrometer-tree.txt"),
-                        settingsSelector));
-
-        gavs.addAll(
-                listDependencies(
-                        reactiveProjectExcludingQuarkusSmallRye,
-                        Paths.get(
-                                extrasPath,
-                                "community-analysis-reactive-excluding-quarkus-smallrye-metrics-tree.txt"),
+                        excludingQuarkusSmallryeMetricsProject,
+                        Paths.get(extrasPath, "community-analysis-excluding-quarkus-smallrye-metrics-tree.txt"),
                         settingsSelector));
 
         CommunityDepAnalyzer depAnalyzer = new CommunityDepAnalyzer(gavs);
@@ -205,19 +185,11 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         }
     }
 
-    private Path buildReactiveProject(String settingsSelector, Collection<String> extensionExcludeFilterList) {
+    private Path buildProjectExcludingSelectedExtensions(
+            String settingsSelector,
+            Collection<String> extensionExcludeFilterList) {
         Path projectPath = generateQuarkusProject(
-                artifactId -> artifactId.contains("reactive")
-                        && extensionExcludeFilterList.stream().noneMatch(it -> it.contains(artifactId)),
-                settingsSelector);
-        buildProject(projectPath, settingsSelector);
-        return projectPath;
-    }
-
-    private Path buildNonReactiveProject(String settingsSelector, Collection<String> extensionExcludeFilterList) {
-        Path projectPath = generateQuarkusProject(
-                artifactId -> !artifactId.contains("reactive")
-                        && extensionExcludeFilterList.stream().noneMatch(it -> it.contains(artifactId)),
+                artifactId -> extensionExcludeFilterList.stream().noneMatch(it -> it.contains(artifactId)),
                 settingsSelector);
         buildProject(projectPath, settingsSelector);
         return projectPath;
