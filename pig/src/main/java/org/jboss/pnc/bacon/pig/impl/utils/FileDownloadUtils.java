@@ -59,9 +59,8 @@ public class FileDownloadUtils {
             .build();
 
     public static void downloadTo(URI downloadUrl, File targetPath) {
-        log.info("Downloading {} to {}", downloadUrl, targetPath);
+        log.debug("Downloading {} to {}", downloadUrl, targetPath);
         doDownload(downloadUrl, targetPath, attempts);
-        log.info("Downloaded {} to {}", downloadUrl, targetPath);
     }
 
     private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft) {
