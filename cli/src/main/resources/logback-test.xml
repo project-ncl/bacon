@@ -58,6 +58,7 @@
     <logger name="org.commonjava.util.jhttpc" level="WARN"/>
     <logger name="org.commonjava.rwx" level="WARN"/>
     <logger name="org.infinispan" level="WARN"/>
+    <logger name="me.snowdrop.licenses" level="ERROR"/>
     <!-- from koji-build-finder -->
 
     <root level="info">
