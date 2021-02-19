@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -119,17 +120,74 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
             }
         }
 
-        Path nonReactiveProject = buildNonReactiveProject(settingsSelector);
-        Path reactiveProject = buildReactiveProject(settingsSelector);
+        Collection<String> extensionsContainingQuarkusMicrometer = Arrays.asList(
+                "quarkus-micrometer-parent",
+                "quarkus-micrometer",
+                "quarkus-micrometer-deployment",
+                "quarkus-micrometer-registry-prometheus-parent",
+                "quarkus-micrometer-registry-prometheus",
+                "quarkus-micrometer-registry-prometheus-deployment",
+                "quarkus-integration-test-main",
+                "quarkus-integration-test-kafka",
+                "quarkus-integration-test-kafka-streams",
+                "quarkus-integration-test-oidc-code-flow",
+                "quarkus-integration-test-mongodb-panache",
+                "quarkus-integration-test-rest-client",
+                "quarkus-integration-test-micrometer-mp-metrics",
+                "quarkus-integration-test-micrometer-prometheus");
+
+        Collection<String> extensionsContainingQuarkusSmallryeMetrics = Arrays.asList(
+                "quarkus-smallrye-metrics-parent",
+                "quarkus-smallrye-metrics",
+                "quarkus-smallrye-metrics-deployment",
+                "quarkus-jaegar",
+                "quarkus-jaeger-deployment",
+                "quarkus-hibernate-orm",
+                "quarkus-hibernate-orm-deployment",
+                "quarkus-agroal-deployment",
+                "quarkus-mongodb-client",
+                "quarkus-mongodb-client-deployment",
+                "quarkus-smallrye-graphql-deployment",
+                "quarkus-integration-test-hibernate-orm-panache",
+                "quarkus-integration-test-neo4j",
+                "quarkus-integration-test-smallrye-metrics ");
+
+        Path nonReactiveExcludingQuarkusMicrometerProject = buildNonReactiveProject(
+                settingsSelector,
+                extensionsContainingQuarkusMicrometer);
+        Path nonReactiveExcludingQuarkusSmallryeMetricsProject = buildNonReactiveProject(
+                settingsSelector,
+                extensionsContainingQuarkusSmallryeMetrics);
+        Path reactiveProjectExcludingQuarkusMicrometer = buildReactiveProject(
+                settingsSelector,
+                extensionsContainingQuarkusMicrometer);
+        Path reactiveProjectExcludingQuarkusSmallRye = buildReactiveProject(
+                settingsSelector,
+                extensionsContainingQuarkusSmallryeMetrics);
 
         Set<GAV> gavs = listDependencies(
-                nonReactiveProject,
-                Paths.get(extrasPath, "community-analysis-non-reactive-tree.txt"),
+                nonReactiveExcludingQuarkusMicrometerProject,
+                Paths.get(extrasPath, "community-analysis-non-reactive-excluding-quarkus-micrometer-tree.txt"),
                 settingsSelector);
         gavs.addAll(
                 listDependencies(
-                        reactiveProject,
-                        Paths.get(extrasPath, "community-analysis-reactive-tree.txt"),
+                        nonReactiveExcludingQuarkusSmallryeMetricsProject,
+                        Paths.get(
+                                extrasPath,
+                                "community-analysis-non-reactive-excluding-quarkus-smallrye-metrics-tree.txt"),
+                        settingsSelector));
+        gavs.addAll(
+                listDependencies(
+                        reactiveProjectExcludingQuarkusMicrometer,
+                        Paths.get(extrasPath, "community-analysis-reactive-excluding-quarkus-micrometer-tree.txt"),
+                        settingsSelector));
+
+        gavs.addAll(
+                listDependencies(
+                        reactiveProjectExcludingQuarkusSmallRye,
+                        Paths.get(
+                                extrasPath,
+                                "community-analysis-reactive-excluding-quarkus-smallrye-metrics-tree.txt"),
                         settingsSelector));
 
         CommunityDepAnalyzer depAnalyzer = new CommunityDepAnalyzer(gavs);
@@ -147,21 +205,20 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         }
     }
 
-    private Path buildReactiveProject(String settingsSelector) {
+    private Path buildReactiveProject(String settingsSelector, Collection<String> extensionExcludeFilterList) {
         Path projectPath = generateQuarkusProject(
-                artifactId -> artifactId.contains("micrometer"),
-                artifactId -> !artifactId.contains("metrics"),
+                artifactId -> artifactId.contains("reactive")
+                        && extensionExcludeFilterList.stream().noneMatch(it -> it.contains(artifactId)),
                 settingsSelector);
         buildProject(projectPath, settingsSelector);
         return projectPath;
     }
 
-    private Path buildNonReactiveProject(String settingsSelector) {
+    private Path buildNonReactiveProject(String settingsSelector, Collection<String> extensionExcludeFilterList) {
         Path projectPath = generateQuarkusProject(
-                artifactId -> !artifactId.contains("micrometer"),
-                artifactId -> artifactId.contains("metrics"),
+                artifactId -> !artifactId.contains("reactive")
+                        && extensionExcludeFilterList.stream().noneMatch(it -> it.contains(artifactId)),
                 settingsSelector);
-        buildProject(projectPath, settingsSelector);
         buildProject(projectPath, settingsSelector);
         return projectPath;
     }
@@ -234,13 +291,10 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 projectPath);
     }
 
-    private Path generateQuarkusProject(
-            Predicate<String> artifactsAllowed,
-            Predicate<String> artifactsNotAllowed,
-            String settingsSelector) {
+    private Path generateQuarkusProject(Predicate<String> artifactSelector, String settingsSelector) {
         Path tempProjectLocation = mkTempDir("q-dep-analysis-generated-project").toPath();
         List<String> extensionArtifactIds = findProductizedExtensions().stream()
-                .filter(artifactsAllowed.and(artifactsNotAllowed))
+                .filter(artifactSelector)
                 .collect(Collectors.toList());
         String command = String.format(
                 "mvn -X io.quarkus:quarkus-maven-plugin:%s:create -DprojectGroupId=tmp -DprojectArtifactId=tmp "
