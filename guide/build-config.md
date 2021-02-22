@@ -11,6 +11,8 @@ title: "Build Config Files"
 
 The build-config.yaml is broken down into 2 big categories: the PNC part and the generation part. The PNC part consists of the configuration on how your builds are performed. Once the builds are done, that information is then fed into the generation part to produce maven repository, javadoc, sources, license zips.
 
+build-config.yaml example file with comments: [build-config.yaml](https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml)
+
 The basic structure of a build-config.yaml looks as follows:
 
 ```yaml
@@ -19,6 +21,8 @@ The basic structure of a build-config.yaml looks as follows:
 product:
   name: test-product
   abbreviation: tp
+  stage: GA
+  issueTrackerUrl: http://issues.jboss.org/browse/TEST 
 version: 1.0.0
 milestone: DR1
 brewTagPrefix: fb-1.0-pnc # Optional
@@ -57,6 +61,8 @@ The product section describes the product that the builds belong. One example of
 product:
   name: my-beautiful-product
   abbreviation: mbp
+  stage: GA
+  issueTrackerUrl: http://issues.jboss.org/browse/TEST
 ```
 The `version` specifies the product version we are building for, and the `milestone` represents the 'step' at which we are in the version. A typical milestone value is DR1, DR2, etc or ER1, ER2 etc. The combination of the version and milestone forms the full release name of the product: e.g 1.0.0.CR1.
 
