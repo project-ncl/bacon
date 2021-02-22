@@ -120,7 +120,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
             }
         }
 
-        Collection<String> extensionsContainingQuarkusMicrometer = Arrays.asList(
+        Collection<String> extensionsContainingQuarkusMicrometerOpenshift = Arrays.asList(
                 "quarkus-micrometer-parent",
                 "quarkus-micrometer",
                 "quarkus-micrometer-deployment",
@@ -134,9 +134,12 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 "quarkus-integration-test-mongodb-panache",
                 "quarkus-integration-test-rest-client",
                 "quarkus-integration-test-micrometer-mp-metrics",
-                "quarkus-integration-test-micrometer-prometheus");
+                "quarkus-integration-test-micrometer-prometheus",
+                "quarkus-openshift",
+                "quarkus-openshift-client",
+                "quarkus-container-image-openshift");
 
-        Collection<String> extensionsContainingQuarkusSmallryeMetrics = Arrays.asList(
+        Collection<String> extensionsContainingQuarkusSmallryeMetricsS2i = Arrays.asList(
                 "quarkus-smallrye-metrics-parent",
                 "quarkus-smallrye-metrics",
                 "quarkus-smallrye-metrics-deployment",
@@ -150,15 +153,18 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 "quarkus-smallrye-graphql-deployment",
                 "quarkus-integration-test-hibernate-orm-panache",
                 "quarkus-integration-test-neo4j",
-                "quarkus-integration-test-smallrye-metrics ");
+                "quarkus-integration-test-smallrye-metrics",
+                "quarkus-container-image-s2i-parent",
+                "quarkus-container-image-s2i",
+                "quarkus-container-image-s2i-deployment");
 
         Path excludingQuarkusMicrometerProject = buildProjectExcludingSelectedExtensions(
                 settingsSelector,
-                extensionsContainingQuarkusMicrometer);
+                extensionsContainingQuarkusMicrometerOpenshift);
 
         Path excludingQuarkusSmallryeMetricsProject = buildProjectExcludingSelectedExtensions(
                 settingsSelector,
-                extensionsContainingQuarkusSmallryeMetrics);
+                extensionsContainingQuarkusSmallryeMetricsS2i);
 
         Set<GAV> gavs = listDependencies(
                 excludingQuarkusMicrometerProject,
