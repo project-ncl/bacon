@@ -20,7 +20,7 @@ public class Indy {
 
     public static String getIndyTempUrl() {
         if (indyTempRepoUrl == null) {
-            indyTempRepoUrl = pigUrl() + "api/content/maven/group/temporary-builds";
+            indyTempRepoUrl = pigUrl() + "api/content/maven/hosted/temporary-builds";
         }
 
         return indyTempRepoUrl;
