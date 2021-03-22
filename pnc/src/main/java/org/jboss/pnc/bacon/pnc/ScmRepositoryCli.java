@@ -86,7 +86,7 @@ public class ScmRepositoryCli {
                 // if already exists, don't try to create!
                 if (existing != null && existing.size() > 0) {
 
-                    log.warn("Repository already exists on PNC! No creation needed");
+                    log.info("Repository already exists in PNC! No creation needed");
                     ObjectHelper.print(getJsonOutput(), existing.getAll().iterator());
                     return 0;
                 }

@@ -226,13 +226,13 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
     @Override
     protected RepositoryData downloadAndRepackage() {
-        log.info("downloading and repackaging maven repository");
+        log.info("Downloading and repackaging maven repository");
         File sourceTopLevelDirectory = download();
         return repackage(sourceTopLevelDirectory);
     }
 
     private RepositoryData repackage(File sourceTopLevelDirectory) {
-        log.info("repackaging the repository");
+        log.info("Repackaging the repository");
         File targetTopLevelDirectory = new File(workDir, getTargetTopLevelDirectoryName());
 
         Path targetZipPath = getTargetZipPath();
@@ -307,7 +307,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     public RepositoryData generate() {
-        log.info("generating maven repository");
+        log.info("Generating maven repository");
         PncBuild build = getBuild(generationData.getSourceBuild());
         File bomDirectory = FileUtils.mkTempDir("repo-from-bom-generation");
 
@@ -359,7 +359,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         result.setFiles(RepoDescriptor.listFiles(contentsDirectory));
         result.setGavs(RepoDescriptor.listGavs(contentsDirectory));
         result.setRepositoryPath(targetZipPath);
-        log.info("created repository: {}", targetZipPath);
+        log.info("Created repository: {}", targetZipPath);
         return result;
     }
 
