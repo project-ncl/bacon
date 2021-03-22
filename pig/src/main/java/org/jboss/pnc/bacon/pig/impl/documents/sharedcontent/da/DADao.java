@@ -65,7 +65,7 @@ public class DADao {
     }
 
     public void fillDaData(CommunityDependency dependency) {
-        log.debug("Starting analysis for: {}", dependency);
+        log.debug("Analyzing: {}", dependency);
         LookupGAVsRequest lookupRequest = new LookupGAVsRequest(Collections.singletonList(dependency.toDaGav()));
         List<LookupReportDto> lookupReports = reportsClient.lookupGav(lookupRequest);
         LookupReportDto lookupReport = getSingle(lookupReports);
@@ -83,7 +83,6 @@ public class DADao {
             dependency.setState(DependencyState.NO_MATCH);
             dependency.setAvailableVersions("None");
         }
-        log.debug("Done for: {}", dependency);
     }
 
     private LookupReportDto getSingle(List<LookupReportDto> lookupReports) {

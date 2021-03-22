@@ -103,7 +103,7 @@ public class OfflineManifestGenerator extends AddOn {
 
         List<ArtifactWrapper> artifactsToList = artifactsToListRaw.stream().distinct().collect(Collectors.toList());
 
-        log.info("Number of collected artifacts without duplicates: {}", artifactsToList.size());
+        log.debug("Number of collected artifacts without duplicates: {}", artifactsToList.size());
 
         String offlineManifestFileName;
         if (getAddOnConfiguration() != null) {

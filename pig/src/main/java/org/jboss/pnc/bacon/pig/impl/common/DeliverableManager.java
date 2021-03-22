@@ -107,7 +107,7 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
     }
 
     protected void zip(File m2Repo, Path repoZipPath) {
-        log.debug("zipping the repository");
+        log.debug("Zipping the repository");
         FileUtils.zip(repoZipPath.toFile(), m2Repo.getParentFile(), m2Repo);
     }
 

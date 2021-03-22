@@ -75,7 +75,7 @@ public class FileDownloadUtils {
                         "failed to download " + downloadUrl + " to " + targetPath.getAbsolutePath(),
                         e);
             } else {
-                log.warn("Failed to download {}. Will reattempt at most {} times", downloadUrl, attemptsLeft);
+                log.debug("Failed to download {}. Will reattempt at most {} times", downloadUrl, attemptsLeft);
                 // sleep with exponential backoff up to a maximum of 30 seconds
                 int sleepTimeInSeconds = (int) Math.ceil(Math.pow(30, (double) 1 / attemptsLeft));
                 log.debug("Sleeping for : {}", sleepTimeInSeconds);

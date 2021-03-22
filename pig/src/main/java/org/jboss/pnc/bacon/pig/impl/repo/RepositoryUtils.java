@@ -187,13 +187,13 @@ public class RepositoryUtils {
     }
 
     public static void removeIrrelevantFiles(File element) {
-        log.debug("removing internal maven files from the repository");
+        log.debug("Removing internal maven files from the repository");
         removeMatchingCondition(element, file -> file.getName().equals("_remote.repositories"));
         removeMatchingCondition(element, file -> file.getName().endsWith(".lastUpdated"));
     }
 
     public static void removeCommunityArtifacts(File element) {
-        log.debug("removing community dependencies from the repository");
+        log.debug("Removing community dependencies from the repository");
         removeMatchingCondition(element, RepositoryUtils::isCommunity);
     }
 
