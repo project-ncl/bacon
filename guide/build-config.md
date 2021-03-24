@@ -66,7 +66,7 @@ product:
 ```
 The `version` specifies the product version we are building for, and the `milestone` represents the 'step' at which we are in the version. A typical milestone value is DR1, DR2, etc or ER1, ER2 etc. The combination of the version and milestone forms the full release name of the product: e.g 1.0.0.CR1.
 
-**TODO**: talk about automatic generation of milestone versions with `--releaseStorageUrl`
+The `--releaseStorageUrl` is location of the release storage, typically on rcm-guest staging. This is url to be used in 'upload to candidates script' when running pig release command. Using '*' in your milestone you could also use this property for automatic incrementation of milestone value. For example 'ER*' as milestone will during pig run command check release storage and increment version to next available milestone version.
 
 The `brewTagPrefix` is an **optional** key that you can use to override the default generated brew tag prefix associated with a product version. The key is used to specify to which Brew tag all the builds should go when the milestone is closed.
 
