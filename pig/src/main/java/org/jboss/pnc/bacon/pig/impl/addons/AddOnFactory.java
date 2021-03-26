@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.addons;
 import org.jboss.pnc.bacon.pig.impl.addons.microprofile.MicroProfileSmallRyeCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
+import org.jboss.pnc.bacon.pig.impl.addons.quarkus.VertxArtifactFinder;
 import org.jboss.pnc.bacon.pig.impl.addons.rhba.OfflineManifestGenerator;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.spring.BomVerifierAddon;
@@ -55,6 +56,7 @@ public class AddOnFactory {
         resultList.add(new MicroProfileSmallRyeCommunityDepAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new QuarkusPostBuildAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new OfflineManifestGenerator(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new VertxArtifactFinder(pigConfiguration, builds, releasePath, extrasPath));
         return resultList;
     }
 
