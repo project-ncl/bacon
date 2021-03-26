@@ -222,7 +222,7 @@ public class App {
          */
         @Override
         public int handleExecutionException(Exception ex, CommandLine cmd, CommandLine.ParseResult parseResult) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage() + ", Error: " + ex.getCause());
             log.debug("Full trace", ex);
 
             return cmd.getExitCodeExceptionMapper() != null ? cmd.getExitCodeExceptionMapper().getExitCode(ex)
