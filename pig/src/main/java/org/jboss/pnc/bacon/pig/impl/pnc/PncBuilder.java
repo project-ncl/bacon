@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
@@ -112,7 +114,10 @@ public class PncBuilder implements Closeable {
                 case SUCCESS:
                     return verifyAllBuildsInGroupBuildInFinalStateWithProperCount(groupBuildId);
                 default:
-                    throw new RuntimeException("Build group failed " + groupBuild);
+                    throw new FatalException(
+                            "Build group failed {}/pnc-web/#/group-builds/{}",
+                            Config.instance().getActiveProfile().getPnc().getUrl(),
+                            groupBuildId);
             }
         } catch (ClientException e) {
             log.warn("Failed to check if build is finished for {}. Assuming it is not finished", groupBuildId, e);
