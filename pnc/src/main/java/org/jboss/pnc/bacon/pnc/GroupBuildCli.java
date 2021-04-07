@@ -73,7 +73,9 @@ public class GroupBuildCli {
                 names = "--rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(names = "--timestamp-alignment", description = "Do timestamp alignment with temporary builds")
+        @Option(
+                names = "--timestamp-alignment",
+                description = "NOT SUPPORTED - Do timestamp alignment with temporary builds")
         private boolean timestampAlignment = false;
         @Option(names = "--temporary-build", description = "Perform temporary builds")
         private boolean temporaryBuild = false;
@@ -97,7 +99,6 @@ public class GroupBuildCli {
             ParameterChecker.checkRebuildModeOption(rebuildMode);
 
             groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
-            groupBuildParams.setTimestampAlignment(timestampAlignment);
             groupBuildParams.setTemporaryBuild(temporaryBuild);
 
             // TODO add GroupBuildRequest with an option to specify BC revisions
