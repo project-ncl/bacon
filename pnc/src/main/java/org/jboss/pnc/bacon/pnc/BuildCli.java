@@ -121,6 +121,10 @@ public class BuildCli {
             if (rebuildMode == null) {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
             }
+            if (timestampAlignment) {
+                log.warn(
+                        "Temporary builds with timestamp alignment are not supported, running temporary builds instead...");
+            }
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             buildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
             buildParams.setKeepPodOnFailure(keepPodOnFailure);
