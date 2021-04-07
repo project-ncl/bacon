@@ -96,6 +96,10 @@ public class GroupBuildCli {
             if (rebuildMode == null) {
                 rebuildMode = RebuildMode.IMPLICIT_DEPENDENCY_CHECK.name();
             }
+            if (timestampAlignment) {
+                log.warn(
+                        "Temporary builds with timestamp alignment are not supported, running temporary builds instead...");
+            }
             ParameterChecker.checkRebuildModeOption(rebuildMode);
 
             groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
