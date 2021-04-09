@@ -105,3 +105,17 @@ addons:
     offlineManifestFileName: offliner.txt
 
 ```
+
+### Vertx Artifact Finder
+
+This Add-on automates the process of creating vertx artifacts list which are used in Quarkus. 
+
+Now, in order to create a list of vertx artifacts, you don't need to manually search for it in the project, this addon will do the work for you.
+
+Adding the following to the bottom of your `build-config.yaml` will generate `vertxList.txt` inside the target directory.
+
+```
+addons:
+   vertxArtifactFinder:
+
+```
