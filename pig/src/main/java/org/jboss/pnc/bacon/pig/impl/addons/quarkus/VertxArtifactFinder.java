@@ -108,6 +108,17 @@ public class VertxArtifactFinder extends AddOn {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write vertx artifacts to the output file", e);
         }
+        // create a text File inside resources/VertxTestRepoZip
+        File fileInTestRepoZip = new File("src/test/resources/VertxTestRepoZip/vertxListTextFile.txt");
+        Path pathOfTestFile = Paths.get("src/test/resources/VertxTestRepoZip/vertxListTextFile.txt");
+
+        byte[] bytes = vertexArtifactList.toString().getBytes();
+
+        try {
+            Files.write(pathOfTestFile, bytes);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
 
     }
 
