@@ -32,7 +32,7 @@
     <artifactId>parent</artifactId>
     <version>2.1.9-SNAPSHOT</version>
     <packaging>pom</packaging>
-
+test
     <name>bacon</name>
     <description>PNC 2.0 CLI</description>
     <url>https://github.com/bacon</url>
