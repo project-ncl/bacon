@@ -63,7 +63,7 @@ public class VertxArtifactFinder extends AddOn {
             String extrasPath,
             Path repoPath) {
         this(pigConfiguration, builds, releasePath, extrasPath);
-        repoPath = this.repoPath;
+        this.repoPath = repoPath;
     }
 
     private List<String> findAllExtensions() {
@@ -108,14 +108,15 @@ public class VertxArtifactFinder extends AddOn {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write vertx artifacts to the output file", e);
         }
-        // create a text File inside resources/VertxTestRepoZip
-        File fileInTestRepoZip = new File("src/test/resources/VertxTestRepoZip/vertxListTextFile.txt");
-        Path pathOfTestFile = Paths.get("src/test/resources/VertxTestRepoZip/vertxListTextFile.txt");
+
+        // append the text File inside resources/VertxTestRepoZip/vertxListExpectedResult.txt with actual data
+        File vertxListExpectedFile = new File("src/test/resources/VertxTestRepoZip/vertxListExpectedResult.txt");
+        Path pathOfVertxListExpectedFile = Paths.get("src/test/resources/VertxTestRepoZip/vertxListExpectedResult.txt");
 
         byte[] bytes = vertexArtifactList.toString().getBytes();
 
         try {
-            Files.write(pathOfTestFile, bytes);
+            Files.write(pathOfVertxListExpectedFile, bytes);
         } catch (IOException exception) {
             exception.printStackTrace();
         }

@@ -7,19 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static org.jboss.pnc.common.json.JsonOutputConverterMapper.log;
 
 public class VertxArtifactFinderTest {
 
     @Test
     public void vertxArtifactFinderTest() throws IOException {
 
-        Path repoPath = Paths.get("src/test/resources/VertxTestRepoZip/vertxListTextFile.txt");
+        Path repoPath = Paths.get("src/test/resources/VertxTestRepoZip/rh-quarkus-maven-repository.zip/");
 
         VertxArtifactFinder vertxArtifactFinder = new VertxArtifactFinder(
                 preConfig(),
@@ -28,21 +29,29 @@ public class VertxArtifactFinderTest {
                 "/test-extras-path",
                 repoPath);
 
+        File vertxListExpectedFile = new File("src/test/resources/VertxTestRepoZip/vertxListExpectedResult.txt");
+        Path vertxListExpectedFilePath = Paths.get("src/test/resources/VertxTestRepoZip/vertxListExpectedResult.txt");
+        List<String> vertexArtifactList = Arrays.asList("vertx", "vertx-core");
+        byte[] bytes = vertexArtifactList.toString().getBytes();
+
+        try {
+            Files.write(vertxListExpectedFilePath, bytes);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
         vertxArtifactFinder.trigger();
 
         if (!verifyResult()) {
             throw new FatalException("The quarkus vertex Artifact Finder addon is not working correctly");
-        } else {
-            log.info(" RESULT IS VERIFIED , files matched ");
         }
-
     }
 
     private boolean verifyResult() throws IOException {
-        log.info(" VERIFYING RESULT ");
+        // TODO : change actual Result
         File actualResult = new File(
                 "/home/sausingh/Desktop/Productisation/build-configurations/Quarkus/1.11/target/quarkus-1.11.5.ER8/extras/vertxList.txt");
-        File expectedResult = new File("src/test/resources/VertxTestRepoZip/vertxListTextFile.txt");
+        File expectedResult = new File("src/test/resources/VertxTestRepoZip/vertxListExpectedResult.txt");
         return FileUtils.contentEquals(expectedResult, actualResult);
     }
 
