@@ -83,6 +83,7 @@ public class PigContext {
 
     private String contextLocation;
 
+    private String prefix;
     private String fullVersion; // version like 1.3.2.DR7
 
     private Map<String, Collection<String>> checksums;
@@ -114,14 +115,12 @@ public class PigContext {
         initFullVersion(pigConfiguration, releaseStorageUrl);
 
         if (deliverables == null) {
-            String prefix = String.format("%s-%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion);
+            prefix = String.format("%s-%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion);
 
             deliverables = new Deliverables();
 
             deliverables.setRepositoryZipName(prefix + "-maven-repository.zip");
-            deliverables.setLicenseZipName(prefix + "-license.zip");
-            deliverables.setSourceZipName(prefix + "-src.zip");
-            deliverables.setJavadocZipName(prefix + "-javadoc.zip");
+
             deliverables.setNvrListName(prefix + "-nvr-list.txt");
         }
 
