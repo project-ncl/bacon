@@ -189,6 +189,7 @@ public final class PigFacade {
 
         } else {
             log.info("Skipping Source Generation");
+            context.getDeliverables().setSourceZipName(null);
         }
 
         if (!(skipJavadoc || context.getPigConfiguration()
@@ -198,6 +199,7 @@ public final class PigFacade {
             generateJavadoc();
         } else {
             log.info("Skipping Javadoc Generation");
+            context.getDeliverables().setJavadocZipName(null);
         }
 
         if (!(skipLicenses || context.getPigConfiguration()
@@ -207,6 +209,7 @@ public final class PigFacade {
             generateLicenses(strictLicenseCheck);
         } else {
             log.info("Skipping License Generation");
+            context.getDeliverables().setLicenseZipName(null);
         }
         if (!skipSharedContent && repo != null) {
             prepareSharedContentAnalysis();
@@ -321,13 +324,15 @@ public final class PigFacade {
 
     public static void generateSources() {
         abortIfContextDataAbsent();
-        PigConfiguration pigConfiguration = context().getPigConfiguration();
-        Map<String, PncBuild> builds = context().getBuilds();
-        RepositoryData repo = context().getRepositoryData();
+        PigContext context = context();
+        context.getDeliverables().setSourceZipName(context.getPrefix() + "-src.zip");
+        PigConfiguration pigConfiguration = context.getPigConfiguration();
+        Map<String, PncBuild> builds = context.getBuilds();
+        RepositoryData repo = context.getRepositoryData();
         SourcesGenerator sourcesGenerator = new SourcesGenerator(
                 pigConfiguration.getFlow().getSourcesGeneration(),
                 pigConfiguration.getTopLevelDirectoryPrefix() + "src",
-                context().getReleasePath() + context().getDeliverables().getSourceZipName());
+                context.getReleasePath() + context.getDeliverables().getSourceZipName());
         sourcesGenerator.generateSources(builds, repo);
     }
 
@@ -444,6 +449,7 @@ public final class PigFacade {
     public static void generateLicenses(boolean strict) {
         abortIfContextDataAbsent();
         PigContext context = context();
+        context.getDeliverables().setLicenseZipName(context.getPrefix() + "-license.zip");
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
 
@@ -454,9 +460,11 @@ public final class PigFacade {
 
     public static void generateJavadoc() {
         abortIfContextDataAbsent();
-        PigConfiguration pigConfiguration = context().getPigConfiguration();
-        Map<String, PncBuild> builds = context().getBuilds();
-        new JavadocManager(pigConfiguration, context().getReleasePath(), context().getDeliverables(), builds).prepare();
+        PigContext context = context();
+        context.getDeliverables().setJavadocZipName(context.getPrefix() + "-javadoc.zip");
+        PigConfiguration pigConfiguration = context.getPigConfiguration();
+        Map<String, PncBuild> builds = context.getBuilds();
+        new JavadocManager(pigConfiguration, context.getReleasePath(), context.getDeliverables(), builds).prepare();
     }
 
     /**

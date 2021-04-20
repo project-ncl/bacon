@@ -12,9 +12,13 @@
 <h2>Product Deliverables</h2>
 <ul>
     <li><a href="${deliverables.repositoryZipName}">${deliverables.repositoryZipName}</a> - Maven repository</li>
-    <li><a href="${deliverables.sourceZipName}">${deliverables.sourceZipName}</a> - Product source</li>
-    <li><a href="${deliverables.licenseZipName}">${deliverables.licenseZipName}</a> - Product licenses</li>
-    <#if deliverables.javadocZipName??>
+    <#if (deliverables.sourceZipName)??>
+        <li><a href="${deliverables.sourceZipName}">${deliverables.sourceZipName}</a> - Product source</li>
+    </#if>
+    <#if (deliverables.licenseZipName)??>
+        <li><a href="${deliverables.licenseZipName}">${deliverables.licenseZipName}</a> - Product licenses</li>
+    </#if>
+    <#if (deliverables.javadocZipName)??>
         <li><a href="${deliverables.javadocZipName}">${deliverables.javadocZipName}</a> - Product javadoc</li>
     </#if>
     <li><a href="${deliverables.nvrListName}">${deliverables.nvrListName}</a> - Product NVR list</li>
