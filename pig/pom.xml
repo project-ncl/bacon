@@ -51,6 +51,14 @@
             <artifactId>org.eclipse.jgit</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-bootstrap-maven-resolver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sisu</groupId>
+            <artifactId>org.eclipse.sisu.inject</artifactId>
+        </dependency>
+        <dependency>
             <groupId>me.snowdrop</groupId>
             <artifactId>licenses-generator</artifactId>
             <exclusions>

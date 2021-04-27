@@ -84,6 +84,7 @@
         <pme.version>4.3</pme.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <quarkus.resolver.version>1.13.2.Final</quarkus.resolver.version>
         <tagSuffix />
     </properties>
 
@@ -384,6 +385,24 @@
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-core</artifactId>
                 <version>${jaxb.version}</version>
+            </dependency>
+
+            <!-- Quarkus bootsrap maven resolver   -->
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-bootstrap-maven-resolver</artifactId>
+                <version>${quarkus.resolver.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.slf4j</groupId>
+                        <artifactId>slf4j-jboss-logmanager</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.sisu</groupId>
+                <artifactId>org.eclipse.sisu.inject</artifactId>
+                <version>0.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>

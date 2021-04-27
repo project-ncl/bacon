@@ -42,6 +42,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
     private List<String> excludeSourceBuilds = new ArrayList<>();
     private String bomGroupId;
     private String bomArtifactId;
+    private String bomVersion;
     private boolean includeJavadoc;
     private boolean includeLicenses;
     private boolean includeMavenMetadata;

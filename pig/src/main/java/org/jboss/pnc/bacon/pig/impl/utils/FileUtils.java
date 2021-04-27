@@ -37,6 +37,7 @@ import org.apache.commons.compress.compressors.xz.XZUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tools.ant.util.PermissionUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -569,5 +570,33 @@ public final class FileUtils {
         } catch (IOException e) {
             throw new RuntimeException("Unzip of " + fileName + " from " + zipName + " failed", e);
         }
+    }
+
+    public static void replaceFileString(String orig, String replace, String fileName) {
+        try {
+            FileInputStream fis = new FileInputStream(fileName);
+            String content = org.apache.commons.io.IOUtils.toString(fis, Charset.defaultCharset());
+            content = content.replaceAll(orig, replace);
+            FileOutputStream fos = new FileOutputStream(fileName);
+            org.apache.commons.io.IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
+            fis.close();
+            fos.close();
+        } catch (IOException e) {
+            log.error("Unable to change settings file", e);
+        }
+    }
+
+    public static String getConfiguredIndySettingsXmlPath(boolean tempBuild) {
+        String settingsXml;
+        if (tempBuild) {
+            settingsXml = ResourceUtils.extractToTmpFile("/indy-temp-settings.xml", "settings", ".xml")
+                    .getAbsolutePath();
+
+        } else {
+            settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
+        }
+        replaceFileString("\\$\\{INDY_URL}", Indy.getIndyUrl(), settingsXml);
+        replaceFileString("\\$\\{INDY_TMP_URL}", Indy.getIndyTempUrl(), settingsXml);
+        return settingsXml;
     }
 }

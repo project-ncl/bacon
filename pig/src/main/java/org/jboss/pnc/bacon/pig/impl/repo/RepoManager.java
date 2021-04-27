@@ -17,8 +17,18 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import lombok.Getter;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.resolution.DependencyResult;
+import org.jboss.bacon.da.rest.LookupReportDto;
+import org.jboss.bacon.da.rest.ReportsApi;
+import org.jboss.da.reports.model.request.LookupGAVsRequest;
+import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
@@ -33,20 +43,23 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -97,6 +110,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
+            case RESOLVE_ONLY:
+                return resolveAndRepackage();
             case IGNORE:
                 log.info(
                         "Ignoring repository zip generation because the config strategy is set to: {}",
@@ -332,6 +347,133 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
 
         return repackage(new File(repoParentDir, "maven-repository"));
+    }
+
+    public RepositoryData resolveAndRepackage() {
+        try {
+            log.info("Generating maven repository");
+            File sourceDir = createMavenGenerationDir();
+            log.info("Source dir " + sourceDir.getAbsolutePath());
+            boolean tempBuild = PigContext.get().isTempBuild();
+            final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
+                    .setUserSettings(new File(FileUtils.getConfiguredIndySettingsXmlPath(tempBuild)))
+                    .setLocalRepository(sourceDir.getAbsolutePath())
+                    .build();
+
+            Map<String, String> params = pigConfiguration.getFlow().getRepositoryGeneration().getParameters();
+            String bomConstraintGroupId = generationData.getBomGroupId();
+            String bomConstraintArtifactId = generationData.getBomArtifactId();
+            String bomConstraintVersion = getRedhatVersion(
+                    new org.jboss.da.model.rest.GAV(
+                            bomConstraintGroupId,
+                            bomConstraintArtifactId,
+                            generationData.getBomVersion()),
+                    tempBuild);
+
+            final Artifact bom = new DefaultArtifact(
+                    bomConstraintGroupId,
+                    bomConstraintArtifactId,
+                    null,
+                    "pom",
+                    bomConstraintVersion);
+            final List<Dependency> bomConstraints = mvnResolver.resolveDescriptor(bom).getManagedDependencies();
+            if (bomConstraints.isEmpty()) {
+                throw new IllegalStateException("Failed to resolve " + bom);
+            }
+            // Must point to a text file which contains list of format "groupId:artifactId:version"
+            String extensionsListUrl = params.get("extensionsListUrl");
+
+            List<Artifact> extensionRtArtifactList = parseExtensionsArtifactList(extensionsListUrl);
+            for (Artifact extensionRtArtifact : extensionRtArtifactList) {
+                // this will resolve all the runtime dependencies and as a consequence populate the local Maven repo
+                // specified in the user settings.xml
+                DependencyResult result = mvnResolver.resolveManagedDependencies(
+                        extensionRtArtifact, // runtime extension artifact
+                        Collections.emptyList(), // enforced direct dependencies, ignore this
+                        bomConstraints, // version constraints from the BOM
+                        Collections.emptyList(), // extra maven repos, ignore this
+                        "test",
+                        "provided" // dependency scopes that should be ignored
+                );
+
+            }
+            return repackage(sourceDir);
+        } catch (Exception bme) {
+            bme.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param urlString url to extensionList file. File must contains the extensions in format of
+     *                  groupId:artifactId:version
+     * @return List of Artifacts
+     * @throws Exception
+     */
+    private List<Artifact> parseExtensionsArtifactList(String urlString) throws Exception {
+        try {
+
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            ArrayList<Artifact> list = new ArrayList<>();
+            String buffer = "";
+            while (buffer != null) {
+                buffer = br.readLine();
+                if (buffer == null) {
+                    break;
+                }
+                String[] parts = buffer.split(":");
+                if (parts.length < 2 || parts.length > 3) {
+                    throw new Exception("Extension text file is not properly formatted");
+                }
+
+                Artifact extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, "jar", parts[2]);
+                list.add(extensionRtArtifact);
+            }
+            return list;
+        } catch (MalformedURLException mfe) {
+            throw new MalformedURLException("url is not proper " + urlString);
+        } catch (IOException e) {
+            throw new IOException("Unable to do IO operation. Url: " + urlString);
+        }
+    }
+
+    private String getRedhatVersion(org.jboss.da.model.rest.GAV gav, boolean isTempBuild) {
+        final String DA_PATH = "/da/rest/v-1";
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
+        builder.providerFactory(factory);
+        ResteasyProviderFactory.setRegisterBuiltinByDefault(true);
+        RegisterBuiltin.register(factory);
+
+        String daUrl = Utils.generateUrlPath(Config.instance().getActiveProfile().getDa().getUrl(), DA_PATH);
+
+        ReportsApi reportsClient = builder.build().target(daUrl).proxy(ReportsApi.class);
+        LookupGAVsRequest lookupRequest;
+        if (isTempBuild) {
+            lookupRequest = new LookupGAVsRequest(
+                    Collections.emptySet(),
+                    Collections.emptySet(),
+                    "DA-temporary-builds",
+                    false,
+                    "TEMPORARY",
+                    "temporary-redhat",
+                    Collections.singletonList(gav));
+        } else {
+            lookupRequest = new LookupGAVsRequest(Collections.singletonList(gav));
+        }
+        List<LookupReportDto> lookupReports = reportsClient.lookupGav(lookupRequest);
+        if (lookupReports.size() != 1) {
+            throw new RuntimeException("Expected exactly one report, got: " + lookupReports.size());
+        }
+        LookupReportDto lookupReport = lookupReports.get(0);
+        String bestVersion = lookupReport.getBestMatchVersion();
+        log.info(
+                "best version for GAV g=" + gav.getGroupId() + ",a=" + gav.getArtifactId() + ",v=" + gav.getVersion()
+                        + ": " + bestVersion);
+        return bestVersion;
     }
 
     private static Predicate<GAV> predicate(Map<String, String> stage) {
