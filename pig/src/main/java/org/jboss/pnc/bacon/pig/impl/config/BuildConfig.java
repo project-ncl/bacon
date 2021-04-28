@@ -276,11 +276,18 @@ public class BuildConfig {
         }
 
         if (!extraRepositories.isEmpty()) {
-            String repositoriesAsString = String.join("\\n", extraRepositories);
+            String repositoriesAsString = String.join("\n", extraRepositories);
             result.put("EXTRA_REPOSITORIES", repositoriesAsString);
         }
 
         return result;
+    }
+
+    public static void main(String[] args) {
+        List<String> test = new ArrayList<>();
+        test.add("boo");
+        test.add("ya");
+        System.out.println(String.join("\\n", test));
     }
 
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
