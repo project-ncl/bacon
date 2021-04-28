@@ -784,7 +784,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-client",
-    "version-regexp": "1\\.1\\..+",
+    "version-regexp": "1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -795,7 +795,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-core",
-    "version-regexp": "1\\.1\\..+",
+    "version-regexp": "1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -806,7 +806,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-thrift",
-    "version-regexp": "1\\.1\\..+",
+    "version-regexp": "1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
@@ -817,7 +817,7 @@
   {
     "groupId": "io.jaegertracing",
     "artifactId": "jaeger-tracerresolver",
-    "version-regexp": "1\\.1\\..+",
+    "version-regexp": "1\\..+",
     "licenses": [
       {
         "name": "Apache License 2.0",
