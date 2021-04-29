@@ -113,7 +113,31 @@ public class App {
         this.configPath = configPath;
     }
 
+    /**
+     * Disable color in Picocli output
+     *
+     * @param noColorPresent if no-color mode is activated
+     */
+    @Option(
+            names = { "--no-color" },
+            description = "Disable color output. Useful when running in a non-ANSI environment",
+            scope = INHERIT)
+    public void setNoColorIfPresent(boolean noColorPresent) {
+        if (noColorPresent) {
+            // Documentation: https://picocli.info/#_forcing_ansi_onoff
+            System.setProperty("picocli.ansi", "false");
+        }
+    }
+
     public int run(String[] args) {
+
+        /*
+         * https://no-color.org/ If NO_COLOR env variable is present, regardless of its value, prevents the addition of
+         * ANSI color
+         */
+        if (System.getenv().containsKey("NO_COLOR")) {
+            setNoColorIfPresent(true);
+        }
 
         CommandLine commandLine = new CommandLine(this);
         commandLine.setExecutionExceptionHandler(new ExceptionMessageHandler());
