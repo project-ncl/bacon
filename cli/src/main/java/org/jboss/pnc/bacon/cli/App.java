@@ -131,14 +131,6 @@ public class App {
 
     public int run(String[] args) {
 
-        /*
-         * https://no-color.org/ If NO_COLOR env variable is present, regardless of its value, prevents the addition of
-         * ANSI color
-         */
-        if (System.getenv().containsKey("NO_COLOR")) {
-            setNoColorIfPresent(true);
-        }
-
         CommandLine commandLine = new CommandLine(this);
         commandLine.setExecutionExceptionHandler(new ExceptionMessageHandler());
         commandLine.setUsageHelpAutoWidth(true);

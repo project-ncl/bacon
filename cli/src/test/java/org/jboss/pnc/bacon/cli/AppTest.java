@@ -24,7 +24,9 @@ class AppTest {
             System.setProperty("picocli.ansi", "false");
             app.run(new String[] { "-h" });
             String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
-            assertThat(text).contains("Usage: bacon [-hovV] [-p=<configurationFileLocation>] [--profile=<profile>]");
+            assertThat(text).contains(
+                    "Usage: bacon [-hovV] [--no-color] [-p=<configurationFileLocation>]",
+                    "[--profile=<profile>]");
         });
     }
 
@@ -193,11 +195,13 @@ class AppTest {
                                             "-h" })));
 
             String expected = String.format(
-                    "Usage: bacon pnc admin maintenance-mode activate [-hovV]%n"
+                    "Usage: bacon pnc admin maintenance-mode activate [-hovV] [--no-color]%n"
                             + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>%n"
                             + "This will disable any new builds from being accepted%n"
                             + "      <reason>              Reason%n"
                             + "  -h, --help                Show this help message and exit.%n"
+                            + "      --no-color            Disable color output. Useful when running in a%n"
+                            + "                              non-ANSI environment%n"
                             + "  -o, --jsonOutput          use json for output (default to yaml)%n"
                             + "  -p, --configPath=<configurationFileLocation>%n"
                             + "                            Path to PNC configuration folder%n"
