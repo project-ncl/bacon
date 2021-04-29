@@ -100,6 +100,17 @@ public class App {
         }
     }
 
+    /**
+     * Make logback quiet if quiet flag is set
+     */
+    @Option(names = { "-q", "--quiet" }, description = "Silent output", scope = INHERIT)
+    public static void setQuietIfPresent(boolean quiet) {
+
+        if (quiet) {
+            ObjectHelper.setRootLoggingLevel(ObjectHelper.LOG_LEVEL_SILENT);
+        }
+    }
+
     @Option(names = "--profile", description = "PNC Configuration profile", scope = INHERIT)
     public void setProfile(String profile) {
         this.profile = profile;
