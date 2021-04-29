@@ -35,3 +35,12 @@ value.
 # Portability of build-config.yaml between different PNC environments
 To be able to re-use the same `build-config.yaml` between different PNC environments (i.e. staging/production):
 - Use `systemimageid` instead of `environmentId` to specify your build environment. The `systemimageid` of the environment will be the same across different PNC environments, however the ids will be different.
+
+# Disable color output
+Disabling CLI color output is useful in environments where the logs are piped
+into a file, and the ANSI color commands show up in the file, making it hard
+to read.
+
+This is done by either:
+- using the `--no-color` flag
+- set the `NO_COLOR` environment variable with any value
