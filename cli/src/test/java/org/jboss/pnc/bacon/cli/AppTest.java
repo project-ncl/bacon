@@ -25,7 +25,7 @@ class AppTest {
             app.run(new String[] { "-h" });
             String text = tapSystemOut(() -> assertEquals(0, app.run(new String[] { "-h" })));
             assertThat(text).contains(
-                    "Usage: bacon [-hovV] [--no-color] [-p=<configurationFileLocation>]",
+                    "Usage: bacon [-hoqvV] [--no-color] [-p=<configurationFileLocation>]",
                     "[--profile=<profile>]");
         });
     }
@@ -195,7 +195,7 @@ class AppTest {
                                             "-h" })));
 
             String expected = String.format(
-                    "Usage: bacon pnc admin maintenance-mode activate [-hovV] [--no-color]%n"
+                    "Usage: bacon pnc admin maintenance-mode activate [-hoqvV] [--no-color]%n"
                             + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>%n"
                             + "This will disable any new builds from being accepted%n"
                             + "      <reason>              Reason%n"
@@ -206,6 +206,7 @@ class AppTest {
                             + "  -p, --configPath=<configurationFileLocation>%n"
                             + "                            Path to PNC configuration folder%n"
                             + "      --profile=<profile>   PNC Configuration profile%n"
+                            + "  -q, --quiet               Silent output%n"
                             + "  -v, --verbose             Verbose output%n"
                             + "  -V, --version             Print version information and exit.%n" + "%n" + "Example:%n"
                             + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for%n"
