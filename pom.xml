@@ -168,7 +168,7 @@
             <dependency>
                 <groupId>org.jline</groupId>
                 <artifactId>jline-console</artifactId>
-                <version>3.19.0</version>
+                <version>3.20.0</version>
             </dependency>
             <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
             <dependency>
