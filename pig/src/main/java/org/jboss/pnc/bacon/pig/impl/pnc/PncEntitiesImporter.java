@@ -371,6 +371,7 @@ public class PncEntitiesImporter implements Closeable {
                 .scmRevision(buildConfig.getScmRevision())
                 .buildScript(buildConfig.getBuildScript())
                 .buildType(BuildType.valueOf(buildConfig.getBuildType()))
+                .brewPullActive(buildConfig.getBrewPullActive())
                 .build();
     }
 

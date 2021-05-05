@@ -108,6 +108,7 @@ public class BuildConfig {
 
     private Set<String> extraRepositories = new TreeSet<>();
     private Boolean branchModified;
+    private Boolean brewPullActive = false;
     private @NotBlank String buildType;
 
     /** deprecated: use brewBuildName instead */
@@ -218,7 +219,8 @@ public class BuildConfig {
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && getEnvironmentId().equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
-                && !isBranchModified(old, skipBranchCheck, temporaryBuild);
+                && !isBranchModified(old, skipBranchCheck, temporaryBuild)
+                && getBrewPullActive() == old.getBrewPullActive();
     }
 
     private Set<String> getAlignmentParameters(BuildConfiguration old) {
