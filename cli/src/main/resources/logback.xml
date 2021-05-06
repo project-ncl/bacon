@@ -26,16 +26,14 @@
 
         -Dlogback.configurationFile=/path/to/config.xml
 
-    It is named logback-test.xml so that it has higher priority compared to the
-    logback.xml included in dependency jars
-
     ******************************************************************************
 -->
 <configuration>
     <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.err</target>
         <encoder>
-            <pattern>[%-5level] - %msg%n</pattern>
+            <!-- Add %logger{60} to get logger location -->
+            <pattern>[%highlight(%-5level)] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -46,6 +44,15 @@
     <logger name="org.jboss.pnc.client" level="WARN"/>
     <logger name="org.jboss.resteasy" level="WARN"/>
     <logger name="org.apache.http" level="WARN"/>
+    <logger name="org.hibernate.validator" level="WARN"/>
+
+    <!-- from PME CLI -->
+    <logger name="org.apache" level="WARN" />
+    <logger name="httpclient.wire" level="WARN" />
+    <logger name="com.jayway.jsonpath.internal.JsonContext" level="WARN" />
+    <logger name="org.commonjava.util.jhttpc" level="WARN" />
+    <logger name="org.commonjava.maven.galley" level="WARN" />
+    <!-- end from PME -->
 
     <!-- from koji-build-finder -->
     <logger name="com.redhat.red.build.koji" level="WARN"/>
@@ -59,7 +66,7 @@
     <logger name="org.commonjava.rwx" level="WARN"/>
     <logger name="org.infinispan" level="WARN"/>
     <logger name="me.snowdrop.licenses" level="ERROR"/>
-    <!-- from koji-build-finder -->
+    <!-- end from koji-build-finder -->
 
     <root level="info">
         <appender-ref ref="STDERR"/>
