@@ -1,15 +1,19 @@
 package org.jboss.pnc.bacon.cli;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.Arrays;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemProperties;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErr;
+import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErrAndOut;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
+import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,6 +31,32 @@ class AppTest {
             assertThat(text).contains(
                     "Usage: bacon [-hoqvV] [--no-color] [-p=<configurationFileLocation>]",
                     "[--profile=<profile>]");
+        });
+    }
+
+    @Test
+    void testNoColor() throws Exception {
+        File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
+        File configYaml = new File(pncClasses.getParentFile().getParentFile().getParentFile(), PNC_TEST_CLASSES);
+        App app = new App();
+        withEnvironmentVariable("NO_COLOR", "true").execute(() -> {
+            String text = tapSystemErrAndOut(
+                    () -> assertEquals(
+                            1,
+                            app.run(
+                                    new String[] {
+                                            "-p",
+                                            configYaml.toString(),
+                                            "-v",
+                                            "pnc",
+                                            "-o",
+                                            "build",
+                                            "get",
+                                            "0" })));
+            assertThat(text).contains("Reconfiguring logger for NO_COLOR");
+            assertThat(text).contains(ANSIConstants.ESC_START);
+            assertThat(Arrays.asList(text.split(System.getProperty("line.separator"))).subList(2, 10).toString())
+                    .doesNotContain(ANSIConstants.ESC_START);
         });
     }
 
@@ -73,6 +103,9 @@ class AppTest {
                         new App().run(
                                 new String[] { "-p", configYaml.toString(), "-v", "pnc", "-o", "build", "get", "0" })));
         assertThat(text).contains("JSON command is enabled: true");
+        assertThat(text).contains(ANSIConstants.ESC_START);
+        assertThat(Arrays.asList(text.split(System.getProperty("line.separator"))).subList(2, 10).toString())
+                .contains(ANSIConstants.ESC_START);
     }
 
     @Test
