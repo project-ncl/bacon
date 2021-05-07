@@ -98,6 +98,8 @@ builds:
 
   scmRevision: <scm revision>
   
+  brewPullActive: false #This flag allows the user to specify whether to activate the brew pull for specific build configs. Number of dependencies in Brew used in current PNC builds is pretty low and the feature slows down both alignment and the build itself.
+  
   # Either specify environmentId, environmentName or systemImageId. 
   # If more than one is specified, the priority will be: environmentId, systemImageId, environmentName
   environmentId: <id> # The specific id of a build environment, e.g. 20
