@@ -106,6 +106,10 @@ public class BuildConfigCli {
                 description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
+        @Option(
+                names = "--brewPullActive",
+                description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
+        private boolean brewPullActive = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -124,6 +128,7 @@ public class BuildConfigCli {
                     .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
                     .scmRevision(scmRevision)
                     .buildType(BuildType.valueOf(buildType))
+                    .brewPullActive(brewPullActive)
                     .parameters(parameters);
 
             if (isNotEmpty(productVersionId)) {
@@ -172,9 +177,12 @@ public class BuildConfigCli {
         private String scmUrl;
         @Option(required = true, names = "--scm-revision", description = "SCM Revision")
         private String scmRevision;
-
         @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
+        @Option(
+                names = "--brewPullActive",
+                description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
+        private boolean brewPullActive = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -192,6 +200,7 @@ public class BuildConfigCli {
                     .scmRevision(scmRevision)
                     .buildScript(buildScript)
                     .buildType(BuildType.valueOf(buildType))
+                    .brewPullActive(brewPullActive)
                     .parameters(parameters)
                     .build();
 
@@ -241,6 +250,10 @@ public class BuildConfigCli {
         private String buildType;
         @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
+        @Option(
+                names = "--brewPullActive",
+                description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
+        private Boolean brewPullActive;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -276,6 +289,9 @@ public class BuildConfigCli {
                 }
                 if (isNotEmpty(productVersionId)) {
                     updated.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
+                if (brewPullActive != null) {
+                    updated.brewPullActive(brewPullActive);
                 }
                 if (parameters != null) {
                     // update the content of the existing parameters
