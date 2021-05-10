@@ -107,7 +107,7 @@ public class BuildConfigCli {
                 defaultValue = "MVN")
         private String buildType;
         @Option(
-                names = "--brewPullActive",
+                names = "--brew-pull-active",
                 description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
         private boolean brewPullActive = false;
 
@@ -180,7 +180,7 @@ public class BuildConfigCli {
         @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
         @Option(
-                names = "--brewPullActive",
+                names = "--brew-pull-active",
                 description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
         private boolean brewPullActive = false;
 
@@ -251,7 +251,7 @@ public class BuildConfigCli {
         @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
         @Option(
-                names = "--brewPullActive",
+                names = "--brew-pull-active",
                 description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
         private Boolean brewPullActive;
 
