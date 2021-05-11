@@ -7,11 +7,12 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemProperties;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErr;
-import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErrAndOut;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,12 +36,12 @@ class AppTest {
     }
 
     @Test
-    void testNoColor() throws Exception {
+    void testNoColor1() throws Exception {
         File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
         File configYaml = new File(pncClasses.getParentFile().getParentFile().getParentFile(), PNC_TEST_CLASSES);
         App app = new App();
         withEnvironmentVariable("NO_COLOR", "true").execute(() -> {
-            String text = tapSystemErrAndOut(
+            String text = tapSystemErr(
                     () -> assertEquals(
                             1,
                             app.run(
@@ -54,9 +55,30 @@ class AppTest {
                                             "get",
                                             "0" })));
             assertThat(text).contains("Reconfiguring logger for NO_COLOR");
+            // The first two lines will have the DEBUG with colour codes until it is reset
             assertThat(text).contains(ANSIConstants.ESC_START);
-            assertThat(Arrays.asList(text.split(System.getProperty("line.separator"))).subList(2, 10).toString())
-                    .doesNotContain(ANSIConstants.ESC_START);
+            List<String> lines = new ArrayList<>(Arrays.asList(text.split(System.getProperty("line.separator"))));
+            // Avoid issues debugging in IntelliJ due to classpath loading.
+            lines.removeIf(
+                    s -> s.contains(
+                            "Unable to retrieve manifest for class org.jboss.pnc.bacon.common.cli.VersionProvider as location is a directory not a jar"));
+            assertThat(lines.subList(2, 10).toString()).doesNotContain(ANSIConstants.ESC_START);
+        });
+    }
+
+    @Test
+    void testNoColor2() throws Exception {
+        File pncClasses = new File(App.class.getClassLoader().getResource("").getFile());
+        File configYaml = new File(pncClasses.getParentFile().getParentFile().getParentFile(), PNC_TEST_CLASSES);
+        App app = new App();
+
+        withEnvironmentVariable("NO_COLOR", "true").execute(() -> {
+            String text = tapSystemErr(
+                    () -> assertEquals(
+                            1,
+                            app.run(new String[] { "-p", configYaml.toString(), "pnc", "-o", "build", "get", "0" })));
+            assertThat(text).doesNotContain(ANSIConstants.ESC_START);
+            assertThat(System.getProperty("picocli.ansi")).contains("false");
         });
     }
 

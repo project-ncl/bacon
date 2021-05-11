@@ -233,8 +233,10 @@ public class App {
             ple.start();
 
             ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
-            consoleAppender.setEncoder(ple);
+            consoleAppender.setName("STDERR");
+            consoleAppender.setTarget("System.err");
             consoleAppender.setContext(loggerContext);
+            consoleAppender.setEncoder(ple);
             consoleAppender.start();
 
             root.addAppender(consoleAppender);
