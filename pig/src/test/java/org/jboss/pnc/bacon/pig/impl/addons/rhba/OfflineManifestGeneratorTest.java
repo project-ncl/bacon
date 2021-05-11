@@ -9,43 +9,93 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.TargetRepository;
 import org.jboss.pnc.enums.RepositoryType;
 import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OfflineManifestGeneratorTest {
 
-    private EasyRandom easyRandom = new EasyRandom();
+    private BuildInfoCollector buildInfoCollector;
+    private PigConfiguration pigConfiguration;
+    private Set<Artifact> artifacts;
+    private Map<String, PncBuild> builds;
 
-    @Test
-    public void testGeneratedOfflineManifest() throws Exception {
-        BuildInfoCollector buildInfoCollector = Mockito.mock(BuildInfoCollector.class);
-        PncBuild build = new PncBuild();
-        TargetRepository tr = TargetRepository.refBuilder()
-                .identifier("id1")
+    @BeforeEach
+    public void testSetUp() {
+        buildInfoCollector = Mockito.mock(BuildInfoCollector.class);
+
+        EasyRandom easyRandom = new EasyRandom();
+        pigConfiguration = easyRandom.nextObject(PigConfiguration.class);
+        pigConfiguration.getFlow().getRepositoryGeneration().setStrategy(BUILD_GROUP);
+
+        mockBuildsAndArtifacts();
+    }
+
+    private void mockBuildsAndArtifacts() {
+        TargetRepository repository = TargetRepository.refBuilder()
+                .identifier("repo1")
                 .repositoryType(RepositoryType.MAVEN)
                 .build();
-        Artifact artifact = Artifact.builder()
-                .targetRepository(tr)
-                .sha256("ada246bd35bf6c1251d2a6ab2e369cd4c22e0b7d7ee75316a6f0a95d51b094cd")
-                .filename("optaplanner-benchmark-7.44.0.Final-redhat-00001.jar")
-                .identifier("org.optaplanner:optaplanner-benchmark:jar:7.44.0.Final-redhat-00001")
-                .build();
-        List<Artifact> artifactList = new ArrayList<>();
-        artifactList.add(artifact);
-        build.addBuiltArtifacts(artifactList);
-        Map<String, PncBuild> builds = new HashMap<>();
-        builds.put("org:org1:jar", build);
-        PigConfiguration pigConfiguration = easyRandom.nextObject(PigConfiguration.class);
+
+        builds = new HashMap<>();
+        artifacts = new HashSet<>();
+        for (int i = 1; i <= 5; i++) {
+            String buildName = "build" + i;
+
+            List<Artifact> builtArtifacts = new ArrayList<>();
+            for (int j = 1; j <= i * 2; j++) {
+                builtArtifacts.add(
+                        Artifact.builder()
+                                .targetRepository(repository)
+                                .identifier("org:built:jar:" + i + "." + j)
+                                .filename("built-" + i + "." + j + ".jar")
+                                .sha256("built_" + i + "_" + j)
+                                .build());
+            }
+
+            List<Artifact> dependencies = new ArrayList<>();
+            for (int k = 1; k <= i * 3; k++) {
+                dependencies.add(
+                        Artifact.builder()
+                                .targetRepository(repository)
+                                .identifier("org:dependency:jar:" + i + "." + k)
+                                .filename("dependency-" + i + "." + k + ".jar")
+                                .sha256("dependency_" + i + "_" + k)
+                                .build());
+            }
+
+            PncBuild build = new PncBuild();
+            build.setId(buildName);
+            build.setName(buildName);
+            build.addBuiltArtifacts(builtArtifacts);
+            build.addDependencyArtifacts(dependencies);
+            builds.put(buildName, build);
+
+            artifacts.addAll(builtArtifacts);
+            artifacts.addAll(dependencies);
+        }
+    }
+
+    @Test
+    public void testGeneration() throws Exception {
         OfflineManifestGenerator generator = new OfflineManifestGenerator(
                 pigConfiguration,
                 builds,
@@ -53,18 +103,52 @@ public class OfflineManifestGeneratorTest {
                 "extras",
                 buildInfoCollector);
         generator.trigger();
-        StringBuilder offlinerContent = new StringBuilder();
-        assertTrue(Paths.get("target/offliner.txt").toFile().exists());
-        try (Stream<String> lines = Files.lines(Paths.get("target/offliner.txt"))) {
-            lines.forEach(string -> offlinerContent.append(string));
+
+        Path offlinerFilePath = Paths.get("target/offliner.txt");
+        assertTrue(offlinerFilePath.toFile().exists());
+
+        List<String> offlinerContent = Files.lines(offlinerFilePath).collect(Collectors.toList());
+        assertEquals(artifacts.size(), offlinerContent.size());
+
+        for (PncBuild build : builds.values()) {
+            assertBuildInclusion(build, offlinerContent, true);
         }
-        assertTrue(offlinerContent.length() > 0);
-        String offlinerAsString = offlinerContent.toString();
-        ArtifactWrapper artifactWrapper = new ArtifactWrapper(artifact);
-        GAV gav = artifactWrapper.toGAV();
-        String artifactAsOfflinerEntry = String
-                .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
-        assertTrue(offlinerAsString.contains(artifactAsOfflinerEntry));
     }
 
+    @Test
+    public void testBuildGroupExcludedSources() throws IOException {
+        List<String> excludeSourceBuilds = Arrays.asList("build2", "build4");
+        pigConfiguration.getFlow().getRepositoryGeneration().setExcludeSourceBuilds(excludeSourceBuilds);
+
+        OfflineManifestGenerator generator = new OfflineManifestGenerator(
+                pigConfiguration,
+                builds,
+                "target/",
+                "extras",
+                buildInfoCollector);
+        generator.trigger();
+
+        Path offlinerFilePath = Paths.get("target/offliner.txt");
+        List<String> offlinerContent = Files.lines(offlinerFilePath).collect(Collectors.toList());
+
+        for (PncBuild build : builds.values()) {
+            assertBuildInclusion(build, offlinerContent, !excludeSourceBuilds.contains(build.getId()));
+        }
+    }
+
+    private void assertBuildInclusion(PncBuild build, List<String> offlinerContent, boolean isIncluded) {
+        List<ArtifactWrapper> builtAndDependencies = new ArrayList<>();
+        builtAndDependencies.addAll(build.getBuiltArtifacts());
+        builtAndDependencies.addAll(build.getDependencyArtifacts());
+        for (ArtifactWrapper artifact : builtAndDependencies) {
+            GAV gav = artifact.toGAV();
+            String offlinerEntry = String
+                    .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
+            if (isIncluded) {
+                assertTrue(offlinerContent.contains(offlinerEntry));
+            } else {
+                assertFalse(offlinerContent.contains(offlinerEntry));
+            }
+        }
+    }
 }

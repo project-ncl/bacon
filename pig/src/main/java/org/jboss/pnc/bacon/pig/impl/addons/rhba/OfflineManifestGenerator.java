@@ -3,6 +3,8 @@ package org.jboss.pnc.bacon.pig.impl.addons.rhba;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -15,12 +17,16 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
+import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.IGNORE;
 
 /**
  * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH
@@ -74,70 +80,77 @@ public class OfflineManifestGenerator extends AddOn {
     }
 
     public void trigger() {
-        log.info("Will generate the offline manifest");
+        log.info("Generating the Offliner manifest");
         if (buildInfoCollector == null) {
             buildInfoCollector = new BuildInfoCollector();
         }
-        List<ArtifactWrapper> artifactsToListRaw = new ArrayList<>();
-        for (PncBuild build : builds.values()) {
-            artifactsToListRaw.addAll(build.getBuiltArtifacts());
-            // TODO: Add filter, basing on the targetRepository.repositoryType, when NCL-6079 is done
-            buildInfoCollector.addDependencies(build, "");
+
+        HashSet<String> artifacts = new HashSet<>();
+        for (PncBuild build : sourceBuilds()) {
+            List<String> builtArtifacts = filterExcludedArtifactsAndFormat(build.getBuiltArtifacts());
+            log.debug("Collected {} built artifacts for build {}", builtArtifacts.size(), build.getName());
+            artifacts.addAll(builtArtifacts);
+            buildInfoCollector.addDependencies(build, "targetRepository.repositoryType==" + RepositoryType.MAVEN);
             if (build.getDependencyArtifacts() != null) {
-                artifactsToListRaw.addAll(build.getDependencyArtifacts());
+                List<String> dependencies = filterExcludedArtifactsAndFormat(build.getDependencyArtifacts());
+                log.debug("Collected {} dependencies for build {}", dependencies.size(), build.getName());
+                artifacts.addAll(dependencies);
             }
         }
-        log.debug("Number of collected artifacts for the Offline manifest: {}", artifactsToListRaw.size());
 
-        List<String> exclusions = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
-        artifactsToListRaw.removeIf(artifact -> {
-            for (String exclusion : exclusions) {
-                if (Pattern.matches(exclusion, artifact.getGapv())) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        log.debug("Number of collected artifacts after exclusion: {}", artifactsToListRaw.size());
-
-        List<ArtifactWrapper> artifactsToList = artifactsToListRaw.stream().distinct().collect(Collectors.toList());
-
-        log.debug("Number of collected artifacts without duplicates: {}", artifactsToList.size());
-
-        String offlineManifestFileName;
-        if (getAddOnConfiguration() != null) {
-            offlineManifestFileName = Optional.of((String) getAddOnConfiguration().get("offlineManifestFileName"))
-                    .orElse(OFFLINE_MANIFEST_DEFAULT_NAME);
-        } else {
-            offlineManifestFileName = OFFLINE_MANIFEST_DEFAULT_NAME;
-        }
-
-        try (PrintWriter file = new PrintWriter(releasePath + offlineManifestFileName, StandardCharsets.UTF_8.name())) {
-            for (ArtifactWrapper artifact : artifactsToList) {
-                // TODO: Remove the check, when NCL-6079 is done
-                if (artifact.getRepositoryType() == RepositoryType.MAVEN) {
-                    GAV gav = artifact.toGAV();
-                    String offlinerString = String
-                            .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
-                    file.println(offlinerString);
-                }
-
-            }
-
-            List<GAV> extraGavs = pigConfiguration.getFlow()
+        try (PrintWriter file = new PrintWriter(
+                releasePath + offlinerManifestFileName(),
+                StandardCharsets.UTF_8.name())) {
+            artifacts.forEach(file::println);
+            pigConfiguration.getFlow()
                     .getRepositoryGeneration()
                     .getExternalAdditionalArtifacts()
                     .stream()
                     .map(GAV::fromColonSeparatedGAPV)
-                    .collect(Collectors.toList());
-            for (GAV extraGav : extraGavs) {
-                String offlinerString = String.format("%s/%s", extraGav.toVersionPath(), extraGav.toFileName());
-                file.println(offlinerString);
-            }
-
+                    .map(extraGav -> String.format("%s/%s", extraGav.toVersionPath(), extraGav.toFileName()))
+                    .forEach(file::println);
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            throw new FatalException("Failed to generate the offline manifest", e.getMessage());
+            throw new FatalException("Failed to generate the Offliner manifest", e);
         }
+    }
+
+    private List<String> filterExcludedArtifactsAndFormat(Collection<ArtifactWrapper> builtArtifacts) {
+        return builtArtifacts.stream()
+                .filter(artifact -> !this.isArtifactExcluded(artifact))
+                .map(
+                        artifact -> String.format(
+                                "%s,%s/%s",
+                                artifact.getSha256(),
+                                artifact.toGAV().toVersionPath(),
+                                artifact.toGAV().toFileName()))
+                .collect(Collectors.toList());
+    }
+
+    private String offlinerManifestFileName() {
+        if (getAddOnConfiguration() == null || getAddOnConfiguration().get("offlineManifestFileName") == null) {
+            return OFFLINE_MANIFEST_DEFAULT_NAME;
+        } else {
+            return (String) getAddOnConfiguration().get("offlineManifestFileName");
+        }
+    }
+
+    private List<PncBuild> sourceBuilds() {
+        RepoGenerationData generationData = pigConfiguration.getFlow().getRepositoryGeneration();
+        RepoGenerationStrategy strategy = generationData.getStrategy();
+        List<String> excludeSourceBuilds = generationData.getExcludeSourceBuilds();
+
+        boolean useExcludeSourceBuilds = Arrays.asList(IGNORE, BUILD_GROUP).contains(strategy);
+        return builds.values()
+                .stream()
+                .filter(build -> !useExcludeSourceBuilds || !excludeSourceBuilds.contains(build.getName()))
+                .collect(Collectors.toList());
+    }
+
+    private boolean isArtifactExcluded(ArtifactWrapper artifact) {
+        return pigConfiguration.getFlow()
+                .getRepositoryGeneration()
+                .getExcludeArtifacts()
+                .stream()
+                .anyMatch(exclusion -> Pattern.matches(exclusion, artifact.getGapv()));
     }
 }
