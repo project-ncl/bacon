@@ -95,7 +95,11 @@ The above will build a repository based on the PNC build group. For a more detai
 
 ### Offliner Manifest
 
-PiG is able to generate an offliner manifest in plain text compatible with the offliner tool. You can find more information about the tool [here](https://release-engineering.github.io/offliner/). This also takes into account any explicit inclusions or exclusions you may have specified as part of your `repositoryGeneration` step.
+PiG is able to generate an offliner manifest in plain text compatible with the offliner tool. 
+You can find more information about the tool [here](https://release-engineering.github.io/offliner/). 
+This also takes into account any explicit inclusions or exclusions you may have specified as part of your `repositoryGeneration` step.
+When the repository generation is set to BUILD_GROUP or to IGNORE then the `excludeSourceBuilds` optional parameter will be used, 
+if it is defined, to exclude the builds specified with it.
 
 Adding the following to the bottom of your `build-config.yaml` will generate `offliner.txt` inside the target directory.
 
