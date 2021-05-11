@@ -2,6 +2,8 @@ package org.jboss.pnc.bacon.pig.impl.utils.indy;
 
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 
 public class Indy {
     private static volatile String indyRepoUrl;
@@ -33,5 +35,18 @@ public class Indy {
             indyUrl = indyUrl + "/";
         }
         return indyUrl;
+    }
+
+    public static String getConfiguredIndySettingsXmlPath(boolean tempBuild) {
+        String settingsXml;
+        if (tempBuild) {
+            settingsXml = ResourceUtils.extractToTmpFile("/indy-temp-settings.xml", "settings", ".xml")
+                    .getAbsolutePath();
+        } else {
+            settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
+        }
+        FileUtils.replaceFileString("\\$\\{INDY_TMP_URL}", Indy.getIndyTempUrl(), settingsXml);
+        FileUtils.replaceFileString("\\$\\{INDY_URL}", Indy.getIndyUrl(), settingsXml);
+        return settingsXml;
     }
 }

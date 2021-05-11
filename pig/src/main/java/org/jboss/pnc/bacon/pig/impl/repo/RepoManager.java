@@ -23,12 +23,7 @@ import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.resolution.DependencyResult;
-import org.jboss.bacon.da.rest.LookupReportDto;
-import org.jboss.bacon.da.rest.ReportsApi;
-import org.jboss.da.reports.model.request.LookupGAVsRequest;
-import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
@@ -43,9 +38,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -355,20 +348,22 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             File sourceDir = createMavenGenerationDir();
             log.info("Source dir " + sourceDir.getAbsolutePath());
             boolean tempBuild = PigContext.get().isTempBuild();
+            String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(tempBuild);
+            log.info("Settings xml path " + settingsXmlPath);
             final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
-                    .setUserSettings(new File(FileUtils.getConfiguredIndySettingsXmlPath(tempBuild)))
+                    .setUserSettings(new File(settingsXmlPath))
                     .setLocalRepository(sourceDir.getAbsolutePath())
                     .build();
 
+            PncBuild pncBuild = getBuild(generationData.getSourceBuild());
+
+            ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(generationData.getSourceArtifact());
+
             Map<String, String> params = pigConfiguration.getFlow().getRepositoryGeneration().getParameters();
+
             String bomConstraintGroupId = generationData.getBomGroupId();
             String bomConstraintArtifactId = generationData.getBomArtifactId();
-            String bomConstraintVersion = getRedhatVersion(
-                    new org.jboss.da.model.rest.GAV(
-                            bomConstraintGroupId,
-                            bomConstraintArtifactId,
-                            generationData.getBomVersion()),
-                    tempBuild);
+            String bomConstraintVersion = bomArtifact.toGAV().getVersion();
 
             final Artifact bom = new DefaultArtifact(
                     bomConstraintGroupId,
@@ -400,14 +395,14 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             return repackage(sourceDir);
         } catch (Exception bme) {
             bme.printStackTrace();
-            return null;
+            throw new RuntimeException("Unable to resolve and package. " + bme.getLocalizedMessage());
         }
     }
 
     /**
      *
      * @param urlString url to extensionList file. File must contains the extensions in format of
-     *                  groupId:artifactId:version
+     *        groupId:artifactId:version
      * @return List of Artifacts
      * @throws Exception
      */
@@ -438,42 +433,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         } catch (IOException e) {
             throw new IOException("Unable to do IO operation. Url: " + urlString);
         }
-    }
-
-    private String getRedhatVersion(org.jboss.da.model.rest.GAV gav, boolean isTempBuild) {
-        final String DA_PATH = "/da/rest/v-1";
-        ResteasyClientBuilder builder = new ResteasyClientBuilder();
-        ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
-        builder.providerFactory(factory);
-        ResteasyProviderFactory.setRegisterBuiltinByDefault(true);
-        RegisterBuiltin.register(factory);
-
-        String daUrl = Utils.generateUrlPath(Config.instance().getActiveProfile().getDa().getUrl(), DA_PATH);
-
-        ReportsApi reportsClient = builder.build().target(daUrl).proxy(ReportsApi.class);
-        LookupGAVsRequest lookupRequest;
-        if (isTempBuild) {
-            lookupRequest = new LookupGAVsRequest(
-                    Collections.emptySet(),
-                    Collections.emptySet(),
-                    "DA-temporary-builds",
-                    false,
-                    "TEMPORARY",
-                    "temporary-redhat",
-                    Collections.singletonList(gav));
-        } else {
-            lookupRequest = new LookupGAVsRequest(Collections.singletonList(gav));
-        }
-        List<LookupReportDto> lookupReports = reportsClient.lookupGav(lookupRequest);
-        if (lookupReports.size() != 1) {
-            throw new RuntimeException("Expected exactly one report, got: " + lookupReports.size());
-        }
-        LookupReportDto lookupReport = lookupReports.get(0);
-        String bestVersion = lookupReport.getBestMatchVersion();
-        log.info(
-                "best version for GAV g=" + gav.getGroupId() + ",a=" + gav.getArtifactId() + ",v=" + gav.getVersion()
-                        + ": " + bestVersion);
-        return bestVersion;
     }
 
     private static Predicate<GAV> predicate(Map<String, String> stage) {
