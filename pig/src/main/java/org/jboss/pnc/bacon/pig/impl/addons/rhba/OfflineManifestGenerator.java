@@ -87,12 +87,12 @@ public class OfflineManifestGenerator extends AddOn {
 
         HashSet<String> artifacts = new HashSet<>();
         for (PncBuild build : sourceBuilds()) {
-            List<String> builtArtifacts = filterExcludedArtifactsAndFormat(build.getBuiltArtifacts());
+            Collection<String> builtArtifacts = filterExcludedArtifactsAndFormat(build.getBuiltArtifacts());
             log.debug("Collected {} built artifacts for build {}", builtArtifacts.size(), build.getName());
             artifacts.addAll(builtArtifacts);
             buildInfoCollector.addDependencies(build, "targetRepository.repositoryType==" + RepositoryType.MAVEN);
             if (build.getDependencyArtifacts() != null) {
-                List<String> dependencies = filterExcludedArtifactsAndFormat(build.getDependencyArtifacts());
+                Collection<String> dependencies = filterExcludedArtifactsAndFormat(build.getDependencyArtifacts());
                 log.debug("Collected {} dependencies for build {}", dependencies.size(), build.getName());
                 artifacts.addAll(dependencies);
             }
@@ -114,7 +114,7 @@ public class OfflineManifestGenerator extends AddOn {
         }
     }
 
-    private List<String> filterExcludedArtifactsAndFormat(Collection<ArtifactWrapper> builtArtifacts) {
+    private Collection<String> filterExcludedArtifactsAndFormat(Collection<ArtifactWrapper> builtArtifacts) {
         return builtArtifacts.stream()
                 .filter(artifact -> !this.isArtifactExcluded(artifact))
                 .map(
@@ -134,15 +134,17 @@ public class OfflineManifestGenerator extends AddOn {
         }
     }
 
-    private List<PncBuild> sourceBuilds() {
+    private Collection<PncBuild> sourceBuilds() {
         RepoGenerationData generationData = pigConfiguration.getFlow().getRepositoryGeneration();
         RepoGenerationStrategy strategy = generationData.getStrategy();
-        List<String> excludeSourceBuilds = generationData.getExcludeSourceBuilds();
+        if (!Arrays.asList(IGNORE, BUILD_GROUP).contains(strategy)) {
+            return builds.values();
+        }
 
-        boolean useExcludeSourceBuilds = Arrays.asList(IGNORE, BUILD_GROUP).contains(strategy);
+        List<String> excludeSourceBuilds = generationData.getExcludeSourceBuilds();
         return builds.values()
                 .stream()
-                .filter(build -> !useExcludeSourceBuilds || !excludeSourceBuilds.contains(build.getName()))
+                .filter(build -> !excludeSourceBuilds.contains(build.getName()))
                 .collect(Collectors.toList());
     }
 
