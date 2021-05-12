@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OfflineManifestGeneratorTest {
@@ -136,7 +135,7 @@ public class OfflineManifestGeneratorTest {
         }
     }
 
-    private void assertBuildInclusion(PncBuild build, List<String> offlinerContent, boolean isIncluded) {
+    private void assertBuildInclusion(PncBuild build, List<String> offlinerContent, boolean shouldBeIncluded) {
         List<ArtifactWrapper> builtAndDependencies = new ArrayList<>();
         builtAndDependencies.addAll(build.getBuiltArtifacts());
         builtAndDependencies.addAll(build.getDependencyArtifacts());
@@ -144,11 +143,7 @@ public class OfflineManifestGeneratorTest {
             GAV gav = artifact.toGAV();
             String offlinerEntry = String
                     .format("%s,%s/%s", artifact.getSha256(), gav.toVersionPath(), gav.toFileName());
-            if (isIncluded) {
-                assertTrue(offlinerContent.contains(offlinerEntry));
-            } else {
-                assertFalse(offlinerContent.contains(offlinerEntry));
-            }
+            assertEquals(shouldBeIncluded, offlinerContent.contains(offlinerEntry));
         }
     }
 }
