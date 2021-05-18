@@ -18,17 +18,14 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.bacon.da.rest.ListingsApi;
-import org.jboss.bacon.da.rest.LookupReportDto;
-import org.jboss.bacon.da.rest.ReportsApi;
+import org.jboss.bacon.da.DaHelper;
+import org.jboss.bacon.da.rest.endpoint.ListingsApi;
+import org.jboss.bacon.da.rest.endpoint.ReportsApi;
 import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.da.reports.model.request.LookupGAVsRequest;
-import org.jboss.pnc.bacon.common.Utils;
+import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,27 +45,17 @@ public class DADao {
 
     private final ReportsApi reportsClient;
     private final ListingsApi listingsClient;
-    private final String DA_PATH = "/da/rest/v-1";
 
     public DADao(DaConfig daConfig) {
-        // Setup required so that resteasy client builder knows how to parse json. Check if still needed?
-        ResteasyClientBuilder builder = new ResteasyClientBuilder();
-        ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
-        builder.providerFactory(factory);
-        ResteasyProviderFactory.setRegisterBuiltinByDefault(true);
-        RegisterBuiltin.register(factory);
-
-        String daUrl = Utils.generateUrlPath(daConfig.getUrl(), DA_PATH);
-
-        reportsClient = builder.build().target(daUrl).proxy(ReportsApi.class);
-        listingsClient = builder.build().target(daUrl).proxy(ListingsApi.class);
+        reportsClient = DaHelper.createReportsApi();
+        listingsClient = DaHelper.createListingsApi();
     }
 
     public void fillDaData(CommunityDependency dependency) {
         log.debug("Analyzing: {}", dependency);
         LookupGAVsRequest lookupRequest = new LookupGAVsRequest(Collections.singletonList(dependency.toDaGav()));
-        List<LookupReportDto> lookupReports = reportsClient.lookupGav(lookupRequest);
-        LookupReportDto lookupReport = getSingle(lookupReports);
+        List<LookupReport> lookupReports = reportsClient.lookupGav(lookupRequest);
+        LookupReport lookupReport = getSingle(lookupReports);
         String bestMatchVersion = lookupReport.getBestMatchVersion();
         String availableVersions = String.join(",", lookupReport.getAvailableVersions());
 
@@ -85,7 +72,7 @@ public class DADao {
         }
     }
 
-    private LookupReportDto getSingle(List<LookupReportDto> lookupReports) {
+    private LookupReport getSingle(List<LookupReport> lookupReports) {
         if (lookupReports.size() != 1) {
             throw new RuntimeException("Expected exactly one report, got: " + lookupReports.size());
         }

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.bacon.da.rest;
+package org.jboss.bacon.da.rest.endpoint;
 
 import org.jboss.da.listings.model.ProductSupportStatus;
 import org.jboss.da.listings.model.rest.ContainsResponse;
