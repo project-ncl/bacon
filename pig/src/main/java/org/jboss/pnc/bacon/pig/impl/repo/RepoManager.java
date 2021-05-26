@@ -22,7 +22,6 @@ import lombok.Getter;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.resolution.DependencyResult;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
@@ -361,9 +360,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
             Map<String, String> params = pigConfiguration.getFlow().getRepositoryGeneration().getParameters();
 
-            String bomConstraintGroupId = generationData.getBomGroupId();
-            String bomConstraintArtifactId = generationData.getBomArtifactId();
-            String bomConstraintVersion = bomArtifact.toGAV().getVersion();
+            GAV bomGAV = bomArtifact.toGAV();
+            String bomConstraintGroupId = bomGAV.getGroupId();
+            String bomConstraintArtifactId = bomGAV.getArtifactId();
+            String bomConstraintVersion = bomGAV.getVersion();
 
             final Artifact bom = new DefaultArtifact(
                     bomConstraintGroupId,
@@ -382,15 +382,47 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             for (Artifact extensionRtArtifact : extensionRtArtifactList) {
                 // this will resolve all the runtime dependencies and as a consequence populate the local Maven repo
                 // specified in the user settings.xml
-                DependencyResult result = mvnResolver.resolveManagedDependencies(
-                        extensionRtArtifact, // runtime extension artifact
-                        Collections.emptyList(), // enforced direct dependencies, ignore this
-                        bomConstraints, // version constraints from the BOM
-                        Collections.emptyList(), // extra maven repos, ignore this
-                        "test",
-                        "provided" // dependency scopes that should be ignored
-                );
+                if (extensionRtArtifact.getExtension().contains("plugin")) {
+                    log.info("Bom Constraint version " + bomConstraintVersion);
+                    Artifact pluginArtifact = new DefaultArtifact(
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId(),
+                            "jar",
+                            bomConstraintVersion);
+                    log.info("Plugin artifact " + pluginArtifact);
+                    mvnResolver.resolvePluginDependencies(pluginArtifact);
+                } else {
+                    if (!extensionRtArtifact.getArtifactId().contains("bom")
+                            || extensionRtArtifact.getExtension().equals("properties")) {
+                        DefaultArtifact redHatArtifact = new DefaultArtifact(
+                                extensionRtArtifact.getGroupId(),
+                                extensionRtArtifact.getArtifactId(),
+                                extensionRtArtifact.getClassifier(),
+                                extensionRtArtifact.getExtension(),
+                                bomConstraintVersion);
+                        log.info(
+                                "Artifact id " + redHatArtifact.getArtifactId() + " version "
+                                        + redHatArtifact.getVersion());
+                        mvnResolver.resolve(redHatArtifact);
+                        mvnResolver.resolveManagedDependencies(
+                                redHatArtifact, // runtime extension artifact
+                                Collections.emptyList(), // enforced direct dependencies, ignore this
+                                bomConstraints, // version constraints from the BOM
+                                Collections.emptyList(), // extra maven repos, ignore this
+                                "test",
+                                "provided" // dependency scopes that should be ignored
+                        );
 
+                    } else {
+                        DefaultArtifact bomPomArtifact = new DefaultArtifact(
+                                extensionRtArtifact.getGroupId(),
+                                extensionRtArtifact.getArtifactId(),
+                                "pom",
+                                bomConstraintVersion);
+                        log.info("BomPomArtifact id " + extensionRtArtifact.getArtifactId());
+                        mvnResolver.resolve(bomPomArtifact);
+                    }
+                }
             }
             return repackage(sourceDir);
         } catch (Exception bme) {
@@ -400,9 +432,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     /**
-     *
      * @param urlString url to extensionList file. File must contains the extensions in format of
-     *        groupId:artifactId:version
+     *        groupId:artifactId:version:type:classifier classifier and type are optionals
      * @return List of Artifacts
      * @throws Exception
      */
@@ -420,17 +451,36 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     break;
                 }
                 String[] parts = buffer.split(":");
-                if (parts.length < 2 || parts.length > 3) {
+                if (parts.length < 2 || parts.length > 5) {
                     throw new Exception("Extension text file is not properly formatted");
                 }
 
-                Artifact extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, "jar", parts[2]);
+                Artifact extensionRtArtifact;
+                if (parts.length == 3) {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, "jar", parts[2]);
+                } else if (parts.length == 4) {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, parts[3], parts[2]);
+                } else {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
+                }
                 list.add(extensionRtArtifact);
+
+                if (extensionRtArtifact.getArtifactId().contains("deployment")) {
+                    int endIdx = extensionRtArtifact.getArtifactId().indexOf("-deployment");
+                    DefaultArtifact runtimeArtifact = new DefaultArtifact(
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId().substring(0, endIdx),
+                            extensionRtArtifact.getClassifier(),
+                            extensionRtArtifact.getExtension(),
+                            extensionRtArtifact.getVersion());
+                    list.add(runtimeArtifact);
+                }
             }
             return list;
         } catch (MalformedURLException mfe) {
             throw new MalformedURLException("url is not proper " + urlString);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new IOException("Unable to do IO operation. Url: " + urlString);
         }
     }
