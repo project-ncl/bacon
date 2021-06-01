@@ -103,7 +103,7 @@ public class BuildConfigCli {
         private String productVersionId;
         @Option(
                 names = "--build-type",
-                description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
+                description = "Build Type. Options are: MVN,GRADLE,NPM,SBT. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
         @Option(
@@ -169,7 +169,7 @@ public class BuildConfigCli {
         private String productVersionId;
         @Option(
                 names = "--build-type",
-                description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN",
+                description = "Build Type. Options are: MVN,GRADLE,NPM,SBT. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
 
@@ -246,7 +246,7 @@ public class BuildConfigCli {
                 names = "--remove-parameters",
                 description = "Parameters to remove. Format: --remove-parameters=key1,key2,key3")
         private java.util.List<String> parametersToRemove;
-        @Option(names = "--build-type", description = "Build Type. Options are: MVN,GRADLE,NPM. Default: MVN")
+        @Option(names = "--build-type", description = "Build Type. Options are: MVN,GRADLE,NPM,SBT. Default: MVN")
         private String buildType;
         @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
