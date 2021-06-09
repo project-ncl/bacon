@@ -51,7 +51,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -102,7 +109,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
-            case RESOLVE_ONLY:
+            case RESOLVE_BOM_ONLY:
                 return resolveAndRepackage();
             case IGNORE:
                 log.info(
@@ -375,12 +382,13 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             if (bomConstraints.isEmpty()) {
                 throw new IllegalStateException("Failed to resolve " + bom);
             }
-            // Must point to a text file which contains list of format "groupId:artifactId:version"
+            // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
             String extensionsListUrl = params.get("extensionsListUrl");
 
             List<Artifact> extensionRtArtifactList = parseExtensionsArtifactList(extensionsListUrl);
             for (Artifact extensionRtArtifact : extensionRtArtifactList) {
-                // this will resolve all the runtime dependencies and as a consequence populate the local Maven repo
+                // this will resolve all the artifacts and their dependencies and as a consequence populate the local
+                // Maven repo
                 // specified in the user settings.xml
                 if (extensionRtArtifact.getExtension().contains("plugin")) {
                     log.info("Bom Constraint version " + bomConstraintVersion);
@@ -389,7 +397,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                             extensionRtArtifact.getArtifactId(),
                             "jar",
                             bomConstraintVersion);
-                    log.info("Plugin artifact " + pluginArtifact);
+                    log.debug("Plugin artifact " + pluginArtifact);
                     mvnResolver.resolvePluginDependencies(pluginArtifact);
                 } else {
                     if (!extensionRtArtifact.getArtifactId().contains("bom")
@@ -400,7 +408,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                 extensionRtArtifact.getClassifier(),
                                 extensionRtArtifact.getExtension(),
                                 bomConstraintVersion);
-                        log.info(
+                        log.debug(
                                 "Artifact id " + redHatArtifact.getArtifactId() + " version "
                                         + redHatArtifact.getVersion());
                         mvnResolver.resolve(redHatArtifact);
@@ -419,7 +427,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                 extensionRtArtifact.getArtifactId(),
                                 "pom",
                                 bomConstraintVersion);
-                        log.info("BomPomArtifact id " + extensionRtArtifact.getArtifactId());
+                        log.debug("BomPomArtifact id " + extensionRtArtifact.getArtifactId());
                         mvnResolver.resolve(bomPomArtifact);
                     }
                 }
@@ -464,17 +472,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
                 }
                 list.add(extensionRtArtifact);
-
-                if (extensionRtArtifact.getArtifactId().contains("deployment")) {
-                    int endIdx = extensionRtArtifact.getArtifactId().indexOf("-deployment");
-                    DefaultArtifact runtimeArtifact = new DefaultArtifact(
-                            extensionRtArtifact.getGroupId(),
-                            extensionRtArtifact.getArtifactId().substring(0, endIdx),
-                            extensionRtArtifact.getClassifier(),
-                            extensionRtArtifact.getExtension(),
-                            extensionRtArtifact.getVersion());
-                    list.add(runtimeArtifact);
-                }
             }
             return list;
         } catch (MalformedURLException mfe) {
