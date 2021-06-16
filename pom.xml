@@ -296,12 +296,7 @@
             <dependency>
                 <groupId>me.snowdrop</groupId>
                 <artifactId>licenses-generator</artifactId>
-                <version>1.0.5</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.lib</groupId>
-                <artifactId>lib-jenkins-maven-embedder</artifactId>
-                <version>3.15</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
@@ -501,11 +496,6 @@
             </snapshots>
             <id>Nexus Staging</id>
             <url>https://oss.sonatype.org/content/groups/staging</url>
-        </repository>
-
-        <repository>
-            <id>jenkins-ci-releases</id>
-            <url>https://repo.jenkins-ci.org/artifactory/releases</url>
         </repository>
     </repositories>
 

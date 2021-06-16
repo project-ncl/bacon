@@ -54,6 +54,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -77,6 +78,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private final boolean removeGeneratedM2Dups;
     private final Path configurationDirectory;
     private final boolean strictLicenseCheck;
+    private final boolean isTestMode;
 
     public RepoManager(
             PigConfiguration pigConfiguration,
@@ -92,6 +94,26 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         this.configurationDirectory = configurationDirectory;
         this.strictLicenseCheck = strictLicenseCheck;
         buildInfoCollector = new BuildInfoCollector();
+        isTestMode = false;
+    }
+
+    public RepoManager(
+            PigConfiguration pigConfiguration,
+            String releasePath,
+            Deliverables deliverables,
+            Map<String, PncBuild> builds,
+            Path configurationDirectory,
+            boolean removeGeneratedM2Dups,
+            boolean strictLicenseCheck,
+            BuildInfoCollector buildInfoCollector,
+            Boolean isTestMode) {
+        super(pigConfiguration, releasePath, deliverables, builds);
+        generationData = pigConfiguration.getFlow().getRepositoryGeneration();
+        this.removeGeneratedM2Dups = removeGeneratedM2Dups;
+        this.configurationDirectory = configurationDirectory;
+        this.strictLicenseCheck = strictLicenseCheck;
+        this.buildInfoCollector = buildInfoCollector;
+        this.isTestMode = isTestMode;
     }
 
     public RepositoryData prepare() {
@@ -109,7 +131,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
-            case RESOLVE_BOM_ONLY:
+            case RESOLVE_ONLY:
                 return resolveAndRepackage();
             case IGNORE:
                 log.info(
@@ -257,9 +279,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         ParentPomDownloader.addParentPoms(targetRepoContentsDir.toPath());
 
-        RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
-        RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
-
+        if (!isTestMode) {
+            RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
+            RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
+        }
         addMissingSources();
 
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
@@ -352,62 +375,79 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         try {
             log.info("Generating maven repository");
             File sourceDir = createMavenGenerationDir();
-            log.info("Source dir " + sourceDir.getAbsolutePath());
+
             boolean tempBuild = PigContext.get().isTempBuild();
             String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(tempBuild);
-            log.info("Settings xml path " + settingsXmlPath);
+
             final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
                     .setUserSettings(new File(settingsXmlPath))
                     .setLocalRepository(sourceDir.getAbsolutePath())
                     .build();
 
-            PncBuild pncBuild = getBuild(generationData.getSourceBuild());
-
-            ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(generationData.getSourceArtifact());
-
-            Map<String, String> params = pigConfiguration.getFlow().getRepositoryGeneration().getParameters();
-
-            GAV bomGAV = bomArtifact.toGAV();
-            String bomConstraintGroupId = bomGAV.getGroupId();
-            String bomConstraintArtifactId = bomGAV.getArtifactId();
-            String bomConstraintVersion = bomGAV.getVersion();
-
-            final Artifact bom = new DefaultArtifact(
-                    bomConstraintGroupId,
-                    bomConstraintArtifactId,
-                    null,
-                    "pom",
-                    bomConstraintVersion);
-            final List<Dependency> bomConstraints = mvnResolver.resolveDescriptor(bom).getManagedDependencies();
-            if (bomConstraints.isEmpty()) {
-                throw new IllegalStateException("Failed to resolve " + bom);
-            }
+            Map<String, String> params = generationData.getParameters();
             // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
             String extensionsListUrl = params.get("extensionsListUrl");
-
             List<Artifact> extensionRtArtifactList = parseExtensionsArtifactList(extensionsListUrl);
+
+            Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
+
+            List<Dependency> bomConstraints = Collections.emptyList();
+            if (generationData.getSourceBuild() != null && !generationData.getSourceBuild().isEmpty()
+                    && generationData.getSourceArtifact() != null && !generationData.getSourceArtifact().isEmpty()) {
+
+                PncBuild pncBuild = getBuild(generationData.getSourceBuild());
+
+                ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(generationData.getSourceArtifact());
+
+                GAV bomGAV = bomArtifact.toGAV();
+                String bomConstraintGroupId = bomGAV.getGroupId();
+                String bomConstraintArtifactId = bomGAV.getArtifactId();
+                String bomConstraintVersion = bomGAV.getVersion();
+
+                final Artifact bom = new DefaultArtifact(
+                        bomConstraintGroupId,
+                        bomConstraintArtifactId,
+                        null,
+                        "pom",
+                        bomConstraintVersion);
+                bomConstraints = mvnResolver.resolveDescriptor(bom).getManagedDependencies();
+                if (bomConstraints.isEmpty()) {
+                    throw new IllegalStateException("Failed to resolve " + bom);
+                }
+            }
+
             for (Artifact extensionRtArtifact : extensionRtArtifactList) {
                 // this will resolve all the artifacts and their dependencies and as a consequence populate the local
                 // Maven repo
                 // specified in the user settings.xml
-                if (extensionRtArtifact.getExtension().contains("plugin")) {
-                    log.info("Bom Constraint version " + bomConstraintVersion);
+                String aptVersion = redhatVersionExtensionArtifactMap
+                        .getOrDefault(extensionRtArtifact, extensionRtArtifact.getVersion());
+                if (extensionRtArtifact.getArtifactId().contains("plugin")) {
                     Artifact pluginArtifact = new DefaultArtifact(
                             extensionRtArtifact.getGroupId(),
                             extensionRtArtifact.getArtifactId(),
-                            "jar",
-                            bomConstraintVersion);
+                            extensionRtArtifact.getExtension(),
+                            aptVersion);
                     log.debug("Plugin artifact " + pluginArtifact);
                     mvnResolver.resolvePluginDependencies(pluginArtifact);
                 } else {
-                    if (!extensionRtArtifact.getArtifactId().contains("bom")
-                            || extensionRtArtifact.getExtension().equals("properties")) {
+                    if ((extensionRtArtifact.getArtifactId().contains("bom")
+                            || extensionRtArtifact.getExtension().equals("pom"))
+                            && !extensionRtArtifact.getExtension().equals("properties")) {
+                        DefaultArtifact bomPomArtifact = new DefaultArtifact(
+                                extensionRtArtifact.getGroupId(),
+                                extensionRtArtifact.getArtifactId(),
+                                "pom",
+                                aptVersion);
+                        log.debug("PomArtifact id " + extensionRtArtifact.getArtifactId());
+                        mvnResolver.resolve(bomPomArtifact);
+                    } else {
                         DefaultArtifact redHatArtifact = new DefaultArtifact(
                                 extensionRtArtifact.getGroupId(),
                                 extensionRtArtifact.getArtifactId(),
                                 extensionRtArtifact.getClassifier(),
                                 extensionRtArtifact.getExtension(),
-                                bomConstraintVersion);
+                                aptVersion);
                         log.debug(
                                 "Artifact id " + redHatArtifact.getArtifactId() + " version "
                                         + redHatArtifact.getVersion());
@@ -420,15 +460,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                 "test",
                                 "provided" // dependency scopes that should be ignored
                         );
-
-                    } else {
-                        DefaultArtifact bomPomArtifact = new DefaultArtifact(
-                                extensionRtArtifact.getGroupId(),
-                                extensionRtArtifact.getArtifactId(),
-                                "pom",
-                                bomConstraintVersion);
-                        log.debug("BomPomArtifact id " + extensionRtArtifact.getArtifactId());
-                        mvnResolver.resolve(bomPomArtifact);
                     }
                 }
             }
@@ -439,13 +470,43 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
+    public Map<Artifact, String> collectRedhatVersions(List<Artifact> extensionArtifacts) {
+        Map<Artifact, String> result = new HashMap<>();
+        builds.forEach((key, pncBuild) -> {
+            if (pncBuild.getBuiltArtifacts() != null) {
+                pncBuild.getBuiltArtifacts().forEach((artifactWrapper -> {
+                    extensionArtifacts.forEach((extensionArtifact -> {
+                        GAV gav = artifactWrapper.toGAV();
+                        if (extensionArtifact.getGroupId().equals(gav.getGroupId())
+                                && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
+                            result.put(extensionArtifact, gav.getVersion());
+                        }
+                    }));
+                }));
+            }
+            if (pncBuild.getDependencyArtifacts() != null) {
+                pncBuild.getDependencyArtifacts().forEach((artifactWrapper -> {
+                    extensionArtifacts.forEach((extensionArtifact -> {
+                        GAV gav = artifactWrapper.toGAV();
+                        if (extensionArtifact.getGroupId().equals(gav.getGroupId())
+                                && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
+                            result.put(extensionArtifact, gav.getVersion());
+                        }
+                    }));
+                }));
+            }
+        });
+
+        return result;
+    }
+
     /**
      * @param urlString url to extensionList file. File must contains the extensions in format of
      *        groupId:artifactId:version:type:classifier classifier and type are optionals
      * @return List of Artifacts
      * @throws Exception
      */
-    private List<Artifact> parseExtensionsArtifactList(String urlString) throws Exception {
+    public List<Artifact> parseExtensionsArtifactList(String urlString) throws Exception {
         try {
 
             URL url = new URL(urlString);
