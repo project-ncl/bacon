@@ -506,7 +506,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
      * @return List of Artifacts
      * @throws Exception
      */
-    public List<Artifact> parseExtensionsArtifactList(String urlString) throws Exception {
+    public List<Artifact> parseExtensionsArtifactList(String urlString) {
         try {
 
             URL url = new URL(urlString);
@@ -521,7 +521,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 }
                 String[] parts = buffer.split(":");
                 if (parts.length < 2 || parts.length > 5) {
-                    throw new Exception("Extension text file is not properly formatted");
+                    throw new RuntimeException("Extension text file is not properly formatted");
                 }
 
                 Artifact extensionRtArtifact;
@@ -536,10 +536,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
             return list;
         } catch (MalformedURLException mfe) {
-            throw new MalformedURLException("url is not proper " + urlString);
+            throw new RuntimeException("url is not proper " + urlString, mfe);
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new IOException("Unable to do IO operation. Url: " + urlString);
+            throw new RuntimeException("Unable to do IO operation. Url: " + urlString, e);
         }
     }
 

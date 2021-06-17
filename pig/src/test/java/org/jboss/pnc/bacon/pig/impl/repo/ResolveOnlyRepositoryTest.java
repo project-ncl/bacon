@@ -33,64 +33,31 @@ import java.util.Set;
 
 import static org.mockito.Mockito.doReturn;
 
-public class RepoManagerTest {
+public class ResolveOnlyRepositoryTest {
 
     @Test
     void resolveAndRepackageShouldGenerateRepository() throws Exception {
 
-        PigContext pigContext = Mockito.mock(PigContext.class);
-        doReturn(false).when(pigContext).isTempBuild();
-        MockedStatic<PigContext> pigContextMockedStatic = Mockito.mockStatic(PigContext.class);
-        pigContextMockedStatic.when(PigContext::get).thenReturn(pigContext);
+        mockPigContextAndMethods();
+        mockIndySettingsFile();
 
-        String pathToTestSettingsFile = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-                .getAbsolutePath();
-        MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
+        PigConfiguration pigConfiguration = mockPigConfigurationAndMethods();
 
-        PigConfiguration pigConfiguration = Mockito.mock(PigConfiguration.class, Mockito.RETURNS_DEEP_STUBS);
-        ProductConfig productConfig = Mockito.mock(ProductConfig.class);
-        doReturn(productConfig).when(pigConfiguration).getProduct();
-        doReturn("sample").when(productConfig).getName();
+        RepoGenerationData generationDataSpy = mockRepoGenerationDataAndMethods();
 
-        RepoGenerationData generationData = new RepoGenerationData();
-        RepoGenerationData generationDataSpy = Mockito.spy(generationData);
+        mockParamsAndMethods(generationDataSpy);
 
-        generationDataSpy.setStrategy(RepoGenerationStrategy.RESOLVE_ONLY);
+        mockFlowAndMethods(pigConfiguration, generationDataSpy);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("extensionsListUrl", "http://gitlab.cee.com");
-        doReturn(params).when(generationDataSpy).getParameters();
-
-        Flow mockFlow = Mockito.mock(Flow.class);
-        doReturn(generationDataSpy).when(mockFlow).getRepositoryGeneration();
-        doReturn(mockFlow).when(pigConfiguration).getFlow();
-
-        Map<String, PncBuild> builds = new HashMap<>();
-        Map<String, PncBuild> buildsSpy = Mockito.spy(builds);
-
-        PncBuild pncBuild = Mockito.mock(PncBuild.class);
-        buildsSpy.put(generationDataSpy.getSourceBuild(), pncBuild);
+        Map<String, PncBuild> buildsSpy = mockBuildsAndMethods(generationDataSpy);
 
         Path configurationDirectory = Mockito.mock(Path.class);
 
-        MockedStatic<ResourceUtils> resourceUtilsMockedStatic = Mockito.mockStatic(ResourceUtils.class);
-        resourceUtilsMockedStatic.when(
-                () -> ResourceUtils.getOverridableResource("/repository-example-settings.xml", configurationDirectory))
-                .thenReturn("fake-resource-name");
+        mockResourceUtilsMethods(configurationDirectory);
 
-        resourceUtilsMockedStatic
-                .when(() -> ResourceUtils.getOverridableResource("/repository-README.md", configurationDirectory))
-                .thenReturn("fake-resource-readme");
+        Deliverables deliverables = mockDeliverables(pigConfiguration);
 
-        Deliverables deliverables = Mockito.mock(Deliverables.class);
-        doReturn("rh-sample-maven-repository.zip").when(deliverables).getRepositoryZipName();
-
-        doReturn("rh-sample-").when(pigConfiguration).getTopLevelDirectoryPrefix();
-
-        String releasePath = "/tmp/resolveRepoTest/";
-        File targetRepoZipPath = new File(releasePath);
-        targetRepoZipPath.mkdirs();
+        String releasePath = createReleasePath();
 
         BuildInfoCollector buildInfoCollectorMock = Mockito.mock(BuildInfoCollector.class);
 
@@ -104,17 +71,11 @@ public class RepoManagerTest {
                 false,
                 buildInfoCollectorMock,
                 true);
+
         RepoManager repoManagerSpy = Mockito.spy(repoManager);
 
-        Artifact vertxWeb = new DefaultArtifact("io.vertx", "vertx-bridge-common", "jar", "4.1.0");
+        prepareFakeExtensionArtifactList(repoManagerSpy);
 
-        List<Artifact> extensionsArtifactList = new ArrayList<>();
-        extensionsArtifactList.add(vertxWeb);
-
-        doReturn(extensionsArtifactList).when(repoManagerSpy).parseExtensionsArtifactList("http://gitlab.cee.com");
-        Map<Artifact, String> redhatVersionMap = new HashMap<>();
-        redhatVersionMap.put(vertxWeb, "4.1.0");
-        doReturn(redhatVersionMap).when(repoManagerSpy).collectRedhatVersions(extensionsArtifactList);
         RepositoryData repoData = repoManagerSpy.prepare();
 
         assert repoData.getRepositoryPath().toString().equals("/tmp/resolveRepoTest/rh-sample-maven-repository.zip");
@@ -122,13 +83,101 @@ public class RepoManagerTest {
         Set<String> repoZipContents = repoZipContentList();
 
         repoData.getFiles().forEach((file) -> {
-            String filePath = file.getAbsolutePath().replaceAll(".+/pig/target/deliverable-generation\\d+/", "");
+            String filePath = file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "");
             if (!repoZipContents.contains(filePath)) {
                 System.out.println("File not included " + filePath);
             }
             assert repoZipContents.contains(filePath);
         });
 
+    }
+
+    private void mockPigContextAndMethods() {
+        PigContext pigContext = Mockito.mock(PigContext.class);
+        doReturn(false).when(pigContext).isTempBuild();
+        MockedStatic<PigContext> pigContextMockedStatic = Mockito.mockStatic(PigContext.class);
+        pigContextMockedStatic.when(PigContext::get).thenReturn(pigContext);
+    }
+
+    private void mockIndySettingsFile() {
+        String pathToTestSettingsFile = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml")
+                .getAbsolutePath();
+        MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
+        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
+    }
+
+    private PigConfiguration mockPigConfigurationAndMethods() {
+        PigConfiguration pigConfiguration = Mockito.mock(PigConfiguration.class, Mockito.RETURNS_DEEP_STUBS);
+        ProductConfig productConfig = Mockito.mock(ProductConfig.class);
+        doReturn(productConfig).when(pigConfiguration).getProduct();
+        doReturn("sample").when(productConfig).getName();
+        return pigConfiguration;
+    }
+
+    private RepoGenerationData mockRepoGenerationDataAndMethods() {
+        RepoGenerationData generationData = new RepoGenerationData();
+        RepoGenerationData generationDataSpy = Mockito.spy(generationData);
+        generationDataSpy.setStrategy(RepoGenerationStrategy.RESOLVE_ONLY);
+
+        return generationDataSpy;
+    }
+
+    private void mockParamsAndMethods(RepoGenerationData generationData) {
+        Map<String, String> params = new HashMap<>();
+        params.put("extensionsListUrl", "http://gitlab.cee.com");
+        doReturn(params).when(generationData).getParameters();
+    }
+
+    private void mockFlowAndMethods(PigConfiguration pigConfiguration, RepoGenerationData generationData) {
+        Flow mockFlow = Mockito.mock(Flow.class);
+        doReturn(generationData).when(mockFlow).getRepositoryGeneration();
+        doReturn(mockFlow).when(pigConfiguration).getFlow();
+    }
+
+    private Map<String, PncBuild> mockBuildsAndMethods(RepoGenerationData generationData) {
+        Map<String, PncBuild> builds = new HashMap<>();
+        Map<String, PncBuild> buildsSpy = Mockito.spy(builds);
+
+        PncBuild pncBuild = Mockito.mock(PncBuild.class);
+        buildsSpy.put(generationData.getSourceBuild(), pncBuild);
+
+        return buildsSpy;
+    }
+
+    private void mockResourceUtilsMethods(Path configurationDirectory) {
+        MockedStatic<ResourceUtils> resourceUtilsMockedStatic = Mockito.mockStatic(ResourceUtils.class);
+        resourceUtilsMockedStatic.when(
+                () -> ResourceUtils.getOverridableResource("/repository-example-settings.xml", configurationDirectory))
+                .thenReturn("fake-resource-name");
+
+        resourceUtilsMockedStatic
+                .when(() -> ResourceUtils.getOverridableResource("/repository-README.md", configurationDirectory))
+                .thenReturn("fake-resource-readme");
+    }
+
+    private Deliverables mockDeliverables(PigConfiguration pigConfiguration) {
+        Deliverables deliverables = Mockito.mock(Deliverables.class);
+        doReturn("rh-sample-maven-repository.zip").when(deliverables).getRepositoryZipName();
+        doReturn("rh-sample-").when(pigConfiguration).getTopLevelDirectoryPrefix();
+        return deliverables;
+    }
+
+    private String createReleasePath() {
+        String releasePath = "/tmp/resolveRepoTest/";
+        File targetRepoZipPath = new File(releasePath);
+        targetRepoZipPath.mkdirs();
+        return releasePath;
+    }
+
+    private void prepareFakeExtensionArtifactList(RepoManager repoManager) {
+        Artifact vertxWeb = new DefaultArtifact("io.vertx", "vertx-bridge-common", "jar", "4.1.0");
+
+        List<Artifact> extensionsArtifactList = new ArrayList<>();
+        extensionsArtifactList.add(vertxWeb);
+        doReturn(extensionsArtifactList).when(repoManager).parseExtensionsArtifactList("http://gitlab.cee.com");
+        Map<Artifact, String> redhatVersionMap = new HashMap<>();
+        redhatVersionMap.put(vertxWeb, "4.1.0");
+        doReturn(redhatVersionMap).when(repoManager).collectRedhatVersions(extensionsArtifactList);
     }
 
     private Set<String> repoZipContentList() {
