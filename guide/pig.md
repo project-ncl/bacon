@@ -90,6 +90,47 @@ repositoryGeneration:
 
 The above will build a repository based on the PNC build group. For a more detailed explanation of the various strategies for the maven repository generation, see [here](build-config.html#maven-repository-generation)
 
+## Repository Packaging Strategies
+
+- ### RESOLVE ONLY
+    This strategy takes the entry points of the artifacts/extensions of of the product which are supposed to be packaged in repository, resolves the artifact, resolves artifacts managed dependencies. It also takes care of the transitives and package them as well.
+  
+    **Necessary configuration**
+    
+    In order to RESOLVE_ONLY strategy to work it requires a link to txt file which contains the artifact or extensions in the format of
+    `groupId:artifactId:version:type:classifier` (type and classifier are optional)
+  
+    *For example*
+  
+    In build-config.yaml
+  
+    ```
+      repositoryGeneration:
+        strategy: RESOLVE_BOM_ONLY
+        parameters:
+          extensionsListUrl: "http://link.to.txt.file"
+    ``` 
+    *Text file sample*
+    ```
+    io.quarkus:quarkus-bom-quarkus-platform-properties:1.11.6.Final:properties
+    io.quarkus:quarkus-logging-json-deployment:1.11.6.Final
+    io.quarkus:quarkus-smallrye-opentracing-deployment:1.11.6.Final
+    
+    ```
+    **Additional Information**
+    Resolve artifacts/extensions in the scope of a bom file
+    In order to resolve the artifacts/extensions in scope of your product bom file, fill `sourceBuild`  and `sourceArtifact` and RESOLVE_ONLY strategy will resolve in the scope of your product bom
+    
+    For example
+    ```
+      repositoryGeneration:
+        strategy: RESOLVE_BOM_ONLY
+        sourceBuild: io.quarkus-quarkus-platform-{{productVersion}}
+        sourceArtifact: 'quarkus-product-bom-[\d]+.*.pom'
+        parameters:
+          extensionsListUrl: "https://gitlab.cee.redhat.com/rmaity/build-configurations/-/raw/resolvePlay/Quarkus/extensionArtifactList.txt"
+    ```
+
 
 ## Add ons
 
