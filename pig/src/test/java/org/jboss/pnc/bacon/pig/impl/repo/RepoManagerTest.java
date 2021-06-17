@@ -120,8 +120,12 @@ public class RepoManagerTest {
         assert repoData.getRepositoryPath().toString().equals("/tmp/resolveRepoTest/rh-sample-maven-repository.zip");
 
         Set<String> repoZipContents = repoZipContentList();
+
         repoData.getFiles().forEach((file) -> {
-            String filePath = file.getAbsolutePath().replaceAll("/tmp/deliverable-generation\\d+/", "");
+            String filePath = file.getAbsolutePath().replaceAll(".+/pig/target/deliverable-generation\\d+/", "");
+            if (!repoZipContents.contains(filePath)) {
+                System.out.println("File not included " + filePath);
+            }
             assert repoZipContents.contains(filePath);
         });
 
