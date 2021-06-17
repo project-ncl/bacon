@@ -515,9 +515,12 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             ArrayList<Artifact> list = new ArrayList<>();
             String buffer = "";
             while (buffer != null) {
-                buffer = br.readLine();
+                buffer = br.readLine().trim();
                 if (buffer == null) {
                     break;
+                }
+                if (buffer.isEmpty() || buffer.startsWith("#")) {
+                    continue;
                 }
                 String[] parts = buffer.split(":");
                 if (parts.length < 2 || parts.length > 5) {
