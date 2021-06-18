@@ -572,18 +572,17 @@ public final class FileUtils {
     }
 
     public static void replaceFileString(String orig, String replace, String fileName) {
-        try {
-            FileInputStream fis = new FileInputStream(fileName);
-            String content = org.apache.commons.io.IOUtils.toString(fis, Charset.defaultCharset());
+        String content;
+        try (FileInputStream fis = new FileInputStream(fileName)) {
+            content = org.apache.commons.io.IOUtils.toString(fis, Charset.defaultCharset());
             content = content.replaceAll(orig, replace);
-            FileOutputStream fos = new FileOutputStream(fileName);
-            log.info("Replaced content");
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read file ", ioe);
+        }
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
             org.apache.commons.io.IOUtils.write(content, fos, Charset.defaultCharset());
-            fis.close();
-            fos.close();
-        } catch (IOException e) {
-            log.error("Unable to change settings file", e);
-            throw new RuntimeException("Unable to change settings file " + e.getLocalizedMessage());
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read file ", ioe);
         }
     }
 

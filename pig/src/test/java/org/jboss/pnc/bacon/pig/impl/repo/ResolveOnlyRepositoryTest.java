@@ -36,7 +36,7 @@ import static org.mockito.Mockito.doReturn;
 public class ResolveOnlyRepositoryTest {
 
     @Test
-    void resolveAndRepackageShouldGenerateRepository() throws Exception {
+    void resolveAndRepackageShouldGenerateRepository() {
 
         mockPigContextAndMethods();
         mockIndySettingsFile();
