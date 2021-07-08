@@ -17,7 +17,11 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import lombok.Getter;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.graph.Dependency;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
@@ -33,15 +37,24 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -65,6 +78,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private final boolean removeGeneratedM2Dups;
     private final Path configurationDirectory;
     private final boolean strictLicenseCheck;
+    private final boolean isTestMode;
 
     public RepoManager(
             PigConfiguration pigConfiguration,
@@ -80,6 +94,26 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         this.configurationDirectory = configurationDirectory;
         this.strictLicenseCheck = strictLicenseCheck;
         buildInfoCollector = new BuildInfoCollector();
+        isTestMode = false;
+    }
+
+    public RepoManager(
+            PigConfiguration pigConfiguration,
+            String releasePath,
+            Deliverables deliverables,
+            Map<String, PncBuild> builds,
+            Path configurationDirectory,
+            boolean removeGeneratedM2Dups,
+            boolean strictLicenseCheck,
+            BuildInfoCollector buildInfoCollector,
+            Boolean isTestMode) {
+        super(pigConfiguration, releasePath, deliverables, builds);
+        generationData = pigConfiguration.getFlow().getRepositoryGeneration();
+        this.removeGeneratedM2Dups = removeGeneratedM2Dups;
+        this.configurationDirectory = configurationDirectory;
+        this.strictLicenseCheck = strictLicenseCheck;
+        this.buildInfoCollector = buildInfoCollector;
+        this.isTestMode = isTestMode;
     }
 
     public RepositoryData prepare() {
@@ -97,6 +131,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 return milestone();
             case BUILD_CONFIGS:
                 return buildConfigs();
+            case RESOLVE_ONLY:
+                return resolveAndRepackage();
             case IGNORE:
                 log.info(
                         "Ignoring repository zip generation because the config strategy is set to: {}",
@@ -243,9 +279,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         ParentPomDownloader.addParentPoms(targetRepoContentsDir.toPath());
 
-        RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
-        RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
-
+        if (!isTestMode) {
+            RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
+            RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
+        }
         addMissingSources();
 
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
@@ -332,6 +369,181 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
 
         return repackage(new File(repoParentDir, "maven-repository"));
+    }
+
+    public RepositoryData resolveAndRepackage() {
+        try {
+            log.info("Generating maven repository");
+            File sourceDir = createMavenGenerationDir();
+
+            boolean tempBuild = PigContext.get().isTempBuild();
+            String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(tempBuild);
+
+            final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
+                    .setUserSettings(new File(settingsXmlPath))
+                    .setLocalRepository(sourceDir.getAbsolutePath())
+                    .build();
+
+            Map<String, String> params = generationData.getParameters();
+            // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
+            String extensionsListUrl = params.get("extensionsListUrl");
+            List<Artifact> extensionRtArtifactList = parseExtensionsArtifactList(extensionsListUrl);
+
+            Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
+
+            List<Dependency> bomConstraints = Collections.emptyList();
+            if (generationData.getSourceBuild() != null && !generationData.getSourceBuild().isEmpty()
+                    && generationData.getSourceArtifact() != null && !generationData.getSourceArtifact().isEmpty()) {
+
+                PncBuild pncBuild = getBuild(generationData.getSourceBuild());
+
+                ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(generationData.getSourceArtifact());
+
+                GAV bomGAV = bomArtifact.toGAV();
+                String bomConstraintGroupId = bomGAV.getGroupId();
+                String bomConstraintArtifactId = bomGAV.getArtifactId();
+                String bomConstraintVersion = bomGAV.getVersion();
+
+                final Artifact bom = new DefaultArtifact(
+                        bomConstraintGroupId,
+                        bomConstraintArtifactId,
+                        null,
+                        "pom",
+                        bomConstraintVersion);
+                bomConstraints = mvnResolver.resolveDescriptor(bom).getManagedDependencies();
+                if (bomConstraints.isEmpty()) {
+                    throw new IllegalStateException("Failed to resolve " + bom);
+                }
+            }
+
+            for (Artifact extensionRtArtifact : extensionRtArtifactList) {
+                // this will resolve all the artifacts and their dependencies and as a consequence populate the local
+                // Maven repo
+                // specified in the user settings.xml
+                String aptVersion = redhatVersionExtensionArtifactMap
+                        .getOrDefault(extensionRtArtifact, extensionRtArtifact.getVersion());
+                if (extensionRtArtifact.getArtifactId().contains("plugin")) {
+                    Artifact pluginArtifact = new DefaultArtifact(
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId(),
+                            extensionRtArtifact.getExtension(),
+                            aptVersion);
+                    log.debug("Plugin artifact " + pluginArtifact);
+                    mvnResolver.resolvePluginDependencies(pluginArtifact);
+                } else {
+                    if ((extensionRtArtifact.getArtifactId().contains("bom")
+                            || extensionRtArtifact.getExtension().equals("pom"))
+                            && !extensionRtArtifact.getExtension().equals("properties")) {
+                        DefaultArtifact bomPomArtifact = new DefaultArtifact(
+                                extensionRtArtifact.getGroupId(),
+                                extensionRtArtifact.getArtifactId(),
+                                "pom",
+                                aptVersion);
+                        log.debug("PomArtifact id " + extensionRtArtifact.getArtifactId());
+                        mvnResolver.resolve(bomPomArtifact);
+                    } else {
+                        DefaultArtifact redHatArtifact = new DefaultArtifact(
+                                extensionRtArtifact.getGroupId(),
+                                extensionRtArtifact.getArtifactId(),
+                                extensionRtArtifact.getClassifier(),
+                                extensionRtArtifact.getExtension(),
+                                aptVersion);
+                        log.debug(
+                                "Artifact id " + redHatArtifact.getArtifactId() + " version "
+                                        + redHatArtifact.getVersion());
+                        mvnResolver.resolve(redHatArtifact);
+                        mvnResolver.resolveManagedDependencies(
+                                redHatArtifact, // runtime extension artifact
+                                Collections.emptyList(), // enforced direct dependencies, ignore this
+                                bomConstraints, // version constraints from the BOM
+                                Collections.emptyList(), // extra maven repos, ignore this
+                                "test",
+                                "provided" // dependency scopes that should be ignored
+                        );
+                    }
+                }
+            }
+            return repackage(sourceDir);
+        } catch (Exception bme) {
+            bme.printStackTrace();
+            throw new RuntimeException("Unable to resolve and package. " + bme.getLocalizedMessage());
+        }
+    }
+
+    public Map<Artifact, String> collectRedhatVersions(List<Artifact> extensionArtifacts) {
+        Map<Artifact, String> result = new HashMap<>();
+        builds.forEach((key, pncBuild) -> {
+            if (pncBuild.getBuiltArtifacts() != null) {
+                pncBuild.getBuiltArtifacts().forEach((artifactWrapper -> {
+                    extensionArtifacts.forEach((extensionArtifact -> {
+                        GAV gav = artifactWrapper.toGAV();
+                        if (extensionArtifact.getGroupId().equals(gav.getGroupId())
+                                && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
+                            result.put(extensionArtifact, gav.getVersion());
+                        }
+                    }));
+                }));
+            }
+            if (pncBuild.getDependencyArtifacts() != null) {
+                pncBuild.getDependencyArtifacts().forEach((artifactWrapper -> {
+                    extensionArtifacts.forEach((extensionArtifact -> {
+                        GAV gav = artifactWrapper.toGAV();
+                        if (extensionArtifact.getGroupId().equals(gav.getGroupId())
+                                && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
+                            result.put(extensionArtifact, gav.getVersion());
+                        }
+                    }));
+                }));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * @param urlString url to extensionList file. File must contains the extensions in format of
+     *        groupId:artifactId:version:type:classifier classifier and type are optionals
+     * @return List of Artifacts
+     * @throws Exception
+     */
+    public List<Artifact> parseExtensionsArtifactList(String urlString) {
+        try {
+
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            ArrayList<Artifact> list = new ArrayList<>();
+            String buffer = "";
+            while (buffer != null) {
+                buffer = br.readLine();
+                if (buffer == null) {
+                    break;
+                }
+                buffer = buffer.trim();
+                if (buffer.isEmpty() || buffer.startsWith("#")) {
+                    continue;
+                }
+                String[] parts = buffer.split(":");
+                if (parts.length < 2 || parts.length > 5) {
+                    throw new RuntimeException("Extension text file is not properly formatted");
+                }
+
+                Artifact extensionRtArtifact;
+                if (parts.length == 3) {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, "jar", parts[2]);
+                } else if (parts.length == 4) {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, parts[3], parts[2]);
+                } else {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
+                }
+                list.add(extensionRtArtifact);
+            }
+            return list;
+        } catch (MalformedURLException mfe) {
+            throw new RuntimeException("url is not proper " + urlString, mfe);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to do IO operation. Url: " + urlString, e);
+        }
     }
 
     private static Predicate<GAV> predicate(Map<String, String> stage) {

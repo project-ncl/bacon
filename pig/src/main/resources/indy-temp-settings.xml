@@ -19,6 +19,31 @@
     <localRepository>${user.home}/.m2/repository</localRepository>
     <profiles>
         <profile>
+            <id>indy-repositories</id>
+            <repositories>
+                <repository>
+                    <id>indy</id>
+                    <url>${INDY_URL}</url>
+                </repository>
+                <repository>
+                    <id>indy-temp</id>
+                    <url>${INDY_TMP_URL}/</url>
+                </repository>
+                <!--${ADDITIONAL_REPOS}-->
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>indy</id>
+                    <url>${INDY_URL}</url>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>indy-temp</id>
+                    <url>${INDY_TMP_URL}</url>
+                </pluginRepository>
+                <!--${ADDITIONAL_PLUGIN_REPOS}-->
+            </pluginRepositories>
+        </profile>
+        <profile>
             <id>maven-central</id>
             <repositories>
                 <repository>
@@ -31,31 +56,6 @@
                     <id>central</id>
                     <url>https://repo1.maven.org/maven2/</url>
                 </pluginRepository>
-            </pluginRepositories>
-        </profile>
-        <profile>
-            <id>indy-repositories</id>
-            <repositories>
-                <repository>
-                    <id>indy</id>
-                    <url>${INDY_URL}</url>
-                </repository>
-                <repository>
-                    <id>indy-temp</id>
-                    <url>${INDY_TMP_URL}/</url>
-                </repository>
-        <!--${ADDITIONAL_REPOS}-->
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>indy</id>
-                    <url>${INDY_URL}</url>
-                </pluginRepository>
-                <pluginRepository>
-                    <id>indy-temp</id>
-                    <url>${INDY_TMP_URL}</url>
-                </pluginRepository>
-        <!--${ADDITIONAL_PLUGIN_REPOS}-->
             </pluginRepositories>
         </profile>
         <profile>

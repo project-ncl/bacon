@@ -18,7 +18,6 @@
 package org.jboss.pnc.bacon.pig.impl.javadoc;
 
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.commonjava.maven.ext.cli.Cli;
 import org.eclipse.jgit.api.Git;
@@ -34,7 +33,6 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Dependency;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Profile;
@@ -47,11 +45,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -147,32 +142,9 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         return ret;
     }
 
-    private static void replaceFileString(String orig, String replace, String fileName) {
-        try {
-            FileInputStream fis = new FileInputStream(fileName);
-            String content = IOUtils.toString(fis, Charset.defaultCharset());
-            content = content.replaceAll(orig, replace);
-            FileOutputStream fos = new FileOutputStream(fileName);
-            IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
-            fis.close();
-            fos.close();
-        } catch (IOException e) {
-            log.error("Unable to change settings file", e);
-        }
-    }
-
     private void init() {
         this.temporaryDestination = FileUtils.mkTempDir("javadoc");
-        if (this.tempBuild) {
-            this.settingsXml = ResourceUtils.extractToTmpFile("/indy-temp-settings.xml", "settings", ".xml")
-                    .getAbsolutePath();
-
-        } else {
-            this.settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-                    .getAbsolutePath();
-        }
-        replaceFileString("\\$\\{INDY_URL}", Indy.getIndyUrl(), this.settingsXml);
-        replaceFileString("\\$\\{INDY_TMP_URL}", Indy.getIndyTempUrl(), this.settingsXml);
+        this.settingsXml = Indy.getConfiguredIndySettingsXmlPath(this.tempBuild);
         this.localRepo = new File(temporaryDestination + File.separator + "localRepo");
         this.localRepo.mkdir();
         this.topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());

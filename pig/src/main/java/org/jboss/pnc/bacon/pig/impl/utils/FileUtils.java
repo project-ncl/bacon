@@ -570,4 +570,20 @@ public final class FileUtils {
             throw new RuntimeException("Unzip of " + fileName + " from " + zipName + " failed", e);
         }
     }
+
+    public static void replaceFileString(String orig, String replace, String fileName) {
+        String content;
+        try (FileInputStream fis = new FileInputStream(fileName)) {
+            content = org.apache.commons.io.IOUtils.toString(fis, Charset.defaultCharset());
+            content = content.replaceAll(orig, replace);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read file ", ioe);
+        }
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+            org.apache.commons.io.IOUtils.write(content, fos, Charset.defaultCharset());
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read file ", ioe);
+        }
+    }
+
 }

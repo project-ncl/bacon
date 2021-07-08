@@ -86,6 +86,7 @@
         <pnc.version>2.1.0</pnc.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <quarkus.resolver.version>2.0.0.Alpha3</quarkus.resolver.version>
         <tagSuffix />
     </properties>
 
@@ -297,7 +298,7 @@
             <dependency>
                 <groupId>me.snowdrop</groupId>
                 <artifactId>licenses-generator</artifactId>
-                <version>1.0.5</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
@@ -386,6 +387,24 @@
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-core</artifactId>
                 <version>${jaxb.version}</version>
+            </dependency>
+
+            <!-- Quarkus bootsrap maven resolver   -->
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-bootstrap-maven-resolver</artifactId>
+                <version>${quarkus.resolver.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.slf4j</groupId>
+                        <artifactId>slf4j-jboss-logmanager</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.sisu</groupId>
+                <artifactId>org.eclipse.sisu.inject</artifactId>
+                <version>0.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
