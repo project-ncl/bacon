@@ -57,6 +57,7 @@ builds:
     scmUrl: git+ssh://<internal url>/productization/github.com/my-app-b.git
     externalScmUrl: https://github.com/my-other-project/.git
     scmRevision: branch-1.2.1_config-1.2.0
+    buildCategory: STANDARD # STANDARD/SERVICE . defaults to STANDARD, build parameter for managed services builds
 
 ###############################################################################
 # after the builds are done, the deliverables are prepared.

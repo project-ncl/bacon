@@ -115,6 +115,8 @@ public class BuildConfig {
     private String executionRoot;
     private String brewBuildName;
 
+    private String buildCategory;
+
     /**
      * Set the defaults of buildConfig if not explicitly specified
      * <p>
@@ -256,6 +258,10 @@ public class BuildConfig {
 
         if (buildPodMemory != null) {
             result.put("BUILDER_POD_MEMORY", buildPodMemory.toString());
+        }
+
+        if (buildCategory != null) {
+            result.put("BUILD_CATEGORY", buildCategory.toUpperCase());
         }
 
         if (pigYamlMetadata != null) {
