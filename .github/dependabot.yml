@@ -9,11 +9,7 @@ updates:
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: com.sun.xml.bind:jaxb-core
-    versions:
-    - 3.0.1
   - dependency-name: com.sun.xml.bind:jaxb-impl
-    versions:
-    - 3.0.1
   - dependency-name: org.jboss:jboss-parent
     versions:
     - "38"
