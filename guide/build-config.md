@@ -213,6 +213,7 @@ Strategy options are:
 - BUILD_CONFIGS
 - BUILD_GROUP
 - MILESTONE
+- RESOLVE_ONLY
 
 The `IGNORE` strategy won't produce any repository. This is particularly useful to temporarily disable generation as you can leave the rest of your configuration in place.
 
@@ -235,6 +236,46 @@ You need to specify `group`. Redhat artifacts are then sorted from builds includ
 - `excludeSourceBuilds` - used to specify the list of build configurations that you don't want to be included in the generated repository.
 
 The `MILESTONE` - not implemented yet
+
+The `RESOLVE_ONLY` strategy takes the entry points of the artifacts/extensions of the product which are supposed to be packaged in repository, resolves the artifact, resolves artifacts managed dependencies. It also takes care of the transitives and package them as well.
+
+ **Necessary configuration**
+ 
+In order to RESOLVE_ONLY strategy to work it requires a link to txt file which contains the artifact or extensions in the format of
+`groupId:artifactId:version:type:classifier` (type and classifier are optional)
+
+*For example*
+
+In build-config.yaml
+
+ ```
+   repositoryGeneration:
+     strategy: RESOLVE_ONLY
+     parameters:
+       extensionsListUrl: "http://link.to.txt.file"
+ ``` 
+ *Text file sample*
+ ```
+ io.quarkus:quarkus-bom-quarkus-platform-properties:1.11.6.Final:properties
+ io.quarkus:quarkus-logging-json-deployment:1.11.6.Final
+ io.quarkus:quarkus-smallrye-opentracing-deployment:1.11.6.Final
+ 
+ ```
+ **Additional Information**
+ Resolve artifacts/extensions in the scope of a bom file
+ In order to resolve the artifacts/extensions in scope of your product bom file, fill `sourceBuild`  and `sourceArtifact` and RESOLVE_ONLY strategy will resolve in the scope of your product bom
+
+ For example
+ ```
+   repositoryGeneration:
+     strategy: RESOLVE_ONLY
+     sourceBuild: io.quarkus-quarkus-platform-{{productVersion}}
+     sourceArtifact: 'quarkus-product-bom-[\d]+.*.pom'
+     parameters:
+       extensionsListUrl: "https://example.com/extensionArtifactList.txt"
+ ```
+
+
 
 ##### Parameters available in all strategies
 
