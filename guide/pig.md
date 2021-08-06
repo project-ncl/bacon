@@ -123,3 +123,26 @@ addons:
    vertxArtifactFinder:
 
 ```
+
+### Extra Deliverables Downloader
+
+The `extraDeliverablesDownloader` add-on downloads artifacts from one or more PiG build configurations and uploads it to your projects staging directory. Each build configuration accepts two yaml variables: `matching` and `suffix` which should be provided together as a list. 
+
+`matching` is a regex of an artifact that is to be downloaded and `suffix` is the name of the artifact you want to give it.
+The final name is created by concatenating `{{project-name}}-{{version}}.{{milestone}}-{{suffix}}`
+
+Make sure to give all artifacts distinct names because two artifacts with the same name can't be uploaded.
+
+An example configuration is:
+```
+addons:
+  extraDeliverablesDownloader:
+    {{keycloakParentBuildConfigName}}:
+        - matching: 'keycloak-server-dist.*\.zip'
+          suffix: 'server-dist.zip'
+        - matching: 'keycloak-api-docs.*\.zip'
+          suffix: 'api-docs.zip'
+    {{keycloakConnectBuildConfigName}}:
+        - matching: 'keycloak-connect.*\.zip'
+          suffix: 'nodejs-adapter-dist.zip'
+```
