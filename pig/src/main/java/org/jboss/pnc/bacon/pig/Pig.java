@@ -60,6 +60,7 @@ import java.util.concurrent.Callable;
         description = "PiG tool",
         subcommands = {
                 Pig.Configure.class,
+                Pig.Cancel.class,
                 Pig.Build.class,
                 Pig.Run.class,
                 Pig.GenerateRepository.class,
@@ -264,6 +265,15 @@ public class Pig {
         @Override
         boolean isStartingPoint() {
             return true;
+        }
+    }
+
+    @Command(name = "cancel", description = "Cancel running group build")
+    public static class Cancel extends PigCommand<String> {
+
+        @Override
+        public String doExecute() {
+            return PigFacade.cancel();
         }
     }
 

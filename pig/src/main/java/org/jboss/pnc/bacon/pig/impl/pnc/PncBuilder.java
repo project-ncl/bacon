@@ -23,10 +23,12 @@ import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.requests.GroupBuildRequest;
+import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
@@ -36,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.util.Collection;
 
+import static java.util.Optional.of;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
 
 /**
@@ -94,6 +98,29 @@ public class PncBuilder implements Closeable {
             return groupConfigClient.trigger(group.getId(), buildParams, request);
         } catch (ClientException e) {
             throw new RuntimeException("Failed to trigger build group " + group.getId(), e);
+        }
+    }
+
+    public String cancelRunningGroupBuild(String groupConfigurationId) {
+        try {
+            Collection<GroupBuild> groupBuilds = groupConfigClient
+                    .getAllGroupBuilds(
+                            groupConfigurationId,
+                            of("=desc=startTime"),
+                            query("status==%s", BuildStatus.BUILDING))
+                    .getAll();
+
+            if (groupBuilds.size() > 1) {
+                throw new RuntimeException("Multiple running builds of one GC are not allowed.");
+            }
+            if (groupBuilds.isEmpty()) {
+                return "No build is running for this group.";
+            }
+            GroupBuild running = groupBuilds.iterator().next();
+            groupBuildClient.cancel(running.getId());
+            return "Group build " + running.getId() + " canceled.";
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get group build info to cancel running build.", e);
         }
     }
 

@@ -95,6 +95,16 @@ public final class PigFacade {
         }
     }
 
+    public static String cancel() {
+        ImportResult importResult = context().getPncImportResult();
+        if (importResult == null) {
+            importResult = readPncEntities();
+        }
+
+        PncBuilder builder = new PncBuilder();
+        return builder.cancelRunningGroupBuild(importResult.getBuildGroup().getId());
+    }
+
     public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode, boolean wait) {
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
