@@ -69,6 +69,7 @@ import java.util.concurrent.TimeUnit;
                 BuildCli.Get.class,
                 BuildCli.GetRevision.class,
                 BuildCli.GetLog.class,
+                BuildCli.GetAlignLog.class,
                 BuildCli.DownloadSources.class })
 @Slf4j
 public class BuildCli {
@@ -297,6 +298,38 @@ public class BuildCli {
                     logProcessor.writeLog(buildId, follow, log::info);
                 }
             } catch (RemoteResourceException | IOException e) {
+                throw new ClientException("Cannot read remote resource.", e);
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "get-align-log", description = "Get alignment log.")
+    public static class GetAlignLog implements Callable<Integer> {
+        @Parameters(description = "Build id.")
+        private String buildId;
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            try (BuildClient client = CREATOR.newClient()) {
+                Optional<InputStream> alignLogs = client.getAlignLogs(buildId);
+                // is there a stored record
+                if (alignLogs.isPresent()) {
+                    try (InputStream inputStream = alignLogs.get();
+                            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                            BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                        reader.lines().forEach(log::info);
+                    } catch (IOException e) {
+                        throw new ClientException("Cannot read log stream.", e);
+                    }
+                }
+            } catch (RemoteResourceException e) {
                 throw new ClientException("Cannot read remote resource.", e);
             }
             return 0;
