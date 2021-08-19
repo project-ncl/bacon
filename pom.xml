@@ -217,10 +217,11 @@
 
             <!-- unirest and family -->
             <dependency>
-                <groupId>com.mashape.unirest</groupId>
+                <groupId>com.konghq</groupId>
                 <artifactId>unirest-java</artifactId>
-                <version>1.4.9</version>
+                <version>3.11.10</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>

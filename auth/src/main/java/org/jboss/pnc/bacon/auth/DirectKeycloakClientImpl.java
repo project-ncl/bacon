@@ -1,10 +1,9 @@
 package org.jboss.pnc.bacon.auth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.ObjectMapper;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
+import kong.unirest.jackson.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.auth.model.CacheFile;
 import org.jboss.pnc.bacon.auth.model.Credential;
@@ -13,7 +12,6 @@ import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 
 import java.io.Console;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -24,32 +22,8 @@ import java.util.Optional;
 public class DirectKeycloakClientImpl implements KeycloakClient {
 
     static {
-        setupUnirest();
-    }
-
-    private static void setupUnirest() {
-        // Only one time
-        Unirest.setObjectMapper(new ObjectMapper() {
-            private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-
-            @Override
-            public <T> T readValue(String value, Class<T> valueType) {
-                try {
-                    return jacksonObjectMapper.readValue(value, valueType);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public String writeValue(Object value) {
-                try {
-                    return jacksonObjectMapper.writeValueAsString(value);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        // Configure Unirest ObjectMapper
+        Unirest.config().setObjectMapper(new JacksonObjectMapper());
     }
 
     @Override
