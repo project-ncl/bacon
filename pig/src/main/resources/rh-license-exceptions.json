@@ -1008,5 +1008,16 @@
         "url": "http://repository.jboss.org/licenses/gpl-2.0-ce.txt"
       }
     ]
+  },
+  {
+    "groupId": "com.github.luben",
+    "artifactId": "zstd-jni",
+    "version": "1\\.4\\.9\\.5\\..+",
+    "licenses": [
+      {
+        "name": "BSD License 2.0",
+        "url": "https://opensource.org/licenses/BSD-2-Clause"
+      }
+    ]
   }
 ]
