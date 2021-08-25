@@ -86,7 +86,7 @@
         <pnc.version>2.1.1</pnc.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <quarkus.resolver.version>2.1.3.Final</quarkus.resolver.version>
+        <quarkus.resolver.version>2.2.0.Final</quarkus.resolver.version>
         <tagSuffix />
     </properties>
 
