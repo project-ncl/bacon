@@ -35,7 +35,6 @@ class BuildConfigTest {
         buildConfig = easyRandom.nextObject(BuildConfig.class);
         buildConfig.setBuildType(BuildType.MVN.toString());
         buildConfig.setScmUrl("http://example.com");
-        buildConfig.setExternalScmUrl(null);
     }
 
     /**

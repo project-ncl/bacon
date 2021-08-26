@@ -35,7 +35,6 @@ class ListBuildConfigCheckTest {
         BuildConfig buildConfig = easyRandom.nextObject(BuildConfig.class);
         buildConfig.setBuildType(BuildType.MVN.toString());
         buildConfig.setScmUrl(null);
-        buildConfig.setExternalScmUrl(null);
 
         ListBuildConfigWrapper wrapper = new ListBuildConfigWrapper(Lists.newArrayList(buildConfig));
         Set<ConstraintViolation<ListBuildConfigWrapper>> violations = validator.validate(wrapper);
@@ -46,16 +45,10 @@ class ListBuildConfigCheckTest {
 
         // when only externalScmUrl null, no violation
         buildConfig.setScmUrl("http://example.com");
-        buildConfig.setExternalScmUrl(null);
         violations = validator.validate(wrapper);
 
         // then
         assertThat(violations).isEmpty();
-
-        // when only scmUrl null, no violation
-        buildConfig.setScmUrl(null);
-        buildConfig.setExternalScmUrl("http://example.com");
-        violations = validator.validate(wrapper);
 
         // then
         assertThat(violations).isEmpty();

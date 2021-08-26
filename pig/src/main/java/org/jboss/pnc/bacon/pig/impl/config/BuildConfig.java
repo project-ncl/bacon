@@ -74,7 +74,6 @@ public class BuildConfig {
     private @NotBlank String project;
     private @NotBlank String buildScript;
     private String scmUrl;
-    private String externalScmUrl;
     private @NotBlank String scmRevision;
     private String description;
 
@@ -235,8 +234,7 @@ public class BuildConfig {
     }
 
     private boolean urlsEqual(SCMRepository repo) {
-        return StringUtils.equals(externalScmUrl, repo.getExternalUrl())
-                || StringUtils.equals(scmUrl, repo.getInternalUrl());
+        return StringUtils.equals(scmUrl, repo.getInternalUrl());
     }
 
     @JsonIgnore

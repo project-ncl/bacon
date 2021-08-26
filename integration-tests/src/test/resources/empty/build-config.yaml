@@ -15,13 +15,13 @@ builds:
     -   name: michalszynkiewicz-et-{{suffix}}
         project: Empty
         buildScript: mvn clean deploy
-        externalScmUrl: https://github.com/michalszynkiewicz/empty.git
+        scmUrl: https://github.com/michalszynkiewicz/empty.git
         scmRevision: 1.0.11
 
     -   name: michalszynkiewicz-et2-{{suffix}}
         project: Empty
         buildScript: mvn clean deploy -DskipTests -B
-        externalScmUrl: https://github.com/michalszynkiewicz/empty2.git
+        scmUrl: https://github.com/michalszynkiewicz/empty2.git
         scmRevision: 1.0.11
         dependencies:
             - michalszynkiewicz-et-{{suffix}}

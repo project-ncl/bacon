@@ -30,10 +30,9 @@ public class ListBuildConfigValidator implements ConstraintValidator<ListBuildCo
             if (value == null) {
                 // we do nothing if value is null?
                 errors.add("is null");
-            } else if (value.getScmUrl() == null && value.getExternalScmUrl() == null) {
+            } else if (value.getScmUrl() == null) {
                 errors.add(
-                        "Build config " + value.getName()
-                                + " has both scmUrl and externalScmUrl not specified. Specify at least one of the keys with a value");
+                        "Build config " + value.getName() + " has scmUrl not specified. Specify the key with a value");
             } else if (value.getRawEnvironmentId() == null && value.getSystemImageId() == null
                     && value.getEnvironmentName() == null) {
                 errors.add(

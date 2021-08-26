@@ -21,13 +21,11 @@ builds:
     project: profile-injection
     buildScript: mvn clean deploy
     scmUrl: git+ssh://code.barfoo.com/vert-x3/profile-injection.git
-    externalScmUrl: git+ssh://code.foobar.com/gerrit/vert-x3/profile-injection.git
     scmRevision: de662
 
   - name: vertx-dependencies-{{vertxStackVersion}}
     project: vertx-dependencies
     scmUrl: git+ssh://code.barfoo.com/vert-x3/vertx-dependencies.git
-    externalScmUrl: git+ssh://code.foobar.com/gerrit/vert-x3/vertx-dependencies.git
     scmRevision: {{vertxStackVersion}}
     buildPodMemory: 24.5
     customPmeParameters:
