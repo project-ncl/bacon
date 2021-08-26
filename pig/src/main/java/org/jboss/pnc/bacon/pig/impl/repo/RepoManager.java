@@ -161,6 +161,11 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 artifact -> !artifact.getGapv().contains("redhat-")
                         && !artifact.getGapv().contains("eap-runtime-artifacts"));
         artifactsToPack.removeIf(artifact -> isArtifactExcluded(artifact.getGapv()));
+
+        if (isFilterActive()) {
+            artifactsToPack.removeIf(artifact -> !isArtifactInFilter(artifact.getGapv()));
+        }
+
         List<GAV> originalListToPack = artifactsToPack.stream()
                 .map(ArtifactWrapper::toGAV)
                 .collect(Collectors.toList());
@@ -258,6 +263,16 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
         }
         return false;
+    }
+
+    private boolean isFilterActive() {
+        List<String> filterArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getFilterArtifacts();
+        return !filterArtifacts.isEmpty();
+    }
+
+    private boolean isArtifactInFilter(String artifact) {
+        List<String> filterArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getFilterArtifacts();
+        return filterArtifacts.stream().anyMatch(filter -> Pattern.matches(filter, artifact));
     }
 
     @Override

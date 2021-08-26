@@ -40,6 +40,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
     private List<String> excludeArtifacts = new ArrayList<>();
     private List<String> sourceBuilds = new ArrayList<>();
     private List<String> excludeSourceBuilds = new ArrayList<>();
+    private List<String> filterArtifacts = new ArrayList<>();
     private String bomGroupId;
     private String bomArtifactId;
     private boolean includeJavadoc;
