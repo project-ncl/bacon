@@ -304,9 +304,11 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         List<Path> devtoolsCommonJars = findAllByExtension("json").stream()
                 .filter(path -> path.endsWith(devtoolsJarName()))
                 .collect(Collectors.toList());
-
-        if (devtoolsCommonJars.size() == 1) {
-            return unpackArtifactIdsFrom(devtoolsCommonJars.get(0));
+        for (Path p : devtoolsCommonJars) {
+            if (p.getParent().toString().contains("com/redhat")) {
+                return unpackArtifactIdsFrom(p);
+            } else
+                continue;
         }
         throw new RuntimeException(
                 "Expected a single " + devtoolsJarName() + " in the repo, found: " + devtoolsCommonJars.size());
