@@ -74,6 +74,7 @@ public class BuildConfig {
     private @NotBlank String project;
     private @NotBlank String buildScript;
     private String scmUrl;
+    private String externalScmUrl;
     private @NotBlank String scmRevision;
     private String description;
 
