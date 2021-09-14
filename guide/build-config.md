@@ -35,7 +35,7 @@ defaultBuildParameters: # Optional: shared between all builds
   buildScript: mvn clean deploy -DskipTests
 builds:
   - name: empty
-    externalScmUrl: https://github.com/michalszynkiewicz/empty.git
+    scmUrl: https://github.com/michalszynkiewicz/empty.git
     scmRevision: 1.1
 
 # Generation part
@@ -93,8 +93,7 @@ builds:
   buildScript: <build script: mvn clean deploy>
   buildType: MVN # Specify whether it's MVN, GRADLE, NPM
 
-  scmUrl: <scm URL> # Either specify scmUrl or externalScmUrl
-  externalScmUrl: <external Scm URL> # Either specify scmUrl or externalScmUrl
+  scmUrl: <scm URL> # Specify scmUrl
 
   scmRevision: <scm revision>
   
@@ -133,8 +132,8 @@ builds:
 
 If another build specifies its own `buildType`, then this overrides the default. Any key/value that you specify for a build can also be specified in the `defaultBuildParameters` section.
 
-#### scmUrl v/s externalScmUrl
-You'll notice that in the YAML above, you can specify either `scmUrl`, or `externalScmUrl`. For most (all?) cases, you'd just need to specify the `scmUrl` (We may deprecate `externalScmUrl` in the future). The `externalScmUrl` describes the external source of the build (e.g the Github link of the project) whereas nowadays the `scmUrl` can be used to describe both the external, and the internal source of the build.
+#### scmUrl
+Nowadays the `scmUrl` can be used to describe both the external, and the internal source of the build.
 
 If the `scmUrl` points to an internal url, it should be in the format:
 ```yaml
