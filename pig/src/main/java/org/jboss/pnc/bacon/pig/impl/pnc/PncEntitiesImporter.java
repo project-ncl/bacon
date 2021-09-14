@@ -384,10 +384,6 @@ public class PncEntitiesImporter implements Closeable {
 
         String matchUrl = buildConfig.getScmUrl();
 
-        if (matchUrl == null) {
-            matchUrl = buildConfig.getExternalScmUrl();
-        }
-
         try {
             List<SCMRepository> foundRepository = toStream(repoClient.getAll(matchUrl, null))
                     .collect(Collectors.toList());
@@ -405,7 +401,7 @@ public class PncEntitiesImporter implements Closeable {
     }
 
     private SCMRepository createRepository(BuildConfig buildConfig) {
-        String scmUrl = buildConfig.getScmUrl() == null ? buildConfig.getExternalScmUrl() : buildConfig.getScmUrl();
+        String scmUrl = buildConfig.getScmUrl();
         CreateAndSyncSCMRequest createRepoRequest = CreateAndSyncSCMRequest.builder()
                 .preBuildSyncEnabled(true)
                 .scmUrl(scmUrl)

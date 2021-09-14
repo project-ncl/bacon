@@ -235,8 +235,7 @@ public class BuildConfig {
     }
 
     private boolean urlsEqual(SCMRepository repo) {
-        return StringUtils.equals(externalScmUrl, repo.getExternalUrl())
-                || StringUtils.equals(scmUrl, repo.getInternalUrl());
+        return StringUtils.equals(scmUrl, repo.getInternalUrl());
     }
 
     @JsonIgnore
