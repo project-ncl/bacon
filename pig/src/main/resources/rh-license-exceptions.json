@@ -1015,7 +1015,7 @@
     "version": "1.4.9.5-redhat-00002",
     "licenses": [
       {
-        "name": "BSD License 2.0",
+        "name": "BSD 2-clause \"Simplified\" License",
         "url": "https://opensource.org/licenses/BSD-2-Clause"
       }
     ]
