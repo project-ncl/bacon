@@ -34,15 +34,19 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.net.URL;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
@@ -57,7 +61,8 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
                 ProductMilestoneCli.CancelMilestoneClose.class,
                 ProductMilestoneCli.Get.class,
                 ProductMilestoneCli.PerformedBuilds.class,
-                ProductMilestoneCli.MilestoneClose.class })
+                ProductMilestoneCli.MilestoneClose.class,
+                ProductMilestoneCli.AnalyzeDeliverables.class })
 public class ProductMilestoneCli {
 
     private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(
@@ -292,6 +297,33 @@ public class ProductMilestoneCli {
             try (ProductMilestoneClient client = CREATOR.newClient()) {
                 return client.getBuilds(id, buildsFilter, Optional.ofNullable(sort), Optional.ofNullable(query))
                         .getAll();
+            }
+        }
+    }
+
+    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables")
+    public static class AnalyzeDeliverables implements Callable<Integer> {
+
+        @Parameters(description = "Milestone id")
+        private String id;
+
+        @Option(names = "--source-link", required = true, description = "Source link to add, can add multiple links")
+        private List<URL> sourceLink;
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            try (ProductMilestoneClient client = CREATOR.newClient()) {
+                DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
+                        .sourcesLink(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
+                        .build();
+                client.analyzeDeliverables(id, deliverablesAnalysisRequest);
+                return 0;
             }
         }
     }
