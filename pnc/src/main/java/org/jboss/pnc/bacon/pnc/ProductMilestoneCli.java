@@ -317,7 +317,7 @@ public class ProductMilestoneCli {
          */
         @Override
         public Integer call() throws Exception {
-            try (ProductMilestoneClient client = CREATOR.newClient()) {
+            try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
                         .sourcesLink(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
                         .build();
