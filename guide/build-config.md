@@ -300,7 +300,13 @@ In build-config.yaml
       - '.*:zip.*'
   ```
 
-The artifact information is specified in the format of `groupId:artifact:artifactId:type:classifier`
+The artifact information is specified in the format of `groupId:artifact:artifactId:type:classifier`.
+
+##### Additional filter available in BUILD_CONFIGS and BUILD_GROUP strategies
+
+When using BUILD_CONFIGS and BUILD_GROUP strategies additional filter `filterArtifacts` is available. You can use it to reduce amount of artifacts in your repo e.g. filter artifacts and download only ones you're interested in. If activated (by adding some artifacts into array) only artifacts matching filter are included in repo generation process.
+
+Artifact information/wildcards should be specified in the format of `groupId:artifact:artifactId:type:classifier`.
 
 #### licenses generation
 Strategy options are:
