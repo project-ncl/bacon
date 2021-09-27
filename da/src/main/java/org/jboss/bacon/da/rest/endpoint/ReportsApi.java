@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.bacon.da.rest;
+package org.jboss.bacon.da.rest.endpoint;
 
 import org.jboss.da.reports.model.request.AlignReportRequest;
 import org.jboss.da.reports.model.request.BuiltReportRequest;
@@ -25,6 +25,7 @@ import org.jboss.da.reports.model.request.SCMReportRequest;
 import org.jboss.da.reports.model.response.AdvancedReport;
 import org.jboss.da.reports.model.response.AlignReport;
 import org.jboss.da.reports.model.response.BuiltReport;
+import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.da.reports.model.response.Report;
 
 import javax.ws.rs.Consumes;
@@ -68,7 +69,7 @@ public interface ReportsApi {
     @Path("/lookup/gavs")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    List<LookupReportDto> lookupGav(LookupGAVsRequest gavRequest);
+    List<LookupReport> lookupGav(LookupGAVsRequest gavRequest);
 
     @POST
     @Path("/scm")
