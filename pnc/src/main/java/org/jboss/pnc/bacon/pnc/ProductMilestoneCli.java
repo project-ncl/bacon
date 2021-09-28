@@ -22,6 +22,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
@@ -30,6 +31,7 @@ import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductMilestoneClient;
 import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
@@ -62,7 +64,8 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
                 ProductMilestoneCli.Get.class,
                 ProductMilestoneCli.PerformedBuilds.class,
                 ProductMilestoneCli.MilestoneClose.class,
-                ProductMilestoneCli.AnalyzeDeliverables.class })
+                ProductMilestoneCli.AnalyzeDeliverables.class,
+                ProductMilestoneCli.ListDeliveredArtifacts.class })
 public class ProductMilestoneCli {
 
     private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(
@@ -318,12 +321,26 @@ public class ProductMilestoneCli {
          */
         @Override
         public Integer call() throws Exception {
-            try (ProductMilestoneClient client = CREATOR.newClient()) {
+            try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
                         .sourcesLink(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
                         .build();
                 client.analyzeDeliverables(id, deliverablesAnalysisRequest);
                 return 0;
+            }
+        }
+    }
+
+    @Command(name = "list-delivered-artifacts", description = "List artifacts delivered in the specified milestone")
+    public static class ListDeliveredArtifacts extends AbstractListCommand<Artifact> {
+
+        @Parameters(description = "Milestone id")
+        private String id;
+
+        @Override
+        public Collection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
+            try (ProductMilestoneClient client = CREATOR.newClient()) {
+                return client.getDeliveredArtifacts(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
