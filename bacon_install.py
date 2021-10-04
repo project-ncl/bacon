@@ -41,7 +41,10 @@ import xml.etree.ElementTree as ET
 
 
 MAVEN_CENTRAL_LINK = "https://repo1.maven.org/maven2/org/jboss/pnc/bacon/cli/"
-MAVEN_SNAPSHOT_LINK = "https://repository.jboss.org/nexus/content/repositories/snapshots/org/jboss/pnc/bacon/cli/"
+
+# use the commented out link once outage is over
+# MAVEN_SNAPSHOT_LINK = "https://repository.jboss.org/nexus/content/repositories/snapshots/org/jboss/pnc/bacon/cli/"
+MAVEN_SNAPSHOT_LINK = "https://origin-repository.jboss.org/nexus/content/repositories/snapshots/org/jboss/pnc/bacon/cli/"
 
 USER_BACON_JAR_FOLDER_LOCATION = os.getenv("HOME") + "/.pnc-bacon/bin"
 ROOT_BACON_JAR_FOLDER_LOCATION = "/opt/bacon/bin"
