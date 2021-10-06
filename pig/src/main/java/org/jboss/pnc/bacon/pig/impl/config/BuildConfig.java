@@ -299,8 +299,15 @@ public class BuildConfig {
 
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
         String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
-        if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)) {
-            log.error("Scm url for {} changed from {} to {}. Please update it via UI", name, oldInternalUrl, scmUrl);
+        String oldExternalUrl = oldConfig.getScmRepository().getExternalUrl();
+        if (scmUrl != null && !StringUtils.equals(scmUrl, oldInternalUrl)
+                && !StringUtils.equals(scmUrl, oldExternalUrl)) {
+            log.error(
+                    "Scm url for {} changed from {} to internal {} and external {} Please update it via UI",
+                    name,
+                    scmUrl,
+                    oldInternalUrl,
+                    oldExternalUrl);
             return false;
         }
         return true;
