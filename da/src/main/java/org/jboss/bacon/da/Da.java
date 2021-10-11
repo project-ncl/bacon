@@ -26,6 +26,6 @@ import picocli.CommandLine.Command;
 @Command(
         name = "da",
         description = "Dependency Analysis related commands",
-        subcommands = { DALookupCli.class, DABlockListCli.class })
+        subcommands = { DABlockListCli.class, DALookupCli.class, DAReportsCli.class })
 public class Da {
 }
