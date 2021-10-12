@@ -101,4 +101,10 @@ public class Config {
     public static String getConfigFilePath() {
         return configFilePath;
     }
+
+    @Deprecated
+    // for tests only
+    public static void setInstance(Config instance) {
+        Config.instance = instance;
+    }
 }

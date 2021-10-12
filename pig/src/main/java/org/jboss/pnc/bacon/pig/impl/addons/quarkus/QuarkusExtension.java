@@ -9,8 +9,6 @@ import lombok.Data;
  */
 @Data
 public class QuarkusExtension {
-    @JsonProperty("group-id")
-    private String groupId;
-    @JsonProperty("artifact-id")
-    private String artifactId;
+    @JsonProperty("artifact")
+    private String artifact;
 }
