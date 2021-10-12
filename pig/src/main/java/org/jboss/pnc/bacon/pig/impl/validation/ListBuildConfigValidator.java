@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.enums.BuildType;
 
@@ -15,6 +16,7 @@ import java.util.List;
 /**
  * Validation implementation for BuildConfig
  */
+@Slf4j
 public class ListBuildConfigValidator implements ConstraintValidator<ListBuildConfigCheck, List<BuildConfig>> {
 
     private ListBuildConfigCheck constraintAnnotation;
@@ -26,6 +28,12 @@ public class ListBuildConfigValidator implements ConstraintValidator<ListBuildCo
         List<String> errors = new ArrayList<>();
 
         for (BuildConfig value : values) {
+
+            if (value.getExternalScmUrl() != null) {
+                log.warn(
+                        "Build config " + value.getName()
+                                + " is using deprecated externalScmUrl property that is not used when creating pnc configurations anymore, use scmUrl instead.");
+            }
 
             if (value == null) {
                 // we do nothing if value is null?
