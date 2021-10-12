@@ -52,6 +52,13 @@ public class CommunityDepAnalyzer {
         this.enricher = enricher;
     }
 
+    public CommunityDepAnalyzer(
+            Collection<GAV> gavs,
+            Function<List<CommunityDependency>, List<? extends CsvExportable>> enricher) {
+        dependencies = gavs.stream().map(CommunityDependency::new).collect(Collectors.toList());
+        this.enricher = enricher;
+    }
+
     public CommunityDepAnalyzer(Collection<GAV> gavs) {
         dependencies = gavs.stream().map(CommunityDependency::new).collect(Collectors.toList());
         enricher = null;

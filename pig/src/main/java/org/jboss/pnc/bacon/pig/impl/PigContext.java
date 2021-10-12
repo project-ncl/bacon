@@ -242,4 +242,10 @@ public class PigContext {
 
         return result;
     }
+
+    @Deprecated
+    // for tests only!
+    public static void setInstance(PigContext instance) {
+        PigContext.instance = instance;
+    }
 }
