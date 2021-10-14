@@ -81,9 +81,16 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
             Deliverables deliverables) {
         super(pigConfiguration, builds, releasePath, extrasPath);
         this.deliverables = deliverables;
-        @SuppressWarnings("unchecked")
-        Collection<String> skippedExtensions = (Collection<String>) getAddOnConfiguration().get("skippedExtensions");
-        this.skippedExtensions = skippedExtensions == null ? Collections.emptySet() : new HashSet<>(skippedExtensions);
+
+        if (shouldRun()) {
+            @SuppressWarnings("unchecked")
+            Collection<String> skippedExtensions = (Collection<String>) getAddOnConfiguration()
+                    .get("skippedExtensions");
+            this.skippedExtensions = skippedExtensions == null ? Collections.emptySet()
+                    : new HashSet<>(skippedExtensions);
+        } else {
+            skippedExtensions = Collections.emptySet();
+        }
     }
 
     @Override
