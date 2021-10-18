@@ -132,7 +132,8 @@ public class PncBuilder implements Closeable {
 
     boolean isSuccessfullyFinished(String groupBuildId) {
 
-        log.debug("Checking if group build {} is successfully finished", groupBuildId);
+        // log set to info for CPaaS to detect infinite loop
+        log.info("Checking if group build {} is successfully finished", groupBuildId);
         try {
             GroupBuild groupBuild = groupBuildClient.getSpecific(groupBuildId);
             switch (groupBuild.getStatus()) {
@@ -172,7 +173,8 @@ public class PncBuilder implements Closeable {
      */
     boolean verifyAllBuildsInGroupBuildInFinalStateWithProperCount(String groupBuildId) {
 
-        log.debug(
+        // log set to info for CPaaS to detect infinite loop
+        log.info(
                 "Checking if all builds in group build {} are in final state with proper count of builds",
                 groupBuildId);
         BuildsFilterParameters filter = new BuildsFilterParameters();
