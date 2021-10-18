@@ -70,7 +70,15 @@ The `--releaseStorageUrl` is location of the release storage, typically on rcm-g
 
 The `brewTagPrefix` is an **optional** key that you can use to override the default generated brew tag prefix associated with a product version. The key is used to specify to which Brew tag all the builds should go when the milestone is closed.
 
-Finally the `group` is the group config where all the builds defined are grouped together. It is highly recommended to make the group name unique to the version being built. For example, if the `version` is 1.0.0, then the group name is: `my-beautiful-product-1.0.0`. To make this easier, consider using [YAML variables](#usage-of-yaml-variables). The group config is automatically linked to the product version.
+Finally the `group` is name of the group config where all the builds defined are grouped together. It is highly recommended to make the group name unique to the version of product / separated projects being built. For example, if the `version` is 1.0.0, then the group name is: `my-beautiful-product-1.0.0`. To make this easier, consider using [YAML variables](#usage-of-yaml-variables). The group config is automatically linked to the product version.
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    It is very important to keep <code> group </code> name unique across all your build-config.yaml files in case you're building multiple build-config.yaml configurations in parallel within e.g. CPaaS (Continuous Productization As A Service).   
+</td>
+</tr>
+</table>
 
 ```yaml
 ...
