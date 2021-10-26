@@ -4,21 +4,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
+import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @Slf4j
 @Command(
         name = "artifact",
         description = "Artifact",
-        subcommands = { ArtifactCli.Get.class, ArtifactCli.ListFromHash.class })
+        subcommands = { ArtifactCli.Get.class, ArtifactCli.ListFromHash.class, ArtifactCli.Usage.class })
 public class ArtifactCli {
 
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
@@ -67,6 +73,23 @@ public class ArtifactCli {
                     ObjectHelper.print(getJsonOutput(), client.getAll(sha256, md5, sha1));
                     return 0;
                 }
+            }
+        }
+    }
+
+    @Command(
+            name = "usage",
+            description = "Get the list of builds using the artifact",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact usage 10")
+    public static class Usage extends AbstractListCommand<Build> {
+
+        @CommandLine.Parameters(description = "Id of artifact")
+        private String id;
+
+        @Override
+        public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
+            try (ArtifactClient client = CREATOR.newClient()) {
+                return client.getDependantBuilds(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
         }
     }
