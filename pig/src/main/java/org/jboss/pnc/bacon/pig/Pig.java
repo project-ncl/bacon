@@ -71,7 +71,8 @@ import java.util.concurrent.Callable;
                 Pig.GenerateDocuments.class,
                 Pig.Release.class,
                 Pig.PreProcessYaml.class,
-                Pig.TriggerAddOns.class })
+                Pig.TriggerAddOns.class,
+                PigExport.class })
 public class Pig {
 
     private Pig() {
