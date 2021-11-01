@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -62,6 +63,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
  *         Date: 11/28/17
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class BuildConfig {
     public static final String BUILD_FORCE = "BUILD_FORCE";
 
@@ -291,13 +293,6 @@ public class BuildConfig {
         return result;
     }
 
-    public static void main(String[] args) {
-        List<String> test = new ArrayList<>();
-        test.add("boo");
-        test.add("ya");
-        System.out.println(String.join("\\n", test));
-    }
-
     public boolean isUpgradableFrom(BuildConfiguration oldConfig) {
         String oldInternalUrl = oldConfig.getScmRepository().getInternalUrl();
         String oldExternalUrl = oldConfig.getScmRepository().getExternalUrl();
@@ -320,6 +315,7 @@ public class BuildConfig {
      *
      * @return environmentId
      */
+    @JsonIgnore
     public String getEnvironmentId() {
 
         if (environmentId != null) {
@@ -356,6 +352,7 @@ public class BuildConfig {
         return null;
     }
 
+    @JsonIgnore
     public String getRawEnvironmentId() {
         return environmentId;
     }
