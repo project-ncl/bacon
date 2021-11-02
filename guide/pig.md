@@ -146,3 +146,13 @@ addons:
         - matching: 'keycloak-connect.*\.zip'
           suffix: 'nodejs-adapter-dist.zip'
 ```
+
+## PiG Export Feature
+
+### Build Configuration Export
+PiG allows you to export an existing build-configuration into YAML format that can then be included into the builds section in a `build-config.yaml`.
+
+The command to generate the YAML output is:
+```
+$ bacon pig export build-config <build-config-id>
+```
