@@ -1,9 +1,9 @@
-rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/37/_remote.repositories.sha1
-rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/37/_remote.repositories.md5
-rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/37/jboss-parent-37.pom.md5
-rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/37/jboss-parent-37.pom
-rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/37/jboss-parent-37.pom.sha1
-rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/37/_remote.repositories
+rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/38/_remote.repositories.sha1
+rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/38/_remote.repositories.md5
+rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/38/jboss-parent-38.pom.md5
+rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/38/jboss-parent-38.pom
+rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/38/jboss-parent-38.pom.sha1
+rh-sample-maven-repository/maven-repository/org/jboss/jboss-parent/38/_remote.repositories
 rh-sample-maven-repository/maven-repository/org/sonatype/oss/oss-parent/7/_remote.repositories.sha1
 rh-sample-maven-repository/maven-repository/org/sonatype/oss/oss-parent/7/_remote.repositories.md5
 rh-sample-maven-repository/maven-repository/org/sonatype/oss/oss-parent/7/oss-parent-7.pom.md5
