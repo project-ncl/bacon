@@ -24,7 +24,12 @@ import java.util.concurrent.Callable;
 @Command(
         name = "artifact",
         description = "Artifact",
-        subcommands = { ArtifactCli.Get.class, ArtifactCli.ListFromHash.class, ArtifactCli.Usage.class })
+        subcommands = {
+                ArtifactCli.Get.class,
+                ArtifactCli.GetGav.class,
+                ArtifactCli.ListFromHash.class,
+                ArtifactCli.Usage.class,
+                ArtifactCli.UsageGav.class })
 public class ArtifactCli {
 
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
@@ -39,6 +44,34 @@ public class ArtifactCli {
         public Artifact getSpecific(String id) throws ClientException {
             try (ArtifactClient client = CREATOR.newClient()) {
                 return client.getSpecific(id);
+            }
+        }
+    }
+
+    @Command(
+            name = "get-gav",
+            description = "Get artifact by its identifier/GAV. Identifier is usually in format of 'groupId:artifactId:classifier:version'",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifacts get-gav args4j:args4j:jar:2.0.16")
+    public static class GetGav extends JSONCommandHandler implements Callable<Integer> {
+
+        @CommandLine.Parameters(description = "Identifier of artifact")
+        private String identifier;
+
+        @Override
+        public Integer call() throws Exception {
+            if (identifier == null) {
+                log.error("You need to specify artifact identifier/gav");
+            }
+            try (ArtifactClient client = CREATOR.newClient()) {
+                ObjectHelper.print(
+                        getJsonOutput(),
+                        client.getAll(
+                                null,
+                                null,
+                                null,
+                                Optional.empty(),
+                                Optional.ofNullable("identifier==" + identifier)).iterator().next());
+                return 0;
             }
         }
     }
@@ -90,6 +123,28 @@ public class ArtifactCli {
         public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
             try (ArtifactClient client = CREATOR.newClient()) {
                 return client.getDependantBuilds(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
+            }
+        }
+    }
+
+    @Command(
+            name = "usage-gav",
+            description = "Get the list of builds using the artifact by artifact identifier/gav",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact usage-gav args4j:args4j:jar:2.0.16")
+    public static class UsageGav extends AbstractListCommand<Build> {
+
+        @CommandLine.Parameters(description = "Identifier of artifact")
+        private String identifier;
+
+        @Override
+        public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
+            try (ArtifactClient client = CREATOR.newClient()) {
+                Artifact a = client
+                        .getAll(null, null, null, Optional.empty(), Optional.ofNullable("identifier==" + identifier))
+                        .iterator()
+                        .next();
+                return client.getDependantBuilds(a.getId(), Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
