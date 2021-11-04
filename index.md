@@ -62,6 +62,8 @@ Run:
 java -jar cli/target/bacon.jar
 ```
 
+If you are installing Bacon on MacOs, please read the [pre-requiste section](#pre-requisite-for-macos).
+
 To install the latest ***released*** version:
 ```bash
 curl -fsSL https://raw.github.com/project-ncl/bacon/master/bacon_install.py | python3 -
@@ -90,6 +92,22 @@ bacon update 2.0.1
 
 # snapshot version
 bacon update snapshot
+```
+
+#### Pre-requisite for MacOs
+1. Ensure `~/bin`  is added to your shell's $PATH, unlike Fedora this is not added by default. Depending on which shell you run you can add it by running:
+
+```
+# ZSH (Default as of macOs 10.15 Catalina)
+echo 'export PATH="$PATH:${HOME}/bin"' >> ~/.zshrc
+
+# BASH
+echo 'export PATH="$PATH:${HOME}/bin"' >> ~/.bash_profile
+```
+
+2. Ensure Python 3 is installed, this can be achieved using homebrew by running:
+```
+brew install python3
 ```
 
 ### Feature Guide
