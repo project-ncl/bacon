@@ -32,6 +32,7 @@ The Bash script also supports update:
 relevant bacon jar and the new bacon Bash script
 """
 import argparse
+import hashlib
 import os
 import platform
 import sys
@@ -154,6 +155,42 @@ def download_link(link, folder, filename, retries=7):
             raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
 
 
+def get_sha1_of_jar(url_of_jar):
+    """
+    Return the sha1 of the download url of the jar.
+
+    Arguments:
+    - url_of_jar: url to download bacon.jar
+
+    Returns: sha1 value
+    """
+    with tempfile.TemporaryDirectory() as temp_folder:
+        download_link(url_of_jar + ".sha1", temp_folder, "sha1")
+        with open(os.path.join(temp_folder, "sha1"), 'r') as f:
+            return f.read().strip()
+
+
+def calculate_sha1(location_of_file):
+    """
+    Calculate sha1 of file
+
+    returns None if file doesn't exist
+    """
+
+    if not os.path.exists(location_of_file):
+        return None
+    # get sha1 of file
+    h = hashlib.sha1()
+    with open(location_of_file, 'rb') as file:
+        while True:
+            # Reading is buffered, so we can read smaller chunks.
+            chunk = file.read(h.block_size)
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def create_folder_if_absent(folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -212,7 +249,26 @@ class BaconInstall:
             url = self.maven_url + \
                 self.latest_version + "/cli-" + self.latest_version + "-shaded.jar"
 
+        sha1_from_maven = get_sha1_of_jar(url)
+        sha1_of_existing_jar = calculate_sha1(self.bacon_jar_location + "/bacon.jar")
+
+        if sha1_from_maven == sha1_of_existing_jar:
+            print("Skipping download since latest bacon.jar is already installed")
+            return
+
         download_link(url, self.bacon_jar_location, "bacon.jar")
+        sha1_of_new_jar = calculate_sha1(self.bacon_jar_location + "/bacon.jar")
+
+        print("Verifying checksums... ", end='')
+        if sha1_from_maven  != sha1_of_new_jar:
+            print("Failed!")
+            print("Checksums do not match!")
+            print("Checksum from Maven is: " + sha1_from_maven)
+            print("Checksum from downloaded jar is: " + sha1_of_new_jar)
+            print("Aborting!")
+            sys.exit(1)
+        else:
+            print("Success!")
 
         print("bacon installed in: {}".format(
             self.bacon_jar_location + "/bacon.jar"))
