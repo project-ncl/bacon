@@ -83,7 +83,7 @@ public class RepositoryUtils {
 
     /*
      * This code was taken from the offliner tool see
-     * https://github.com/release-engineering/offliner/blob/master/src/main/java/com/redhat/red/offliner/Main.java#L687
+     * https://github.com/release-engineering/offliner/blob/main/src/main/java/com/redhat/red/offliner/Main.java#L687
      * discussed with John Casey if it would be possible to make this public and a deployed shared lib, there is also
      * functionality in offliner for creating the md5 and sha1 files which we could use as well
      */
@@ -104,9 +104,9 @@ public class RepositoryUtils {
             List<SingleVersion> singleVersions = entry.getValue();
             Collections.sort(singleVersions);
 
-            Metadata master = new Metadata();
-            master.setGroupId(ga.getGroupId());
-            master.setArtifactId(ga.getArtifactId());
+            Metadata main = new Metadata();
+            main.setGroupId(ga.getGroupId());
+            main.setArtifactId(ga.getArtifactId());
             Versioning versioning = new Versioning();
             for (SingleVersion v : singleVersions) {
                 versioning.addVersion(v.renderStandard());
@@ -114,7 +114,7 @@ public class RepositoryUtils {
             String latest = singleVersions.get(singleVersions.size() - 1).renderStandard();
             versioning.setLatest(latest);
             versioning.setRelease(latest);
-            master.setVersioning(versioning);
+            main.setVersioning(versioning);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             File metadataFile = Paths
@@ -125,7 +125,7 @@ public class RepositoryUtils {
                             "maven-metadata.xml")
                     .toFile();
             try {
-                new MetadataXpp3Writer().write(baos, master);
+                new MetadataXpp3Writer().write(baos, main);
                 FileUtils.writeByteArrayToFile(metadataFile, baos.toByteArray());
             } catch (IOException e) {
                 throw new RuntimeException("Failed to generate maven-metadata file: %s" + metadataFile, e);

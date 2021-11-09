@@ -2,7 +2,7 @@
     {
         "name": "Creative Commons Zero 1.0 Universal",
         "url": "http://creativecommons.org/publicdomain/zero/1.0/legalcode",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/CC0-1.0.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/CC0-1.0.txt",
         "aliases": [
             "CC0"
         ],
@@ -162,7 +162,7 @@
     {
         "name": "Common Development and Distribution License 1.1",
         "url": "https://javaee.github.io/glassfish/LICENSE",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/CDDL-1.1.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/CDDL-1.1.txt",
         "aliases": [
             "Common Development and Distribution License 1.1",
             "CDDL 1.1"
@@ -192,7 +192,7 @@
     {
         "name": "Dual license consisting of the CDDL v1.1 and GPL v2",
         "url": "https://oss.oracle.com/licenses/CDDL+GPL-1.1",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/CDDL+GPL-1.1",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/CDDL+GPL-1.1",
         "aliases": [
             "Dual license consisting of the CDDL v1.1 and GPL v2"
         ],
@@ -214,7 +214,7 @@
     {
         "name": "Eclipse Public License, Version 1.0",
         "url": "http://repository.jboss.org/licenses/epl-1.0.txt",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/EPL-1.0.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/EPL-1.0.txt",
         "aliases": [
             "Eclipse Public License, Version 1.0",
             "Eclipse Public License 1.0",
@@ -231,7 +231,7 @@
     {
         "name": "Eclipse Public License 2.0",
         "url": "http://www.eclipse.org/legal/epl-v20.html",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/EPL-2.0.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/EPL-2.0.txt",
         "aliases": [
             "EPL 2.0",
             "Eclipse Public License v. 2.0",
@@ -356,7 +356,7 @@
     {
         "name": "MySQL License",
         "url": "http://www.mysql.com/company/legal/licensing/foss-exception.html",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/mysql-license.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/mysql-license.txt",
         "aliases": [
             "The GNU General Public License, v2 with FOSS exception"
         ],
@@ -366,7 +366,7 @@
     },
     {
         "name": "Universal Permissive License v1.0",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/UPL-1.0.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/UPL-1.0.txt",
         "url": "http://opensource.org/licenses/UPL",
         "aliases": [
             "Universal Permissive License, Version 1.0"
@@ -377,7 +377,7 @@
     },
     {
         "name": "GNU Lesser General Public License v2.1 or later",
-        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/master/static-resources/deprecated_LGPL-2.1+.txt",
+        "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/deprecated_LGPL-2.1+.txt",
         "url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
         "aliases": [
             "GNU Library General Public License v2.1 or later"

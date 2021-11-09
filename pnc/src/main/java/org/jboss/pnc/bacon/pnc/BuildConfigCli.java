@@ -77,7 +77,7 @@ public class BuildConfigCli {
             description = "Create a build config",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build-config create \\%n"
                     + "\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\%n"
-                    + "\t--scm-repository-id 176 --scm-revision master \\%n"
+                    + "\t--scm-repository-id 176 --scm-revision main \\%n"
                     + "\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\%n"
                     + "\t--build-type MVN buildconfigname")
     public static class Create extends JSONCommandHandler implements Callable<Integer> {
@@ -148,7 +148,7 @@ public class BuildConfigCli {
                     + "\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\%n"
                     + "\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\%n"
                     + "\t--build-type MVN buildconfigname \\%n"
-                    + "\t--scm-url=http://github.com/project-ncl/pnc.git \\%n\t--scm-revision=master"
+                    + "\t--scm-url=http://github.com/project-ncl/pnc.git \\%n\t--scm-revision=main"
                     + "\t--no-prebuild-sync")
     public static class CreateWithSCM extends JSONCommandHandler implements Callable<Integer> {
 
