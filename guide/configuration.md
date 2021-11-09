@@ -7,7 +7,7 @@ title: "Configuration"
 
 # Configuring Bacon
 
-An example configuration is present [here](https://github.com/project-ncl/bacon/blob/master/config.yaml)
+An example configuration is present [here](https://github.com/project-ncl/bacon/blob/main/config.yaml)
 
 The default configuration used by `bacon` should be located in folder: `~/.config/pnc-bacon/` with name `config.yaml`. We can specify a different folder for the location of the `config.yaml` via the `-p` flag:
 

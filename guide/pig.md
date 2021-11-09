@@ -38,7 +38,7 @@ bacon pig <phase> ...
 
 The application is configured via the `build-config.yaml` file.
 
-A PiG `build-config.yaml` looks like [this](https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml). See [this](build-config.html) for a detailed guide of `build-config.yaml`
+A PiG `build-config.yaml` looks like [this](https://github.com/project-ncl/bacon/blob/main/example-pig-config.yaml). See [this](build-config.html) for a detailed guide of `build-config.yaml`
 
 # Operation
 
