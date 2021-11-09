@@ -11,7 +11,7 @@ title: "Build Config Files"
 
 The build-config.yaml is broken down into 2 big categories: the PNC part and the generation part. The PNC part consists of the configuration on how your builds are performed. Once the builds are done, that information is then fed into the generation part to produce maven repository, javadoc, sources, license zips.
 
-build-config.yaml example file with comments: [build-config.yaml](https://github.com/project-ncl/bacon/blob/master/example-pig-config.yaml)
+build-config.yaml example file with comments: [build-config.yaml](https://github.com/project-ncl/bacon/blob/main/example-pig-config.yaml)
 
 The basic structure of a build-config.yaml looks as follows:
 
