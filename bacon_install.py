@@ -229,7 +229,11 @@ class BaconInstall:
         self.__create_bacon_shell_script()
 
         print("")
-        print("Installed version: {}!".format(self.latest_version))
+        # latest snapshot or released version installed
+        if self.__is_snapshot() or self.version is None:
+            print("Installed version: {}!".format(self.latest_version))
+        else:
+            print("Installed version: {}!".format(self.version))
         print_mac_notice_if_required()
 
     def __download_version(self):
@@ -275,8 +279,8 @@ class BaconInstall:
 
     def __get_latest_version(self):
         """
-        Read the maven-metadata.xml of bacon and parse the last released
-        version
+        Read the maven-metadata.xml of bacon and parse the last released or
+        snapshot version
         """
 
         temp_folder = tempfile.mkdtemp()
