@@ -283,30 +283,30 @@ class BaconInstall:
         snapshot version
         """
 
-        temp_folder = tempfile.mkdtemp()
-        download_maven_metadata_xml(self.maven_url, temp_folder)
-        root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
+        with tempfile.TemporaryDirectory() as temp_folder:
+            download_maven_metadata_xml(self.maven_url, temp_folder)
+            root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
 
-        if self.__is_snapshot():
-            latest_tags = root.findall("versioning/versions/version")
+            if self.__is_snapshot():
+                latest_tags = root.findall("versioning/versions/version")
 
-            # choose the one listed last. This might bite us in the future
-            latest_tag = latest_tags[-1]
-        else:
-            latest_tag = root.find("versioning/latest")
+                # choose the one listed last. This might bite us in the future
+                latest_tag = latest_tags[-1]
+            else:
+                latest_tag = root.find("versioning/latest")
 
-        return latest_tag.text
+            return latest_tag.text
 
     def __get_latest_snapshot_version(self):
 
         url = self.maven_url + self.latest_version
-        temp_folder = tempfile.mkdtemp()
-        download_maven_metadata_xml(url, temp_folder)
+        with tempfile.TemporaryDirectory() as temp_folder:
+            download_maven_metadata_xml(url, temp_folder)
 
-        root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
+            root = ET.parse(temp_folder + "/maven-metadata.xml").getroot()
 
-        latest_tag = root.findall("versioning/snapshotVersions/snapshotVersion")
-        return latest_tag[0].find("value").text
+            latest_tag = root.findall("versioning/snapshotVersions/snapshotVersion")
+            return latest_tag[0].find("value").text
 
     def __create_bacon_shell_script(self):
 
