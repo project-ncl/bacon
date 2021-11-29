@@ -273,6 +273,8 @@
         "aliases": [
             "BSD 3-clause \"New\" or \"Revised\" License",
             "BSD 3-Clause",
+            "BSD 3-Clause \"New\" or \"Revised\" License",
+            "BSD-3-Clause",
             "BSD 3-Clause License"
         ],
         "urlAliases": [
@@ -280,6 +282,7 @@
             "http://www.opensource.org/licenses/BSD-3-Clause",
             "http://opensource.org/licenses/BSD-3-Clause",
             "http://www.antlr.org/license.html",
+            "http://x-stream.github.io/license.html",
             "http://dom4j.sourceforge.net/dom4j-1.6.1/license.html"
         ]
     },
@@ -328,6 +331,19 @@
         ],
         "urlAliases": [
             "http://www.json.org/license.html"
+        ]
+    },
+    {
+        "name": "jQuery license",
+        "url": "http://jquery.org/license/",
+        "aliases": [
+            "jQuery license",
+            "jquery license",
+            "the jQuery license",
+            "jQuery License"
+        ],
+        "urlAliases": [
+            "http://jquery.org/license/"
         ]
     },
     {
