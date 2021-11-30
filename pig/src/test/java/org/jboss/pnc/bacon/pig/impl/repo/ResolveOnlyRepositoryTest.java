@@ -13,6 +13,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -197,5 +198,10 @@ public class ResolveOnlyRepositoryTest {
         }
 
         return Collections.emptySet();
+    }
+
+    @AfterAll
+    static void after() {
+        Mockito.clearAllCaches();
     }
 }

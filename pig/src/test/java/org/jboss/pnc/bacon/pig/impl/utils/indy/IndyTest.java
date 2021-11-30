@@ -21,12 +21,12 @@ class IndyTest {
     @Test
     void getIndyUrl() {
         assertNotNull(Indy.getIndyUrl());
-        assertTrue(Indy.getIndyUrl().contains("http://indy.com/api/content"));
+        assertTrue(Indy.getIndyUrl().contains("http://indy.com/api/content/maven/group/static"));
     }
 
     @Test
     void getIndyTempUrl() {
         assertNotNull(Indy.getIndyTempUrl());
-        assertTrue(Indy.getIndyTempUrl().contains("http://indy.com/api/content"));
+        assertTrue(Indy.getIndyTempUrl().contains("http://indy.com/api/content/maven/hosted/temporary-builds"));
     }
 }
