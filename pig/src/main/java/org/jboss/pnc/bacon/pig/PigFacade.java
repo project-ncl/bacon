@@ -160,9 +160,6 @@ public final class PigFacade {
             log.info("Skipping builds");
             groupBuildInfo = getBuilds(importResult, tempBuild);
         } else {
-            if (tempBuild) {
-                log.info("Temporary build");
-            }
             groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode, true);
         }
 
