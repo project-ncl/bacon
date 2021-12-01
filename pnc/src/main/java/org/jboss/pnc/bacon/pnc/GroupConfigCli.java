@@ -24,6 +24,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.RemoteResourceException;
@@ -283,7 +284,10 @@ public class GroupConfigCli {
                     ObjectHelper.print(getJsonOutput(), latest.get());
                     return 0;
                 } else {
-                    log.error("Couldn't find any group build from group config id: {}", id);
+                    log.error(
+                            "Couldn't find any group build from group config id: {} ({})",
+                            id,
+                            UrlGenerator.generateGroupConfigUrl(id));
                     return 1;
                 }
             }

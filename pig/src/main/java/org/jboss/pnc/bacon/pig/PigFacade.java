@@ -44,6 +44,7 @@ import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductVersionClient;
@@ -298,9 +299,12 @@ public final class PigFacade {
                     throw new RuntimeException(
                             "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
                 }
-                log.info("{} pushed to brew", build.getId());
+                log.info("{} pushed to brew ({}) ", build.getId(), UrlGenerator.generateBuildUrl(build.getId()));
             } catch (RemoteResourceException e) {
-                throw new RuntimeException("Failed to push build " + build.getId() + " to brew", e);
+                throw new RuntimeException(
+                        "Failed to push build " + build.getId() + " to brew ("
+                                + UrlGenerator.generateBuildUrl(build.getId()) + ")",
+                        e);
             }
         }
     }
