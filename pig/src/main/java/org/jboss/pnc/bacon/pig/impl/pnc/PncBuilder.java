@@ -18,8 +18,8 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
+import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
@@ -85,7 +85,10 @@ public class PncBuilder implements Closeable {
             boolean tempBuild,
             boolean tempBuildTS,
             RebuildMode rebuildMode) {
-        log.info("Performing builds of build group {} in PNC", group.getId());
+        log.info(
+                "Performing builds of group config {} in PNC ({})",
+                group.getId(),
+                UrlGenerator.generateGroupConfigUrl(group.getId()));
         if (tempBuildTS)
             log.warn(
                     "Temporary builds with timestamp alignment are not supported, running temporary builds instead...");
@@ -125,7 +128,10 @@ public class PncBuilder implements Closeable {
     }
 
     void waitForSuccessfulFinish(String groupBuildId) {
-        log.info("Waiting for finish of group build {}", groupBuildId);
+        log.info(
+                "Waiting for finish of group build {} ({})",
+                groupBuildId,
+                UrlGenerator.generateGroupBuildUrl(groupBuildId));
         SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30, true);
         log.info("Group build finished successfully");
     }
@@ -144,13 +150,14 @@ public class PncBuilder implements Closeable {
                 case SUCCESS:
                     return verifyAllBuildsInGroupBuildInFinalStateWithProperCount(groupBuildId);
                 default:
-                    throw new FatalException(
-                            "Build group failed {}/pnc-web/#/group-builds/{}",
-                            Config.instance().getActiveProfile().getPnc().getUrl(),
-                            groupBuildId);
+                    throw new FatalException("Build group failed {}", UrlGenerator.generateGroupBuildUrl(groupBuildId));
             }
         } catch (ClientException e) {
-            log.warn("Failed to check if build is finished for {}. Assuming it is not finished", groupBuildId, e);
+            log.warn(
+                    "Failed to check if build is finished for {} ({}). Assuming it is not finished",
+                    groupBuildId,
+                    UrlGenerator.generateGroupBuildUrl(groupBuildId),
+                    e);
             return false;
         }
     }
@@ -175,8 +182,9 @@ public class PncBuilder implements Closeable {
 
         // log set to info for CPaaS to detect infinite loop
         log.info(
-                "Checking if all builds in group build {} are in final state with proper count of builds",
-                groupBuildId);
+                "Checking if all builds in group build {} are in final state with proper count of builds ({})",
+                groupBuildId,
+                UrlGenerator.generateGroupBuildUrl(groupBuildId));
         BuildsFilterParameters filter = new BuildsFilterParameters();
         filter.setLatest(false);
         filter.setRunning(false);

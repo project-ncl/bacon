@@ -25,6 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
@@ -160,13 +161,15 @@ public class PncBuild {
                     buildLog = readLog(inputStream);
                 }
             } else {
-                log.debug("Couldn't find logs for build id: {}", id);
+                log.debug("Couldn't find logs for build id: {} ({})", id, UrlGenerator.generateBuildUrl(id));
                 buildLog = Collections.emptyList();
             }
 
             return buildLog;
         } catch (ClientException | IOException e) {
-            throw new RuntimeException("Failed to get build log for " + id, e);
+            throw new RuntimeException(
+                    "Failed to get build log for " + id + " (" + UrlGenerator.generateBuildUrl(id) + ")",
+                    e);
         }
     }
 
