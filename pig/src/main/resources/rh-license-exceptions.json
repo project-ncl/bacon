@@ -586,6 +586,17 @@
   },
   {
     "groupId": "org.apache.kafka",
+    "artifactId": "connect-runtime",
+    "version-regexp": "2\\..+",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ]
+ },
+  {
+    "groupId": "org.apache.kafka",
     "artifactId": "connect-api",
     "version-regexp": "2\\..+",
     "licenses": [
@@ -1041,5 +1052,16 @@
         "url": "https://opensource.org/licenses/BSD-2-Clause"
       }
     ]
-  }
+  },
+  {
+    "groupId": "org.jboss.fuse.maven",
+    "artifactId": "maven-exclude-extension",
+    "version-regexp": "1\\.0\\.0\\.fuse-\\d{6}-redhat-\\d{5}",
+    "licenses": [
+        {
+            "name": "Apache License 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ]
+ }
 ]
