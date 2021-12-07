@@ -109,11 +109,13 @@
             "GPL-2.0-with-classpath-exception",
             "GPL2 w/ CPE",
             "gpl",
+            "The GNU General Public License (GPL), Version 2, With Classpath Exception",
             "General Public License, version 2 with the GNU Classpath"
         ],
         "urlAliases": [
             "http://repository.jboss.org/licenses/gpl-2.0-ce.txt",
             "http://openjdk.java.net/legal/gplv2+ce.html",
+            "https://www.gnu.org/software/classpath/license.html",
             "https://projects.eclipse.org/license/secondary-gpl-2.0-cp"
         ]
     },
@@ -135,11 +137,13 @@
         "url": "http://www.opensource.org/licenses/MIT",
         "aliases": [
             "MIT License",
+            "MIT",
             "The MIT License"
         ],
         "urlAliases": [
             "http://www.opensource.org/licenses/MIT",
             "https://opensource.org/licenses/MIT",
+            "https://raw.github.com/tatsuhiro-t/argparse4j/master/LICENSE.txt",
             "http://www.opensource.org/licenses/mit-license.php"
         ]
     },
@@ -344,6 +348,25 @@
         ],
         "urlAliases": [
             "http://jquery.org/license/"
+        ]
+    },
+    {
+        "name": "W3C license",
+        "url": "https://www.w3.org/Consortium/Legal/copyright-documents-19990405",
+        "aliases": [
+            "W3C license",
+            "W3C Document License",
+            "W3C Software Notice and Document License",
+            "The W3C License",
+            "W3C Software Notice and License",
+            "W3C Software Notice and License (2002-12-31)",
+            "W3",
+            "w3c license"
+        ],
+        "urlAliases": [
+            "http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231.html",
+            "https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document",
+            "http://www.w3.org/Consortium/Legal/copyright-software-19980720.html"
         ]
     },
     {

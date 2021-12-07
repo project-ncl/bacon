@@ -586,6 +586,28 @@
   },
   {
     "groupId": "org.apache.kafka",
+    "artifactId": "kafka-log4j-appender",
+    "version-regexp": "2\\..+",
+    "licenses": [
+        {
+            "name": "Apache License 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    ]
+  },
+  {
+    "groupId": "org.apache.kafka",
+    "artifactId": "kafka-tools",
+    "version-regexp": "2\\..+",
+    "licenses": [
+        {
+            "name": "Apache License 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    ]
+  },
+  {
+    "groupId": "org.apache.kafka",
     "artifactId": "connect-runtime",
     "version-regexp": "2\\..+",
     "licenses": [
