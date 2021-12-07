@@ -338,16 +338,18 @@
         ]
     },
     {
-        "name": "jQuery license",
-        "url": "http://jquery.org/license/",
+        "name": "JQuery Foundation MIT",
+        "url": "https://jquery.org/license/",
         "aliases": [
+            "JQuery Foundation MIT",
             "jQuery license",
             "jquery license",
             "the jQuery license",
             "jQuery License"
         ],
         "urlAliases": [
-            "http://jquery.org/license/"
+            "http://jquery.org/license/",
+            "https://jquery.org/license/"
         ]
     },
     {
