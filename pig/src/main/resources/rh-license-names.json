@@ -353,11 +353,12 @@
         ]
     },
     {
-        "name": "W3C license",
+        "name": "W3C Document Notice and License (1999-04-05)",
         "url": "https://www.w3.org/Consortium/Legal/copyright-documents-19990405",
         "aliases": [
             "W3C license",
             "W3C Document License",
+            "W3C-DOCS-19990405",
             "W3C Software Notice and Document License",
             "The W3C License",
             "W3C Software Notice and License",
@@ -366,9 +367,7 @@
             "w3c license"
         ],
         "urlAliases": [
-            "http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231.html",
-            "https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document",
-            "http://www.w3.org/Consortium/Legal/copyright-software-19980720.html"
+            "https://www.w3.org/Consortium/Legal/copyright-documents-19990405"
         ]
     },
     {
