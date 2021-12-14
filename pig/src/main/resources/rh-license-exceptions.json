@@ -717,6 +717,17 @@
     ]
   },
   {
+    "groupId": "com.thoughtworks.xstream",
+    "artifactId": "xstream",
+    "version-regexp": "1\\.4\\..+",
+    "licenses": [
+        {
+            "name": "BSD-3-Clause",
+            "url": "https://opensource.org/licenses/BSD-3-Clause"
+        }
+    ]
+  },
+  {
     "groupId": "com.github.fge",
     "artifactId": "btf",
     "version-regexp": "1\\.2\\.0\\..+",
