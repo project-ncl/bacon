@@ -728,6 +728,61 @@
     ]
   },
   {
+    "groupId": "com.atlassian.platform",
+    "artifactId": "platform",
+    "version-regexp": "3\\.1\\..+",
+    "licenses": [
+        {
+            "name": "BSD License",
+            "url": "https://packages.atlassian.com/maven-internal/licenses/license.txt"
+        }
+    ]
+  },
+  {
+    "groupId": "com.atlassian.platform",
+    "artifactId": "platform-poms",
+    "version-regexp": "3\\.1\\..+",
+    "licenses": [
+        {
+            "name": "BSD License",
+            "url": "https://packages.atlassian.com/maven-internal/licenses/license.txt"
+        }
+    ]
+  },
+  {
+    "groupId": "com.atlassian.platform",
+    "artifactId": "third-party",
+    "version-regexp": "3\\.1\\..+",
+    "licenses": [
+        {
+            "name": "BSD License",
+            "url": "https://packages.atlassian.com/maven-internal/licenses/license.txt"
+        }
+    ]
+  },
+  {
+    "groupId": "com.atlassian.pom",
+    "artifactId": "public-pom",
+    "version-regexp": "4\\.0\\..+",
+    "licenses": [
+        {
+            "name": "BSD License",
+            "url": "https://packages.atlassian.com/maven-internal/licenses/license.txt"
+        }
+    ]
+  },
+  {
+    "groupId": "com.atlassian.pom",
+    "artifactId": "public-pom",
+    "version-regexp": "5\\.0\\..+",
+    "licenses": [
+        {
+            "name": "BSD License",
+            "url": "https://packages.atlassian.com/maven-internal/licenses/license.txt"
+        }
+    ]
+  },
+  {
     "groupId": "com.github.fge",
     "artifactId": "btf",
     "version-regexp": "1\\.2\\.0\\..+",
