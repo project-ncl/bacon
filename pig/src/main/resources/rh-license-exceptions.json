@@ -662,6 +662,17 @@
     ]
   },
   {
+    "groupId": "org.apache.kafka",
+    "artifactId": "kafka-streams-test-utils",
+    "version-regexp": "2\\..+",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ]
+  },
+  {
     "groupId": "com.graphql-java",
     "artifactId": "graphql-java",
     "version-regexp": ".*",
