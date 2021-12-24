@@ -706,6 +706,28 @@
     ]
   },
   {
+    "groupId": "org.reactivestreams",
+    "artifactId": "reactive-streams-examples",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name": "Creative Commons Zero 1.0 Universal",
+        "url": "http://creativecommons.org/publicdomain/zero/1.0/legalcode"
+      }
+    ]
+  },
+  {
+    "groupId": "org.reactivestreams",
+    "artifactId": "reactive-streams-tck",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name": "Creative Commons Zero 1.0 Universal",
+        "url": "http://creativecommons.org/publicdomain/zero/1.0/legalcode"
+      }
+    ]
+  },
+  {
     "groupId": "com.thoughtworks.paranamer",
     "artifactId": "paranamer-parent",
     "version": "2.8.0.redhat-00001",
