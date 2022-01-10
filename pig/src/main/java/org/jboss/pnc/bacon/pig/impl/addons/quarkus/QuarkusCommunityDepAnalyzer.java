@@ -244,7 +244,8 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 continue;
         }
         throw new RuntimeException(
-                "Expected a single " + devtoolsJarName() + " in the repo, found: " + devtoolsCommonJars.size());
+                "Expected to find a devtools json of name " + devtoolsJarName()
+                        + " with groupId starting from com.redhat in the repo, found only: " + devtoolsCommonJars);
     }
 
     private String devtoolsJarName() {
