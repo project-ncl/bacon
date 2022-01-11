@@ -196,7 +196,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
     @Deprecated
     private RepositoryData packAllBuiltAndDependencies() {
-        log.warn("Repo generation stratagy 'PACK_ALL' is deprecated please use BUILD_CONFIGS");
+        log.warn("Repo generation strategy 'PACK_ALL' is deprecated please use BUILD_CONFIGS");
         PncBuild build = getBuild(generationData.getSourceBuild());
         List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
         getRedhatArtifacts(artifactsToPack, build);
