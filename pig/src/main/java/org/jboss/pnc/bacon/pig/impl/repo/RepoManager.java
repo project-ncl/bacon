@@ -78,6 +78,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private final boolean removeGeneratedM2Dups;
     private final Path configurationDirectory;
     private final boolean strictLicenseCheck;
+    private final boolean strictDownloadSource;
     private final boolean isTestMode;
 
     public RepoManager(
@@ -87,12 +88,14 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             Map<String, PncBuild> builds,
             Path configurationDirectory,
             boolean removeGeneratedM2Dups,
-            boolean strictLicenseCheck) {
+            boolean strictLicenseCheck,
+            boolean strictDownloadSource) {
         super(pigConfiguration, releasePath, deliverables, builds);
         generationData = pigConfiguration.getFlow().getRepositoryGeneration();
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
         this.configurationDirectory = configurationDirectory;
         this.strictLicenseCheck = strictLicenseCheck;
+        this.strictDownloadSource = strictDownloadSource;
         buildInfoCollector = new BuildInfoCollector();
         isTestMode = false;
     }
@@ -105,6 +108,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             Path configurationDirectory,
             boolean removeGeneratedM2Dups,
             boolean strictLicenseCheck,
+            boolean strictDownloadSource,
             BuildInfoCollector buildInfoCollector,
             Boolean isTestMode) {
         super(pigConfiguration, releasePath, deliverables, builds);
@@ -112,6 +116,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
         this.configurationDirectory = configurationDirectory;
         this.strictLicenseCheck = strictLicenseCheck;
+        this.strictDownloadSource = strictDownloadSource;
         this.buildInfoCollector = buildInfoCollector;
         this.isTestMode = isTestMode;
     }
@@ -191,7 +196,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     .map(GAV::toJavadocJar)
                     .forEach(gavsToPack::add);
         }
-        gavsToPack.forEach(a -> ExternalArtifactDownloader.downloadExternalArtifact(a, sourceDir.toPath(), true));
+        gavsToPack.forEach(
+                a -> ExternalArtifactDownloader.downloadExternalArtifact(a, sourceDir.toPath(), !strictDownloadSource));
     }
 
     @Deprecated

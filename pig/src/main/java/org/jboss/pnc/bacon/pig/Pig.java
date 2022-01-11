@@ -233,6 +233,12 @@ public class Pig {
                 description = "if set to true will fail on license zip with missing/invalid entries")
         private boolean strictLicenseCheck;
 
+        @Option(
+                names = "--strictDownloadSource",
+                defaultValue = "false",
+                description = "If set, any missing source jars will throw an error")
+        private boolean strictDownloadSource;
+
         @Override
         public PigRunOutput doExecute() {
 
@@ -253,6 +259,7 @@ public class Pig {
                     RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck,
                     strictLicenseCheck,
+                    strictDownloadSource,
                     configurationDirectory);
 
             PigContext context = PigContext.get();
@@ -354,11 +361,20 @@ public class Pig {
                 description = "if set to true will fail on license zip with missing/invalid entries")
         private boolean strictLicenseCheck;
 
+        @Option(
+                names = "--strictDownloadSource",
+                defaultValue = "false",
+                description = "If set, any missing source jars will throw an error")
+        private boolean strictDownloadSource;
+
         @Override
         public RepositoryData doExecute() {
             Path configurationDirectory = Paths.get(configDir);
-            RepositoryData result = PigFacade
-                    .generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
+            RepositoryData result = PigFacade.generateRepo(
+                    removeGeneratedM2Dups,
+                    configurationDirectory,
+                    strictLicenseCheck,
+                    strictDownloadSource);
             PigContext.get().setRepositoryData(result);
             PigContext.get().storeContext();
             return result;

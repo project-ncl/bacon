@@ -70,6 +70,7 @@ public class ResolveOnlyRepositoryTest {
                 configurationDirectory,
                 false,
                 false,
+                false,
                 buildInfoCollectorMock,
                 true);
 

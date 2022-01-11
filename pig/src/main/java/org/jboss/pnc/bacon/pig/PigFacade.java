@@ -143,6 +143,7 @@ public final class PigFacade {
             RebuildMode rebuildMode,
             boolean skipBranchCheck,
             boolean strictLicenseCheck,
+            boolean strictDownloadSource,
             Path configurationDirectory) {
 
         PigContext context = context();
@@ -181,7 +182,11 @@ public final class PigFacade {
             if (repoZipPath != null) {
                 repo = parseRepository(new File(repoZipPath));
             } else {
-                repo = generateRepo(removeGeneratedM2Dups, configurationDirectory, strictLicenseCheck);
+                repo = generateRepo(
+                        removeGeneratedM2Dups,
+                        configurationDirectory,
+                        strictLicenseCheck,
+                        strictDownloadSource);
             }
             context.setRepositoryData(repo);
             context.storeContext();
@@ -416,7 +421,8 @@ public final class PigFacade {
     public static RepositoryData generateRepo(
             boolean removeGeneratedM2Dups,
             Path configurationDirectory,
-            boolean strictLicenseCheck) {
+            boolean strictLicenseCheck,
+            boolean strictSourceDownload) {
         abortIfBuildDataAbsentFromContext();
         PigContext context = context();
         try (RepoManager repoManager = new RepoManager(
@@ -426,7 +432,8 @@ public final class PigFacade {
                 context.getBuilds(),
                 configurationDirectory,
                 removeGeneratedM2Dups,
-                strictLicenseCheck)) {
+                strictLicenseCheck,
+                strictSourceDownload)) {
 
             RepositoryData repositoryData = repoManager.prepare();
 
