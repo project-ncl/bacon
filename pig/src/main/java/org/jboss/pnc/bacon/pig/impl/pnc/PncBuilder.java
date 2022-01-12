@@ -86,7 +86,7 @@ public class PncBuilder implements Closeable {
             boolean tempBuildTS,
             RebuildMode rebuildMode) {
         log.info(
-                "Performing builds of group config {} in PNC ({})",
+                "Performing builds of group config {} in PNC ( {} )",
                 group.getId(),
                 UrlGenerator.generateGroupConfigUrl(group.getId()));
         if (tempBuildTS)
@@ -129,7 +129,7 @@ public class PncBuilder implements Closeable {
 
     void waitForSuccessfulFinish(String groupBuildId) {
         log.info(
-                "Waiting for finish of group build {} ({})",
+                "Waiting for finish of group build {} ( {} )",
                 groupBuildId,
                 UrlGenerator.generateGroupBuildUrl(groupBuildId));
         SleepUtils.waitFor(() -> isSuccessfullyFinished(groupBuildId), 30, true);
@@ -154,7 +154,7 @@ public class PncBuilder implements Closeable {
             }
         } catch (ClientException e) {
             log.warn(
-                    "Failed to check if build is finished for {} ({}). Assuming it is not finished",
+                    "Failed to check if build is finished for {} ( {} ). Assuming it is not finished",
                     groupBuildId,
                     UrlGenerator.generateGroupBuildUrl(groupBuildId),
                     e);
@@ -182,7 +182,7 @@ public class PncBuilder implements Closeable {
 
         // log set to info for CPaaS to detect infinite loop
         log.info(
-                "Checking if all builds in group build {} are in final state with proper count of builds ({})",
+                "Checking if all builds in group build {} are in final state with proper count of builds ( {} )",
                 groupBuildId,
                 UrlGenerator.generateGroupBuildUrl(groupBuildId));
         BuildsFilterParameters filter = new BuildsFilterParameters();

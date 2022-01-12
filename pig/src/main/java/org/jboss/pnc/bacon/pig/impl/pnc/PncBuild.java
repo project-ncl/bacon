@@ -161,7 +161,7 @@ public class PncBuild {
                     buildLog = readLog(inputStream);
                 }
             } else {
-                log.debug("Couldn't find logs for build id: {} ({})", id, UrlGenerator.generateBuildUrl(id));
+                log.debug("Couldn't find logs for build id: {} ( {} )", id, UrlGenerator.generateBuildUrl(id));
                 buildLog = Collections.emptyList();
             }
 
