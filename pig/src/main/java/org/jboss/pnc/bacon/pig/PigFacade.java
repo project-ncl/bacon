@@ -299,7 +299,7 @@ public final class PigFacade {
                     throw new RuntimeException(
                             "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
                 }
-                log.info("{} pushed to brew ({}) ", build.getId(), UrlGenerator.generateBuildUrl(build.getId()));
+                log.info("{} pushed to brew ( {} ) ", build.getId(), UrlGenerator.generateBuildUrl(build.getId()));
             } catch (RemoteResourceException e) {
                 throw new RuntimeException(
                         "Failed to push build " + build.getId() + " to brew ("

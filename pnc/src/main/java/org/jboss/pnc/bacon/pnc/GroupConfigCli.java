@@ -285,7 +285,7 @@ public class GroupConfigCli {
                     return 0;
                 } else {
                     log.error(
-                            "Couldn't find any group build from group config id: {} ({})",
+                            "Couldn't find any group build from group config id: {} ( {} )",
                             id,
                             UrlGenerator.generateGroupConfigUrl(id));
                     return 1;
