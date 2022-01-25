@@ -12,6 +12,8 @@ import org.jboss.pnc.bacon.auth.model.KeycloakResponse;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import java.io.Console;
 import java.time.Instant;
 import java.util.Optional;
@@ -208,6 +210,11 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
                 HttpResponse<KeycloakResponse> postResponse = body.asObject(KeycloakResponse.class);
                 return postResponse.getBody();
             } catch (UnirestException e) {
+                if (e.getCause().getClass().equals(SSLHandshakeException.class)) {
+                    throw new FatalException(
+                            "Cannot reach the Keycloak server because of missing TLS certificates",
+                            e.getCause());
+                }
                 retries++;
 
                 if (retries > MAX_RETRIES) {
