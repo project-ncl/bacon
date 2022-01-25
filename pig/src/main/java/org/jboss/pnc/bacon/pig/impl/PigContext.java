@@ -115,7 +115,14 @@ public class PigContext {
         initFullVersion(pigConfiguration, releaseStorageUrl);
 
         if (deliverables == null) {
-            prefix = String.format("%s-%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion);
+            String suffix = "";
+            // for e.g, zip will become <releaseFile>-<fullVersion>-<suffix>-maven-repository.zip
+            if (pigConfiguration.getOutputSuffix() != null && !pigConfiguration.getOutputSuffix().isBlank()) {
+                suffix = "-" + pigConfiguration.getOutputSuffix();
+            }
+
+            prefix = String
+                    .format("%s-%s%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion, suffix);
 
             deliverables = new Deliverables();
 
