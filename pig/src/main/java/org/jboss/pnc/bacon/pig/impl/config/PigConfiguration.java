@@ -71,6 +71,7 @@ public class PigConfiguration implements Validate {
     private @NotNull BuildConfig defaultBuildParameters = new BuildConfig();
     private @NotEmpty @ListBuildConfigCheck @Valid List<BuildConfig> builds = new ArrayList<>();
     private @NotNull @Valid Output outputPrefixes;
+    private String outputSuffix;
 
     private @NotNull @Valid Flow flow;
     private String majorMinor;
@@ -242,7 +243,12 @@ public class PigConfiguration implements Validate {
     }
 
     public String getTopLevelDirectoryPrefix() {
-        return String.format("%s-%s.%s-", outputPrefixes.getReleaseDir(), version, product.getStage());
+        String finalSuffix = "";
+        // folder name will become <release-dir>-<version>-<stage>-<suffix>-maven-repository
+        if (outputSuffix != null && !outputSuffix.isBlank()) {
+            finalSuffix = "-" + outputSuffix;
+        }
+        return String.format("%s-%s.%s%s-", outputPrefixes.getReleaseDir(), version, product.getStage(), finalSuffix);
     }
 
     @Deprecated
