@@ -57,12 +57,12 @@ Compile:
 mvn clean install
 ```
 
-Run:
+Run after compilation:
 ```bash
 java -jar cli/target/bacon.jar
 ```
 
-If you are installing Bacon on MacOs, please read the [pre-requiste section](#pre-requisite-for-macos).
+Java JDK 11 is the minimum supported runtime. If you are installing Bacon on MacOs, please read the [pre-requiste section](#pre-requisite-for-macos). If you are running PNC internally with a company-signed TLS certificate, please read the [TLS certificate section](#tls-certificate)
 
 To install the latest ***released*** version:
 ```bash
@@ -108,6 +108,15 @@ echo 'export PATH="$PATH:${HOME}/bin"' >> ~/.bash_profile
 2. Ensure Python 3 is installed, this can be achieved using homebrew by running:
 ```
 brew install python3
+```
+
+#### TLS Certificate
+If PNC is deployed internally using a company-signed TLS certificate, The Java JDK will complain about using an untrusted certificate. We need to add the public key of the certificate to the Java truststore. There are a few ways to remedy this:
+
+- When using the default JDK from your Linux distro, there might be a certificate rpm present that will add the company-signed TLS certificate to the Java truststore. The certificate rpm may not apply the TLS certificate to custom JDKs such as OracleJDK.
+- If there is no such certificate rpm, the company public key can be added to the Java truststore using:
+```
+sudo keytool -import -alias <company>-<cert> -file <file of company public key.crt> -trustcacerts -storepass changeit --noprompt
 ```
 
 ### Feature Guide
