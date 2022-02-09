@@ -303,6 +303,11 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         if (!isTestMode) {
             RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
             RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
+
+            // Delete excluded artifacts in the maven-repository. Needed for resolve only generation where filtering
+            // can't be done before download
+            List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
+            RepositoryUtils.removeExcludedArtifacts(targetRepoContentsDir, excludeArtifacts);
         }
         addMissingSources();
 
