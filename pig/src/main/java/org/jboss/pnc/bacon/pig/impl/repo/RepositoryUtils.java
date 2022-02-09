@@ -197,6 +197,32 @@ public class RepositoryUtils {
         removeMatchingCondition(element, RepositoryUtils::isCommunity);
     }
 
+    /**
+     * Given a folder having maven artifacts stored in a maven repository formatted folders, remove from that folder the
+     * excluded artifacts, specified with the Maven identifier format <group id>:<artifactid>:<packaging>:<version>
+     *
+     * @param element
+     * @param excludedArtifacts
+     */
+    public static void removeExcludedArtifacts(File element, List<String> excludedArtifacts) {
+        log.debug("Removing excluded artifacts from the repository");
+        List<String> excludedPaths = excludedArtifacts.stream()
+                .map(a -> convertMavenIdentifierToPath(a))
+                .collect(Collectors.toList());
+        if (element.isDirectory()) {
+            Stream.of(element.listFiles()).forEach(file -> removeExcludedArtifacts(file, excludedArtifacts));
+        } else {
+            for (String excludedPath : excludedPaths) {
+                Pattern matchesRegex = Pattern.compile(excludedPath);
+                if (matchesRegex.matcher(element.getAbsolutePath()).find()) {
+                    File parent = element.getParentFile();
+                    element.delete();
+                    recursivelyDeleteEmptyFolder(parent);
+                }
+            }
+        }
+    }
+
     private static boolean isCommunity(File f) {
         String absolutePath = f.getAbsolutePath();
         return !absolutePath.contains("redhat-") && !absolutePath.contains("eap-runtime-artifacts");
@@ -205,9 +231,7 @@ public class RepositoryUtils {
     private static void removeMatchingCondition(File element, Function<File, Boolean> condition) {
         if (element.isDirectory()) {
             Stream.of(element.listFiles()).forEach(file -> removeMatchingCondition(file, condition));
-            if (element.list().length == 0) {
-                element.delete();
-            }
+            recursivelyDeleteEmptyFolder(element);
         } else {
             if (condition.apply(element)) {
                 element.delete();
@@ -262,6 +286,45 @@ public class RepositoryUtils {
                 return FileVisitResult.SKIP_SUBTREE;
             }
         });
+    }
+
+    /**
+     * If file is an empty folder, delete the folder, and recursively delete the parent of the folder if also empty
+     *
+     * @param element
+     */
+    public static void recursivelyDeleteEmptyFolder(File element) {
+        if (element.isDirectory() && element.list().length == 0) {
+            log.debug("Deleted empty folder {}", element);
+            File parent = element.getParentFile();
+            element.delete();
+            recursivelyDeleteEmptyFolder(parent);
+        }
+    }
+
+    /**
+     * Method to transform a Maven identifier into a filesystem path
+     *
+     * Transform <group-id>:<artifact-id>:<packaging>:<version> to
+     * <group-id>/<artifact-id>/<version>/<artifact-id>-<version>.<packaging>
+     *
+     * @param identifier
+     * @return
+     */
+    public static String convertMavenIdentifierToPath(String identifier) {
+        String[] sections = identifier.split(":");
+        if (sections.length != 4) {
+            throw new IllegalArgumentException(
+                    identifier + " is wrongly formatted! It should be <group-id>:<artifact-id>:<packaging>:<version>");
+        }
+        String fileSeparator = System.getProperty("file.separator");
+
+        String groupId = sections[0].replace(".", fileSeparator);
+        String artifactId = sections[1];
+        String packaging = sections[2];
+        String version = sections[3];
+        return groupId + fileSeparator + artifactId + fileSeparator + version + fileSeparator + artifactId + "-"
+                + version + "." + packaging;
     }
 
     private static class RedHatArtifactVersion {
