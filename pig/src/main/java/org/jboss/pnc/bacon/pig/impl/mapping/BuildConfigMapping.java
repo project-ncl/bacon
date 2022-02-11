@@ -44,27 +44,36 @@ public class BuildConfigMapping {
         if (parameters.containsKey("ALIGNMENT_PARAMETERS")) {
             String[] alignmentParameters = parameters.get("ALIGNMENT_PARAMETERS").split(",");
             buildConfig.setAlignmentParameters(new HashSet<>(Arrays.asList(alignmentParameters)));
+            parameters.remove("ALIGNMENT_PARAMETERS");
         }
 
         if (parameters.containsKey("BUILDER_POD_MEMORY")) {
             buildConfig.setBuildPodMemory(Double.parseDouble(parameters.get("BUILDER_POD_MEMORY")));
+            parameters.remove("BUILDER_POD_MEMORY");
         }
 
         if (parameters.containsKey("BUILD_CATEGORY")) {
             buildConfig.setBuildCategory(parameters.get("BUILD_CATEGORY"));
+            parameters.remove("BUILD_CATEGORY");
         }
 
         if (parameters.containsKey("PIG_YAML_METADATA")) {
             buildConfig.setPigYamlMetadata(parameters.get("PIG_YAML_METADATA"));
+            parameters.remove("PIG_YAML_METADATA");
         }
 
         if (parameters.containsKey("BREW_BUILD_NAME")) {
             buildConfig.setBrewBuildName(parameters.get("BREW_BUILD_NAME"));
+            parameters.remove("BREW_BUILD_NAME");
         }
 
         if (parameters.containsKey("EXTRA_REPOSITORIES")) {
             String[] extraRepositories = parameters.get("EXTRA_REPOSITORIES").split("\n");
             buildConfig.setExtraRepositories(new HashSet<>(Arrays.asList(extraRepositories)));
+            parameters.remove("EXTRA_REPOSITORIES");
+        }
+        if (!parameters.isEmpty()) {
+            buildConfig.setParameters(parameters);
         }
     }
 }

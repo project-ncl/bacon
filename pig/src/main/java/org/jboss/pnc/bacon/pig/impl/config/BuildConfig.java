@@ -107,6 +107,7 @@ public class BuildConfig {
     /** deprecated: use alignmentParameters instead */
     private Set<String> customPmeParameters = new TreeSet<>();
     private Set<String> alignmentParameters = new TreeSet<>();
+    private Map<String, String> parameters = new HashMap<>();
 
     private Set<String> extraRepositories = new TreeSet<>();
     private Boolean branchModified;
@@ -223,7 +224,7 @@ public class BuildConfig {
                 && StringUtils.equals(scmRevision, old.getScmRevision())
                 && getEnvironmentId().equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
-                && !isBranchModified(old, skipBranchCheck, temporaryBuild)
+                && parameters.equals(old.getParameters()) && !isBranchModified(old, skipBranchCheck, temporaryBuild)
                 && getBrewPullActive() == old.getBrewPullActive();
     }
 
@@ -249,6 +250,8 @@ public class BuildConfig {
             alignmentParameters = customPmeParameters;
         }
         Map<String, String> result = new HashMap<>();
+
+        result.putAll(parameters);
 
         Optional<String> oldForceValue = oldConfig == null ? Optional.empty()
                 : Optional.ofNullable(oldConfig.getParameters().get(BUILD_FORCE));
