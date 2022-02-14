@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
@@ -72,8 +73,9 @@ public class PncBuilder implements Closeable {
             boolean tempBuild,
             boolean tempBuildTS,
             RebuildMode rebuildMode,
-            boolean wait) {
-        GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode);
+            boolean wait,
+            boolean dryRun) {
+        GroupBuild groupBuild = run(group, tempBuild, tempBuildTS, rebuildMode, dryRun);
         if (wait) {
             waitForSuccessfulFinish(groupBuild.getId());
         }
@@ -84,7 +86,8 @@ public class PncBuilder implements Closeable {
             GroupConfigurationRef group,
             boolean tempBuild,
             boolean tempBuildTS,
-            RebuildMode rebuildMode) {
+            RebuildMode rebuildMode,
+            boolean dryRun) {
         log.info(
                 "Performing builds of group config {} in PNC ( {} )",
                 group.getId(),
@@ -95,6 +98,10 @@ public class PncBuilder implements Closeable {
         GroupBuildParameters buildParams = new GroupBuildParameters();
         buildParams.setRebuildMode(rebuildMode);
         buildParams.setTemporaryBuild(tempBuild);
+        if (dryRun) {
+            buildParams.setTemporaryBuild(true);
+            buildParams.setAlignmentPreference(AlignmentPreference.PREFER_PERSISTENT);
+        }
         GroupBuildRequest request = GroupBuildRequest.builder().build();
 
         try {

@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
@@ -109,6 +110,8 @@ public class BuildCli {
         private Integer timeout;
         @Option(names = "--revision", description = "Build Config revision to build.")
         private Integer revision;
+        @Option(names = "--dry-run", description = "Perform a dry run")
+        private boolean dryRun = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -130,6 +133,11 @@ public class BuildCli {
             buildParams.setKeepPodOnFailure(keepPodOnFailure);
             buildParams.setTemporaryBuild(temporaryBuild);
             buildParams.setBuildDependencies(!noBuildDependencies);
+
+            if (dryRun) {
+                buildParams.setTemporaryBuild(true);
+                buildParams.setAlignmentPreference(AlignmentPreference.PREFER_PERSISTENT);
+            }
 
             try (AdvancedBuildConfigurationClient client = BC_CREATOR.newClientAuthenticated()) {
 

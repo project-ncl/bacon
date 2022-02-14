@@ -104,6 +104,9 @@ public class Pig {
                 description = "If specified, PNC will perform temporary builds")
         boolean tempBuild;
 
+        @Option(names = "--dry-run", defaultValue = "false", description = "If specified, PNC will perform a dry run")
+        boolean dryRun;
+
         @Option(
                 names = "--releaseStorageUrl",
                 description = "Location of the release storage, typically on rcm-guest staging. Required for auto-incremented milestones, e.g. DR*")
@@ -255,6 +258,7 @@ public class Pig {
                     removeGeneratedM2Dups,
                     repoZipPath,
                     tempBuild,
+                    dryRun,
                     tempBuildTS,
                     RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck,
@@ -333,7 +337,7 @@ public class Pig {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             GroupBuildInfo groupBuildInfo = PigFacade
-                    .build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode), wait);
+                    .build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode), wait, dryRun);
             if (wait) {
                 PigContext context = PigContext.get();
                 context.setBuilds(groupBuildInfo.getBuilds());

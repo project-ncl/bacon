@@ -106,7 +106,12 @@ public final class PigFacade {
         return builder.cancelRunningGroupBuild(importResult.getBuildGroup().getId());
     }
 
-    public static GroupBuildInfo build(boolean tempBuild, boolean tempBuildTS, RebuildMode rebuildMode, boolean wait) {
+    public static GroupBuildInfo build(
+            boolean tempBuild,
+            boolean tempBuildTS,
+            RebuildMode rebuildMode,
+            boolean wait,
+            boolean dryRun) {
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -118,7 +123,7 @@ public final class PigFacade {
 
         try (PncBuilder pncBuilder = new PncBuilder()) {
             GroupBuild groupBuild = pncBuilder
-                    .build(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode, wait);
+                    .build(importResult.getBuildGroup(), tempBuild, tempBuildTS, rebuildMode, wait, dryRun);
             if (wait) {
                 try (BuildInfoCollector buildInfoCollector = new BuildInfoCollector()) {
                     return buildInfoCollector.getBuildsFromGroupBuild(groupBuild);
@@ -139,6 +144,7 @@ public final class PigFacade {
             boolean removeGeneratedM2Dups,
             String repoZipPath,
             boolean tempBuild,
+            boolean dryRun,
             boolean tempBuildTS,
             RebuildMode rebuildMode,
             boolean skipBranchCheck,
@@ -162,7 +168,7 @@ public final class PigFacade {
             log.info("Skipping builds");
             groupBuildInfo = getBuilds(importResult, tempBuild);
         } else {
-            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode, true);
+            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode, true, dryRun);
         }
 
         context.setBuilds(groupBuildInfo.getBuilds());
