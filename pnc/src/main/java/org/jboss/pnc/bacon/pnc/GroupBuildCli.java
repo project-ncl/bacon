@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
@@ -83,6 +84,8 @@ public class GroupBuildCli {
         private boolean wait = false;
         @Option(names = "--timeout", description = "Time in minutes the command waits for Group Build completion")
         private String timeout;
+        @Option(names = "--dry-run", description = "Perform a dry run")
+        private boolean dryRun = false;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -104,6 +107,10 @@ public class GroupBuildCli {
 
             groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
             groupBuildParams.setTemporaryBuild(temporaryBuild);
+            if (dryRun) {
+                groupBuildParams.setTemporaryBuild(true);
+                groupBuildParams.setAlignmentPreference(AlignmentPreference.PREFER_PERSISTENT);
+            }
 
             // TODO add GroupBuildRequest with an option to specify BC revisions
             try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
