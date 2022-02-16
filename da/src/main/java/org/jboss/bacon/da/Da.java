@@ -23,6 +23,9 @@ import picocli.CommandLine.Command;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-@Command(name = "da", description = "Dependency Analysis related commands", subcommands = { DALookupCli.class })
+@Command(
+        name = "da",
+        description = "Dependency Analysis related commands",
+        subcommands = { DALookupCli.class, DABlockListCli.class })
 public class Da {
 }
