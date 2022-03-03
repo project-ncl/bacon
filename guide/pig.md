@@ -124,6 +124,16 @@ addons:
 
 ```
 
+### Build From Source Statistics
+
+The `runtimeDependenciesToAlignTree` add-on produces statistics on the percentage of dependencies that are build-from-source compliant and provides a reverse-mapping of dependencies to all of the parents in the tree which brings that dependency in.
+
+```
+addons:
+   runtimeDependenciesToAlignTree:
+
+```
+
 ### Extra Deliverables Downloader
 
 The `extraDeliverablesDownloader` add-on downloads artifacts from one or more PiG build configurations and uploads it to your projects staging directory. Each build configuration accepts two yaml variables: `matching` and `suffix` which should be provided together as a list. 
