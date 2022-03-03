@@ -545,7 +545,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     continue;
                 }
                 String[] parts = buffer.split(":");
-                if (parts.length < 2 || parts.length > 5) {
+                if (parts.length < 3 || parts.length > 5) {
                     throw new RuntimeException("Extension text file is not properly formatted");
                 }
 
