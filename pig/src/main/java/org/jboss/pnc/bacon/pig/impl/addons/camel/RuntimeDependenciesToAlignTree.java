@@ -78,9 +78,16 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 List<String> runtimeDeps = new ArrayList<String>();
                 // Do build-from-source counts
                 int allDependencyCount = 0;
+                int allRuntimeCount = 0;
+                int allCompileCount = 0;
                 for (String line : bcLog) {
                     line.trim();
                     if ((line.endsWith(":compile")) || (line.endsWith(":runtime"))) {
+                        if (line.endsWith(":runtime")) {
+                            allRuntimeCount++;
+                        } else if (line.endsWith(":compile")) {
+                            allCompileCount++;
+                        }
                         allDependencyCount++;
                         runtimeDeps.add(parseDependency(line));
                     }
@@ -91,19 +98,40 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
 
                 // Get the productized dependency count
                 int productizedCount = 0;
+                int runtimeProductizedCount = 0;
+                int compileProductizedCount = 0;
                 for (String line : bcLog) {
                     line.trim();
-                    if ((line.contains("redhat-")) && ((line.endsWith(":compile")) || (line.endsWith(":runtime")))) {
-                        productizedCount++;
+                    if (line.contains("redhat-")) {
+                        if (line.endsWith(":runtime")) {
+                            runtimeProductizedCount++;
+                            productizedCount++;
+                        } else if (line.endsWith(":compile")) {
+                            compileProductizedCount++;
+                            productizedCount++;
+                        }
+
                     }
                 }
 
                 // Print out the productization stats
                 file.print(
-                        "Found " + allDependencyCount + " dependencies, with " + productizedCount
-                                + " productized dependencies\n");
+                        "Found " + productizedCount + " unique productized dependencies, " + allDependencyCount
+                                + " total dependencies\n");
                 float pct = (float) productizedCount / allDependencyCount;
                 file.print("Build from source percentage : " + String.format("%.2f", pct * 100) + "%\n");
+
+                file.print(
+                        "Found " + runtimeProductizedCount + " unique productized runtime dependencies, "
+                                + allRuntimeCount + " total unique runtime dependencies\n");
+                pct = (float) runtimeProductizedCount / allRuntimeCount;
+                file.print("Build from source percentage (runtime) : " + String.format("%.2f", pct * 100) + "%\n");
+
+                file.print(
+                        "Found " + compileProductizedCount + " unique productized compile-scope dependencies, "
+                                + allCompileCount + " total unique compile-scope dependencies\n");
+                pct = (float) compileProductizedCount / allCompileCount;
+                file.print("Build from source percentage (compile) : " + String.format("%.2f", pct * 100) + "%\n");
 
                 // Build a list of parentage
                 String currentParent = null;
