@@ -121,7 +121,7 @@ public class PncBuilder implements Closeable {
                     .getAll();
 
             if (groupBuilds.size() > 1) {
-                throw new RuntimeException("Multiple running builds of one GC are not allowed.");
+                throw new RuntimeException("Multiple running builds of one GroupConfiguration are not allowed.");
             }
             if (groupBuilds.isEmpty()) {
                 return "No build is running for this group.";
