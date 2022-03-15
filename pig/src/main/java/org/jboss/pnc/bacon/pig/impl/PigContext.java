@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
 import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.hashDirectory;
 
@@ -144,7 +145,7 @@ public class PigContext {
         String version = pigConfiguration.getVersion();
         if (milestone.contains("*")) {
             String url = releaseStorageUrl.orElse(pigConfiguration.getReleaseStorageUrl());
-            if (url == null) {
+            if (isEmpty(url)) {
                 throw new RuntimeException(
                         "Auto-incremented milestone used but no releaseStorageUrl provided. "
                                 + "Please either set the releaseStorageUrl in the build config yaml, by the product version or set the url by adding `--releaseStorageUrl=...` parameter");
