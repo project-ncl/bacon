@@ -65,15 +65,21 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
 
     @Override
     public void trigger() {
-        String filename = extrasPath + "CamelRuntimeDependenciesToAlignTree.txt";
-        log.info("Running RuntimeDependenciesToAlignTree - report is {}", filename);
-        try (PrintWriter file = new PrintWriter(filename, StandardCharsets.UTF_8.name())) {
+        String filename = extrasPath + "DependenciesToAlignTree.txt";
+        String buildFromSourceStatsFileName = extrasPath + "BuildFromSourceStats.txt";
+        log.info("Running DependenciesToAlignTree - report is {}", filename);
+        PrintWriter file = null;
+        PrintWriter buildFromSourceStatsFile = null;
+        try {
+            file = new PrintWriter(filename, StandardCharsets.UTF_8.name());
+            buildFromSourceStatsFile = new PrintWriter(buildFromSourceStatsFileName, StandardCharsets.UTF_8.name());
             for (PncBuild build : builds.values()) {
                 // Make a unique list so we don't get multiples from
                 // sub-module's dependency tree list
                 List<String> bcLog = build.getBuildLog().stream().distinct().collect(Collectors.toList());
 
                 file.print("-------- [" + build.getId() + "] " + build.getName() + " --------\n");
+                buildFromSourceStatsFile.print("-------- [" + build.getId() + "] " + build.getName() + " --------\n");
 
                 List<String> runtimeDeps = new ArrayList<String>();
                 // Do build-from-source counts
@@ -115,23 +121,26 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 }
 
                 // Print out the productization stats
-                file.print(
+                buildFromSourceStatsFile.print(
                         "Found " + productizedCount + " unique productized dependencies, " + allDependencyCount
                                 + " total dependencies\n");
                 float pct = (float) productizedCount / allDependencyCount;
-                file.print("Build from source percentage : " + String.format("%.2f", pct * 100) + "%\n");
+                buildFromSourceStatsFile
+                        .print("Build from source percentage : " + String.format("%.2f", pct * 100) + "%\n");
 
-                file.print(
+                buildFromSourceStatsFile.print(
                         "Found " + runtimeProductizedCount + " unique productized runtime dependencies, "
                                 + allRuntimeCount + " total unique runtime dependencies\n");
                 pct = (float) runtimeProductizedCount / allRuntimeCount;
-                file.print("Build from source percentage (runtime) : " + String.format("%.2f", pct * 100) + "%\n");
+                buildFromSourceStatsFile
+                        .print("Build from source percentage (runtime) : " + String.format("%.2f", pct * 100) + "%\n");
 
-                file.print(
+                buildFromSourceStatsFile.print(
                         "Found " + compileProductizedCount + " unique productized compile-scope dependencies, "
                                 + allCompileCount + " total unique compile-scope dependencies\n");
                 pct = (float) compileProductizedCount / allCompileCount;
-                file.print("Build from source percentage (compile) : " + String.format("%.2f", pct * 100) + "%\n");
+                buildFromSourceStatsFile
+                        .print("Build from source percentage (compile) : " + String.format("%.2f", pct * 100) + "%\n");
 
                 // Build a list of parentage
                 String currentParent = null;
@@ -168,8 +177,19 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 }
                 file.print("\n");
             }
+
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Error while creating RuntimeDependenciesToAlignTree report", e);
+        } finally {
+            if (file != null) {
+                file.flush();
+                file.close();
+            }
+
+            if (buildFromSourceStatsFile != null) {
+                buildFromSourceStatsFile.flush();
+                buildFromSourceStatsFile.close();
+            }
         }
     }
 }
