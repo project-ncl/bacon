@@ -22,7 +22,7 @@ product:
   name: test-product
   abbreviation: tp
   stage: GA
-  issueTrackerUrl: http://issues.jboss.org/browse/TEST 
+  issueTrackerUrl: http://issues.jboss.org/browse/TEST
 version: 1.0.0
 milestone: DR1
 brewTagPrefix: fb-1.0-pnc # Optional
@@ -75,7 +75,7 @@ Finally the `group` is name of the group config where all the builds defined are
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    It is very important to keep <code> group </code> name unique across all your build-config.yaml files in case you're building multiple build-config.yaml configurations in parallel within e.g. CPaaS (Continuous Productization As A Service).   
+    It is very important to keep <code> group </code> name unique across all your build-config.yaml files in case you're building multiple build-config.yaml configurations in parallel within e.g. CPaaS (Continuous Productization As A Service).
 </td>
 </tr>
 </table>
@@ -104,10 +104,10 @@ builds:
   scmUrl: <scm URL> # Specify scmUrl
 
   scmRevision: <scm revision>
-  
+
   brewPullActive: false #This flag allows the user to specify whether to activate the brew pull for specific build configs. Number of dependencies in Brew used in current PNC builds is pretty low and the feature slows down both alignment and the build itself.
-  
-  # Either specify environmentId, environmentName or systemImageId. 
+
+  # Either specify environmentId, environmentName or systemImageId.
   # If more than one is specified, the priority will be: environmentId, systemImageId, environmentName
   environmentId: <id> # The specific id of a build environment, e.g. 20
   environmentName: <env-name> # The name of the builder image, e.g. OpenJDK 1.8; Mvn 3.6.0. As this will pick the latest up-to-date version of the image, it's the recommended option
@@ -121,7 +121,7 @@ builds:
   alignmentParameters: <alignment parameters> # Optional: if you want to add parameters to the alignment invocation
   extraRepositories: # Optional: use if you want your build to connect to more Maven repositories
   - http://custom.repository
-  
+
   buildCategory: STANDARD # Optional: used for managed services builds, specify STANDARD or SERVICE, defaults to STANDARD
 
   brewBuildName: <brew build name> # Optional: if you wish to push the build to an alternate brew tag
@@ -162,9 +162,9 @@ builds:
 
 The build environment used for builds has a unique id, name and system image id.
 
-We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`. 
+We allow the user to specify the build environment using either `environmentId`, `environmentName` or the `systemImageId`.
 
-The `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what has been traditionally used, but it can be problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable. 
+The `environmentId` refers to the exact id of the build environment as stored in the PNC database. This is what has been traditionally used, but it can be problematic since the ids are different between PNC servers (Devel, Stage, Prod), which makes the `build-config.yaml` not very portable.
 
 To overcome the portability issue, it is possible to specify the `systemImageId` instead, which is the same across different PNC servers. Both `environmentId` and `systemImageId` **preserve the docker-image version** of the environment, which means that after some time the version may become deprecated and users may need to update the value every once in a while. (**NOTE**: `systemImageIds` with `:latest` suffix will **no longer be available** in PNC).
 
@@ -255,44 +255,41 @@ You need to specify `group`. Redhat artifacts are then sorted from builds includ
 
 The `MILESTONE` - not implemented yet
 
-The `RESOLVE_ONLY` strategy takes the entry points of the artifacts/extensions of the product which are supposed to be packaged in repository, resolves the artifact, resolves artifacts managed dependencies. It also takes care of the transitives and package them as well.
+The `RESOLVE_ONLY` strategy resolves a list of artifacts against a BOM. The resolution is transitive, i.e. direct (except optional) and transitive dependencies of the listed artifacts are included in the repo zip as well.
 
  **Necessary configuration**
- 
-In order to RESOLVE_ONLY strategy to work it requires a link to txt file which contains the artifact or extensions in the format of
-`groupId:artifactId:version:type:classifier` (type and classifier are optional)
 
-*For example*
+In order to RESOLVE_ONLY strategy to work, three things need be defined:
 
-In build-config.yaml
+1. `sourceBuild` - the PNC build to take the `sourceArtifact` from
+1. `sourceArtifact` - the BOM against which the artifacts should be resolved
+2. The list of artifacts to resolve against the BOM via one or more of the following options:
 
- ```
-   repositoryGeneration:
-     strategy: RESOLVE_ONLY
-     parameters:
-       extensionsListUrl: "http://link.to.txt.file"
- ``` 
- *Text file sample*
- ```
- io.quarkus:quarkus-bom-quarkus-platform-properties:1.11.6.Final:properties
- io.quarkus:quarkus-logging-json-deployment:1.11.6.Final
- io.quarkus:quarkus-smallrye-opentracing-deployment:1.11.6.Final
- 
- ```
- **Additional Information**
- Resolve artifacts/extensions in the scope of a bom file
- In order to resolve the artifacts/extensions in scope of your product bom file, fill `sourceBuild`  and `sourceArtifact` and RESOLVE_ONLY strategy will resolve in the scope of your product bom
+    - `parameters.extensionsListUrl` - a URL referring to a text file containing the list of artifacts in the format `groupId:artifactId:version:type:classifier` (type and classifier are optional)
+    - `parameters.resolveIncludes` and `parameters.resolveExcludes` - these are comma separated lists of artifact patterns to filter out from the given BOM (that is transformed to an effective pom before the evaluation). The patterns are of the form `groupIdPattern:[artifactIdPattern:[[typePatter:classifierIdPattern]:versionPattern]]`. The subpatterns can contain string literals combined with wildcard `*`.
 
- For example
- ```
+It is possible to set both `parameters.extensionsListUrl` and `parameters.resolveIncludes`. In such a case the union of both sets will be used.
+
+`build-config.yaml` example:
+
+ ```yaml
    repositoryGeneration:
      strategy: RESOLVE_ONLY
      sourceBuild: io.quarkus-quarkus-platform-{{productVersion}}
      sourceArtifact: 'quarkus-product-bom-[\d]+.*.pom'
      parameters:
-       extensionsListUrl: "https://example.com/extensionArtifactList.txt"
+       extensionsListUrl: "http://link.to.txt.file"
+       resolveIncludes: "*:*:*redhat-*" # get all artifacts from the BOM that have redhat- substring in their versions
+       resolveExcludes: "io.netty:*:*:linux-aarch_64:*,io.netty:*:*:osx-*:*" # but ignore all netty artifacts with linux-aarch_64 and osx-* classifiers
  ```
 
+`extensionsListUrl` example:
+
+ ```
+ io.quarkus:quarkus-bom-quarkus-platform-properties:1.11.6.Final:properties
+ io.quarkus:quarkus-logging-json-deployment:1.11.6.Final
+ io.quarkus:quarkus-smallrye-opentracing-deployment:1.11.6.Final
+ ```
 
 
 ##### Parameters available in all strategies
@@ -369,11 +366,11 @@ Strategy options are:
 
 The `IGNORE` strategy won't produce any sources zip.
 
-The `GENERATE` strategy get sources from builds. 
+The `GENERATE` strategy get sources from builds.
 
-The `GENERATE_EXTENDED` strategy get same result as `GENERATE` and add sources of unreleased dependencies. 
+The `GENERATE_EXTENDED` strategy get same result as `GENERATE` and add sources of unreleased dependencies.
 
-The `GENERATE_SELECTED` strategy get sources from selected `sourceBuild`. 
+The `GENERATE_SELECTED` strategy get sources from selected `sourceBuild`.
 
 All `GENERATE*` strategies require that the repository generation is **not** ignored.
 
