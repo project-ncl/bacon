@@ -522,9 +522,24 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                 "Artifact id " + redHatArtifact.getArtifactId() + " version "
                                         + redHatArtifact.getVersion());
                         mvnResolver.resolve(redHatArtifact);
+
+                        /*
+                         * We resolve the BOM (assuming it has no own dependencies) and add the artifact we actually
+                         * want to resolve as its sole dependency. In this way, optional dependencies do not get
+                         * resolved, which we want. If we resolved the artifact directly, it would also resolve the
+                         * direct optional dependencies.
+                         */
                         mvnResolver.resolveManagedDependencies(
-                                redHatArtifact, // runtime extension artifact
-                                Collections.emptyList(), // enforced direct dependencies, ignore this
+                                bom,
+                                Collections.singletonList(
+                                        new Dependency(
+                                                new DefaultArtifact(
+                                                        extensionRtArtifact.getGroupId(),
+                                                        extensionRtArtifact.getArtifactId(),
+                                                        extensionRtArtifact.getClassifier(),
+                                                        extensionRtArtifact.getExtension(),
+                                                        null),
+                                                "compile")),
                                 bomConstraints, // version constraints from the BOM
                                 Collections.emptyList(), // extra maven repos, ignore this
                                 "test",

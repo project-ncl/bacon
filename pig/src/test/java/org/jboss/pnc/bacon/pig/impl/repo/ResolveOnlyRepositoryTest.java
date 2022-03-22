@@ -111,12 +111,13 @@ public class ResolveOnlyRepositoryTest {
             throw new RuntimeException("Could not write to " + actualOutput, e);
         }
 
-        Assertions.assertThat(actualFiles)
-                .withFailMessage(
-                        "You may want to compare src/test/resources/%s with %s",
-                        EXPECTED_ARTIFACT_LIST_TXT,
-                        ACTUAL_REPO_FILES)
-                .containsExactlyElementsOf(expectedFiles);
+        if (!actualFiles.equals(expectedFiles)) {
+            System.out.printf(
+                    "\nThe zipped repository has unexpected content. You may want to compare src/test/resources/%s with %s\n\n",
+                    EXPECTED_ARTIFACT_LIST_TXT,
+                    ACTUAL_REPO_FILES);
+        }
+        Assertions.assertThat(actualFiles).containsExactlyElementsOf(expectedFiles);
     }
 
     private void mockPigContextAndMethods() {
