@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
@@ -9,8 +10,10 @@ import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.junit.jupiter.api.AfterAll;
@@ -22,23 +25,30 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.doReturn;
 
 public class ResolveOnlyRepositoryTest {
 
+    private static final String EXPECTED_ARTIFACT_LIST_TXT = "resolve-and-repackage-repo-artifact-list.txt";
+    private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
+    private static final String BOM_PATTERN = "vertx-dependencies-[\\d]+.*.pom";
+
     @Test
     void resolveAndRepackageShouldGenerateRepository() {
-
         mockPigContextAndMethods();
         mockIndySettingsFile();
 
@@ -80,18 +90,33 @@ public class ResolveOnlyRepositoryTest {
 
         RepositoryData repoData = repoManagerSpy.prepare();
 
-        assert repoData.getRepositoryPath().toString().equals("/tmp/resolveRepoTest/rh-sample-maven-repository.zip");
+        Assertions.assertThat(repoData.getRepositoryPath().toString())
+                .isEqualTo("/tmp/resolveRepoTest/rh-sample-maven-repository.zip");
 
-        Set<String> repoZipContents = repoZipContentList();
+        final Set<String> expectedFiles = repoZipContentList();
 
-        repoData.getFiles().forEach((file) -> {
-            String filePath = file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "");
-            if (!repoZipContents.contains(filePath)) {
-                System.out.println("File not included " + filePath);
-            }
-            assert repoZipContents.contains(filePath);
-        });
+        final Set<String> actualFiles = repoData.getFiles()
+                .stream()
+                .map(file -> file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "").replace('\\', '/'))
+                .collect(Collectors.toCollection(TreeSet::new));
 
+        final String ACTUAL_REPO_FILES = "target/resolve-and-repackage-repo-artifact-list-actual.txt";
+        final Path actualOutput = Paths.get(ACTUAL_REPO_FILES);
+        try {
+            Files.createDirectories(actualOutput.getParent());
+            Files.write(
+                    actualOutput,
+                    (actualFiles.stream().collect(Collectors.joining("\n")) + "\n").getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write to " + actualOutput, e);
+        }
+
+        Assertions.assertThat(actualFiles)
+                .withFailMessage(
+                        "You may want to compare src/test/resources/%s with %s",
+                        EXPECTED_ARTIFACT_LIST_TXT,
+                        ACTUAL_REPO_FILES)
+                .containsExactlyElementsOf(expectedFiles);
     }
 
     private void mockPigContextAndMethods() {
@@ -120,13 +145,15 @@ public class ResolveOnlyRepositoryTest {
         RepoGenerationData generationData = new RepoGenerationData();
         RepoGenerationData generationDataSpy = Mockito.spy(generationData);
         generationDataSpy.setStrategy(RepoGenerationStrategy.RESOLVE_ONLY);
+        generationDataSpy.setSourceBuild("test-build");
+        generationDataSpy.setSourceArtifact(BOM_PATTERN);
 
         return generationDataSpy;
     }
 
     private void mockParamsAndMethods(RepoGenerationData generationData) {
         Map<String, String> params = new HashMap<>();
-        params.put("extensionsListUrl", "http://gitlab.cee.com");
+        params.put("extensionsListUrl", EXTENSIONS_LIST_URL);
         doReturn(params).when(generationData).getParameters();
     }
 
@@ -142,6 +169,11 @@ public class ResolveOnlyRepositoryTest {
 
         PncBuild pncBuild = Mockito.mock(PncBuild.class);
         buildsSpy.put(generationData.getSourceBuild(), pncBuild);
+
+        ArtifactWrapper artifactWrapper = Mockito.spy(ArtifactWrapper.class);
+        GAV gav = new GAV("io.vertx", "vertx-dependencies", "4.1.0", "pom");
+        doReturn(gav).when(artifactWrapper).toGAV();
+        doReturn(artifactWrapper).when(pncBuild).findArtifactByFileName(BOM_PATTERN);
 
         return buildsSpy;
     }
@@ -176,7 +208,7 @@ public class ResolveOnlyRepositoryTest {
 
         List<Artifact> extensionsArtifactList = new ArrayList<>();
         extensionsArtifactList.add(vertxWeb);
-        doReturn(extensionsArtifactList).when(repoManager).parseExtensionsArtifactList("http://gitlab.cee.com");
+        doReturn(extensionsArtifactList).when(repoManager).parseExtensionsArtifactList(EXTENSIONS_LIST_URL);
         Map<Artifact, String> redhatVersionMap = new HashMap<>();
         redhatVersionMap.put(vertxWeb, "4.1.0");
         doReturn(redhatVersionMap).when(repoManager).collectRedhatVersions(extensionsArtifactList);
@@ -185,9 +217,8 @@ public class ResolveOnlyRepositoryTest {
     private Set<String> repoZipContentList() {
         ClassLoader classLoader = getClass().getClassLoader();
         File repoZipContentListFile = new File(
-                Objects.requireNonNull(classLoader.getResource("resolve-and-repackage-repo-artifact-list.txt"))
-                        .getFile());
-        Set<String> repoZipContents = new HashSet<>();
+                Objects.requireNonNull(classLoader.getResource(EXPECTED_ARTIFACT_LIST_TXT)).getFile());
+        Set<String> repoZipContents = new TreeSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(repoZipContentListFile))) {
             for (String line; (line = br.readLine()) != null;) {
