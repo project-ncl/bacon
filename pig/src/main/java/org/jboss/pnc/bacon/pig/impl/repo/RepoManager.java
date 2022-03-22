@@ -36,6 +36,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pig.impl.utils.GavSet;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
@@ -54,12 +55,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -411,13 +414,22 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     .build();
 
             Map<String, String> params = generationData.getParameters();
-            // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
-            String extensionsListUrl = params.get("extensionsListUrl");
-            List<Artifact> extensionRtArtifactList = parseExtensionsArtifactList(extensionsListUrl);
-
-            Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
+            final String extensionsListUrl = params.get("extensionsListUrl");
+            final Comparator<Artifact> artifactComparator = Comparator.comparing(Artifact::getGroupId)
+                    .thenComparing(Artifact::getArtifactId)
+                    .thenComparing(Artifact::getExtension)
+                    .thenComparing(Artifact::getClassifier)
+                    .thenComparing(Artifact::getVersion);
+            /* We use TreeSet for reproducible ordering */
+            final Set<Artifact> extensionRtArtifactList = new TreeSet<>(artifactComparator);
+            if (extensionsListUrl != null) {
+                // extensionsListUrl is optional
+                // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
+                extensionRtArtifactList.addAll(parseExtensionsArtifactList(extensionsListUrl));
+            }
 
             List<Dependency> bomConstraints = Collections.emptyList();
+            final Artifact bom;
             if (generationData.getSourceBuild() != null && !generationData.getSourceBuild().isEmpty()
                     && generationData.getSourceArtifact() != null && !generationData.getSourceArtifact().isEmpty()) {
 
@@ -430,7 +442,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 String bomConstraintArtifactId = bomGAV.getArtifactId();
                 String bomConstraintVersion = bomGAV.getVersion();
 
-                final Artifact bom = new DefaultArtifact(
+                bom = new DefaultArtifact(
                         bomConstraintGroupId,
                         bomConstraintArtifactId,
                         null,
@@ -440,7 +452,39 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 if (bomConstraints.isEmpty()) {
                     throw new IllegalStateException("Failed to resolve " + bom);
                 }
+            } else {
+                throw new IllegalStateException(
+                        "sourceBuild and sourceArtifact must be set; found sourceBuild: ["
+                                + generationData.getSourceBuild() + "] and sourceArtifact: ["
+                                + generationData.getSourceArtifact() + "]");
             }
+
+            /* Get the extensionsListUrl from the BOM based on resolveIncludes and resolveExcludes params */
+            final String rawIncludes = params.get("resolveIncludes");
+            if (rawIncludes != null) {
+                final GavSet resolveSet = GavSet.builder()
+                        .includes(rawIncludes)
+                        .excludes(params.get("resolveExcludes"))
+                        .build();
+
+                bomConstraints.stream()
+                        .map(Dependency::getArtifact)
+                        .filter(
+                                a -> resolveSet.contains(
+                                        a.getGroupId(),
+                                        a.getArtifactId(),
+                                        a.getExtension(),
+                                        a.getClassifier(),
+                                        a.getVersion()))
+                        .forEach(extensionRtArtifactList::add);
+            }
+
+            log.debug(
+                    "About to resolve artifacts \n" + extensionRtArtifactList.stream()
+                            .map(Artifact::toString)
+                            .collect(Collectors.joining("\n")));
+
+            Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
 
             for (Artifact extensionRtArtifact : extensionRtArtifactList) {
                 // this will resolve all the artifacts and their dependencies and as a consequence populate the local
@@ -496,7 +540,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
-    public Map<Artifact, String> collectRedhatVersions(List<Artifact> extensionArtifacts) {
+    public Map<Artifact, String> collectRedhatVersions(Collection<Artifact> extensionArtifacts) {
         Map<Artifact, String> result = new HashMap<>();
         builds.forEach((key, pncBuild) -> {
             if (pncBuild.getBuiltArtifacts() != null) {
@@ -533,12 +577,12 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
      * @throws Exception
      */
     public List<Artifact> parseExtensionsArtifactList(String urlString) {
+        ArrayList<Artifact> list = new ArrayList<>();
         try {
 
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            ArrayList<Artifact> list = new ArrayList<>();
             String buffer = "";
             while (buffer != null) {
                 buffer = br.readLine();
@@ -554,7 +598,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     throw new RuntimeException("Extension text file is not properly formatted");
                 }
 
-                Artifact extensionRtArtifact;
+                final Artifact extensionRtArtifact;
                 if (parts.length == 3) {
                     extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, "jar", parts[2]);
                 } else if (parts.length == 4) {
@@ -562,14 +606,14 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 } else {
                     extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
                 }
-                list.add(extensionRtArtifact);
+                ((Consumer<Artifact>) list::add).accept(extensionRtArtifact);
             }
-            return list;
         } catch (MalformedURLException mfe) {
             throw new RuntimeException("url is not proper " + urlString, mfe);
         } catch (IOException e) {
             throw new RuntimeException("Unable to do IO operation. Url: " + urlString, e);
         }
+        return list;
     }
 
     private static Predicate<GAV> predicate(Map<String, String> stage) {
