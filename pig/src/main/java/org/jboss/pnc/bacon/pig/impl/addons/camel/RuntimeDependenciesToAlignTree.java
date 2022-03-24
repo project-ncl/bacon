@@ -68,11 +68,10 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
         String filename = extrasPath + "DependenciesToAlignTree.txt";
         String buildFromSourceStatsFileName = extrasPath + "BuildFromSourceStats.txt";
         log.info("Running DependenciesToAlignTree - report is {}", filename);
-        PrintWriter file = null;
-        PrintWriter buildFromSourceStatsFile = null;
-        try {
-            file = new PrintWriter(filename, StandardCharsets.UTF_8.name());
-            buildFromSourceStatsFile = new PrintWriter(buildFromSourceStatsFileName, StandardCharsets.UTF_8.name());
+        try (PrintWriter file = new PrintWriter(filename, StandardCharsets.UTF_8.name());
+                PrintWriter buildFromSourceStatsFile = new PrintWriter(
+                        buildFromSourceStatsFileName,
+                        StandardCharsets.UTF_8.name())) {
             for (PncBuild build : builds.values()) {
                 // Make a unique list so we don't get multiples from
                 // sub-module's dependency tree list
@@ -178,18 +177,11 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 file.print("\n");
             }
 
+            file.flush();
+            buildFromSourceStatsFile.flush();
+
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Error while creating RuntimeDependenciesToAlignTree report", e);
-        } finally {
-            if (file != null) {
-                file.flush();
-                file.close();
-            }
-
-            if (buildFromSourceStatsFile != null) {
-                buildFromSourceStatsFile.flush();
-                buildFromSourceStatsFile.close();
-            }
         }
     }
 }
