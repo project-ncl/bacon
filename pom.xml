@@ -83,7 +83,7 @@
         <picocli.version>4.6.2</picocli.version>
         <pme.version>4.6</pme.version>
 
-        <pnc.version>2.2.2-SNAPSHOT</pnc.version>
+        <pnc.version>2.3.0</pnc.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.resolver.version>2.5.2.Final</quarkus.resolver.version>
@@ -139,7 +139,7 @@
             <dependency>
                 <groupId>org.jboss.da</groupId>
                 <artifactId>reports-model</artifactId>
-                <version>2.3.1-SNAPSHOT</version>
+                <version>2.3.1</version>
             </dependency>
 
             <!-- pnc client -->
