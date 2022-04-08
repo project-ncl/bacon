@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Tag;
 
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Optional;
 
 @Tag(TestType.REAL_SERVICE_ONLY)
 public abstract class PigFunctionalTest {
@@ -26,7 +25,7 @@ public abstract class PigFunctionalTest {
         Config.configure(CLIExecutor.CONFIG_LOCATION.toString(), Constant.CONFIG_FILE_NAME, "default");
     }
 
-    static String init(Path configDir, boolean clean, Optional<String> releaseStorageUrl, Path targetDirectory) {
+    static String init(Path configDir, boolean clean, String releaseStorageUrl, Path targetDirectory) {
         String suffix = prepareSuffix();
         // todo release storage url mocking
         if (configDir == null) {
