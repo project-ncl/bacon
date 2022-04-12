@@ -304,7 +304,7 @@ public class ProductMilestoneCli {
         }
     }
 
-    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables")
+    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables", hidden = true)
     public static class AnalyzeDeliverables implements Callable<Integer> {
 
         @Parameters(description = "Milestone id")
@@ -331,7 +331,10 @@ public class ProductMilestoneCli {
         }
     }
 
-    @Command(name = "list-delivered-artifacts", description = "List artifacts delivered in the specified milestone")
+    @Command(
+            name = "list-delivered-artifacts",
+            description = "List artifacts delivered in the specified milestone",
+            hidden = true)
     public static class ListDeliveredArtifacts extends AbstractListCommand<Artifact> {
 
         @Parameters(description = "Milestone id")
