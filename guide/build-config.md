@@ -27,6 +27,7 @@ version: 1.0.0
 milestone: DR1
 brewTagPrefix: fb-1.0-pnc # Optional
 group: Test Product 1.0-all
+releaseStorageUrl: http://testurl.com/releaseStorage
 
 # PNC builds part
 defaultBuildParameters: # Optional: shared between all builds
@@ -59,14 +60,19 @@ The product section describes the product that the builds belong. One example of
 
 ```
 product:
-  name: my-beautiful-product
-  abbreviation: mbp
+  name: test-product
+  abbreviation: tp
   stage: GA
   issueTrackerUrl: http://issues.jboss.org/browse/TEST
+version: 1.0.0
+milestone: DR1
+brewTagPrefix: fb-1.0-pnc # Optional
+group: Test Product 1.0-all
+releaseStorageUrl: http://testurl.com/registry
 ```
 The `version` specifies the product version we are building for, and the `milestone` represents the 'step' at which we are in the version. A typical milestone value is DR1, DR2, etc or ER1, ER2 etc. The combination of the version and milestone forms the full release name of the product: e.g 1.0.0.CR1.
 
-The `--releaseStorageUrl` is location of the release storage, typically on rcm-guest staging. This is url to be used in 'upload to candidates script' when running pig release command. Using '*' in your milestone you could also use this property for automatic incrementation of milestone value. For example 'ER*' as milestone will during pig run command check release storage and increment version to next available milestone version.
+The `releaseStorageUrl` is location of the release storage, typically on rcm-guest staging. This is the url to be used in the 'upload to candidates script' when running the `pig release` command. Using `*` in the milestone means that this property may also be used for automatic increment of milestone value. For example `ER*` as milestone, during `pig run`, the command will check the configured release storage and increment the version to next available milestone version. It is possible to configure it either within the `build-config.yaml` or via the CLI using the flag `--releaseStorageUrl=<...>`. Value in build-config.yaml takes precedence.
 
 The `brewTagPrefix` is an **optional** key that you can use to override the default generated brew tag prefix associated with a product version. The key is used to specify to which Brew tag all the builds should go when the milestone is closed.
 
