@@ -110,7 +110,9 @@ public class BuildCli {
         private Integer timeout;
         @Option(names = "--revision", description = "Build Config revision to build.")
         private Integer revision;
-        @Option(names = "--dry-run", description = "Perform a dry run")
+        @Option(
+                names = "--dry-run",
+                description = "Perform a dry run. Temporary build with, alignment preference of persistent artifacts.")
         private boolean dryRun = false;
 
         /**
