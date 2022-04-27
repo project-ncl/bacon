@@ -101,10 +101,13 @@ public class Pig {
         @Option(
                 names = { "-t", "--tempBuild" },
                 defaultValue = "false",
-                description = "If specified, PNC will perform temporary builds")
+                description = "If specified, PNC will perform temporary builds. Akin to dry-run but with temporary alignment preference.")
         boolean tempBuild;
 
-        @Option(names = "--dry-run", defaultValue = "false", description = "If specified, PNC will perform a dry run")
+        @Option(
+                names = "--dry-run",
+                defaultValue = "false",
+                description = "If specified, PNC will perform a dry run. Akin to tempBuild but with persistent alignment preference.")
         boolean dryRun;
 
         @Option(
