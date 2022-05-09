@@ -1184,5 +1184,16 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         }
     ]
- }
+  },
+  {
+    "groupId": "com.typesafe.scala-logging",
+    "artifactId": "scala-logging_2.12",
+    "version-regexp": "3\\.9\\.2\\.redhat-.*",
+    "licenses": [
+        {
+            "name": "Apache License 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ]
+  }
 ]
