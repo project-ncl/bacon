@@ -158,7 +158,10 @@ public class PncBuilder implements Closeable {
                 case SUCCESS:
                     return verifyAllBuildsInGroupBuildInFinalStateWithProperCount(groupBuildId);
                 default:
-                    throw new FatalException("Build group failed {}", UrlGenerator.generateGroupBuildUrl(groupBuildId));
+                    throw new FatalException(
+                            "Build group failed {} with status {}",
+                            UrlGenerator.generateGroupBuildUrl(groupBuildId),
+                            groupBuild.getStatus());
             }
         } catch (ClientException e) {
             log.warn(
