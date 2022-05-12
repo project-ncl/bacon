@@ -32,6 +32,7 @@ import org.jboss.pnc.bacon.pig.impl.out.PigReleaseOutput;
 import org.jboss.pnc.bacon.pig.impl.out.PigRunOutput;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
+import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
@@ -100,14 +101,13 @@ public class Pig {
         @Option(
                 names = { "-t", "--tempBuild" },
                 defaultValue = "false",
-                description = "If specified, PNC will perform temporary builds. Akin to dry-run but with temporary alignment preference.")
+                description = "If specified, PNC will perform temporary builds.")
         boolean tempBuild;
 
         @Option(
-                names = "--dry-run",
-                defaultValue = "false",
-                description = "If specified, PNC will perform a dry run. Akin to tempBuild but with persistent alignment preference.")
-        boolean dryRun;
+                names = { "--tempBuildAlignment" },
+                description = "Alignment preference for temporary build. Options: (default)TEMPORARY, PERSISTENT")
+        AlignmentType tempAlign = AlignmentType.TEMPORARY;
 
         @Option(
                 names = "--releaseStorageUrl",
@@ -259,7 +259,7 @@ public class Pig {
                     removeGeneratedM2Dups,
                     repoZipPath,
                     tempBuild,
-                    dryRun,
+                    tempAlign,
                     tempBuildTS,
                     RebuildMode.valueOf(rebuildMode),
                     skipBranchCheck,
@@ -338,7 +338,7 @@ public class Pig {
 
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             GroupBuildInfo groupBuildInfo = PigFacade
-                    .build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode), wait, dryRun);
+                    .build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode), wait, tempAlign);
             if (wait) {
                 PigContext context = PigContext.get();
                 context.setBuilds(groupBuildInfo.getBuilds());

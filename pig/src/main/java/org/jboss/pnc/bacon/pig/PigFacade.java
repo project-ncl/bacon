@@ -41,6 +41,7 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.script.ScriptGenerator;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
+import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
@@ -113,15 +114,21 @@ public final class PigFacade {
             boolean tempBuildTS,
             RebuildMode rebuildMode,
             boolean wait,
-            boolean dryRun) {
+            AlignmentType tempAlign) {
         beforeCommand(false);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
         }
 
-        if (tempBuild) {
-            log.info("Temporary build");
+        boolean dryRun = false;
+        if (tempBuild != false) {
+            AlignmentType alignmentPreference = context().getPigConfiguration().getTemporaryBuildAlignmentPreference();
+
+            if ((alignmentPreference != null && alignmentPreference.equals(AlignmentType.PERSISTENT))
+                    || (alignmentPreference == null) && tempAlign.equals(AlignmentType.PERSISTENT)) {
+                dryRun = true;
+            }
         }
 
         try (PncBuilder pncBuilder = new PncBuilder()) {
@@ -147,7 +154,7 @@ public final class PigFacade {
             boolean removeGeneratedM2Dups,
             String repoZipPath,
             boolean tempBuild,
-            boolean dryRun,
+            AlignmentType tempAlign,
             boolean tempBuildTS,
             RebuildMode rebuildMode,
             boolean skipBranchCheck,
@@ -172,7 +179,7 @@ public final class PigFacade {
             log.info("Skipping builds");
             groupBuildInfo = getBuilds(importResult, tempBuild);
         } else {
-            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode, true, dryRun);
+            groupBuildInfo = build(tempBuild, tempBuildTS, rebuildMode, true, tempAlign);
         }
 
         context.setBuilds(groupBuildInfo.getBuilds());
