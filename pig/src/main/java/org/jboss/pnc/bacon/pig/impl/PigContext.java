@@ -28,6 +28,7 @@ import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncEntitiesImporter;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.MilestoneNumberFinder;
 
@@ -42,7 +43,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
@@ -89,11 +89,7 @@ public class PigContext {
 
     private Map<String, Collection<String>> checksums;
 
-    public void initConfig(
-            Path configDir,
-            String targetPath,
-            Optional<String> releaseStorageUrl,
-            Map<String, String> overrides) {
+    public void initConfig(Path configDir, String targetPath, String releaseStorageUrl, Map<String, String> overrides) {
         File configFile = configDir.resolve("build-config.yaml").toFile();
         if (configFile.exists()) {
             try (FileInputStream configStream = new FileInputStream(configFile)) {
@@ -108,13 +104,49 @@ public class PigContext {
         }
     }
 
-    private void setPigConfiguration(
-            PigConfiguration pigConfiguration,
-            String targetPath,
-            Optional<String> releaseStorageUrl) {
+    private void setPigConfiguration(PigConfiguration pigConfiguration, String targetPath, String releaseStorageUrl) {
         this.pigConfiguration = pigConfiguration;
-        initFullVersion(pigConfiguration, releaseStorageUrl);
+        if (releaseStorageUrl != null) {
+            pigConfiguration.setReleaseStorageUrl(releaseStorageUrl);
+        }
 
+        this.targetPath = targetPath;
+    }
+
+    public void initFullVersion(boolean requireStorageUrl) {
+        if (fullVersion != null) {
+            return;
+        }
+        @SuppressWarnings("deprecation")
+        String milestone = pigConfiguration.getMilestone();
+        @SuppressWarnings("deprecation")
+        String version = pigConfiguration.getVersion();
+        if (milestone.contains("*") && requireStorageUrl) {
+            String url = pigConfiguration.getReleaseStorageUrl();
+            if (isEmpty(url)) {
+                throw new RuntimeException(
+                        "Auto-incremented milestone used but no releaseStorageUrl provided. "
+                                + "Please either set the releaseStorageUrl in the build config yaml, by the product version or set the url by adding `--releaseStorageUrl=...` parameter");
+            }
+            milestone = MilestoneNumberFinder.getFirstUnused(url, version, milestone);
+        } else if (milestone.contains("*")) {
+            log.info("Loading latest product milestone from PNC.");
+            try (PncEntitiesImporter importer = new PncEntitiesImporter()) {
+                String milestoneFullVersion = importer.getLatestProductMilestoneFullVersion();
+                if (!milestoneFullVersion.startsWith(version)) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Milestone version retrieved by PNC (%s) differs from in the version part from the version defined in build-config.yaml (%s).",
+                                    milestoneFullVersion,
+                                    version));
+                }
+                milestone = milestoneFullVersion.replace(version + '.', "");
+            }
+        }
+        setFullVersion(version + "." + milestone);
+    }
+
+    public void configureTargetDirectories() {
         if (deliverables == null) {
             String suffix = "";
             // for e.g, zip will become <releaseFile>-<fullVersion>-<suffix>-maven-repository.zip
@@ -132,32 +164,7 @@ public class PigContext {
             deliverables.setNvrListName(prefix + "-nvr-list.txt");
         }
 
-        configureTargetDirectories(pigConfiguration, targetPath);
-    }
-
-    private void initFullVersion(PigConfiguration pigConfiguration, Optional<String> releaseStorageUrl) {
-        if (fullVersion != null) {
-            return;
-        }
-        @SuppressWarnings("deprecation")
-        String milestone = pigConfiguration.getMilestone();
-        @SuppressWarnings("deprecation")
-        String version = pigConfiguration.getVersion();
-        if (milestone.contains("*")) {
-            String url = releaseStorageUrl.orElse(pigConfiguration.getReleaseStorageUrl());
-            if (isEmpty(url)) {
-                throw new RuntimeException(
-                        "Auto-incremented milestone used but no releaseStorageUrl provided. "
-                                + "Please either set the releaseStorageUrl in the build config yaml, by the product version or set the url by adding `--releaseStorageUrl=...` parameter");
-            }
-            milestone = MilestoneNumberFinder.getFirstUnused(url, version, milestone);
-        }
-        setFullVersion(version + "." + milestone);
-    }
-
-    private void configureTargetDirectories(PigConfiguration pigConfiguration, String targetPath) {
-        String productPrefix = pigConfiguration.getProduct().prefix();
-        this.targetPath = targetPath;
+        String productPrefix = this.pigConfiguration.getProduct().prefix();
         releaseDirName = productPrefix + "-" + fullVersion;
         releasePath = targetPath + File.separator + releaseDirName + File.separator;
 
@@ -197,7 +204,7 @@ public class PigContext {
             boolean clean,
             Path configDir,
             String targetPath,
-            Optional<String> releaseStorageUrl,
+            String releaseStorageUrl,
             Map<String, String> overrides) {
         instance = readContext(clean, configDir);
         instance.initConfig(configDir, targetPath, releaseStorageUrl, overrides);

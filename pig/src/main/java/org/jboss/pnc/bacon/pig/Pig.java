@@ -47,7 +47,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 
@@ -113,7 +112,7 @@ public class Pig {
         @Option(
                 names = "--releaseStorageUrl",
                 description = "Location of the release storage, typically on rcm-guest staging. Required for auto-incremented milestones, e.g. DR*")
-        private String releaseStorageUrl;
+        protected String releaseStorageUrl;
 
         @Option(
                 names = "--clean",
@@ -158,7 +157,6 @@ public class Pig {
 
             FileDownloadUtils.setAttempts(downloadAttempts);
 
-            Optional<String> releaseStorageUrl = Optional.ofNullable(this.releaseStorageUrl);
             PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl, overrides);
             PigContext.get().setTempBuild(tempBuild);
             ObjectHelper.print(getJsonOutput(), doExecute());

@@ -41,6 +41,7 @@ import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.Product;
 import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductMilestoneRef;
 import org.jboss.pnc.dto.ProductRef;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -121,6 +122,33 @@ public class PncEntitiesImporter implements Closeable {
         log.debug("Adding builds to group");
         addBuildConfigIdsToGroup();
         return new ImportResult(milestone, buildGroup, version, configs);
+    }
+
+    public String getLatestProductMilestoneFullVersion() {
+        try {
+            Product product = maybeSingle(
+                    productClient.getAll(empty(), findByNameQuery(this.pigConfiguration.getProduct().getName())))
+                            .orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Error while retrieving current/latest Milestone. Product mentioned in build-config.yaml doesn't exist."));
+            ProductVersion productVersion = maybeSingle(
+                    productClient.getProductVersions(
+                            product.getId(),
+                            empty(),
+                            query("version=='%s'", pigConfiguration.getMajorMinor()))).orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Error while retrieving current/latest Milestone. Product Version mentioned in build-config.yaml doesn't exist for the Product."));
+
+            ProductMilestoneRef currentProductMilestone = productVersion.getCurrentProductMilestone();
+            if (currentProductMilestone == null) {
+                throw new RuntimeException(
+                        "Error while retrieving current/latest Milestone. No current milestone set for Product Version.");
+            }
+            return currentProductMilestone.getVersion();
+        } catch (RemoteResourceException exception) {
+            throw new RuntimeException(
+                    "Error while retrieving current/latest Milestone. Reason: " + exception.getMessage());
+        }
     }
 
     private void checkForDeprecatedEnvironments(List<BuildConfigData> configs) {

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +13,9 @@ class PigContextTest {
     void testPrefixGeneration() {
         Path resourcesFolderPath = Paths.get("src", "test", "resources");
         PigContext pigContext = new PigContext();
-        pigContext.initConfig(resourcesFolderPath, "targetPath", Optional.empty(), null);
+        pigContext.initConfig(resourcesFolderPath, "targetPath", null, null);
+        pigContext.initFullVersion(false);
+        pigContext.configureTargetDirectories();
         assertTrue(
                 pigContext.getPrefix()
                         .startsWith(pigContext.getPigConfiguration().getOutputPrefixes().getReleaseFile()));

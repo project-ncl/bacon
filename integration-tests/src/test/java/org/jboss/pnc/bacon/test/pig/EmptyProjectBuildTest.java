@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -24,7 +23,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
 
     @Test
     void shouldConfigureEmptyProject(@TempDir Path targetDir) {
-        String suffix = init(Paths.get("src", "test", "resources", "empty"), true, Optional.empty(), targetDir);
+        String suffix = init(Paths.get("src", "test", "resources", "empty"), true, null, targetDir);
 
         ImportResult importResult = PigFacade.configure(true, false);
         assertThat(importResult.getBuildGroup().getId()).isNotNull();
@@ -36,7 +35,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
 
     @Test
     void shouldBuildEmpty(@TempDir Path targetDir) {
-        String suffix = init(Paths.get("src", "test", "resources", "empty"), true, Optional.empty(), targetDir);
+        String suffix = init(Paths.get("src", "test", "resources", "empty"), true, null, targetDir);
 
         PigFacade.configure(true, false);
         GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, false);
@@ -49,7 +48,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
 
     @Test
     void shouldReturnPreviousBuildsOnRebuild(@TempDir Path targetDir) {
-        String suffix = init(Paths.get("src", "test", "resources", "empty"), true, Optional.empty(), targetDir);
+        String suffix = init(Paths.get("src", "test", "resources", "empty"), true, null, targetDir);
 
         PigFacade.configure(true, false);
         GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, false);

@@ -85,6 +85,7 @@ public final class PigFacade {
     }
 
     public static ImportResult configure(boolean skipBranchCheck, boolean temporaryBuild) {
+        beforeCommand(true);
         try (PncEntitiesImporter pncImporter = new PncEntitiesImporter()) {
             return pncImporter.performImport(skipBranchCheck, temporaryBuild);
         }
@@ -97,6 +98,7 @@ public final class PigFacade {
     }
 
     public static String cancel() {
+        beforeCommand(false);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -112,6 +114,7 @@ public final class PigFacade {
             RebuildMode rebuildMode,
             boolean wait,
             boolean dryRun) {
+        beforeCommand(false);
         ImportResult importResult = context().getPncImportResult();
         if (importResult == null) {
             importResult = readPncEntities();
@@ -247,7 +250,7 @@ public final class PigFacade {
     }
 
     public static PigReleaseOutput release() {
-
+        beforeCommand(false);
         abortIfBuildDataAbsentFromContext();
         pushToBrew(false);
 
@@ -321,6 +324,7 @@ public final class PigFacade {
     }
 
     public static void generateDocuments() {
+        beforeCommand(false);
         abortIfContextDataAbsent();
         DocumentGenerator docGenerator = new DocumentGenerator(
                 context().getPigConfiguration(),
@@ -331,6 +335,7 @@ public final class PigFacade {
     }
 
     public static void prepareSharedContentAnalysis() {
+        beforeCommand(false);
         abortIfContextDataAbsent();
         try {
             DocumentGenerator docGenerator = new DocumentGenerator(
@@ -345,6 +350,7 @@ public final class PigFacade {
     }
 
     public static void generateSources() {
+        beforeCommand(false);
         abortIfContextDataAbsent();
         PigContext context = context();
         context.getDeliverables().setSourceZipName(context.getPrefix() + "-src.zip");
@@ -411,6 +417,7 @@ public final class PigFacade {
     }
 
     public static void triggerAddOns() {
+        beforeCommand(false);
         abortIfBuildDataAbsentFromContext();
         AddOnFactory
                 .listAddOns(
@@ -429,6 +436,7 @@ public final class PigFacade {
             Path configurationDirectory,
             boolean strictLicenseCheck,
             boolean strictSourceDownload) {
+        beforeCommand(false);
         abortIfBuildDataAbsentFromContext();
         PigContext context = context();
         try (RepoManager repoManager = new RepoManager(
@@ -454,6 +462,11 @@ public final class PigFacade {
         }
     }
 
+    private static void beforeCommand(boolean requireStorageUrl) {
+        context().initFullVersion(requireStorageUrl);
+        context().configureTargetDirectories();
+    }
+
     /**
      * From the group configuration defined in the import result, get the latest successful builds in it Used only in
      * with --skipBuilds
@@ -471,6 +484,7 @@ public final class PigFacade {
     }
 
     public static void generateLicenses(boolean strict) {
+        beforeCommand(false);
         abortIfContextDataAbsent();
         PigContext context = context();
         context.getDeliverables().setLicenseZipName(context.getPrefix() + "-license.zip");
@@ -483,6 +497,7 @@ public final class PigFacade {
     }
 
     public static void generateJavadoc() {
+        beforeCommand(false);
         abortIfContextDataAbsent();
         PigContext context = context();
         context.getDeliverables().setJavadocZipName(context.getPrefix() + "-javadoc.zip");
