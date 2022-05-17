@@ -99,7 +99,22 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 }
 
                 // Get a distinct list of deps
-                List<String> distinctDeps = runtimeDeps.stream().distinct().collect(Collectors.toList());
+                List<String> distinctDeps = runtimeDeps.stream().distinct().sorted().collect(Collectors.toList());
+
+
+                // If printProjectLogs: true, then print out the unique dependencies for the project
+                if ((getAddOnConfiguration() != null)
+                        && (Boolean.TRUE.equals(getAddOnConfiguration().get("printProjectLogs")))) {
+
+                    PrintWriter buildFile = new PrintWriter(
+                            new String(extrasPath + build.getName() + "-projectDependencies.txt"),
+                            StandardCharsets.UTF_8.name());
+                    for (String dep : distinctDeps) {
+                        buildFile.println(dep);
+                    }
+                    buildFile.flush();
+                    buildFile.close();
+                }
 
                 // Get the productized dependency count
                 int productizedCount = 0;
@@ -115,7 +130,6 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                             compileProductizedCount++;
                             productizedCount++;
                         }
-
                     }
                 }
 
