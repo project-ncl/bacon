@@ -155,6 +155,7 @@ public final class PigFacade {
             boolean strictDownloadSource,
             Path configurationDirectory) {
 
+        beforeCommand(false);
         PigContext context = context();
 
         ImportResult importResult;
