@@ -134,6 +134,17 @@ addons:
 
 ```
 
+The `runtimeDependenciesToAlignTree` has optional logging for sorted lists by project of the unique dependencies of that project.    To generate these:
+
+```
+addons:
+   runtimeDependenciesToAlignTree:
+       printProjectLogs: true
+```
+
+For each project in the build configuration, a log will be generated within the extras folder.
+
+
 ### Extra Deliverables Downloader
 
 The `extraDeliverablesDownloader` add-on downloads artifacts from one or more PiG build configurations and uploads it to your projects staging directory. Each build configuration accepts two yaml variables: `matching` and `suffix` which should be provided together as a list. 
