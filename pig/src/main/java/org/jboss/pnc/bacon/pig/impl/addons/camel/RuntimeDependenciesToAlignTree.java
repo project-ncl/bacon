@@ -101,7 +101,6 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 // Get a distinct list of deps
                 List<String> distinctDeps = runtimeDeps.stream().distinct().sorted().collect(Collectors.toList());
 
-
                 // If printProjectLogs: true, then print out the unique dependencies for the project
                 if ((getAddOnConfiguration() != null)
                         && (Boolean.TRUE.equals(getAddOnConfiguration().get("printProjectLogs")))) {
