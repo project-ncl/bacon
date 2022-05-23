@@ -50,6 +50,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -61,11 +62,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -405,6 +408,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             log.info("Generating maven repository");
             File sourceDir = createMavenGenerationDir();
 
+            final Map<String, Path> bannedDirs = parseBannedArtifactsParameter(sourceDir);
+            final StringBuilder bannedReport = new StringBuilder();
+
             boolean tempBuild = PigContext.get().isTempBuild();
             String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(tempBuild);
 
@@ -547,12 +553,47 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                         );
                     }
                 }
+                bannedDirs.entrySet()
+                        .stream()
+                        .filter(en -> Files.exists(en.getValue()) && hasProdVersionSubdir(en.getValue()))
+                        .peek(en -> bannedReport.append("\n " + en.getKey() + " pulled by " + extensionRtArtifact))
+                        .forEach(en -> {
+                            try {
+                                org.apache.commons.io.FileUtils.deleteDirectory(en.getValue().toFile());
+                            } catch (IOException e) {
+                                throw new RuntimeException("Could not delete " + en.getValue(), e);
+                            }
+                        });
+            }
+            if (bannedReport.length() > 0) {
+                throw new IllegalStateException("Banned artifacts found: " + bannedReport.toString());
             }
             return repackage(sourceDir);
         } catch (Exception bme) {
             bme.printStackTrace();
             throw new RuntimeException("Unable to resolve and package. " + bme.getLocalizedMessage());
         }
+    }
+
+    static boolean hasProdVersionSubdir(Path path) {
+        try (Stream<Path> files = Files.list(path)) {
+            return files.anyMatch(p -> p.getFileName().toString().contains("redhat-"));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not list " + path, e);
+        }
+    }
+
+    private Map<String, Path> parseBannedArtifactsParameter(File sourceDir) {
+        Map<String, String> params = generationData.getParameters();
+        final Map<String, Path> result = new TreeMap<>();
+        final String bannedArtifacts = params.get("bannedArtifacts");
+        if (bannedArtifacts != null) {
+            for (String c : bannedArtifacts.split(",")) {
+                String[] coords = c.split(":");
+                result.put(c, sourceDir.toPath().resolve(coords[0].replace('.', '/') + "/" + coords[1]));
+            }
+        }
+        return result;
     }
 
     public Map<Artifact, String> collectRedhatVersions(Collection<Artifact> extensionArtifacts) {
