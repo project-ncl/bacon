@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -76,6 +77,7 @@ import java.util.stream.Stream;
  */
 public class RepoManager extends DeliverableManager<RepoGenerationData, RepositoryData> implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(RepoManager.class);
+    private static final Pattern SPLIT_PATTERN = Pattern.compile("[, \t\n\r\f]+");
 
     private final BuildInfoCollector buildInfoCollector;
     @Getter
@@ -434,35 +436,15 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 extensionRtArtifactList.addAll(parseExtensionsArtifactList(extensionsListUrl));
             }
 
-            List<Dependency> bomConstraints = Collections.emptyList();
-            final Artifact bom;
-            if (generationData.getSourceBuild() != null && !generationData.getSourceBuild().isEmpty()
-                    && generationData.getSourceArtifact() != null && !generationData.getSourceArtifact().isEmpty()) {
-
-                PncBuild pncBuild = getBuild(generationData.getSourceBuild());
-
-                ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(generationData.getSourceArtifact());
-
-                GAV bomGAV = bomArtifact.toGAV();
-                String bomConstraintGroupId = bomGAV.getGroupId();
-                String bomConstraintArtifactId = bomGAV.getArtifactId();
-                String bomConstraintVersion = bomGAV.getVersion();
-
-                bom = new DefaultArtifact(
-                        bomConstraintGroupId,
-                        bomConstraintArtifactId,
-                        null,
-                        "pom",
-                        bomConstraintVersion);
-                bomConstraints = mvnResolver.resolveDescriptor(bom).getManagedDependencies();
-                if (bomConstraints.isEmpty()) {
-                    throw new IllegalStateException("Failed to resolve " + bom);
-                }
-            } else {
-                throw new IllegalStateException(
-                        "sourceBuild and sourceArtifact must be set; found sourceBuild: ["
-                                + generationData.getSourceBuild() + "] and sourceArtifact: ["
-                                + generationData.getSourceArtifact() + "]");
+            final List<GAV> bomGAVs = getBomGavFromConfig();
+            final Set<Dependency> bomConstraints = new LinkedHashSet<>();
+            Artifact bom = null;
+            for (GAV gav : bomGAVs) {
+                bom = new DefaultArtifact(gav.getGroupId(), gav.getArtifactId(), null, "pom", gav.getVersion());
+                bomConstraints.addAll(mvnResolver.resolveDescriptor(bom).getManagedDependencies());
+            }
+            if (bomConstraints.isEmpty()) {
+                throw new IllegalStateException("Failed to get constraints from BOMs " + bomGAVs);
             }
 
             /* Get the extensionsListUrl from the BOM based on resolveIncludes and resolveExcludes params */
@@ -546,7 +528,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                                         extensionRtArtifact.getExtension(),
                                                         null),
                                                 "compile")),
-                                bomConstraints, // version constraints from the BOM
+                                new ArrayList<>(bomConstraints), // version constraints from the BOM
                                 Collections.emptyList(), // extra maven repos, ignore this
                                 "test",
                                 "provided" // dependency scopes that should be ignored
@@ -583,12 +565,51 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
+    private List<GAV> getBomGavFromConfig() {
+
+        final List<GAV> result = new ArrayList<>();
+        String sourceArtifact = generationData.getSourceArtifact();
+        PncBuild pncBuild = null;
+        if (sourceArtifact != null && !sourceArtifact.isEmpty()) {
+            pncBuild = getBuild(sourceArtifact, generationData.getSourceBuild());
+            final ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(sourceArtifact);
+            result.add(bomArtifact.toGAV());
+        }
+
+        final String rawBomGavs = generationData.getParameters().get("bomGavs");
+        if (rawBomGavs != null && !rawBomGavs.isEmpty()) {
+            for (String rawGav : SPLIT_PATTERN.split(rawBomGavs)) {
+                String[] gav = rawGav.split(":");
+                if (gav.length == 3) {
+                    result.add(new GAV(gav[0], gav[1], gav[2], "pom"));
+                } else if (gav.length == 2) {
+                    if (pncBuild == null) {
+                        pncBuild = getBuild(sourceArtifact, generationData.getSourceBuild());
+                    }
+                    result.add(pncBuild.findArtifact(gav[0] + ":" + gav[1] + ":pom:.*").toGAV());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private PncBuild getBuild(String sourceArtifact, final String sourceBuild) {
+        if (sourceBuild == null || sourceBuild.isEmpty()) {
+            throw new IllegalStateException(
+                    "sourceBuild must be set if sourceArtifact is set for RESOLVE_ONLY strategy; found sourceBuild: ["
+                            + sourceBuild + "] and sourceArtifact: [" + sourceArtifact + "]");
+        }
+        final PncBuild pncBuild = getBuild(sourceBuild);
+        return pncBuild;
+    }
+
     private Map<String, Path> parseBannedArtifactsParameter(File sourceDir) {
         Map<String, String> params = generationData.getParameters();
         final Map<String, Path> result = new TreeMap<>();
         final String bannedArtifacts = params.get("bannedArtifacts");
         if (bannedArtifacts != null) {
-            for (String c : bannedArtifacts.split(",")) {
+            for (String c : SPLIT_PATTERN.split(bannedArtifacts)) {
                 String[] coords = c.split(":");
                 result.put(c, sourceDir.toPath().resolve(coords[0].replace('.', '/') + "/" + coords[1]));
             }
