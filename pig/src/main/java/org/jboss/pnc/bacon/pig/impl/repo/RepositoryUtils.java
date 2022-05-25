@@ -313,9 +313,10 @@ public class RepositoryUtils {
      */
     public static String convertMavenIdentifierToPath(String identifier) {
         String[] sections = identifier.split(":");
-        if (sections.length != 4) {
+        if (sections.length != 4 && sections.length != 5) {
             throw new IllegalArgumentException(
-                    identifier + " is wrongly formatted! It should be <group-id>:<artifact-id>:<packaging>:<version>");
+                    identifier
+                            + " is wrongly formatted! It should be <group-id>:<artifact-id>:<packaging>:<version>:<classifier>");
         }
         String fileSeparator = System.getProperty("file.separator");
 
@@ -323,8 +324,12 @@ public class RepositoryUtils {
         String artifactId = sections[1];
         String packaging = sections[2];
         String version = sections[3];
+        String classifier = "";
+        if (sections.length == 5) {
+            classifier = "-" + sections[4];
+        }
         return groupId + fileSeparator + artifactId + fileSeparator + version + fileSeparator + artifactId + "-"
-                + version + "." + packaging;
+                + version + classifier + "." + packaging;
     }
 
     private static class RedHatArtifactVersion {

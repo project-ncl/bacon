@@ -47,6 +47,12 @@ class RepositoryUtilsTest {
         String path = RepositoryUtils.convertMavenIdentifierToPath(identifier);
         assertEquals(Paths.get("test", "me", "here", "letmego", "1.2.3", "letmego-1.2.3.tar").toFile().getPath(), path);
 
+        identifier = "test.me.here:letmego:zip:1.2.3:docs";
+        path = RepositoryUtils.convertMavenIdentifierToPath(identifier);
+        assertEquals(
+                Paths.get("test", "me", "here", "letmego", "1.2.3", "letmego-1.2.3-docs.zip").toFile().getPath(),
+                path);
+
         String identifierWrong = "test.me.here:letmego:1.2.3";
         assertThrows(
                 IllegalArgumentException.class,
