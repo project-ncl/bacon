@@ -306,7 +306,7 @@ public class RepositoryUtils {
      * Method to transform a Maven identifier into a filesystem path
      *
      * Transform <group-id>:<artifact-id>:<packaging>:<version> to
-     * <group-id>/<artifact-id>/<version>/<artifact-id>-<version>.<packaging>
+     * <group-id>/<artifact-id>/<version>/<artifact-id>-<version>[-classifier].<packaging>
      *
      * @param identifier
      * @return
@@ -316,7 +316,7 @@ public class RepositoryUtils {
         if (sections.length != 4 && sections.length != 5) {
             throw new IllegalArgumentException(
                     identifier
-                            + " is wrongly formatted! It should be <group-id>:<artifact-id>:<packaging>:<version>:<classifier>");
+                            + " is wrongly formatted! It should be <group-id>:<artifact-id>:<packaging>:<version>:[classifier]");
         }
         String fileSeparator = System.getProperty("file.separator");
 
