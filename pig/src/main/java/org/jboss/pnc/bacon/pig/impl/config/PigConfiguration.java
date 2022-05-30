@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import lombok.Data;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Validate;
+import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.validation.ListBuildConfigCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,8 @@ public class PigConfiguration implements Validate {
     private String micro;
     private Map<String, Map<String, ?>> addons = new HashMap<>();
     private String releaseStorageUrl;
+
+    private AlignmentType temporaryBuildAlignmentPreference;
 
     /** Allow user to override brewTag auto-generated in PNC for a product version */
     private String brewTagPrefix;

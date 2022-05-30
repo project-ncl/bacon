@@ -5,6 +5,7 @@ import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildConfigData;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.enums.RebuildMode;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
         String suffix = init(Paths.get("src", "test", "resources", "empty"), true, null, targetDir);
 
         PigFacade.configure(true, false);
-        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, false);
+        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, null);
         assertThat(build.getBuilds()).isNotEmpty();
 
         assertThat(build.getBuilds().keySet()).contains(format(emptyNameBase1, suffix), format(emptyNameBase2, suffix));
@@ -51,7 +52,8 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
         String suffix = init(Paths.get("src", "test", "resources", "empty"), true, null, targetDir);
 
         PigFacade.configure(true, false);
-        GroupBuildInfo build = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, false);
+        GroupBuildInfo build = PigFacade
+                .build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, AlignmentType.TEMPORARY);
 
         Map<String, PncBuild> builds = build.getBuilds();
         assertThat(builds).isNotEmpty();
@@ -61,7 +63,8 @@ public class EmptyProjectBuildTest extends PigFunctionalTest {
         assertThat(builds.values().stream()).allMatch(b -> b.getBuildStatus() == BuildStatus.SUCCESS);
         List<String> successfulBuilds = buildIds(build);
 
-        GroupBuildInfo rebuild = PigFacade.build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, false);
+        GroupBuildInfo rebuild = PigFacade
+                .build(false, false, RebuildMode.EXPLICIT_DEPENDENCY_CHECK, true, AlignmentType.TEMPORARY);
         assertThat(buildIds(rebuild)).containsAll(successfulBuilds);
     }
 

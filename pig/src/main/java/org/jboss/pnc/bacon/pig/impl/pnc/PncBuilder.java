@@ -101,7 +101,12 @@ public class PncBuilder implements Closeable {
         if (dryRun) {
             buildParams.setTemporaryBuild(true);
             buildParams.setAlignmentPreference(AlignmentPreference.PREFER_PERSISTENT);
-        }
+            log.info("Build running as: temporary build with persistent dependency preference");
+        } else if (tempBuild) {
+            log.info("Build running as: temporary build");
+        } else
+            log.info("Build running as: persistent build");
+
         GroupBuildRequest request = GroupBuildRequest.builder().build();
 
         try {
