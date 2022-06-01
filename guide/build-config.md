@@ -239,6 +239,8 @@ Strategy options are:
 - MILESTONE
 - RESOLVE_ONLY
 
+##### `IGNORE`
+
 The `IGNORE` strategy won't produce any repository. This is particularly useful to temporarily disable generation as you can leave the rest of your configuration in place.
 
 The `GENERATE` strategy generates repository based on build. You need to specify `sourceArtifact` and `sourceBuild`. `sourceArtifact` is a regular expression pattern for the file name of a BOM that is used for repository generation, `sourceBuild` is name of build configuration with build for BOM.
@@ -247,10 +249,15 @@ The `GENERATE` strategy generates repository based on build. You need to specify
 - `additionalRepo` - used to specify additonal maven repositories, e.g. for Quarkus build from master where we do a fake release to repository.engineering.redhat.com; used only for temp builds
 - `ignored` - set of artifact ids (dependencies in the BOM) to ignore, i.e. not copy from BOM to the generated project's pom
 
+##### `DOWNLOAD`
 
 The `DOWNLOAD` strategy generates repository based on artifact. You need to specify `sourceArtifact` and `sourceBuild`. Specified artifact is downloaded and repackaged.
 
+##### `BUILD_CONFIGS`
+
 The `BUILD_CONFIGS` strategy generates repository based on specified build configurations. You need to specify `sourceBuilds`. Redhat artifacts are exctracted from last successful build of specified build configurations, parent poms, `additionalArtifacts`, missing sources, checksums are added and packaged into repository.
+
+##### `BUILD_GROUP`
 
 The `BUILD_GROUP` strategy generates repository for builds included in pnc build group. This produces a repository with build and runtime dependencies that are based on an amalgamated list of dependencies retrieved from the builds in a group build.
 
@@ -259,24 +266,63 @@ You need to specify `group`. Redhat artifacts are then sorted from builds includ
 `Optional parameters:`
 - `excludeSourceBuilds` - used to specify the list of build configurations that you don't want to be included in the generated repository.
 
+##### `MILESTONE`
+
 The `MILESTONE` - not implemented yet
+
+##### `RESOLVE_ONLY`
 
 The `RESOLVE_ONLY` strategy resolves a list of artifacts against a BOM. The resolution is transitive, i.e. direct (except optional) and transitive dependencies of the listed artifacts are included in the repo zip as well.
 
- **Necessary configuration**
+###### `RESOLVE_ONLY` configuration
 
-In order to RESOLVE_ONLY strategy to work, three things need be defined:
+For the `RESOLVE_ONLY` strategy to work, two main things need to be defined: 1. the BOM(s) to resolve against and 2.
+the set of artifacts to resolve. Both 1. and 2. can be defined in more than one way.
 
-1. `sourceBuild` - the PNC build to take the `sourceArtifact` from
-1. `sourceArtifact` - the BOM against which the artifacts should be resolved
-2. The list of artifacts to resolve against the BOM via one or more of the following options:
+###### 1. BOMs
 
-    - `parameters.extensionsListUrl` - a URL referring to a text file containing the list of artifacts in the format `groupId:artifactId:version:type:classifier` (type and classifier are optional)
-    - `parameters.resolveIncludes` and `parameters.resolveExcludes` - these are comma separated lists of artifact patterns to filter out from the given BOM (that is transformed to an effective pom before the evaluation). The patterns are of the form `groupIdPattern:[artifactIdPattern:[[typePatter:classifierIdPattern]:versionPattern]]`. The subpatterns can contain string literals combined with wildcard `*`.
+Option A: using `sourceBuild` and `sourceArtifact` options
+
+* `sourceBuild` - the PNC build to take the `sourceArtifact` from
+* `sourceArtifact` - a regular expression to match against files in `sourceBuild`.
+  It should select the BOM against which the artifacts should be resolved
+
+Option B: using `bomGavs` parameter
+
+* `bomGavs` - a comma or whitespace separated list of BOM artifact coordinates.
+  You can either pass `groupId:artifactId:version` in which case `sourceBuild` is not needed
+  or you can pass just `groupId:artifactId` in which case the BOM artifact will be looked up
+  in the build referenced by `sourceBuild`.
+
+Options A. and B. can be combined: if you use both `sourceArtifact` and `bomGavs` then a union of BOMs defined
+through both options will get effective.
+
+###### 2. Set of artifacts to resolve
+
+The list of artifacts to resolve against the BOMs can be defined via one or more of the following options:
+
+* `parameters.extensionsListUrl` - a URL referring to a text file containing the list of artifacts in the format `groupId:artifactId:version:type:classifier` (type and classifier are optional)
+* `parameters.resolveIncludes` and `parameters.resolveExcludes` - these are comma or whitespace separated lists of artifact patterns to filter out from the given BOM (that is transformed to an effective pom before the evaluation). The patterns are of the form `groupIdPattern:[artifactIdPattern:[[typePatter:classifierIdPattern]:versionPattern]]`. The subpatterns can contain string literals combined with wildcard `*`.
 
 It is possible to set both `parameters.extensionsListUrl` and `parameters.resolveIncludes`. In such a case the union of both sets will be used.
 
-`build-config.yaml` example:
+`build-config.yaml` example using `bomGavs`, `resolveIncludes` and `resolveExcludes`:
+
+ ```yaml
+   repositoryGeneration:
+     strategy: RESOLVE_ONLY
+     parameters:
+       bomGavs: >-
+         io.quarkus:quarkus-bom:1.2.3.Final-redhat-00001
+         org.apache.camel.quarkus:camel-quarkus-bom:2.3.4.redhat-00002
+       resolveIncludes: >-
+         *:*:*redhat-*" # get all artifacts from the BOM that have redhat- substring in their versions
+       resolveExcludes: >-
+         io.netty:*:*:linux-aarch_64:* # but ignore all netty artifacts with linux-aarch_64
+         io.netty:*:*:osx-*:*          # and osx-* classifiers
+ ```
+
+`build-config.yaml` example using `sourceBuild`, `sourceArtifact` and `extensionsListUrl`:
 
  ```yaml
    repositoryGeneration:
@@ -285,8 +331,6 @@ It is possible to set both `parameters.extensionsListUrl` and `parameters.resolv
      sourceArtifact: 'quarkus-product-bom-[\d]+.*.pom'
      parameters:
        extensionsListUrl: "http://link.to.txt.file"
-       resolveIncludes: "*:*:*redhat-*" # get all artifacts from the BOM that have redhat- substring in their versions
-       resolveExcludes: "io.netty:*:*:linux-aarch_64:*,io.netty:*:*:osx-*:*" # but ignore all netty artifacts with linux-aarch_64 and osx-* classifiers
  ```
 
 `extensionsListUrl` example:
@@ -297,6 +341,12 @@ It is possible to set both `parameters.extensionsListUrl` and `parameters.resolv
  io.quarkus:quarkus-smallrye-opentracing-deployment:1.11.6.Final
  ```
 
+###### Miscelaneous `RESOLVE_ONLY` parameters
+
+* `bannedArtifacts` - a comma or whitespace separated list of `groupId:artifactId` artifact coordinates.
+      Handy for troubleshooting which BOM entry pulls some specific artifact. If any of the banned
+      artifacts is spotted in the local Maven repo, then the triggering artifact is logged
+      and the generation fails.
 
 ##### Parameters available in all strategies
 
@@ -330,7 +380,8 @@ When using BUILD_CONFIGS and BUILD_GROUP strategies additional filter `filterArt
 
 Artifact information/wildcards should be specified in the format of `groupId:artifact:artifactId:type:classifier`.
 
-#### licenses generation
+#### Licenses generation
+
 Strategy options are:
 - IGNORE (default)
 - GENERATE
