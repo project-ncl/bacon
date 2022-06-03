@@ -78,7 +78,7 @@ The `releaseStorageUrl` is location of the release storage, typically on rcm-gue
 
 The `brewTagPrefix` is an **optional** key that you can use to override the default generated brew tag prefix associated with a product version. The key is used to specify to which Brew tag all the builds should go when the milestone is closed.
 
-The `temporaryBuildAlignmentPreference` is an option to specify alignment preference for temporary build to be run with: PERSISTENT or TEMPORARY(default). This property will override --tempBuildAlignment=PERSISTENT/TEMPORARY flag passed in as command line option.
+The `temporaryBuildAlignmentPreference` is an option to specify alignment preference for temporary build to be run with: PERSISTENT or TEMPORARY(default). This property will override `--tempBuildAlignment=PERSISTENT|TEMPORARY` flag passed in as command line option.
 
 Finally the `group` is name of the group config where all the builds defined are grouped together. It is highly recommended to make the group name unique to the version of product / separated projects being built. For example, if the `version` is 1.0.0, then the group name is: `my-beautiful-product-1.0.0`. To make this easier, consider using [YAML variables](#usage-of-yaml-variables). The group config is automatically linked to the product version.
 
