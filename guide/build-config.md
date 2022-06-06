@@ -28,6 +28,7 @@ milestone: DR1
 brewTagPrefix: fb-1.0-pnc # Optional
 group: Test Product 1.0-all
 releaseStorageUrl: http://testurl.com/releaseStorage
+temporaryBuildAlignmentPreference: PERSISTENT
 
 # PNC builds part
 defaultBuildParameters: # Optional: shared between all builds
@@ -69,12 +70,15 @@ milestone: DR1
 brewTagPrefix: fb-1.0-pnc # Optional
 group: Test Product 1.0-all
 releaseStorageUrl: http://testurl.com/registry
+temporaryBuildAlignmentPreference: TEMPORARY
 ```
 The `version` specifies the product version we are building for, and the `milestone` represents the 'step' at which we are in the version. A typical milestone value is DR1, DR2, etc or ER1, ER2 etc. The combination of the version and milestone forms the full release name of the product: e.g 1.0.0.CR1.
 
 The `releaseStorageUrl` is location of the release storage, typically on rcm-guest staging. This is the url to be used in the 'upload to candidates script' when running the `pig release` command. Using `*` in the milestone means that this property may also be used for automatic increment of milestone value. For example `ER*` as milestone, during `pig run`, the command will check the configured release storage and increment the version to next available milestone version. It is possible to configure it either within the `build-config.yaml` or via the CLI using the flag `--releaseStorageUrl=<...>` with the former taking precedence.
 
 The `brewTagPrefix` is an **optional** key that you can use to override the default generated brew tag prefix associated with a product version. The key is used to specify to which Brew tag all the builds should go when the milestone is closed.
+
+The `temporaryBuildAlignmentPreference` is an option to specify alignment preference for temporary build to be run with: PERSISTENT or TEMPORARY(default). This property will override `--tempBuildAlignment=PERSISTENT|TEMPORARY` flag passed in as command line option.
 
 Finally the `group` is name of the group config where all the builds defined are grouped together. It is highly recommended to make the group name unique to the version of product / separated projects being built. For example, if the `version` is 1.0.0, then the group name is: `my-beautiful-product-1.0.0`. To make this easier, consider using [YAML variables](#usage-of-yaml-variables). The group config is automatically linked to the product version.
 
