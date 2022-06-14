@@ -24,6 +24,7 @@ import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.VertxArtifactFinder;
 import org.jboss.pnc.bacon.pig.impl.addons.rhba.OfflineManifestGenerator;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
+import org.jboss.pnc.bacon.pig.impl.addons.scanservice.PostBuildScanService;
 import org.jboss.pnc.bacon.pig.impl.addons.spring.BomVerifierAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.vertx.NotYetAlignedFromDependencyTree;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -59,6 +60,7 @@ public class AddOnFactory {
         resultList.add(new QuarkusPostBuildAnalyzer(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new OfflineManifestGenerator(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new VertxArtifactFinder(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new PostBuildScanService(pigConfiguration, builds, releasePath, extrasPath));
         return resultList;
     }
 
