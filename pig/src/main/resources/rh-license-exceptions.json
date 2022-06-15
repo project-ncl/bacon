@@ -1166,7 +1166,7 @@
   {
     "groupId": "com.github.luben",
     "artifactId": "zstd-jni",
-    "version": "1.4.9.5-redhat-00003",
+    "version": "1.5.0.2-redhat-00003",
     "licenses": [
       {
         "name": "BSD 2-clause \"Simplified\" License",
@@ -1225,5 +1225,38 @@
           "url": "http://www.gnu.org/licenses/gpl.txt"
         }
       ]
-    }
+  },
+  {
+      "groupId": "org.rocksdb",
+      "artifactId": "rocksdbjni",
+      "version": "6.22.1.redhat-00002",
+      "licenses": [
+          {
+              "name": "Apache License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "org.elasticsearch.client",
+      "artifactId": "elasticsearch-rest-client-sniffer",
+      "version": "7.16.3.redhat-00002",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "org.elasticsearch.client",
+      "artifactId": "elasticsearch-rest-client",
+      "version": "7.16.3.redhat-00002",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  }
 ]
