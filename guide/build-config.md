@@ -328,6 +328,7 @@ It is possible to set both `parameters.extensionsListUrl` and `parameters.resolv
 
 `build-config.yaml` example using `sourceBuild`, `sourceArtifact` and `extensionsListUrl`:
 
+{% raw %}
  ```yaml
    repositoryGeneration:
      strategy: RESOLVE_ONLY
@@ -336,6 +337,7 @@ It is possible to set both `parameters.extensionsListUrl` and `parameters.resolv
      parameters:
        extensionsListUrl: "http://link.to.txt.file"
  ```
+{% endraw %}
 
 `extensionsListUrl` example:
 
@@ -437,6 +439,7 @@ All `GENERATE*` strategies require that the repository generation is **not** ign
 
 ## Usage of YAML variables
 You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:
+{% raw %}
 ```yaml
 #!variable=value
 #!variable_next={{variable}} value2
@@ -447,6 +450,7 @@ milestone: {{milestone}}
 ...
 ```
 From the above, we can also define the variable `variable_next` using another variable. To use the variable in the file, put in your yaml: `{{variable}}`.
+{% endraw %}
 
 You can also define or override the value of the variable in the YAML by using the `bacon pig` option '-e' or '--env'.
 
