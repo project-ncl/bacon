@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -437,6 +438,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
                 extensionRtArtifactList.addAll(parseExtensionsArtifactList(extensionsListUrl));
             }
+            addResolveArtifacts(params.get("resolveArtifacts"), extensionRtArtifactList::add);
 
             final List<GAV> bomGAVs = getBomGavFromConfig();
             final Set<Dependency> bomConstraints = new LinkedHashSet<>();
@@ -556,6 +558,32 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         } catch (Exception bme) {
             bme.printStackTrace();
             throw new RuntimeException("Unable to resolve and package. " + bme.getLocalizedMessage());
+        }
+    }
+
+    static void addResolveArtifacts(String resolveArtifacts, Consumer<Artifact> artifactConsumer) {
+        if (resolveArtifacts != null) {
+            final StringTokenizer st = new StringTokenizer(resolveArtifacts, ", \t\n\r\f");
+            while (st.hasMoreTokens()) {
+                final Artifact extensionRtArtifact;
+                final String coords = st.nextToken();
+                final String[] parts = coords.split(":");
+                switch (parts.length) {
+                    case 3:
+                        extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, "jar", parts[2]);
+                        break;
+                    case 4:
+                        extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, parts[2], parts[3]);
+                        break;
+                    case 5:
+                        extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[3], parts[2], parts[4]);
+                        break;
+                    default:
+                        throw new IllegalStateException(
+                                "Unparseable artifact coordinates '" + coords + "' in resolveArtifacts parameter.");
+                }
+                artifactConsumer.accept(extensionRtArtifact);
+            }
         }
     }
 
@@ -685,7 +713,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 } else {
                     extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
                 }
-                ((Consumer<Artifact>) list::add).accept(extensionRtArtifact);
+                list.add(extensionRtArtifact);
             }
         } catch (MalformedURLException mfe) {
             throw new RuntimeException("url is not proper " + urlString, mfe);
