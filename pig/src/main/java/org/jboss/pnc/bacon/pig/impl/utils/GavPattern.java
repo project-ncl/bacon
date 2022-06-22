@@ -226,10 +226,10 @@ public class GavPattern implements Serializable {
      * for groupId, artifactId, classifier and version need to be delimited by colon {@value #DELIMITER}.
      * <p>
      * The general syntax of a {@link GavPattern} follows the pattern
-     * <code>groupIdPattern:[artifactIdPattern:[[classifierIdPattern]:versionPattern]]</code> Note that the classifier
-     * occurs on the third position and that it is optional giving precedence to version. Hence a {@link GavPattern}
-     * with three segments {@code org.my-group:my-artifact:1.2.3} is a short hand for
-     * {@code org.my-group:*:my-artifact:1.2.3} matching any classifier.
+     * <code>groupIdPattern:[artifactIdPattern:[[typePattern:classifierIdPattern]:versionPattern]]</code>. Note that
+     * type and classifier need to be specified both or none and that they may occur on the third and fourth position
+     * respectively. Hence a {@link GavPattern} with three segments {@code org.my-group:my-artifact:1.2.3} is a short
+     * hand for {@code org.my-group:*:*:my-artifact:1.2.3} matching any type and any classifier.
      * <p>
      * GAV pattern examples:
      * <p>
@@ -246,8 +246,16 @@ public class GavPattern implements Serializable {
      * {@code org.my-group:my-artifact:1.2.3} - will match just the version 1.2.3 of artifacts
      * {@code org.my-group:my-artifact}.
      * <p>
-     * {@code org.my-group:my-artifact:linux-x86_64:1.2.3} - will match just the artifacts having classifier
+     * {@code org.my-group:my-artifact:*:linux-x86_64:1.2.3} - will match artifacts of all types having classifier
      * linux-x86_64 and version 1.2.3 of {@code org.my-group:my-artifact}.
+     * <p>
+     * {@code org.my-group:my-artifact:*::1.2.3} - will match artifacts of all types having no classifier and version
+     * 1.2.3 of {@code org.my-group:my-artifact}.
+     * <p>
+     * {@code org.my-group:my-artifact:jar:1.2.3} - Illegal because both type and classifier have to be specified.
+     * <p>
+     * {@code org.my-group:my-artifact:jar::1.2.3} - will match the jar having no classifier and version 1.2.3 of
+     * {@code org.my-group:my-artifact}.
      *
      * @param wildcardPattern a string pattern to parse and create a new {@link GavPattern} from
      * @return a new {@link GavPattern}

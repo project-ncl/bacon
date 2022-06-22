@@ -55,7 +55,7 @@ public class GavPatternTest {
     }
 
     @Test
-    public void gacv() {
+    public void gatcv() {
         {
             final GavPattern p = GavPattern.of("org.my-group:my-artifact:*:*:1.2.3");
             Assertions.assertTrue(p.matches("org.my-group", "my-artifact", "jar", "foo", "1.2.3"));
@@ -69,6 +69,15 @@ public class GavPatternTest {
             Assertions.assertFalse(p.matches("org.my-group", "my-artifact", "jar", "", "1.2.3"));
             Assertions.assertFalse(p.matches("org.my-group", "my-artifact", "jar", null, "1.2.3"));
             Assertions.assertFalse(p.matches("org.my-group", "my-artifact", "jar", null, "1.2.4"));
+        }
+    }
+
+    @Test
+    public void gatv() {
+        try {
+            GavPattern.of("org.my-group:my-artifact:jar:1.2.3");
+            Assertions.fail("Expected IllegalStateException for 'org.my-group:my-artifact:jar:1.2.3'");
+        } catch (IllegalStateException expected) {
         }
     }
 
