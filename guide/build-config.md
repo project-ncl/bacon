@@ -305,12 +305,19 @@ through both options will get effective.
 
 The list of artifacts to resolve against the BOMs can be defined via one or more of the following options:
 
-* `parameters.extensionsListUrl` - a URL referring to a text file containing the list of artifacts in the format `groupId:artifactId:version:type:classifier` (type and classifier are optional)
 * `parameters.resolveIncludes` and `parameters.resolveExcludes` - these are comma or whitespace separated lists of artifact patterns to filter out from the given BOM (that is transformed to an effective pom before the evaluation). The patterns are of the form `groupIdPattern:[artifactIdPattern:[[typePatter:classifierIdPattern]:versionPattern]]`. The subpatterns can contain string literals combined with wildcard `*`.
+* `parameters.resolveArtifacts` - a comma or whitespace separated list of artifacts in the format `groupId:artifactId:[type:[classifier:]]version`. Note that type and classifier are optional. No type means `jar` and no classifier means empty classifier. Also note that the ordering of the segments is the same like in `resolveIncludes` and `resolveExcludes` but different than in `extensionsListUrl`.
+* `parameters.extensionsListUrl` - a URL referring to a text file containing the list of artifacts in the format `groupId:artifactId:version:type:classifier` (type and classifier are optional)
 
-It is possible to set both `parameters.extensionsListUrl` and `parameters.resolveIncludes`. In such a case the union of both sets will be used.
+It is possible to use all of the three above parameters simultaneously. In such a case the union of all sets will be used.
 
-`build-config.yaml` example using `bomGavs`, `resolveIncludes` and `resolveExcludes`:
+When to use which? 
+
+* The combination of `resolveIncludes` and `resolveExcludes` should cover the most of what you need because the pattern are flexible enough to cover many use cases. Keep in mind that the universe from which the patterns are selecting the artifacts is only defined by `bomGavs`. What is not managed in any of the BOMs, cannot be selected by any pattern.
+* `resolveArtifacts` can be used for adding artifacts that are not managed in any of the `bomGavs`. This is typically the case for Maven plugins and similar artifacts. 
+* `extensionsListUrl` is much like `resolveArtifacts`, but it is an external file. It may come in handy if you generate it by some external tool.
+
+`build-config.yaml` example using `bomGavs`, `resolveIncludes`/`resolveExcludes` and `resolveArtifacts`:
 
  ```yaml
    repositoryGeneration:
@@ -324,6 +331,8 @@ It is possible to set both `parameters.extensionsListUrl` and `parameters.resolv
        resolveExcludes: >-
          io.netty:*:*:linux-aarch_64:* # but ignore all netty artifacts with linux-aarch_64
          io.netty:*:*:osx-*:*          # and osx-* classifiers
+       resolveArtifacts: >-
+         io.quarkus:quarkus-maven-plugin:1.2.3.Final-redhat-00001 # this one is not managed in io.quarkus:quarkus-bom
  ```
 
 `build-config.yaml` example using `sourceBuild`, `sourceArtifact` and `extensionsListUrl`:
