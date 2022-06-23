@@ -205,9 +205,8 @@ public class RepositoryUtils {
      * @param excludedArtifacts
      */
     public static void removeExcludedArtifacts(File element, List<String> excludedArtifacts) {
-        log.debug("Removing excluded artifacts from the repository");
         List<String> excludedPaths = excludedArtifacts.stream()
-                .map(a -> convertMavenIdentifierToPath(a))
+                .map(a -> convertMavenIdentifierToPathRegex(a))
                 .collect(Collectors.toList());
         if (element.isDirectory()) {
             Stream.of(element.listFiles()).forEach(file -> removeExcludedArtifacts(file, excludedArtifacts));
@@ -215,6 +214,10 @@ public class RepositoryUtils {
             for (String excludedPath : excludedPaths) {
                 Pattern matchesRegex = Pattern.compile(excludedPath);
                 if (matchesRegex.matcher(element.getAbsolutePath()).find()) {
+                    log.debug(
+                            "Removing path {} from the repository since it matches regex: {}",
+                            element.getAbsolutePath(),
+                            excludedPath);
                     File parent = element.getParentFile();
                     element.delete();
                     recursivelyDeleteEmptyFolder(parent);
@@ -311,7 +314,7 @@ public class RepositoryUtils {
      * @param identifier
      * @return
      */
-    public static String convertMavenIdentifierToPath(String identifier) {
+    public static String convertMavenIdentifierToPathRegex(String identifier) {
         String[] sections = identifier.split(":");
         if (sections.length != 4 && sections.length != 5) {
             throw new IllegalArgumentException(
@@ -320,7 +323,14 @@ public class RepositoryUtils {
         }
         String fileSeparator = System.getProperty("file.separator");
 
-        String groupId = sections[0].replace(".", fileSeparator);
+        String groupId = "";
+        // if groupId is only a catch-all regex, let it be a catch-all regex
+        if (sections[0].equals(".*")) {
+            groupId = sections[0];
+        } else {
+            // break down the group id into several paths
+            groupId = sections[0].replace(".", fileSeparator);
+        }
         String artifactId = sections[1];
         String packaging = sections[2];
         String version = sections[3];
@@ -328,8 +338,9 @@ public class RepositoryUtils {
         if (sections.length == 5) {
             classifier = "-" + sections[4];
         }
+        // include the '$' at the end to make sure it matches the file extension, and nothing more!
         return groupId + fileSeparator + artifactId + fileSeparator + version + fileSeparator + artifactId + "-"
-                + version + classifier + "." + packaging;
+                + version + classifier + "\\." + packaging + "$";
     }
 
     private static class RedHatArtifactVersion {
