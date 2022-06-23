@@ -1063,7 +1063,7 @@
   {
     "groupId": "aopalliance",
     "artifactId": "aopalliance",
-    "version": "1.0.0.redhat-2",
+    "version-regexp": "1.0.0.redhat-.+",
     "licenses": [
       {
         "name": "Public Domain",
