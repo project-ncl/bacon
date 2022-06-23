@@ -62,7 +62,7 @@ public class DAReportsCli {
             ReportsApi reportsApi = DaHelper.createReportsApi();
             try {
                 Report result = reportsApi.scmGenerator(request);
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -96,7 +96,7 @@ public class DAReportsCli {
             ReportsApi reportsApi = DaHelper.createReportsApi();
             try {
                 AdvancedReport result = WLStripper.strip(reportsApi.advancedScmGenerator(request));
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -135,7 +135,7 @@ public class DAReportsCli {
             try {
                 org.jboss.da.reports.model.response.striped.AlignReport result = WLStripper
                         .strip(reportsApi.alignReport(request));
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -171,7 +171,7 @@ public class DAReportsCli {
             ReportsApi reportsApi = DaHelper.createReportsApi();
             try {
                 Set<org.jboss.da.reports.model.response.BuiltReport> result = reportsApi.builtReport(request);
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -213,7 +213,7 @@ public class DAReportsCli {
             ReportsApi reportsApi = DaHelper.createReportsApi();
             try {
                 List<NPMVersionsReport> result = reportsApi.lookupVersionsNpm(request);
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
