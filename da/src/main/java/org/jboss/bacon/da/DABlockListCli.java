@@ -47,7 +47,7 @@ public class DABlockListCli {
             ListingsApi listingsApi = DaHelper.createListingsApi();
             try {
                 Collection<RestArtifact> artifacts = listingsApi.getAllBlackArtifacts();
-                ObjectHelper.print(false, artifacts);
+                ObjectHelper.print(getJsonOutput(), artifacts);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

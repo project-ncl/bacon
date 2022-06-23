@@ -83,7 +83,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenLookupResult> result = lookupApi.lookupMaven(request);
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -125,7 +125,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenLatestResult> result = lookupApi.lookupMaven(request);
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -173,7 +173,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<NPMLookupResult> result = lookupApi.lookupNPM(request);
-                ObjectHelper.print(false, result);
+                ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
