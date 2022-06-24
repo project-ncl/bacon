@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,20 +43,35 @@ class RepositoryUtilsTest {
     }
 
     @Test
-    void testConvertMavenIdentifierToPath() {
+    void testConvertMavenIdentifierToPathRegex() {
         String identifier = "test.me.here:letmego:tar:1.2.3";
-        String path = RepositoryUtils.convertMavenIdentifierToPath(identifier);
-        assertEquals(Paths.get("test", "me", "here", "letmego", "1.2.3", "letmego-1.2.3.tar").toFile().getPath(), path);
+        String pathRegex = RepositoryUtils.convertMavenIdentifierToPathRegex(identifier);
+        assertTrue(
+                Pattern.matches(
+                        pathRegex,
+                        Paths.get("test", "me", "here", "letmego", "1.2.3", "letmego-1.2.3.tar").toFile().getPath()));
 
         identifier = "test.me.here:letmego:zip:1.2.3:docs";
-        path = RepositoryUtils.convertMavenIdentifierToPath(identifier);
-        assertEquals(
-                Paths.get("test", "me", "here", "letmego", "1.2.3", "letmego-1.2.3-docs.zip").toFile().getPath(),
-                path);
+        pathRegex = RepositoryUtils.convertMavenIdentifierToPathRegex(identifier);
+        assertTrue(
+                Pattern.matches(
+                        pathRegex,
+                        Paths.get("test", "me", "here", "letmego", "1.2.3", "letmego-1.2.3-docs.zip")
+                                .toFile()
+                                .getPath()));
 
         String identifierWrong = "test.me.here:letmego:1.2.3";
         assertThrows(
                 IllegalArgumentException.class,
-                () -> RepositoryUtils.convertMavenIdentifierToPath(identifierWrong));
+                () -> RepositoryUtils.convertMavenIdentifierToPathRegex(identifierWrong));
+
+        // Test for NCLSUP-679
+        String identifierPathShouldNotMatch = "org/kie/server/kie-server-wars/5.0.0.Final/kie-server-wars-5.0.0.Final.pom";
+        String identifierPathShouldMatch = "org/kie/server/kie-server/5.0.0.Final/kie-server-wars-5.0.0.Final.war";
+        pathRegex = RepositoryUtils.convertMavenIdentifierToPathRegex(".*:.*:war:.*");
+
+        System.out.println(pathRegex);
+        assertFalse(Pattern.matches(pathRegex, identifierPathShouldNotMatch));
+        assertTrue(Pattern.matches(pathRegex, identifierPathShouldMatch));
     }
 }
