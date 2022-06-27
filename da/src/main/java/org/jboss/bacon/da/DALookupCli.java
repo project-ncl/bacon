@@ -32,8 +32,11 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import picocli.CommandLine;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -105,16 +108,35 @@ public class DALookupCli {
         @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
         private String[] gavs;
 
+        @CommandLine.Option(names = "--filename", description = "filename to specify GAVs, one per line")
+        private String filename;
+
         @Override
         public Integer call() {
 
-            if (gavs == null) {
-                throw new FatalException("You didn't specify any GAVs!");
+            if (filename == null && gavs == null) {
+                throw new FatalException("You didn't specify any GAVs or file!");
             }
 
             Set<GAV> gavSet = new HashSet<>();
-            for (String gav : gavs) {
-                gavSet.add(DaHelper.toGAV(gav));
+            if (gavs != null) {
+                for (String gav : gavs) {
+                    gavSet.add(DaHelper.toGAV(gav));
+                }
+            }
+
+            if (filename != null) {
+                try (Scanner scanner = new Scanner(new File(filename))) {
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine().trim();
+                        // ignore line if it starts with '#', it's a comment
+                        if (!line.isEmpty() && !line.strip().startsWith("#")) {
+                            gavSet.add(DaHelper.toGAV(line));
+                        }
+                    }
+                } catch (FileNotFoundException e) {
+                    throw new FatalException("File " + filename + " does not exist!");
+                }
             }
 
             MavenLatestRequest request = MavenLatestRequest.builder()
