@@ -35,7 +35,8 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -72,7 +73,7 @@ public class DALookupCli {
                 throw new FatalException("You didn't specify any GAVs!");
             }
 
-            Set<GAV> gavSet = new HashSet<>();
+            LinkedHashSet<GAV> gavSet = new LinkedHashSet<>();
             for (String gav : gavs) {
                 gavSet.add(DaHelper.toGAV(gav));
             }
@@ -86,7 +87,8 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenLookupResult> result = lookupApi.lookupMaven(request);
-                ObjectHelper.print(getJsonOutput(), result);
+                List<MavenLookupResult> orderedResult = DaHelper.orderedMavenLookupResult(gavSet, result);
+                ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -118,7 +120,8 @@ public class DALookupCli {
                 throw new FatalException("You didn't specify any GAVs or file!");
             }
 
-            Set<GAV> gavSet = new HashSet<>();
+            // Use LinkedHashSet to maintain order of insertion
+            LinkedHashSet<GAV> gavSet = new LinkedHashSet<>();
             if (gavs != null) {
                 for (String gav : gavs) {
                     gavSet.add(DaHelper.toGAV(gav));
@@ -147,12 +150,14 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenLatestResult> result = lookupApi.lookupMaven(request);
-                ObjectHelper.print(getJsonOutput(), result);
+                List<MavenLatestResult> orderedResult = DaHelper.orderedMavenLatestResult(gavSet, result);
+                ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             return 0;
         }
+
     }
 
     @CommandLine.Command(name = "npm", description = "Finds best matching versions for given NPM artifact coordinates")
@@ -182,7 +187,7 @@ public class DALookupCli {
                 throw new FatalException("You didn't specify any npm versions!");
             }
 
-            Set<NPMPackage> pkgs = new HashSet<>();
+            LinkedHashSet<NPMPackage> pkgs = new LinkedHashSet<>();
             for (String npmVersion : npmVersions) {
                 pkgs.add(DaHelper.toNPMPackage(npmVersion));
             }
@@ -195,7 +200,8 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<NPMLookupResult> result = lookupApi.lookupNPM(request);
-                ObjectHelper.print(getJsonOutput(), result);
+                List<NPMLookupResult> orderedResult = DaHelper.orderedNPMLookupResult(pkgs, result);
+                ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

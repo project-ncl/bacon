@@ -21,6 +21,9 @@ import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
 import org.jboss.bacon.da.rest.endpoint.ReportsApi;
 import org.jboss.da.listings.model.rest.RestArtifact;
+import org.jboss.da.lookup.model.MavenLatestResult;
+import org.jboss.da.lookup.model.MavenLookupResult;
+import org.jboss.da.lookup.model.NPMLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
 import org.jboss.pnc.bacon.common.Utils;
@@ -38,6 +41,11 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MultivaluedMap;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Helper methods for DA stuff
@@ -168,6 +176,79 @@ public class DaHelper {
         }
 
         return new NPMPackage(pieces[0], pieces[1]);
+    }
+
+    /**
+     * Based on the order in the gavSet, order the 'result' the same way based on the GAV, and return as a list
+     *
+     * @param gavSet order of gav
+     * @param result set of result to order
+     *
+     * @return list of the ordered result
+     */
+    public static List<MavenLatestResult> orderedMavenLatestResult(
+            Iterable<GAV> gavSet,
+            Set<MavenLatestResult> result) {
+
+        Map<GAV, MavenLatestResult> gavToMavenLatestResult = result.stream()
+                .collect(Collectors.toMap(MavenLatestResult::getGav, x -> x));
+
+        List<MavenLatestResult> ordered = new ArrayList<>();
+
+        for (GAV gav : gavSet) {
+            ordered.add(gavToMavenLatestResult.get(gav));
+        }
+
+        return ordered;
+    }
+
+    /**
+     * Based on the order in the gavSet, order the 'result' the same way based on the GAV, and return as a list
+     *
+     * @param gavSet order of gav
+     * @param result set of result to order
+     *
+     * @return list of the ordered result
+     */
+    public static List<MavenLookupResult> orderedMavenLookupResult(
+            Iterable<GAV> gavSet,
+            Set<MavenLookupResult> result) {
+
+        Map<GAV, MavenLookupResult> gavToMavenLookupResult = result.stream()
+                .collect(Collectors.toMap(MavenLookupResult::getGav, x -> x));
+
+        List<MavenLookupResult> ordered = new ArrayList<>();
+
+        for (GAV gav : gavSet) {
+            ordered.add(gavToMavenLookupResult.get(gav));
+        }
+
+        return ordered;
+    }
+
+    /**
+     * Based on the order in the npmPackageSet, order the 'result' the same way based on the npm package, and return as
+     * a list
+     *
+     * @param npmPackageSet order of npm package
+     * @param result set of result to order
+     *
+     * @return list of the ordered result
+     */
+    public static List<NPMLookupResult> orderedNPMLookupResult(
+            Iterable<NPMPackage> npmPackageSet,
+            Set<NPMLookupResult> result) {
+
+        Map<NPMPackage, NPMLookupResult> gavToNPMLookupResult = result.stream()
+                .collect(Collectors.toMap(NPMLookupResult::getNpmPackage, x -> x));
+
+        List<NPMLookupResult> ordered = new ArrayList<>();
+
+        for (NPMPackage npmPackage : npmPackageSet) {
+            ordered.add(gavToNPMLookupResult.get(npmPackage));
+        }
+
+        return ordered;
     }
 
     private static class TokenAuthenticator implements ClientRequestFilter {
