@@ -93,6 +93,20 @@ The above will build a repository based on the PNC build group. For a more detai
 
 ## Add ons
 
+### Skipping some addons via the command line
+To skip addon(s) on the `bacon pig run` or `bacon pig addons` command, use the `--skipAddon=<addon>` option:
+
+```bash
+bacon pig run ... --skipAddon=a
+```
+
+To specify more than one addon to skip, repeat the `--skipAddon` option again:
+
+```bash
+bacon pig run ... --skipAddon=a --skipAddon=b
+```
+
+
 ### Offliner Manifest
 
 PiG is able to generate an offliner manifest in plain text compatible with the offliner tool. 
