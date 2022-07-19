@@ -49,7 +49,7 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "notYetAlignedFromDependencyTree";
     }
 

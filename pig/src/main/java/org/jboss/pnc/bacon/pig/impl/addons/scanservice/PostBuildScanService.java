@@ -58,7 +58,7 @@ public class PostBuildScanService extends AddOn implements Validate {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return ADDON_SCAN_SERVICE_MAP_KEY;
     }
 

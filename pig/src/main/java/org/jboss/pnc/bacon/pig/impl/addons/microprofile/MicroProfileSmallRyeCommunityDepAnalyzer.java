@@ -35,7 +35,7 @@ public class MicroProfileSmallRyeCommunityDepAnalyzer extends AddOn {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return NAME;
     }
 

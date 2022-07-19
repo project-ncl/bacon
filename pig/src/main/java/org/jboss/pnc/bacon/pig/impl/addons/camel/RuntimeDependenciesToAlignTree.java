@@ -52,7 +52,7 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "runtimeDependenciesToAlignTree";
     }
 
