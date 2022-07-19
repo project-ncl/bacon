@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
@@ -66,6 +67,7 @@ import javax.ws.rs.NotFoundException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -160,6 +162,7 @@ public final class PigFacade {
             boolean skipBranchCheck,
             boolean strictLicenseCheck,
             boolean strictDownloadSource,
+            String[] skippedAddons,
             Path configurationDirectory) {
 
         beforeCommand(false);
@@ -245,7 +248,7 @@ public final class PigFacade {
             prepareSharedContentAnalysis();
         }
 
-        triggerAddOns();
+        triggerAddOns(skippedAddons);
 
         if (repo != null) {
             generateDocuments();
@@ -424,7 +427,10 @@ public final class PigFacade {
         return result;
     }
 
-    public static void triggerAddOns() {
+    public static void triggerAddOns(String[] skippedAddons) {
+
+        List<String> skippedAddonsList = Arrays.asList(skippedAddons);
+
         beforeCommand(false);
         abortIfBuildDataAbsentFromContext();
         AddOnFactory
@@ -435,8 +441,50 @@ public final class PigFacade {
                         context().getExtrasPath(),
                         context().getDeliverables())
                 .stream()
+                .filter(addOn -> !skippedAddonsList.contains(addOn.getName()))
                 .filter(AddOn::shouldRun)
                 .forEach(AddOn::trigger);
+    }
+
+    /**
+     * List all the addon names present in Bacon
+     *
+     * @return list of addon names
+     */
+    private static boolean isSkippedAddonsInAddOnsList(String[] skippedAddons) {
+
+        boolean skippedAddonsValidated = true;
+
+        List<String> existingAddons = AddOnFactory
+                .listAddOns(
+                        context().getPigConfiguration(),
+                        context().getBuilds(),
+                        context().getReleasePath(),
+                        context().getExtrasPath(),
+                        context().getDeliverables())
+                .stream()
+                .map(AddOn::getName)
+                .collect(Collectors.toList());
+
+        for (String skippedAddon : skippedAddons) {
+            if (!existingAddons.contains(skippedAddon)) {
+                log.error("Addon '{}' doesn't exist", skippedAddon);
+                skippedAddonsValidated = false;
+            }
+        }
+
+        return skippedAddonsValidated;
+    }
+
+    /**
+     * Exit the application if the skipped addons listed are not present in Bacon
+     *
+     * @param skippedAddons
+     */
+    public static void exitIfSkippedAddonsInvalid(String[] skippedAddons) {
+        if (!PigFacade.isSkippedAddonsInAddOnsList(skippedAddons)) {
+            throw new FatalException("skipAddon option contains invalid addons");
+        }
     }
 
     public static RepositoryData generateRepo(

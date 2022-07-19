@@ -243,9 +243,21 @@ public class Pig {
                 description = "If set, any missing source jars will throw an error")
         private boolean strictDownloadSource;
 
+        /**
+         * addOns to skip. Specified in CLI by using the flag multiple times: --skipAddon=a --skipAddon=b
+         *
+         * If the flag is not specified, the defaultValue causes 'skippedAddons' to be an empty array
+         */
+        @Option(
+                names = "--skipAddon",
+                defaultValue = "",
+                description = "Specify which addon(s) to skip. Can be specified multiple times (e.g --skipAddon=a --skipAddon=b")
+        private String[] skippedAddons;
+
         @Override
         public PigRunOutput doExecute() {
 
+            PigFacade.exitIfSkippedAddonsInvalid(skippedAddons);
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             Path configurationDirectory = Paths.get(configDir);
 
@@ -265,6 +277,7 @@ public class Pig {
                     skipBranchCheck,
                     strictLicenseCheck,
                     strictDownloadSource,
+                    skippedAddons,
                     configurationDirectory);
 
             PigContext context = PigContext.get();
@@ -444,9 +457,21 @@ public class Pig {
     @Command(name = "addons", description = "Addons")
     public static class TriggerAddOns extends PigCommand<String> {
 
+        /**
+         * addOns to skip. Specified in CLI by using the flag multiple times: --skipAddon=a --skipAddon=b
+         *
+         * If the flag is not specified, the defaultValue causes 'skippedAddons' to be an empty array
+         */
+        @Option(
+                names = "--skipAddon",
+                defaultValue = "",
+                description = "Specify which addon(s) to skip. Can be specified multiple times (e.g --skipAddon=a --skipAddon=b")
+        private String[] skippedAddons;
+
         @Override
         public String doExecute() {
-            PigFacade.triggerAddOns();
+            PigFacade.exitIfSkippedAddonsInvalid(skippedAddons);
+            PigFacade.triggerAddOns(skippedAddons);
             return "Add-ons executed successfully";
         }
     }
