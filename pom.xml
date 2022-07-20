@@ -649,9 +649,6 @@
                 <version>2.22.8</version>
                 <configuration>
                     <java>
-                        <includes>
-                            <include>**/*.java</include>
-                        </includes>
                         <removeUnusedImports />
                         <eclipse>
                             <file>eclipse-codeStyle.xml</file>
