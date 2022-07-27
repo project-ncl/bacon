@@ -2,18 +2,22 @@ package org.jboss.bacon.da;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.da.rest.endpoint.ReportsApi;
+import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
 import org.jboss.da.reports.model.api.SCMLocator;
 import org.jboss.da.reports.model.request.AlignReportRequest;
 import org.jboss.da.reports.model.request.BuiltReportRequest;
+import org.jboss.da.reports.model.request.LookupGAVsRequest;
 import org.jboss.da.reports.model.request.SCMReportRequest;
 import org.jboss.da.reports.model.request.VersionsNPMRequest;
+import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.da.reports.model.response.NPMVersionsReport;
 import org.jboss.da.reports.model.response.Report;
 import org.jboss.da.reports.model.response.striped.AdvancedReport;
 import org.jboss.da.reports.model.response.striped.WLStripper;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -31,7 +35,8 @@ import java.util.concurrent.Callable;
                 DAReportsCli.SCMAdvancedReport.class,
                 DAReportsCli.AlignReport.class,
                 DAReportsCli.BuiltReport.class,
-                DAReportsCli.LookupVersionsNPMReport.class })
+                DAReportsCli.LookupVersionsNPMReport.class,
+                DAReportsCli.LookupGAVReport.class })
 @Slf4j
 public class DAReportsCli {
 
@@ -213,6 +218,37 @@ public class DAReportsCli {
             ReportsApi reportsApi = DaHelper.createReportsApi();
             try {
                 List<NPMVersionsReport> result = reportsApi.lookupVersionsNpm(request);
+                ObjectHelper.print(getJsonOutput(), result);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return 0;
+        }
+    }
+
+    @CommandLine.Command(name = "lookup-gav", description = "Get built artifacts for GAVs specified.")
+    public static class LookupGAVReport extends JSONCommandHandler implements Callable<Integer> {
+
+        @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
+        private String[] gavs;
+
+        @Override
+        public Integer call() {
+
+            if (gavs == null) {
+                throw new FatalException("You didn't specify any GAVs!");
+            }
+
+            List<GAV> gavList = new ArrayList<>();
+            for (String gav : gavs) {
+                gavList.add(DaHelper.toGAV(gav));
+            }
+
+            LookupGAVsRequest request = new LookupGAVsRequest(gavList);
+
+            ReportsApi reportsApi = DaHelper.createReportsApi();
+            try {
+                List<LookupReport> result = reportsApi.lookupGav(request);
                 ObjectHelper.print(getJsonOutput(), result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
