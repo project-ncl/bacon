@@ -26,7 +26,9 @@ import org.jboss.pnc.bacon.pig.impl.addons.rhba.OfflineManifestGenerator;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.scanservice.PostBuildScanService;
 import org.jboss.pnc.bacon.pig.impl.addons.spring.BomVerifierAddon;
+import org.jboss.pnc.bacon.pig.impl.addons.vertx.FindTransitiveDuplicateArtifactsInDepTree;
 import org.jboss.pnc.bacon.pig.impl.addons.vertx.NotYetAlignedFromDependencyTree;
+import org.jboss.pnc.bacon.pig.impl.addons.vertx.SaveBuildLogsLocally;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
@@ -61,6 +63,14 @@ public class AddOnFactory {
         resultList.add(new OfflineManifestGenerator(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new VertxArtifactFinder(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new PostBuildScanService(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new SaveBuildLogsLocally(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(
+                new FindTransitiveDuplicateArtifactsInDepTree(
+                        pigConfiguration,
+                        builds,
+                        releasePath,
+                        extrasPath,
+                        deliverables));
         return resultList;
     }
 
