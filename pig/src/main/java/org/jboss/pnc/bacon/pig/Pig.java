@@ -127,6 +127,12 @@ public class Pig {
         private int downloadAttempts;
 
         @Option(
+                names = "--skipJsonOutput",
+                defaultValue = "false",
+                description = "Stop all the build output JSON going to stdout")
+        private boolean skipJsonOutput;
+
+        @Option(
                 names = "--targetPath",
                 defaultValue = "target",
                 description = "The directory where the deliverables will be put")
@@ -159,7 +165,12 @@ public class Pig {
 
             PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl, overrides);
             PigContext.get().setTempBuild(tempBuild);
-            ObjectHelper.print(getJsonOutput(), doExecute());
+            if (skipJsonOutput) {
+                doExecute();
+            } else {
+                ObjectHelper.print(getJsonOutput(), doExecute());
+            }
+
             return 0;
         }
 
