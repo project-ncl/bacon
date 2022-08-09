@@ -467,7 +467,7 @@ public final class PigFacade {
                 .collect(Collectors.toList());
 
         for (String skippedAddon : skippedAddons) {
-            if (!existingAddons.contains(skippedAddon)) {
+            if (!skippedAddon.isBlank() && !existingAddons.contains(skippedAddon)) {
                 log.error("Addon '{}' doesn't exist", skippedAddon);
                 skippedAddonsValidated = false;
             }
