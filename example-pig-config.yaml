@@ -18,6 +18,8 @@
 product:
   name: ProductA # full product name
   abbreviation: test # official product name abbreviation - used to create the brew/koji tag name
+  productManagers: managers # Managers of product
+  productPagesCode: code # Code for product pages
   stage: Alpha1 # product phase, if we're targetting GA, should be GA, etc
   issueTrackerUrl: http://issues.jboss.org/browse/TEST
 version: {{version}}
