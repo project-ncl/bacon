@@ -610,6 +610,8 @@ public class PncEntitiesImporter implements Closeable {
         Product product = Product.builder()
                 .name(productConfig.getName())
                 .abbreviation(productConfig.getAbbreviation())
+                .productManagers(productConfig.getProductManagers())
+                .productPagesCode(productConfig.getProductPagesCode())
                 .build();
         try {
             return productClient.createNew(product);

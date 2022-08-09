@@ -29,6 +29,8 @@ import javax.validation.constraints.NotBlank;
 public class ProductConfig {
     private @NotBlank String name;
     private @NotBlank String abbreviation;
+    private String productPagesCode;
+    private String productManagers;
     private String stage;
     private String issueTrackerUrl;
 
