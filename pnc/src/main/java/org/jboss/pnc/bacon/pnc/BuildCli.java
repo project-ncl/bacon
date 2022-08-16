@@ -283,19 +283,11 @@ public class BuildCli {
          */
         @Override
         public Integer call() throws Exception {
-            try {
-                Optional<InputStream> buildLogs;
-                try (BuildClient client = CREATOR.newClient()) {
-                    buildLogs = client.getBuildLogs(buildId);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    buildLogs = Optional.empty();
-                }
-                // is there a stored record
+            try (BuildClient client = CREATOR.newClient()) {
+                Optional<InputStream> buildLogs = client.getBuildLogs(buildId);
+
                 if (buildLogs.isPresent()) {
-                    try (InputStream inputStream = buildLogs.get();
-                            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                            BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(buildLogs.get()))) {
                         reader.lines().forEach(log::info);
                     } catch (IOException e) {
                         throw new ClientException("Cannot read log stream.", e);
@@ -307,8 +299,8 @@ public class BuildCli {
                     BifrostClient logProcessor = new BifrostClient(bifrostUri);
                     logProcessor.writeLog(buildId, follow, log::info);
                 }
-            } catch (RemoteResourceException | IOException e) {
-                throw new ClientException("Cannot read remote resource.", e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             return 0;
         }
