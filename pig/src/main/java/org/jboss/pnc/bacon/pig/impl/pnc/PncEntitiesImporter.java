@@ -525,7 +525,7 @@ public class PncEntitiesImporter implements Closeable {
                     "Product version in the old config is different than the one in the new config for config {}",
                     name);
         }
-        return configMismatch || !newConfig.isUpgradableFrom(oldConfig);
+        return configMismatch;
     }
 
     private List<BuildConfiguration> getCurrentBuildConfigs() {
