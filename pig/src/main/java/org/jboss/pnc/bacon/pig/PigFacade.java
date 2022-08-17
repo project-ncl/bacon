@@ -248,13 +248,13 @@ public final class PigFacade {
             prepareSharedContentAnalysis();
         }
 
-        triggerAddOns(skippedAddons);
-
         if (repo != null) {
             generateDocuments();
         } else {
             log.info("Skipping Document Generation");
         }
+
+        triggerAddOns(skippedAddons);
 
         log.info("PiG run completed, the results are in: {}", Paths.get(context().getTargetPath()).toAbsolutePath());
         return groupBuildInfo;
