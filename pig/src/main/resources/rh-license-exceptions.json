@@ -1118,7 +1118,40 @@
   {
     "groupId": "org.eclipse.jgit",
     "artifactId": "org.eclipse.jgit",
-    "version-regexp": "5\\.0\\.2\\.201807311906-r-redhat-00001",
+    "version-regexp": "5\\..*",
+    "licenses": [
+      {
+        "name": "Eclipse Distribution License (New BSD License)",
+        "url": "https://www.eclipse.org/org/documents/edl-v10.html"
+      }
+    ]
+  },
+  {
+    "groupId": "org.eclipse.jgit",
+    "artifactId": "org.eclipse.jgit.junit.http",
+    "version-regexp": "5\\..*",
+    "licenses": [
+      {
+        "name": "Eclipse Distribution License (New BSD License)",
+        "url": "https://www.eclipse.org/org/documents/edl-v10.html"
+      }
+    ]
+  },
+  {
+    "groupId": "org.eclipse.jgit",
+    "artifactId": "org.eclipse.jgit.junit.ssh",
+    "version-regexp": "5\\..*",
+    "licenses": [
+      {
+        "name": "Eclipse Distribution License (New BSD License)",
+        "url": "https://www.eclipse.org/org/documents/edl-v10.html"
+      }
+    ]
+  },
+  {
+    "groupId": "org.eclipse.jgit",
+    "artifactId": "org.eclipse.jgit.ssh.apache",
+    "version-regexp": "5\\..*",
     "licenses": [
       {
         "name": "Eclipse Distribution License (New BSD License)",
@@ -1129,7 +1162,7 @@
   {
     "groupId": "org.eclipse.jgit",
     "artifactId": "org.eclipse.jgit-parent",
-    "version-regexp": "5\\.0\\.2\\.201807311906-r-redhat-00001",
+    "version-regexp": "5\\..*",
     "licenses": [
       {
         "name": "Eclipse Distribution License (New BSD License)",
