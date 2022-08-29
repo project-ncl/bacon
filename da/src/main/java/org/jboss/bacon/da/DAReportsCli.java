@@ -232,6 +232,14 @@ public class DAReportsCli {
         @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
         private String[] gavs;
 
+        @CommandLine.Option(names = "--brew-pull-active", description = "Check for versions also in Brew")
+        private boolean brewPullActive = false;
+
+        @CommandLine.Option(
+                names = "--mode",
+                description = "Available search modes: SERVICE_TEMPORARY, PERSISTENT, TEMPORARY, SERVICE, SERVICE_TEMPORARY_PREFER_PERSISTENT, TEMPORARY_PREFER_PERSISTENT")
+        private String mode = "PERSISTENT";
+
         @Override
         public Integer call() {
 
@@ -244,7 +252,14 @@ public class DAReportsCli {
                 gavList.add(DaHelper.toGAV(gav));
             }
 
-            LookupGAVsRequest request = new LookupGAVsRequest(gavList);
+            LookupGAVsRequest request = new LookupGAVsRequest(
+                    Collections.emptySet(),
+                    Collections.emptySet(),
+                    "",
+                    brewPullActive,
+                    mode,
+                    "",
+                    gavList);
 
             ReportsApi reportsApi = DaHelper.createReportsApi();
             try {
