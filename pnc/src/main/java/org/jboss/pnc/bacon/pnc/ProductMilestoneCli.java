@@ -323,7 +323,7 @@ public class ProductMilestoneCli {
         public Integer call() throws Exception {
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
-                        .sourcesLink(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
+                        .deliverablesUrls(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
                         .build();
                 client.analyzeDeliverables(id, deliverablesAnalysisRequest);
                 return 0;
