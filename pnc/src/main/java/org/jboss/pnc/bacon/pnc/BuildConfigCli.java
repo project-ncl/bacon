@@ -63,6 +63,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
                 BuildConfigCli.ListRevision.class,
                 BuildConfigCli.ListBuilds.class,
                 BuildConfigCli.Update.class,
+                BuildConfigCli.Clone.class,
                 BuildConfigCli.CreateRevision.class,
                 BuildConfigCli.AddDependency.class,
                 BuildConfigCli.RemoveDependency.class })
@@ -312,6 +313,51 @@ public class BuildConfigCli {
         protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
                 client.update(buildConfigId, updated);
+            }
+        }
+    }
+
+    @Command(
+            name = "clone",
+            description = "Clone a build configuration and optionally set a new name and scm revision",
+            footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build-config clone 5 --scmRevision newTag")
+    public static class Clone extends JSONCommandHandler implements Callable<Integer> {
+
+        @Parameters(description = "Build config ID to clone")
+        protected String buildConfigId;
+
+        @Option(names = "--buildConfigName", description = "Set a new name for the cloned build configuration")
+        private String buildConfigName;
+
+        @Option(names = "--scmRevision", description = "Set a new SCM Revision to the cloned build configuration")
+        private String scmRevision;
+
+        @Override
+        public Integer call() throws Exception {
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                BuildConfiguration buildConfiguration = client.clone(buildConfigId);
+
+                BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
+
+                boolean changed = false;
+                if (isNotEmpty(buildConfigName)) {
+                    updated.name(buildConfigName);
+                    changed = true;
+                }
+
+                if (isNotEmpty(scmRevision)) {
+                    updated.scmRevision(scmRevision);
+                    changed = true;
+                }
+
+                BuildConfiguration newBuildConfiguration = updated.build();
+
+                if (changed) {
+                    client.update(buildConfiguration.getId(), newBuildConfiguration);
+                }
+
+                ObjectHelper.print(getJsonOutput(), newBuildConfiguration);
+                return 0;
             }
         }
     }
