@@ -51,7 +51,9 @@ import java.util.concurrent.Callable;
 @Slf4j
 public class DALookupCli {
 
-    @CommandLine.Command(name = "maven", description = "Finds best matching versions for given Maven artifact GAVs")
+    @CommandLine.Command(
+            name = "maven",
+            description = "Finds best matching versions for given Maven artifact GAVs. In PNC it is used for alignment and ignores blacklisted artifacts.")
     public static class LookupMaven extends JSONCommandHandler implements Callable<Integer> {
 
         @CommandLine.Option(names = "--temporary", description = "Lookup temporary version")
@@ -98,7 +100,7 @@ public class DALookupCli {
 
     @CommandLine.Command(
             name = "maven-latest",
-            description = "Finds latest matching versions for given Maven artifact GAVs")
+            description = "Finds latest matching versions for given Maven artifact GAVs. In PNC it is used for version increment, by default looking for versions in Indy and Brew.")
     public static class LookupMavenLatest extends JSONCommandHandler implements Callable<Integer> {
 
         @CommandLine.Option(names = "--temporary", description = "Lookup temporary version")
