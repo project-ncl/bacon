@@ -33,6 +33,7 @@ import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -304,8 +305,8 @@ public class ProductMilestoneCli {
         }
     }
 
-    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables", hidden = true)
-    public static class AnalyzeDeliverables implements Callable<Integer> {
+    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables")
+    public static class AnalyzeDeliverables extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Milestone id")
         private String id;
@@ -325,16 +326,15 @@ public class ProductMilestoneCli {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
                         .deliverablesUrls(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
                         .build();
-                client.analyzeDeliverables(id, deliverablesAnalysisRequest);
+                DeliverableAnalyzerOperation deliverableAnalyzerOperation = client
+                        .analyzeDeliverables(id, deliverablesAnalysisRequest);
+                ObjectHelper.print(getJsonOutput(), deliverableAnalyzerOperation);
                 return 0;
             }
         }
     }
 
-    @Command(
-            name = "list-delivered-artifacts",
-            description = "List artifacts delivered in the specified milestone",
-            hidden = true)
+    @Command(name = "list-delivered-artifacts", description = "List artifacts delivered in the specified milestone")
     public static class ListDeliveredArtifacts extends AbstractListCommand<Artifact> {
 
         @Parameters(description = "Milestone id")
