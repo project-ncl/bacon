@@ -311,8 +311,11 @@ public class ProductMilestoneCli {
         @Parameters(description = "Milestone id")
         private String id;
 
-        @Option(names = "--source-link", required = true, description = "Source link to add, can add multiple links")
-        private List<URL> sourceLink;
+        @Option(
+                names = "--deliverables-link",
+                required = true,
+                description = "Link to deliverables to be analysed, can add multiple links")
+        private List<URL> deliverablesLink;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -324,7 +327,7 @@ public class ProductMilestoneCli {
         public Integer call() throws Exception {
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
-                        .deliverablesUrls(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
+                        .deliverablesUrls(deliverablesLink.stream().map(URL::toString).collect(Collectors.toList()))
                         .build();
                 DeliverableAnalyzerOperation deliverableAnalyzerOperation = client
                         .analyzeDeliverables(id, deliverablesAnalysisRequest);
