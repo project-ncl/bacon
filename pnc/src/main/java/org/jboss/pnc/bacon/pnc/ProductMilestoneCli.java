@@ -28,6 +28,7 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.OperationClient;
 import org.jboss.pnc.client.ProductMilestoneClient;
 import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteResourceException;
@@ -66,13 +67,16 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
                 ProductMilestoneCli.PerformedBuilds.class,
                 ProductMilestoneCli.MilestoneClose.class,
                 ProductMilestoneCli.AnalyzeDeliverables.class,
-                ProductMilestoneCli.ListDeliveredArtifacts.class })
+                ProductMilestoneCli.ListDeliveredArtifacts.class,
+                ProductMilestoneCli.GetDeliverableAnalysisOperation.class })
 public class ProductMilestoneCli {
 
     private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(
             ProductMilestoneClient::new);
     private static final ClientCreator<ProductVersionClient> VERSION_CREATOR = new ClientCreator<>(
             ProductVersionClient::new);
+
+    private static final ClientCreator<OperationClient> OPERATION_CREATOR = new ClientCreator<>(OperationClient::new);
 
     /**
      * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product
@@ -344,6 +348,18 @@ public class ProductMilestoneCli {
         public Collection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
             try (ProductMilestoneClient client = CREATOR.newClient()) {
                 return client.getDeliveredArtifacts(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
+            }
+        }
+    }
+
+    @Command(name = "get-deliverables-analysis", description = "Get a deliverables analysis operation status")
+    public static class GetDeliverableAnalysisOperation
+            extends AbstractGetSpecificCommand<DeliverableAnalyzerOperation> {
+
+        @Override
+        public DeliverableAnalyzerOperation getSpecific(String id) throws ClientException {
+            try (OperationClient client = OPERATION_CREATOR.newClient()) {
+                return client.getSpecificDeliverableAnalyzer(id);
             }
         }
     }
