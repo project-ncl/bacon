@@ -9,6 +9,7 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
@@ -17,6 +18,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -94,14 +96,13 @@ public class ArtifactCli {
             identifier = transformIdentifierIfGAV(identifier);
 
             try (ArtifactClient client = CREATOR.newClient()) {
-                ObjectHelper.print(
-                        getJsonOutput(),
-                        client.getAll(
-                                null,
-                                null,
-                                null,
-                                Optional.empty(),
-                                Optional.ofNullable("identifier==" + identifier)).iterator().next());
+                RemoteCollection<Artifact> result = client
+                        .getAll(null, null, null, Optional.empty(), Optional.ofNullable("identifier==" + identifier));
+                if (result.size() == 0) {
+                    ObjectHelper.print(getJsonOutput(), Collections.emptySet());
+                } else {
+                    ObjectHelper.print(getJsonOutput(), result.iterator().next());
+                }
                 return 0;
             }
         }
