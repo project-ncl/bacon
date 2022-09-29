@@ -118,12 +118,7 @@ public class PncBuilder implements Closeable {
 
     public String cancelRunningGroupBuild(String groupConfigurationId) {
         try {
-            Collection<GroupBuild> groupBuilds = groupConfigClient
-                    .getAllGroupBuilds(
-                            groupConfigurationId,
-                            of("=desc=startTime"),
-                            query("status==%s", BuildStatus.BUILDING))
-                    .getAll();
+            Collection<GroupBuild> groupBuilds = getRunningGroupBuilds(groupConfigurationId);
 
             if (groupBuilds.size() > 1) {
                 return ("Can't cancel, there are multiple GroupBuilds running for single GroupConfiguration name and we can't decide correct one to cancel from build-config.yaml information. Found:"
@@ -137,6 +132,20 @@ public class PncBuilder implements Closeable {
             return "Group build " + running.getId() + " canceled.";
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get group build info to cancel running build.", e);
+        }
+    }
+
+    public Collection<GroupBuild> getRunningGroupBuilds(String groupConfigurationId) {
+        try {
+            Collection<GroupBuild> groupBuilds = groupConfigClient
+                    .getAllGroupBuilds(
+                            groupConfigurationId,
+                            of("=desc=startTime"),
+                            query("status==%s", BuildStatus.BUILDING))
+                    .getAll();
+            return groupBuilds;
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get group build info.", e);
         }
     }
 
