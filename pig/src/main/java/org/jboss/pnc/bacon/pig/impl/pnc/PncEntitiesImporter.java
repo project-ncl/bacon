@@ -541,7 +541,7 @@ public class PncEntitiesImporter implements Closeable {
         return buildConfigSetId.orElseGet(() -> generateBuildGroup(version));
     }
 
-    private Optional<GroupConfiguration> getBuildGroup() {
+    public Optional<GroupConfiguration> getBuildGroup() {
         try {
             return toStream(
                     groupConfigClient.getAll(empty(), Optional.of("name=='" + pigConfiguration.getGroup() + "'")))

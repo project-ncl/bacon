@@ -45,6 +45,7 @@ import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.BuildClient;
@@ -67,6 +68,7 @@ import javax.ws.rs.NotFoundException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -167,6 +169,12 @@ public final class PigFacade {
 
         beforeCommand(false);
         PigContext context = context();
+
+        PncEntitiesImporter importer = new PncEntitiesImporter();
+
+        if (importer.getBuildGroup().isPresent()) {
+            waitForInProgressBuild(importer.getBuildGroup().get().getId());
+        }
 
         ImportResult importResult;
         if (skipPncUpdate) {
@@ -583,4 +591,21 @@ public final class PigFacade {
         }
     }
 
+    private static void waitForInProgressBuild(String groupId) {
+        log.info("Checking in progress builds.");
+        SleepUtils.waitFor(() -> recentBuildInProgress(groupId), 30, false);
+    }
+
+    private static boolean recentBuildInProgress(String groupId) {
+        PncBuilder builder = new PncBuilder();
+        Collection<GroupBuild> groupBuilds = builder.getRunningGroupBuilds(groupId);
+        for (GroupBuild gb : groupBuilds) {
+            Instant week = Instant.now().minusSeconds(604800); // limiting to a week because of old stuck groupbuilds
+            if (gb.getStartTime().isAfter(week)) {
+                log.warn("Waiting for running builds to finish.");
+                return false;
+            }
+        }
+        return true;
+    }
 }
