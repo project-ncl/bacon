@@ -15,6 +15,7 @@ import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,7 @@ public class SourcesGenerator {
     private static final String KOJI_TOP_URL = "http://download.eng.bos.redhat.com/brewroot";
 
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
+
     public static final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
 
     private final SourcesGenerationData sourcesGenerationData;
@@ -75,15 +77,47 @@ public class SourcesGenerator {
             builds = Maps.filterEntries(builds, entry -> entry.getKey().equals(sourceBuild.getName()));
         }
 
+        if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES
+                || sourcesGenerationData
+                        .getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES_EXTENDED) {
+            builds = addRedhatDependencyBuilds(builds);
+        }
+
         downloadSourcesFromBuilds(builds, workDir, contentsDir);
 
-        if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_EXTENDED) {
+        if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_EXTENDED || sourcesGenerationData
+                .getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES_EXTENDED) {
             addSourcesOfUnreleasedDependencies(repo, workDir, contentsDir);
         }
 
         File zipFile = new File(targetZipFileName);
 
         FileUtils.zip(zipFile, workDir, contentsDir);
+    }
+
+    private Map<String, PncBuild> addRedhatDependencyBuilds(Map<String, PncBuild> parentBuilds) {
+        Map<String, PncBuild> completeBuilds = parentBuilds;
+        try (BuildClient client = CREATOR.newClient()) {
+            for (PncBuild parentBuild : parentBuilds.values()) {
+                List<Artifact> redhatArtifacts = client.getDependencyArtifacts(parentBuild.getId())
+                        .getAll()
+                        .stream()
+                        .filter(artifact -> artifact.getIdentifier().matches(".*redhat-\\d{1,5}"))
+                        .collect(Collectors.toList());
+                for (Artifact a : redhatArtifacts) {
+                    try {
+                        String buildName = a.getBuild().getBuildConfigRevision().getName();
+                        PncBuild pncBuild = new PncBuild(a.getBuild());
+                        completeBuilds.put(buildName, pncBuild);
+                    } catch (NullPointerException e) {
+                        log.warn("Artifact " + a.getIdentifier() + " does not have build assigned! No sources added.");
+                    }
+                }
+            }
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException(e);
+        }
+        return completeBuilds;
     }
 
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
