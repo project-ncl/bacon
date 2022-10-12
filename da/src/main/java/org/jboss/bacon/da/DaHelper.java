@@ -101,22 +101,31 @@ public class DaHelper {
      *
      * @param temporary whether the artifact is a temporary one
      * @param managedService whether the artifact is targetting a managed service
+     * @param mode explicitly specify the mode to use
      *
      * @return appropriate mode
      */
-    public static String getMode(boolean temporary, boolean managedService) {
-        if (managedService) {
-            if (temporary) {
-                return "SERVICE_TEMPORARY";
+    public static String getMode(boolean temporary, boolean managedService, String mode) {
+        if (mode == null) {
+            if (managedService) {
+                if (temporary) {
+                    return "SERVICE_TEMPORARY";
+                } else {
+                    return "SERVICE";
+                }
             } else {
-                return "SERVICE";
+                if (temporary) {
+                    return "TEMPORARY";
+                } else {
+                    return "PERSISTENT";
+                }
             }
         } else {
-            if (temporary) {
-                return "TEMPORARY";
-            } else {
-                return "PERSISTENT";
+            if (temporary || managedService) {
+                throw new IllegalArgumentException(
+                        "Don't specify temporary or managed service when specifying mode explicitly.");
             }
+            return mode;
         }
     }
 
