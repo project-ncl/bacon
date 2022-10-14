@@ -435,6 +435,8 @@ Strategy options are:
 - GENERATE (default)
 - GENERATE_EXTENDED
 - GENERATE_SELECTED
+- GENERATE_REDHAT_DEPENDENCIES
+- GENERATE_REDHAT_DEPENDENCIES_EXTENDED
 
 The `IGNORE` strategy won't produce any sources zip.
 
@@ -443,6 +445,10 @@ The `GENERATE` strategy get sources from builds.
 The `GENERATE_EXTENDED` strategy get same result as `GENERATE` and add sources of unreleased dependencies.
 
 The `GENERATE_SELECTED` strategy get sources from selected `sourceBuild`.
+
+The `GENERATE_REDHAT_DEPENDENCIES` strategy get sources from builds and add sources of redhat dependencies used in these builds.
+
+The `GENERATE_REDHAT_DEPENDENCIES_EXTENDED` strategy get same result as `GENERATE_REDHAT_DEPENDENCIES` and add sources of unreleased dependencies.
 
 All `GENERATE*` strategies require that the repository generation is **not** ignored.
 
