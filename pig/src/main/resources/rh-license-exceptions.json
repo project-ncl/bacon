@@ -1199,7 +1199,7 @@
   {
     "groupId": "com.github.luben",
     "artifactId": "zstd-jni",
-    "version": "1.5.0.2-redhat-00003",
+    "version": "1\\.5\\..+",
     "licenses": [
       {
         "name": "BSD 2-clause \"Simplified\" License",
