@@ -112,7 +112,7 @@ public class PncEntitiesImporter implements Closeable {
 
         milestone = pncConfigurator.getOrGenerateMilestone(version, PigContext.get().getFullVersion());
         pncConfigurator.markMilestoneCurrent(version, milestone);
-        buildGroup = getOrGenerateBuildGroup();
+        buildGroup = getUpdateOrGenerateBuildGroup(version);
 
         configs = getAddOrUpdateBuildConfigs(skipBranchCheck, temporaryBuild);
         checkForDeprecatedEnvironments(configs);
@@ -536,8 +536,20 @@ public class PncEntitiesImporter implements Closeable {
         }
     }
 
-    private GroupConfiguration getOrGenerateBuildGroup() {
+    private GroupConfiguration getUpdateOrGenerateBuildGroup(ProductVersion version) {
         Optional<GroupConfiguration> buildConfigSetId = getBuildGroup();
+        if (buildConfigSetId.isPresent()) {
+            GroupConfiguration update = buildConfigSetId.get();
+            if (!update.getProductVersion().equals(version)) {
+                update = update.toBuilder().productVersion(version).build();
+                try {
+                    groupConfigClient.update(update.getId(), update);
+                    buildConfigSetId = Optional.of(update);
+                } catch (ClientException e) {
+                    throw new RuntimeException("Failed to update group config: " + pigConfiguration.getGroup());
+                }
+            }
+        }
         return buildConfigSetId.orElseGet(() -> generateBuildGroup(version));
     }
 
