@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -97,8 +98,9 @@ public class SourcesGenerator {
 
     private Map<String, PncBuild> addRedhatDependencyBuilds(Map<String, PncBuild> parentBuilds) {
         Map<String, PncBuild> completeBuilds = parentBuilds;
+        List<PncBuild> mapBuilds = parentBuilds.values().stream().collect(Collectors.toCollection(ArrayList::new));
         try (BuildClient client = CREATOR.newClient()) {
-            for (PncBuild parentBuild : parentBuilds.values()) {
+            for (PncBuild parentBuild : mapBuilds) {
                 List<Artifact> redhatArtifacts = client.getDependencyArtifacts(parentBuild.getId())
                         .getAll()
                         .stream()
