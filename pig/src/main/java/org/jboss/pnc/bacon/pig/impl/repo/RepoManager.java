@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import lombok.Getter;
 import org.eclipse.aether.artifact.Artifact;
@@ -381,6 +382,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     public RepositoryData generate() {
+        return generate(generationData);
+    }
+
+    private RepositoryData generate(RepoGenerationData generationData) {
         log.info("Generating maven repository");
         PncBuild build = getBuild(generationData.getSourceBuild());
         File bomDirectory = FileUtils.mkTempDir("repo-from-bom-generation");
@@ -411,153 +416,164 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     public RepositoryData resolveAndRepackage() {
         try {
             log.info("Generating maven repository");
-            File sourceDir = createMavenGenerationDir();
-
-            final Map<String, Path> bannedDirs = parseBannedArtifactsParameter(sourceDir);
-            final StringBuilder bannedReport = new StringBuilder();
-
-            boolean tempBuild = PigContext.get().isTempBuild();
-            String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(tempBuild);
-
+            final File sourceDir = createMavenGenerationDir();
             final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
-                    .setUserSettings(new File(settingsXmlPath))
+                    .setUserSettings(getIndyMavenSettings())
                     .setLocalRepository(sourceDir.getAbsolutePath())
                     .build();
-
-            Map<String, String> params = generationData.getParameters();
-            final String extensionsListUrl = params.get("extensionsListUrl");
             final Comparator<Artifact> artifactComparator = Comparator.comparing(Artifact::getGroupId)
                     .thenComparing(Artifact::getArtifactId)
                     .thenComparing(Artifact::getExtension)
                     .thenComparing(Artifact::getClassifier)
                     .thenComparing(Artifact::getVersion);
-            /* We use TreeSet for reproducible ordering */
-            final Set<Artifact> extensionRtArtifactList = new TreeSet<>(artifactComparator);
-            if (extensionsListUrl != null) {
-                // extensionsListUrl is optional
-                // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
-                extensionRtArtifactList.addAll(parseExtensionsArtifactList(extensionsListUrl));
-            }
-            addResolveArtifacts(params.get("resolveArtifacts"), extensionRtArtifactList::add);
-
-            final List<GAV> bomGAVs = getBomGavFromConfig();
-            final Set<Dependency> bomConstraints = new LinkedHashSet<>();
-            Artifact bom = null;
-            for (GAV gav : bomGAVs) {
-                bom = new DefaultArtifact(gav.getGroupId(), gav.getArtifactId(), null, "pom", gav.getVersion());
-                bomConstraints.addAll(mvnResolver.resolveDescriptor(bom).getManagedDependencies());
-            }
-            if (bomConstraints.isEmpty()) {
-                throw new IllegalStateException("Failed to get constraints from BOMs " + bomGAVs);
-            }
-
-            /* Get the extensionsListUrl from the BOM based on resolveIncludes and resolveExcludes params */
-            final String rawIncludes = params.get("resolveIncludes");
-            if (rawIncludes != null) {
-                final GavSet resolveSet = GavSet.builder()
-                        .includes(rawIncludes)
-                        .excludes(params.get("resolveExcludes"))
-                        .build();
-
-                bomConstraints.stream()
-                        .map(Dependency::getArtifact)
-                        .filter(
-                                a -> resolveSet.contains(
-                                        a.getGroupId(),
-                                        a.getArtifactId(),
-                                        a.getExtension(),
-                                        a.getClassifier(),
-                                        a.getVersion()))
-                        .forEach(extensionRtArtifactList::add);
-            }
-
-            log.debug(
-                    "About to resolve artifacts \n" + extensionRtArtifactList.stream()
-                            .map(Artifact::toString)
-                            .collect(Collectors.joining("\n")));
-
-            Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
-
-            for (Artifact extensionRtArtifact : extensionRtArtifactList) {
-                // this will resolve all the artifacts and their dependencies and as a consequence populate the local
-                // Maven repo
-                // specified in the user settings.xml
-                String aptVersion = redhatVersionExtensionArtifactMap
-                        .getOrDefault(extensionRtArtifact, extensionRtArtifact.getVersion());
-                if (extensionRtArtifact.getArtifactId().contains("plugin")) {
-                    Artifact pluginArtifact = new DefaultArtifact(
-                            extensionRtArtifact.getGroupId(),
-                            extensionRtArtifact.getArtifactId(),
-                            extensionRtArtifact.getExtension(),
-                            aptVersion);
-                    log.debug("Plugin artifact " + pluginArtifact);
-                    mvnResolver.resolvePluginDependencies(pluginArtifact);
-                } else {
-                    if ((extensionRtArtifact.getArtifactId().contains("bom")
-                            || extensionRtArtifact.getExtension().equals("pom"))
-                            && !extensionRtArtifact.getExtension().equals("properties")) {
-                        DefaultArtifact bomPomArtifact = new DefaultArtifact(
-                                extensionRtArtifact.getGroupId(),
-                                extensionRtArtifact.getArtifactId(),
-                                "pom",
-                                aptVersion);
-                        log.debug("PomArtifact id " + extensionRtArtifact.getArtifactId());
-                        mvnResolver.resolve(bomPomArtifact);
-                    } else {
-                        DefaultArtifact redHatArtifact = new DefaultArtifact(
-                                extensionRtArtifact.getGroupId(),
-                                extensionRtArtifact.getArtifactId(),
-                                extensionRtArtifact.getClassifier(),
-                                extensionRtArtifact.getExtension(),
-                                aptVersion);
-                        log.debug(
-                                "Artifact id " + redHatArtifact.getArtifactId() + " version "
-                                        + redHatArtifact.getVersion());
-                        mvnResolver.resolve(redHatArtifact);
-
-                        /*
-                         * We resolve the BOM (assuming it has no own dependencies) and add the artifact we actually
-                         * want to resolve as its sole dependency. In this way, optional dependencies do not get
-                         * resolved, which we want. If we resolved the artifact directly, it would also resolve the
-                         * direct optional dependencies.
-                         */
-                        mvnResolver.resolveManagedDependencies(
-                                bom,
-                                Collections.singletonList(
-                                        new Dependency(
-                                                new DefaultArtifact(
-                                                        extensionRtArtifact.getGroupId(),
-                                                        extensionRtArtifact.getArtifactId(),
-                                                        extensionRtArtifact.getClassifier(),
-                                                        extensionRtArtifact.getExtension(),
-                                                        null),
-                                                "compile")),
-                                new ArrayList<>(bomConstraints), // version constraints from the BOM
-                                Collections.emptyList(), // extra maven repos, ignore this
-                                "test",
-                                "provided" // dependency scopes that should be ignored
-                        );
-                    }
+            if (generationData.getSteps().isEmpty()) {
+                resolveAndRepackage(generationData, sourceDir, mvnResolver, artifactComparator);
+            } else {
+                for (RepoGenerationData step : generationData.getSteps()) {
+                    final RepoGenerationData mergedData = RepoGenerationData.merge(generationData, step);
+                    resolveAndRepackage(mergedData, sourceDir, mvnResolver, artifactComparator);
                 }
-                bannedDirs.entrySet()
-                        .stream()
-                        .filter(en -> Files.exists(en.getValue()) && hasProdVersionSubdir(en.getValue()))
-                        .peek(en -> bannedReport.append("\n " + en.getKey() + " pulled by " + extensionRtArtifact))
-                        .forEach(en -> {
-                            try {
-                                org.apache.commons.io.FileUtils.deleteDirectory(en.getValue().toFile());
-                            } catch (IOException e) {
-                                throw new RuntimeException("Could not delete " + en.getValue(), e);
-                            }
-                        });
-            }
-            if (bannedReport.length() > 0) {
-                throw new IllegalStateException("Banned artifacts found: " + bannedReport.toString());
             }
             return repackage(sourceDir);
         } catch (Exception bme) {
             bme.printStackTrace();
             throw new RuntimeException("Unable to resolve and package. " + bme.getLocalizedMessage());
+        }
+    }
+
+    private void resolveAndRepackage(
+            RepoGenerationData generationData,
+            File sourceDir,
+            MavenArtifactResolver mvnResolver,
+            Comparator<Artifact> artifactComparator) throws BootstrapMavenException {
+        final Map<String, Path> bannedDirs = parseBannedArtifactsParameter(generationData, sourceDir);
+
+        /* We use TreeSet for reproducible ordering */
+        final Set<Artifact> extensionRtArtifactList = new TreeSet<>(artifactComparator);
+
+        final Map<String, String> params = generationData.getParameters();
+        final String extensionsListUrl = params.get("extensionsListUrl");
+        if (extensionsListUrl != null) {
+            // extensionsListUrl is optional
+            // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
+            extensionRtArtifactList.addAll(parseExtensionsArtifactList(extensionsListUrl));
+        }
+
+        addResolveArtifacts(params.get("resolveArtifacts"), extensionRtArtifactList::add);
+
+        final List<GAV> bomGAVs = getBomGavFromConfig(generationData);
+        final Set<Dependency> bomConstraints = new LinkedHashSet<>();
+        Artifact bom = null;
+        for (GAV gav : bomGAVs) {
+            bom = new DefaultArtifact(gav.getGroupId(), gav.getArtifactId(), null, "pom", gav.getVersion());
+            bomConstraints.addAll(mvnResolver.resolveDescriptor(bom).getManagedDependencies());
+        }
+        if (bomConstraints.isEmpty()) {
+            throw new IllegalStateException("Failed to get constraints from BOMs " + bomGAVs);
+        }
+
+        /* Get the extensionsListUrl from the BOM based on resolveIncludes and resolveExcludes params */
+        final String rawIncludes = params.get("resolveIncludes");
+        if (rawIncludes != null) {
+            final GavSet resolveSet = GavSet.builder()
+                    .includes(rawIncludes)
+                    .excludes(params.get("resolveExcludes"))
+                    .build();
+
+            bomConstraints.stream()
+                    .map(Dependency::getArtifact)
+                    .filter(
+                            a -> resolveSet.contains(
+                                    a.getGroupId(),
+                                    a.getArtifactId(),
+                                    a.getExtension(),
+                                    a.getClassifier(),
+                                    a.getVersion()))
+                    .forEach(extensionRtArtifactList::add);
+        }
+
+        log.debug(
+                "About to resolve artifacts \n"
+                        + extensionRtArtifactList.stream().map(Artifact::toString).collect(Collectors.joining("\n")));
+
+        Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
+
+        final StringBuilder bannedReport = new StringBuilder();
+        for (Artifact extensionRtArtifact : extensionRtArtifactList) {
+            // this will resolve all the artifacts and their dependencies and as a consequence populate the local
+            // Maven repo
+            // specified in the user settings.xml
+            String aptVersion = redhatVersionExtensionArtifactMap
+                    .getOrDefault(extensionRtArtifact, extensionRtArtifact.getVersion());
+            if (extensionRtArtifact.getArtifactId().contains("plugin")) {
+                Artifact pluginArtifact = new DefaultArtifact(
+                        extensionRtArtifact.getGroupId(),
+                        extensionRtArtifact.getArtifactId(),
+                        extensionRtArtifact.getExtension(),
+                        aptVersion);
+                log.debug("Plugin artifact " + pluginArtifact);
+                mvnResolver.resolvePluginDependencies(pluginArtifact);
+            } else {
+                if ((extensionRtArtifact.getArtifactId().contains("bom")
+                        || extensionRtArtifact.getExtension().equals("pom"))
+                        && !extensionRtArtifact.getExtension().equals("properties")) {
+                    DefaultArtifact bomPomArtifact = new DefaultArtifact(
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId(),
+                            "pom",
+                            aptVersion);
+                    log.debug("PomArtifact id " + extensionRtArtifact.getArtifactId());
+                    mvnResolver.resolve(bomPomArtifact);
+                } else {
+                    DefaultArtifact redHatArtifact = new DefaultArtifact(
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId(),
+                            extensionRtArtifact.getClassifier(),
+                            extensionRtArtifact.getExtension(),
+                            aptVersion);
+                    log.debug(
+                            "Artifact id " + redHatArtifact.getArtifactId() + " version "
+                                    + redHatArtifact.getVersion());
+                    mvnResolver.resolve(redHatArtifact);
+
+                    /*
+                     * We resolve the BOM (assuming it has no own dependencies) and add the artifact we actually want to
+                     * resolve as its sole dependency. In this way, optional dependencies do not get resolved, which we
+                     * want. If we resolved the artifact directly, it would also resolve the direct optional
+                     * dependencies.
+                     */
+                    mvnResolver.resolveManagedDependencies(
+                            bom,
+                            Collections.singletonList(
+                                    new Dependency(
+                                            new DefaultArtifact(
+                                                    extensionRtArtifact.getGroupId(),
+                                                    extensionRtArtifact.getArtifactId(),
+                                                    extensionRtArtifact.getClassifier(),
+                                                    extensionRtArtifact.getExtension(),
+                                                    null),
+                                            "compile")),
+                            new ArrayList<>(bomConstraints), // version constraints from the BOM
+                            Collections.emptyList(), // extra maven repos, ignore this
+                            "test",
+                            "provided" // dependency scopes that should be ignored
+                    );
+                }
+            }
+            bannedDirs.entrySet()
+                    .stream()
+                    .filter(en -> Files.exists(en.getValue()) && hasProdVersionSubdir(en.getValue()))
+                    .peek(en -> bannedReport.append("\n " + en.getKey() + " pulled by " + extensionRtArtifact))
+                    .forEach(en -> {
+                        try {
+                            org.apache.commons.io.FileUtils.deleteDirectory(en.getValue().toFile());
+                        } catch (IOException e) {
+                            throw new RuntimeException("Could not delete " + en.getValue(), e);
+                        }
+                    });
+        }
+        if (bannedReport.length() > 0) {
+            throw new IllegalStateException("Banned artifacts found: " + bannedReport.toString());
         }
     }
 
@@ -595,7 +611,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
-    private List<GAV> getBomGavFromConfig() {
+    private List<GAV> getBomGavFromConfig(RepoGenerationData generationData) {
 
         final List<GAV> result = new ArrayList<>();
         String sourceArtifact = generationData.getSourceArtifact();
@@ -630,11 +646,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     "sourceBuild must be set if sourceArtifact is set for RESOLVE_ONLY strategy; found sourceBuild: ["
                             + sourceBuild + "] and sourceArtifact: [" + sourceArtifact + "]");
         }
-        final PncBuild pncBuild = getBuild(sourceBuild);
-        return pncBuild;
+        return getBuild(sourceBuild);
     }
 
-    private Map<String, Path> parseBannedArtifactsParameter(File sourceDir) {
+    private static Map<String, Path> parseBannedArtifactsParameter(RepoGenerationData generationData, File sourceDir) {
         Map<String, String> params = generationData.getParameters();
         final Map<String, Path> result = new TreeMap<>();
         final String bannedArtifacts = params.get("bannedArtifacts");
@@ -789,5 +804,14 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     @Override
     public void close() {
         buildInfoCollector.close();
+    }
+
+    private static File getIndyMavenSettings() {
+        final String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(PigContext.get().isTempBuild());
+        final File settings = new File(settingsXmlPath);
+        if (!settings.exists()) {
+            throw new RuntimeException("Failed to locate the Indy Maven settings at " + settings);
+        }
+        return settings;
     }
 }
