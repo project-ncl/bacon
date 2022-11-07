@@ -1,5 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
+import org.apache.maven.settings.Profile;
+import org.apache.maven.settings.Repository;
+import org.apache.maven.settings.RepositoryPolicy;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.io.DefaultSettingsReader;
+import org.apache.maven.settings.io.DefaultSettingsWriter;
 import org.assertj.core.api.Assertions;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
@@ -10,10 +17,8 @@ import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
-import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.junit.jupiter.api.AfterAll;
@@ -24,6 +29,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,11 +49,14 @@ import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.doReturn;
 
-public class ResolveOnlyRepositoryTest {
+public class ResolveOnlyStepsRepositoryTest {
 
+    private static final String IO_QUARKUS_PLATFORM_TEST = "io.quarkus.platform.test";
+    private static final String ORIGINAL_LOCAL_REPO = "original-local";
+    private static final String TEST_PLATFORM_ARTIFACTS = "test-platform-artifacts";
     private static final String EXPECTED_ARTIFACT_LIST_TXT = "resolve-and-repackage-repo-artifact-list.txt";
     private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
-    private static final String BOM_PATTERN = "vertx-dependencies-[\\d]+.*.pom";
+    private static final String BOM_PATTERN = "quarkus-bom-[\\d]+.*.pom";
 
     private Path workDir;
     private File testMavenSettings;
@@ -75,18 +84,50 @@ public class ResolveOnlyRepositoryTest {
     }
 
     @Test
-    void resolveAndRepackageShouldGenerateRepository() {
+    void resolveAndRepackageShouldGenerateRepository() throws Exception {
 
         mockPigContextAndMethods();
         mockIndySettingsFile();
 
+        // initialize a Maven artifact resolver with the local Maven repo pointing
+        // to a location we want to install the platform related artifacts below
+        final MavenArtifactResolver resolver = MavenArtifactResolver.builder()
+                .setLocalRepository(getPlatformTestArtifacts().toString())
+                .setUserSettings(testMavenSettings)
+                .build();
+
+        // Compose a Quarkus platform model and install the artifacts into a Maven repo at a temporary location.
+        // This temporary repo will be activated as a remote Maven repo when running the Maven repo generator
+        TestPlatformBuilder.newInstance(workDir)
+                // quarkus-bom
+                .newBom(IO_QUARKUS_PLATFORM_TEST, "quarkus-bom", "1.1.1.redhat-00001")
+                .addConstraint("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
+                .platform()
+                // install core artifacts
+                .installArtifactWithDependencies("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
+                // this common-lib productized version is not in the quarkus-bom
+                .addDependency("org.thirdparty", "common-lib", "1.0.0.redhat-00005")
+                .platform()
+                .installArtifact("org.thirdparty", "common-lib", "1.0.0.redhat-00005")
+                .installArtifact("org.thirdparty", "common-lib", "1.0.0")
+                // quarkus-camel-bom
+                .newBom(IO_QUARKUS_PLATFORM_TEST, "quarkus-camel-bom", "1.1.1.redhat-00001")
+                .addConstraint("org.apache.camel.quarkus", "camel-quarkus-core", "2.2.2.redhat-00002")
+                // this common-lib upstream version is managed by the quarkus-camel-bom
+                .addConstraint("org.thirdparty", "common-lib", "1.0.0")
+                .platform()
+                // install Camel artifacts
+                .installArtifactWithDependencies("org.apache.camel.quarkus", "camel-quarkus-core", "2.2.2.redhat-00002")
+                .addDependency("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
+                .platform()
+                // install the Maven plugin
+                .installArtifact(IO_QUARKUS_PLATFORM_TEST, "quarkus-maven-plugin", "1.1.1.redhat-00001")
+                .setMavenResolver(resolver)
+                .build();
+
         PigConfiguration pigConfiguration = mockPigConfigurationAndMethods();
 
-        RepoGenerationData generationDataSpy = mockRepoGenerationDataAndMethods();
-
-        mockParamsAndMethods(generationDataSpy);
-
-        mockFlowAndMethods(pigConfiguration, generationDataSpy);
+        RepoGenerationData generationDataSpy = mockRepoGenerationDataAndMethods(pigConfiguration);
 
         Map<String, PncBuild> buildsSpy = mockBuildsAndMethods(generationDataSpy);
 
@@ -108,7 +149,7 @@ public class ResolveOnlyRepositoryTest {
                 false,
                 false,
                 buildInfoCollectorMock,
-                true);
+                false);
 
         RepoManager repoManagerSpy = Mockito.spy(repoManager);
 
@@ -128,7 +169,6 @@ public class ResolveOnlyRepositoryTest {
 
         final Path actualArtifactList = workDir.resolve("resolve-and-repackage-repo-artifact-list-actual.txt");
         try {
-            Files.createDirectories(actualArtifactList.getParent());
             Files.write(
                     actualArtifactList,
                     (actualFiles.stream().collect(Collectors.joining("\n")) + "\n").getBytes(StandardCharsets.UTF_8));
@@ -154,9 +194,74 @@ public class ResolveOnlyRepositoryTest {
 
     private void mockIndySettingsFile() {
         testMavenSettings = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml");
+
+        Settings settings;
+        try {
+            settings = new DefaultSettingsReader().read(testMavenSettings, Map.of());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read Maven settings from " + testMavenSettings, e);
+        }
+
+        String originalLocalRepo = settings.getLocalRepository();
+        if (originalLocalRepo == null || originalLocalRepo.isBlank()) {
+            originalLocalRepo = System.getProperty("user.home") + "/.m2/repository";
+        } else {
+            originalLocalRepo = originalLocalRepo.replace("${user.home}", System.getProperty("user.home"));
+        }
+
+        settings.setLocalRepository(getTestLocalRepo().toString());
+
+        // original local repo
+        addLocalRepo(settings, ORIGINAL_LOCAL_REPO, Paths.get(originalLocalRepo));
+        // test platform artifacts
+        addLocalRepo(settings, TEST_PLATFORM_ARTIFACTS, getPlatformTestArtifacts());
+
+        try (BufferedWriter writer = Files.newBufferedWriter(testMavenSettings.toPath())) {
+            new DefaultSettingsWriter().write(writer, Map.of(), settings);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to persist Maven settings to " + testMavenSettings, e);
+        }
+
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
         MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
         indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
+    }
+
+    private Repository addLocalRepo(Settings settings, String id, Path localPath) {
+        Profile profile = new Profile();
+        profile.setId(id);
+        settings.addActiveProfile(id);
+        settings.addProfile(profile);
+
+        Repository repo;
+        try {
+            repo = configureRepo(id, localPath.toUri().toURL().toExternalForm());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to configure repository", e);
+        }
+        profile.addRepository(repo);
+        profile.addPluginRepository(repo);
+        return repo;
+    }
+
+    private Path getTestLocalRepo() {
+        return workDir.resolve("test-local-repo");
+    }
+
+    private Path getPlatformTestArtifacts() {
+        return workDir.resolve(TEST_PLATFORM_ARTIFACTS);
+    }
+
+    private Repository configureRepo(String id, String url) {
+        final Repository repo = new Repository();
+        repo.setId(id);
+        repo.setLayout("default");
+        repo.setUrl(url);
+        RepositoryPolicy policy = new RepositoryPolicy();
+        policy.setEnabled(true);
+        repo.setReleases(policy);
+        repo.setSnapshots(policy);
+        return repo;
     }
 
     private PigConfiguration mockPigConfigurationAndMethods() {
@@ -167,20 +272,35 @@ public class ResolveOnlyRepositoryTest {
         return pigConfiguration;
     }
 
-    private RepoGenerationData mockRepoGenerationDataAndMethods() {
+    private RepoGenerationData mockRepoGenerationDataAndMethods(PigConfiguration pigConfiguration) {
         RepoGenerationData generationData = new RepoGenerationData();
+        generationData.setParameters(
+                Map.of(
+                        "extensionsListUrl",
+                        EXTENSIONS_LIST_URL,
+                        "resolveIncludes",
+                        "*:*:*redhat-*",
+                        // we add the quarkus-bom to the default params, since it will have to be enabled for everyone
+                        "bomGavs",
+                        IO_QUARKUS_PLATFORM_TEST + ":quarkus-bom:1.1.1.redhat-00001"));
+
+        // this quarkus-bom step is simply to generate the repo for the quarkus-bom
+        final RepoGenerationData quarkusBomStep = new RepoGenerationData();
+
+        // the Camel step includes only the quarkus-camel-bom, because the quarkus-bom will be inherited from the
+        // default config
+        final RepoGenerationData quarkusCamelBomStep = new RepoGenerationData();
+        quarkusCamelBomStep
+                .setParameters(Map.of("bomGavs", IO_QUARKUS_PLATFORM_TEST + ":quarkus-camel-bom:1.1.1.redhat-00001"));
+
+        generationData.setSteps(List.of(quarkusBomStep, quarkusCamelBomStep));
+
         RepoGenerationData generationDataSpy = Mockito.spy(generationData);
         generationDataSpy.setStrategy(RepoGenerationStrategy.RESOLVE_ONLY);
         generationDataSpy.setSourceBuild("test-build");
-        generationDataSpy.setSourceArtifact(BOM_PATTERN);
 
+        mockFlowAndMethods(pigConfiguration, generationDataSpy);
         return generationDataSpy;
-    }
-
-    private void mockParamsAndMethods(RepoGenerationData generationData) {
-        Map<String, String> params = new HashMap<>();
-        params.put("extensionsListUrl", EXTENSIONS_LIST_URL);
-        doReturn(params).when(generationData).getParameters();
     }
 
     private void mockFlowAndMethods(PigConfiguration pigConfiguration, RepoGenerationData generationData) {
@@ -192,15 +312,8 @@ public class ResolveOnlyRepositoryTest {
     private Map<String, PncBuild> mockBuildsAndMethods(RepoGenerationData generationData) {
         Map<String, PncBuild> builds = new HashMap<>();
         Map<String, PncBuild> buildsSpy = Mockito.spy(builds);
-
         PncBuild pncBuild = Mockito.mock(PncBuild.class);
         buildsSpy.put(generationData.getSourceBuild(), pncBuild);
-
-        ArtifactWrapper artifactWrapper = Mockito.spy(ArtifactWrapper.class);
-        GAV gav = new GAV("io.vertx", "vertx-dependencies", "4.1.0", "pom");
-        doReturn(gav).when(artifactWrapper).toGAV();
-        doReturn(artifactWrapper).when(pncBuild).findArtifactByFileName(BOM_PATTERN);
-
         return buildsSpy;
     }
 
@@ -223,20 +336,26 @@ public class ResolveOnlyRepositoryTest {
     }
 
     private void prepareFakeExtensionArtifactList(RepoManager repoManager) {
-        Artifact vertxWeb = new DefaultArtifact("io.vertx", "vertx-bridge-common", "jar", "4.1.0");
+        Artifact mavenPlugin = new DefaultArtifact(
+                IO_QUARKUS_PLATFORM_TEST,
+                "quarkus-maven-plugin",
+                "jar",
+                "1.1.1.redhat-00001");
 
         List<Artifact> extensionsArtifactList = new ArrayList<>();
-        extensionsArtifactList.add(vertxWeb);
+        extensionsArtifactList.add(mavenPlugin);
         doReturn(extensionsArtifactList).when(repoManager).parseExtensionsArtifactList(EXTENSIONS_LIST_URL);
         Map<Artifact, String> redhatVersionMap = new HashMap<>();
-        redhatVersionMap.put(vertxWeb, "4.1.0");
+        redhatVersionMap.put(mavenPlugin, "1.1.1.redhat-00001");
         doReturn(redhatVersionMap).when(repoManager).collectRedhatVersions(extensionsArtifactList);
     }
 
     private Set<String> repoZipContentList() {
         ClassLoader classLoader = getClass().getClassLoader();
         File repoZipContentListFile = new File(
-                Objects.requireNonNull(classLoader.getResource(EXPECTED_ARTIFACT_LIST_TXT)).getFile());
+                Objects.requireNonNull(
+                        classLoader.getResource(getClass().getSimpleName() + "/" + EXPECTED_ARTIFACT_LIST_TXT))
+                        .getFile());
         Set<String> repoZipContents = new TreeSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(repoZipContentListFile))) {
