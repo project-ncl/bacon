@@ -540,7 +540,9 @@ public class PncEntitiesImporter implements Closeable {
         Optional<GroupConfiguration> buildConfigSetId = getBuildGroup();
         if (buildConfigSetId.isPresent()) {
             GroupConfiguration update = buildConfigSetId.get();
-            if (!update.getProductVersion().equals(version)) {
+            // if build config set has no product version or if the product version doesn't match the one in the
+            // build-config.yaml: update it
+            if (update.getProductVersion() == null || !update.getProductVersion().equals(version)) {
                 update = update.toBuilder().productVersion(version).build();
                 try {
                     groupConfigClient.update(update.getId(), update);
