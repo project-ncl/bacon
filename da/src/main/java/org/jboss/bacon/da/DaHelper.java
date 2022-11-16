@@ -17,6 +17,7 @@
  */
 package org.jboss.bacon.da;
 
+import io.opentelemetry.api.trace.Span;
 import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
 import org.jboss.bacon.da.rest.endpoint.ReportsApi;
@@ -26,11 +27,13 @@ import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.lookup.model.NPMLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
+import org.jboss.pnc.bacon.common.OTELHelper;
 import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -68,8 +71,14 @@ public class DaHelper {
             DaConfig daConfig = Config.instance().getActiveProfile().getDa();
             daUrl = Utils.generateUrlPath(daConfig.getUrl(), DA_PATH);
         }
-
-        return builder.build().target(daUrl);
+        ResteasyClient resteasyClient = builder.build();
+        if (OTELHelper.otelEnabled()) {
+            resteasyClient.register(
+                    new CustomRestHeaderFilter(
+                            Span.current().getSpanContext().getSpanId(),
+                            Span.current().getSpanContext().getTraceId()));
+        }
+        return resteasyClient.target(daUrl);
     }
 
     private static ResteasyWebTarget getAuthenticatedClient() {

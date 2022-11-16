@@ -145,6 +145,12 @@ rh-sample-maven-repository/maven-repository/io/netty/netty-transport/4.1.65.Fina
 rh-sample-maven-repository/maven-repository/io/netty/netty-transport/4.1.65.Final/netty-transport-4.1.65.Final.pom
 rh-sample-maven-repository/maven-repository/io/netty/netty-transport/4.1.65.Final/netty-transport-4.1.65.Final.pom.md5
 rh-sample-maven-repository/maven-repository/io/netty/netty-transport/4.1.65.Final/netty-transport-4.1.65.Final.pom.sha1
+rh-sample-maven-repository/maven-repository/io/opentelemetry/opentelemetry-bom/1.19.0/_remote.repositories
+rh-sample-maven-repository/maven-repository/io/opentelemetry/opentelemetry-bom/1.19.0/_remote.repositories.md5
+rh-sample-maven-repository/maven-repository/io/opentelemetry/opentelemetry-bom/1.19.0/_remote.repositories.sha1
+rh-sample-maven-repository/maven-repository/io/opentelemetry/opentelemetry-bom/1.19.0/opentelemetry-bom-1.19.0.pom
+rh-sample-maven-repository/maven-repository/io/opentelemetry/opentelemetry-bom/1.19.0/opentelemetry-bom-1.19.0.pom.md5
+rh-sample-maven-repository/maven-repository/io/opentelemetry/opentelemetry-bom/1.19.0/opentelemetry-bom-1.19.0.pom.sha1
 rh-sample-maven-repository/maven-repository/io/vertx/vertx-bridge-common/4.1.0/_remote.repositories
 rh-sample-maven-repository/maven-repository/io/vertx/vertx-bridge-common/4.1.0/_remote.repositories.md5
 rh-sample-maven-repository/maven-repository/io/vertx/vertx-bridge-common/4.1.0/_remote.repositories.sha1
