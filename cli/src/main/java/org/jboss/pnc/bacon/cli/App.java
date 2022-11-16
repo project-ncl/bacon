@@ -22,10 +22,12 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import com.redhat.resilience.otel.OtelCLIHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.fusesource.jansi.AnsiConsole;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.common.OTELHelper;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.VersionProvider;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -155,7 +157,7 @@ public class App {
             builtins.alias("bindkey", "keymap");
 
             PicocliCommands picocliCommands = new PicocliCommands(commandLine);
-            init();
+            init(null);
 
             Parser parser = new DefaultParser();
 
@@ -204,12 +206,15 @@ public class App {
                 throw new FatalException("Unable to construct terminal console", e);
             }
         } else {
-            return commandLine.setExecutionStrategy(parseResult -> executionStrategy(commandLine, parseResult))
-                    .execute(args);
+            try {
+                return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
+            } finally {
+                OTELHelper.stopOtel();
+            }
         }
     }
 
-    private void init() {
+    private void init(String command) {
         /*
          * https://no-color.org/ If NO_COLOR env variable is present, regardless of its value, prevents the addition of
          * ANSI color
@@ -249,6 +254,16 @@ public class App {
         } else {
             setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "constant");
         }
+
+        String endpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
+        String service = System.getenv("OTEL_SERVICE_NAME");
+        if (endpoint != null) {
+            log.debug("Enabling OTEL collection on {} with service name {}", endpoint, service);
+            OTELHelper.startOtel(
+                    service,
+                    command,
+                    OtelCLIHelper.defaultSpanProcessor(OtelCLIHelper.defaultSpanExporter(endpoint)));
+        }
     }
 
     private void setConfigLocation(String configLocation, String source) {
@@ -256,8 +271,12 @@ public class App {
         log.debug("Config file set from {} with profile {} to {}", source, profile, Config.getConfigFilePath());
     }
 
-    private int executionStrategy(CommandLine commandLine, CommandLine.ParseResult parseResult) {
-        init(); // custom initialization to be done before executing any command or subcommand
+    private int executionStrategy(CommandLine.ParseResult parseResult) {
+        String command = null;
+        if (parseResult.subcommand() != null) {
+            command = parseResult.subcommand().commandSpec().commandLine().getCommandName();
+        }
+        init(command); // custom initialization to be done before executing any command or subcommand
         return new CommandLine.RunLast().execute(parseResult); // default execution strategy
     }
 
