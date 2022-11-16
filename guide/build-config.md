@@ -383,6 +383,36 @@ When to use which?
       artifacts is spotted in the local Maven repo, then the triggering artifact is logged
       and the generation fails.
 
+###### Multi step Maven repository generation
+
+If a product includes multiple BOMs that could be imported in any combination in customer projects, to make sure the generated Maven repository includes all the artifacts to cover all the combinations, a Maven repository would have to be generated for each BOM individually after which all the Maven generated repositories would have to be merged together to form a single deliverable.
+For these kind of scenarious, the repository generation configuration allows configuring steps. Here is an example of how it could look like for a Quarkus platform including the RHBQ quarkus-bom and the CEQ quarkus-camel-bom.
+
+ ```yaml
+   repositoryGeneration:
+     strategy: RESOLVE_ONLY
+     sourceBuild: io.quarkus-quarkus-platform-{{productVersion}}
+     steps:
+       -
+         parameters:
+           extensionsListUrl: "http://link-to-RHBQ-extra-artifacts-list"
+       -
+         parameters:
+           bomGavs: 'com.redhat.quarkus.platform:quarkus-camel-bom:2.13.4.Final-redhat-00001'
+           extensionsListUrl: "http://link-to-CEQ-extra-artifacts-list"
+     parameters:
+       resolveIncludes: *:*:*redhat-*
+       bomGavs: 'com.redhat.quarkus.platform:quarkus-bom:2.13.4.Final-redhat-00001'
+ ```
+
+In this example, the generation of the Maven repository will consist of two steps:
+* generating Maven repository content for the RHBQ using the `RESOLVE_ONLY` strategy applied to the `com.redhat.quarkus.platform:quarkus-bom:2.13.4.Final-redhat-00001` and the extra artifacts configured in `http://link-to-RHBQ-extra-artifacts-list`
+* generating Maven repository content for the CEQ using the `RESOLVE_ONLY` strategy applied to the `com.redhat.quarkus.platform:quarkus-camel-bom:2.13.4.Final-redhat-00001` *and* `com.redhat.quarkus.platform:quarkus-bom:2.13.4.Final-redhat-00001` (given that the CEQ BOM will not be imported w/o the RHBQ BOM) and the extra artifacts configured in `http://link-to-RHBQ-extra-artifacts-list`
+
+Configuration options configured outside steps are inherited by each configured step. Each step may augment the default configuration by providing any configuration option that is supported by `repositoryGeneration` with the exception of configuring nested steps or changing the strategy (in fact, the RESOLVE_ONLY strategy is only strategy currently supporting multi step Maven repository generation).
+
+If the same configuration option is found directly under the `repositoryGeneration` and under a step, the effective value of the option will either be a merge of the two (in case a value represents a list or a map) or the one configured in a step will override the default one (in case a value has a simple type, such as string). For example, in the above example the effective value of the `bomGavs` for the second step will be `com.redhat.quarkus.platform:quarkus-bom:2.13.4.Final-redhat-00001,com.redhat.quarkus.platform:quarkus-camel-bom:2.13.4.Final-redhat-00001`.
+
 ##### Parameters available in all strategies
 
 - `additionalArtifacts` - artifacts to be specifically added to the repository from specific builds. Should use regular expressions to match any incremental suffixes.
