@@ -71,6 +71,7 @@
         "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
         "aliases": [
             "GNU Lesser General Public License, Version 3",
+            "GNU Lesser General Public License",
             "The GNU Lesser General Public License, version 3"
         ],
         "urlAliases": [
@@ -79,6 +80,7 @@
             "https://www.gnu.org/licenses/lgpl.html",
             "http://www.gnu.org/licenses/lgpl.html",
             "https://www.gnu.org/licenses/lgpl-3.0.txt",
+            "https://www.gnu.org/licenses/lgpl-3.0.html",
             "http://www.gnu.org/licenses/lgpl-3.0.txt"
         ]
     },
