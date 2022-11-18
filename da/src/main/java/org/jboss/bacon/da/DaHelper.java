@@ -75,8 +75,8 @@ public class DaHelper {
         if (OTELHelper.otelEnabled()) {
             resteasyClient.register(
                     new CustomRestHeaderFilter(
-                            Span.current().getSpanContext().getSpanId(),
-                            Span.current().getSpanContext().getTraceId()));
+                            Span.current().getSpanContext().getTraceId(),
+                            Span.current().getSpanContext().getSpanId()));
         }
         return resteasyClient.target(daUrl);
     }

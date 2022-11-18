@@ -87,9 +87,11 @@ public class PncClientHelper {
                     .host(uri.getHost())
                     .bearerToken(bearerToken)
                     .pageSize(50)
+                    .addDefaultMdcToHeadersMappings()
                     .build();
 
             printBannerIfNecessary(configuration);
+
             return configuration;
 
         } catch (URISyntaxException e) {

@@ -258,11 +258,12 @@ public class App {
         String endpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
         String service = System.getenv("OTEL_SERVICE_NAME");
         if (endpoint != null) {
-            log.debug("Enabling OTEL collection on {} with service name {}", endpoint, service);
+            log.debug("Enabling OpenTelemetry collection on {} with service name {}", endpoint, service);
             OTELHelper.startOtel(
                     service,
                     command,
                     OtelCLIHelper.defaultSpanProcessor(OtelCLIHelper.defaultSpanExporter(endpoint)));
+            OTELHelper.addMDCContext();
         }
     }
 
