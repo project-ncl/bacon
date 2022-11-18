@@ -12,6 +12,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 
 @Slf4j
 @UtilityClass
@@ -37,7 +38,7 @@ public class OTELHelper {
                 .setResource(resource)
                 .build();
 
-        // NOTE the use of EnvarExtractingPropagator here OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
+        // NOTE the use of EnvarExtractingPropagator here
         OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(sdkTracerProvider)
                 .setPropagators(ContextPropagators.create(EnvarExtractingPropagator.getInstance()))
@@ -58,7 +59,7 @@ public class OTELHelper {
     }
 
     public void stopOtel() {
-        if (root != null && processor != null) {
+        if (otelEnabled()) {
             log.debug("Finishing OTEL instrumentation for {}", root);
             root.end();
             processor.close();
@@ -67,5 +68,13 @@ public class OTELHelper {
 
     public String generateTraceParent(String trace, String span) {
         return "00" + '-' + trace + '-' + span + "-01";
+    }
+
+    public void addMDCContext() {
+        String trace = Span.current().getSpanContext().getTraceId();
+        String span = Span.current().getSpanContext().getSpanId();
+        MDC.put("trace_id", trace);
+        MDC.put("span_id", span);
+        MDC.put("traceparent", generateTraceParent(trace, span));
     }
 }
