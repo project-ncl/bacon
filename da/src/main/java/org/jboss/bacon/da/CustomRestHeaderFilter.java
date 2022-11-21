@@ -1,6 +1,7 @@
 package org.jboss.bacon.da;
 
-import org.jboss.pnc.bacon.common.OTELHelper;
+import io.opentelemetry.api.trace.SpanContext;
+import org.jboss.pnc.common.otel.OtelUtils;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -8,19 +9,17 @@ import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
 
 public class CustomRestHeaderFilter implements ClientRequestFilter {
-    private final String trace;
 
-    private final String span;
+    private final SpanContext spanContext;
 
-    public CustomRestHeaderFilter(String trace, String span) {
-        this.span = span;
-        this.trace = trace;
+    public CustomRestHeaderFilter(SpanContext spanContext) {
+        this.spanContext = spanContext;
     }
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        requestContext.getHeaders().add("trace-id", trace);
-        requestContext.getHeaders().add("span-id", span);
-        requestContext.getHeaders().add("traceparent", OTELHelper.generateTraceParent(trace, span));
+        requestContext.getHeaders().add("trace-id", spanContext.getTraceId());
+        requestContext.getHeaders().add("span-id", spanContext.getSpanId());
+        OtelUtils.createTraceParentHeader(spanContext).forEach((k, v) -> requestContext.getHeaders().add(k, v));
     }
 }

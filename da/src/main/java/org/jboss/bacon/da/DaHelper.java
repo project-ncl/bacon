@@ -17,6 +17,7 @@
  */
 package org.jboss.bacon.da;
 
+import com.redhat.resilience.otel.OTelCLIHelper;
 import io.opentelemetry.api.trace.Span;
 import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
@@ -27,7 +28,6 @@ import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.lookup.model.NPMLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
-import org.jboss.pnc.bacon.common.OTELHelper;
 import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
@@ -72,11 +72,8 @@ public class DaHelper {
             daUrl = Utils.generateUrlPath(daConfig.getUrl(), DA_PATH);
         }
         ResteasyClient resteasyClient = builder.build();
-        if (OTELHelper.otelEnabled()) {
-            resteasyClient.register(
-                    new CustomRestHeaderFilter(
-                            Span.current().getSpanContext().getTraceId(),
-                            Span.current().getSpanContext().getSpanId()));
+        if (OTelCLIHelper.otelEnabled()) {
+            resteasyClient.register(new CustomRestHeaderFilter(Span.current().getSpanContext()));
         }
         return resteasyClient.target(daUrl);
     }
