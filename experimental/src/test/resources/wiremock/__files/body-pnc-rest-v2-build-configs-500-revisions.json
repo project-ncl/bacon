@@ -1,0 +1,61 @@
+{
+    "pageIndex": 0,
+    "pageSize": 50,
+    "totalPages": 1,
+    "totalHits": 30,
+    "content": [
+        {
+            "id": "500",
+            "rev": 500,
+            "name": "dependency-common",
+            "buildScript": "false",
+            "scmRevision": "release-1.0.0",
+            "creationTime": "2022-10-25T10:01:41.241Z",
+            "modificationTime": "2022-12-16T03:39:17.256Z",
+            "buildType": "MVN",
+            "defaultAlignmentParams": "",
+            "brewPullActive": false,
+            "scmRepository": {
+                "id": "100",
+                "internalUrl": "git+ssh://example.com/dependency-common.git",
+                "externalUrl": "https://external.example.com/dependency-common.git",
+                "preBuildSyncEnabled": true
+            },
+            "project": {
+                "id": "100",
+                "name": "testproject",
+                "description": null,
+                "issueTrackerUrl": null,
+                "projectUrl": null,
+                "engineeringTeam": null,
+                "technicalLeader": null
+            },
+            "environment": {
+                "id": "435",
+                "name": "OpenJDK 11.0.9+11; Mvn 3.6.3",
+                "description": "OpenJDK 11.0.9+11; Mvn 3.6.3 [builder-rhel-7-j11.0.9-11-mvn3.6.3:1.0.4]",
+                "systemImageRepositoryUrl": "quay.io/rh-newcastle",
+                "systemImageId": "builder-rhel-7-j11.0.9-11-mvn3.6.3:1.0.4",
+                "attributes": {
+                    "JDK": "11.0.9-11",
+                    "MAVEN": "3.6.3",
+                    "OS": "Linux"
+                },
+                "systemImageType": "DOCKER_IMAGE",
+                "deprecated": false,
+                "hidden": false
+            },
+            "parameters": {
+            },
+            "creationUser": {
+                "id": "100",
+                "username": "test-account"
+            },
+            "modificationUser": {
+                "id": "100",
+                "username": "test-account"
+            }
+        }
+    ]
+}
+

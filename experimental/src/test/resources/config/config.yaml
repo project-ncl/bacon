@@ -1,0 +1,43 @@
+# ##############################################################################
+#
+# Config for bacon
+#
+# All urls are the base paths only.
+#
+#     e.g USE http://example.co
+#
+#                 as opposed to:
+#
+#             http://example.com/path
+#
+# ##############################################################################
+
+# ******************************************************************************
+# PNC details
+#
+# ******************************************************************************
+profile:
+    -   name: "default"
+        pnc:
+            url: "http://localhost:45656/pnc-rest/v2/"
+            bifrostBaseurl: "http://example.com"
+
+        # ******************************************************************************
+        # Authentication information
+        #
+        # Uncomment this section if you want to create / update / delete
+        # ******************************************************************************
+
+        keycloak:
+            url: "${keycloak-url}"
+            realm: "${keycloak-realm}"
+            username: "${keycloak-user}"
+            clientSecret: "${keycloak-secret}"
+
+        pig:
+            kojiHubUrl: "http://koji.url"
+            licenseServiceUrl: "http://license.url"
+            indyUrl: "http://indy.url"
+        da:
+            url: "http://localhost:45656"
+

@@ -1,0 +1,40 @@
+dependencyResolutionConfig:
+    excludeArtifacts:
+        - org.apache.maven:*:*
+
+buildConfigGeneratorConfig:
+    defaultValues:
+        environmentName: "OpenJDK 11.0; Mvn 3.5.4"
+    scmReplaceWithPlaceholder:
+        - "svn.apache.org"
+    scmPattern:
+        "git@github.com:": "https://github.com/"
+    scmMapping:
+        "example.com/repo/foo.git": "https://example.com/gerrit/repo/foo.git"
+
+    pigTemplate:
+        product:
+            name: Autobuild Example
+            abbreviation: ABX
+            stage: Alpha
+            issueTrackerUrl: https://issues.example.com/projects/ABX
+        version: 0.0.1
+        milestone: DR1
+        group: autobuild-example
+        builds:
+            -
+        flow:
+            licensesGeneration:
+                strategy: IGNORE
+            repositoryGeneration:
+                strategy: IGNORE
+            javadocGeneration:
+                strategy: IGNORE
+            sourcesGeneration:
+                strategy: IGNORE
+        outputPrefixes:
+            releaseFile: ab-example
+            releaseDir: ab-example
+        addons:
+            notYetAlignedFromDependencyTree:
+
