@@ -514,9 +514,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 log.debug("Plugin artifact " + pluginArtifact);
                 mvnResolver.resolvePluginDependencies(pluginArtifact);
             } else {
-                if ((extensionRtArtifact.getArtifactId().contains("bom")
-                        || extensionRtArtifact.getExtension().equals("pom"))
-                        && !extensionRtArtifact.getExtension().equals("properties")) {
+                if (extensionRtArtifact.getArtifactId().contains("bom")
+                        && !extensionRtArtifact.getExtension().equals("properties")
+                        && !extensionRtArtifact.getExtension().equals("json")
+                        || extensionRtArtifact.getExtension().equals("pom")) {
                     DefaultArtifact bomPomArtifact = new DefaultArtifact(
                             extensionRtArtifact.getGroupId(),
                             extensionRtArtifact.getArtifactId(),

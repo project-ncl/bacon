@@ -2,7 +2,6 @@ package org.jboss.pnc.bacon.pig.impl.repo;
 
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
-import io.quarkus.bootstrap.util.ZipUtils;
 import io.quarkus.maven.dependency.ArtifactCoords;
 import io.quarkus.maven.dependency.GACTV;
 import org.apache.maven.model.Dependency;
@@ -12,7 +11,6 @@ import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 
 import java.io.BufferedWriter;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,6 +40,16 @@ public class TestPlatformBuilder {
 
     public TestPlatformBuilder installArtifact(String groupId, String artifactId, String version) {
         artifacts.add(new TestArtifactBuilder(new GACTV(groupId, artifactId, version)));
+        return this;
+    }
+
+    public TestPlatformBuilder installArtifact(
+            String groupId,
+            String artifactId,
+            String classifier,
+            String type,
+            String version) {
+        artifacts.add(new TestArtifactBuilder(new GACTV(groupId, artifactId, classifier, type, version)));
         return this;
     }
 
@@ -85,6 +93,22 @@ public class TestPlatformBuilder {
             return this;
         }
 
+        public TestPlatformBomBuilder addConstraint(
+                String groupId,
+                String artifactId,
+                String classifier,
+                String type,
+                String version) {
+            final Dependency d = new Dependency();
+            d.setGroupId(groupId);
+            d.setArtifactId(artifactId);
+            d.setVersion(version);
+            d.setClassifier(classifier);
+            d.setType(type);
+            bomBuilder.addManagedDependency(d);
+            return this;
+        }
+
         public TestPlatformBomBuilder addConstraint(Dependency d) {
             bomBuilder.addManagedDependency(d);
             return this;
@@ -108,8 +132,8 @@ public class TestPlatformBuilder {
             pom.setGroupId(coords.getGroupId());
             pom.setArtifactId(coords.getArtifactId());
             pom.setVersion(coords.getVersion());
-            if ("pom".equals(coords.getType())) {
-                pom.setPackaging(coords.getType());
+            if (!coords.getType().isEmpty() && !coords.getType().equals("jar")) {
+                pom.setPackaging("pom");
             }
         }
 
@@ -181,14 +205,12 @@ public class TestPlatformBuilder {
             Path artifactPath = localRepoDir.resolve(toFileName((coords)));
             try {
                 Files.createDirectories(artifactPath.getParent());
-                if (pom.getPackaging().equals("pom")) {
+                if (coords.getExtension().equals("pom")) {
                     ModelUtils.persistModel(artifactPath, pom);
                     resolver.install(coords.setFile(artifactPath.toFile()));
                 } else {
-                    try (FileSystem zip = ZipUtils.newZip(artifactPath)) {
-                        try (BufferedWriter writer = Files.newBufferedWriter(zip.getPath("content"))) {
-                            writer.write("content");
-                        }
+                    try (BufferedWriter writer = Files.newBufferedWriter(artifactPath)) {
+                        writer.write("content");
                     }
                     resolver.install(coords.setFile(artifactPath.toFile()));
                     // install the pom

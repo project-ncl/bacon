@@ -101,9 +101,33 @@ public class ResolveOnlyStepsRepositoryTest {
         TestPlatformBuilder.newInstance(workDir)
                 // quarkus-bom
                 .newBom(IO_QUARKUS_PLATFORM_TEST, "quarkus-bom", "1.1.1.redhat-00001")
+                .addConstraint(
+                        IO_QUARKUS_PLATFORM_TEST,
+                        "quarkus-bom-quarkus-platform-descriptor",
+                        "1.1.1.redhat-00001",
+                        "json",
+                        "1.1.1.redhat-00001")
+                .addConstraint(
+                        IO_QUARKUS_PLATFORM_TEST,
+                        "quarkus-bom-quarkus-platform-properties",
+                        "",
+                        "properties",
+                        "1.1.1.redhat-00001")
                 .addConstraint("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
                 .platform()
                 // install core artifacts
+                .installArtifact(
+                        IO_QUARKUS_PLATFORM_TEST,
+                        "quarkus-bom-quarkus-platform-descriptor",
+                        "1.1.1.redhat-00001",
+                        "json",
+                        "1.1.1.redhat-00001")
+                .installArtifact(
+                        IO_QUARKUS_PLATFORM_TEST,
+                        "quarkus-bom-quarkus-platform-properties",
+                        "",
+                        "properties",
+                        "1.1.1.redhat-00001")
                 .installArtifactWithDependencies("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
                 // this common-lib productized version is not in the quarkus-bom
                 .addDependency("org.thirdparty", "common-lib", "1.0.0.redhat-00005")
@@ -112,11 +136,23 @@ public class ResolveOnlyStepsRepositoryTest {
                 .installArtifact("org.thirdparty", "common-lib", "1.0.0")
                 // quarkus-camel-bom
                 .newBom(IO_QUARKUS_PLATFORM_TEST, "quarkus-camel-bom", "1.1.1.redhat-00001")
+                .addConstraint(
+                        IO_QUARKUS_PLATFORM_TEST,
+                        "quarkus-camel-bom-quarkus-platform-descriptor",
+                        "1.1.1.redhat-00001",
+                        "json",
+                        "1.1.1.redhat-00001")
                 .addConstraint("org.apache.camel.quarkus", "camel-quarkus-core", "2.2.2.redhat-00002")
                 // this common-lib upstream version is managed by the quarkus-camel-bom
                 .addConstraint("org.thirdparty", "common-lib", "1.0.0")
                 .platform()
                 // install Camel artifacts
+                .installArtifact(
+                        IO_QUARKUS_PLATFORM_TEST,
+                        "quarkus-camel-bom-quarkus-platform-descriptor",
+                        "1.1.1.redhat-00001",
+                        "json",
+                        "1.1.1.redhat-00001")
                 .installArtifactWithDependencies("org.apache.camel.quarkus", "camel-quarkus-core", "2.2.2.redhat-00002")
                 .addDependency("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
                 .platform()
