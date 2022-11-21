@@ -31,6 +31,15 @@
             <artifactId>rest-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.resilience.otel</groupId>
+            <artifactId>opentelemetry-ext-cli-java</artifactId>
+        </dependency>
+        <!-- To be removed - should be explicitly in opentelemetry-ext-cli-java -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

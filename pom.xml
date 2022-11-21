@@ -438,6 +438,18 @@
                 <artifactId>opentelemetry-ext-cli-java</artifactId>
                 <version>1.1.0</version>
             </dependency>
+            <!-- To be removed - should be explicitly in opentelemetry-ext-cli-java -->
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>1.19.0</version>
+            </dependency>
+            <!-- To be removed once BuildeFinder has upgraded. -->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs-client</artifactId>
+                <version>3.3.4</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
