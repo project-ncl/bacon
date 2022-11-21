@@ -22,18 +22,20 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
-import com.redhat.resilience.otel.OtelCLIHelper;
+import com.redhat.resilience.otel.OTelCLIHelper;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import lombok.extern.slf4j.Slf4j;
 import org.fusesource.jansi.AnsiConsole;
 import org.jboss.bacon.da.Da;
 import org.jboss.pnc.bacon.common.Constant;
-import org.jboss.pnc.bacon.common.OTELHelper;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.VersionProvider;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
+import org.jboss.pnc.common.log.MDCUtils;
 import org.jline.console.SystemRegistry;
 import org.jline.console.impl.Builtins;
 import org.jline.console.impl.SystemRegistryImpl;
@@ -209,7 +211,7 @@ public class App {
             try {
                 return commandLine.setExecutionStrategy(this::executionStrategy).execute(args);
             } finally {
-                OTELHelper.stopOtel();
+                OTelCLIHelper.stopOTel();
             }
         }
     }
@@ -258,12 +260,16 @@ public class App {
         String endpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
         String service = System.getenv("OTEL_SERVICE_NAME");
         if (endpoint != null) {
+            if (service == null) {
+                service = "bacon";
+            }
             log.debug("Enabling OpenTelemetry collection on {} with service name {}", endpoint, service);
-            OTELHelper.startOtel(
+            OTelCLIHelper.startOTel(
                     service,
                     command,
-                    OtelCLIHelper.defaultSpanProcessor(OtelCLIHelper.defaultSpanExporter(endpoint)));
-            OTELHelper.addMDCContext();
+                    OTelCLIHelper.defaultSpanProcessor(OTelCLIHelper.defaultSpanExporter(endpoint)));
+            SpanContext current = Span.current().getSpanContext();
+            MDCUtils.addMDCFromOtelHeadersWithFallback(null, current, true);
         }
     }
 
