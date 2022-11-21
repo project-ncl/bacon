@@ -61,6 +61,7 @@
         <module>da</module>
         <module>pig</module>
         <module>pnc</module>
+        <module>experimental</module>
         <module>test-common</module>
         <module>integration-tests</module>
     </modules>
@@ -133,6 +134,11 @@
             <dependency>
                 <groupId>org.jboss.pnc.bacon</groupId>
                 <artifactId>pnc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.bacon</groupId>
+                <artifactId>experimental</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -432,6 +438,13 @@
                 <groupId>org.eclipse.sisu</groupId>
                 <artifactId>org.eclipse.sisu.inject</artifactId>
                 <version>0.3.5</version>
+            </dependency>
+
+            <!-- autobuilder -->
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-domino-api</artifactId>
+                <version>0.0.74</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.resilience.otel</groupId>

@@ -15,23 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.bacon.config;
+package org.jboss.bacon.experimental;
 
-import lombok.Data;
+import picocli.CommandLine.Command;
 
-import java.util.Map;
+@Command(
+        name = "experimental",
+        hidden = true,
+        description = "EXPERIMENTAL COMMANDS: commands that are not fully supported, in development and/or without backward compatibility guarantee.",
+        subcommands = { DependencyGenerator.class })
+public class Experimental {
 
-@Data
-public class ConfigProfile {
-
-    private String name;
-    private String keycloakUrl;
-    private PncConfig pnc;
-    private DaConfig da;
-    private IndyConfig indy;
-    private PigConfig pig;
-    private KeycloakConfig keycloak;
-    private boolean enableExperimental;
-
-    private Map<String, Map<String, ?>> addOns;
 }
