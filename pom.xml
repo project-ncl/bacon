@@ -136,6 +136,11 @@
                 <artifactId>pnc</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.bacon</groupId>
+                <artifactId>temp-name</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- da -->
             <dependency>
