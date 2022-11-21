@@ -25,6 +25,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import lombok.extern.slf4j.Slf4j;
 import org.fusesource.jansi.AnsiConsole;
 import org.jboss.bacon.da.Da;
+import org.jboss.bacon.tempname.TempName;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.VersionProvider;
@@ -72,7 +73,7 @@ import static picocli.CommandLine.ScopeType.INHERIT;
         scope = INHERIT,
         mixinStandardHelpOptions = true,
         versionProvider = VersionProvider.class,
-        subcommands = { Da.class, Pig.class, Pnc.class })
+        subcommands = { Da.class, Pig.class, Pnc.class, TempName.class })
 public class App {
 
     private String profile = "default";
