@@ -61,6 +61,7 @@
         <module>da</module>
         <module>pig</module>
         <module>pnc</module>
+        <module>temp-name</module>
         <module>test-common</module>
         <module>integration-tests</module>
     </modules>
