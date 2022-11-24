@@ -56,7 +56,6 @@ public class ResolveOnlyStepsRepositoryTest {
     private static final String TEST_PLATFORM_ARTIFACTS = "test-platform-artifacts";
     private static final String EXPECTED_ARTIFACT_LIST_TXT = "resolve-and-repackage-repo-artifact-list.txt";
     private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
-    private static final String BOM_PATTERN = "quarkus-bom-[\\d]+.*.pom";
 
     private Path workDir;
     private File testMavenSettings;
@@ -114,6 +113,8 @@ public class ResolveOnlyStepsRepositoryTest {
                         "properties",
                         "1.1.1.redhat-00001")
                 .addConstraint("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
+                // shaded jar should result in inclusion of the default jar in the Maven repo ZIP
+                .addConstraint("org.acme", "acme", "shaded", "jar", "1.2.3.redhat-30303")
                 .platform()
                 // install core artifacts
                 .installArtifact(
@@ -134,6 +135,17 @@ public class ResolveOnlyStepsRepositoryTest {
                 .platform()
                 .installArtifact("org.thirdparty", "common-lib", "1.0.0.redhat-00005")
                 .installArtifact("org.thirdparty", "common-lib", "1.0.0")
+                .installArtifactWithDependencies("org.acme", "acme", "1.2.3.redhat-30303")
+                // a POM in the repo should result in the JAR associated with it also pulled in
+                .addDependency("org.acme", "acme-library", "", "pom", "2.2.4.redhat-00005")
+                .platform()
+                .installArtifact("org.acme", "acme", "shaded", "jar", "1.2.3.redhat-30303")
+                .installArtifactWithDependencies("org.acme", "acme-library", "2.2.4.redhat-00005")
+                .addDependency("org.acme", "acme-excluded", "2.2.4.redhat-00005")
+                .addDependency("org.acme", "acme-non-existent-excluded", "2.2.4.redhat-00005")
+                .addDependency("org.acme", "acme-other-non-existent-excluded", "other", "jar", "2.2.4")
+                .platform()
+                .installArtifact("org.acme", "acme-excluded", "2.2.4.redhat-00005")
                 // quarkus-camel-bom
                 .newBom(IO_QUARKUS_PLATFORM_TEST, "quarkus-camel-bom", "1.1.1.redhat-00001")
                 .addConstraint(
@@ -316,6 +328,10 @@ public class ResolveOnlyStepsRepositoryTest {
                         EXTENSIONS_LIST_URL,
                         "resolveIncludes",
                         "*:*:*redhat-*",
+                        "resolveExcludes",
+                        "*:*-excluded:*",
+                        "excludeTransitive",
+                        "org.acme:acme-non-existent-excluded, org.acme:acme-other-non-existent-excluded:other:jar",
                         // we add the quarkus-bom to the default params, since it will have to be enabled for everyone
                         "bomGavs",
                         IO_QUARKUS_PLATFORM_TEST + ":quarkus-bom:1.1.1.redhat-00001"));

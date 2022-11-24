@@ -4,6 +4,7 @@ import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
 import io.quarkus.maven.dependency.ArtifactCoords;
 import io.quarkus.maven.dependency.GACTV;
+import io.quarkus.maven.dependency.GAV;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -14,7 +15,9 @@ import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TestPlatformBuilder {
 
@@ -23,7 +26,7 @@ public class TestPlatformBuilder {
     }
 
     private final Path workDir;
-    private final List<TestArtifactBuilder> artifacts = new ArrayList<>();
+    private final Map<GAV, TestArtifactBuilder> artifacts = new HashMap<>();
     private MavenArtifactResolver resolver;
 
     private TestPlatformBuilder(Path workDir) {
@@ -39,7 +42,10 @@ public class TestPlatformBuilder {
     }
 
     public TestPlatformBuilder installArtifact(String groupId, String artifactId, String version) {
-        artifacts.add(new TestArtifactBuilder(new GACTV(groupId, artifactId, version)));
+        ArtifactCoords coords = new GACTV(groupId, artifactId, version);
+        artifacts.computeIfAbsent(
+                new GAV(coords.getGroupId(), coords.getArtifactId(), coords.getVersion()),
+                k -> new TestArtifactBuilder(coords));
         return this;
     }
 
@@ -49,14 +55,18 @@ public class TestPlatformBuilder {
             String classifier,
             String type,
             String version) {
-        artifacts.add(new TestArtifactBuilder(new GACTV(groupId, artifactId, classifier, type, version)));
+        final ArtifactCoords coords = new GACTV(groupId, artifactId, classifier, type, version);
+        final TestArtifactBuilder builder = artifacts
+                .computeIfAbsent(toGav(coords), k -> new TestArtifactBuilder(coords));
+        if (classifier != null && !classifier.isEmpty()) {
+            builder.classifiers.add(classifier);
+        }
         return this;
     }
 
     public TestArtifactBuilder installArtifactWithDependencies(String groupId, String artifactId, String version) {
-        final TestArtifactBuilder ab = new TestArtifactBuilder(new GACTV(groupId, artifactId, version));
-        artifacts.add(ab);
-        return ab;
+        ArtifactCoords coords = new GACTV(groupId, artifactId, version);
+        return artifacts.computeIfAbsent(toGav(coords), k -> new TestArtifactBuilder(coords));
     }
 
     public TestPlatformBuilder setMavenResolver(MavenArtifactResolver resolver) {
@@ -72,7 +82,7 @@ public class TestPlatformBuilder {
                 throw new IllegalStateException("Failed to initialize Maven artifact resolver", e);
             }
         }
-        artifacts.forEach(TestArtifactBuilder::build);
+        artifacts.values().forEach(TestArtifactBuilder::build);
     }
 
     public class TestPlatformBomBuilder {
@@ -81,7 +91,7 @@ public class TestPlatformBuilder {
 
         private TestPlatformBomBuilder(ArtifactCoords bomCoords) {
             this.bomBuilder = new TestArtifactBuilder(bomCoords);
-            artifacts.add(bomBuilder);
+            artifacts.put(toGav(bomCoords), bomBuilder);
         }
 
         public TestPlatformBuilder platform() {
@@ -119,6 +129,7 @@ public class TestPlatformBuilder {
 
         private final Artifact coords;
         private final Model pom;
+        private final List<String> classifiers = new ArrayList<>();
 
         private TestArtifactBuilder(ArtifactCoords coords) {
             this.coords = new DefaultArtifact(
@@ -170,10 +181,21 @@ public class TestPlatformBuilder {
         }
 
         public TestArtifactBuilder addDependency(String groupId, String artifactId, String version) {
+            return addDependency(groupId, artifactId, "", "jar", version);
+        }
+
+        public TestArtifactBuilder addDependency(
+                String groupId,
+                String artifactId,
+                String classifier,
+                String type,
+                String version) {
             final Dependency d = new Dependency();
             d.setGroupId(groupId);
             d.setArtifactId(artifactId);
             d.setVersion(version);
+            d.setClassifier(classifier);
+            d.setType(type);
             return addDependency(d);
         }
 
@@ -202,7 +224,7 @@ public class TestPlatformBuilder {
 
         private void build() {
             final Path localRepoDir = workDir.resolve("artifacts");
-            Path artifactPath = localRepoDir.resolve(toFileName((coords)));
+            Path artifactPath = localRepoDir.resolve(toFileName(coords));
             try {
                 Files.createDirectories(artifactPath.getParent());
                 if (coords.getExtension().equals("pom")) {
@@ -223,6 +245,21 @@ public class TestPlatformBuilder {
                     ModelUtils.persistModel(artifactPath, pom);
                     resolver.install(pomArtifact.setFile(artifactPath.toFile()));
                 }
+                if (!classifiers.isEmpty()) {
+                    for (String classifier : classifiers) {
+                        final Artifact artifact = new DefaultArtifact(
+                                coords.getGroupId(),
+                                coords.getArtifactId(),
+                                classifier,
+                                "jar",
+                                coords.getVersion());
+                        artifactPath = localRepoDir.resolve(toFileName(artifact));
+                        try (BufferedWriter writer = Files.newBufferedWriter(artifactPath)) {
+                            writer.write("content");
+                        }
+                        resolver.install(artifact.setFile(artifactPath.toFile()));
+                    }
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Failed to install " + coords, e);
             }
@@ -236,5 +273,9 @@ public class TestPlatformBuilder {
             }
             return sb.append('.').append(a.getExtension()).toString();
         }
+    }
+
+    private static GAV toGav(ArtifactCoords coords) {
+        return new GAV(coords.getGroupId(), coords.getArtifactId(), coords.getVersion());
     }
 }
