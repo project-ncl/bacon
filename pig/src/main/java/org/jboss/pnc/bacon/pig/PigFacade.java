@@ -167,7 +167,8 @@ public final class PigFacade {
             String[] skippedAddons,
             Path configurationDirectory) {
 
-        beforeCommand(false);
+        // NO beforeCommand! it is called from configure
+
         PigContext context = context();
 
         PncEntitiesImporter importer = new PncEntitiesImporter();
