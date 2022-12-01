@@ -382,6 +382,7 @@ When to use which?
       Handy for troubleshooting which BOM entry pulls some specific artifact. If any of the banned
       artifacts is spotted in the local Maven repo, then the triggering artifact is logged
       and the generation fails.
+* `excludeTransitive` - a comma or whitespace separated list of `groupId:artifactId[:classifier:type]` artifact coordinates that should be excluded by the Maven artifact resolver when resolving dependencies of the root artifacts that should be added to the Maven repository ZIP. This parameter allows excluding artifacts that do not exist in Indy and that would fail to be resolved.
 
 ###### Multi step Maven repository generation
 
