@@ -167,7 +167,11 @@ public final class PigFacade {
             String[] skippedAddons,
             Path configurationDirectory) {
 
-        // NO beforeCommand! it is called from configure
+        // If skipping configure we need to check and compute full version, if configure is running it will take care of
+        // it
+        if (skipPncUpdate) {
+            beforeCommand(false);
+        }
 
         PigContext context = context();
 
