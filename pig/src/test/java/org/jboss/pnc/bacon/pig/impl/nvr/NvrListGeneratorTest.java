@@ -39,7 +39,7 @@ class NvrListGeneratorTest {
                     Arrays.asList(new BuildFinderObjectMapper().readValue(buildsJson, KojiBuild[].class)));
             Map<String, Collection<String>> checksums = Collections.emptyMap();
 
-            utilsMockedStatic.when(() -> BuildFinderUtils.findBuilds(checksums, true)).thenReturn(builds);
+            utilsMockedStatic.when(() -> BuildFinderUtils.findBuilds(checksums, false)).thenReturn(builds);
 
             assertThat(NvrListGenerator.generateNvrList(checksums, target)).isTrue();
 

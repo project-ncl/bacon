@@ -40,7 +40,7 @@ public final class NvrListGenerator {
     public static boolean generateNvrList(Map<String, Collection<String>> checksums, Path targetPath) {
         log.info("Generating NVR list for {} checksums and saving result to {}", checksums.size(), targetPath);
 
-        List<KojiBuild> builds = BuildFinderUtils.findBuilds(checksums, true);
+        List<KojiBuild> builds = BuildFinderUtils.findBuilds(checksums, false);
         File outputDirectory = targetPath.normalize().getParent().toFile();
         Report nvrReport = new NVRReport(outputDirectory, builds);
         nvrReport.setBaseFilename(baseFileName(targetPath));
