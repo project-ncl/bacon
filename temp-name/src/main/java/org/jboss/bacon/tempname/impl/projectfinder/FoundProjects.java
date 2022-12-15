@@ -6,5 +6,5 @@ import java.util.Set;
 
 @Data
 public class FoundProjects {
-    Set<FoundProjects> foundProjects;
+    Set<FoundProject> foundProjects;
 }
