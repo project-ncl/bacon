@@ -21,6 +21,8 @@ import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLatestResult;
 import org.jboss.da.lookup.model.MavenLookupRequest;
 import org.jboss.da.lookup.model.MavenLookupResult;
+import org.jboss.da.lookup.model.MavenVersionsRequest;
+import org.jboss.da.lookup.model.MavenVersionsResult;
 import org.jboss.da.lookup.model.NPMLookupRequest;
 import org.jboss.da.lookup.model.NPMLookupResult;
 
@@ -39,6 +41,10 @@ public interface LookupApi {
     @POST
     @Path(value = "/maven")
     Set<MavenLookupResult> lookupMaven(MavenLookupRequest request);
+
+    @POST
+    @Path(value = "/maven/versions")
+    Set<MavenVersionsResult> versionsMaven(MavenVersionsRequest request);
 
     @POST
     @Path(value = "/maven/latest")
