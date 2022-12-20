@@ -1,0 +1,92 @@
+[
+    {
+        "groupId": "dependency-one",
+        "artifactId": "baz",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "toplevel-two",
+        "artifactId": "baz",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "toplevel-one",
+        "artifactId": "foo",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "toplevel-two",
+        "artifactId": "bar",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-common",
+        "artifactId": "bar",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-common",
+        "artifactId": "foo",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-one",
+        "artifactId": "bar",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-one",
+        "artifactId": "foo",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-two",
+        "artifactId": "bar",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "toplevel-one",
+        "artifactId": "baz",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-common",
+        "artifactId": "baz",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "toplevel-two",
+        "artifactId": "foo",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-two",
+        "artifactId": "baz",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "dependency-two",
+        "artifactId": "foo",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    },
+    {
+        "groupId": "toplevel-one",
+        "artifactId": "bar",
+        "version": "2.3.4",
+        "availableVersions": ["2.3.2.redhat-00001", "2.4.0.redhat-00001", "3.0.2.redhat-00004"]
+    }
+]
