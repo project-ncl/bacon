@@ -11,5 +11,13 @@ import java.util.Set;
 public class FoundProject {
     private Set<GAV> gavs; // maybe use different GAV class?
     private Optional<BuildConfigurationRevision> buildConfig;
+    /**
+     * Did the found build produced exact match of the version? Exact match means the same Major.Minor.Micro.Qualifier,
+     * but can differ in the -redhat suffix.
+     */
     private boolean exactMatch;
+    /**
+     * Did the found build produced all the GAs?
+     */
+    private boolean complete;
 }

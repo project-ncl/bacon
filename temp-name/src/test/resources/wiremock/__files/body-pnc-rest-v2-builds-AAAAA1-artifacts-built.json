@@ -1,0 +1,56 @@
+{
+    "pageIndex": 0,
+    "pageSize": 50,
+    "totalPages": 1,
+    "totalHits": 3,
+    "content": [
+        {
+            "id": "100",
+            "identifier": "dependency-two:bar:pom:2.3.2.redhat-00001",
+            "deployPath": null,
+            "targetRepository": {
+                "id": "100",
+                "repositoryType": "MAVEN"
+            },
+            "build": {
+                "id": "AAAAA0",
+                "buildConfigRevision": {
+                    "id": "100",
+                    "rev": 100
+                }
+            }
+        },
+        {
+            "id": "101",
+            "identifier": "dependency-two:baz:pom:2.3.2.redhat-00001",
+            "deployPath": null,
+            "targetRepository": {
+                "id": "100",
+                "repositoryType": "MAVEN"
+            },
+            "build": {
+                "id": "AAAAA0",
+                "buildConfigRevision": {
+                    "id": "100",
+                    "rev": 100
+                }
+            }
+        },
+        {
+            "id": "102",
+            "identifier": "dependency-two:foo:pom:2.3.2.redhat-00001",
+            "deployPath": null,
+            "targetRepository": {
+                "id": "100",
+                "repositoryType": "MAVEN"
+            },
+            "build": {
+                "id": "AAAAA0",
+                "buildConfigRevision": {
+                    "id": "100",
+                    "rev": 100
+                }
+            }
+        }
+    ]
+}
