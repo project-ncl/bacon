@@ -1,0 +1,21 @@
+{
+  "id" : "d1e6f9f8-87f8-30ca-0400-8c72a0525606",
+  "request" : {
+    "url" : "/pnc-rest/v2/build-configs/400/revisions/400",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-pnc-rest-v2-build-configs-400-revisions-400.json",
+    "headers" : {
+      "access-control-allow-headers" : "accept, authorization,  content-type, x-requested-with",
+      "date" : "Tue, 20 Dec 2022 19:23:18 GMT",
+      "access-control-allow-origin" : "*",
+      "access-control-allow-credentials" : "true",
+      "content-type" : "application/json",
+      "access-control-max-age" : "1",
+      "access-control-allow-methods" : "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+    }
+  },
+  "uuid" : "d1e6f9f8-87f8-30ca-0400-8c72a0525606"
+}
