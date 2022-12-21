@@ -439,6 +439,13 @@
                 <artifactId>org.eclipse.sisu.inject</artifactId>
                 <version>0.3.5</version>
             </dependency>
+
+            <!-- autobuilder -->
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>deps-to-build-api</artifactId>
+                <version>0.0.70</version>
+            </dependency>
             <dependency>
                 <groupId>com.redhat.resilience.otel</groupId>
                 <artifactId>opentelemetry-ext-cli-java</artifactId>
