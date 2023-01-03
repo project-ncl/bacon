@@ -20,6 +20,7 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
@@ -90,7 +91,8 @@ public class ProjectFinder {
         }
         found.setComplete(validateBuild(gavs, buildVersion.build));
         found.setExactMatch(isExactVersion(gav.getVersion(), buildVersion.version));
-        found.setBuildConfig(Optional.of(getBuildConfigurationRevision(buildVersion.build)));
+        found.setBuildConfigRevision(Optional.of(getBuildConfigurationRevision(buildVersion.build)));
+        found.setBuildConfig(Optional.of(getBuildConfiguration(buildVersion.build)));
         return found;
     }
 
@@ -145,6 +147,15 @@ public class ProjectFinder {
                 }
             }
             return null;
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private BuildConfiguration getBuildConfiguration(Build build) {
+        try {
+            BuildConfigurationRevisionRef buildConfigRevision = build.getBuildConfigRevision();
+            return buildConfigClient.getSpecific(buildConfigRevision.getId());
         } catch (RemoteResourceException e) {
             throw new RuntimeException(e);
         }

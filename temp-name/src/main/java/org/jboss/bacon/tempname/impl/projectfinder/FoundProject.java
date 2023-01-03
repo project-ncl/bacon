@@ -2,6 +2,7 @@ package org.jboss.bacon.tempname.impl.projectfinder;
 
 import lombok.Data;
 import org.jboss.da.model.rest.GAV;
+import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 
 import java.util.Optional;
@@ -10,7 +11,8 @@ import java.util.Set;
 @Data
 public class FoundProject {
     private Set<GAV> gavs; // maybe use different GAV class?
-    private Optional<BuildConfigurationRevision> buildConfig;
+    private Optional<BuildConfigurationRevision> buildConfigRevision;
+    private Optional<BuildConfiguration> buildConfig;
     /**
      * Did the found build produced exact match of the version? Exact match means the same Major.Minor.Micro.Qualifier,
      * but can differ in the -redhat suffix.

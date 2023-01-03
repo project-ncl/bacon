@@ -57,7 +57,7 @@ public class ProjectFinderTest {
         }
         assertThat(toplevelOne).isNotNull();
         assertThat(toplevelOne.getBuildConfig()).isNotEmpty();
-        BuildConfigurationRevision revision = toplevelOne.getBuildConfig().get();
+        BuildConfigurationRevision revision = toplevelOne.getBuildConfigRevision().get();
         assertThat(revision.getId()).isEqualTo("300");
     }
 
