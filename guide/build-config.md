@@ -135,6 +135,9 @@ builds:
   buildCategory: STANDARD # Optional: used for managed services builds, specify STANDARD or SERVICE, defaults to STANDARD
 
   brewBuildName: <brew build name> # Optional: if you wish to push the build to an alternate brew tag
+
+  parameters: #generic parameters 
+    parameter: "value"
 ...
 ```
 
@@ -198,6 +201,17 @@ builds:
 ```
 
 You can specify which builds need to be done before the build dependency is specified for. Dependency build must also be part of the 'builds' list in the build-configuration.yaml
+
+#### parameters
+
+```
+builds:
+- name: build-1
+  parameters:
+     BPM_SERVER: "RH-DEV"
+```
+
+You can specify generic parameters without specific property to set them directly.
 
 ### Best practices for the naming of builds
 We recommend that each build configuration's name uses the format "\<project name\>-\<version being built\>" or "\<GroupId\>-\<ArtifactId\>-\<version\>". This allows you to more easily build different versions of the project without having to edit the same build configuration.
