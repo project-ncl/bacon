@@ -506,6 +506,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         final List<Exclusion> transitiveExclusions = parseExclusions(params.get("excludeTransitive"));
 
+        ensureDefaultJarsIncluded(extensionRtArtifactList);
+
         if (log.isDebugEnabled()) {
             log.debug(
                     "About to resolve artifacts \n" + extensionRtArtifactList.stream()
@@ -516,8 +518,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 transitiveExclusions.forEach(e -> log.debug("  " + e));
             }
         }
-
-        ensureDefaultJarsIncluded(extensionRtArtifactList);
 
         Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
 
