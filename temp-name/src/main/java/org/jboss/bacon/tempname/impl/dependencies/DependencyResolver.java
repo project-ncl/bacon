@@ -1,12 +1,17 @@
 package org.jboss.bacon.tempname.impl.dependencies;
 
-import io.quarkus.bom.decomposer.ReleaseOrigin;
-import io.quarkus.bom.decomposer.maven.ProjectDependencyConfig;
-import io.quarkus.bom.decomposer.maven.ProjectDependencyResolver;
-import io.quarkus.bom.decomposer.maven.ReleaseRepo;
+import io.quarkus.bom.decomposer.ReleaseId;
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
+import io.quarkus.domino.ProjectDependencyConfig;
+import io.quarkus.domino.ProjectDependencyResolver;
+import io.quarkus.domino.ReleaseRepo;
+import io.quarkus.maven.dependency.ArtifactCoords;
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.tempname.impl.config.DependencyResolutionConfig;
 import org.jboss.da.model.rest.GAV;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,31 +19,59 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class DependencyResolver {
 
-    private final ProjectDependencyConfig.Mutable config;
+    private final ProjectDependencyConfig.Mutable dominoConfig;
+    private final DependencyResolutionConfig config;
 
     public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig) {
-        config = ProjectDependencyConfig.builder();
-        config.setExcludePatterns(Set.of()) // TODO
+        this.config = dependencyResolutionConfig;
+        dominoConfig = ProjectDependencyConfig.builder();
+
+        config.getExcludeArtifacts().stream().map(ArtifactCoords::fromString).forEach(dominoConfig::addExcludePattern);
+        config.getIncludeArtifacts().stream().map(ArtifactCoords::fromString).forEach(dominoConfig::addIncludePattern);
+        Set<ArtifactCoords> artifacts = config.getAnalyzeArtifacts()
+                .stream()
+                .map(ArtifactCoords::fromString)
+                .collect(Collectors.toSet());
+
+        dominoConfig.setIncludeNonManaged(true)
                 .setExcludeBomImports(false) // TODO
-                .setExcludeGroupIds(Set.of()) // TODO
-                .setExcludeKeys(Set.of()) // TODO
                 .setExcludeParentPoms(false) // TODO
-                .setIncludeArtifacts(Set.of()) // TODO
-                .setIncludeGroupIds(Set.of()) // TODO
-                .setIncludeKeys(Set.of()) // TODO
+                .setIncludeArtifacts(artifacts)
                 .setLevel(-1)
-                .setProjectArtifacts(Set.of())
-                // .setProjectArtifacts(rootArtifacts.stream().map(ArtifactCoords::fromString).collect(Collectors.toList()))
+                .setProjectArtifacts(Set.of()) // TODO
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
     }
 
-    public DependencyResult resolve() {
-        ProjectDependencyResolver resolver = ProjectDependencyResolver.builder().setDependencyConfig(config).build();
-
+    public DependencyResult resolve(Path projectDir) {
+        dominoConfig.setProjectDir(projectDir);
+        ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
+                .setArtifactResolver(getArtifactResolver(projectDir))
+                .setDependencyConfig(dominoConfig)
+                .build();
         return parseReleaseRepos(resolver.getReleaseRepos());
+    }
+
+    public DependencyResult resolve() {
+        ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
+                .setDependencyConfig(dominoConfig)
+                .build();
+        return parseReleaseRepos(resolver.getReleaseRepos());
+    }
+
+    protected MavenArtifactResolver getArtifactResolver(Path projectDir) {
+        try {
+            return MavenArtifactResolver.builder()
+                    .setCurrentProject(projectDir.toAbsolutePath().toString())
+                    .setEffectiveModelBuilder(true)
+                    .setPreferPomsFromWorkspace(true)
+                    .build();
+        } catch (BootstrapMavenException e) {
+            throw new RuntimeException("Failed to initialize Maven artifact resolver", e);
+        }
     }
 
     private DependencyResult parseReleaseRepos(Collection<ReleaseRepo> releaseRepos) {
@@ -46,12 +79,15 @@ public class DependencyResolver {
         Set<Project> rootProjects = new HashSet<>();
         for (ReleaseRepo repo : releaseRepos) {
             Project project = new Project();
+
             Set<GAV> gavs = repo.getArtifacts()
+                    .keySet()
                     .stream()
                     .map(a -> new GAV(a.getGroupId(), a.getArtifactId(), a.getVersion()))
                     .collect(Collectors.toSet());
             project.setGavs(gavs);
-            project.setSourceCodeURL(getSourceCodeURL(repo.id().origin()));
+            project.setSourceCodeURL(getSourceCodeURL(repo.id()));
+            project.setSourceCodeRevision(getSourceCodeRevision(repo.id()));
             mapping.put(repo, project);
             if (repo.isRoot()) {
                 rootProjects.add(project);
@@ -67,7 +103,11 @@ public class DependencyResolver {
         return result;
     }
 
-    private String getSourceCodeURL(ReleaseOrigin origin) {
-        return origin.toString(); // TODO: this API will probably change
+    private String getSourceCodeURL(ReleaseId releaseId) {
+        return releaseId.origin().toString(); // TODO: this API will probably change
+    }
+
+    private String getSourceCodeRevision(ReleaseId releaseId) {
+        return releaseId.version().asString(); // TODO: this API will probably change
     }
 }

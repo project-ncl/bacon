@@ -30,8 +30,14 @@ import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import picocli.CommandLine;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -45,6 +51,12 @@ public class DependencyGenerator {
     @CommandLine.Command(name = "generate", description = "Generates build config")
     public static class Generate extends JSONCommandHandler implements Callable<Integer> {
 
+        @CommandLine.Option(names = { "--project-dir" }, description = "Project directory")
+        private Path projectDir;
+
+        @CommandLine.Parameters(description = "Autobuilder configuration file")
+        private Path config;
+
         @Override
         public Integer call() {
             try {
@@ -55,12 +67,30 @@ public class DependencyGenerator {
             return 0;
         }
 
+        private GeneratorConfig loadConfig() {
+            if (config == null) {
+                throw new FatalException("You need to specify the configuration directory!");
+            }
+
+            Yaml yaml = new Yaml(new Constructor(GeneratorConfig.class));
+            try (BufferedReader reader = Files.newBufferedReader(config)) {
+                return yaml.load(reader);
+            } catch (IOException e) {
+                throw new FatalException("Unable to load config file", e);
+            }
+        }
+
         private PigConfiguration generatePigConfig() {
             // Load config file
-            GeneratorConfig config = null;
+            GeneratorConfig config = loadConfig();
             // Analyze dependencies
             DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
-            DependencyResult dependencies = dependencyResolver.resolve();
+            DependencyResult dependencies;
+            if (projectDir != null) {
+                dependencies = dependencyResolver.resolve(projectDir);
+            } else {
+                dependencies = dependencyResolver.resolve();
+            }
             // Generate BCs
             // Find pre-existing BC in PNC
             ProjectFinder projectFinder = new ProjectFinder();

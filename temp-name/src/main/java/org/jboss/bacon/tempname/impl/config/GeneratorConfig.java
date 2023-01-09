@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class GeneratorConfig {
-    DependencyResolutionConfig dependencyResolutionConfig;
-    BuildConfigGeneratorConfig buildConfigGeneratorConfig;
+    private DependencyResolutionConfig dependencyResolutionConfig = new DependencyResolutionConfig();
+    private BuildConfigGeneratorConfig buildConfigGeneratorConfig = new BuildConfigGeneratorConfig();
 }

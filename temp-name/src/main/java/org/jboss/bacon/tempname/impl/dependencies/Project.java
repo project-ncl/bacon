@@ -10,6 +10,7 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = "dependencies")
 public class Project {
     private String sourceCodeURL;
-    private Set<GAV> gavs; // maybe use different GAV class?
+    private String sourceCodeRevision;
+    private Set<GAV> gavs;
     private Set<Project> dependencies;
 }
