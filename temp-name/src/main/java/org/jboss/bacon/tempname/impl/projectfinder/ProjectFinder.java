@@ -10,6 +10,7 @@ import org.jboss.bacon.tempname.impl.dependencies.Project;
 import org.jboss.da.lookup.model.MavenVersionsRequest;
 import org.jboss.da.lookup.model.MavenVersionsResult;
 import org.jboss.da.lookup.model.VersionDistanceRule;
+import org.jboss.da.lookup.model.VersionFilter;
 import org.jboss.da.model.rest.GA;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -86,6 +87,7 @@ public class ProjectFinder {
         BuildVersion buildVersion = findBuild(gav, availableVersions.get(gav));
 
         if (buildVersion == null) {
+            found.setBuildConfigRevision(Optional.empty());
             found.setBuildConfig(Optional.empty());
             return found;
         }
@@ -124,6 +126,7 @@ public class ProjectFinder {
     private Map<GAV, List<String>> findAvailableVersions(Set<GAV> allGAVs) {
         MavenVersionsRequest request = MavenVersionsRequest.builder()
                 .mode("TEMPORARY_PREFER_PERSISTENT")
+                .filter(VersionFilter.ALL)
                 .artifacts(allGAVs)
                 .distanceRule(VersionDistanceRule.CLOSEST_BY_PARTS)
                 .build();
@@ -173,10 +176,11 @@ public class ProjectFinder {
     private Build searchBuild(GAV gav) throws RemoteResourceException {
         String identifier = gav.getGroupId() + ":" + gav.getArtifactId() + ":pom:" + gav.getVersion();
         String identifierQuery = "identifier==" + identifier;
+        String artifactQuery = identifierQuery + ";build=isnull=false";
         RemoteCollection<Artifact> artifacts = artifactClient
-                .getAll(null, null, null, Optional.empty(), Optional.of(identifierQuery));
+                .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
         if (artifacts.size() == 0) {
-            throw new IllegalStateException("There should exist artifact with identifier " + identifier);
+            return null;
         } else if (artifacts.size() > 1) {
             throw new IllegalStateException("There should exist only one artifact with identifier " + identifier);
         }
