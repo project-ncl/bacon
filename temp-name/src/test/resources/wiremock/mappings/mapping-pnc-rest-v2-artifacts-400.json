@@ -1,7 +1,7 @@
 {
   "id" : "88148ab5-612f-3260-0400-962d92dcb686",
   "request" : {
-    "url" : "/pnc-rest/v2/artifacts?pageSize=50&pageIndex=0&q=identifier%3D%3Dtoplevel-two%3Abar%3Apom%3A2.3.2.redhat-00001",
+    "url" : "/pnc-rest/v2/artifacts?pageSize=50&pageIndex=0&q=identifier%3D%3Dtoplevel-two%3Abar%3Apom%3A2.3.2.redhat-00001;build=isnull=false",
     "method" : "GET"
   },
   "response" : {
