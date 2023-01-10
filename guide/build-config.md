@@ -186,6 +186,19 @@ To get the `environmentId`, `environmentName` or the `systemImageId` of the buil
 bacon pnc environment list
 ```
 
+#### dependencies
+```
+builds:
+- name: build-1
+  ...
+- name: build-2
+  ...
+  dependencies:
+  - build-1  
+```
+
+You can specify which builds need to be done before the build dependency is specified for. Dependency build must also be part of the 'builds' list in the build-configuration.yaml
+
 ### Best practices for the naming of builds
 We recommend that each build configuration's name uses the format "\<project name\>-\<version being built\>" or "\<GroupId\>-\<ArtifactId\>-\<version\>". This allows you to more easily build different versions of the project without having to edit the same build configuration.
 
