@@ -1281,6 +1281,39 @@
           }
       ]
   },
+    {
+        "groupId": "org.scala-lang.modules",
+        "artifactId": "scala-collection-compat_2.13",
+        "version-regexp": "2\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "com.typesafe.scala-logging",
+        "artifactId": "scala-logging_2.13",
+        "version-regexp": "3\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "org.scala-lang.modules",
+        "artifactId": "scala-java8-compat_2.13",
+        "version-regexp": "1\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
   {
       "groupId": "org.elasticsearch.client",
       "artifactId": "elasticsearch-rest-client",
