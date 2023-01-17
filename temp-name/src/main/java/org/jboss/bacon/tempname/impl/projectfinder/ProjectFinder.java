@@ -87,14 +87,16 @@ public class ProjectFinder {
         BuildVersion buildVersion = findBuild(gav, availableVersions.get(gav));
 
         if (buildVersion == null) {
-            found.setBuildConfigRevision(Optional.empty());
-            found.setBuildConfig(Optional.empty());
+            found.setFound(false);
             return found;
         }
         found.setComplete(validateBuild(gavs, buildVersion.build));
         found.setExactMatch(isExactVersion(gav.getVersion(), buildVersion.version));
-        found.setBuildConfigRevision(Optional.of(getBuildConfigurationRevision(buildVersion.build)));
-        found.setBuildConfig(Optional.of(getBuildConfiguration(buildVersion.build)));
+        BuildConfigurationRevision buildConfigurationRevision = getBuildConfigurationRevision(buildVersion.build);
+        found.setBuildConfigRevision(buildConfigurationRevision);
+        found.setBuildConfig(getBuildConfiguration(buildVersion.build));
+        int latestRev = getLatestBuildConfigurationRevision(buildConfigurationRevision.getId()).getRev();
+        found.setLatestRevision(buildConfigurationRevision.getRev() == latestRev);
         return found;
     }
 
@@ -146,6 +148,7 @@ public class ProjectFinder {
                 GAV toSearch = new GAV(gav.getGA(), version);
                 Build build = searchBuild(toSearch);
                 if (build != null) {
+                    log.debug("Found build " + build.getId() + " for GAV " + toSearch);
                     return new BuildVersion(build, toSearch.getVersion());
                 }
             }
@@ -159,6 +162,18 @@ public class ProjectFinder {
         try {
             BuildConfigurationRevisionRef buildConfigRevision = build.getBuildConfigRevision();
             return buildConfigClient.getSpecific(buildConfigRevision.getId());
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private BuildConfigurationRevision getLatestBuildConfigurationRevision(String buildConfigId) {
+        try {
+            return buildConfigClient.getRevisions(buildConfigId)
+                    .getAll()
+                    .stream()
+                    .max((new BuildConfigRevisionAgeComparator()))
+                    .get();
         } catch (RemoteResourceException e) {
             throw new RuntimeException(e);
         }
@@ -203,4 +218,22 @@ public class ProjectFinder {
         private String version;
     }
 
+    /**
+     * Compares Build Config Revisions by modification time. If the modification times are the same or some is null, it
+     * compares the Revisions by revision (rev) number.
+     */
+    private class BuildConfigRevisionAgeComparator implements Comparator<BuildConfigurationRevision> {
+
+        @Override
+        public int compare(BuildConfigurationRevision one, BuildConfigurationRevision two) {
+            if (one.getModificationTime() == null || two.getModificationTime() == null) {
+                return Integer.compare(one.getRev(), two.getRev());
+            }
+            int comp = one.getModificationTime().compareTo(two.getModificationTime());
+            if (comp == 0) {
+                comp = Integer.compare(one.getRev(), two.getRev());
+            }
+            return comp;
+        }
+    }
 }
