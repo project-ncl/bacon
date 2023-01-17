@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Validate;
@@ -62,6 +64,7 @@ import static java.util.stream.Collectors.toMap;
  *         Date: 11/28/17
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PigConfiguration implements Validate {
     private static final Logger log = LoggerFactory.getLogger(PigConfiguration.class);
 
@@ -245,6 +248,7 @@ public class PigConfiguration implements Validate {
         }
     }
 
+    @JsonIgnore
     public String getTopLevelDirectoryPrefix() {
         String finalSuffix = "";
         // folder name will become <release-dir>-<version>-<stage>-<suffix>-maven-repository
