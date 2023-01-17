@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -26,6 +27,7 @@ import javax.validation.constraints.NotBlank;
  *         Date: 11/28/17
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductConfig {
     private @NotBlank String name;
     private @NotBlank String abbreviation;

@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import java.util.TreeSet;
  *         Date: 5/25/18
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class JavadocGenerationData extends GenerationData<JavadocGenerationStrategy> {
     private static final Logger log = LoggerFactory.getLogger(JavadocGenerationData.class);
 

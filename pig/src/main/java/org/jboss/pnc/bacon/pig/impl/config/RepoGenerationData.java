@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -33,6 +34,7 @@ import java.util.Set;
  *         Date: 1/17/18
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
 
     public static RepoGenerationData merge(RepoGenerationData defaults, RepoGenerationData overrides) {
