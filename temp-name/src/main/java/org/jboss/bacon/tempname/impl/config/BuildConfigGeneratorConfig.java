@@ -2,8 +2,15 @@ package org.jboss.bacon.tempname.impl.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+
+import java.util.LinkedHashMap;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class BuildConfigGeneratorConfig {
+    private PigConfiguration pigTemplate;
+    private LinkedHashMap<String, String> scmPattern = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> scmMapping = new LinkedHashMap<>();
+    private boolean failGeneratedBuildScript = true;
 }
