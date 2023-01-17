@@ -66,6 +66,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -506,6 +507,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         final List<Exclusion> transitiveExclusions = parseExclusions(params.get("excludeTransitive"));
 
+        ensureDefaultJarsIncluded(extensionRtArtifactList);
+
         if (log.isDebugEnabled()) {
             log.debug(
                     "About to resolve artifacts \n" + extensionRtArtifactList.stream()
@@ -516,8 +519,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 transitiveExclusions.forEach(e -> log.debug("  " + e));
             }
         }
-
-        ensureDefaultJarsIncluded(extensionRtArtifactList);
 
         Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
 
@@ -791,11 +792,23 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     public Map<Artifact, String> collectRedhatVersions(Collection<Artifact> extensionArtifacts) {
+        /*
+         * Take only those versions from the PNC build which are not managed in the BOM. This is important when
+         * performing quick local MRRC builds that rely on BOMs built and installed locally whose versions are newer
+         * than in any available PNC build.
+         */
+        final List<Artifact> extensionArtifactsWithoutVersions = extensionArtifacts.stream()
+                .filter(artifact -> artifact.getVersion() == null)
+                .collect(Collectors.toList());
+        if (extensionArtifactsWithoutVersions.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         Map<Artifact, String> result = new HashMap<>();
         builds.forEach((key, pncBuild) -> {
             if (pncBuild.getBuiltArtifacts() != null) {
                 pncBuild.getBuiltArtifacts().forEach((artifactWrapper -> {
-                    extensionArtifacts.forEach((extensionArtifact -> {
+                    extensionArtifactsWithoutVersions.forEach((extensionArtifact -> {
                         GAV gav = artifactWrapper.toGAV();
                         if (extensionArtifact.getGroupId().equals(gav.getGroupId())
                                 && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
@@ -806,7 +819,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
             if (pncBuild.getDependencyArtifacts() != null) {
                 pncBuild.getDependencyArtifacts().forEach((artifactWrapper -> {
-                    extensionArtifacts.forEach((extensionArtifact -> {
+                    extensionArtifactsWithoutVersions.forEach((extensionArtifact -> {
                         GAV gav = artifactWrapper.toGAV();
                         if (extensionArtifact.getGroupId().equals(gav.getGroupId())
                                 && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
