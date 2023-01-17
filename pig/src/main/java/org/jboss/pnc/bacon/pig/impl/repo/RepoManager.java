@@ -29,6 +29,8 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.graph.Exclusion;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
@@ -458,7 +460,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             RepoGenerationData generationData,
             File sourceDir,
             MavenArtifactResolver mvnResolver,
-            Comparator<Artifact> artifactComparator) throws BootstrapMavenException {
+            Comparator<Artifact> artifactComparator) throws BootstrapMavenException, DependencyResolutionException {
         final Map<String, Path> bannedDirs = parseBannedArtifactsParameter(generationData, sourceDir);
 
         /* We use TreeSet for reproducible ordering */
@@ -566,14 +568,27 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                      * want. If we resolved the artifact directly, it would also resolve the direct optional
                      * dependencies.
                      */
-                    final DependencyNode root = mvnResolver.resolveManagedDependencies(
-                            bom,
-                            List.of(new Dependency(redHatArtifact, JavaScopes.RUNTIME, false, transitiveExclusions)),
-                            managedDeps, // version constraints from the BOM
-                            List.of(), // extra maven repos, ignore this
-                            JavaScopes.TEST,
-                            JavaScopes.PROVIDED // dependency scopes that should be ignored
-                    ).getRoot();
+
+                    final DependencyNode root = mvnResolver.getSystem()
+                            .resolveDependencies(
+                                    mvnResolver.getSession(),
+                                    new DependencyRequest().setCollectRequest(
+                                            mvnResolver.newCollectManagedRequest(
+                                                    bom,
+                                                    List.of(
+                                                            new Dependency(
+                                                                    redHatArtifact,
+                                                                    JavaScopes.RUNTIME,
+                                                                    false,
+                                                                    transitiveExclusions)),
+                                                    managedDeps, // version constraints from the BOM
+                                                    List.of(), // extra maven repos, ignore this
+                                                    List.of(), // exclusions
+                                                    Set.of(JavaScopes.TEST, JavaScopes.PROVIDED) // dependency scopes
+                                                                                                 // that should be
+                                                                                                 // ignored
+                                            )))
+                            .getRoot();
                     root.getChildren().forEach(n -> collectArtifacts(n, collectedArtifacts));
                 }
             }
