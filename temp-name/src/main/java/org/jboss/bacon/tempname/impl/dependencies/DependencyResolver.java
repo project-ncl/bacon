@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.tempname.impl.config.DependencyResolutionConfig;
 import org.jboss.da.model.rest.GAV;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -104,7 +105,16 @@ public class DependencyResolver {
     }
 
     private String getSourceCodeURL(ReleaseId releaseId) {
-        return releaseId.origin().toString(); // TODO: this API will probably change
+        String sourceUrl = releaseId.origin().toString(); // TODO: this API will probably change
+        try {
+            URI uri = URI.create(sourceUrl);
+            if (!uri.getScheme().startsWith("git") && !uri.getScheme().startsWith("http")) {
+                return null;
+            }
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+        return sourceUrl;
     }
 
     private String getSourceCodeRevision(ReleaseId releaseId) {

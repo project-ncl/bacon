@@ -12,5 +12,7 @@ public class BuildConfigGeneratorConfig {
     private PigConfiguration pigTemplate;
     private LinkedHashMap<String, String> scmPattern = new LinkedHashMap<>();
     private LinkedHashMap<String, String> scmMapping = new LinkedHashMap<>();
+    private String placeholderSCMUrl = "https://github.com/michalszynkiewicz/empty.git";
+    private String placeholderSCMRevision = "master";
     private boolean failGeneratedBuildScript = true;
 }

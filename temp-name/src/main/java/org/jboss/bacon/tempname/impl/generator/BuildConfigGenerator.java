@@ -84,8 +84,14 @@ public class BuildConfigGenerator {
         buildConfig.setName(name);
         buildConfig.setProject(gav.getGroupId() + "-" + gav.getArtifactId());
         buildConfig.setDescription("Autobuild genearted config for " + gav);
-        buildConfig.setScmUrl(processScmUrl(project.getSourceCodeURL()));
-        buildConfig.setScmRevision(project.getSourceCodeRevision());
+        if (project.getSourceCodeURL() == null) {
+            log.warn("Using placeholder SCM url for Build Config {}", name);
+            buildConfig.setScmUrl(config.getPlaceholderSCMUrl());
+            buildConfig.setScmRevision(config.getPlaceholderSCMRevision());
+        } else {
+            buildConfig.setScmUrl(processScmUrl(project.getSourceCodeURL()));
+            buildConfig.setScmRevision(project.getSourceCodeRevision());
+        }
         return buildConfig;
     }
 
