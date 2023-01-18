@@ -37,11 +37,16 @@ public class DependencyResolver {
                 .map(ArtifactCoords::fromString)
                 .collect(Collectors.toSet());
 
+        if (config.getAnalyzeBOM() != null) {
+            dominoConfig.setProjectBom(ArtifactCoords.fromString(config.getAnalyzeBOM()));
+        }
+
         dominoConfig.setIncludeNonManaged(true)
                 .setExcludeBomImports(false) // TODO
                 .setExcludeParentPoms(false) // TODO
                 .setIncludeArtifacts(artifacts)
                 .setLevel(-1)
+                .setWarnOnResolutionErrors(true)
                 .setProjectArtifacts(Set.of()) // TODO
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
