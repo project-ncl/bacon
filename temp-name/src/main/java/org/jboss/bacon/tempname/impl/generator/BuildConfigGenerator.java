@@ -50,6 +50,10 @@ public class BuildConfigGenerator {
             return buildConfigMap.get(project);
         }
         BuildConfig buildConfig = processProject(project, getFoundForProject(project, foundProjects));
+
+        // Set the build category to AUTO for every adjusted or generated BuildConfiguration
+        buildConfig.getParameters().put("BUILD_CATEGORY", "AUTO");
+
         buildConfigMap.put(project, buildConfig);
         for (Project dep : project.getDependencies()) {
             BuildConfig depBuildConfig = generateConfig(buildConfigMap, dep, foundProjects);
