@@ -91,6 +91,7 @@ public class DependencyGenerator {
             } else {
                 dependencies = dependencyResolver.resolve();
             }
+            log.info("Analyzed project and found {} dependencies", dependencies.getCount());
             // Generate BCs
             // Find pre-existing BC in PNC
             ProjectFinder projectFinder = new ProjectFinder();

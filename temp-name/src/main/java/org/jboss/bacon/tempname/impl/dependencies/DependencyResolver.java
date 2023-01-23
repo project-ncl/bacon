@@ -106,6 +106,7 @@ public class DependencyResolver {
 
         DependencyResult result = new DependencyResult();
         result.setTopLevelProjects(rootProjects);
+        result.setCount(releaseRepos.size());
         return result;
     }
 
