@@ -45,10 +45,8 @@ import picocli.CommandLine.Parameters;
 
 import javax.ws.rs.core.Response;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -283,25 +281,14 @@ public class BuildCli {
          */
         @Override
         public Integer call() throws Exception {
-            try (BuildClient client = CREATOR.newClient()) {
-                Optional<InputStream> buildLogs = client.getBuildLogs(buildId);
-
-                if (buildLogs.isPresent()) {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(buildLogs.get()))) {
-                        reader.lines().forEach(log::info);
-                    } catch (IOException e) {
-                        throw new ClientException("Cannot read log stream.", e);
-                    }
-                } else {
-                    // print live log
-                    String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
-                    URI bifrostUri = URI.create(bifrostBase);
-                    BifrostClient logProcessor = new BifrostClient(bifrostUri);
-                    logProcessor.writeLog(buildId, follow, log::info);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
+            URI bifrostUri = URI.create(bifrostBase);
+            BifrostClient logProcessor = new BifrostClient(bifrostUri);
+            logProcessor.writeLog(
+                    buildId,
+                    follow,
+                    log::info,
+                    follow ? BifrostClient.LogType.COMPLETE : BifrostClient.LogType.BUILD);
             return 0;
         }
     }
@@ -319,21 +306,10 @@ public class BuildCli {
          */
         @Override
         public Integer call() throws Exception {
-            try (BuildClient client = CREATOR.newClient()) {
-                Optional<InputStream> alignLogs = client.getAlignLogs(buildId);
-                // is there a stored record
-                if (alignLogs.isPresent()) {
-                    try (InputStream inputStream = alignLogs.get();
-                            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                            BufferedReader reader = new BufferedReader(inputStreamReader)) {
-                        reader.lines().forEach(log::info);
-                    } catch (IOException e) {
-                        throw new ClientException("Cannot read log stream.", e);
-                    }
-                }
-            } catch (RemoteResourceException e) {
-                throw new ClientException("Cannot read remote resource.", e);
-            }
+            String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
+            URI bifrostUri = URI.create(bifrostBase);
+            BifrostClient logProcessor = new BifrostClient(bifrostUri);
+            logProcessor.writeLog(buildId, false, log::info, BifrostClient.LogType.ALIGNMENT);
             return 0;
         }
     }

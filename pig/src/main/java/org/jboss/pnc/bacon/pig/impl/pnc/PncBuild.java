@@ -24,26 +24,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
-import org.jboss.pnc.client.BuildClient;
-import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -153,33 +148,22 @@ public class PncBuild {
             return buildLog;
         }
 
-        try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration())) {
-            Optional<InputStream> maybeBuildLogs = buildClient.getBuildLogs(id);
+        String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
+        URI bifrostUri = URI.create(bifrostBase);
+        BifrostClient logProcessor = new BifrostClient(bifrostUri);
+        try {
+            buildLog = logProcessor.getLog(id, BifrostClient.LogType.BUILD);
 
-            if (maybeBuildLogs.isPresent()) {
-                try (InputStream inputStream = maybeBuildLogs.get()) {
-                    buildLog = readLog(inputStream);
-                }
-            } else {
+            if (buildLog == null) {
                 log.debug("Couldn't find logs for build id: {} ( {} )", id, UrlGenerator.generateBuildUrl(id));
                 buildLog = Collections.emptyList();
             }
 
             return buildLog;
-        } catch (ClientException | IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(
                     "Failed to get build log for " + id + " (" + UrlGenerator.generateBuildUrl(id) + ")",
                     e);
-        }
-    }
-
-    private static List<String> readLog(InputStream inputStream) throws IOException {
-        List<String> lines = new ArrayList<>();
-
-        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            reader.lines().forEach(lines::add);
-            return lines;
         }
     }
 
