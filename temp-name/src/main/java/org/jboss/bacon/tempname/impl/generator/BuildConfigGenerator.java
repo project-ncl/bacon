@@ -84,12 +84,11 @@ public class BuildConfigGenerator {
         buildConfig.setName(name);
         buildConfig.setProject(gav.getGroupId() + "-" + gav.getArtifactId());
         buildConfig.setDescription("Autobuild genearted config for " + gav);
-        if (project.getSourceCodeURL() == null) {
-            log.warn("Using placeholder SCM url for Build Config {}", name);
-            buildConfig.setScmUrl(config.getPlaceholderSCMUrl());
-            buildConfig.setScmRevision(config.getPlaceholderSCMRevision());
+        String scmUrl = processScmUrl(project.getSourceCodeURL());
+        if (scmUrl == null) {
+            setPlaceholderSCM(name, buildConfig);
         } else {
-            buildConfig.setScmUrl(processScmUrl(project.getSourceCodeURL()));
+            buildConfig.setScmUrl(scmUrl);
             buildConfig.setScmRevision(project.getSourceCodeRevision());
         }
         return buildConfig;
@@ -198,12 +197,31 @@ public class BuildConfigGenerator {
                 .useEnvironmentName(true)
                 .build();
         BuildConfig buildConfig = BuildConfigMapping.toBuildConfig(bc, bcr, opts);
-        buildConfig.setScmUrl(processScmUrl(buildConfig.getScmUrl()));
+        String scmUrl = processScmUrl(buildConfig.getScmUrl());
+        if (scmUrl == null) {
+            setPlaceholderSCM(name, buildConfig);
+        } else {
+            buildConfig.setScmUrl(scmUrl);
+        }
         buildConfig.getDependencies().clear();
         return buildConfig;
     }
 
+    private void setPlaceholderSCM(String name, BuildConfig buildConfig) {
+        log.warn("Using placeholder SCM url for Build Config {}", name);
+        buildConfig.setScmUrl(config.getPlaceholderSCMUrl());
+        buildConfig.setScmRevision(config.getPlaceholderSCMRevision());
+    }
+
     private String processScmUrl(String originalUrl) {
+        if (originalUrl == null) {
+            return null;
+        }
+        for (String key : config.getScmReplaceWithPlaceholder()) {
+            if (originalUrl.contains(key)) {
+                return null;
+            }
+        }
         String updatedUrl = originalUrl;
         for (Map.Entry<String, String> e : config.getScmPattern().entrySet()) {
             updatedUrl = updatedUrl.replace(e.getKey(), e.getValue());
