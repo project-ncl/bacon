@@ -120,7 +120,7 @@ public class ProjectFinder {
                         return true;
                 }
             }
-            log.warn("Build " + build + "does not produce these GAs: " + missing);
+            log.warn("Build " + build.getId() + "does not produce these GAs: " + missing);
             return false;
         } catch (RemoteResourceException e) {
             throw new RuntimeException(e);
