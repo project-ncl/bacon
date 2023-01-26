@@ -87,6 +87,7 @@ public class ProjectFinder {
         BuildVersion buildVersion = findBuild(gav, availableVersions.get(gav));
 
         if (buildVersion == null) {
+            log.debug("Project " + gav + " was not built in PNC before.");
             found.setFound(false);
             return found;
         }
@@ -99,6 +100,11 @@ public class ProjectFinder {
         found.setBuildConfig(getBuildConfiguration(buildVersion.build));
         int latestRev = getLatestBuildConfigurationRevision(buildConfigurationRevision.getId()).getRev();
         found.setLatestRevision(buildConfigurationRevision.getRev() == latestRev);
+
+        if (log.isDebugEnabled()) {
+            String how = found.isExactMatch() ? "exactly" : "in different version";
+            log.debug("Project " + gav + " was built in PNC before " + how + " by " + buildVersion.build.getId());
+        }
         return found;
     }
 
@@ -120,7 +126,7 @@ public class ProjectFinder {
                         return true;
                 }
             }
-            log.warn("Build " + build.getId() + "does not produce these GAs: " + missing);
+            log.warn("Build " + build.getId() + " does not produce these GAs: " + missing);
             return false;
         } catch (RemoteResourceException e) {
             throw new RuntimeException(e);
