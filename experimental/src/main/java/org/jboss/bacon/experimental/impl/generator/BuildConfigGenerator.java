@@ -117,18 +117,15 @@ public class BuildConfigGenerator {
     }
 
     private BuildConfig updateBuildConfig(BuildConfig buildConfig, Project project) {
-        boolean modified = false;
         Set<String> originalAlignParams = buildConfig.getAlignmentParameters();
         Set<String> alignmentParameters = originalAlignParams.stream()
                 .map(this::removeDependencyOverride)
                 .collect(Collectors.toSet());
+        buildConfig.setScmRevision(project.getSourceCodeRevision());
         if (!alignmentParameters.equals(originalAlignParams)) {
             buildConfig.setAlignmentParameters(alignmentParameters);
-            modified = true;
         }
-        if (modified) {
-            buildConfig.setBuildScript(updateBuildScript(buildConfig.getBuildScript()));
-        }
+        buildConfig.setBuildScript(updateBuildScript(buildConfig.getBuildScript()));
         return buildConfig;
     }
 
