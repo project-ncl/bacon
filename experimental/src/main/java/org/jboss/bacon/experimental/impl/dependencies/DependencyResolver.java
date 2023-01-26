@@ -3,6 +3,7 @@ package org.jboss.bacon.experimental.impl.dependencies;
 import io.quarkus.bom.decomposer.ReleaseId;
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
+import io.quarkus.devtools.messagewriter.MessageWriter;
 import io.quarkus.domino.ProjectDependencyConfig;
 import io.quarkus.domino.ProjectDependencyResolver;
 import io.quarkus.domino.ReleaseRepo;
@@ -51,12 +52,15 @@ public class DependencyResolver {
                 .setProjectArtifacts(Set.of()) // TODO
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
+        // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
+        System.setProperty("quarkus-internal.maven-cmd-line-args", "-ntp");
     }
 
     public DependencyResult resolve(Path projectDir) {
         dominoConfig.setProjectDir(projectDir);
         ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
                 .setArtifactResolver(getArtifactResolver(projectDir))
+                .setMessageWriter(new Slf4jMessageWriter())
                 .setDependencyConfig(dominoConfig)
                 .build();
         return parseReleaseRepos(resolver.getReleaseRepos());
@@ -65,6 +69,7 @@ public class DependencyResolver {
     public DependencyResult resolve() {
         ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
                 .setDependencyConfig(dominoConfig)
+                .setMessageWriter(new Slf4jMessageWriter())
                 .build();
         return parseReleaseRepos(resolver.getReleaseRepos());
     }
@@ -126,5 +131,34 @@ public class DependencyResolver {
 
     private String getSourceCodeRevision(ReleaseId releaseId) {
         return releaseId.version().asString(); // TODO: this API will probably change
+    }
+
+    private static class Slf4jMessageWriter implements MessageWriter {
+        private static final org.slf4j.Logger messageWriterLog = org.slf4j.LoggerFactory.getLogger("domino");
+
+        @Override
+        public void info(String s) {
+            messageWriterLog.info(s);
+        }
+
+        @Override
+        public void error(String s) {
+            messageWriterLog.error(s);
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            return messageWriterLog.isDebugEnabled();
+        }
+
+        @Override
+        public void debug(String s) {
+            messageWriterLog.debug(s);
+        }
+
+        @Override
+        public void warn(String s) {
+            messageWriterLog.warn(s);
+        }
     }
 }
