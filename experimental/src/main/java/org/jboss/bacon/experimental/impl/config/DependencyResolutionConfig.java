@@ -12,4 +12,5 @@ public class DependencyResolutionConfig {
     private Set<String> includeArtifacts = Set.of();
     private Set<String> analyzeArtifacts = Set.of();
     private String analyzeBOM;
+    private boolean includeOptionalDependencies = true;
 }

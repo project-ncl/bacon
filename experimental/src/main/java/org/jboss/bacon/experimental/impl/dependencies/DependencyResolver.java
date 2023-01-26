@@ -46,6 +46,7 @@ public class DependencyResolver {
                 .setExcludeParentPoms(false) // TODO
                 .setIncludeArtifacts(artifacts)
                 .setLevel(-1)
+                .setIncludeOptionalDeps(config.isIncludeOptionalDependencies())
                 .setWarnOnResolutionErrors(true)
                 .setProjectArtifacts(Set.of()) // TODO
                 .setValidateCodeRepoTags(false) // TODO
