@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
+import org.jboss.bacon.experimental.impl.projectfinder.EnvironmentResolver;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProject;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
 import org.jboss.da.model.rest.GAV;
@@ -13,6 +14,7 @@ import org.jboss.pnc.bacon.pig.impl.mapping.BuildConfigMapping;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
+import org.jboss.pnc.dto.Environment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +31,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BuildConfigGenerator {
     private BuildConfigGeneratorConfig config;
+    private EnvironmentResolver environments;
 
     public BuildConfigGenerator(BuildConfigGeneratorConfig buildConfigGeneratorConfig) {
         this.config = buildConfigGeneratorConfig;
+        environments = new EnvironmentResolver(buildConfigGeneratorConfig);
     }
 
     public List<BuildConfig> generateConfigs(DependencyResult dependencies, FoundProjects foundProjects) {
@@ -205,9 +209,11 @@ public class BuildConfigGenerator {
     }
 
     public BuildConfig copyExisting(BuildConfiguration bc, BuildConfigurationRevision bcr, String name) {
+        boolean useEnvironmentName = shouldUseEnvironmentName(name, bcr.getEnvironment());
+
         BuildConfigMapping.GeneratorOptions opts = BuildConfigMapping.GeneratorOptions.builder()
                 .nameOverride(Optional.of(name))
-                .useEnvironmentName(true)
+                .useEnvironmentName(useEnvironmentName)
                 .build();
         BuildConfig buildConfig = BuildConfigMapping.toBuildConfig(bc, bcr, opts);
         String scmUrl = processScmUrl(buildConfig.getScmUrl());
@@ -218,6 +224,24 @@ public class BuildConfigGenerator {
         }
         buildConfig.getDependencies().clear();
         return buildConfig;
+    }
+
+    private boolean shouldUseEnvironmentName(String name, Environment environment) {
+        if (environments.isValidName(environment.getName())) {
+            return true;
+        }
+        if (config.isAllowDeprecatedEnvironments()) {
+            log.warn(
+                    "Environment " + environment.getName() + " for build config " + name
+                            + " is deprecated, using it anyway (with system image id " + environment.getSystemImageId()
+                            + ")");
+            return false;
+        } else {
+            log.warn(
+                    "Environment " + environment.getName() + " for build config " + name
+                            + " is deprecated, you will have to update it manually");
+            return true;
+        }
     }
 
     private void setPlaceholderSCM(String name, BuildConfig buildConfig) {

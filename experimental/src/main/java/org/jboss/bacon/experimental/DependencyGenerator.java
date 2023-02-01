@@ -103,8 +103,12 @@ public class DependencyGenerator {
         private PigConfiguration generatePigConfig() {
             // Load config file
             GeneratorConfig config = loadConfig();
-            // Analyze dependencies
+            // Initialize working classes
             DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
+            ProjectFinder projectFinder = new ProjectFinder();
+            BuildConfigGenerator buildConfigGenerator = new BuildConfigGenerator(
+                    config.getBuildConfigGeneratorConfig());
+            // Analyze dependencies
             DependencyResult dependencies;
             if (projectDir != null) {
                 dependencies = dependencyResolver.resolve(projectDir);
@@ -114,11 +118,8 @@ public class DependencyGenerator {
             log.info("Analyzed project and found {} dependencies", dependencies.getCount());
             // Generate BCs
             // Find pre-existing BC in PNC
-            ProjectFinder projectFinder = new ProjectFinder();
             FoundProjects foundProjects = projectFinder.findProjects(dependencies);
             // Use correct strategy to generate BC
-            BuildConfigGenerator buildConfigGenerator = new BuildConfigGenerator(
-                    config.getBuildConfigGeneratorConfig());
             List<BuildConfig> buildConfigs = buildConfigGenerator.generateConfigs(dependencies, foundProjects);
             // Generate build-config.yaml
             PigConfiguration template = config.getBuildConfigGeneratorConfig().getPigTemplate();

@@ -25,4 +25,5 @@ public class BuildConfigGeneratorConfig {
     @Valid
     @NotNull
     private DefaultBuildConfigValues defaultValues = new DefaultBuildConfigValues();
+    private boolean allowDeprecatedEnvironments = false;
 }
