@@ -28,17 +28,24 @@ import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
 import org.jboss.bacon.experimental.impl.projectfinder.ProjectFinder;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import picocli.CommandLine;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 @CommandLine.Command(
         name = "dependency-generator",
@@ -72,9 +79,24 @@ public class DependencyGenerator {
 
             Yaml yaml = new Yaml(new Constructor(GeneratorConfig.class));
             try (BufferedReader reader = Files.newBufferedReader(config)) {
-                return yaml.load(reader);
+                GeneratorConfig config = yaml.load(reader);
+                validate(config);
+                return config;
             } catch (IOException e) {
                 throw new FatalException("Unable to load config file", e);
+            }
+        }
+
+        private void validate(GeneratorConfig config) {
+            try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+                Validator validator = factory.getValidator();
+                Set<ConstraintViolation<GeneratorConfig>> violations = validator.validate(config);
+
+                if (!violations.isEmpty()) {
+                    throw new FatalException(
+                            "Errors while validating the autobuilder config.yaml:\n"
+                                    + Validate.<GeneratorConfig> prettifyConstraintViolation(violations));
+                }
             }
         }
 
