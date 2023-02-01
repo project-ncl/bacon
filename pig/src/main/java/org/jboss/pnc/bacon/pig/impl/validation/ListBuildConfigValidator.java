@@ -28,6 +28,11 @@ public class ListBuildConfigValidator implements ConstraintValidator<ListBuildCo
         List<String> errors = new ArrayList<>();
 
         for (BuildConfig value : values) {
+            if (value == null) {
+                // we do nothing if value is null?
+                errors.add("is null");
+                continue;
+            }
 
             if (value.getExternalScmUrl() != null) {
                 log.warn(
@@ -35,23 +40,20 @@ public class ListBuildConfigValidator implements ConstraintValidator<ListBuildCo
                                 + " is using deprecated externalScmUrl property that is not used when creating pnc configurations anymore, use scmUrl instead.");
             }
 
-            if (value == null) {
-                // we do nothing if value is null?
-                errors.add("is null");
-            } else if (value.getScmUrl() == null) {
+            if (value.getScmUrl() == null) {
                 errors.add(
                         "Build config " + value.getName() + " has scmUrl not specified. Specify the key with a value");
-            } else if (value.getRawEnvironmentId() == null && value.getSystemImageId() == null
+            }
+            if (value.getRawEnvironmentId() == null && value.getSystemImageId() == null
                     && value.getEnvironmentName() == null) {
                 errors.add(
                         "Build config " + value.getName()
                                 + " has neither environmentId, environmentName nor systemImageId specified. Specify one of the keys with a value");
-            } else {
-                try {
-                    BuildType.valueOf(value.getBuildType());
-                } catch (IllegalArgumentException e) {
-                    errors.add("Build config " + value.getName() + " has wrong buildType");
-                }
+            }
+            try {
+                BuildType.valueOf(value.getBuildType());
+            } catch (IllegalArgumentException e) {
+                errors.add("Build config " + value.getName() + " has wrong buildType");
             }
         }
 
