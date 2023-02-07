@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,16 +50,19 @@ public class BifrostClient {
 
         switch (logType) {
             case BUILD:
-                query = "direction=ASC" + "&matchFilters=mdc.processContext.keyword:build-" + id
-                        + "&prefixFilters=loggerName.keyword:org.jboss.pnc._userlog_.build-log";
+                query = MessageFormat.format(
+                        "direction=ASC&matchFilters=mdc.processContext:build-{0},loggerName:org.jboss.pnc._userlog_.build-log&batchSize=5000&batchDelay=500&format=LEVEL",
+                        id);
                 break;
             case ALIGNMENT:
-                query = "direction=ASC" + "&matchFilters=mdc.processContext.keyword:build-" + id
-                        + "&prefixFilters=loggerName.keyword:org.jboss.pnc._userlog_.alignment-log";
+                query = MessageFormat.format(
+                        "direction=ASC&matchFilters=mdc.processContext:build-{0},loggerName:org.jboss.pnc._userlog_.alignment-log&batchSize=5000&batchDelay=500&format=LEVEL",
+                        id);
                 break;
             default:
-                query = "direction=ASC" + "&matchFilters=mdc.processContext.keyword:build-" + id
-                        + "&prefixFilters=loggerName.keyword:org.jboss.pnc._userlog_";
+                query = MessageFormat.format(
+                        "direction=ASC&matchFilters=mdc.processContext:build-{0}&prefixFilters=loggerName:org.jboss.pnc._userlog_&batchSize=500&batchDelay=500&format=TIMESTAMP",
+                        id);
         }
 
         if (follow) {
