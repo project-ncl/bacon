@@ -18,12 +18,17 @@
 package org.jboss.pnc.bacon.config;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/17/18
  */
 @Data
+@Slf4j
 public class PncConfig implements Validate {
 
     private String url;
@@ -32,7 +37,19 @@ public class PncConfig implements Validate {
 
     @Override
     public void validate() {
+        checkAndLog(url);
         Validate.validateUrl(url, "PNC");
         Validate.validateUrl(bifrostBaseurl, "Bifrost");
+    }
+
+    private void checkAndLog(String url) {
+        try {
+            URI uri = new URI(url);
+            if (!uri.getPath().isEmpty()) {
+                log.error("Check if your " + url + " url is correct, usually there should not be path part");
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Could not parse:", e);
+        }
     }
 }
