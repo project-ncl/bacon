@@ -127,3 +127,4 @@ Below are links to more specific information about configuring sets of features 
 * [Build Config Files](guide/build-config.html)
 * [Hints](guide/hints.html)
 * [PiG](guide/pig.html)
+* [Experimental](guide/experimental.html)
