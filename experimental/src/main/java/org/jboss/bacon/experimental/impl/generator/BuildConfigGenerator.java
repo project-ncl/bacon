@@ -63,10 +63,11 @@ public class BuildConfigGenerator {
         String name = generateBCName(project);
         // Strategy
         if (found.isExactMatch()) {
-            return copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
+            BuildConfig buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
+            return updateExactMatch(buildConfig, project);
         } else if (found.isFound()) {
             BuildConfig buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
-            return updateBuildConfig(buildConfig, project);
+            return updateSimilar(buildConfig, project);
         } else {
             return generateNewBuildConfig(project, name);
         }
@@ -116,23 +117,41 @@ public class BuildConfigGenerator {
         return sj.toString();
     }
 
-    private BuildConfig updateBuildConfig(BuildConfig buildConfig, Project project) {
-        Set<String> originalAlignParams = buildConfig.getAlignmentParameters();
-        Set<String> alignmentParameters = originalAlignParams.stream()
-                .map(this::removeDependencyOverride)
-                .collect(Collectors.toSet());
-        buildConfig.setScmRevision(project.getSourceCodeRevision());
-        if (!alignmentParameters.equals(originalAlignParams)) {
-            buildConfig.setAlignmentParameters(alignmentParameters);
+    private BuildConfig updateExactMatch(BuildConfig buildConfig, Project project) {
+        boolean updated = updateAlignParams(buildConfig, true);
+        if (updated) {
+            buildConfig.setBuildScript(updateBuildScript(buildConfig.getBuildScript()));
         }
+        return buildConfig;
+    }
+
+    private BuildConfig updateSimilar(BuildConfig buildConfig, Project project) {
+        updateAlignParams(buildConfig, false);
+        buildConfig.setScmRevision(project.getSourceCodeRevision());
         buildConfig.setBuildScript(updateBuildScript(buildConfig.getBuildScript()));
         return buildConfig;
     }
 
-    private String removeDependencyOverride(String parameter) {
+    private boolean updateAlignParams(BuildConfig buildConfig, boolean keepVersionOverride) {
+        Set<String> originalAlignParams = buildConfig.getAlignmentParameters();
+        Set<String> alignmentParameters = originalAlignParams.stream()
+                .map(p -> BuildConfigGenerator.removeOverride(p, keepVersionOverride))
+                .filter(p -> !p.isBlank())
+                .collect(Collectors.toSet());
+        if (alignmentParameters.equals(originalAlignParams)) {
+            return false;
+        } else {
+            buildConfig.setAlignmentParameters(alignmentParameters);
+            return true;
+        }
+    }
+
+    static String removeOverride(String parameter, boolean keepVersionOverride) {
         return Arrays.stream(parameter.split(" "))
                 .filter(s -> !s.contains("dependencyOverride"))
+                .filter(s -> keepVersionOverride || !s.contains("versionOverride"))
                 .collect(Collectors.joining(" "));
+        // TODO: what about `manipulation.disable=true`,
     }
 
     private String generateBCName(Project project) {
