@@ -20,7 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,11 +124,35 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
     private List<String> filterArtifacts = new ArrayList<>();
     private String bomGroupId;
     private String bomArtifactId;
-    @Setter(AccessLevel.NONE)
+
+    /**
+     * We use {@link Boolean} instead of boolean since we use the same DTO to set the defaults and overrides. We use
+     * null to know that the override is not setting a new value for a default. The default value is set in the
+     * {@link #isIncludeJavadoc} method
+     *
+     * We remove the default Getter method from lombok since we are implementing our own getter method
+     */
+    @Getter(AccessLevel.NONE)
     private Boolean includeJavadoc;
-    @Setter(AccessLevel.NONE)
+
+    /**
+     * We use {@link Boolean} instead of boolean since we use the same DTO to set the defaults and overrides. We use
+     * null to know that the override is not setting a new value for a default. The default value is set in the
+     * {@link #isIncludeLicenses} method
+     *
+     * We remove the default Getter method from lombok since we are implementing our own getter method
+     */
+    @Getter(AccessLevel.NONE)
     private Boolean includeLicenses;
-    @Setter(AccessLevel.NONE)
+
+    /**
+     * We use {@link Boolean} instead of boolean since we use the same DTO to set the defaults and overrides. We use
+     * null to know that the override is not setting a new value for a default. The default value is set in the
+     * {@link #isIncludeMavenMetadata} method
+     *
+     * We remove the default Getter method from lombok since we are implementing our own getter method
+     */
+    @Getter(AccessLevel.NONE)
     private Boolean includeMavenMetadata;
     private String buildScript;
     private Set<String> ignored = new HashSet<>();
@@ -148,4 +172,35 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
     public boolean isIncludeMavenMetadata() {
         return includeMavenMetadata == null ? false : includeMavenMetadata;
     }
+
+    /**
+     * We are handwriting this setter object because SnakeYaml doesn't know how to call a setter method for
+     * {@link Boolean} but knows how to do it for boolean when parsing a yaml file.
+     *
+     * @param includeJavadoc boolean to set
+     */
+    public void setIncludeJavadoc(boolean includeJavadoc) {
+        this.includeJavadoc = includeJavadoc;
+    }
+
+    /**
+     * We are handwriting this setter object because SnakeYaml doesn't know how to call a setter method for
+     * {@link Boolean} but knows how to do it for boolean when parsing a yaml file.
+     *
+     * @param includeLicenses boolean to set
+     */
+    public void setIncludeLicenses(boolean includeLicenses) {
+        this.includeLicenses = includeLicenses;
+    }
+
+    /**
+     * We are handwriting this setter object because SnakeYaml doesn't know how to call a setter method for
+     * {@link Boolean} but knows how to do it for boolean when parsing a yaml file.
+     *
+     * @param includeMavenMetadata boolean to set
+     */
+    public void setIncludeMavenMetadata(boolean includeMavenMetadata) {
+        this.includeMavenMetadata = includeMavenMetadata;
+    }
+
 }
