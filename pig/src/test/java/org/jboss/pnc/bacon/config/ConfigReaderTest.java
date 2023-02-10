@@ -106,4 +106,22 @@ class ConfigReaderTest {
         }
         assertTrue(thrown);
     }
+
+    @Test
+    void shouldParseRepoGenerationWithIncludeJavadocSet() {
+        PigConfiguration config = loadBuildConfig("/build-config-custom-repo-generation.yaml");
+        assertNotNull(config);
+        assertThat(config.getFlow().getRepositoryGeneration().isIncludeJavadoc()).isEqualTo(true);
+        assertThat(config.getFlow().getRepositoryGeneration().isIncludeLicenses()).isEqualTo(false);
+        assertThat(config.getFlow().getRepositoryGeneration().isIncludeMavenMetadata()).isEqualTo(true);
+    }
+
+    @Test
+    void shouldParseRepoGenerationWithIncludeJavadocNotSpecified() {
+        PigConfiguration config = loadBuildConfig("/build-config.yaml");
+        assertNotNull(config);
+        assertThat(config.getFlow().getRepositoryGeneration().isIncludeJavadoc()).isEqualTo(false);
+        assertThat(config.getFlow().getRepositoryGeneration().isIncludeLicenses()).isEqualTo(false);
+        assertThat(config.getFlow().getRepositoryGeneration().isIncludeMavenMetadata()).isEqualTo(false);
+    }
 }

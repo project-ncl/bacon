@@ -1,0 +1,39 @@
+product:
+  name: mszynkie-demo
+  abbreviation: md
+  stage: GA
+  issueTrackerUrl: http://example.com/demo
+version: 1.0.1
+milestone: DR16
+group: mszynkie demo All
+defaultBuildParameters:
+  project: mszynkie-demo
+  environmentName: "OpenJDK 1.8; Mvn 3.3.9"
+  buildScript: mvn clean deploy -DskipTests -B
+builds:
+  - name: foo-1.0
+    scmUrl: https://github.com/michalszynkiewicz/demo-foo
+    scmRevision: 1.0.1
+  - name: bar-1.0
+    scmUrl: https://github.com/michalszynkiewicz/demo-bar
+    scmRevision: 1.0.1
+    dependencies:
+      - foo-1.0
+
+outputPrefixes:
+  releaseFile: mszynkie-demo
+  releaseDir: mszynkie-demo
+outputSuffix: jms
+flow:
+  # licensesGeneration: gen.downloadFrom 'WildFly-Swarm' matching '.*license\.zip'
+  licensesGeneration:
+    strategy: GENERATE
+  repositoryGeneration:
+    strategy: PACK_ALL
+    sourceBuild: bar-1.0
+    includeJavadoc: true
+    includeLicenses: false
+    includeMavenMetadata: true
+
+  javadocGeneration:
+    strategy: IGNORE
