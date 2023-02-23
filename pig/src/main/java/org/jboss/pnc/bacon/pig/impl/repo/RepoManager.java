@@ -292,6 +292,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
         for (String exclusion : excludeArtifacts) {
             if (Pattern.matches(exclusion, artifact)) {
+                log.debug(
+                        "Artifact {} will not be downloaded to the maven repository since it matches exclusion regex: {}",
+                        artifact,
+                        exclusion);
                 return true;
             }
         }
