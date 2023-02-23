@@ -24,6 +24,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.enums.RepositoryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -85,19 +87,27 @@ public class DocumentGenerator {
         generator.generateFiles(releasePath, extrasPath, templateData);
     }
 
+    /**
+     * TODO: we ignore any NPM artifacts for now. Maybe we should consider adding them in the future
+     *
+     * @param repoData
+     * @param builds
+     * @throws IOException
+     */
     public void generateSharedContentReport(RepositoryData repoData, Map<String, PncBuild> builds) throws IOException {
         SharedContentReportGenerator sharedContentReportGenerator = new SharedContentReportGenerator(
                 repoData.getFiles(),
-                getAllBuiltArtifacts(builds));
+                getAllMavenBuiltArtifacts(builds));
         File reportFile = new File(extrasPath, deliverables.getSharedContentReport());
         sharedContentReportGenerator.generateReport(reportFile);
     }
 
-    private static Set<GAV> getAllBuiltArtifacts(Map<String, PncBuild> builds) {
+    private static Set<GAV> getAllMavenBuiltArtifacts(Map<String, PncBuild> builds) {
         return builds.values()
                 .stream()
                 .map(PncBuild::getBuiltArtifacts)
                 .flatMap(List::stream)
+                .filter(a -> Objects.equals(a.getRepositoryType(), RepositoryType.MAVEN))
                 .map(ArtifactWrapper::toGAV)
                 .collect(Collectors.toSet());
     }
