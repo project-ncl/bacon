@@ -35,8 +35,8 @@ public class DependencyResolver {
         this.config = dependencyResolutionConfig;
         dominoConfig = ProjectDependencyConfig.builder();
 
-        config.getExcludeArtifacts().stream().map(ArtifactCoords::fromString).forEach(dominoConfig::addExcludePattern);
-        config.getIncludeArtifacts().stream().map(ArtifactCoords::fromString).forEach(dominoConfig::addIncludePattern);
+        config.getExcludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
+        config.getIncludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addIncludePattern);
         Set<ArtifactCoords> artifacts = config.getAnalyzeArtifacts()
                 .stream()
                 .map(ArtifactCoords::fromString)
