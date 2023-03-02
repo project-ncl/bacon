@@ -444,7 +444,13 @@
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-domino-api</artifactId>
-                <version>0.0.74</version>
+                <version>0.0.78</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.slf4j</groupId>
+                        <artifactId>slf4j-jboss-logmanager</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.redhat.resilience.otel</groupId>
