@@ -1,6 +1,8 @@
 package org.jboss.bacon.experimental.impl.dependencies;
 
 import io.quarkus.bom.decomposer.ReleaseId;
+import io.quarkus.bom.decomposer.ReleaseOrigin;
+import io.quarkus.bom.decomposer.ReleaseVersion;
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.devtools.messagewriter.MessageWriter;
@@ -12,11 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
 import org.jboss.da.model.rest.GAV;
 
-import java.net.URI;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,6 +53,7 @@ public class DependencyResolver {
                 .setLevel(-1)
                 .setIncludeOptionalDeps(config.isIncludeOptionalDependencies())
                 .setWarnOnResolutionErrors(true)
+                .setWarnOnMissingScm(true)
                 .setProjectArtifacts(Set.of()) // TODO
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
@@ -109,6 +114,7 @@ public class DependencyResolver {
             Project project = mapping.get(repo);
             project.setDependencies(repo.getDependencies().stream().map(mapping::get).collect(Collectors.toSet()));
         }
+        detectCircularRepoDeps(rootProjects);
 
         DependencyResult result = new DependencyResult();
         result.setTopLevelProjects(rootProjects);
@@ -116,21 +122,55 @@ public class DependencyResolver {
         return result;
     }
 
-    private String getSourceCodeURL(ReleaseId releaseId) {
-        String sourceUrl = releaseId.origin().toString(); // TODO: this API will probably change
-        try {
-            URI uri = URI.create(sourceUrl);
-            if (!uri.getScheme().startsWith("git") && !uri.getScheme().startsWith("http")) {
-                return null;
-            }
-        } catch (IllegalArgumentException ex) {
-            return null;
+    // TODO copied from domino, replace when there is an API that provides this info
+    private void detectCircularRepoDeps(Set<Project> rootProjects) {
+        for (Project r : rootProjects) {
+            final List<Project> chain = new ArrayList<>();
+            detectCircularRepoDeps(r, chain);
         }
-        return sourceUrl;
+    }
+
+    private boolean detectCircularRepoDeps(Project r, List<Project> chain) {
+        final int i = chain.indexOf(r);
+        if (i >= 0) {
+            final List<Project> loop = new ArrayList<>(chain.size() - i + 1);
+            for (int j = i; j < chain.size(); ++j) {
+                loop.add(chain.get(j));
+            }
+            loop.add(r);
+            String loopS = loop.stream().map(p -> p.getFirstGAV().toString()).collect(Collectors.joining(" -> "));
+            log.error(
+                    "Detected circular dependency. This may be caused by incorrect SCM information, consider updating the recipe repository. We are cutting the dependency loop now, but this will lead to broken build config.");
+            log.error("Detected loop: " + loopS);
+            return true;
+        }
+        chain.add(r);
+        Iterator<Project> it = r.getDependencies().iterator();
+        while (it.hasNext()) {
+            Project d = it.next();
+            if (detectCircularRepoDeps(d, chain)) {
+                it.remove();
+                r.setCutDepenendecy(true);
+            }
+        }
+        chain.remove(chain.size() - 1);
+        return false;
+    }
+
+    private String getSourceCodeURL(ReleaseId releaseId) {
+        ReleaseOrigin origin = releaseId.origin(); // TODO: this API will probably change
+        if (origin.isUrl()) {
+            return origin.toString();
+        }
+        return null;
     }
 
     private String getSourceCodeRevision(ReleaseId releaseId) {
-        return releaseId.version().asString(); // TODO: this API will probably change
+        ReleaseVersion version = releaseId.version(); // TODO: this API will probably change
+        if (version.isTag()) {
+            return version.asString();
+        }
+        return null;
     }
 
     private static class Slf4jMessageWriter implements MessageWriter {
