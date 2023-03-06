@@ -11,6 +11,7 @@ import org.jboss.pnc.dto.Environment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -84,8 +85,10 @@ public class BuildConfigMapping {
 
         // TODO: could this code be unified with the code in BuildConfig.java?
         if (parameters.containsKey("ALIGNMENT_PARAMETERS")) {
-            String[] alignmentParameters = parameters.get("ALIGNMENT_PARAMETERS").split(",");
-            buildConfig.setAlignmentParameters(new HashSet<>(Arrays.asList(alignmentParameters)));
+            String alignmentParameters = parameters.get("ALIGNMENT_PARAMETERS");
+            if (!alignmentParameters.isBlank()) {
+                buildConfig.setAlignmentParameters(Collections.singleton(alignmentParameters));
+            }
             parameters.remove("ALIGNMENT_PARAMETERS");
         }
 
