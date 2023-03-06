@@ -44,7 +44,7 @@ buildConfigGeneratorConfig: # Configuration for how the new build configs should
             buildScript: "mvn deploy" # Build script to be used when generating new build config. Defaults to given example.
             scmUrl: "https://github.com/michalszynkiewicz/empty.git" # Placeholder SCM URL
             # to be used when no SCM url was found for the project. We need it to generate valid build-config. Defaults to given example.
-            scmRevision: "master" # Placeholder SCM revision to be used when using placeholder URL. Defaults to given example.
+            scmRevision: "master" # Placeholder SCM revision to be used when using placeholder URL or when SCM revision was not resolved. Defaults to given example.
     scmReplaceWithPlaceholder: # SCM URLs which contain one of the string listed will be replaced by the default placeholder scmUrl
          - "svn.example.com"
     scmPattern: # SCM URLs will have the listed key substring replaced with the value
@@ -53,6 +53,7 @@ buildConfigGeneratorConfig: # Configuration for how the new build configs should
         "svn.example.com/foo-bar": "https://git.example.com/foo/bar.git" # "https://svn.example.com/foo-bar/branch" -> "https://git.example.com/foo/bar.git"
     failGeneratedBuildScript: true # When generating new or copying and changing existing build config, will part to build script to make sure the build fails
     # This can be helpful to make sure the configs are manually reviewed
+    allowDeprecatedEnvironments: false # If true, uses systemImageId to specify environment (to force use of specific environment) when the enviornment defined by environmentName would not be found because it was deprecated.
     pigTemplate: # Template of the PiG build-config.yaml to use
         product:
             name: Autobuild Example
@@ -85,7 +86,10 @@ The strategy for creating Build Configs goes like this:
 - For each project identified by the dependency analysis, we try to find if it was already built in PNC in the same or simmilar version.
 - If we found that a project version was already build we create a copy of the build config with some changes:
     - strip any `-DdependencyOverride` from the alignment parameters.
-    - **Note:** It may be that the original build config did not have dependecies setup correctly so we want a copy that has the depenencies right. Even if the original had correct dependencies, for autobuilder we now want to use one "static" or "stable" build config per project version as we may not have the influence over the original which could be updated to build different version.
+    - **Note:** This may cause that an existing artifacts may be rebuilt, but this is intended.
+	    - It may be that the original build config did not have dependecies setup correctly so we want a copy that has the depenencies right. We want to rerun the build so it can pickup the newly built dependencies.
+	    - Even if the original had correct dependencies, for autobuilder we now want to use one "static" or "stable" build config per project version as we may not have the influence over the original which could be updated to build different version.
+	    - Once the artifacts are build by an autobuilder run, following autobuilder runs will reuse the exsisting `-AUTOBUILDER` build config, so there will not be rebuild of artifacts that were produced by autobuilder.
  - If we find that a project was build in different version, we find closest built version and create a copy of the build config and doing some changes:
      - changing the SCM revision
      - strip any `-DdependencyOverride` from the alignment parameters.
