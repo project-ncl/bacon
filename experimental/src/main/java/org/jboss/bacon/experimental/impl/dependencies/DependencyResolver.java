@@ -144,6 +144,9 @@ public class DependencyResolver {
             log.error("Detected loop: " + loopS);
             return true;
         }
+        if (chain.size() > r.getDepth()) {
+            r.setDepth(chain.size());
+        }
         chain.add(r);
         Iterator<Project> it = r.getDependencies().iterator();
         while (it.hasNext()) {

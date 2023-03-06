@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
+import org.jboss.bacon.experimental.impl.dependencies.ProjectDepthComparator;
 import org.jboss.bacon.experimental.impl.projectfinder.EnvironmentResolver;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProject;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
@@ -18,14 +19,14 @@ import org.jboss.pnc.dto.Environment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,7 +40,7 @@ public class BuildConfigGenerator {
     }
 
     public List<BuildConfig> generateConfigs(DependencyResult dependencies, FoundProjects foundProjects) {
-        Map<Project, BuildConfig> buildConfigMap = new HashMap<>();
+        Map<Project, BuildConfig> buildConfigMap = new TreeMap<>(new ProjectDepthComparator());
         for (Project project : dependencies.getTopLevelProjects()) {
             generateConfig(buildConfigMap, project, foundProjects);
         }
@@ -60,6 +61,7 @@ public class BuildConfigGenerator {
             String name = depBuildConfig.getName();
             buildConfig.getDependencies().add(name);
         }
+        Collections.sort(buildConfig.getDependencies());
         return buildConfig;
     }
 
