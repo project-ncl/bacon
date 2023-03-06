@@ -205,6 +205,17 @@ public class BuildInfoCollector implements Closeable {
         }
     }
 
+    public String ConfigNametoId(String buildConfigName) {
+        try {
+            return buildConfigClient.getAll(Optional.empty(), Optional.of("name==" + buildConfigName))
+                    .iterator()
+                    .next()
+                    .getId();
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void close() {
         buildClient.close();
