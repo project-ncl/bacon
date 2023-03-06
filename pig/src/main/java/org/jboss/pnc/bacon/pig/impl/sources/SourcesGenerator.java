@@ -4,8 +4,10 @@ import com.google.common.collect.Maps;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import org.apache.commons.io.FilenameUtils;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.MRRCSearcher;
+import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
@@ -44,6 +46,8 @@ public class SourcesGenerator {
 
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
 
+    private final BuildInfoCollector buildInfoCollector;
+
     public static final MRRCSearcher mrrcSearcher = MRRCSearcher.getInstance();
 
     private final SourcesGenerationData sourcesGenerationData;
@@ -59,6 +63,7 @@ public class SourcesGenerator {
         this.sourcesGenerationData = sourcesGenerationData;
         this.topLevelDirectoryName = topLevelDirectoryName;
         this.targetZipFileName = targetZipFileName;
+        buildInfoCollector = new BuildInfoCollector();
     }
 
     public void generateSources(Map<String, PncBuild> builds, RepositoryData repo) {
@@ -82,6 +87,18 @@ public class SourcesGenerator {
                 || sourcesGenerationData
                         .getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES_EXTENDED) {
             builds = addRedhatDependencyBuilds(builds);
+        }
+        if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_ADDITIONAL_SELECTED) {
+            for (String buildConfigName : sourcesGenerationData.getAdditionalExternalSources()) {
+                BuildInfoCollector.BuildSearchType type = PigContext.get().isTempBuild()
+                        ? BuildInfoCollector.BuildSearchType.TEMPORARY
+                        : BuildInfoCollector.BuildSearchType.PERMANENT;
+
+                builds.put(
+                        buildConfigName,
+                        buildInfoCollector.getLatestBuild(buildInfoCollector.ConfigNametoId(buildConfigName), type));
+
+            }
         }
 
         downloadSourcesFromBuilds(builds, workDir, contentsDir);
