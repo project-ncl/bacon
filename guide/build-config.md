@@ -52,7 +52,9 @@ flow:
   javadocGeneration:
     strategy: IGNORE
   sourcesGeneration: # Optional
-    strategy: GENERATE
+    strategy: GENERATE_ADDITIONAL_SELECTED
+    additionalExternalSources:
+      - org.drools-drools-8.32.0.Final
 ```
 
 ## PNC part
@@ -445,13 +447,15 @@ If the same configuration option is found directly under the `repositoryGenerati
 
 - `additionalArtifacts` - artifacts to be specifically added to the repository from specific builds. Should use regular expressions to match any incremental suffixes.
 - `externalAdditionalArtifacts` - artifacts from other builds, not within this product's build group. This list should contain artifact identifiers, as shown in the PNC UI.
-
+- `externalAdditionalConfigs` - built artifacts from other builds, you use exact name of build configuration, to add all built artifacts of this config. Depending on build type, it's checking for last successful temporary or persistent build.
   Example:
   ```
   repositoryGeneration:
     strategy: BUILD_GROUP
     externalAdditionalArtifacts:
       - 'com.google.guava:guava-parent:pom:18.0.0.redhat-1'
+    externalAdditionalConfigs:
+      - org.drools-drools-8.32.0.Final
   ```
 
 - `excludeArtifacts` - exclude artifacts based on a pattern
@@ -513,20 +517,23 @@ Strategy options are:
 - GENERATE (default)
 - GENERATE_EXTENDED
 - GENERATE_SELECTED
+- GENERATE_ADDITIONAL_SELECTED
 - GENERATE_REDHAT_DEPENDENCIES
 - GENERATE_REDHAT_DEPENDENCIES_EXTENDED
 
 The `IGNORE` strategy won't produce any sources zip.
 
-The `GENERATE` strategy get sources from builds.
+The `GENERATE` strategy gets sources from builds.
 
-The `GENERATE_EXTENDED` strategy get same result as `GENERATE` and add sources of unreleased dependencies.
+The `GENERATE_EXTENDED` strategy gets same results as `GENERATE` and adds sources of unreleased dependencies.
 
-The `GENERATE_SELECTED` strategy get sources from selected `sourceBuild`.
+The `GENERATE_SELECTED` strategy gets sources from selected `sourceBuild`.
 
-The `GENERATE_REDHAT_DEPENDENCIES` strategy get sources from builds and add sources of redhat dependencies used in these builds.
+The `GENERATE_ADDITIONAL_SELECTED` strategy gets same results as `GENERATE` and adds sources of builds external to current group. `externalAdditionalConfigs` specifies Build Config names of builds, outside this group.
 
-The `GENERATE_REDHAT_DEPENDENCIES_EXTENDED` strategy get same result as `GENERATE_REDHAT_DEPENDENCIES` and add sources of unreleased dependencies.
+The `GENERATE_REDHAT_DEPENDENCIES` strategy gets sources from builds and adds sources of redhat dependencies used in these builds.
+
+The `GENERATE_REDHAT_DEPENDENCIES_EXTENDED` strategy gets same result as `GENERATE_REDHAT_DEPENDENCIES` and add sources of unreleased dependencies.
 
 All `GENERATE*` strategies require that the repository generation is **not** ignored.
 
