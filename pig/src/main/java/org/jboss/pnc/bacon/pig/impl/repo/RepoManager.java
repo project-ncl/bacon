@@ -328,6 +328,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         repackage(sourceTopLevelDirectory, targetTopLevelDirectory);
 
         addAdditionalArtifacts();
+        addAdditionalConfigs();
 
         ParentPomDownloader.addParentPoms(targetRepoContentsDir.toPath());
 
@@ -388,6 +389,18 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 .stream()
                 .map(GAV::fromColonSeparatedGAPV)
                 .forEach(this::downloadExternalArtifact);
+    }
+
+    private void addAdditionalConfigs() {
+        List<String> additionalBuilds = generationData.getExternalAdditionalConfigs();
+        BuildInfoCollector.BuildSearchType type = PigContext.get().isTempBuild()
+                ? BuildInfoCollector.BuildSearchType.TEMPORARY
+                : BuildInfoCollector.BuildSearchType.PERMANENT;
+        additionalBuilds.forEach(configName -> {
+            buildInfoCollector.getLatestBuild(buildInfoCollector.ConfigNametoId(configName), type)
+                    .getBuiltArtifacts()
+                    .forEach(artifact -> downloadExternalArtifact(artifact.toGAV()));
+        });
     }
 
     private void downloadExternalArtifact(GAV gav) {

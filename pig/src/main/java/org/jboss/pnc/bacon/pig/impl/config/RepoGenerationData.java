@@ -62,6 +62,9 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
         result.externalAdditionalArtifacts = merge(
                 defaults.externalAdditionalArtifacts,
                 overrides.externalAdditionalArtifacts);
+        result.externalAdditionalConfigs = merge(
+                defaults.externalAdditionalConfigs,
+                overrides.externalAdditionalConfigs);
         result.excludeArtifacts = merge(defaults.excludeArtifacts, overrides.excludeArtifacts);
         result.sourceBuilds = merge(defaults.sourceBuilds, overrides.sourceBuilds);
         result.excludeSourceBuilds = merge(defaults.excludeSourceBuilds, overrides.excludeSourceBuilds);
@@ -118,6 +121,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
      * list of groupId:artifactId:packaging:version with <strong>exact</strong> version
      */
     private List<String> externalAdditionalArtifacts = new ArrayList<>();
+    private List<String> externalAdditionalConfigs = new ArrayList<>();
     private List<String> excludeArtifacts = new ArrayList<>();
     private List<String> sourceBuilds = new ArrayList<>();
     private List<String> excludeSourceBuilds = new ArrayList<>();
