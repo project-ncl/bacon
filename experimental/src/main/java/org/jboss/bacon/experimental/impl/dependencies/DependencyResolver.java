@@ -6,8 +6,10 @@ import io.quarkus.bom.decomposer.ReleaseVersion;
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.devtools.messagewriter.MessageWriter;
+import io.quarkus.domino.CircularReleaseDependency;
 import io.quarkus.domino.ProjectDependencyConfig;
 import io.quarkus.domino.ProjectDependencyResolver;
+import io.quarkus.domino.ReleaseCollection;
 import io.quarkus.domino.ReleaseRepo;
 import io.quarkus.maven.dependency.ArtifactCoords;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +17,10 @@ import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
 import org.jboss.da.model.rest.GAV;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,7 @@ public class DependencyResolver {
                 .setMessageWriter(new Slf4jMessageWriter())
                 .setDependencyConfig(dominoConfig)
                 .build();
-        return parseReleaseRepos(resolver.getReleaseRepos());
+        return parseReleaseCollection(resolver.getReleaseCollection());
     }
 
     public DependencyResult resolve() {
@@ -76,7 +77,7 @@ public class DependencyResolver {
                 .setDependencyConfig(dominoConfig)
                 .setMessageWriter(new Slf4jMessageWriter())
                 .build();
-        return parseReleaseRepos(resolver.getReleaseRepos());
+        return parseReleaseCollection(resolver.getReleaseCollection());
     }
 
     protected MavenArtifactResolver getArtifactResolver(Path projectDir) {
@@ -91,73 +92,92 @@ public class DependencyResolver {
         }
     }
 
-    private DependencyResult parseReleaseRepos(Collection<ReleaseRepo> releaseRepos) {
+    private DependencyResult parseReleaseCollection(ReleaseCollection releaseCollection) {
+        var depsToCut = processCircularDependencies(releaseCollection.getCircularDependencies());
+
         Map<ReleaseRepo, Project> mapping = new HashMap<>();
         Set<Project> rootProjects = new HashSet<>();
-        for (ReleaseRepo repo : releaseRepos) {
-            Project project = new Project();
-
-            Set<GAV> gavs = repo.getArtifacts()
-                    .keySet()
-                    .stream()
-                    .map(a -> new GAV(a.getGroupId(), a.getArtifactId(), a.getVersion()))
-                    .collect(Collectors.toSet());
-            project.setGavs(gavs);
-            project.setSourceCodeURL(getSourceCodeURL(repo.id()));
-            project.setSourceCodeRevision(getSourceCodeRevision(repo.id()));
+        for (ReleaseRepo repo : releaseCollection) {
+            Project project = mapToProject(repo, depsToCut);
             mapping.put(repo, project);
             if (repo.isRoot()) {
                 rootProjects.add(project);
             }
         }
-        for (ReleaseRepo repo : releaseRepos) {
-            Project project = mapping.get(repo);
-            project.setDependencies(repo.getDependencies().stream().map(mapping::get).collect(Collectors.toSet()));
-        }
-        detectCircularRepoDeps(rootProjects);
+        setupDependencies(mapping, depsToCut);
+        setDepth(rootProjects);
 
         DependencyResult result = new DependencyResult();
         result.setTopLevelProjects(rootProjects);
-        result.setCount(releaseRepos.size());
+        result.setCount(mapping.size());
         return result;
     }
 
-    // TODO copied from domino, replace when there is an API that provides this info
-    private void detectCircularRepoDeps(Set<Project> rootProjects) {
-        for (Project r : rootProjects) {
-            final List<Project> chain = new ArrayList<>();
-            detectCircularRepoDeps(r, chain);
+    private void setupDependencies(Map<ReleaseRepo, Project> mapping, Map<ReleaseId, Set<ReleaseId>> depsToCut) {
+        for (var entry : mapping.entrySet()) {
+            ReleaseRepo repo = entry.getKey();
+            Project project = entry.getValue();
+            Set<ReleaseId> toCut = depsToCut.getOrDefault(repo.id(), Collections.emptySet());
+            project.setDependencies(
+                    repo.getDependencies()
+                            .stream()
+                            .filter(d -> !toCut.contains(d.id()))
+                            .map(mapping::get)
+                            .collect(Collectors.toSet()));
         }
     }
 
-    private boolean detectCircularRepoDeps(Project r, List<Project> chain) {
-        final int i = chain.indexOf(r);
-        if (i >= 0) {
-            final List<Project> loop = new ArrayList<>(chain.size() - i + 1);
-            for (int j = i; j < chain.size(); ++j) {
-                loop.add(chain.get(j));
-            }
-            loop.add(r);
-            String loopS = loop.stream().map(p -> p.getFirstGAV().toString()).collect(Collectors.joining(" -> "));
+    private Map<ReleaseId, Set<ReleaseId>> processCircularDependencies(
+            Collection<CircularReleaseDependency> circularDependencies) {
+        Map<ReleaseId, Set<ReleaseId>> depsToCut = new HashMap<>();
+        if (!circularDependencies.isEmpty()) {
             log.error(
-                    "Detected circular dependency. This may be caused by incorrect SCM information, consider updating the recipe repository. We are cutting the dependency loop now, but this will lead to broken build config.");
-            log.error("Detected loop: " + loopS);
-            return true;
-        }
-        if (chain.size() > r.getDepth()) {
-            r.setDepth(chain.size());
-        }
-        chain.add(r);
-        Iterator<Project> it = r.getDependencies().iterator();
-        while (it.hasNext()) {
-            Project d = it.next();
-            if (detectCircularRepoDeps(d, chain)) {
-                it.remove();
-                r.setCutDepenendecy(true);
+                    "Detected circular dependencies. This may be caused by incorrect SCM information, "
+                            + "consider updating the recipe repository. We are cutting the dependency loop now, "
+                            + "but this will lead to broken build config.");
+            for (CircularReleaseDependency circularDependency : circularDependencies) {
+                log.error("Detected loop: " + circularDependency);
+                List<ReleaseId> releaseDependencyChain = circularDependency.getReleaseDependencyChain();
+                ReleaseId child = releaseDependencyChain.get(releaseDependencyChain.size() - 1);
+                ReleaseId parent = releaseDependencyChain.get(releaseDependencyChain.size() - 2);
+                Set<ReleaseId> releaseIds = depsToCut.computeIfAbsent(parent, k -> new HashSet<>());
+                releaseIds.add(child);
             }
         }
-        chain.remove(chain.size() - 1);
-        return false;
+        return depsToCut;
+    }
+
+    private Project mapToProject(ReleaseRepo repo, Map<ReleaseId, Set<ReleaseId>> depsToCut) {
+        Project project = new Project();
+        Set<GAV> gavs = repo.getArtifacts()
+                .keySet()
+                .stream()
+                .map(a -> new GAV(a.getGroupId(), a.getArtifactId(), a.getVersion()))
+                .collect(Collectors.toSet());
+        project.setGavs(gavs);
+        project.setSourceCodeURL(getSourceCodeURL(repo.id()));
+        project.setSourceCodeRevision(getSourceCodeRevision(repo.id()));
+        if (depsToCut.containsKey(repo.id())) {
+            GAV firstGAV = project.getFirstGAV();
+            log.warn("Project " + firstGAV + " has cut some dependency(ies).");
+            project.setCutDepenendecy(true);
+        }
+        return project;
+    }
+
+    private void setDepth(Set<Project> rootProjects) {
+        for (Project project : rootProjects) {
+            setDepth(project, 0);
+        }
+    }
+
+    private void setDepth(Project project, int depth) {
+        if (depth > project.getDepth()) {
+            project.setDepth(depth);
+        }
+        for (Project dependency : project.getDependencies()) {
+            setDepth(dependency, depth + 1);
+        }
     }
 
     private String getSourceCodeURL(ReleaseId releaseId) {
