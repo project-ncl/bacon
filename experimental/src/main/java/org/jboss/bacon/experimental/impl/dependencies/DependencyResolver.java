@@ -55,6 +55,7 @@ public class DependencyResolver {
                 .setIncludeOptionalDeps(config.isIncludeOptionalDependencies())
                 .setWarnOnResolutionErrors(true)
                 .setWarnOnMissingScm(true)
+                .setRecipeRepos(config.getRecipeRepos())
                 .setProjectArtifacts(Set.of()) // TODO
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
