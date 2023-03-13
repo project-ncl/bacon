@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -17,5 +18,6 @@ public class DependencyResolutionConfig {
     @NotNull
     private Set<String> analyzeArtifacts = Set.of();
     private String analyzeBOM;
+    private List<String> recipeRepos = List.of();
     private boolean includeOptionalDependencies = true;
 }
