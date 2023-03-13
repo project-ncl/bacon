@@ -37,6 +37,8 @@ dependencyResolutionConfig: # Configuration for the dependency resolution by Dom
         # The format is G:A:[C:T:]V where every part can be replaced with '*'
         - foo:*:*
     includeOptionalDependencies: true # Wheather optional dependencies should be included in the analysis. Defaults to true
+    recipeRepos: # The list of URLs to use for the SCM recipes. The SCM recipes are used for determining SCM coordinates for project. Defaults to given example.
+        - https://github.com/redhat-appstudio/jvm-build-data 
 
 buildConfigGeneratorConfig: # Configuration for how the new build configs should be created
     defaultValues: # Default values to be used when generating build config
