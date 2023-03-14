@@ -469,7 +469,7 @@ If the same configuration option is found directly under the `repositoryGenerati
       - '.*:.*:zip:.*'
   ```
 
-The artifact information is specified in the format of `groupId:artifact:artifactId:type:classifier`.
+The artifact information is specified in the format of `groupId:artifactId:packaging:version[:classifier]`
 
 ##### Additional filter available in BUILD_CONFIGS and BUILD_GROUP strategies
 
