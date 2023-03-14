@@ -529,7 +529,7 @@ The `GENERATE_EXTENDED` strategy gets same results as `GENERATE` and adds source
 
 The `GENERATE_SELECTED` strategy gets sources from selected `sourceBuild`.
 
-The `GENERATE_ADDITIONAL_SELECTED` strategy gets same results as `GENERATE` and adds sources of builds external to current group. `externalAdditionalConfigs` specifies Build Config names of builds, outside this group.
+The `GENERATE_ADDITIONAL_SELECTED` strategy gets same results as `GENERATE` and adds sources of builds external to current group. `additionalExternalSources` specifies Build Config names of builds, outside this group.
 
 The `GENERATE_REDHAT_DEPENDENCIES` strategy gets sources from builds and adds sources of redhat dependencies used in these builds.
 
