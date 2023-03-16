@@ -10,6 +10,7 @@ import org.jboss.pnc.build.finder.core.BuildSystemInteger;
 import org.jboss.pnc.build.finder.core.Checksum;
 import org.jboss.pnc.build.finder.core.ChecksumType;
 import org.jboss.pnc.build.finder.core.DistributionAnalyzer;
+import org.jboss.pnc.build.finder.core.LocalFile;
 import org.jboss.pnc.build.finder.core.Utils;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public final class BuildFinderUtils {
     private static final Logger log = LoggerFactory.getLogger(BuildFinderUtils.class);
@@ -53,7 +55,7 @@ public final class BuildFinderUtils {
             Collection<String> filenames = entry.getValue();
 
             for (String filename : filenames) {
-                Checksum checksum = new Checksum(ChecksumType.md5, md5sum, filename);
+                Checksum checksum = new Checksum(ChecksumType.md5, md5sum, filename, 0);
                 multiMap.put(checksum, filename);
             }
         }
@@ -119,12 +121,21 @@ public final class BuildFinderUtils {
         List<String> inputs = Collections.singletonList(file.getPath());
         ExecutorService pool = Executors.newSingleThreadExecutor();
         DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config);
-        Future<Map<ChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
+        Future<Map<ChecksumType, MultiValuedMap<String, LocalFile>>> futureChecksums = pool.submit(analyzer);
 
         try {
-            Map<ChecksumType, MultiValuedMap<String, String>> checksums = futureChecksums.get();
-            MultiValuedMap<String, String> md5s = checksums.get(ChecksumType.md5);
-            Map<String, Collection<String>> map = md5s.asMap();
+            Map<ChecksumType, MultiValuedMap<String, LocalFile>> checksums = futureChecksums.get();
+            MultiValuedMap<String, LocalFile> md5s = checksums.get(ChecksumType.md5);
+            Map<String, Collection<String>> map = md5s.asMap()
+                    .entrySet()
+                    .stream()
+                    .collect(
+                            Collectors.toMap(
+                                    Map.Entry::getKey,
+                                    entry -> entry.getValue()
+                                            .stream()
+                                            .map(LocalFile::getFilename)
+                                            .collect(Collectors.toList())));
             return Collections.unmodifiableMap(map);
         } catch (InterruptedException e) {
             log.error("Failed to get checksums: {}", e.getMessage(), e);
@@ -178,7 +189,7 @@ public final class BuildFinderUtils {
         BuildConfig config = getKojiBuildFinderConfig();
         ExecutorService pool = Executors.newFixedThreadPool(poolSize);
         DistributionAnalyzer analyzer = new DistributionAnalyzer(new ArrayList<>(inputs), config);
-        Future<Map<ChecksumType, MultiValuedMap<String, String>>> futureChecksums = pool.submit(analyzer);
+        Future<Map<ChecksumType, MultiValuedMap<String, LocalFile>>> futureChecksums = pool.submit(analyzer);
 
         try (KojiClientSession session = new KojiClientSession(config.getKojiHubURL())) {
             BuildFinder finder = new BuildFinder(session, config, analyzer);
