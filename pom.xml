@@ -82,7 +82,7 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <picocli.version>4.6.2</picocli.version>
-        <pme.version>4.6</pme.version>
+        <pme.version>4.15</pme.version>
 
         <pnc.version>2.4.1</pnc.version>
 
