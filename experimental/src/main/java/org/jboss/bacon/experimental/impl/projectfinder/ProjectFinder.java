@@ -109,8 +109,9 @@ public class ProjectFinder {
     }
 
     private boolean isExactVersion(String query, String found) {
-        String suffixless = found.replaceFirst("[.-]redhat-[0-9]+$", "");
-        return query.equals(suffixless);
+        String suffixlessQuery = query.replaceFirst("[.-]redhat-[0-9]+$", "");
+        String suffixlessFound = found.replaceFirst("[.-]redhat-[0-9]+$", "");
+        return suffixlessQuery.equals(suffixlessFound);
     }
 
     private boolean validateBuild(Set<GAV> gavs, Build build) {

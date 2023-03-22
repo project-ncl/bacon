@@ -221,6 +221,8 @@ public class BuildConfigGenerator {
                 .useEnvironmentName(useEnvironmentName)
                 .build();
         BuildConfig buildConfig = BuildConfigMapping.toBuildConfig(bc, bcr, opts);
+        String copyMessage = "# Autobuilder copied this Build Config from BC #" + bcr.getId() + " rev " + bcr.getRev();
+        buildConfig.setBuildScript(copyMessage + "\n" + buildConfig.getBuildScript());
         String scmUrl = processScmUrl(buildConfig.getScmUrl());
         if (scmUrl == null) {
             setPlaceholderSCM(name, buildConfig);
