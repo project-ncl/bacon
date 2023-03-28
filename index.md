@@ -62,7 +62,7 @@ Run after compilation:
 java -jar cli/target/bacon.jar
 ```
 
-Java JDK 11 is the minimum supported runtime. If you are installing Bacon on MacOs, please read the [pre-requiste section](#pre-requisite-for-macos). If you are running PNC internally with a company-signed TLS certificate, please read the [TLS certificate section](#tls-certificate)
+**Java JDK 11** is the supported runtime. If you are installing Bacon on MacOs, please read the [pre-requiste section](#pre-requisite-for-macos). If you are running PNC internally with a company-signed TLS certificate, please read the [TLS certificate section](#tls-certificate)
 
 To install the latest ***released*** version:
 ```bash
