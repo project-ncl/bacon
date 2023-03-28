@@ -167,9 +167,9 @@ public class BuildConfigGenerator {
     static String removeOverride(String parameter, boolean keepVersionOverride) {
         return Arrays.stream(parameter.split(" "))
                 .filter(s -> !s.contains("dependencyOverride"))
+                .filter(s -> !s.contains("manipulation.disable=true"))
                 .filter(s -> keepVersionOverride || !s.contains("versionOverride"))
                 .collect(Collectors.joining(" "));
-        // TODO: what about `manipulation.disable=true`,
     }
 
     private String generateBCName(Project project) {
