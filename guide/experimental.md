@@ -87,20 +87,25 @@ buildConfigGeneratorConfig: # Configuration for how the new build configs should
 The strategy for creating Build Configs goes like this:
 - For each project identified by the dependency analysis, we try to find if it was already built in PNC in the same or simmilar version.
 - If we found that a project version was already build we create a copy of the build config with some changes:
-    - strip any `-DdependencyOverride` from the alignment parameters.
+    - strip following from the alignment parameters:
+        - `-DdependencyOverride`
+        - `-Dmanipulation.disable=true`
     - **Note:** This may cause that an existing artifacts may be rebuilt, but this is intended.
 	    - It may be that the original build config did not have dependecies setup correctly so we want a copy that has the depenencies right. We want to rerun the build so it can pickup the newly built dependencies.
 	    - Even if the original had correct dependencies, for autobuilder we now want to use one "static" or "stable" build config per project version as we may not have the influence over the original which could be updated to build different version.
 	    - Once the artifacts are build by an autobuilder run, following autobuilder runs will reuse the exsisting `-AUTOBUILDER` build config, so there will not be rebuild of artifacts that were produced by autobuilder.
  - If we find that a project was build in different version, we find closest built version and create a copy of the build config and doing some changes:
-     - changing the SCM revision
-     - strip any `-DdependencyOverride` from the alignment parameters.
+    - chang the SCM revision and URL
+    - strip following from the alignment parameters:
+        - `-DdependencyOverride`
+        - `-Dmanipulation.disable=true`
+        - `-DversionOverride` - because we are building different version
  - If we found that given artifact was not built at all, we generate new build config
 
 We expect there could be multiple build config generation strategies, but it's something that we need to distill from prod engineers experience. We expect lots of feature request from you.
 
-### Why strip `dependencyOverride`?
-Autobuilder generates the whole dependency tree (unless excluded) of build configs and the goal is to build all the dependecies. The automatic alignment then aligns dependencies to the artifacts produced by builds down the tree. Having `dependencyOverride` would break the alignment on the dependencies introduced by autobuilder.
+### Why strip `dependencyOverride` and `-Dmanipulation.disable=true`?
+Autobuilder generates the whole dependency tree (unless excluded) of build configs and the goal is to build all the dependecies. The automatic alignment then aligns dependencies to the artifacts produced by builds down the tree. Having `dependencyOverride` would break the alignment on the dependencies introduced by autobuilder. Having `-Dmanipulation.disable=true` would disable the alignment completly.
 
 ## Examples
 ### Analysis of BOM project
