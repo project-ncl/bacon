@@ -252,7 +252,7 @@ The `releaseFile` is used as the prefix for the zips produced in the generation 
 When unzipped, the content of the data will be under the folder name: `releasedir-<fullVersion>-maven-repository`. The `releaseDir` specifies the name of the folder prefix inside the zip.
 
 #### Output Suffix
-The `outputSuffix` key can be used to specify a suffix in the generation of zip files and folders. For example, the mavne repository zip name will then be `releasefile-<fullVersion>-<suffix>-maven-repository.zip`, and the folder inside named `releasedir-<fullVersion>-<suffix>-maven-repository`.
+The `outputSuffix` key can be used to specify a suffix in the generation of zip files and folders. For example, the maven repository zip name will then be `releasefile-<fullVersion>-<suffix>-maven-repository.zip`, and the folder inside named `releasedir-<fullVersion>-<suffix>-maven-repository`.
 
 `outputSuffix` is optional.
 
