@@ -18,7 +18,6 @@ import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -165,7 +164,8 @@ public class BuildConfigGenerator {
     }
 
     static String removeOverride(String parameter, boolean keepVersionOverride) {
-        return Arrays.stream(parameter.split(" "))
+        return ArgumentTokenizer.tokenize(parameter)
+                .stream()
                 .filter(s -> !s.contains("dependencyOverride"))
                 .filter(s -> !s.contains("manipulation.disable=true"))
                 .filter(s -> keepVersionOverride || !s.contains("versionOverride"))
