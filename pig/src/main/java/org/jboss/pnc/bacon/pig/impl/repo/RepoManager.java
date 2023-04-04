@@ -436,7 +436,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         File repoWorkDir = FileUtils.mkTempDir("repository");
         File repoParentDir = new File(repoWorkDir, topLevelDirectoryName);
         List<Map<String, String>> stages = generationData.getStages();
-        if (stages != null) {
+        if (stages.size() != 0) {
             stages.forEach(stage -> repoBuilder.build(bomFile, repoParentDir, predicate(stage)));
         } else {
             repoBuilder.build(bomFile, repoParentDir, gav -> true);
