@@ -214,7 +214,8 @@ public class BuildConfigGenerator {
     }
 
     public BuildConfig copyExisting(BuildConfiguration bc, BuildConfigurationRevision bcr, String name) {
-        boolean useEnvironmentName = shouldUseEnvironmentName(name, bcr.getEnvironment());
+        Environment env = environments.resolve(bcr.getEnvironment());
+        boolean useEnvironmentName = shouldUseEnvironmentName(name, env);
 
         BuildConfigMapping.GeneratorOptions opts = BuildConfigMapping.GeneratorOptions.builder()
                 .nameOverride(Optional.of(name))
@@ -223,6 +224,7 @@ public class BuildConfigGenerator {
         BuildConfig buildConfig = BuildConfigMapping.toBuildConfig(bc, bcr, opts);
         String copyMessage = "# Autobuilder copied this Build Config from BC #" + bcr.getId() + " rev " + bcr.getRev();
         buildConfig.setBuildScript(copyMessage + "\n" + buildConfig.getBuildScript());
+        setEnvironment(buildConfig, env, useEnvironmentName);
         String scmUrl = processScmUrl(buildConfig.getScmUrl());
         if (scmUrl == null) {
             setPlaceholderSCM(name, buildConfig);
@@ -233,8 +235,26 @@ public class BuildConfigGenerator {
         return buildConfig;
     }
 
+    private static void setEnvironment(BuildConfig buildConfig, Environment env, boolean useName) {
+        if (useName) {
+            if (!env.getName().equals(buildConfig.getEnvironmentName())) {
+                log.info(
+                        "Replacing environmentName for " + buildConfig.getName() + ": "
+                                + buildConfig.getEnvironmentName() + " -> " + env.getName());
+                buildConfig.setEnvironmentName(env.getName());
+            }
+        } else {
+            if (!env.getSystemImageId().equals(buildConfig.getSystemImageId())) {
+                log.info(
+                        "Replacing systemImageId for " + buildConfig.getName() + ": " + buildConfig.getSystemImageId()
+                                + " -> " + env.getSystemImageId());
+                buildConfig.setSystemImageId(env.getSystemImageId());
+            }
+        }
+    }
+
     private boolean shouldUseEnvironmentName(String name, Environment environment) {
-        if (environments.isValidName(environment.getName())) {
+        if (!environment.isDeprecated()) {
             return true;
         }
         if (config.isAllowDeprecatedEnvironments()) {
