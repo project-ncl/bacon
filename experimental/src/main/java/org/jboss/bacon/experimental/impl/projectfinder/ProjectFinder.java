@@ -136,7 +136,7 @@ public class ProjectFinder {
 
     private Map<GAV, List<String>> findAvailableVersions(Set<GAV> allGAVs) {
         MavenVersionsRequest request = MavenVersionsRequest.builder()
-                .mode("TEMPORARY_PREFER_PERSISTENT")
+                .mode("PERSISTENT")
                 .filter(VersionFilter.ALL)
                 .artifacts(allGAVs)
                 .distanceRule(VersionDistanceRule.CLOSEST_BY_PARTS)
