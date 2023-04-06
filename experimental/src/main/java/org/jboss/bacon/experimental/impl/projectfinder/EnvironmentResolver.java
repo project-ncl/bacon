@@ -9,56 +9,74 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 public class EnvironmentResolver {
-    private BuildConfigGeneratorConfig config;
 
-    private final EnvironmentClient environmentClient;
+    private final Map<String, Environment> environments = new HashMap<>();
 
-    private final Set<Environment> environments = new HashSet<>();
-
-    private final Set<String> nonDeprecatedNames = new HashSet<>();
-
-    public EnvironmentResolver(BuildConfigGeneratorConfig buildConfigGeneratorConfig) {
-        this.config = buildConfigGeneratorConfig;
-        environmentClient = new ClientCreator<>(EnvironmentClient::new).newClient();
-        init();
-    }
-
-    private void init() {
+    public EnvironmentResolver(BuildConfigGeneratorConfig config) {
         try {
+            EnvironmentClient environmentClient = new ClientCreator<>(EnvironmentClient::new).newClient();
             RemoteCollection<Environment> all = environmentClient.getAll(Optional.empty(), Optional.empty());
             for (Environment env : all) {
-                environments.add(env);
-                if (isValidEnvironment(env)) {
-                    nonDeprecatedNames.add(env.getName());
-                }
+                environments.put(env.getId(), env);
             }
-            validateDefaultEnvironment();
+            validateDefaultEnvironment(config.getDefaultValues().getEnvironmentName());
         } catch (RemoteResourceException e) {
             throw new FatalException("Failed to load PNC environment list.", e);
         }
     }
 
-    private void validateDefaultEnvironment() {
-        String defaultEnv = config.getDefaultValues().getEnvironmentName();
-        if (!nonDeprecatedNames.contains(defaultEnv)) {
+    private void validateDefaultEnvironment(String defaultEnv) {
+        Environment byName = null;
+        for (Environment env : environments.values()) {
+            if (env.getName().equals(defaultEnv)) {
+                if (!env.isDeprecated()) {
+                    return;
+                }
+                byName = env;
+            }
+        }
+        if (byName == null) {
             throw new FatalException(
                     "Could not find environment \"" + defaultEnv
                             + "\" in PNC, update default environment value in config.");
         }
+        Environment replacement = resolve(byName);
+        String msg = "Default environment \"" + defaultEnv
+                + "\" is deprecated, update default environment value in config.";
+        if (!replacement.isDeprecated()) {
+            msg += " Environment upgrade path suggests upgrading to \"" + replacement.getName() + "\"";
+        }
+        throw new FatalException(msg);
     }
 
-    public boolean isValidName(String name) {
-        return nonDeprecatedNames.contains(name);
+    public Environment resolve(Environment env) {
+        if (!env.isDeprecated()) {
+            return env;
+        }
+        String replacementID = env.getAttributes().get("DEPRECATION_REPLACEMENT");// TODO: replace with constant from
+                                                                                  // 2.5
+        if (replacementID == null) {
+            log.error(
+                    "Environment " + env.getName() + " #" + env.getId()
+                            + " is deprecated, but does not have a DEPRECATION_REPLACEMENT provided.");// TODO: replace
+                                                                                                       // with constant
+                                                                                                       // from 2.5
+            return env;
+        }
+        Environment replacement = environments.get(replacementID);
+        if (replacement == null) {
+            log.error(
+                    "Environment " + env.getName() + " #" + env.getId()
+                            + " is deprecated, but DEPRECATION_REPLACEMENT points to invalid Environment #"
+                            + replacementID + ".");// TODO: replace with constant from 2.5
+            return env;
+        }
+        return resolve(replacement);
     }
-
-    public boolean isValidEnvironment(Environment env) {
-        return !env.isDeprecated() && !env.isHidden();
-    }
-
 }
