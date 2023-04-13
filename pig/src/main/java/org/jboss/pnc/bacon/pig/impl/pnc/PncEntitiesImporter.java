@@ -393,6 +393,7 @@ public class PncEntitiesImporter implements Closeable {
         return builder.productVersion(version)
                 .parameters(buildConfig.getGenericParameters(null, false))
                 .name(buildConfig.getName())
+                .description(buildConfig.getDescription())
                 .project(project)
                 .environment(environment)
                 .scmRepository(repository)
