@@ -47,16 +47,14 @@ public class DependencyResolver {
             dominoConfig.setProjectBom(ArtifactCoords.fromString(config.getAnalyzeBOM()));
         }
 
-        dominoConfig.setIncludeNonManaged(true)
-                .setExcludeBomImports(false) // TODO
+        dominoConfig.setExcludeBomImports(false) // TODO
                 .setExcludeParentPoms(false) // TODO
-                .setIncludeArtifacts(artifacts)
                 .setLevel(-1)
                 .setIncludeOptionalDeps(config.isIncludeOptionalDependencies())
                 .setWarnOnResolutionErrors(true)
                 .setWarnOnMissingScm(true)
                 .setRecipeRepos(config.getRecipeRepos())
-                .setProjectArtifacts(Set.of()) // TODO
+                .setProjectArtifacts(artifacts)
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
         // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
