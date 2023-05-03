@@ -128,16 +128,17 @@ public class PncEntitiesImporter implements Closeable {
         try {
             Product product = maybeSingle(
                     productClient.getAll(empty(), findByNameQuery(this.pigConfiguration.getProduct().getName())))
-                            .orElseThrow(
-                                    () -> new RuntimeException(
-                                            "Error while retrieving current/latest Milestone. Product mentioned in build-config.yaml doesn't exist."));
+                    .orElseThrow(
+                            () -> new RuntimeException(
+                                    "Error while retrieving current/latest Milestone. Product mentioned in build-config.yaml doesn't exist."));
             ProductVersion productVersion = maybeSingle(
                     productClient.getProductVersions(
                             product.getId(),
                             empty(),
-                            query("version=='%s'", pigConfiguration.getMajorMinor()))).orElseThrow(
-                                    () -> new RuntimeException(
-                                            "Error while retrieving current/latest Milestone. Product Version mentioned in build-config.yaml doesn't exist for the Product."));
+                            query("version=='%s'", pigConfiguration.getMajorMinor())))
+                    .orElseThrow(
+                            () -> new RuntimeException(
+                                    "Error while retrieving current/latest Milestone. Product Version mentioned in build-config.yaml doesn't exist for the Product."));
 
             ProductMilestoneRef currentProductMilestone = productVersion.getCurrentProductMilestone();
             if (currentProductMilestone == null) {
@@ -560,7 +561,7 @@ public class PncEntitiesImporter implements Closeable {
         try {
             return toStream(
                     groupConfigClient.getAll(empty(), Optional.of("name=='" + pigConfiguration.getGroup() + "'")))
-                            .findAny();
+                    .findAny();
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to check if build group exists");
         }
