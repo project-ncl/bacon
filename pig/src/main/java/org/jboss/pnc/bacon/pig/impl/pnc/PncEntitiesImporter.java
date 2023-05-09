@@ -21,6 +21,7 @@ import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
+import org.jboss.pnc.bacon.pig.impl.config.StrategyConfig;
 import org.jboss.pnc.bacon.pig.impl.utils.CollectionUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
@@ -35,6 +36,7 @@ import org.jboss.pnc.client.ProjectClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.constants.Attributes;
+import org.jboss.pnc.dto.AlignmentStrategy;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.Environment;
@@ -387,6 +389,8 @@ public class PncEntitiesImporter implements Closeable {
 
         BuildConfiguration.Builder builder = BuildConfiguration.builder();
 
+        Set<AlignmentStrategy> strategies = convertStrategies(buildConfig.getAlignmentStrategies());
+
         if (existing != null) {
             builder = existing.toBuilder();
         }
@@ -402,6 +406,7 @@ public class PncEntitiesImporter implements Closeable {
                 .buildScript(buildConfig.getBuildScript())
                 .buildType(BuildType.valueOf(buildConfig.getBuildType()))
                 .brewPullActive(buildConfig.getBrewPullActive())
+                .alignmentStrategies(strategies)
                 .build();
     }
 
@@ -428,6 +433,18 @@ public class PncEntitiesImporter implements Closeable {
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to search for repository by " + matchUrl, e);
         }
+    }
+
+    private Set<AlignmentStrategy> convertStrategies(List<StrategyConfig> strategyConfigs) {
+        return strategyConfigs.stream()
+                .map(
+                        config -> AlignmentStrategy.builder()
+                                .dependencyOverride(config.getDependencyOverride())
+                                .allowList(config.getAllowList())
+                                .denyList(config.getDenyList())
+                                .ranks(config.getRanks())
+                                .build())
+                .collect(Collectors.toSet());
     }
 
     private SCMRepository createRepository(BuildConfig buildConfig) {
