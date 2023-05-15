@@ -20,4 +20,5 @@ public class DependencyResolutionConfig {
     private String analyzeBOM;
     private List<String> recipeRepos = List.of();
     private boolean includeOptionalDependencies = true;
+    private boolean excludeProductizedArtifacts = false;
 }

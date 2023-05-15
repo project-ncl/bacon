@@ -15,6 +15,8 @@ import io.quarkus.maven.dependency.ArtifactCoords;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
 import org.jboss.da.model.rest.GAV;
+import org.jboss.pnc.common.version.SuffixedVersion;
+import org.jboss.pnc.common.version.VersionParser;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -31,6 +33,7 @@ public class DependencyResolver {
 
     private final ProjectDependencyConfig.Mutable dominoConfig;
     private final DependencyResolutionConfig config;
+    private final VersionParser versionParser = new VersionParser("redhat");
 
     public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig) {
         this.config = dependencyResolutionConfig;
@@ -99,7 +102,7 @@ public class DependencyResolver {
         for (ReleaseRepo repo : releaseCollection) {
             Project project = mapToProject(repo, depsToCut);
             mapping.put(repo, project);
-            if (repo.isRoot()) {
+            if (repo.isRoot() && filterProductized(project)) {
                 rootProjects.add(project);
             }
         }
@@ -108,7 +111,6 @@ public class DependencyResolver {
 
         DependencyResult result = new DependencyResult();
         result.setTopLevelProjects(rootProjects);
-        result.setCount(mapping.size());
         return result;
     }
 
@@ -122,8 +124,20 @@ public class DependencyResolver {
                             .stream()
                             .filter(d -> !toCut.contains(d.id()))
                             .map(mapping::get)
+                            .filter(this::filterProductized)
                             .collect(Collectors.toSet()));
         }
+    }
+
+    /**
+     * Returns false if excludeProductizedArtifacts is true and the project version contains -redhat-X.
+     */
+    private boolean filterProductized(Project releaseRepo) {
+        if (!config.isExcludeProductizedArtifacts()) {
+            return true;
+        }
+        SuffixedVersion version = versionParser.parse(releaseRepo.getFirstGAV().getVersion());
+        return !version.isSuffixed();
     }
 
     private Map<ReleaseId, Set<ReleaseId>> processCircularDependencies(
