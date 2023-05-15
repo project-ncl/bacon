@@ -9,11 +9,12 @@ import java.util.Set;
 
 @Data
 @ToString(exclude = { "dependencies", "depth" })
-@EqualsAndHashCode(exclude = { "dependencies", "depth" })
+@EqualsAndHashCode(exclude = { "dependencies", "depth", "cutDepenendecy" })
 public class Project {
     private String sourceCodeURL;
     private String sourceCodeRevision;
     private Set<GAV> gavs;
+
     private Set<Project> dependencies;
     private int depth = -1;
     private boolean cutDepenendecy = false;
