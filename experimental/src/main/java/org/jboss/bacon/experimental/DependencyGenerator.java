@@ -18,50 +18,77 @@
 package org.jboss.bacon.experimental;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.bacon.experimental.cli.ExperimentalCommand;
+import org.jboss.bacon.experimental.cli.DependencyGeneratorCommand;
 import org.jboss.bacon.experimental.impl.config.GeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResolver;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
+import org.jboss.bacon.experimental.impl.dependencies.Project;
 import org.jboss.bacon.experimental.impl.generator.BuildConfigGenerator;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
 import org.jboss.bacon.experimental.impl.projectfinder.ProjectFinder;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import picocli.CommandLine;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 @CommandLine.Command(
         name = "dependency-generator",
         description = "Automated dependency Build Config generator",
-        subcommands = { DependencyGenerator.Generate.class })
+        subcommands = { DependencyGenerator.Generate.class, DependencyGenerator.DepTree.class })
 @Slf4j
 public class DependencyGenerator {
 
+    @CommandLine.Command(name = "dependency-tree", description = "Outputs the analyzed dependency tree")
+    public static class DepTree extends DependencyGeneratorCommand {
+
+        @Override
+        public void run() {
+            GeneratorConfig config = loadConfig();
+            DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
+            DependencyResult dependencies;
+            if (projectDir != null) {
+                dependencies = dependencyResolver.resolve(projectDir);
+            } else {
+                dependencies = dependencyResolver.resolve();
+            }
+            print(dependencies);
+        }
+
+        private void print(DependencyResult dependencies) {
+            Set<Project> entered = new HashSet<>();
+            Stack<StackElem> stack = new Stack<>();
+            for (Project topLevelProject : dependencies.getTopLevelProjects()) {
+                stack.push(new StackElem(topLevelProject, "# "));
+            }
+            while (!stack.isEmpty()) {
+                StackElem stackElem = stack.pop();
+                System.out.println(stackElem.prefix + stackElem.project.getFirstGAV());
+                if (!entered.contains(stackElem.project)) {
+                    entered.add(stackElem.project);
+                    for (Project dependency : stackElem.project.getDependencies()) {
+                        stack.push(new StackElem(dependency, stackElem.prefix + " "));
+                    }
+                }
+            }
+        }
+
+        @AllArgsConstructor
+        private static class StackElem {
+            Project project;
+            String prefix;
+        }
+    }
+
     @CommandLine.Command(name = "generate", description = "Generates build config")
-    public static class Generate extends ExperimentalCommand {
-
-        @CommandLine.Option(names = { "--project-dir" }, description = "Project directory")
-        private Path projectDir;
-
-        @CommandLine.Parameters(description = "Autobuilder configuration file")
-        private Path config;
+    public static class Generate extends DependencyGeneratorCommand {
 
         @Override
         public void run() {
@@ -69,34 +96,6 @@ public class DependencyGenerator {
                 ObjectHelper.print(getJsonOutput(), generatePigConfig());
             } catch (JsonProcessingException e) {
                 throw new FatalException("Caught exception " + e.getMessage(), e);
-            }
-        }
-
-        private GeneratorConfig loadConfig() {
-            if (config == null) {
-                throw new FatalException("You need to specify the configuration directory!");
-            }
-
-            Yaml yaml = new Yaml(new Constructor(GeneratorConfig.class));
-            try (BufferedReader reader = Files.newBufferedReader(config)) {
-                GeneratorConfig config = yaml.load(reader);
-                validate(config);
-                return config;
-            } catch (IOException e) {
-                throw new FatalException("Unable to load config file", e);
-            }
-        }
-
-        private void validate(GeneratorConfig config) {
-            try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-                Validator validator = factory.getValidator();
-                Set<ConstraintViolation<GeneratorConfig>> violations = validator.validate(config);
-
-                if (!violations.isEmpty()) {
-                    throw new FatalException(
-                            "Errors while validating the autobuilder config.yaml:\n"
-                                    + Validate.<GeneratorConfig> prettifyConstraintViolation(violations));
-                }
             }
         }
 
