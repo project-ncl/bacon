@@ -8,10 +8,13 @@ import org.jboss.bacon.experimental.impl.dependencies.ProjectDepthComparator;
 import org.jboss.bacon.experimental.impl.projectfinder.EnvironmentResolver;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProject;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
+import org.jboss.da.model.rest.GA;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.mapping.BuildConfigMapping;
+import org.jboss.pnc.common.version.SuffixedVersion;
+import org.jboss.pnc.common.version.VersionParser;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
@@ -19,6 +22,7 @@ import org.jboss.pnc.dto.Environment;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +34,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class BuildConfigGenerator {
-    private BuildConfigGeneratorConfig config;
-    private EnvironmentResolver environments;
+    private final BuildConfigGeneratorConfig config;
+    private final EnvironmentResolver environments;
+    private final VersionParser versionParser = new VersionParser("redhat");
+
+    private Map<GA, Set<Project>> projectsByGA;
 
     public BuildConfigGenerator(BuildConfigGeneratorConfig buildConfigGeneratorConfig) {
         this.config = buildConfigGeneratorConfig;
@@ -39,11 +46,21 @@ public class BuildConfigGenerator {
     }
 
     public List<BuildConfig> generateConfigs(DependencyResult dependencies, FoundProjects foundProjects) {
+        projectsByGA = new HashMap<>();
+        fillProjectsByGA(dependencies.getTopLevelProjects());
         Map<Project, BuildConfig> buildConfigMap = new TreeMap<>(new ProjectDepthComparator());
         for (Project project : dependencies.getTopLevelProjects()) {
             generateConfig(buildConfigMap, project, foundProjects);
         }
         return new ArrayList<>(buildConfigMap.values());
+    }
+
+    private void fillProjectsByGA(Set<Project> projects) {
+        for (Project project : projects) {
+            GA ga = project.getFirstGAV().getGA();
+            projectsByGA.computeIfAbsent(ga, g -> new HashSet<>()).add(project);
+            fillProjectsByGA(project.getDependencies());
+        }
     }
 
     private BuildConfig generateConfig(
@@ -137,7 +154,8 @@ public class BuildConfigGenerator {
     }
 
     private boolean isTainted(Project project) {
-        return project.isCutDepenendecy();
+        return project.isCutDepenendecy() // Cut dependency means that the project will miss linked dependencies
+                || isThereConflictingProject(project); // Conflict means there are multiple BCs building the same thing
     }
 
     private BuildConfig updateSimilar(BuildConfig buildConfig, Project project) {
@@ -176,7 +194,37 @@ public class BuildConfigGenerator {
 
     private String generateBCName(Project project) {
         GAV gav = project.getFirstGAV();
-        return gav.getGroupId() + "-" + gav.getArtifactId() + "-" + gav.getVersion() + "-AUTOBUILD";
+        String version = resolveVersionForName(project, gav);
+        return gav.getGroupId() + "-" + gav.getArtifactId() + "-" + version + "-AUTOBUILD";
+    }
+
+    private String resolveVersionForName(Project project, GAV gav) {
+        SuffixedVersion version = versionParser.parse(gav.getVersion());
+        if (!version.isSuffixed()) {
+            return gav.getVersion();
+        }
+        if (isThereConflictingProject(project)) {
+            log.error("Project " + gav + " has a duplicate project without the redhat suffix.");
+            return gav.getVersion();
+        }
+        return version.unsuffixedVersion();
+    }
+
+    private boolean isThereConflictingProject(Project project) {
+        GAV gav = project.getFirstGAV();
+        GA ga = gav.getGA();
+        SuffixedVersion version = versionParser.parse(gav.getVersion());
+        Set<Project> projects = projectsByGA.get(ga);
+        for (Project other : projects) {
+            if (other.equals(project)) {
+                continue;
+            }
+            SuffixedVersion otherVersion = versionParser.parse(other.getFirstGAV().getVersion());
+            if (otherVersion.unsuffixedVersion().equals(version.unsuffixedVersion())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
