@@ -19,6 +19,7 @@ import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.common.version.VersionParser;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
@@ -41,6 +42,7 @@ public class ProjectFinder {
     private final ArtifactClient artifactClient;
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
+    private final VersionParser versionParser = new VersionParser("redhat");
 
     public ProjectFinder() {
         lookupApi = DaHelper.createLookupApi();
@@ -109,8 +111,8 @@ public class ProjectFinder {
     }
 
     private boolean isExactVersion(String query, String found) {
-        String suffixlessQuery = query.replaceFirst("[.-]redhat-[0-9]+$", "");
-        String suffixlessFound = found.replaceFirst("[.-]redhat-[0-9]+$", "");
+        String suffixlessQuery = versionParser.parse(query).unsuffixedVersion();
+        String suffixlessFound = versionParser.parse(found).unsuffixedVersion();
         return suffixlessQuery.equals(suffixlessFound);
     }
 
