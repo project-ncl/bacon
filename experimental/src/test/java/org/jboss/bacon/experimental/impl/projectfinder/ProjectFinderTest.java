@@ -65,6 +65,27 @@ public class ProjectFinderTest {
         assertThat(revision.getId()).isEqualTo("300");
     }
 
+    @Test
+    public void testExactMatch() throws RemoteResourceException {
+        GAV gav = new GAV("com.sun.xml.bind", "jaxb-bom-ext", "2.3.3-b02");
+        Project project = new Project();
+        project.setGavs(Set.of(gav));
+        project.setDependencies(Set.of());
+        project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
+        project.setSourceCodeRevision("2.3.3-b02-RI");
+        DependencyResult dependencyResult = new DependencyResult();
+        dependencyResult.setTopLevelProjects(Set.of(project));
+
+        FoundProjects projects = finder.findProjects(dependencyResult);
+
+        assertThat(projects).isNotNull();
+        assertThat(projects.getFoundProjects()).hasSize(1);
+        FoundProject found = projects.getFoundProjects().iterator().next();
+        assertThat(found).isNotNull();
+        assertThat(found.isFound()).isTrue();
+        assertThat(found.isExactMatch()).isTrue();
+    }
+
     private DependencyResult generateDependencyResult() {
         Project toplevel1 = generateProject("toplevel-one");
         Project toplevel2 = generateProject("toplevel-two");

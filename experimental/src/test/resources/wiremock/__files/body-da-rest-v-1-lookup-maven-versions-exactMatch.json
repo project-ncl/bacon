@@ -1,0 +1,8 @@
+[
+    {
+        "groupId": "com.sun.xml.bind",
+        "artifactId": "jaxb-bom-ext",
+        "version": "2.3.3-b02",
+        "availableVersions": ["2.3.3.b02-redhat-00004"]
+    }
+]

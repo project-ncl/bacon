@@ -1,0 +1,24 @@
+{
+    "pageIndex": 0,
+    "pageSize": 50,
+    "totalPages": 1,
+    "totalHits": 1,
+    "content": [
+        {
+            "id": "10246664",
+            "identifier": "dcom.sun.xml.bind:jaxb-bom-ext:pom:2.3.3.b02-redhat-00004",
+            "deployPath": null,
+            "targetRepository": {
+                "id": "100",
+                "repositoryType": "MAVEN"
+            },
+            "build": {
+                "id": "EXACTMATCH1",
+                "buildConfigRevision": {
+                    "id": "10246",
+                    "rev": 10246
+                }
+            }
+        }
+    ]
+}
