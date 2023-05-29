@@ -263,6 +263,14 @@ outputSuffix: picard
 
 
 ### Flow
+<table bgcolor="#ffff00">
+<tr>
+<td>
+Flow part is mainly for maven type of project output, e.g. maven, gradle, scala builds. NPM Projects could set all strategies to IGNORE or modify generation to get empty repo to which they manually download needed packages through additional repo options.
+</td>
+</tr>
+</table>
+
 ```yaml
 flow:
   repositoryGeneration:
