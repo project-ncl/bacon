@@ -8,6 +8,7 @@ import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.devtools.messagewriter.MessageWriter;
 import io.quarkus.domino.CircularReleaseDependency;
 import io.quarkus.domino.ProjectDependencyConfig;
+import io.quarkus.domino.ProjectDependencyConfigMapper;
 import io.quarkus.domino.ProjectDependencyResolver;
 import io.quarkus.domino.ReleaseCollection;
 import io.quarkus.domino.ReleaseRepo;
@@ -18,6 +19,8 @@ import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,6 +69,7 @@ public class DependencyResolver {
 
     public DependencyResult resolve(Path projectDir) {
         dominoConfig.setProjectDir(projectDir);
+        logDominoConfig();
         ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
                 .setArtifactResolver(getArtifactResolver(projectDir))
                 .setMessageWriter(new Slf4jMessageWriter())
@@ -75,11 +79,23 @@ public class DependencyResolver {
     }
 
     public DependencyResult resolve() {
+        logDominoConfig();
         ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
                 .setDependencyConfig(dominoConfig)
                 .setMessageWriter(new Slf4jMessageWriter())
                 .build();
         return parseReleaseCollection(resolver.getReleaseCollection());
+    }
+
+    private void logDominoConfig() {
+        if (log.isDebugEnabled()) {
+            try (StringWriter writer = new StringWriter()) {
+                ProjectDependencyConfigMapper.serialize(dominoConfig, writer);
+                log.debug("Using domino config:\n" + writer.toString());
+            } catch (IOException e) {
+                log.info("Failed to serialize domino config.", e);
+            }
+        }
     }
 
     protected MavenArtifactResolver getArtifactResolver(Path projectDir) {
