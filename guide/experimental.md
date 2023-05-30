@@ -33,6 +33,7 @@ dependencyResolutionConfig: # Configuration for the dependency resolution by Dom
         # The matching artifact and it's dependencies will be ommited from the resulting build tree
         # The format is G:A:[C:T:]V where every part can be replaced with '*'
         - org.apache.maven:*:*
+    excludeProductizedArtifacts: false # If set to true, all -redhat-X artifacts and their dependencies are ommited from the resulting build tree
     includeArtifacts: # List of artifacts that should not be excluded from the analysis
         # The format is G:A:[C:T:]V where every part can be replaced with '*'
         - foo:*:*
@@ -218,4 +219,11 @@ buildConfigGeneratorConfig:
             releaseDir: ab-example
         addons:
             notYetAlignedFromDependencyTree:
+```
+
+## Dependency tree
+
+You can print out the analyzed dependency tree using your autobuilder configuration using the `dependency-tree` subcommand instead of the `generate` subcommand. For example:
+```shell
+bacon experimental dependency-generator dependency-tree <config>
 ```
