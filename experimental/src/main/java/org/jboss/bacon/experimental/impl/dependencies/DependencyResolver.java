@@ -69,28 +69,30 @@ public class DependencyResolver {
 
     public DependencyResult resolve(Path projectDir) {
         dominoConfig.setProjectDir(projectDir);
-        logDominoConfig();
+        ProjectDependencyConfig conf = dominoConfig.build();
+        logDominoConfig(conf);
         ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
                 .setArtifactResolver(getArtifactResolver(projectDir))
                 .setMessageWriter(new Slf4jMessageWriter())
-                .setDependencyConfig(dominoConfig)
+                .setDependencyConfig(conf)
                 .build();
         return parseReleaseCollection(resolver.getReleaseCollection());
     }
 
     public DependencyResult resolve() {
-        logDominoConfig();
+        ProjectDependencyConfig conf = dominoConfig.build();
+        logDominoConfig(conf);
         ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
-                .setDependencyConfig(dominoConfig)
+                .setDependencyConfig(conf)
                 .setMessageWriter(new Slf4jMessageWriter())
                 .build();
         return parseReleaseCollection(resolver.getReleaseCollection());
     }
 
-    private void logDominoConfig() {
+    private void logDominoConfig(ProjectDependencyConfig conf) {
         if (log.isDebugEnabled()) {
             try (StringWriter writer = new StringWriter()) {
-                ProjectDependencyConfigMapper.serialize(dominoConfig, writer);
+                ProjectDependencyConfigMapper.serialize(conf, writer);
                 log.debug("Using domino config:\n" + writer.toString());
             } catch (IOException e) {
                 log.info("Failed to serialize domino config.", e);
