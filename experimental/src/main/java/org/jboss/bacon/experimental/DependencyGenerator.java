@@ -54,11 +54,7 @@ public class DependencyGenerator {
             GeneratorConfig config = loadConfig();
             DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
             DependencyResult dependencies;
-            if (projectDir != null) {
-                dependencies = dependencyResolver.resolve(projectDir);
-            } else {
-                dependencies = dependencyResolver.resolve();
-            }
+            dependencies = dependencyResolver.resolve(projectDir, dominoConfig);
             print(dependencies);
         }
 
@@ -109,11 +105,7 @@ public class DependencyGenerator {
                     config.getBuildConfigGeneratorConfig());
             // Analyze dependencies
             DependencyResult dependencies;
-            if (projectDir != null) {
-                dependencies = dependencyResolver.resolve(projectDir);
-            } else {
-                dependencies = dependencyResolver.resolve();
-            }
+            dependencies = dependencyResolver.resolve(projectDir, dominoConfig);
             log.info("Analyzed project and found {} dependencies", dependencies.getCount());
             // Generate BCs
             // Find pre-existing BC in PNC
