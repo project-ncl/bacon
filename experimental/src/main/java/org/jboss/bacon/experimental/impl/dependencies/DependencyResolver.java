@@ -16,6 +16,7 @@ import io.quarkus.maven.dependency.ArtifactCoords;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
 import org.jboss.da.model.rest.GAV;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
 
@@ -34,14 +35,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DependencyResolver {
 
-    private final ProjectDependencyConfig.Mutable dominoConfig;
     private final DependencyResolutionConfig config;
     private final VersionParser versionParser = new VersionParser("redhat");
 
     public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig) {
         this.config = dependencyResolutionConfig;
-        dominoConfig = ProjectDependencyConfig.builder();
+        // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
+        System.setProperty("quarkus-internal.maven-cmd-line-args", "-ntp");
+    }
 
+    private void setupConfig(ProjectDependencyConfig.Mutable dominoConfig) {
         config.getExcludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
         config.getIncludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addIncludePattern);
         Set<ArtifactCoords> artifacts = config.getAnalyzeArtifacts()
@@ -63,28 +66,29 @@ public class DependencyResolver {
                 .setProjectArtifacts(artifacts)
                 .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
-        // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
-        System.setProperty("quarkus-internal.maven-cmd-line-args", "-ntp");
     }
 
-    public DependencyResult resolve(Path projectDir) {
-        dominoConfig.setProjectDir(projectDir);
+    public DependencyResult resolve(Path projectDir, Path dominoConfigFile) {
+        ProjectDependencyConfig.Mutable dominoConfig;
+        if (dominoConfigFile == null) {
+            dominoConfig = ProjectDependencyConfig.builder();
+        } else {
+            try {
+                dominoConfig = ProjectDependencyConfig.mutableFromFile(dominoConfigFile);
+            } catch (IOException e) {
+                throw new FatalException("Failed to load domino config file " + dominoConfigFile, e);
+            }
+        }
+        ProjectDependencyResolver.Builder resolverBuilder = ProjectDependencyResolver.builder();
+        if (projectDir != null) {
+            dominoConfig.setProjectDir(projectDir);
+            resolverBuilder.setArtifactResolver(getArtifactResolver(projectDir));
+        }
+        setupConfig(dominoConfig);
         ProjectDependencyConfig conf = dominoConfig.build();
         logDominoConfig(conf);
-        ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
-                .setArtifactResolver(getArtifactResolver(projectDir))
-                .setMessageWriter(new Slf4jMessageWriter())
+        ProjectDependencyResolver resolver = resolverBuilder.setMessageWriter(new Slf4jMessageWriter())
                 .setDependencyConfig(conf)
-                .build();
-        return parseReleaseCollection(resolver.getReleaseCollection());
-    }
-
-    public DependencyResult resolve() {
-        ProjectDependencyConfig conf = dominoConfig.build();
-        logDominoConfig(conf);
-        ProjectDependencyResolver resolver = ProjectDependencyResolver.builder()
-                .setDependencyConfig(conf)
-                .setMessageWriter(new Slf4jMessageWriter())
                 .build();
         return parseReleaseCollection(resolver.getReleaseCollection());
     }

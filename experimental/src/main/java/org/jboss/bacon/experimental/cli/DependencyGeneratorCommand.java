@@ -22,6 +22,12 @@ public class DependencyGeneratorCommand extends ExperimentalCommand {
     @CommandLine.Option(names = { "--project-dir" }, description = "Project directory")
     protected Path projectDir;
 
+    @CommandLine.Option(
+            names = { "--domino-config" },
+            description = "Path to the domino config json. The config is "
+                    + "used to initialize the dependency resolution config and then the autobuilder config is applied.")
+    protected Path dominoConfig;
+
     @CommandLine.Parameters(description = "Autobuilder configuration file")
     protected Path config;
 
