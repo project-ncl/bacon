@@ -19,7 +19,9 @@ package org.jboss.pnc.bacon.pig.impl.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
@@ -82,6 +84,8 @@ public class PigConfiguration implements Validate {
     private String micro;
     private Map<String, Map<String, ?>> addons = new HashMap<>();
     private String releaseStorageUrl;
+    @Getter(AccessLevel.NONE)
+    private Boolean draft;
 
     private AlignmentType temporaryBuildAlignmentPreference;
 
@@ -271,5 +275,13 @@ public class PigConfiguration implements Validate {
     @Deprecated
     public String getMajorMinor() {
         return majorMinor;
+    }
+
+    public boolean isDraft() {
+        return draft != null && draft;
+    }
+
+    public void setDraft(boolean draft) {
+        this.draft = draft;
     }
 }
