@@ -126,13 +126,15 @@ public final class PigFacade {
         }
 
         boolean dryRun = false;
-        if (tempBuild != false) {
+        if (tempBuild) {
             AlignmentType alignmentPreference = context().getPigConfiguration().getTemporaryBuildAlignmentPreference();
 
             if ((alignmentPreference != null && alignmentPreference.equals(AlignmentType.PERSISTENT))
                     || (alignmentPreference == null) && tempAlign.equals(AlignmentType.PERSISTENT)) {
                 dryRun = true;
             }
+        } else if (context().getPigConfiguration().isDraft()) {
+            throw new FatalException("Pig config is marked as draft, you can run it only as temporary.");
         }
 
         try (PncBuilder pncBuilder = new PncBuilder()) {

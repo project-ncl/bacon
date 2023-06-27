@@ -114,7 +114,7 @@ public class DependencyGenerator {
             List<BuildConfig> buildConfigs = buildConfigGenerator.generateConfigs(dependencies, foundProjects);
             // Generate build-config.yaml
             PigConfiguration template = config.getBuildConfigGeneratorConfig().getPigTemplate();
-            template.setBuilds(buildConfigs);
+            template.setDraft(true);
             return template;
         }
 
