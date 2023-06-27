@@ -52,6 +52,18 @@ public class BuildConfigGenerator {
         for (Project project : dependencies.getTopLevelProjects()) {
             generateConfig(buildConfigMap, project, foundProjects);
         }
+        if (config.isFailGeneratedBuildScript()) {
+            log.info(
+                    "Some Build Configs might have been generated or modified. Autobuilder appended command `false` to "
+                            + "build scripts of such Build Configs and a human should review the Build Configs before "
+                            + "removig the command `false`. The generated build-config.yaml can still be run in PNC "
+                            + "even with the command `false` present, as it will provide you with information about "
+                            + "alignment and the build run.");
+        } else {
+            log.info(
+                    "Some Build Configs might have been generated or modified and a human should review the Build "
+                            + "Configs before build outputs from these build configs are used.");
+        }
         return new ArrayList<>(buildConfigMap.values());
     }
 
@@ -140,6 +152,7 @@ public class BuildConfigGenerator {
             failCommand += " # This build configuration is tainted, you should fix errors reported from Autobuilder before removing this command";
             sj.add(failCommand);
         } else if (config.isFailGeneratedBuildScript()) {
+            failCommand += " # This build configuration was modified by Autobuilder and should be reviewed by a human. After review, this line can be removed.";
             sj.add(failCommand);
         }
         return sj.toString();
