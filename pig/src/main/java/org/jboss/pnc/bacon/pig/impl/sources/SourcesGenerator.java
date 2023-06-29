@@ -30,6 +30,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,6 +68,10 @@ public class SourcesGenerator {
     }
 
     public void generateSources(Map<String, PncBuild> builds, RepositoryData repo) {
+        // Do not modify the original builds map. Rather, create a shallow copy and modify it.
+        // The builds map could be a 'global' object and we don't want to modify that since it'll wrongly add
+        // additional builds to the list of builds done as part of PiG run
+        Map<String, PncBuild> additionalBuildsForSources = new HashMap<>(builds);
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.IGNORE) {
             log.info("Ignoring source zip generation");
             return;
@@ -79,14 +84,15 @@ public class SourcesGenerator {
         contentsDir.mkdirs();
 
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_SELECTED) {
-            PncBuild sourceBuild = builds.get(sourcesGenerationData.getSourceBuild());
-            builds = Maps.filterEntries(builds, entry -> entry.getKey().equals(sourceBuild.getName()));
+            PncBuild sourceBuild = additionalBuildsForSources.get(sourcesGenerationData.getSourceBuild());
+            additionalBuildsForSources = Maps
+                    .filterEntries(additionalBuildsForSources, entry -> entry.getKey().equals(sourceBuild.getName()));
         }
 
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES
                 || sourcesGenerationData
                         .getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES_EXTENDED) {
-            builds = addRedhatDependencyBuilds(builds);
+            additionalBuildsForSources = addRedhatDependencyBuilds(additionalBuildsForSources);
         }
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_ADDITIONAL_SELECTED) {
             for (String buildConfigName : sourcesGenerationData.getAdditionalExternalSources()) {
@@ -94,14 +100,14 @@ public class SourcesGenerator {
                         ? BuildInfoCollector.BuildSearchType.TEMPORARY
                         : BuildInfoCollector.BuildSearchType.PERMANENT;
 
-                builds.put(
+                additionalBuildsForSources.put(
                         buildConfigName,
                         buildInfoCollector.getLatestBuild(buildInfoCollector.ConfigNametoId(buildConfigName), type));
 
             }
         }
 
-        downloadSourcesFromBuilds(builds, workDir, contentsDir);
+        downloadSourcesFromBuilds(additionalBuildsForSources, workDir, contentsDir);
 
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_EXTENDED || sourcesGenerationData
                 .getStrategy() == SourcesGenerationStrategy.GENERATE_REDHAT_DEPENDENCIES_EXTENDED) {
