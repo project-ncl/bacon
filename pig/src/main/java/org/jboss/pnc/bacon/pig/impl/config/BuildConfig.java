@@ -23,11 +23,9 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
-import org.jboss.pnc.bacon.pig.impl.validation.ListAlignmentStrategyCheck;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.dto.AlignmentStrategy;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
@@ -49,7 +47,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -122,8 +119,6 @@ public class BuildConfig {
     private String brewBuildName;
 
     private String buildCategory;
-
-    private @ListAlignmentStrategyCheck List<StrategyConfig> alignmentStrategies = new ArrayList<>();
 
     /**
      * Set the defaults of buildConfig if not explicitly specified
@@ -230,8 +225,7 @@ public class BuildConfig {
                 && getEnvironmentId().equals(old.getEnvironment().getId())
                 && alignmentParameters.equals(getAlignmentParameters(old)) && urlsEqual(old.getScmRepository())
                 && parameters.equals(old.getParameters()) && !isBranchModified(old, skipBranchCheck, temporaryBuild)
-                && getBrewPullActive() == old.getBrewPullActive()
-                && areStrategiesEqual(getAlignmentStrategies(), old.getAlignmentStrategies());
+                && getBrewPullActive() == old.getBrewPullActive();
     }
 
     private Set<String> getAlignmentParameters(BuildConfiguration old) {
@@ -246,41 +240,6 @@ public class BuildConfig {
     private boolean urlsEqual(SCMRepository repo) {
         return StringUtils.equals(externalScmUrl, repo.getExternalUrl())
                 || StringUtils.equals(scmUrl, repo.getInternalUrl());
-    }
-
-    private boolean areStrategiesEqual(List<StrategyConfig> baconStrategies, Set<AlignmentStrategy> dtoStrategies) {
-        Map<String, StrategyConfig> baconStrategyMap = baconStrategies.stream()
-                .collect(toMap(StrategyConfig::getDependencyOverride, identity()));
-        Map<String, AlignmentStrategy> dtoStrategyMap = dtoStrategies.stream()
-                .collect(toMap(AlignmentStrategy::getDependencyOverride, identity()));
-
-        Set<String> baconExtra = new HashSet<>(baconStrategyMap.keySet());
-        baconExtra.removeAll(dtoStrategyMap.keySet());
-        if (!baconExtra.isEmpty()) {
-            // Some strategies are new in BuildConfig
-            return false;
-        }
-
-        Set<String> dtoExtra = new HashSet<>(dtoStrategyMap.keySet());
-        dtoExtra.removeAll(baconStrategyMap.keySet());
-        if (!dtoExtra.isEmpty()) {
-            // Some strategies are new in BuildConfiguration DTO
-            return false;
-        }
-
-        // Strategies match depOverrides; Compare the actual strategies
-        for (String depOverride : baconStrategyMap.keySet()) {
-            var baconStrat = baconStrategyMap.get(depOverride);
-            var dtoStrat = dtoStrategyMap.get(depOverride);
-
-            if (!(Objects.equals(baconStrat.getRanks(), dtoStrat.getRanks())
-                    && Objects.equals(baconStrat.getAllowList(), dtoStrat.getAllowList())
-                    && Objects.equals(baconStrat.getDenyList(), dtoStrat.getDenyList()))) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     @JsonIgnore
