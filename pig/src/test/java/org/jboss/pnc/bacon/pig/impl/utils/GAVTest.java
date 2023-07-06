@@ -86,4 +86,26 @@ class GAVTest {
 
         assertThat(gav.toGapvc()).isEqualTo(gapvc);
     }
+
+    /**
+     * This test is related to NCL-7238: when an artifact has no packaging, we just set the packaging to string "empty"
+     * to generate proper PURL and to avoid artifact duplicates. Unfortunately this affects how the GAV uri is generated
+     * <p/>
+     * This is a test to make sure we handle it properly
+     */
+    @Test
+    void testEmptyPackagingUri() {
+        String gapvc = "com.fasterxml.jackson.core:jackson-databin:pom:2.13.4";
+        GAV gav = GAV.fromColonSeparatedGAPV(gapvc);
+        assertThat(gav.toFileName()).isEqualTo("jackson-databin-2.13.4.pom");
+        assertThat(gav.toUri())
+                .isEqualTo("com/fasterxml/jackson/core/jackson-databin/2.13.4/jackson-databin-2.13.4.pom");
+
+        // with empty packaging, there should be no extension in the filename or url
+        String gapvcEmpty = "com.fasterxml.jackson.core:jackson-databin:empty:2.13.4";
+        GAV gavEmpty = GAV.fromColonSeparatedGAPV(gapvcEmpty);
+        assertThat(gavEmpty.toFileName()).isEqualTo("jackson-databin-2.13.4");
+        assertThat(gavEmpty.toUri())
+                .isEqualTo("com/fasterxml/jackson/core/jackson-databin/2.13.4/jackson-databin-2.13.4");
+    }
 }

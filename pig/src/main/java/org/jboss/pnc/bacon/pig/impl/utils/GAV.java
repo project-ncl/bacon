@@ -46,6 +46,13 @@ public class GAV {
     private static final Logger log = LoggerFactory.getLogger(GAV.class);
 
     public static final Comparator<GAV> gapvcComparator = Comparator.comparing(GAV::toGapvc);
+    /**
+     * See NCL-7238. Some gavs have no packaging due to weird Maven behaviour. In PNC, we need to specify a packaging to
+     * generate a valid PURL and to avoid duplicates of artifacts. Therefore we chose to use the "empty" packaging.
+     *
+     * Also specified in repository-driver
+     */
+    public static final String FILE_NO_EXTENSION_PACKAGING = "empty";
 
     private String packaging; // not final for jackson
     private String groupId; // not final for jackson
@@ -154,10 +161,18 @@ public class GAV {
     }
 
     public String toFileName() {
-        if (classifier == null) {
-            return String.format("%s-%s.%s", artifactId, version, packaging);
+        if (FILE_NO_EXTENSION_PACKAGING.equals(packaging)) {
+            if (classifier == null) {
+                return String.format("%s-%s", artifactId, version);
+            } else {
+                return String.format("%s-%s-%s", artifactId, version, classifier);
+            }
         } else {
-            return String.format("%s-%s-%s.%s", artifactId, version, classifier, packaging);
+            if (classifier == null) {
+                return String.format("%s-%s.%s", artifactId, version, packaging);
+            } else {
+                return String.format("%s-%s-%s.%s", artifactId, version, classifier, packaging);
+            }
         }
     }
 
