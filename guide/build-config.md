@@ -131,8 +131,7 @@ builds:
 
   buildPodMemory: <number> # Optional: use if you want to override the default memory inside a builder pod. e.g buildPodMemory: 6
 
-  # see https://github.com/project-ncl/project-manipulator/blob/master/README.md#usage for syntax and other flags you can use
-  alignmentParameters: # Optional: if you want to add parameters to the alignment invocation. 
+  alignmentParameters: # Optional: if you want to add parameters to the alignment invocation - see https://github.com/project-ncl/project-manipulator/blob/master/README.md#usage for syntax and other flags
   # These 3 flags are the default behaviour if none are set. BREW_BUILD_VERSION in build-config will match x.y.z-redhat-00001
   # and Post-alignment SCM Tag will match x.y.z-redhat-00001-gitcommmitSHA
   - '-DversioningStrategy=HYPHENED'
