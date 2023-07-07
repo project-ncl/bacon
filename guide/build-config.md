@@ -132,11 +132,12 @@ builds:
   buildPodMemory: <number> # Optional: use if you want to override the default memory inside a builder pod. e.g buildPodMemory: 6
   # and https://github.com/project-ncl/project-manipulator/blob/master/README.md#usage for syntax and other flags you can use
   alignmentParameters: # Optional: if you want to add parameters to the alignment invocation. 
-  # These 3 flags are the default behaviour if none are set, resulting in x.y.z-redhat-00001 as BREW_BUILD_VERSION in build-config,
-  # and Post-alignment SCM Tag will be something like x.y.z-redhat-00001-gitcommmitSHA
+  # These 3 flags are the default behaviour if none are set. BREW_BUILD_VERSION in build-config will match x.y.z-redhat-00001
+  # and Post-alignment SCM Tag will match x.y.z-redhat-00001-gitcommmitSHA
   - '-DversioningStrategy=HYPHENED'
-  - '-DversionIncrementalSuffixPadding=4'
   - '-DversionIncrementalSuffix=redhat'
+  # PNC overrides manully set value with its own default '5'
+  - '-DversionIncrementalSuffixPadding=5'
   # can also set a package scope if applicable
   - '-DpackageScope=redhat'
   extraRepositories: # Optional: use if you want your build to connect to more Maven repositories
