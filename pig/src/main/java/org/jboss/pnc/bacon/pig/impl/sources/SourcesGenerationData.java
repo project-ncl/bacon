@@ -17,6 +17,8 @@ public class SourcesGenerationData extends GenerationData<SourcesGenerationStrat
 
     private List<String> additionalExternalSources;
 
+    private List<String> excludeSourceBuilds;
+
     /**
      * Add defaults to avoid having existing configurations having to define a sourceGeneration object in the flow
      * section
@@ -24,6 +26,7 @@ public class SourcesGenerationData extends GenerationData<SourcesGenerationStrat
     public SourcesGenerationData() {
         this.whitelistedArtifacts = new ArrayList<>();
         this.additionalExternalSources = new ArrayList<>();
+        this.excludeSourceBuilds = new ArrayList<>();
         setStrategy(SourcesGenerationStrategy.GENERATE);
     }
 }
