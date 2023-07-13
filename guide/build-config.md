@@ -336,6 +336,14 @@ You need to specify `group`. Redhat artifacts are then sorted from builds includ
 `Optional parameters:`
 - `excludeSourceBuilds` - used to specify the list of build configurations that you don't want to be included in the generated repository.
 
+  Example:
+  ```
+  repositoryGeneration:
+    strategy: BUILD_GROUP
+    excludeSourceBuilds:
+      - 'org.kie.kogito-kogito-images-1.40.0.Final'
+  ```
+
 ##### `MILESTONE`
 
 The `MILESTONE` - not implemented yet
@@ -465,6 +473,7 @@ If the same configuration option is found directly under the `repositoryGenerati
 - `additionalArtifacts` - artifacts to be specifically added to the repository from specific builds. Should use regular expressions to match any incremental suffixes.
 - `externalAdditionalArtifacts` - artifacts from other builds, not within this product's build group. This list should contain artifact identifiers, as shown in the PNC UI.
 - `externalAdditionalConfigs` - built artifacts from other builds, you use exact name of build configuration, to add all built artifacts of this config. Depending on build type, it's checking for last successful temporary or persistent build.
+
   Example:
   ```
   repositoryGeneration:
@@ -553,6 +562,17 @@ The `GENERATE_REDHAT_DEPENDENCIES` strategy gets sources from builds and adds so
 The `GENERATE_REDHAT_DEPENDENCIES_EXTENDED` strategy gets same result as `GENERATE_REDHAT_DEPENDENCIES` and add sources of unreleased dependencies.
 
 All `GENERATE*` strategies require that the repository generation is **not** ignored.
+
+`Optional parameters available in all strategies:`
+- `excludeSourceBuilds` - used to specify the list of build configurations that you don't want to be included in the generated sources.
+
+  Example:
+  ```
+  sourcesGeneration:
+    strategy: GENERATE
+    excludeSourceBuilds:
+       - 'org.kie.kogito-kogito-images-1.40.0.Final'
+  ```
 
 ## Usage of YAML variables
 You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:
