@@ -77,11 +77,6 @@ public class SourcesGenerator {
             return;
         }
 
-        if (!sourcesGenerationData.getExcludeSourceBuilds().isEmpty()) {
-            log.info("Removing builds from sources generation " + sourcesGenerationData.getExcludeSourceBuilds());
-            additionalBuildsForSources.keySet().removeAll(sourcesGenerationData.getExcludeSourceBuilds());
-        }
-
         File workDir = FileUtils.mkTempDir("sources");
 
         File contentsDir = new File(workDir, topLevelDirectoryName);
@@ -112,6 +107,10 @@ public class SourcesGenerator {
             }
         }
 
+        if (!sourcesGenerationData.getExcludeSourceBuilds().isEmpty()) {
+            log.info("Removing builds from sources generation " + sourcesGenerationData.getExcludeSourceBuilds());
+            additionalBuildsForSources.keySet().removeAll(sourcesGenerationData.getExcludeSourceBuilds());
+        }
         downloadSourcesFromBuilds(additionalBuildsForSources, workDir, contentsDir);
 
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_EXTENDED || sourcesGenerationData
