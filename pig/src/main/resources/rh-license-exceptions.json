@@ -1262,7 +1262,7 @@
   {
       "groupId": "org.rocksdb",
       "artifactId": "rocksdbjni",
-      "version-regexp": "6\\..+",
+      "version-regexp": "7\\..+",
       "licenses": [
           {
               "name": "Apache License, Version 2.0",
