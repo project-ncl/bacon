@@ -194,6 +194,12 @@
                 <artifactId>jline-console</artifactId>
                 <version>3.21.0</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-installed-adapter</artifactId>
+                <version>21.1.2</version>
+            </dependency>
             <!-- I need this, otherwise the snowdrop dependency overrides the version and it messes things up -->
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>

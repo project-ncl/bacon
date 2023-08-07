@@ -23,6 +23,11 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-installed-adapter</artifactId>
+        </dependency>
+
         <!-- logging -->
         <dependency>
             <groupId>org.slf4j</groupId>

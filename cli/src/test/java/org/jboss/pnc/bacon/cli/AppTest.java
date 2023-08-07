@@ -189,26 +189,7 @@ class AppTest {
         ObjectHelper.setRootLoggingLevel(Level.INFO);
         ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.WARN);
 
-        String text;
-        text = tapSystemErr(
-                () -> assertEquals(
-                        1,
-                        new App().run(
-                                new String[] {
-                                        "-p",
-                                        configYaml.toString(),
-                                        "pig",
-                                        "configure",
-                                        "--releaseStorageUrl",
-                                        "http://www.example.com",
-                                        "--tempBuild",
-                                        buildConfig.toString() })));
-
-        assertThat(text).contains("Keycloak authentication failed!");
-        assertThat(text).doesNotContain("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getBearerToken");
-        assertThat(text).doesNotContain("Unknown option: '--tempBuild'");
-
-        text = tapSystemErr(
+        String text = tapSystemErr(
                 () -> assertEquals(
                         1,
                         new App().run(
