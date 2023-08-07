@@ -1,20 +1,29 @@
 package org.jboss.pnc.bacon.auth;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kong.unirest.HttpResponse;
 import kong.unirest.MultipartBody;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import kong.unirest.jackson.JacksonObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.bacon.auth.model.CacheFile;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.model.KeycloakResponse;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.keycloak.adapters.installed.KeycloakInstalled;
+import org.keycloak.representations.AccessToken;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import java.io.Console;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -22,7 +31,7 @@ import java.util.Optional;
  * Authenticates to Keycloak using direct flow!
  */
 @Slf4j
-public class DirectKeycloakClientImpl implements KeycloakClient {
+public class KeycloakClientImpl implements KeycloakClient {
 
     private static final int MAX_RETRIES = 10;
 
@@ -37,15 +46,28 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
 
         Optional<Credential> cachedCredential = CacheFile.getCredentialFromCacheFile(keycloakBaseUrl, realm, username);
 
+        KeycloakInstalled keycloak = null;
+
         if (cachedCredential.isPresent()) {
 
             Credential cred = cachedCredential.get();
             if (cred.isValid()) {
-                log.debug("Using cached credential details");
-                Credential refreshed;
+                Credential refreshed = cred;
+                keycloak = new KeycloakInstalled(
+                        constructKeycloakSettings(
+                                realm,
+                                keycloakBaseUrl,
+                                client,
+                                false,
+
+                                cred.getRefreshToken(),
+                                true));
                 try {
-                    refreshed = refreshCredentialIfNeededAndReturnNewCredential(keycloakBaseUrl, realm, username, cred);
-                } catch (UnirestException e) {
+                    if (cred.needsNewAccessToken()) {
+                        keycloak.refreshToken(cred.getRefreshToken());
+                        refreshed = tokenToCredential(keycloak, keycloakBaseUrl, client, realm);
+                    }
+                } catch (Exception e) {
                     throw new KeycloakClientException(e);
                 }
 
@@ -73,36 +95,26 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
             }
         }
 
-        // if we're here, it means we couldn't use / get the credential in the cached file
-        String keycloakEndpoint = keycloakEndpoint(keycloakBaseUrl, realm);
+        if (keycloak == null) {
+            keycloak = new KeycloakInstalled(
+                    constructKeycloakSettings(realm, keycloakBaseUrl, client, true, null, false));
+        }
 
         try {
-            log.debug("Getting token via username/password");
+            keycloak.loginManual();
+            keycloak.refreshToken();
 
-            MultipartBody body = Unirest.post(keycloakEndpoint)
-                    .field("grant_type", "password")
-                    .field("client_id", client)
-                    .field("username", username)
-                    .field("password", askForPassword());
+            Credential credential = tokenToCredential(keycloak, keycloakBaseUrl, client, realm);
 
-            KeycloakResponse response = getKeycloakResponseWithRetries(body);
-            Instant now = Instant.now();
+            CacheFile.writeCredentialToCacheFile(
+                    keycloakBaseUrl,
+                    realm,
+                    keycloak.getToken().getPreferredUsername(),
+                    credential);
 
-            Credential credential = Credential.builder()
-                    .keycloakBaseUrl(keycloakBaseUrl)
-                    .realm(realm)
-                    .client(client)
-                    .username(username)
-                    .accessToken(response.getAccessToken())
-                    .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
-                    .refreshToken(response.getRefreshToken())
-                    .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
-                    .build();
-
-            CacheFile.writeCredentialToCacheFile(keycloakBaseUrl, realm, username, credential);
             return credential;
         } catch (Exception e) {
-            throw new KeycloakClientException(e);
+            throw new FatalException("Failed to login:", e);
         }
     }
 
@@ -142,52 +154,6 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         }
     }
 
-    private Credential refreshToken(Credential credential) throws UnirestException {
-        String keycloakEndpoint = keycloakEndpoint(credential.getKeycloakBaseUrl(), credential.getRealm());
-        MultipartBody body = Unirest.post(keycloakEndpoint)
-                .field("grant_type", "refresh_token")
-                .field("client_id", credential.getClient())
-                .field("refresh_token", credential.getRefreshToken());
-
-        KeycloakResponse response = getKeycloakResponseWithRetries(body);
-        Instant now = Instant.now();
-
-        return credential.toBuilder()
-                .accessToken(response.getAccessToken())
-                .accessTokenExpiresIn(now.plusSeconds(response.getExpiresIn()))
-                .refreshToken(response.getRefreshToken())
-                .refreshTokenExpiresIn(now.plusSeconds(response.getRefreshExpiresIn()))
-                .build();
-    }
-
-    private static String askForPassword() {
-
-        Console console = System.console();
-
-        if (console == null) {
-            throw new FatalException("Couldn't get console instance");
-        }
-        char[] passwordArray = console.readPassword("Enter your password: ");
-        return new String(passwordArray);
-    }
-
-    private Credential refreshCredentialIfNeededAndReturnNewCredential(
-            String keycloakUrl,
-            String realm,
-            String username,
-            Credential cred) throws UnirestException {
-
-        if (cred.needsNewAccessToken()) {
-            // if it needs a refresh
-            log.info("Refreshing access token...");
-            Credential refreshed = refreshToken(cred);
-            CacheFile.writeCredentialToCacheFile(keycloakUrl, realm, username, refreshed);
-            return refreshed;
-        } else {
-            return cred;
-        }
-    }
-
     /**
      * Tiny helper method that takes in a Unirest body and submits the request, and parses the response as a
      * KeycloakResponse object. This helper method add retries (up to MAX_RETRIES) if the request fails for whatever
@@ -197,7 +163,6 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
      * seconds
      *
      * @param body Unirest body to send request
-     *
      * @return The KeycloakResponse object
      * @throws UnirestException when all hope is lost to recover
      */
@@ -247,5 +212,91 @@ public class DirectKeycloakClientImpl implements KeycloakClient {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private InputStream constructKeycloakSettings(
+            String realm,
+            String keycloakBaseUrl,
+            String client,
+            boolean user,
+            String secret,
+            boolean refresh) {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        KeycloakSettings kSettings = new KeycloakSettings();
+        kSettings.setRealm(realm);
+        kSettings.setAuthServerUrl(keycloakBaseUrl + "/auth");
+        kSettings.setSslRequired("none");
+        kSettings.setResource(client);
+        kSettings.setConfidentialPort("0");
+
+        if (user) {
+            kSettings.setPublicClient(user);
+        } else {
+            Credentials cred = new Credentials(secret);
+            kSettings.setCredentials(cred);
+        }
+        // Enable auth with refresh token
+        if (refresh) {
+            kSettings.setBasicAuth(true);
+        }
+
+        String settings = null;
+        try {
+            settings = mapper.writeValueAsString(kSettings);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new ByteArrayInputStream(settings.getBytes());
+    }
+
+    private Credential tokenToCredential(
+            KeycloakInstalled keycloak,
+            String keycloakBaseUrl,
+            String client,
+            String realm) {
+        Instant now = Instant.now();
+        AccessToken token = keycloak.getToken();
+
+        Credential credential = Credential.builder()
+                .keycloakBaseUrl(keycloakBaseUrl)
+                .accessToken(keycloak.getTokenString())
+                .refreshToken(keycloak.getRefreshToken())
+                .client(client)
+                .realm(realm)
+                .username(token.getPreferredUsername())
+                .accessTokenExpiresIn(now.plusSeconds(keycloak.getTokenResponse().getExpiresIn()))
+                .refreshTokenExpiresIn(now.plusSeconds(keycloak.getTokenResponse().getRefreshExpiresIn()))
+                .build();
+
+        return credential;
+    }
+
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private class KeycloakSettings {
+        private String realm;
+
+        @JsonProperty("auth-server-url")
+        private String authServerUrl;
+        @JsonProperty("ssl-required")
+        private String sslRequired;
+        private String resource;
+        @JsonProperty("confidential-port")
+        private String confidentialPort;
+        @JsonProperty("public-client")
+        private Boolean publicClient;
+        private Credentials credentials;
+        @JsonProperty("enable-basic-auth")
+        private Boolean basicAuth;
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class Credentials {
+        private String secret;
     }
 }

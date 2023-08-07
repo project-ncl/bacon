@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DirectKeycloakClientImplTest {
+class KeycloakClientImplTest {
 
     @Test
     void testGetServiceAccountFatalExceptionThrownOnTLSCertException() {
-        KeycloakClient keycloakClient = new DirectKeycloakClientImpl();
+        KeycloakClient keycloakClient = new KeycloakClientImpl();
         try {
             keycloakClient.getCredentialServiceAccount(
                     "https://self-signed.badssl.com",
