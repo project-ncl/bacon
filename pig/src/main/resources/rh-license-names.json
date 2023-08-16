@@ -447,6 +447,18 @@
         ]
     },
     {
+        "name": "GNU Lesser General Public Licence",
+        "textUrl": "http://www.gnu.org/licenses/lgpl.txt",
+        "url": "http://www.gnu.org/licenses/lgpl.txt",
+        "aliases": [
+            "GNU Lesser General Public License v30 or later",
+            "GNU Lesser General Public License v3.0 or later"
+        ],
+        "urlAliases": [
+            "http://www.gnu.org/licenses/lgpl.txt"
+        ]
+    },
+    {
         "name": "GNU Lesser General Public License v2.1 or later",
         "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/deprecated_LGPL-2.1+.txt",
         "url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
