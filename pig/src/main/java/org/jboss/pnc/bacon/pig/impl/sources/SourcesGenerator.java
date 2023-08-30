@@ -137,6 +137,7 @@ public class SourcesGenerator {
                     try {
                         String buildName = a.getBuild().getBuildConfigRevision().getName();
                         PncBuild pncBuild = new PncBuild(a.getBuild());
+                        pncBuild.setName(pncBuild.getName().replaceAll("-AUTOBUILD", ""));
                         completeBuilds.put(buildName, pncBuild);
                     } catch (NullPointerException e) {
                         log.warn("Artifact " + a.getIdentifier() + " does not have build assigned! No sources added.");
