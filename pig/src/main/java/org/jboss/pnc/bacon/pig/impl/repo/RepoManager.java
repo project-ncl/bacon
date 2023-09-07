@@ -970,7 +970,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     RepoDescriptor.listGavs(new File(m2Repo, RepoDescriptor.MAVEN_REPOSITORY)),
                     new File(m2Repo, "licenses"),
                     PigContext.get().isTempBuild(),
-                    strictLicenseCheck);
+                    strictLicenseCheck,
+                    PigContext.get().getPigConfiguration().getFlow().getLicensesGeneration().getLicenseExceptionsPath(),
+                    PigContext.get().getPigConfiguration().getFlow().getLicensesGeneration().getLicenseNamesPath());
         }
     }
 

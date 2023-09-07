@@ -50,6 +50,10 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
     private final boolean useTempBuilds;
     private final boolean strict;
 
+    private String exceptionsPath;
+
+    private String namesPath;
+
     public LicenseManager(
             PigConfiguration pigConfiguration,
             String releasePath,
@@ -63,6 +67,9 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
 
         generationData = pigConfiguration.getFlow().getLicensesGeneration();
         useTempBuilds = PigContext.get().isTempBuild();
+
+        exceptionsPath = pigConfiguration.getFlow().getLicensesGeneration().getLicenseExceptionsPath();
+        namesPath = pigConfiguration.getFlow().getLicensesGeneration().getLicenseNamesPath();
     }
 
     public void prepare() {
@@ -111,7 +118,9 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
                     repositoryData.getGavs(),
                     getTargetZipPath().toFile(),
                     getTargetTopLevelDirectoryName(),
-                    strict);
+                    strict,
+                    exceptionsPath,
+                    namesPath);
         }
     }
 }

@@ -167,7 +167,9 @@ public final class PigFacade {
             boolean strictLicenseCheck,
             boolean strictDownloadSource,
             String[] skippedAddons,
-            Path configurationDirectory) {
+            Path configurationDirectory,
+            String licenseExceptionsPath,
+            String licenseNamesPath) {
 
         // If skipping configure we need to check and compute full version, if configure is running it will take care of
         // it
@@ -254,7 +256,12 @@ public final class PigFacade {
                 .getFlow()
                 .getLicensesGeneration()
                 .getStrategy() == LicenseGenerationStrategy.IGNORE)) {
-            generateLicenses(strictLicenseCheck);
+            context.getPigConfiguration()
+                    .getFlow()
+                    .getLicensesGeneration()
+                    .setLicenseExceptionsPath(licenseExceptionsPath);
+            context.getPigConfiguration().getFlow().getLicensesGeneration().setLicenseNamesPath(licenseNamesPath);
+            generateLicenses(strictLicenseCheck, licenseExceptionsPath, licenseNamesPath);
         } else {
             log.info("Skipping License Generation");
             context.getDeliverables().setLicenseZipName(null);
@@ -554,11 +561,13 @@ public final class PigFacade {
         }
     }
 
-    public static void generateLicenses(boolean strict) {
+    public static void generateLicenses(boolean strict, String licenseExceptionsPath, String licenseNamesPath) {
         beforeCommand(false);
         abortIfContextDataAbsent();
         PigContext context = context();
         context.getDeliverables().setLicenseZipName(context.getPrefix() + "-license.zip");
+        context.getPigConfiguration().getFlow().getLicensesGeneration().setLicenseExceptionsPath(licenseExceptionsPath);
+        context.getPigConfiguration().getFlow().getLicensesGeneration().setLicenseNamesPath(licenseNamesPath);
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
 
