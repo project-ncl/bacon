@@ -243,6 +243,16 @@ public class Pig {
                 description = "If set, any missing source jars will throw an error")
         private boolean strictDownloadSource;
 
+        @Option(
+                names = "--licenseExceptionsPath",
+                description = "Path to file with exceptions for license generation. Usually rh-license-exceptions.json.")
+        private String licenseExceptionsPath;
+
+        @Option(
+                names = "--licenseNamesPath",
+                description = "Path to file with license names for license generation. Usually rh-license-names.json.")
+        private String licenseNamesPath;
+
         /**
          * addOns to skip. Specified in CLI by using the flag multiple times: --skipAddon=a --skipAddon=b
          *
@@ -278,7 +288,9 @@ public class Pig {
                     strictLicenseCheck,
                     strictDownloadSource,
                     skippedAddons,
-                    configurationDirectory);
+                    configurationDirectory,
+                    licenseExceptionsPath,
+                    licenseNamesPath);
 
             PigContext context = PigContext.get();
             return new PigRunOutput(
@@ -407,9 +419,19 @@ public class Pig {
                 description = "if set to true will fail on license zip with missing/invalid entries")
         private boolean strictLicenseCheck;
 
+        @Option(
+                names = "--licenseExceptionsPath",
+                description = "Path to file with exceptions for license generation. Usually rh-license-exceptions.json.")
+        private String licenseExceptionsPath;
+
+        @Option(
+                names = "--licenseNamesPath",
+                description = "Path to file with license names for license generation. Usually rh-license-names.json.")
+        private String licenseNamesPath;
+
         @Override
         public String doExecute() {
-            PigFacade.generateLicenses(strictLicenseCheck);
+            PigFacade.generateLicenses(strictLicenseCheck, licenseExceptionsPath, licenseNamesPath);
             return "Licenses generated successfully"; // TODO: better output
         }
     }
