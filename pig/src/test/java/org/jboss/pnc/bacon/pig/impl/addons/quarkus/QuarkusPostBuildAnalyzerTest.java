@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -73,8 +75,10 @@ public class QuarkusPostBuildAnalyzerTest {
         quarkusPostBuildAnalyzer.trigger();
         wireMockServer.stop();
         if (!verifyResults()) {
+            cleanup();
             throw new FatalException("The quarkus post build analyzer addon is not working correctly");
         }
+        cleanup();
     }
 
     @Test
@@ -85,6 +89,26 @@ public class QuarkusPostBuildAnalyzerTest {
                 "/test-release-path",
                 "/test-extras-path");
         quarkusPostBuildAnalyzer.trigger();
+    }
+
+    private void cleanup() {
+        List<String> files = Arrays.asList(
+                new String[] {
+                        "latest.zip",
+                        "latest_artifacts.txt",
+                        "latest_nonexistent-redhat-deps.txt",
+                        "new_dependencies.csv",
+                        "new_license.xml",
+                        "old.zip",
+                        "old_artifacts.txt",
+                        "old_dependencies.csv",
+                        "old_license.xml",
+                        "old_nonexistent-redhat-deps.txt",
+                        "post-build-info.txt" });
+        files.stream().forEach(path -> {
+            File f = new File(path);
+            f.delete();
+        });
     }
 
     private PigConfiguration preConfig() {
