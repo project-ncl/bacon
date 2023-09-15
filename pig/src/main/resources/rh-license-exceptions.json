@@ -1267,6 +1267,14 @@
           {
               "name": "Apache License, Version 2.0",
               "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          },
+          {
+            "name": "GNU General Public License v2.0 only",
+            "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+          },
+          {
+            "name": "BSD 3-clause \"New\" or \"Revised\" License",
+            "url": "https://opensource.org/licenses/BSD-3-Clause"
           }
       ]
   },
