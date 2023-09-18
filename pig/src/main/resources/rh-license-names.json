@@ -241,7 +241,8 @@
         "aliases": [
             "EPL 2.0",
             "Eclipse Public License v. 2.0",
-            "Eclipse Public License - v 2.0"
+            "Eclipse Public License - v 2.0",
+            "Eclipse Public License, Version 2.0"
         ],
         "urlAliases": [
             "http://www.eclipse.org/legal/epl-2.0"
@@ -253,26 +254,12 @@
         "aliases": [
             "Eclipse Distribution License, Version 1.0",
             "Eclipse Distribution License - v 1.0",
-            "Eclipse Public License - v 1.0",
             "Eclipse Distribution License (EDL), Version 1.0"
         ],
         "urlAliases": [
             "http://repository.jboss.org/licenses/edl-1.0.txt",
             "https://github.com/locationtech/jts/blob/master/LICENSE_EDLv1.txt",
             "http://www.eclipse.org/org/documents/edl-v10.php"
-        ]
-    },
-    {
-        "name": "Eclipse Distribution License, Version 2.0",
-        "url": "http://www.eclipse.org/legal/epl-v20.html",
-        "aliases": [
-            "Eclipse Distribution License, Version 2.0",
-            "Eclipse Distribution License - v 2.0",
-            "Eclipse Public License - v 2.0",
-            "Eclipse Distribution License (EDL), Version 2.0"
-        ],
-        "urlAliases": [
-            "https://github.com/locationtech/jts/blob/master/LICENSE_EPLv2.txt"
         ]
     },
     {
