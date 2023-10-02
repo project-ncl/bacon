@@ -1,0 +1,69 @@
+[INFO] --- maven-dependency-plugin:3.2.0:tree (default-cli) @ camel-package-maven-plugin ---
+[INFO] org.apache.camel:camel-package-maven-plugin:maven-plugin:3.18.2.redhat-00002
+[INFO] +- org.apache.camel:camel-util-json:jar:3.18.2.redhat-00002:compile
+[INFO] +- org.apache.camel:camel-tooling-util:jar:3.18.2.redhat-00002:compile
+[INFO] +- org.apache.camel:camel-tooling-model:jar:3.18.2.redhat-00002:compile
+[INFO] +- org.mvel:mvel2:jar:2.4.14.Final:compile
+[INFO] +- org.apache.maven:maven-core:jar:3.1.1:provided
+[INFO] |  +- org.apache.maven:maven-model:jar:3.1.1:provided
+[INFO] |  +- org.apache.maven:maven-settings:jar:3.1.1:provided
+[INFO] |  +- org.apache.maven:maven-settings-builder:jar:3.1.1:provided
+[INFO] |  +- org.apache.maven:maven-repository-metadata:jar:3.1.1:provided
+[INFO] |  +- org.apache.maven:maven-model-builder:jar:3.1.1:provided
+[INFO] |  +- org.apache.maven:maven-aether-provider:jar:3.1.1:provided
+[INFO] |  |  \- org.eclipse.aether:aether-spi:jar:0.9.0.M2:provided
+[INFO] |  +- org.eclipse.aether:aether-impl:jar:0.9.0.M2:provided
+[INFO] |  +- org.eclipse.aether:aether-api:jar:0.9.0.M2:compile
+[INFO] |  +- org.eclipse.aether:aether-util:jar:0.9.0.M2:compile
+[INFO] |  +- org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.0.0.M5:provided
+[INFO] |  |  +- javax.enterprise:cdi-api:jar:1.0:provided
+[INFO] |  |  |  +- javax.annotation:jsr250-api:jar:1.0:provided
+[INFO] |  |  |  \- javax.inject:javax.inject:jar:1:provided
+[INFO] |  |  +- com.google.guava:guava:jar:20.0:provided
+[INFO] |  |  +- org.sonatype.sisu:sisu-guice:jar:no_aop:3.1.0:provided
+[INFO] |  |  |  \- aopalliance:aopalliance:jar:1.0:provided
+[INFO] |  |  \- org.eclipse.sisu:org.eclipse.sisu.inject:jar:0.0.0.M5:provided
+[INFO] |  +- org.codehaus.plexus:plexus-interpolation:jar:1.19:provided
+[INFO] |  +- org.codehaus.plexus:plexus-classworlds:jar:2.5.1:compile
+[INFO] |  +- org.codehaus.plexus:plexus-component-annotations:jar:1.5.5:compile
+[INFO] |  \- org.sonatype.plexus:plexus-sec-dispatcher:jar:1.3:provided
+[INFO] |     \- org.sonatype.plexus:plexus-cipher:jar:1.4:provided
+[INFO] +- org.apache.maven:maven-artifact:jar:3.1.1:provided
+[INFO] +- org.apache.maven:maven-plugin-api:jar:3.1.1:provided
+[INFO] +- org.apache.maven.plugin-tools:maven-plugin-annotations:jar:3.6.4:compile
+[INFO] +- org.apache.maven:maven-compat:jar:3.1.1:provided
+[INFO] |  \- org.apache.maven.wagon:wagon-provider-api:jar:2.4:provided
+[INFO] +- org.apache.maven.shared:maven-dependency-tree:jar:2.2:compile
+[INFO] +- org.codehaus.plexus:plexus-container-default:jar:1.6.0.redhat-00003:compile
+[INFO] |  +- org.apache.xbean:xbean-reflect:jar:3.7:compile
+[INFO] |  \- com.google.collections:google-collections:jar:1.0:compile
+[INFO] +- org.codehaus.plexus:plexus-utils:jar:3.3.0.redhat-00001:compile
+[INFO] +- org.sonatype.plexus:plexus-build-api:jar:0.0.7:compile
+[INFO] +- commons-io:commons-io:jar:2.11.0.redhat-00001:compile
+[INFO] +- org.apache.commons:commons-text:jar:1.9.0.redhat-00001:compile
+[INFO] |  \- org.apache.commons:commons-lang3:jar:3.11.0.redhat-00001:compile
+[INFO] +- org.jboss.forge.roaster:roaster-api:jar:2.24.0.Final:compile
+[INFO] +- org.jboss.forge.roaster:roaster-jdt:jar:2.24.0.Final:compile
+[INFO] +- org.jboss:jandex:jar:2.4.3.Final-redhat-00001:compile
+[INFO] +- org.ow2.asm:asm-tree:jar:8.0.1:compile
+[INFO] |  \- org.ow2.asm:asm:jar:8.0.1:compile
+[INFO] +- org.apache.camel:spi-annotations:jar:3.18.2.redhat-00002:compile
+[INFO] +- jakarta.xml.bind:jakarta.xml.bind-api:jar:2.3.3:compile
+[INFO] |  \- jakarta.activation:jakarta.activation-api:jar:1.2.2:compile
+[INFO] +- org.snakeyaml:snakeyaml-engine:jar:2.3.0.redhat-00001:compile
+[INFO] +- org.apache.logging.log4j:log4j-slf4j-impl:jar:2.17.2.redhat-00003:test
+[INFO] |  +- org.slf4j:slf4j-api:jar:1.7.36.redhat-00002:test
+[INFO] |  +- org.apache.logging.log4j:log4j-api:jar:2.17.2.redhat-00003:test
+[INFO] |  \- org.apache.logging.log4j:log4j-core:jar:2.17.2.redhat-00003:test
+[INFO] +- org.junit.jupiter:junit-jupiter:jar:5.8.2:test
+[INFO] |  +- org.junit.jupiter:junit-jupiter-api:jar:5.8.2:test
+[INFO] |  |  +- org.opentest4j:opentest4j:jar:1.2.0:test
+[INFO] |  |  +- org.junit.platform:junit-platform-commons:jar:1.8.2:test
+[INFO] |  |  \- org.apiguardian:apiguardian-api:jar:1.1.2:test
+[INFO] |  +- org.junit.jupiter:junit-jupiter-params:jar:5.8.2:test
+[INFO] |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.8.2:test
+[INFO] |     \- org.junit.platform:junit-platform-engine:jar:1.8.2:test
+[INFO] +- org.assertj:assertj-core:jar:3.23.1:test
+[INFO] |  \- net.bytebuddy:byte-buddy:jar:1.12.10:test
+[INFO] \- javax.annotation:javax.annotation-api:jar:1.3.2.redhat-00001:compile
+[INFO]
