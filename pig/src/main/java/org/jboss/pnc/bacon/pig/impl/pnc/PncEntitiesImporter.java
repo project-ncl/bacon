@@ -504,7 +504,6 @@ public class PncEntitiesImporter implements Closeable {
 
         List<BuildConfiguration> incompatibleConfigs = currentConfigs.stream()
                 .filter(config -> newConfigsByName.containsKey(config.getName()))
-                .filter(config -> isModifiedInUnsupportedWay(config, newConfigsByName))
                 .collect(Collectors.toList());
         if (!incompatibleConfigs.isEmpty()) {
             throw new RuntimeException(
@@ -513,21 +512,6 @@ public class PncEntitiesImporter implements Closeable {
                             + ". Look above for the cause");
         }
         return incompatibleConfigs;
-    }
-
-    private boolean isModifiedInUnsupportedWay(
-            BuildConfiguration oldConfig,
-            Map<String, BuildConfig> newConfigsByName) {
-        String name = oldConfig.getName();
-        BuildConfig newConfig = newConfigsByName.get(name);
-        ProductVersionRef productVersion = oldConfig.getProductVersion();
-        boolean configMismatch = productVersion == null || !productVersion.getId().equals(version.getId());
-        if (configMismatch) {
-            log.warn(
-                    "Product version in the old config is different than the one in the new config for config {}",
-                    name);
-        }
-        return configMismatch;
     }
 
     private List<BuildConfiguration> getCurrentBuildConfigs() {
