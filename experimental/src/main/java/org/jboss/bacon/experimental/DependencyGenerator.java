@@ -26,6 +26,7 @@ import org.jboss.bacon.experimental.impl.dependencies.DependencyResolver;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
 import org.jboss.bacon.experimental.impl.generator.BuildConfigGenerator;
+import org.jboss.bacon.experimental.impl.generator.ProjectNameGenerator;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
 import org.jboss.bacon.experimental.impl.projectfinder.ProjectFinder;
 import org.jboss.pnc.bacon.common.ObjectHelper;
@@ -100,14 +101,16 @@ public class DependencyGenerator {
             GeneratorConfig config = loadConfig();
             // Initialize working classes
             DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
+            ProjectNameGenerator projectNameGenerator = new ProjectNameGenerator();
             ProjectFinder projectFinder = new ProjectFinder();
             BuildConfigGenerator buildConfigGenerator = new BuildConfigGenerator(
                     config.getBuildConfigGeneratorConfig());
             // Analyze dependencies
-            DependencyResult dependencies;
-            dependencies = dependencyResolver.resolve(projectDir, dominoConfig);
+            DependencyResult dependencies = dependencyResolver.resolve(projectDir, dominoConfig);
             log.info("Analyzed project and found {} dependencies", dependencies.getCount());
             // Generate BCs
+            // Generate project's names
+            projectNameGenerator.nameProjects(dependencies.getTopLevelProjects());
             // Find pre-existing BC in PNC
             FoundProjects foundProjects = projectFinder.findProjects(dependencies);
             // Use correct strategy to generate BC
