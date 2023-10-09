@@ -21,6 +21,8 @@ import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -90,7 +92,11 @@ public class DependencyResolver {
         ProjectDependencyResolver resolver = resolverBuilder.setMessageWriter(new Slf4jMessageWriter())
                 .setDependencyConfig(conf)
                 .build();
-        return parseReleaseCollection(resolver.getReleaseCollection());
+        PrintStream origOut = System.out;
+        System.setOut(new PrintStream(new LogOutputStream()));
+        ReleaseCollection releaseCollection = resolver.getReleaseCollection();
+        System.setOut(origOut);
+        return parseReleaseCollection(releaseCollection);
     }
 
     private void logDominoConfig(ProjectDependencyConfig conf) {
@@ -258,5 +264,42 @@ public class DependencyResolver {
         public void warn(String s) {
             messageWriterLog.warn(s);
         }
+    }
+
+    private static class LogOutputStream extends OutputStream {
+        protected boolean closed = false;
+
+        private StringBuffer stringBuffer = new StringBuffer();
+
+        @Override
+        public void close() {
+            flush();
+            closed = true;
+        }
+
+        @Override
+        public void flush() {
+            if (stringBuffer.length() == 0) {
+                return;
+            }
+            log.info(stringBuffer.toString());
+            stringBuffer.setLength(0);
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            if (closed) {
+                throw new IOException("Stream is closed.");
+            }
+            if (b == 0) {
+                return;
+            }
+            if (b == '\n' || b == '\r') {
+                flush();
+                return;
+            }
+            stringBuffer.append((char) b);
+        }
+
     }
 }
