@@ -150,7 +150,7 @@ public class BuildConfigGenerator {
     }
 
     private boolean isTainted(Project project) {
-        return project.isCutDepenendecy() // Cut dependency means that the project will miss linked dependencies
+        return project.isCutDependency() // Cut dependency means that the project will miss linked dependencies
                 || project.isConflictingName(); // Conflict means there are multiple BCs building the same thing
     }
 

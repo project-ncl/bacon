@@ -201,7 +201,7 @@ public class DependencyResolver {
         if (depsToCut.containsKey(repo.id())) {
             GAV firstGAV = project.getFirstGAV();
             log.warn("Project " + firstGAV + " has cut some dependency(ies).");
-            project.setCutDepenendecy(true);
+            project.setCutDependency(true);
         }
         return project;
     }
