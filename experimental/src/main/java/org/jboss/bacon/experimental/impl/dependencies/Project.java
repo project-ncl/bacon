@@ -7,7 +7,7 @@ import org.jboss.da.model.rest.GAV;
 import java.util.Set;
 
 @Data
-@EqualsAndHashCode(exclude = { "dependencies", "depth", "cutDepenendecy", "name", "conflictingName" })
+@EqualsAndHashCode(exclude = { "dependencies", "depth", "cutDependency", "name", "conflictingName" })
 public class Project {
     private String sourceCodeURL;
     private String sourceCodeRevision;
@@ -17,7 +17,7 @@ public class Project {
 
     private Set<Project> dependencies;
     private int depth = -1;
-    private boolean cutDepenendecy = false;
+    private boolean cutDependency = false;
     private boolean conflictingName = false;
 
     public GAV getFirstGAV() {
