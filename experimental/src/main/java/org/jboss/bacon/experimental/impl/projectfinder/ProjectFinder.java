@@ -82,10 +82,7 @@ public class ProjectFinder {
         FoundProject found = new FoundProject();
         found.setGavs(project.getGavs());
         Set<GAV> gavs = project.getGavs();
-        GAV gav = gavs.stream()
-                .sorted(Comparator.comparing(GAV::getGroupId).thenComparing(GAV::getArtifactId))
-                .findFirst()
-                .get();
+        GAV gav = project.getFirstGAV();
         BuildVersion buildVersion = findBuild(gav, availableVersions.get(gav));
 
         if (buildVersion == null) {
