@@ -79,7 +79,10 @@ public class BuildConfigGenerator {
     public BuildConfig processProject(Project project, FoundProject found) {
         String name = project.getName();
         // Strategy
-        if (found.isExactMatch()) {
+        if (found.isManaged()) {
+            BuildConfig buildConfig = copyManaged(found.getBuildConfig(), name);
+            return updateExactMatch(buildConfig, project);
+        } else if (found.isExactMatch()) {
             BuildConfig buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
             return updateExactMatch(buildConfig, project);
         } else if (found.isFound()) {
@@ -133,10 +136,14 @@ public class BuildConfigGenerator {
         sj.add(buildCommand);
         if (tainted) {
             failCommand += " # This build configuration is tainted, you should fix errors reported from Autobuilder before removing this command";
-            sj.add(failCommand);
+            if (!buildCommand.contains(failCommand)) {
+                sj.add(failCommand);
+            }
         } else if (config.isFailGeneratedBuildScript()) {
             failCommand += " # This build configuration was modified by Autobuilder and should be reviewed by a human. After review, this line can be removed.";
-            sj.add(failCommand);
+            if (!buildCommand.contains(failCommand)) {
+                sj.add(failCommand);
+            }
         }
         return sj.toString();
     }
@@ -222,6 +229,26 @@ public class BuildConfigGenerator {
 
     private FoundProject getFoundForProject(Project project, FoundProjects founds) {
         return founds.getFoundProjects().stream().filter(fp -> fp.getGavs().equals(project.getGavs())).findAny().get();
+    }
+
+    public BuildConfig copyManaged(BuildConfiguration bc, String name) {
+        Environment env = environments.resolve(bc.getEnvironment());
+        boolean useEnvironmentName = shouldUseEnvironmentName(name, env);
+
+        BuildConfigMapping.GeneratorOptions opts = BuildConfigMapping.GeneratorOptions.builder()
+                .nameOverride(Optional.of(name))
+                .useEnvironmentName(useEnvironmentName)
+                .build();
+        BuildConfig buildConfig = BuildConfigMapping.toBuildConfig(bc, opts);
+        setEnvironment(buildConfig, env, useEnvironmentName);
+        String scmUrl = processScmUrl(buildConfig.getScmUrl());
+        if (scmUrl == null) {
+            setPlaceholderSCM(name, buildConfig);
+        } else {
+            buildConfig.setScmUrl(scmUrl);
+        }
+        buildConfig.getDependencies().clear();
+        return buildConfig;
     }
 
     public BuildConfig copyExisting(BuildConfiguration bc, BuildConfigurationRevision bcr, String name) {

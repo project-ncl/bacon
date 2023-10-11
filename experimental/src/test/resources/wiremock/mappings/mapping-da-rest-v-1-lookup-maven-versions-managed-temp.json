@@ -1,0 +1,26 @@
+{
+  "id" : "54b9e1c8-0007-8642-b2ad-8bab1274c4be",
+  "request" : {
+    "url" : "/da/rest/v-1/lookup/maven/versions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"filter\":\"ALL\",\"distanceRule\":\"CLOSEST_BY_PARTS\",\"mode\":\"TEMPORARY_PREFER_PERSISTENT\",\"artifacts\":[{\"groupId\":\"foo.bar\",\"artifactId\":\"managed\",\"version\":\"1.2.3\"}],\"includeBad\":false,\"brewPullActive\":false}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-da-rest-v-1-lookup-maven-versions-managed-temp.json",
+    "headers" : {
+      "access-control-allow-headers" : "accept, authorization,  content-type, x-requested-with",
+      "date" : "Tue, 20 Dec 2022 19:10:32 GMT",
+      "access-control-allow-origin" : "*",
+      "access-control-allow-credentials" : "true",
+      "content-type" : "application/json",
+      "access-control-max-age" : "1",
+      "access-control-allow-methods" : "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+    }
+  },
+  "uuid" : "54b9e1c8-0007-8642-b2ad-8bab1274c4be"
+}

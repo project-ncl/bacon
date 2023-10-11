@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
 import org.jboss.da.model.rest.GAV;
@@ -12,6 +13,7 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -36,12 +38,20 @@ public class ProjectFinderTest {
             .build();
 
     private static WireMockServer mockServer;
-    private ProjectFinder finder = new ProjectFinder();
+
+    private BuildConfigGeneratorConfig config;
+    private ProjectFinder finder;
     public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
 
     @BeforeAll
     public static void initBaconConfig() {
         Config.configure(CONFIG_LOCATION.toString(), Constant.CONFIG_FILE_NAME, "default");
+    }
+
+    @BeforeEach
+    public void initProjectFinder() {
+        config = new BuildConfigGeneratorConfig();
+        finder = new ProjectFinder(config);
     }
 
     @Test
@@ -84,6 +94,32 @@ public class ProjectFinderTest {
         assertThat(found).isNotNull();
         assertThat(found.isFound()).isTrue();
         assertThat(found.isExactMatch()).isTrue();
+    }
+
+    @Test
+    public void shouldReuseAutobuilderConfig() throws RemoteResourceException {
+        config.setReuseAutobuilderConfigs(true);
+
+        GAV gav = new GAV("foo.bar", "managed", "1.2.3");
+        Project project = new Project();
+        project.setGavs(Set.of(gav));
+        project.setName("foo.bar-managed-1.2.3-AUTOBUILDER");
+        project.setDependencies(Set.of());
+        project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
+        project.setSourceCodeRevision("2.3.3-b02-RI");
+
+        DependencyResult dependencyResult = new DependencyResult();
+        dependencyResult.setTopLevelProjects(Set.of(project));
+
+        FoundProjects projects = finder.findProjects(dependencyResult);
+
+        assertThat(projects).isNotNull();
+        assertThat(projects.getFoundProjects()).hasSize(1);
+        FoundProject found = projects.getFoundProjects().iterator().next();
+        assertThat(found).isNotNull();
+        assertThat(found.isFound()).isTrue();
+        assertThat(found.isManaged()).isTrue();
+        assertThat(found.getBuildConfig().getBuildScript()).contains("# Created by Autobuilder-afs231");
     }
 
     @Test

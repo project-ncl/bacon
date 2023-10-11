@@ -1,0 +1,8 @@
+[
+    {
+        "groupId": "foo.bar",
+        "artifactId": "managed",
+        "version": "1.2.3",
+        "availableVersions": []
+    }
+]

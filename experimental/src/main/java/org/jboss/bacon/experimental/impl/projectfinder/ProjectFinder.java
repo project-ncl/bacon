@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.commonjava.atlas.maven.ident.ref.SimpleArtifactRef;
 import org.jboss.bacon.da.DaHelper;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
+import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
 import org.jboss.da.lookup.model.MavenVersionsRequest;
@@ -13,6 +14,7 @@ import org.jboss.da.lookup.model.VersionDistanceRule;
 import org.jboss.da.lookup.model.VersionFilter;
 import org.jboss.da.model.rest.GA;
 import org.jboss.da.model.rest.GAV;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
@@ -27,6 +29,7 @@ import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 public class ProjectFinder {
@@ -43,8 +47,10 @@ public class ProjectFinder {
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
     private final VersionParser versionParser = new VersionParser("redhat", "temporary-redhat");
+    private final BuildConfigGeneratorConfig config;
 
-    public ProjectFinder() {
+    public ProjectFinder(BuildConfigGeneratorConfig config) {
+        this.config = config;
         lookupApi = DaHelper.createLookupApi();
         artifactClient = new ClientCreator<>(ArtifactClient::new).newClient();
         buildClient = new ClientCreator<>(BuildClient::new).newClient();
@@ -52,10 +58,12 @@ public class ProjectFinder {
     }
 
     ProjectFinder(
+            BuildConfigGeneratorConfig config,
             LookupApi lookupApi,
             ArtifactClient artifactClient,
             BuildClient buildClient,
             BuildConfigurationClient buildConfigClient) {
+        this.config = config;
         this.lookupApi = lookupApi;
         this.artifactClient = artifactClient;
         this.buildClient = buildClient;
@@ -72,13 +80,36 @@ public class ProjectFinder {
 
         FoundProjects foundProjects = new FoundProjects();
         for (Project project : projects) {
-            foundProjects.getFoundProjects().add(findProject(project, availableVersions));
+            FoundProject foundProject = null;
+            if (config.isReuseAutobuilderConfigs()) {
+                foundProject = findManagedProject(project);
+            }
+            if (foundProject == null) {
+                foundProject = findPreviouslyBuiltProject(project, availableVersions);
+            }
+            foundProjects.getFoundProjects().add(foundProject);
         }
 
         return foundProjects;
     }
 
-    private FoundProject findProject(Project project, Map<GAV, List<String>> availableVersions) {
+    private FoundProject findManagedProject(Project project) {
+        BuildConfiguration buildConfig = findBuildConfig(project.getName());
+        if (buildConfig == null) {
+            return null;
+        }
+        FoundProject found = new FoundProject();
+        found.setGavs(project.getGavs());
+        log.debug(
+                "Project " + project.getName() + " is already created by Autobuilder in PNC, reusing BC "
+                        + buildConfig.getId() + ".");
+        found.setFound(true);
+        found.setManaged(true);
+        found.setBuildConfig(buildConfig);
+        return found;
+    }
+
+    private FoundProject findPreviouslyBuiltProject(Project project, Map<GAV, List<String>> availableVersions) {
         FoundProject found = new FoundProject();
         found.setGavs(project.getGavs());
         Set<GAV> gavs = project.getGavs();
@@ -105,6 +136,20 @@ public class ProjectFinder {
             log.debug("Project " + gav + " was built in PNC before " + how + " by " + buildVersion.build.getId());
         }
         return found;
+    }
+
+    private BuildConfiguration findBuildConfig(String name) {
+        try {
+            RemoteCollection<BuildConfiguration> all = buildConfigClient
+                    .getAll(Optional.empty(), Optional.of("name==" + name));
+
+            return StreamSupport.stream(all.spliterator(), false)
+                    .filter(bc -> bc.getName().equals(name))
+                    .findAny()
+                    .orElse(null);
+        } catch (RemoteResourceException ex) {
+            throw new FatalException("Failure when getting build configuration", ex);
+        }
     }
 
     private boolean isExactVersion(String query, String found) {
