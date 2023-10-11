@@ -17,6 +17,10 @@ public class FoundProject {
      */
     private boolean found;
     /**
+     * Is the found build config created by previous runs of autobuilder?
+     */
+    private boolean managed;
+    /**
      * Did the found build produced exact match of the version? Exact match means the same Major.Minor.Micro.Qualifier,
      * but can differ in the -redhat suffix.
      */
