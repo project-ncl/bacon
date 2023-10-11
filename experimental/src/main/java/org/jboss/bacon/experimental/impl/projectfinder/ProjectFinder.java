@@ -42,7 +42,7 @@ public class ProjectFinder {
     private final ArtifactClient artifactClient;
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
-    private final VersionParser versionParser = new VersionParser("redhat");
+    private final VersionParser versionParser = new VersionParser("redhat", "temporary-redhat");
 
     public ProjectFinder() {
         lookupApi = DaHelper.createLookupApi();
@@ -134,17 +134,25 @@ public class ProjectFinder {
     }
 
     private Map<GAV, List<String>> findAvailableVersions(Set<GAV> allGAVs) {
+        Map<GAV, List<String>> versions = findAvailableVersions(allGAVs, "PERSISTENT");
+        boolean foundPersistent = versions.values().stream().flatMap(Collection::stream).findAny().isPresent();
+        if (!foundPersistent) {
+            log.info(
+                    "Could not find any persistent builds for " + allGAVs.stream().sorted().findFirst()
+                            + ", trying temporary builds.");
+            versions = findAvailableVersions(allGAVs, "TEMPORARY_PREFER_PERSISTENT");
+        }
+        return versions;
+    }
+
+    private Map<GAV, List<String>> findAvailableVersions(Set<GAV> allGAVs, String mode) {
         MavenVersionsRequest request = MavenVersionsRequest.builder()
-                .mode("PERSISTENT")
+                .mode(mode)
                 .filter(VersionFilter.ALL)
                 .artifacts(allGAVs)
                 .distanceRule(VersionDistanceRule.CLOSEST_BY_PARTS)
                 .build();
         Set<MavenVersionsResult> versionsResults = lookupApi.versionsMaven(request);
-        for (MavenVersionsResult versionsResult : versionsResults) {
-            versionsResult.getGav();
-        }
-
         Map<GAV, List<String>> availableVersions = versionsResults.stream()
                 .collect(Collectors.toMap(MavenVersionsResult::getGav, MavenVersionsResult::getAvailableVersions));
         return availableVersions;
