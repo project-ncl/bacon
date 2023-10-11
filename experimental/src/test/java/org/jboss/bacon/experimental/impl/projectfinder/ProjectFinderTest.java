@@ -86,6 +86,74 @@ public class ProjectFinderTest {
         assertThat(found.isExactMatch()).isTrue();
     }
 
+    @Test
+    public void shouldFindPersistentBuild() throws RemoteResourceException {
+        GAV gav = new GAV("foo.bar", "built", "1.2.3");
+        Project project = new Project();
+        project.setGavs(Set.of(gav));
+        project.setName("foo.bar-built-1.2.3-AUTOBUILDER");
+        project.setDependencies(Set.of());
+        project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
+        project.setSourceCodeRevision("2.3.3-b02-RI");
+
+        DependencyResult dependencyResult = new DependencyResult();
+        dependencyResult.setTopLevelProjects(Set.of(project));
+
+        FoundProjects projects = finder.findProjects(dependencyResult);
+
+        assertThat(projects).isNotNull();
+        assertThat(projects.getFoundProjects()).hasSize(1);
+        FoundProject found = projects.getFoundProjects().iterator().next();
+        assertThat(found).isNotNull();
+        assertThat(found.isFound()).isTrue();
+        assertThat(found.isExactMatch()).isTrue();
+    }
+
+    @Test
+    public void shouldFindTempBuildWhenPersistentDoesntExist() throws RemoteResourceException {
+        GAV gav = new GAV("foo.bar", "temporary", "1.2.3");
+        Project project = new Project();
+        project.setGavs(Set.of(gav));
+        project.setName("foo.bar-temporary-1.2.3-AUTOBUILDER");
+        project.setDependencies(Set.of());
+        project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
+        project.setSourceCodeRevision("2.3.3-b02-RI");
+
+        DependencyResult dependencyResult = new DependencyResult();
+        dependencyResult.setTopLevelProjects(Set.of(project));
+
+        FoundProjects projects = finder.findProjects(dependencyResult);
+
+        assertThat(projects).isNotNull();
+        assertThat(projects.getFoundProjects()).hasSize(1);
+        FoundProject found = projects.getFoundProjects().iterator().next();
+        assertThat(found).isNotNull();
+        assertThat(found.isFound()).isTrue();
+        assertThat(found.isExactMatch()).isTrue();
+    }
+
+    @Test
+    public void shouldNotFindBuild() throws RemoteResourceException {
+        GAV gav = new GAV("foo.bar", "notbuilt", "1.2.3");
+        Project project = new Project();
+        project.setGavs(Set.of(gav));
+        project.setName("foo.bar-notbuilt-1.2.3-AUTOBUILDER");
+        project.setDependencies(Set.of());
+        project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
+        project.setSourceCodeRevision("2.3.3-b02-RI");
+
+        DependencyResult dependencyResult = new DependencyResult();
+        dependencyResult.setTopLevelProjects(Set.of(project));
+
+        FoundProjects projects = finder.findProjects(dependencyResult);
+
+        assertThat(projects).isNotNull();
+        assertThat(projects.getFoundProjects()).hasSize(1);
+        FoundProject found = projects.getFoundProjects().iterator().next();
+        assertThat(found).isNotNull();
+        assertThat(found.isFound()).isFalse();
+    }
+
     private DependencyResult generateDependencyResult() {
         Project toplevel1 = generateProject("toplevel-one");
         Project toplevel2 = generateProject("toplevel-two");
