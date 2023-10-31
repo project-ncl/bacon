@@ -179,8 +179,8 @@
     },
     {
         "name": "Common Development and Distribution License (CDDL) and GNU Public License v.2 w/Classpath Exception",
-        "url": "https://netbeans.org/cddl-gplv2.html",
-        "textUrl": "https://netbeans.org/cddl-gplv2.html",
+        "url": "https://github.com/javaee/javax.annotation/blob/master/LICENSE",
+        "textUrl": "https://raw.githubusercontent.com/javaee/javax.annotation/master/LICENSE",
         "aliases": [
             "Common Development and Distribution License (CDDL) and GNU Public License v.2 w/Classpath Exception",
             "CDDL + GPLv2 with classpath exception",
@@ -190,7 +190,7 @@
             "CDDL/GPLv2+CE"
         ],
         "urlAliases": [
-            "https://netbeans.org/cddl-gplv2.html",
+            "https://github.com/javaee/javax.annotation/blob/master/LICENSE",
             "https://glassfish.java.net/public/CDDL+GPL_1_1.html",
             "https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html"
         ]
@@ -387,13 +387,13 @@
     },
     {
         "name": "Common Public License, Version 1.0",
-        "url": "https://opensource.org/licenses/CPL-1.0",
+        "url": "https://opensource.org/license/cpl1-0-txt",
         "aliases": [
             "Common Public License, Version 1.0",
             "Common Public License Version 1.0"
         ],
         "urlAliases": [
-            "https://opensource.org/licenses/CPL-1.0",
+            "https://opensource.org/license/cpl1-0-txt",
             "http://opensource.org/licenses/CPL-1.0",
             "http://www.opensource.org/licenses/cpl1.0.txt"
         ]
