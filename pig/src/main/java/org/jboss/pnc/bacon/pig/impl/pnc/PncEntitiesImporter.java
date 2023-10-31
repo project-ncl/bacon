@@ -487,9 +487,7 @@ public class PncEntitiesImporter implements Closeable {
         }
     }
 
-    private List<BuildConfiguration> dropConfigsFromInvalidVersion(
-            List<BuildConfiguration> currentConfigs,
-            List<BuildConfig> newConfigs) {
+    private void dropConfigsFromInvalidVersion(List<BuildConfiguration> currentConfigs, List<BuildConfig> newConfigs) {
         Map<String, BuildConfig> newConfigsByName = BuildConfig.mapByName(newConfigs);
 
         currentConfigs.stream().filter(config -> !newConfigsByName.containsKey(config.getName())).forEach(config -> {
@@ -501,17 +499,6 @@ public class PncEntitiesImporter implements Closeable {
                         "Failed to remove build config " + config.getId() + " from build group " + buildGroup.getId());
             }
         });
-
-        List<BuildConfiguration> incompatibleConfigs = currentConfigs.stream()
-                .filter(config -> newConfigsByName.containsKey(config.getName()))
-                .collect(Collectors.toList());
-        if (!incompatibleConfigs.isEmpty()) {
-            throw new RuntimeException(
-                    "The following configurations should be updated "
-                            + "in an unsupported fashion, please drop or update them via PNC UI: " + incompatibleConfigs
-                            + ". Look above for the cause");
-        }
-        return incompatibleConfigs;
     }
 
     private List<BuildConfiguration> getCurrentBuildConfigs() {
