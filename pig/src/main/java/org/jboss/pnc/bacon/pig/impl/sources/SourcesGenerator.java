@@ -154,7 +154,7 @@ public class SourcesGenerator {
         builds.values().forEach(build -> {
             URI url = gerritSnapshotDownloadUrl(build.getInternalScmUrl(), build.getScmRevision());
 
-            File targetPath = new File(workDir, build.getName() + ".tar.gz");
+            File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
             try (BuildClient client = CREATOR.newClient();
                     Response response = client.getInternalScmArchiveLink(build.getId())) {
                 InputStream in = (InputStream) response.getEntity();
