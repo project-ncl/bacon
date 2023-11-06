@@ -1354,5 +1354,16 @@
               "url": "http://www.apache.org/licenses/LICENSE-2.0"
           }
       ]
+  },
+  {
+      "groupId": "org.sonatype.oss",
+      "artifactId": "oss-parent",
+      "version-regexp": "7.0.0.redhat-.+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
   }
 ]
