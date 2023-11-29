@@ -73,6 +73,20 @@ public class ProjectNameGeneratorTest {
     }
 
     @Test
+    public void shouldGetShorterName() {
+        GAV longer = new GAV("org.jboss", "jboss-parent-mr-jar", "32");
+        GAV shorter = new GAV("org.jboss", "jboss-parent", "32");
+
+        Project nonRedhat = new Project();
+        nonRedhat.setGavs(Set.of(longer, shorter));
+        nonRedhat.setDependencies(Set.of());
+
+        png.nameProjects(Set.of(nonRedhat));
+
+        assertThat(nonRedhat.getName()).isEqualTo("org.jboss-jboss-parent-32-AUTOBUILD");
+    }
+
+    @Test
     public void shouldDetectDuplicateWithTemporary() {
         Project nonRedhat = new Project();
         nonRedhat.setGavs(Collections.singleton(new GAV("org.slf4j", "slf4j-api", "1.7.25")));
