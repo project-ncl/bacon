@@ -75,7 +75,7 @@
 
     <properties>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
-        <domino.version>0.0.92</domino.version>
+        <domino.version>0.0.100</domino.version>
         <jackson.version>2.13.1</jackson.version>
         <jaxb.version>2.2.11</jaxb.version>
         <junit.version>5.8.2</junit.version>
@@ -91,7 +91,7 @@
         <pnc.version>2.5.0</pnc.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <quarkus.resolver.version>2.16.7.Final</quarkus.resolver.version>
+        <quarkus.resolver.version>2.16.12.Final</quarkus.resolver.version>
         <tagSuffix />
     </properties>
 
