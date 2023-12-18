@@ -75,7 +75,7 @@
 
     <properties>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
-        <domino.version>0.0.100</domino.version>
+        <domino.version>0.0.102</domino.version>
         <jackson.version>2.13.1</jackson.version>
         <jaxb.version>2.2.11</jaxb.version>
         <junit.version>5.8.2</junit.version>
