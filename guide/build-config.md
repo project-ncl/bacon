@@ -308,6 +308,7 @@ Strategy options are:
 - BUILD_GROUP
 - MILESTONE
 - RESOLVE_ONLY
+- BOM
 
 ##### `IGNORE`
 
@@ -467,6 +468,23 @@ In this example, the generation of the Maven repository will consist of two step
 Configuration options configured outside steps are inherited by each configured step. Each step may augment the default configuration by providing any configuration option that is supported by `repositoryGeneration` with the exception of configuring nested steps or changing the strategy (in fact, the RESOLVE_ONLY strategy is only strategy currently supporting multi step Maven repository generation).
 
 If the same configuration option is found directly under the `repositoryGeneration` and under a step, the effective value of the option will either be a merge of the two (in case a value represents a list or a map) or the one configured in a step will override the default one (in case a value has a simple type, such as string). For example, in the above example the effective value of the `bomGavs` for the second step will be `com.redhat.quarkus.platform:quarkus-bom:2.13.4.Final-redhat-00001,com.redhat.quarkus.platform:quarkus-camel-bom:2.13.4.Final-redhat-00001`.
+
+##### `BOM`
+
+`BOM` strategy is an enhanced version of `RESOLVE_ONLY` strategy and is meant to replace for it. The primary difference is that `BOM` strategy is processing dependencies and Maven repository content concurrently instead of sequentially as `RESOLVE_ONLY` does. This allows to significantly reduce the time required to generate an equivalent Maven repository ZIP.
+For example, for Quarkus 3.2.9, starting with an empty local repository, `BOM` strategy completes in ~11 minutes, while `RESOLVE_ONLY` takes 70+ minutes to generate the same deliverable using the same configuration.
+
+Note that the following configuration options are currently **not** supported by the `BOM` strategy compared to `RESOLVE_ONLY`:
+- `excludeArtifacts` - this option is not supported in favor of using `resolveExcludes` and `excludeTransitives` filters;
+- `bannedArtifacts` - this option is currently not implemented (originally added for debugging purposes to `RESOLVE_ONLY`) but can be supported in the future if required.
+
+###### Local testing
+
+To test `BOM` strategy locally, an existing config using `RESOLVE_ONLY` should simply be updated to use the `BOM` strategy. Here is a sample command line that generates RHBQ 3.2.9 Maven repository ZIP:
+
+```
+java -jar bacon.jar pig run --clean --skipBuilds --skipBranchCheck --skipPncUpdate --skipLicenses --skipSources --releaseStorageUrl https://download.eng.bos.redhat.com/rcm-guest/staging/quarkus config-dir/ --targetPath deliverables
+```
 
 ##### Parameters available in all strategies
 
