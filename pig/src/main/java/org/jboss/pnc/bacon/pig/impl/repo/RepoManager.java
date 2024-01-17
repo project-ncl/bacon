@@ -17,20 +17,13 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContext;
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
-import io.quarkus.bootstrap.util.IoUtils;
-import io.quarkus.devtools.messagewriter.MessageWriter;
-import io.quarkus.domino.inspect.DependencyTreeError;
-import io.quarkus.domino.inspect.DependencyTreeInspector;
-import io.quarkus.domino.inspect.DependencyTreeVisitor;
 import io.quarkus.maven.dependency.ArtifactCoords;
-import io.quarkus.maven.dependency.ArtifactKey;
+import io.quarkus.maven.dependency.GACTV;
 import lombok.Getter;
 import org.apache.maven.model.Model;
-import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
@@ -39,7 +32,6 @@ import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.listener.ChainedRepositoryListener;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
@@ -65,11 +57,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,6 +68,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,7 +80,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -158,8 +148,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
     public RepositoryData prepare() {
         switch (generationData.getStrategy()) {
-            case BOM:
-                return generateForBom();
             case DOWNLOAD:
                 return downloadAndRepackage();
             case GENERATE:
@@ -519,8 +507,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         /* Get the extensionsListUrl from the BOM based on resolveIncludes and resolveExcludes params */
         final String rawIncludes = params.get("resolveIncludes");
+        final GavSet resolveSet;
         if (rawIncludes != null) {
-            var resolveSet = GavSet.builder().includes(rawIncludes).excludes(params.get("resolveExcludes")).build();
+            resolveSet = GavSet.builder().includes(rawIncludes).excludes(params.get("resolveExcludes")).build();
             bomConstraints.stream()
                     .map(Dependency::getArtifact)
                     .filter(
@@ -531,46 +520,65 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                     a.getClassifier(),
                                     a.getVersion()))
                     .forEach(extensionRtArtifactList::add);
+        } else {
+            resolveSet = GavSet.includeAll();
         }
 
         final List<Exclusion> transitiveExclusions = parseExclusions(params.get("excludeTransitive"));
 
         ensureDefaultJarsIncluded(extensionRtArtifactList);
 
-        final List<Artifact> artifactList = ensureVersionsSet(extensionRtArtifactList);
         if (log.isDebugEnabled()) {
             log.debug(
-                    "About to resolve artifacts \n"
-                            + artifactList.stream().map(Artifact::toString).collect(Collectors.joining("\n")));
+                    "About to resolve artifacts \n" + extensionRtArtifactList.stream()
+                            .map(Artifact::toString)
+                            .collect(Collectors.joining("\n")));
             if (!transitiveExclusions.isEmpty()) {
                 log.debug("Applying exclusions to transitive dependencies:");
                 transitiveExclusions.forEach(e -> log.debug("  " + e));
             }
         }
 
+        Map<Artifact, String> redhatVersionExtensionArtifactMap = collectRedhatVersions(extensionRtArtifactList);
+
         final List<Dependency> managedDeps = new ArrayList<>(bomConstraints);
         final StringBuilder bannedReport = new StringBuilder();
         final Set<ArtifactCoords> collectedArtifacts = new HashSet<>();
-        for (Artifact artifact : artifactList) {
+        for (Artifact extensionRtArtifact : extensionRtArtifactList) {
             // this will resolve all the artifacts and their dependencies and as a consequence populate the local
             // Maven repo
             // specified in the user settings.xml
-            if (artifact.getArtifactId().contains("maven-plugin")) {
-                log.debug("Resolving dependencies of plugin {}", artifact);
-                mvnResolver.resolvePluginDependencies(artifact);
+            String aptVersion = redhatVersionExtensionArtifactMap
+                    .getOrDefault(extensionRtArtifact, extensionRtArtifact.getVersion());
+            if (extensionRtArtifact.getArtifactId().contains("plugin")) {
+                Artifact pluginArtifact = new DefaultArtifact(
+                        extensionRtArtifact.getGroupId(),
+                        extensionRtArtifact.getArtifactId(),
+                        extensionRtArtifact.getExtension(),
+                        aptVersion);
+                log.debug("Resolving dependencies of plugin {}", pluginArtifact);
+                mvnResolver.resolvePluginDependencies(pluginArtifact);
             } else {
-                if (artifact.getArtifactId().contains("bom") && !artifact.getExtension().equals("properties")
-                        && !artifact.getExtension().equals("json") || artifact.getExtension().equals(POM)) {
+                if (extensionRtArtifact.getArtifactId().contains("bom")
+                        && !extensionRtArtifact.getExtension().equals("properties")
+                        && !extensionRtArtifact.getExtension().equals("json")
+                        || extensionRtArtifact.getExtension().equals(POM)) {
                     DefaultArtifact bomPomArtifact = new DefaultArtifact(
-                            artifact.getGroupId(),
-                            artifact.getArtifactId(),
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId(),
                             POM,
-                            artifact.getVersion());
-                    log.debug("Resolving POM {}", bomPomArtifact);
+                            aptVersion);
+                    log.debug("Resolving POM {}", extensionRtArtifact);
                     mvnResolver.resolve(bomPomArtifact);
                 } else {
-                    log.debug("Resolving dependencies of {}", artifact);
-                    mvnResolver.resolve(artifact);
+                    DefaultArtifact redHatArtifact = new DefaultArtifact(
+                            extensionRtArtifact.getGroupId(),
+                            extensionRtArtifact.getArtifactId(),
+                            extensionRtArtifact.getClassifier(),
+                            extensionRtArtifact.getExtension(),
+                            aptVersion);
+                    log.debug("Resolving dependencies of {}", redHatArtifact);
+                    mvnResolver.resolve(redHatArtifact);
 
                     /*
                      * We resolve the BOM (assuming it has no own dependencies) and add the artifact we actually want to
@@ -587,7 +595,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                                                     bom,
                                                     List.of(
                                                             new Dependency(
-                                                                    artifact,
+                                                                    redHatArtifact,
                                                                     JavaScopes.RUNTIME,
                                                                     false,
                                                                     transitiveExclusions)),
@@ -605,7 +613,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             bannedDirs.entrySet()
                     .stream()
                     .filter(en -> Files.exists(en.getValue()) && hasProdVersionSubdir(en.getValue()))
-                    .peek(en -> bannedReport.append("\n " + en.getKey() + " pulled by " + artifact))
+                    .peek(en -> bannedReport.append("\n " + en.getKey() + " pulled by " + extensionRtArtifact))
                     .forEach(en -> {
                         try {
                             org.apache.commons.io.FileUtils.deleteDirectory(en.getValue().toFile());
@@ -615,513 +623,18 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     });
         }
         if (bannedReport.length() > 0) {
-            throw new IllegalStateException("Banned artifacts found: " + bannedReport);
+            throw new IllegalStateException("Banned artifacts found: " + bannedReport.toString());
         }
 
         addMissingJarsForPoms(mvnResolver);
     }
 
-    private RepositoryData generateForBom() {
-        if (!pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "The BOM strategy does not support excludeArtifacts. "
-                            + "Consider using resolveExcludes and/or excludeTransitive options");
-        }
-
-        final BomRepoGenerationSummary summary = new BomRepoGenerationSummary();
-        final ResolvedArtifactCollector artifactCollector = new ResolvedArtifactCollector();
-        final File repoDir = createMavenGenerationDir();
-        final MavenArtifactResolver resolver = getResolverForBomStrategy(repoDir, artifactCollector);
-        if (generationData.getSteps().isEmpty()) {
-            generateForBom(generationData, resolver, summary);
-        } else {
-            for (RepoGenerationData step : generationData.getSteps()) {
-                final RepoGenerationData mergedData = RepoGenerationData.merge(generationData, step);
-                generateForBom(mergedData, resolver, summary);
-            }
-        }
-
-        resolveAdditionalArtifacts(resolver, summary);
-        finalizeArtifacts(resolver, artifactCollector, summary);
-        summary.logSummary();
-
-        log.info("Repackaging the repository");
-        final File targetTopLevelDirectory = new File(workDir, getTargetTopLevelDirectoryName());
-        targetTopLevelDirectory.mkdirs();
-
-        final Path targetZipPath = getTargetZipPath();
-        repackage(repoDir, targetTopLevelDirectory);
-
-        zip(targetTopLevelDirectory, targetZipPath);
-
-        return result(targetTopLevelDirectory, targetZipPath);
-    }
-
-    /**
-     * Initiailizes a Maven artifact resolver for the BOM resolution strategy
-     *
-     * @param repoDir local Maven repository directory to be used
-     * @param artifactCollector resolved artifact collector
-     * @return Maven artifact resolver initialized for the BOM resolution strategy
-     */
-    private MavenArtifactResolver getResolverForBomStrategy(File repoDir, ResolvedArtifactCollector artifactCollector) {
-        try {
-            var mvnCtx = new BootstrapMavenContext(
-                    BootstrapMavenContext.config()
-                            .setUserSettings(getIndyMavenSettings())
-                            .setLocalRepository(repoDir.getAbsolutePath())
-                            .setWorkspaceDiscovery(false)
-                            .setArtifactTransferLogging(false));
-            var session = new DefaultRepositorySystemSession(mvnCtx.getRepositorySystemSession());
-            session.setRepositoryListener(
-                    ChainedRepositoryListener.newInstance(session.getRepositoryListener(), artifactCollector));
-            return new MavenArtifactResolver(
-                    new BootstrapMavenContext(
-                            BootstrapMavenContext.config()
-                                    .setUserSettings(mvnCtx.getUserSettings())
-                                    .setLocalRepository(mvnCtx.getLocalRepo())
-                                    .setWorkspaceDiscovery(false)
-                                    .setArtifactTransferLogging(false)
-                                    .setRepositorySystem(mvnCtx.getRepositorySystem())
-                                    .setRepositorySystemSession(session)
-                                    .setRemoteRepositories(mvnCtx.getRemoteRepositories())
-                                    .setRemoteRepositoryManager(mvnCtx.getRemoteRepositoryManager())
-                                    .setRemotePluginRepositories(mvnCtx.getRemotePluginRepositories())));
-        } catch (BootstrapMavenException e) {
-            throw new RuntimeException("Failed to initialize Maven artifact resolver", e);
-        }
-    }
-
-    private void generateForBom(
-            RepoGenerationData generationData,
-            MavenArtifactResolver resolver,
-            BomRepoGenerationSummary summary) {
-
-        final Map<String, String> params = generationData.getParameters();
-        if (params.containsKey("bannedArtifacts")) {
-            throw new IllegalArgumentException(
-                    "This Maven repository strategy does not support bannedArtifacts option");
-        }
-
-        final List<GAV> bomGAVs = getBomGavFromConfig(generationData);
-        var sb = new StringBuilder();
-        sb.append("Resolving dependencies from ").append(bomGAVs.get(0).toGapv());
-        if (bomGAVs.size() > 1) {
-            for (int i = 1; i < bomGAVs.size() - 1; ++i) {
-                sb.append(", ").append(bomGAVs.get(i).toGapv());
-            }
-            sb.append(" and ").append(bomGAVs.get(bomGAVs.size() - 1).toGapv());
-        }
-        log.info(sb.toString());
-
-        final List<Dependency> bomConstraints = getBomConstraints(bomGAVs, resolver);
-        final List<Artifact> rootArtifacts = collectRootArtifacts(params, bomConstraints);
-        final List<Exclusion> transitiveExclusions = parseExclusions(params.get("excludeTransitive"));
-
-        if (log.isDebugEnabled()) {
-            log.debug(
-                    "Resolving dependencies of " + System.lineSeparator()
-                            + rootArtifacts.stream()
-                                    .map(Artifact::toString)
-                                    .collect(Collectors.joining(System.lineSeparator())));
-            if (!transitiveExclusions.isEmpty()) {
-                log.debug("Applying exclusions to transitive dependencies:");
-                transitiveExclusions.forEach(e -> log.debug("  " + e));
-            }
-        }
-
-        final List<DependencyTreeError> retryRequests = new ArrayList<>(0);
-        var dependencyInspector = DependencyTreeInspector.configure()
-                .setArtifactResolver(resolver)
-                .setResolveDependencies(true)
-                .setParallelProcessing(true)
-                .setTreeVisitor(new DependencyTreeVisitor<>() {
-                    @Override
-                    public void visit(DependencyTreeVisit<Object> visit) {
-                    }
-
-                    @Override
-                    public void onEvent(Object event, MessageWriter log) {
-                    }
-
-                    @Override
-                    public void handleResolutionFailures(Collection<DependencyTreeError> errors) {
-                        retryRequests.addAll(errors);
-                    }
-                })
-                .setProgressTrackerPrefix("Resolved dependencies of ")
-                .setMessageWriter(new Sl4jMessageWriter(log));
-
-        for (Artifact artifact : rootArtifacts) {
-            if (artifact.getArtifactId().contains("maven-plugin")) {
-                dependencyInspector.inspectPlugin(artifact, transitiveExclusions);
-            } else {
-                dependencyInspector.inspectAsDependency(artifact, bomConstraints, transitiveExclusions);
-            }
-        }
-        dependencyInspector.complete();
-
-        if (!retryRequests.isEmpty()) {
-            // occasionally (seems to be rare) there could be failures related to concurrent resolutions of the same
-            // artifacts
-            // in this case a re-try seems to help, to be safe they are re-tried with a sequential resolution
-            log.debug("Re-trying failed resolution requests sequentially");
-            dependencyInspector = DependencyTreeInspector.configure()
-                    .setArtifactResolver(resolver)
-                    .setResolveDependencies(true)
-                    .setParallelProcessing(true)
-                    .setTreeVisitor(new DependencyTreeVisitor<>() {
-                        @Override
-                        public void visit(DependencyTreeVisit<Object> visit) {
-                        }
-
-                        @Override
-                        public void onEvent(Object event, MessageWriter log) {
-                        }
-
-                        @Override
-                        public void handleResolutionFailures(Collection<DependencyTreeError> errors) {
-                            for (var e : errors) {
-                                var a = e.getRequest().getArtifact();
-                                summary.addDependencyResolutionFailure(
-                                        ArtifactCoords.of(
-                                                a.getGroupId(),
-                                                a.getArtifactId(),
-                                                a.getClassifier(),
-                                                a.getExtension(),
-                                                a.getVersion()),
-                                        e.getError());
-                            }
-                        }
-                    })
-                    .setProgressTrackerPrefix("Resolved dependencies of ")
-                    .setMessageWriter(new Sl4jMessageWriter(log));
-            for (var error : retryRequests) {
-                dependencyInspector.inspect(error.getRequest());
-            }
-            dependencyInspector.complete();
-        }
-    }
-
-    /**
-     * Collect all the artifacts whose dependencies should be resolved as part of the BOM resolution strategy.
-     *
-     * @param params repository generation parameters
-     * @param bomConstraints BOM managed dependencies
-     * @return artifacts whose dependencies should be resolved
-     */
-    private List<Artifact> collectRootArtifacts(Map<String, String> params, List<Dependency> bomConstraints) {
-        List<Artifact> rootArtifacts = new ArrayList<>();
-        final String extensionsListUrl = params.get("extensionsListUrl");
-        if (extensionsListUrl != null) {
-            // extensionsListUrl is optional
-            // Must point to a text file which contains list of format "groupId:artifactId:version:type:classifier"
-            rootArtifacts.addAll(parseExtensionsArtifactList(extensionsListUrl));
-        }
-
-        addResolveArtifacts(params.get("resolveArtifacts"), rootArtifacts::add);
-
-        final String rawIncludes = params.get("resolveIncludes");
-        if (rawIncludes != null) {
-            var resolveSet = GavSet.builder().includes(rawIncludes).excludes(params.get("resolveExcludes")).build();
-            for (var d : bomConstraints) {
-                var a = d.getArtifact();
-                if (resolveSet.contains(
-                        a.getGroupId(),
-                        a.getArtifactId(),
-                        a.getExtension(),
-                        a.getClassifier(),
-                        a.getVersion())) {
-                    rootArtifacts.add(a);
-                }
-            }
-        }
-        return ensureVersionsSet(rootArtifacts);
-    }
-
-    /**
-     * Collect all the dependencies managed by the BOMs
-     *
-     * @param bomGAVs BOM artifacts
-     * @param resolver artifact resolver
-     * @return all the dependencies managed by the configured BOMs
-     */
-    private List<Dependency> getBomConstraints(List<GAV> bomGAVs, MavenArtifactResolver resolver) {
-        List<Dependency> bomConstraints = List.of();
-        if (bomGAVs.size() > 1) {
-            Map<ArtifactKey, Dependency> map = new HashMap<>();
-            for (GAV gav : bomGAVs) {
-                var bom = new DefaultArtifact(gav.getGroupId(), gav.getArtifactId(), POM, gav.getVersion());
-                final List<Dependency> managedDeps;
-                try {
-                    managedDeps = resolver.resolveDescriptor(bom).getManagedDependencies();
-                } catch (BootstrapMavenException e) {
-                    throw new RuntimeException("Failed to resolve descriptor for " + bom, e);
-                }
-                for (var d : managedDeps) {
-                    var a = d.getArtifact();
-                    map.putIfAbsent(
-                            ArtifactKey.of(a.getGroupId(), a.getArtifactId(), a.getClassifier(), a.getExtension()),
-                            d);
-                }
-            }
-            bomConstraints = new ArrayList<>(map.values());
-        } else if (bomGAVs.size() == 1) {
-            var bom = bomGAVs.get(0);
-            try {
-                bomConstraints = resolver
-                        .resolveDescriptor(
-                                new DefaultArtifact(bom.getGroupId(), bom.getArtifactId(), POM, bom.getVersion()))
-                        .getManagedDependencies();
-            } catch (BootstrapMavenException e) {
-                throw new RuntimeException("Failed to resolve descriptor for " + bom, e);
-            }
-        }
-        if (bomConstraints.isEmpty()) {
-            throw new IllegalStateException("Failed to get constraints from BOMs " + bomGAVs);
-        }
-        return bomConstraints;
-    }
-
-    /**
-     * Finalize resolved artifacts in the Maven repository directory by making sure that, for example, all the expected
-     * checksums are generated, non-productized content is removed, there are no "orphaned POM artifacts", i.e. POM
-     * artifacts with package 'jar' that are missing JARs in the generated repository.
-     *
-     * @param resolver artifact resolver
-     * @param artifactCollector resolved artifact collector
-     * @param summary error collector
-     */
-    private void finalizeArtifacts(
-            MavenArtifactResolver resolver,
-            ResolvedArtifactCollector artifactCollector,
-            BomRepoGenerationSummary summary) {
-        log.info("Finalizing resolved artifacts");
-        var resolvedArtifacts = new ArrayList<>(artifactCollector.getResolvedArtifacts());
-        var progressTracker = new ArtifactProgressTracker("Finalized ", resolvedArtifacts.size());
-        final List<CompletableFuture<?>> all = new ArrayList<>(resolvedArtifacts.size());
-        for (var resolvedArtifact : resolvedArtifacts) {
-            if (resolvedArtifact.isRedHatVersion()) {
-                all.add(finalizeRedHatArtifact(resolver, resolvedArtifact, progressTracker, summary));
-            } else {
-                all.add(finalizeCommunityArtifact(resolvedArtifact, progressTracker));
-            }
-        }
-        CompletableFuture.allOf(all.toArray(new CompletableFuture<?>[0])).join();
-    }
-
-    private CompletableFuture<?> finalizeRedHatArtifact(
-            MavenArtifactResolver resolver,
-            ResolvedGav resolved,
-            ArtifactProgressTracker progressTracker,
-            BomRepoGenerationSummary summary) {
-        return CompletableFuture.runAsync(() -> {
-            boolean jarResolved = resolved.isFlagSet(ResolvedGav.JAR_RESOLVED);
-            var gav = resolved.getGav();
-            if (!jarResolved) {
-                if (resolved.isPackagingJar()) {
-                    var jar = new DefaultArtifact(
-                            gav.getGroupId(),
-                            gav.getArtifactId(),
-                            ArtifactCoords.TYPE_JAR,
-                            gav.getVersion());
-                    try {
-                        resolver.resolve(jar);
-                        summary.addJarAccompanyingOrphanedPom(
-                                ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), gav.getVersion()));
-                    } catch (Exception e) {
-                        summary.addFailedToResolveJarAccompanyingOrphanedPom(
-                                ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), gav.getVersion()),
-                                e);
-                    }
-                    jarResolved = true;
-                }
-            }
-            if (jarResolved && !resolved.isFlagSet(ResolvedGav.SOURCES_RESOLVED)) {
-                try {
-                    resolver.resolve(
-                            new DefaultArtifact(
-                                    gav.getGroupId(),
-                                    gav.getArtifactId(),
-                                    "sources",
-                                    ArtifactCoords.TYPE_JAR,
-                                    gav.getVersion()));
-                } catch (Exception e) {
-                    summary.addMissingSources(
-                            ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), "sources", gav.getVersion()));
-                }
-            }
-
-            //
-            // The following should be done after all the artifacts have been resolved
-            //
-
-            // delete _remote.repositories
-            final Path artifactDir = resolved.getArtifactDirectory();
-            var remoteRepos = artifactDir.resolve("_remote.repositories");
-            try {
-                Files.deleteIfExists(remoteRepos);
-            } catch (IOException e) {
-                log.warn("Failed to delete " + remoteRepos, e);
-            }
-            // delete .lastUpdated
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(artifactDir)) {
-                for (var file : stream) {
-                    if (file.getFileName().toString().endsWith(".lastUpdated")) {
-                        Files.delete(file);
-                    }
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-
-            // generate md5 and sha1 checksums
-            final List<CompletableFuture<Void>> checksums = new ArrayList<>(resolved.getArtifacts().size());
-            for (var a : resolved.getArtifacts()) {
-                checksums.add(CompletableFuture.runAsync(() -> {
-                    RepositoryUtils.addCheckSums(a.getFile().toPath(), "md5", "sha1");
-                }));
-            }
-
-            CompletableFuture.allOf(checksums.toArray(new CompletableFuture<?>[0])).join();
-            progressTracker.finalized(gav);
-        });
-    }
-
-    private CompletableFuture<?> finalizeCommunityArtifact(
-            ResolvedGav resolved,
-            ArtifactProgressTracker progressTracker) {
-        // remove community content
-        return CompletableFuture.runAsync(() -> {
-            var parent = resolved.getArtifactDirectory();
-            try {
-                try (DirectoryStream<Path> stream = Files.newDirectoryStream(parent)) {
-                    for (var file : stream) {
-                        if (Files.isDirectory(file)) {
-                            IoUtils.recursiveDelete(file);
-                        } else {
-                            Files.delete(file);
-                        }
-                    }
-                }
-                Files.delete(parent);
-
-                parent = parent.getParent();
-                boolean empty = true;
-                try (DirectoryStream<Path> stream = Files.newDirectoryStream(parent)) {
-                    for (var p : stream) {
-                        var fileName = p.getFileName().toString();
-                        if (fileName.startsWith("maven-metadata-") || fileName.equals("resolver-status.properties")) {
-                            try {
-                                Files.delete(p);
-                            } catch (IOException e) {
-                                log.warn("Failed to delete " + p, e);
-                                empty = false;
-                            }
-                        } else {
-                            empty = false;
-                        }
-                    }
-                }
-
-                if (empty) {
-                    Files.delete(parent);
-                    parent = parent.getParent();
-                    while (parent != null) {
-                        try (DirectoryStream<Path> stream = Files.newDirectoryStream(parent)) {
-                            if (stream.iterator().hasNext()) {
-                                break;
-                            }
-                        }
-                        Files.delete(parent);
-                        parent = parent.getParent();
-                    }
-                }
-            } catch (IOException e) {
-                log.warn("Failed to finalize " + resolved.getGav(), e);
-            }
-            progressTracker.finalized(resolved.getGav());
-        });
-    }
-
     private static void collectArtifacts(DependencyNode node, Set<ArtifactCoords> collected) {
         final Artifact a = node.getArtifact();
-        collected.add(
-                ArtifactCoords
-                        .of(a.getGroupId(), a.getArtifactId(), a.getClassifier(), a.getExtension(), a.getVersion()));
+        collected
+                .add(new GACTV(a.getGroupId(), a.getArtifactId(), a.getClassifier(), a.getExtension(), a.getVersion()));
         for (DependencyNode c : node.getChildren()) {
             collectArtifacts(c, collected);
-        }
-    }
-
-    private static CompletableFuture<Void> resolveAsync(
-            MavenArtifactResolver resolver,
-            GAV coords,
-            ArtifactProgressTracker progressTracker,
-            BomRepoGenerationSummary summary) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                resolver.resolve(
-                        new DefaultArtifact(
-                                coords.getGroupId(),
-                                coords.getArtifactId(),
-                                coords.getClassifier(),
-                                coords.getPackaging(),
-                                coords.getVersion()));
-                progressTracker.finalized(
-                        coords.getGroupId(),
-                        coords.getArtifactId(),
-                        coords.getClassifier(),
-                        coords.getPackaging(),
-                        coords.getVersion());
-            } catch (BootstrapMavenException e) {
-                summary.addFailedToResolveAdditionalArtifact(
-                        ArtifactCoords.of(
-                                coords.getGroupId(),
-                                coords.getArtifactId(),
-                                coords.getClassifier(),
-                                coords.getPackaging(),
-                                coords.getVersion()),
-                        e);
-            }
-        });
-    }
-
-    private void resolveAdditionalArtifacts(MavenArtifactResolver resolver, BomRepoGenerationSummary summary) {
-        final List<AdditionalArtifactsFromBuild> artifactList = generationData.getAdditionalArtifacts();
-        final List<String> additionalBuilds = generationData.getExternalAdditionalConfigs();
-        final List<String> externalArtifacts = generationData.getExternalAdditionalArtifacts();
-        if (artifactList.isEmpty() && additionalBuilds.isEmpty() && externalArtifacts.isEmpty()) {
-            return;
-        }
-        log.info("Resolving additional artifacts");
-        var progressTracker = new ArtifactProgressTracker("Resolved additional ");
-        final List<CompletableFuture<Void>> additionalArtifacts = new ArrayList<>();
-        for (var artifacts : artifactList) {
-            final PncBuild build = getBuild(artifacts.getFrom());
-            for (var regex : artifacts.getDownload()) {
-                additionalArtifacts
-                        .add(resolveAsync(resolver, build.findArtifact(regex).toGAV(), progressTracker, summary));
-            }
-        }
-        for (var coords : externalArtifacts) {
-            additionalArtifacts
-                    .add(resolveAsync(resolver, GAV.fromColonSeparatedGAPV(coords), progressTracker, summary));
-        }
-
-        final BuildInfoCollector.BuildSearchType type = PigContext.get().isTempBuild()
-                ? BuildInfoCollector.BuildSearchType.TEMPORARY
-                : BuildInfoCollector.BuildSearchType.PERMANENT;
-        for (var configName : additionalBuilds) {
-            var builtArtifacts = buildInfoCollector.getLatestBuild(buildInfoCollector.ConfigNametoId(configName), type)
-                    .getBuiltArtifacts();
-            for (var a : builtArtifacts) {
-                additionalArtifacts.add(resolveAsync(resolver, a.toGAV(), progressTracker, summary));
-            }
-        }
-        if (!additionalArtifacts.isEmpty()) {
-            progressTracker.setTotal(additionalArtifacts.size());
-            CompletableFuture.allOf(additionalArtifacts.toArray(new CompletableFuture<?>[0])).join();
         }
     }
 
@@ -1266,7 +779,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         PncBuild pncBuild = null;
         if (sourceArtifact != null && !sourceArtifact.isEmpty()) {
             pncBuild = getBuild(sourceArtifact, generationData.getSourceBuild());
-            result.add(pncBuild.findArtifactByFileName(sourceArtifact).toGAV());
+            final ArtifactWrapper bomArtifact = pncBuild.findArtifactByFileName(sourceArtifact);
+            result.add(bomArtifact.toGAV());
         }
 
         final String rawBomGavs = generationData.getParameters().get("bomGavs");
@@ -1284,9 +798,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
         }
 
-        if (result.isEmpty()) {
-            throw new RuntimeException("Failed to determine the BOM artifacts to use");
-        }
         return result;
     }
 
@@ -1312,76 +823,44 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return result;
     }
 
-    /**
-     * This method makes sure that every artifact in the collection has a version set. Artifacts that are missing
-     * versions will get their versions from PNC builds.
-     *
-     * @param artifacts artifacts to process
-     * @return artifacts with all the versions set
-     */
-    public List<Artifact> ensureVersionsSet(Collection<Artifact> artifacts) {
+    public Map<Artifact, String> collectRedhatVersions(Collection<Artifact> extensionArtifacts) {
         /*
          * Take only those versions from the PNC build which are not managed in the BOM. This is important when
          * performing quick local MRRC builds that rely on BOMs built and installed locally whose versions are newer
          * than in any available PNC build.
          */
-        var result = new ArrayList<Artifact>(artifacts.size());
-        Map<ArtifactKey, Artifact> missingVersions = Map.of();
-        for (var a : artifacts) {
-            if (a.getVersion() == null) {
-                if (missingVersions.isEmpty()) {
-                    missingVersions = new HashMap<>();
-                }
-                missingVersions.put(ArtifactKey.ga(a.getGroupId(), a.getArtifactId()), a);
-            } else {
-                result.add(a);
-            }
-        }
-        if (missingVersions.isEmpty()) {
-            return result;
+        final List<Artifact> extensionArtifactsWithoutVersions = extensionArtifacts.stream()
+                .filter(artifact -> artifact.getVersion() == null)
+                .collect(Collectors.toList());
+        if (extensionArtifactsWithoutVersions.isEmpty()) {
+            return Collections.emptyMap();
         }
 
-        for (var pncBuild : builds.values()) {
+        Map<Artifact, String> result = new HashMap<>();
+        builds.forEach((key, pncBuild) -> {
             if (pncBuild.getBuiltArtifacts() != null) {
-                for (var artifactWrapper : pncBuild.getBuiltArtifacts()) {
-                    final GAV gav = artifactWrapper.toGAV();
-                    var a = missingVersions.remove(ArtifactKey.ga(gav.getGroupId(), gav.getArtifactId()));
-                    if (a != null) {
-                        result.add(
-                                new DefaultArtifact(
-                                        a.getGroupId(),
-                                        a.getArtifactId(),
-                                        a.getClassifier(),
-                                        a.getExtension(),
-                                        gav.getVersion()));
-                        if (missingVersions.isEmpty()) {
-                            break;
+                pncBuild.getBuiltArtifacts().forEach((artifactWrapper -> {
+                    extensionArtifactsWithoutVersions.forEach((extensionArtifact -> {
+                        GAV gav = artifactWrapper.toGAV();
+                        if (extensionArtifact.getGroupId().equals(gav.getGroupId())
+                                && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
+                            result.put(extensionArtifact, gav.getVersion());
                         }
-                    }
-                }
+                    }));
+                }));
             }
             if (pncBuild.getDependencyArtifacts() != null) {
-                for (var artifactWrapper : pncBuild.getDependencyArtifacts()) {
-                    final GAV gav = artifactWrapper.toGAV();
-                    var a = missingVersions.remove(ArtifactKey.ga(gav.getGroupId(), gav.getArtifactId()));
-                    if (a != null) {
-                        result.add(
-                                new DefaultArtifact(
-                                        a.getGroupId(),
-                                        a.getArtifactId(),
-                                        a.getClassifier(),
-                                        a.getExtension(),
-                                        gav.getVersion()));
-                        if (missingVersions.isEmpty()) {
-                            break;
+                pncBuild.getDependencyArtifacts().forEach((artifactWrapper -> {
+                    extensionArtifactsWithoutVersions.forEach((extensionArtifact -> {
+                        GAV gav = artifactWrapper.toGAV();
+                        if (extensionArtifact.getGroupId().equals(gav.getGroupId())
+                                && extensionArtifact.getArtifactId().equals(gav.getArtifactId())) {
+                            result.put(extensionArtifact, gav.getVersion());
                         }
-                    }
-                }
+                    }));
+                }));
             }
-            if (missingVersions.isEmpty()) {
-                break;
-            }
-        }
+        });
 
         return result;
     }
@@ -1395,30 +874,34 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     public List<Artifact> parseExtensionsArtifactList(String urlString) {
         ArrayList<Artifact> list = new ArrayList<>();
         try {
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                String buffer = br.readLine();
-                while (buffer != null) {
-                    buffer = buffer.trim();
-                    if (!buffer.isEmpty() && !buffer.startsWith("#")) {
-                        String[] parts = buffer.split(":");
-                        if (parts.length < 3 || parts.length > 5) {
-                            throw new RuntimeException("Extension text file is not properly formatted");
-                        }
 
-                        final Artifact extensionRtArtifact;
-                        if (parts.length == 3) {
-                            extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, JAR, parts[2]);
-                        } else if (parts.length == 4) {
-                            extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, parts[3], parts[2]);
-                        } else {
-                            extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
-                        }
-                        list.add(extensionRtArtifact);
-                    }
-                    buffer = br.readLine();
+            URL url = new URL(urlString);
+            URLConnection connection = (URLConnection) url.openConnection();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String buffer = "";
+            while (buffer != null) {
+                buffer = br.readLine();
+                if (buffer == null) {
+                    break;
                 }
+                buffer = buffer.trim();
+                if (buffer.isEmpty() || buffer.startsWith("#")) {
+                    continue;
+                }
+                String[] parts = buffer.split(":");
+                if (parts.length < 3 || parts.length > 5) {
+                    throw new RuntimeException("Extension text file is not properly formatted");
+                }
+
+                final Artifact extensionRtArtifact;
+                if (parts.length == 3) {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, JAR, parts[2]);
+                } else if (parts.length == 4) {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], null, parts[3], parts[2]);
+                } else {
+                    extensionRtArtifact = new DefaultArtifact(parts[0], parts[1], parts[4], parts[3], parts[2]);
+                }
+                list.add(extensionRtArtifact);
             }
         } catch (MalformedURLException mfe) {
             throw new RuntimeException("url is not proper " + urlString, mfe);
@@ -1496,7 +979,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     @Override
     public void close() {
         buildInfoCollector.close();
-        IoUtils.recursiveDelete(workDir.toPath());
     }
 
     private static File getIndyMavenSettings() {

@@ -228,7 +228,9 @@ public class ResolveOnlyRepositoryTest {
         List<Artifact> extensionsArtifactList = new ArrayList<>();
         extensionsArtifactList.add(vertxWeb);
         doReturn(extensionsArtifactList).when(repoManager).parseExtensionsArtifactList(EXTENSIONS_LIST_URL);
-        doReturn(extensionsArtifactList).when(repoManager).ensureVersionsSet(extensionsArtifactList);
+        Map<Artifact, String> redhatVersionMap = new HashMap<>();
+        redhatVersionMap.put(vertxWeb, "4.1.0");
+        doReturn(redhatVersionMap).when(repoManager).collectRedhatVersions(extensionsArtifactList);
     }
 
     private Set<String> repoZipContentList() {

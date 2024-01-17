@@ -29,12 +29,10 @@ import org.commonjava.maven.atlas.ident.version.SingleVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -185,42 +183,6 @@ public class RepositoryUtils {
             FileUtils.write(checkSumFile, checksum, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Unable to create checksum file: " + checkSumFile.getAbsolutePath());
-        }
-    }
-
-    /**
-     * Calculates and persists checksums for a file in a local Maven repository. The implementation reads the file once
-     * for all the checksums. The algorithms passed in are currently limited to {@code md5} and {@code sha1}.
-     *
-     * @param file file to generate checksums for
-     * @param algs checksum algorithms to use, for example md5, sha1.
-     */
-    public static void addCheckSums(Path file, String... algs) {
-        byte[] content = null;
-        for (var alg : algs) {
-            var checksumFile = file.getParent().resolve(file.getFileName() + "." + alg);
-            if (!Files.exists(checksumFile)) {
-                if (content == null) {
-                    try {
-                        content = Files.readAllBytes(file);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                }
-                final String checksum;
-                if ("md5".equals(alg)) {
-                    checksum = DigestUtils.md5Hex(content);
-                } else if ("sha1".equals(alg)) {
-                    checksum = DigestUtils.sha1Hex(content);
-                } else {
-                    throw new IllegalArgumentException("Unexpected checksum type " + alg);
-                }
-                try (BufferedWriter writer = Files.newBufferedWriter(checksumFile)) {
-                    writer.append(checksum);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
         }
     }
 
