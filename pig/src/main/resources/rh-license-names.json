@@ -67,12 +67,17 @@
         ]
     },
     {
-        "name": "GNU Lesser General Public License, Version 3",
+        "name": "GNU Lesser General Public License v3.0 or later",
         "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+        "textUrl": "http://www.gnu.org/licenses/lgpl-3.0.txt",
         "aliases": [
             "GNU Lesser General Public License, Version 3",
             "GNU Lesser General Public License",
-            "The GNU Lesser General Public License, version 3"
+            "The GNU Lesser General Public License, version 3",
+            "GNU Lesser General Public License v30 or later",
+            "GNU Lesser General Public License v3.0 or later",
+            "GNU Lesser General Public License v3.0 only",
+            "GNU Lesser General Public License v30 only"
         ],
         "urlAliases": [
             "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
@@ -81,6 +86,7 @@
             "http://www.gnu.org/licenses/lgpl.html",
             "https://www.gnu.org/licenses/lgpl-3.0.txt",
             "https://www.gnu.org/licenses/lgpl-3.0.html",
+            "http://www.gnu.org/licenses/lgpl-3.0.html",
             "http://www.gnu.org/licenses/lgpl-3.0.txt"
         ]
     },
@@ -431,18 +437,6 @@
         "urlAliases": [
             "https://opensource.org/licenses/EPL-2.0",
             "https://opensource.org/licenses/Apache-2.0"
-        ]
-    },
-    {
-        "name": "GNU Lesser General Public Licence",
-        "textUrl": "http://www.gnu.org/licenses/lgpl.txt",
-        "url": "http://www.gnu.org/licenses/lgpl.txt",
-        "aliases": [
-            "GNU Lesser General Public License v30 or later",
-            "GNU Lesser General Public License v3.0 or later"
-        ],
-        "urlAliases": [
-            "http://www.gnu.org/licenses/lgpl.txt"
         ]
     },
     {
