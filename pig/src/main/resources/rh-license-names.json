@@ -24,6 +24,7 @@
         "name": "Apache License 2.0",
         "url": "http://www.apache.org/licenses/LICENSE-2.0",
         "aliases": [
+            "The Apache License, Version 2.0",
             "Apache Software License, Version 2.0",
             "The Apache Software License, Version 2.0",
             "Apache License, version 2.0",
@@ -290,7 +291,8 @@
             "BSD 3-Clause",
             "BSD 3-Clause \"New\" or \"Revised\" License",
             "BSD-3-Clause",
-            "BSD 3-Clause License"
+            "BSD 3-Clause License",
+            "Go License"
         ],
         "urlAliases": [
             "https://opensource.org/licenses/BSD-3-Clause",
@@ -298,7 +300,8 @@
             "http://opensource.org/licenses/BSD-3-Clause",
             "http://www.antlr.org/license.html",
             "http://x-stream.github.io/license.html",
-            "http://dom4j.sourceforge.net/dom4j-1.6.1/license.html"
+            "http://dom4j.sourceforge.net/dom4j-1.6.1/license.html",
+            "https://go.dev/LICENSE"
         ]
     },
     {
@@ -409,7 +412,8 @@
         "url": "http://www.mysql.com/company/legal/licensing/foss-exception.html",
         "textUrl": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/mysql-license.txt",
         "aliases": [
-            "The GNU General Public License, v2 with FOSS exception"
+            "The GNU General Public License, v2 with FOSS exception",
+            "The GNU General Public License, v2 with Universal FOSS Exception, v1.0"
         ],
         "urlAliases": [
             "http://www.mysql.com/company/legal/licensing/foss-exception.html"
