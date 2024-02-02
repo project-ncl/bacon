@@ -1365,5 +1365,148 @@
               "url": "http://www.apache.org/licenses/LICENSE-2.0"
           }
       ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-api",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-contrib-exemplar-util",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-contrib-grpc-metrics",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-contrib-resource-util",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-exporter-metrics-util",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-exporter-stats-stackdriver",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-exporter-trace-stackdriver",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-impl",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-impl-core",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-proto",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "io.opencensus",
+      "artifactId": "opencensus-contrib-http-util",
+      "version-regexp": "0\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "org.opensearch",
+      "artifactId": "opensearch-testcontainers",
+      "version-regexp": "2\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0"
+          }
+      ]
+  },
+  {
+      "groupId": "com.google.re2j",
+      "artifactId": "re2j",
+      "version-regexp": "1\\..+",
+      "licenses": [
+        {
+          "name": "BSD 3-clause \"New\" or \"Revised\" License",
+          "url": "https://opensource.org/licenses/BSD-3-Clause"
+        }
+      ]
   }
 ]
