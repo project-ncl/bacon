@@ -13,7 +13,7 @@
 
 ## Prerequisites
 
-* Java 1.8 or later
+* Java 17 or later
 * Maven 3.3.9 or later
 
 ## Contribution Requirements
