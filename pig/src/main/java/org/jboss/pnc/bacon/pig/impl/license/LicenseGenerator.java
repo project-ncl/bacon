@@ -18,12 +18,12 @@
 
 package org.jboss.pnc.bacon.pig.impl.license;
 
-import me.snowdrop.licenses.LicensesGenerator;
-import me.snowdrop.licenses.LicensesGeneratorException;
-import me.snowdrop.licenses.properties.GeneratorProperties;
-import me.snowdrop.licenses.utils.Gav;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.licenses.LicensesGenerator;
+import org.jboss.pnc.bacon.licenses.LicensesGeneratorException;
+import org.jboss.pnc.bacon.licenses.properties.GeneratorProperties;
+import org.jboss.pnc.bacon.licenses.utils.Gav;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;

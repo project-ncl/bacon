@@ -1,0 +1,33 @@
+[
+  {
+    "name": "Test License Name",
+    "url": "http://test-license.com",
+    "aliases": [
+      "Test License Alias"
+    ],
+    "urlAliases": [
+      "http://test-license-alias.com"
+    ]
+  },
+  {
+    "name": "Test License Name 2",
+    "url": "http://test-license-2.com",
+    "aliases": [
+      "Test License Alias 2"
+    ],
+    "urlAliases": [
+      "http://test-license-alias-2.com"
+    ]
+  },
+  {
+    "name": "Test License Name 3",
+    "url": "http://test-license-3.com/licens.html",
+    "textUrl": "http://internal-host/license3.txt",
+    "aliases": [
+      "Test License Name 3"
+    ],
+    "urlAliases": [
+      "http://test-license-3.com/licens.html"
+    ]
+  }
+]
