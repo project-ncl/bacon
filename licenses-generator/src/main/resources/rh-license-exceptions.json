@@ -1,0 +1,106 @@
+[
+  {
+    "groupId": "org.apache.tomcat",
+    "artifactId": "servlet-api",
+    "version": "6.0.41",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      },
+      {
+        "name": "Common Development and Distribution License 1.0",
+        "url": "http://repository.jboss.org/licenses/cddl.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "org.apache.tomcat",
+    "artifactId": "servlet-api",
+    "version": "6.0.41-redhat",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      },
+      {
+        "name": "Common Development and Distribution License 1.0",
+        "url": "http://repository.jboss.org/licenses/cddl.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "antlr",
+    "artifactId": "antlr",
+    "version": "2.7.7",
+    "licenses": [
+      {
+        "name": "The Antlr 2.7.7 License",
+        "url": "http://www.antlr2.org/license.html"
+      }
+    ]
+  },
+  {
+    "groupId": "antlr",
+    "artifactId": "antlr",
+    "version": "2.7.7-redhat",
+    "licenses": [
+      {
+        "name": "The Antlr 2.7.7 License",
+        "url": "http://www.antlr2.org/license.html"
+      }
+    ]
+  },
+  {
+    "groupId": "dom4j",
+    "artifactId": "dom4j",
+    "version": "1.6.1",
+    "licenses": [
+      {
+        "name": "Plexus Classworlds License",
+        "url": "https://raw.githubusercontent.com/dom4j/dom4j/dom4j_1_6_1/LICENSE.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "dom4j",
+    "artifactId": "dom4j",
+    "version": "1.6.1-redhat",
+    "licenses": [
+      {
+        "name": "Plexus Classworlds License",
+        "url": "https://raw.githubusercontent.com/dom4j/dom4j/dom4j_1_6_1/LICENSE.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "com.h2database",
+    "artifactId": "h2",
+    "version": "1.4.196",
+    "licenses": [
+      {
+        "name": "Eclipse Public License, Version 1.0",
+        "url": "http://repository.jboss.org/licenses/epl-1.0.txt"
+      },
+      {
+        "name": "Mozilla Public License 2.0",
+        "url": "https://www.mozilla.org/en-US/MPL/2.0/"
+      }
+    ]
+  },
+  {
+    "groupId": "com.h2database",
+    "artifactId": "h2",
+    "version": "1.4.197",
+    "licenses": [
+      {
+        "name": "Eclipse Public License, Version 1.0",
+        "url": "http://repository.jboss.org/licenses/epl-1.0.txt"
+      },
+      {
+        "name": "Mozilla Public License 2.0",
+        "url": "https://www.mozilla.org/en-US/MPL/2.0/"
+      }
+    ]
+  }
+]

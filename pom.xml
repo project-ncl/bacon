@@ -59,6 +59,7 @@
         <module>common</module>
         <module>config</module>
         <module>da</module>
+        <module>licenses-generator</module>
         <module>pig</module>
         <module>pnc</module>
         <module>experimental</module>
@@ -74,13 +75,23 @@
     </scm>
 
     <properties>
+        <assertj.version>3.21.0</assertj.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <commons-configuration2.version>2.7</commons-configuration2.version>
+        <commons-io.version>2.7</commons-io.version>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
         <domino.version>0.0.102</domino.version>
+        <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
+        <glassfish-json.version>1.1.4</glassfish-json.version>
         <jackson.version>2.13.1</jackson.version>
         <jaxb.version>2.2.11</jaxb.version>
+
+        <jenkins-maven-embedder.version>3.15</jenkins-maven-embedder.version>
+        <json.version>1.1.4</json.version>
         <junit.version>5.8.2</junit.version>
         <maven-core.version>3.8.1</maven-core.version>
         <maven-resolver.version>1.6.3</maven-resolver.version>
+        <maven-wagon.version>3.5.3</maven-wagon.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
@@ -92,8 +103,12 @@
         <pnc.version>2.5.0</pnc.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <quarkus.resolver.version>2.16.12.Final</quarkus.resolver.version>
+        <quarkus.resolver.version>${quarkus.version}</quarkus.resolver.version>
+        <quarkus.version>2.16.12.Final</quarkus.version>
+        <qute.version>${quarkus.version}</qute.version>
+
         <tagSuffix />
+        <undertow.version>2.2.8.Final</undertow.version>
     </properties>
 
     <dependencyManagement>
@@ -128,6 +143,11 @@
             <dependency>
                 <groupId>org.jboss.pnc.bacon</groupId>
                 <artifactId>da</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.bacon</groupId>
+                <artifactId>licenses-generator</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -210,11 +230,86 @@
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-client</artifactId>
                 <version>3.14.0.Final</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.sun.activation</groupId>
+                        <artifactId>jakarta.activation</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.spec.javax.xml.bind</groupId>
+                        <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-jackson2-provider</artifactId>
                 <version>3.12.1.Final</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>jakarta.activation</groupId>
+                        <artifactId>jakarta.activation-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- licenses generator -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-configuration2</artifactId>
+                <version>${commons-configuration2.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkus.qute</groupId>
+                <artifactId>qute-core</artifactId>
+                <version>${qute.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jenkins-ci.lib</groupId>
+                <artifactId>lib-jenkins-maven-embedder</artifactId>
+                <version>${jenkins-maven-embedder.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>jsr250-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.maven</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${glassfish-jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.json</artifactId>
+                <version>${glassfish-json.version}</version>
             </dependency>
 
             <!-- log -->
@@ -322,11 +417,6 @@
                 <groupId>org.eclipse.jgit</groupId>
                 <artifactId>org.eclipse.jgit</artifactId>
                 <version>6.6.1.202309021850-r</version>
-            </dependency>
-            <dependency>
-                <groupId>me.snowdrop</groupId>
-                <artifactId>licenses-generator</artifactId>
-                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
@@ -541,6 +631,26 @@
                 <version>${maven-resolver.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-file</artifactId>
+                <version>${maven-wagon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-http</artifactId>
+                <version>${maven-wagon.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.sisu</groupId>
                 <artifactId>org.eclipse.sisu.inject</artifactId>
                 <version>0.3.5</version>
@@ -568,6 +678,17 @@
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-hdfs-client</artifactId>
                 <version>3.3.4</version>
+            </dependency>
+            <dependency>
+                <groupId>io.undertow</groupId>
+                <artifactId>undertow-servlet</artifactId>
+                <version>${undertow.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.spec.javax.annotation</groupId>
+                        <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -605,7 +726,7 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.21.0</version>
+                <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

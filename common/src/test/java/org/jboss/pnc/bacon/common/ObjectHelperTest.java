@@ -1,9 +1,9 @@
 package org.jboss.pnc.bacon.common;
 
 import ch.qos.logback.classic.Level;
-import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
@@ -14,7 +14,7 @@ class ObjectHelperTest {
     @Test
     void printJson() throws Exception {
         String actual = tapSystemOut(() -> {
-            Map<String, String> testSubject = Maps.newHashMap();
+            Map<String, String> testSubject = new HashMap<>();
 
             testSubject.put("test", "subject");
 
@@ -29,7 +29,7 @@ class ObjectHelperTest {
     @Test
     void printYaml() throws Exception {
         String actual = tapSystemOut(() -> {
-            Map<String, String> testSubject = Maps.newHashMap();
+            Map<String, String> testSubject = new HashMap<>();
 
             testSubject.put("test", "subject");
 

@@ -1,0 +1,72 @@
+[
+  {
+    "groupId": "testGroupId",
+    "artifactId": "testArtifactId",
+    "version": "testVersion",
+    "licenses": [
+      {
+        "name": "Test License Name",
+        "url": "http://test-license.com"
+      }
+    ]
+  },
+  {
+    "groupId": "testGroupId2",
+    "artifactId": "testArtifactId2",
+    "version": "testVersion2",
+    "licenses": [
+      {
+        "name": "Test License Name",
+        "url": "http://test-license.com"
+      },
+      {
+        "name": "Test License Name 2",
+        "url": "http://test-license-2.com"
+      }
+    ]
+  },
+  {
+    "groupId": "testGroupId3",
+    "artifactId": "testArtifactId3",
+    "version-range": "[1.0.0,2.0.0]",
+    "licenses": [
+      {
+        "name": "Test License Name",
+        "url": "http://test-license.com"
+      }
+    ]
+  },
+  {
+    "groupId": "testGroupId4",
+    "artifactId": "testArtifactId4",
+    "version-regexp": "1.0.0(-redhat-\\d+)?",
+    "licenses": [
+      {
+        "name": "Test License Name",
+        "url": "http://test-license.com"
+      }
+    ]
+  },
+  {
+    "groupId": "eap-unknown",
+    "artifactId": "artifact",
+    "version": "2.0.0-redhat-1",
+    "licenses": [
+      {
+        "name": "Test License A",
+        "url": "http://test-license-a.com"
+      }
+    ]
+  },
+  {
+    "groupId": "eap-unknown",
+    "artifactId": "artifact",
+    "version": "1.0",
+    "licenses": [
+      {
+        "name": "Test License B",
+        "url": "http://test-license-b.com"
+      }
+    ]
+  }
+]

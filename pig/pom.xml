@@ -59,7 +59,7 @@
             <artifactId>org.eclipse.sisu.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>me.snowdrop</groupId>
+            <groupId>org.jboss.pnc.bacon</groupId>
             <artifactId>licenses-generator</artifactId>
             <exclusions>
                 <exclusion>
