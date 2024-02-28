@@ -163,7 +163,8 @@ public class PncBuilder implements Closeable {
         // log set to info for CPaaS to detect infinite loop
         log.info("Checking if group build {} is successfully finished", groupBuildId);
         try {
-            GroupBuild groupBuild = groupBuildClient.getSpecific(groupBuildId);
+            GroupBuildClient anonymousGroupBuildClient = new GroupBuildClient(getPncConfiguration(false));
+            GroupBuild groupBuild = anonymousGroupBuildClient.getSpecific(groupBuildId);
             switch (groupBuild.getStatus()) {
                 case BUILDING:
                     return false;
