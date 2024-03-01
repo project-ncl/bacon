@@ -1,0 +1,34 @@
+dependencyResolutionConfig:
+    analyzeArtifacts: []
+    excludeArtifacts: []
+    recipeRepos: []
+buildConfigGeneratorConfig:
+    failGeneratedBuildScript: false
+    allowDeprecatedEnvironments: false
+    defaultValues:
+        scmRevision: !SYSPROP ${user.home}
+        environmentName: "OpenJDK 11.0; Mvn 3.5.4"
+        buildScript: !ENV ${PWD}
+    pigTemplate:
+        product:
+            name: My Product
+            abbreviation: my-product
+            stage: GA
+            issueTrackerUrl: http://issues.jboss.org/browse/MYPROD
+        version: 1.0.0
+        milestone: CR1
+        group: my-product-autobuild
+        flow:
+            licensesGeneration:
+                strategy: IGNORE
+            repositoryGeneration:
+                strategy: IGNORE
+            javadocGeneration:
+                strategy: IGNORE
+            sourcesGeneration:
+                strategy: IGNORE
+        outputPrefixes:
+            releaseFile: my-product-autobuild
+            releaseDir: MY-PRODUCT-AUTOBUILD
+        addons:
+            notYetAlignedFromDependencyTree:
