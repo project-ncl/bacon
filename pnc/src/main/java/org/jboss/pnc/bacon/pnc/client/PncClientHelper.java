@@ -80,14 +80,18 @@ public class PncClientHelper {
                 port = uri.getPort();
             }
 
-            Configuration configuration = Configuration.builder()
+            Configuration.ConfigurationBuilder builder = Configuration.builder()
                     .protocol(uri.getScheme())
                     .port(port)
                     .host(uri.getHost())
                     .bearerToken(bearerToken)
                     .pageSize(50)
-                    .addDefaultMdcToHeadersMappings()
-                    .build();
+                    .addDefaultMdcToHeadersMappings();
+
+            if (authenticationNeeded && keycloakConfig != null) {
+                builder = builder.bearerTokenSupplier(() -> getBearerToken(keycloakConfig));
+            }
+            Configuration configuration = builder.build();
 
             printBannerIfNecessary(configuration);
 
