@@ -51,17 +51,31 @@ import java.util.concurrent.Callable;
 @Slf4j
 public class DALookupCli {
 
-    @CommandLine.Command(name = "maven", description = "Finds best matching versions for given Maven artifact GAVs")
+    private final static String availableModes = "Available modes: PERSISTENT, TEMPORARY, TEMPORARY_PREFER_PERSISTENT, SERVICE, SERVICE_TEMPORARY, SERVICE_TEMPORARY_PREFER_PERSISTENT";
+
+    @CommandLine.Command(
+            name = "maven",
+            description = "Finds best matching versions for given Maven artifact GAVs. In PNC it is used for alignment and ignores blacklisted artifacts.")
     public static class LookupMaven extends JSONCommandHandler implements Callable<Integer> {
 
-        @CommandLine.Option(names = "--temporary", description = "Lookup temporary version")
+        @Deprecated(forRemoval = true)
+        @CommandLine.Option(names = "--temporary", description = "Lookup temporary version. Deprecated.", hidden = true)
         private boolean temporary = false;
 
-        @CommandLine.Option(names = "--managed-service", description = "Lookup managed service options")
+        @Deprecated(forRemoval = true)
+        @CommandLine.Option(
+                names = "--managed-service",
+                description = "Lookup managed service options. Deprecated.",
+                hidden = true)
         private boolean managedService = false;
 
         @CommandLine.Option(names = "--brew-pull-active", description = "Check for versions also in Brew")
         private boolean brewPullActive = false;
+
+        @CommandLine.Option(
+                names = "--lookup-mode",
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+        private String lookupMode;
 
         @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
         private String[] gavs;
@@ -79,7 +93,7 @@ public class DALookupCli {
             }
 
             MavenLookupRequest request = MavenLookupRequest.builder()
-                    .mode(DaHelper.getMode(temporary, managedService))
+                    .mode(DaHelper.getMode(temporary, managedService, lookupMode))
                     .brewPullActive(brewPullActive)
                     .artifacts(gavSet)
                     .build();
@@ -98,14 +112,24 @@ public class DALookupCli {
 
     @CommandLine.Command(
             name = "maven-latest",
-            description = "Finds latest matching versions for given Maven artifact GAVs")
+            description = "Finds latest matching versions for given Maven artifact GAVs. In PNC it is used for version increment, by default looking for versions in Indy and Brew.")
     public static class LookupMavenLatest extends JSONCommandHandler implements Callable<Integer> {
 
-        @CommandLine.Option(names = "--temporary", description = "Lookup temporary version")
+        @Deprecated(forRemoval = true)
+        @CommandLine.Option(names = "--temporary", description = "Lookup temporary version. Deprecated.", hidden = true)
         private boolean temporary = false;
 
-        @CommandLine.Option(names = "--managed-service", description = "Lookup managed service options")
+        @Deprecated(forRemoval = true)
+        @CommandLine.Option(
+                names = "--managed-service",
+                description = "Lookup managed service options. Deprecated.",
+                hidden = true)
         private boolean managedService = false;
+
+        @CommandLine.Option(
+                names = "--lookup-mode",
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+        private String lookupMode;
 
         @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
         private String[] gavs;
@@ -143,7 +167,7 @@ public class DALookupCli {
             }
 
             MavenLatestRequest request = MavenLatestRequest.builder()
-                    .mode(DaHelper.getMode(temporary, managedService))
+                    .mode(DaHelper.getMode(temporary, managedService, lookupMode))
                     .artifacts(gavSet)
                     .build();
 
@@ -163,14 +187,24 @@ public class DALookupCli {
     @CommandLine.Command(name = "npm", description = "Finds best matching versions for given NPM artifact coordinates")
     public static class LookupNPM extends JSONCommandHandler implements Callable<Integer> {
 
-        @CommandLine.Option(names = "--temporary", description = "Lookup temporary version")
+        @Deprecated(forRemoval = true)
+        @CommandLine.Option(names = "--temporary", description = "Lookup temporary version. Deprecated.", hidden = true)
         private boolean temporary = false;
 
-        @CommandLine.Option(names = "--managed-service", description = "Lookup managed service options")
+        @Deprecated(forRemoval = true)
+        @CommandLine.Option(
+                names = "--managed-service",
+                description = "Lookup managed service options. Deprecated.",
+                hidden = true)
         private boolean managedService = false;
 
         @CommandLine.Option(names = "--brew-pull-active", description = "Check for versions also in Brew")
         private boolean brewPullActive = false;
+
+        @CommandLine.Option(
+                names = "--lookup-mode",
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+        private String lookupMode;
 
         @CommandLine.Parameters(description = "package:version of the artifact to lookup")
         private String[] npmVersions;
@@ -193,7 +227,7 @@ public class DALookupCli {
             }
 
             NPMLookupRequest request = NPMLookupRequest.builder()
-                    .mode(DaHelper.getMode(temporary, managedService))
+                    .mode(DaHelper.getMode(temporary, managedService, lookupMode))
                     .packages(pkgs)
                     .build();
 

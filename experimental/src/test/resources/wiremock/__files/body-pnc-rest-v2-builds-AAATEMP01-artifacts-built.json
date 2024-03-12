@@ -1,0 +1,24 @@
+{
+    "pageIndex": 0,
+    "pageSize": 50,
+    "totalPages": 1,
+    "totalHits": 3,
+    "content": [
+        {
+            "id": "100",
+            "identifier": "foo.bar:temporary:pom:1.2.3.temporary-redhat-00001",
+            "deployPath": null,
+            "targetRepository": {
+                "id": "100",
+                "repositoryType": "MAVEN"
+            },
+            "build": {
+                "id": "AAATEMP01",
+                "buildConfigRevision": {
+                    "id": "100",
+                    "rev": 100
+                }
+            }
+        }
+    ]
+}

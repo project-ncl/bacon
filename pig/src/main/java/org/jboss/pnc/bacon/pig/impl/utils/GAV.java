@@ -28,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -44,6 +46,13 @@ public class GAV {
     private static final Logger log = LoggerFactory.getLogger(GAV.class);
 
     public static final Comparator<GAV> gapvcComparator = Comparator.comparing(GAV::toGapvc);
+    /**
+     * See NCL-7238. Some gavs have no packaging due to weird Maven behaviour. In PNC, we need to specify a packaging to
+     * generate a valid PURL and to avoid duplicates of artifacts. Therefore we chose to use the "empty" packaging.
+     *
+     * Also specified in repository-driver
+     */
+    public static final String FILE_NO_EXTENSION_PACKAGING = "empty";
 
     private String packaging; // not final for jackson
     private String groupId; // not final for jackson
@@ -51,26 +60,38 @@ public class GAV {
     private String version; // not final for jackson
     private String scope;
     private String classifier;
+    // Extensions with no "standard" format, like having a dot on it
+    List<String> extensionExceptions = Arrays.asList("tar.gz", "tar.bz2");
 
     @Deprecated // for jackson
     public GAV() {
 
     }
 
-    public GAV(String path) {
-        log.debug("parsing artifact path {}", path);
+    public GAV(String artifactPath) {
+        log.debug("parsing artifact path {}", artifactPath);
 
-        path = FilenameUtils.normalizeNoEndSeparator(path, true);
+        final String path = FilenameUtils.normalizeNoEndSeparator(artifactPath, true);
 
         int versionEnd = path.lastIndexOf('/');
         int artifactEnd = path.lastIndexOf('/', versionEnd - 1);
         int groupEnd = path.lastIndexOf('/', artifactEnd - 1);
 
         try {
-            packaging = path.substring(path.lastIndexOf('.') + 1);
+            packaging = extensionExceptions.stream()
+                    .filter(e -> path.endsWith("." + e))
+                    .findFirst()
+                    .orElse(path.substring(path.lastIndexOf('.') + 1));
             version = path.substring(artifactEnd + 1, versionEnd);
             artifactId = path.substring(groupEnd + 1, artifactEnd);
             groupId = path.substring(0, groupEnd).replaceAll("/", ".");
+            try {
+                classifier = path
+                        .substring(path.lastIndexOf(version) + version.length() + 1, path.lastIndexOf(packaging) - 1);
+            } catch (Exception e) {
+                // artifact doesn't have a classifier
+                classifier = null;
+            }
         } catch (StringIndexOutOfBoundsException parsingException) {
             throw new RuntimeException("Unable to parse path " + path + " to artifact", parsingException);
         }
@@ -124,7 +145,11 @@ public class GAV {
     }
 
     public String toGapvc() {
-        return String.format("%s:%s:%s:%s:%s", groupId, artifactId, packaging, version, classifier);
+        if (classifier == null) {
+            return String.format("%s:%s:%s:%s", groupId, artifactId, packaging, version);
+        } else {
+            return String.format("%s:%s:%s:%s:%s", groupId, artifactId, packaging, version, classifier);
+        }
     }
 
     public String toVersionPath() {
@@ -136,10 +161,18 @@ public class GAV {
     }
 
     public String toFileName() {
-        if (classifier == null) {
-            return String.format("%s-%s.%s", artifactId, version, packaging);
+        if (FILE_NO_EXTENSION_PACKAGING.equals(packaging)) {
+            if (classifier == null) {
+                return String.format("%s-%s", artifactId, version);
+            } else {
+                return String.format("%s-%s-%s", artifactId, version, classifier);
+            }
         } else {
-            return String.format("%s-%s-%s.%s", artifactId, version, classifier, packaging);
+            if (classifier == null) {
+                return String.format("%s-%s.%s", artifactId, version, packaging);
+            } else {
+                return String.format("%s-%s-%s.%s", artifactId, version, classifier, packaging);
+            }
         }
     }
 

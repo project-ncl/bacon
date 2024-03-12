@@ -1,0 +1,21 @@
+{
+  "id" : "0f9b2292-d4c8-33df-bfae-f64f0e696be5",
+  "request" : {
+    "url" : "/pnc-rest/v2/artifacts?pageSize=50&pageIndex=0&q=identifier%3D%3Ddependency-one%3Abar%3Apom%3A2.3.2.redhat-00001%3Bbuild%3Disnull%3Dfalse",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-pnc-rest-v2-artifacts-200.json",
+    "headers" : {
+      "access-control-allow-headers" : "accept, authorization,  content-type, x-requested-with",
+      "date" : "Tue, 20 Dec 2022 19:47:05 GMT",
+      "access-control-allow-origin" : "*",
+      "access-control-allow-credentials" : "true",
+      "content-type" : "application/json",
+      "access-control-max-age" : "1",
+      "access-control-allow-methods" : "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+    }
+  },
+  "uuid" : "0f9b2292-d4c8-33df-bfae-f64f0e696be5"
+}

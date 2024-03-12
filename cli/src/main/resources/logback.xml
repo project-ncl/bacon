@@ -68,6 +68,11 @@
     <logger name="me.snowdrop.licenses" level="ERROR"/>
     <!-- end from koji-build-finder -->
 
+    <!-- for PNC rest client -->
+    <!-- Get rid of Netty- cannot access class jdk.internal.misc.Unsafe *debug* message when running on J11 -->
+    <logger name="io.netty.util" level="ERROR"/>
+    <!-- end from PNC rest client -->
+
     <root level="info">
         <appender-ref ref="STDERR"/>
     </root>

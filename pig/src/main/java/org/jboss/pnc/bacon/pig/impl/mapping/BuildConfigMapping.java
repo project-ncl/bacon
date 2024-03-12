@@ -1,18 +1,27 @@
 package org.jboss.pnc.bacon.pig.impl.mapping;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.BuildConfigurationRevision;
+import org.jboss.pnc.dto.Environment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 
 public class BuildConfigMapping {
 
-    public static BuildConfig toBuildConfig(BuildConfiguration buildConfiguration) {
+    public static BuildConfig toBuildConfig(BuildConfiguration buildConfiguration, GeneratorOptions options) {
         BuildConfig buildConfig = new BuildConfig();
-        buildConfig.setName(buildConfiguration.getName());
+
+        buildConfig.setName(options.getNameOverride().orElseGet(buildConfiguration::getName));
         buildConfig.setProject(buildConfiguration.getProject().getName());
         buildConfig.setBuildScript(buildConfiguration.getBuildScript());
 
@@ -25,25 +34,61 @@ public class BuildConfigMapping {
         buildConfig.setScmRevision(buildConfiguration.getScmRevision());
         buildConfig.setDescription(buildConfiguration.getDescription());
 
-        // favor systemImageId
-        buildConfig.setSystemImageId(buildConfiguration.getEnvironment().getSystemImageId());
+        setEnvironment(buildConfig, buildConfiguration.getEnvironment(), options);
         buildConfig.setDependencies(new ArrayList<>(buildConfiguration.getDependencies().keySet()));
 
         buildConfig.setBrewPullActive(buildConfiguration.getBrewPullActive());
         buildConfig.setBuildType(buildConfiguration.getBuildType().toString());
 
-        setBuildConfigFieldsBasedOnParameters(buildConfiguration, buildConfig);
+        setBuildConfigFieldsBasedOnParameters(buildConfig, buildConfiguration.getParameters());
         return buildConfig;
     }
 
-    static void setBuildConfigFieldsBasedOnParameters(BuildConfiguration buildConfiguration, BuildConfig buildConfig) {
+    public static BuildConfig toBuildConfig(
+            BuildConfiguration buildConfiguration,
+            BuildConfigurationRevision revision,
+            GeneratorOptions options) {
+        BuildConfig buildConfig = new BuildConfig();
+        buildConfig.setName(options.getNameOverride().orElseGet(revision::getName));
+        buildConfig.setProject(revision.getProject().getName());
+        buildConfig.setBuildScript(revision.getBuildScript());
 
-        Map<String, String> parameters = buildConfiguration.getParameters();
+        if (revision.getScmRepository().getExternalUrl() != null) {
+            buildConfig.setScmUrl(revision.getScmRepository().getExternalUrl());
+        } else {
+            buildConfig.setScmUrl(revision.getScmRepository().getInternalUrl());
+        }
+
+        buildConfig.setScmRevision(revision.getScmRevision());
+        buildConfig.setDescription(buildConfiguration.getDescription());
+
+        setEnvironment(buildConfig, revision.getEnvironment(), options);
+        buildConfig.setDependencies(new ArrayList<>(buildConfiguration.getDependencies().keySet()));
+
+        buildConfig.setBrewPullActive(buildConfiguration.getBrewPullActive());
+        buildConfig.setBuildType(revision.getBuildType().toString());
+
+        setBuildConfigFieldsBasedOnParameters(buildConfig, revision.getParameters());
+        return buildConfig;
+    }
+
+    private static void setEnvironment(BuildConfig buildConfig, Environment environment, GeneratorOptions options) {
+        // favor systemImageId
+        if (options.useEnvironmentName) {
+            buildConfig.setEnvironmentName(environment.getName());
+        } else {
+            buildConfig.setSystemImageId(environment.getSystemImageId());
+        }
+    }
+
+    static void setBuildConfigFieldsBasedOnParameters(BuildConfig buildConfig, Map<String, String> parameters) {
 
         // TODO: could this code be unified with the code in BuildConfig.java?
         if (parameters.containsKey("ALIGNMENT_PARAMETERS")) {
-            String[] alignmentParameters = parameters.get("ALIGNMENT_PARAMETERS").split(",");
-            buildConfig.setAlignmentParameters(new HashSet<>(Arrays.asList(alignmentParameters)));
+            String alignmentParameters = parameters.get("ALIGNMENT_PARAMETERS");
+            if (!alignmentParameters.isBlank()) {
+                buildConfig.setAlignmentParameters(Collections.singleton(alignmentParameters));
+            }
             parameters.remove("ALIGNMENT_PARAMETERS");
         }
 
@@ -75,5 +120,14 @@ public class BuildConfigMapping {
         if (!parameters.isEmpty()) {
             buildConfig.setParameters(parameters);
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class GeneratorOptions {
+        private boolean useEnvironmentName = false;
+        private Optional<String> nameOverride = Optional.empty();
     }
 }

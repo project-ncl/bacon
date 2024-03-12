@@ -17,9 +17,19 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
+
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 5/25/18
  */
+@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LicenseGenerationData extends GenerationData<LicenseGenerationStrategy> {
+
+    private String licenseExceptionsPath;
+
+    private String licenseNamesPath;
+
 }

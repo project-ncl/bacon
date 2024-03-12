@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
@@ -44,6 +45,7 @@ import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerator;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.BuildClient;
@@ -66,6 +68,8 @@ import javax.ws.rs.NotFoundException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -122,13 +126,15 @@ public final class PigFacade {
         }
 
         boolean dryRun = false;
-        if (tempBuild != false) {
+        if (tempBuild) {
             AlignmentType alignmentPreference = context().getPigConfiguration().getTemporaryBuildAlignmentPreference();
 
             if ((alignmentPreference != null && alignmentPreference.equals(AlignmentType.PERSISTENT))
                     || (alignmentPreference == null) && tempAlign.equals(AlignmentType.PERSISTENT)) {
                 dryRun = true;
             }
+        } else if (context().getPigConfiguration().isDraft()) {
+            throw new FatalException("Pig config is marked as draft, you can run it only as temporary.");
         }
 
         try (PncBuilder pncBuilder = new PncBuilder()) {
@@ -160,10 +166,24 @@ public final class PigFacade {
             boolean skipBranchCheck,
             boolean strictLicenseCheck,
             boolean strictDownloadSource,
-            Path configurationDirectory) {
+            String[] skippedAddons,
+            Path configurationDirectory,
+            String licenseExceptionsPath,
+            String licenseNamesPath) {
 
-        beforeCommand(false);
+        // If skipping configure we need to check and compute full version, if configure is running it will take care of
+        // it
+        if (skipPncUpdate) {
+            beforeCommand(false);
+        }
+
         PigContext context = context();
+
+        PncEntitiesImporter importer = new PncEntitiesImporter();
+
+        if (importer.getBuildGroup().isPresent()) {
+            waitForInProgressBuild(importer.getBuildGroup().get().getId());
+        }
 
         ImportResult importResult;
         if (skipPncUpdate) {
@@ -236,7 +256,12 @@ public final class PigFacade {
                 .getFlow()
                 .getLicensesGeneration()
                 .getStrategy() == LicenseGenerationStrategy.IGNORE)) {
-            generateLicenses(strictLicenseCheck);
+            context.getPigConfiguration()
+                    .getFlow()
+                    .getLicensesGeneration()
+                    .setLicenseExceptionsPath(licenseExceptionsPath);
+            context.getPigConfiguration().getFlow().getLicensesGeneration().setLicenseNamesPath(licenseNamesPath);
+            generateLicenses(strictLicenseCheck, licenseExceptionsPath, licenseNamesPath);
         } else {
             log.info("Skipping License Generation");
             context.getDeliverables().setLicenseZipName(null);
@@ -245,13 +270,13 @@ public final class PigFacade {
             prepareSharedContentAnalysis();
         }
 
-        triggerAddOns();
-
         if (repo != null) {
             generateDocuments();
         } else {
             log.info("Skipping Document Generation");
         }
+
+        triggerAddOns(skippedAddons);
 
         log.info("PiG run completed, the results are in: {}", Paths.get(context().getTargetPath()).toAbsolutePath());
         return groupBuildInfo;
@@ -424,7 +449,10 @@ public final class PigFacade {
         return result;
     }
 
-    public static void triggerAddOns() {
+    public static void triggerAddOns(String[] skippedAddons) {
+
+        List<String> skippedAddonsList = Arrays.asList(skippedAddons);
+
         beforeCommand(false);
         abortIfBuildDataAbsentFromContext();
         AddOnFactory
@@ -435,8 +463,50 @@ public final class PigFacade {
                         context().getExtrasPath(),
                         context().getDeliverables())
                 .stream()
+                .filter(addOn -> !skippedAddonsList.contains(addOn.getName()))
                 .filter(AddOn::shouldRun)
                 .forEach(AddOn::trigger);
+    }
+
+    /**
+     * List all the addon names present in Bacon
+     *
+     * @return list of addon names
+     */
+    private static boolean isSkippedAddonsInAddOnsList(String[] skippedAddons) {
+
+        boolean skippedAddonsValidated = true;
+
+        List<String> existingAddons = AddOnFactory
+                .listAddOns(
+                        context().getPigConfiguration(),
+                        context().getBuilds(),
+                        context().getReleasePath(),
+                        context().getExtrasPath(),
+                        context().getDeliverables())
+                .stream()
+                .map(AddOn::getName)
+                .collect(Collectors.toList());
+
+        for (String skippedAddon : skippedAddons) {
+            if (!skippedAddon.isBlank() && !existingAddons.contains(skippedAddon)) {
+                log.error("Addon '{}' doesn't exist", skippedAddon);
+                skippedAddonsValidated = false;
+            }
+        }
+
+        return skippedAddonsValidated;
+    }
+
+    /**
+     * Exit the application if the skipped addons listed are not present in Bacon
+     *
+     * @param skippedAddons
+     */
+    public static void exitIfSkippedAddonsInvalid(String[] skippedAddons) {
+        if (!PigFacade.isSkippedAddonsInAddOnsList(skippedAddons)) {
+            throw new FatalException("skipAddon option contains invalid addons");
+        }
     }
 
     public static RepositoryData generateRepo(
@@ -491,11 +561,13 @@ public final class PigFacade {
         }
     }
 
-    public static void generateLicenses(boolean strict) {
+    public static void generateLicenses(boolean strict, String licenseExceptionsPath, String licenseNamesPath) {
         beforeCommand(false);
         abortIfContextDataAbsent();
         PigContext context = context();
         context.getDeliverables().setLicenseZipName(context.getPrefix() + "-license.zip");
+        context.getPigConfiguration().getFlow().getLicensesGeneration().setLicenseExceptionsPath(licenseExceptionsPath);
+        context.getPigConfiguration().getFlow().getLicensesGeneration().setLicenseNamesPath(licenseNamesPath);
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         RepositoryData repo = context.getRepositoryData();
 
@@ -535,4 +607,21 @@ public final class PigFacade {
         }
     }
 
+    private static void waitForInProgressBuild(String groupId) {
+        log.info("Checking in progress builds.");
+        SleepUtils.waitFor(() -> recentBuildInProgress(groupId), 30, false);
+    }
+
+    private static boolean recentBuildInProgress(String groupId) {
+        PncBuilder builder = new PncBuilder();
+        Collection<GroupBuild> groupBuilds = builder.getRunningGroupBuilds(groupId);
+        for (GroupBuild gb : groupBuilds) {
+            Instant week = Instant.now().minusSeconds(604800); // limiting to a week because of old stuck groupbuilds
+            if (gb.getStartTime().isAfter(week)) {
+                log.warn("Waiting for running builds to finish.");
+                return false;
+            }
+        }
+        return true;
+    }
 }

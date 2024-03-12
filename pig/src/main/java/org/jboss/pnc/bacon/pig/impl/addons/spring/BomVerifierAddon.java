@@ -56,7 +56,7 @@ public class BomVerifierAddon extends AddOn {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "bomVerifier";
     }
 

@@ -50,11 +50,15 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration
 public class PncBuilder implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(PncBuilder.class);
     private final GroupBuildClient groupBuildClient;
+    private final GroupBuildClient anonymousGroupBuildClient;
     private final GroupConfigurationClient groupConfigClient;
+    private final GroupConfigurationClient anonymousGroupConfigClient;
 
     public PncBuilder() {
         groupBuildClient = new GroupBuildClient(getPncConfiguration());
+        anonymousGroupBuildClient = new GroupBuildClient(getPncConfiguration(false));
         groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
+        anonymousGroupConfigClient = new GroupConfigurationClient(getPncConfiguration(false));
     }
 
     /**
@@ -63,9 +67,15 @@ public class PncBuilder implements Closeable {
      * @param gb
      * @param gc
      */
-    PncBuilder(GroupBuildClient gb, GroupConfigurationClient gc) {
+    PncBuilder(
+            GroupBuildClient gb,
+            GroupBuildClient anonymousGroupBuildClient,
+            GroupConfigurationClient gc,
+            GroupConfigurationClient anonymousGroupConfigClient) {
         groupBuildClient = gb;
+        this.anonymousGroupBuildClient = anonymousGroupBuildClient;
         groupConfigClient = gc;
+        this.anonymousGroupConfigClient = anonymousGroupConfigClient;
     }
 
     public GroupBuild build(
@@ -118,12 +128,7 @@ public class PncBuilder implements Closeable {
 
     public String cancelRunningGroupBuild(String groupConfigurationId) {
         try {
-            Collection<GroupBuild> groupBuilds = groupConfigClient
-                    .getAllGroupBuilds(
-                            groupConfigurationId,
-                            of("=desc=startTime"),
-                            query("status==%s", BuildStatus.BUILDING))
-                    .getAll();
+            Collection<GroupBuild> groupBuilds = getRunningGroupBuilds(groupConfigurationId);
 
             if (groupBuilds.size() > 1) {
                 return ("Can't cancel, there are multiple GroupBuilds running for single GroupConfiguration name and we can't decide correct one to cancel from build-config.yaml information. Found:"
@@ -137,6 +142,20 @@ public class PncBuilder implements Closeable {
             return "Group build " + running.getId() + " canceled.";
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get group build info to cancel running build.", e);
+        }
+    }
+
+    public Collection<GroupBuild> getRunningGroupBuilds(String groupConfigurationId) {
+        try {
+            Collection<GroupBuild> groupBuilds = anonymousGroupConfigClient
+                    .getAllGroupBuilds(
+                            groupConfigurationId,
+                            of("=desc=startTime"),
+                            query("status==%s", BuildStatus.BUILDING))
+                    .getAll();
+            return groupBuilds;
+        } catch (RemoteResourceException e) {
+            throw new RuntimeException("Failed to get group build info.", e);
         }
     }
 
@@ -154,7 +173,7 @@ public class PncBuilder implements Closeable {
         // log set to info for CPaaS to detect infinite loop
         log.info("Checking if group build {} is successfully finished", groupBuildId);
         try {
-            GroupBuild groupBuild = groupBuildClient.getSpecific(groupBuildId);
+            GroupBuild groupBuild = anonymousGroupBuildClient.getSpecific(groupBuildId);
             switch (groupBuild.getStatus()) {
                 case BUILDING:
                     return false;
@@ -206,7 +225,7 @@ public class PncBuilder implements Closeable {
         filter.setRunning(false);
 
         try {
-            Collection<Build> builds = groupBuildClient.getBuilds(groupBuildId, filter).getAll();
+            Collection<Build> builds = anonymousGroupBuildClient.getBuilds(groupBuildId, filter).getAll();
             boolean allFinal = builds.stream().allMatch(b -> b.getStatus().isFinal());
             return allFinal && getCountOfBuildConfigsForGroupBuild(groupBuildId) == builds.size();
         } catch (ClientException e) {
@@ -227,9 +246,9 @@ public class PncBuilder implements Closeable {
     int getCountOfBuildConfigsForGroupBuild(String groupBuildId) {
 
         try {
-            GroupBuild gb = groupBuildClient.getSpecific(groupBuildId);
+            GroupBuild gb = anonymousGroupBuildClient.getSpecific(groupBuildId);
             GroupConfigurationRef gc = gb.getGroupConfig();
-            return groupConfigClient.getBuildConfigs(gc.getId()).size();
+            return anonymousGroupConfigClient.getBuildConfigs(gc.getId()).size();
         } catch (ClientException e) {
             log.warn("Failed to get count of build configs in the group build {}", groupBuildId, e);
             return -1;
@@ -239,6 +258,8 @@ public class PncBuilder implements Closeable {
     @Override
     public void close() {
         groupBuildClient.close();
+        anonymousGroupBuildClient.close();
         groupConfigClient.close();
+        anonymousGroupConfigClient.close();
     }
 }

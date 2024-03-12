@@ -17,6 +17,8 @@ import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -47,8 +49,34 @@ public class ResolveOnlyRepositoryTest {
     private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
     private static final String BOM_PATTERN = "vertx-dependencies-[\\d]+.*.pom";
 
+    private Path workDir;
+    private File testMavenSettings;
+
+    @BeforeEach
+    void beforeEach() throws Exception {
+        workDir = Paths.get("target")
+                .resolve("test-output")
+                .resolve(getClass().getSimpleName())
+                .toAbsolutePath()
+                .normalize();
+        Files.createDirectories(workDir);
+    }
+
+    @AfterEach
+    void afterEach() {
+        if (testMavenSettings != null && testMavenSettings.exists()) {
+            testMavenSettings.deleteOnExit();
+        }
+    }
+
+    @AfterAll
+    static void after() {
+        Mockito.clearAllCaches();
+    }
+
     @Test
     void resolveAndRepackageShouldGenerateRepository() {
+
         mockPigContextAndMethods();
         mockIndySettingsFile();
 
@@ -68,13 +96,11 @@ public class ResolveOnlyRepositoryTest {
 
         Deliverables deliverables = mockDeliverables(pigConfiguration);
 
-        String releasePath = createReleasePath();
-
         BuildInfoCollector buildInfoCollectorMock = Mockito.mock(BuildInfoCollector.class);
 
         RepoManager repoManager = new RepoManager(
                 pigConfiguration,
-                releasePath,
+                workDir.toString(),
                 deliverables,
                 buildsSpy,
                 configurationDirectory,
@@ -90,8 +116,8 @@ public class ResolveOnlyRepositoryTest {
 
         RepositoryData repoData = repoManagerSpy.prepare();
 
-        Assertions.assertThat(repoData.getRepositoryPath().toString())
-                .isEqualTo("/tmp/resolveRepoTest/rh-sample-maven-repository.zip");
+        Assertions.assertThat(repoData.getRepositoryPath())
+                .isEqualTo(workDir.resolve("rh-sample-maven-repository.zip"));
 
         final Set<String> expectedFiles = repoZipContentList();
 
@@ -100,22 +126,21 @@ public class ResolveOnlyRepositoryTest {
                 .map(file -> file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "").replace('\\', '/'))
                 .collect(Collectors.toCollection(TreeSet::new));
 
-        final String ACTUAL_REPO_FILES = "target/resolve-and-repackage-repo-artifact-list-actual.txt";
-        final Path actualOutput = Paths.get(ACTUAL_REPO_FILES);
+        final Path actualArtifactList = workDir.resolve("resolve-and-repackage-repo-artifact-list-actual.txt");
         try {
-            Files.createDirectories(actualOutput.getParent());
+            Files.createDirectories(actualArtifactList.getParent());
             Files.write(
-                    actualOutput,
+                    actualArtifactList,
                     (actualFiles.stream().collect(Collectors.joining("\n")) + "\n").getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new RuntimeException("Could not write to " + actualOutput, e);
+            throw new RuntimeException("Could not write to " + actualArtifactList, e);
         }
 
         if (!actualFiles.equals(expectedFiles)) {
             System.out.printf(
                     "\nThe zipped repository has unexpected content. You may want to compare src/test/resources/%s with %s\n\n",
                     EXPECTED_ARTIFACT_LIST_TXT,
-                    ACTUAL_REPO_FILES);
+                    actualArtifactList);
         }
         Assertions.assertThat(actualFiles).containsExactlyElementsOf(expectedFiles);
     }
@@ -128,8 +153,8 @@ public class ResolveOnlyRepositoryTest {
     }
 
     private void mockIndySettingsFile() {
-        String pathToTestSettingsFile = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml")
-                .getAbsolutePath();
+        testMavenSettings = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml");
+        String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
         MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
         indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
     }
@@ -197,22 +222,13 @@ public class ResolveOnlyRepositoryTest {
         return deliverables;
     }
 
-    private String createReleasePath() {
-        String releasePath = "/tmp/resolveRepoTest/";
-        File targetRepoZipPath = new File(releasePath);
-        targetRepoZipPath.mkdirs();
-        return releasePath;
-    }
-
     private void prepareFakeExtensionArtifactList(RepoManager repoManager) {
         Artifact vertxWeb = new DefaultArtifact("io.vertx", "vertx-bridge-common", "jar", "4.1.0");
 
         List<Artifact> extensionsArtifactList = new ArrayList<>();
         extensionsArtifactList.add(vertxWeb);
         doReturn(extensionsArtifactList).when(repoManager).parseExtensionsArtifactList(EXTENSIONS_LIST_URL);
-        Map<Artifact, String> redhatVersionMap = new HashMap<>();
-        redhatVersionMap.put(vertxWeb, "4.1.0");
-        doReturn(redhatVersionMap).when(repoManager).collectRedhatVersions(extensionsArtifactList);
+        doReturn(extensionsArtifactList).when(repoManager).ensureVersionsSet(extensionsArtifactList);
     }
 
     private Set<String> repoZipContentList() {
@@ -231,10 +247,5 @@ public class ResolveOnlyRepositoryTest {
         }
 
         return Collections.emptySet();
-    }
-
-    @AfterAll
-    static void after() {
-        Mockito.clearAllCaches();
     }
 }

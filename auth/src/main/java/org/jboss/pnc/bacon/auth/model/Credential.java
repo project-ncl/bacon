@@ -47,7 +47,7 @@ public class Credential {
         if (!isValid()) {
             return true;
         } else {
-            return Instant.now().until(accessTokenExpiresIn, ChronoUnit.HOURS) < 20;
+            return Instant.now().until(accessTokenExpiresIn, ChronoUnit.MINUTES) < 1;
         }
     }
 

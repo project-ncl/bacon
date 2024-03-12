@@ -1,0 +1,323 @@
+[
+  {
+    "name": "The Antlr 2.7.7 License",
+    "url": "http://www.antlr2.org/license.html",
+    "aliases": [
+      "The Antlr 2.7.7 License"
+    ],
+    "urlAliases": [
+      "http://www.antlr2.org/license.html"
+    ]
+  },
+  {
+    "name": "Apache License 2.0",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0",
+    "textUrl": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "aliases": [
+      "Apache Software License, Version 2.0",
+      "The Apache Software License, Version 2.0",
+      "Apache License, version 2.0",
+      "Apache License Version 2.0 ",
+      "Apache 2.0",
+      "Apache 2",
+      "Apache License",
+      "Apache License 2.0",
+      "ASL 2.0",
+      "ASL, version 2",
+      "Apache-2.0",
+      "AL2"
+    ],
+    "urlAliases": [
+      "http://www.apache.org/licenses/LICENSE-2.0",
+      "http://www.apache.org/licenses/LICENSE-2.0.txt",
+      "http://www.apache.org/licenses/LICENSE-2.0.html"
+    ]
+  },
+  {
+    "name": "GNU Lesser General Public License v2.1 only",
+    "textUrl": "http://repository.jboss.org/licenses/lgpl-2.1.txt",
+    "url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
+    "aliases": [
+      "GNU Lesser General Public License (LGPL), Version 2.1",
+      "GNU Lesser General Public License, Version 2.1",
+      "lgpl",
+      "LGPL 2.1",
+      "LGPL, version 2.1"
+    ],
+    "urlAliases": [
+      "http://repository.jboss.org/licenses/lgpl-2.1.txt",
+      "https://www.gnu.org/licenses/lgpl-2.1.html",
+      "http://www.gnu.org/licenses/lgpl-2.1.html",
+      "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
+      "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"
+    ]
+  },
+  {
+    "name": "GNU Lesser General Public License, Version 3",
+    "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+    "aliases": [
+      "GNU Lesser General Public License, Version 3",
+      "The GNU Lesser General Public License, version 3"
+    ],
+    "urlAliases": [
+      "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+      "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+      "https://www.gnu.org/licenses/lgpl.html",
+      "http://www.gnu.org/licenses/lgpl.html",
+      "https://www.gnu.org/licenses/lgpl-3.0.txt",
+      "http://www.gnu.org/licenses/lgpl-3.0.txt"
+    ]
+  },
+  {
+    "name": "GNU General Public License v2.0 only",
+    "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
+    "aliases": [
+      "GNU General Public License v2.0 only",
+      "The GNU General Public License, Version 2"
+    ],
+    "urlAliases": [
+      "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
+      "http://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
+      "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
+      "http://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
+      "https://www.gnu.org/licenses/gpl-2.0.txt",
+      "http://www.gnu.org/licenses/gpl-2.0.txt"
+    ]
+  },
+  {
+    "name": "GNU General Public License, Version 2 with the Classpath Exception",
+    "url": "http://repository.jboss.org/licenses/gpl-2.0-ce.txt",
+    "aliases": [
+      "GNU General Public License, Version 2 with the Classpath Exception",
+      "GPL2 w/ CPE"
+    ],
+    "urlAliases": [
+      "http://repository.jboss.org/licenses/gpl-2.0-ce.txt"
+    ]
+  },
+  {
+    "name": "GNU General Public License v3.0 only",
+    "url": "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
+    "aliases": [
+      "GNU General Public License v3.0 only",
+      "GPLv3",
+      "GPL 3"
+    ],
+    "urlAliases": [
+      "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
+      "http://www.gnu.org/licenses/gpl-3.0-standalone.html"
+    ]
+  },
+  {
+    "name": "MIT License",
+    "url": "https://opensource.org/licenses/MIT/",
+    "aliases": [
+      "MIT License",
+      "The MIT License"
+    ],
+    "urlAliases": [
+      "http://www.opensource.org/licenses/MIT",
+      "http://opensource.org/licenses/MIT",
+      "https://opensource.org/licenses/MIT",
+      "http://www.opensource.org/licenses/mit-license.php"
+    ]
+  },
+  {
+    "name": "Common Development and Distribution License 1.0",
+    "url": "http://repository.jboss.org/licenses/cddl.txt",
+    "aliases": [
+      "Common Development Distribution License",
+      "Common Development and Distribution License",
+      "Common Development and Distribution License 1.0",
+      "CDDL License",
+      "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0"
+    ],
+    "urlAliases": [
+      "http://repository.jboss.org/licenses/cddl.txt",
+      "http://www.sun.com/cddl/cddl.html",
+      "http://www.opensource.org/licenses/cddl1.php"
+    ]
+  },
+  {
+    "name": "Common Development and Distribution License 1.1",
+    "url": "https://javaee.github.io/glassfish/LICENSE",
+    "aliases": [
+      "Common Development and Distribution License 1.1",
+      "CDDL 1.1"
+    ],
+    "urlAliases": [
+      "https://javaee.github.io/glassfish/LICENSE"
+    ]
+  },
+  {
+    "name": "Common Development and Distribution License (CDDL) and GNU Public License v.2 w/Classpath Exception",
+    "url": "https://netbeans.org/cddl-gplv2.html",
+    "aliases": [
+      "Common Development and Distribution License (CDDL) and GNU Public License v.2 w/Classpath Exception",
+      "CDDL + GPLv2 with classpath exception",
+      "CDDL or GPLv2 with exceptions"
+    ],
+    "urlAliases": [
+      "https://netbeans.org/cddl-gplv2.html",
+      "https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html"
+    ]
+  },
+  {
+    "name": "Sax Public Domain Notice",
+    "url": "http://www.saxproject.org/copying.html",
+    "aliases": [
+      "Sax Public Domain Notice",
+      "The SAX License"
+    ],
+    "urlAliases": [
+      "http://www.saxproject.org/copying.html"
+    ]
+  },
+  {
+    "name": "Eclipse Public License, Version 1.0",
+    "url": "http://repository.jboss.org/licenses/epl-1.0.txt",
+    "aliases": [
+      "Eclipse Public License, Version 1.0",
+      "Eclipse Public License 1.0",
+      "Eclipse Public License v1.0",
+      "Eclipse Public License - v 1.0",
+      "Eclipse Public License (EPL), Version 1.0"
+    ],
+    "urlAliases": [
+      "http://repository.jboss.org/licenses/epl-1.0.txt",
+      "http://www.eclipse.org/legal/epl-v10.html",
+      "http://www.eclipse.org/org/documents/epl-v10.php"
+    ]
+  },
+  {
+    "name": "Eclipse Distribution License, Version 1.0",
+    "url": "http://repository.jboss.org/licenses/edl-1.0.txt",
+    "textUrl": "http://repository.jboss.org/licenses/edl-1.0.txt",
+    "aliases": [
+      "Eclipse Distribution License, Version 1.0",
+      "Eclipse Distribution License (EDL), Version 1.0"
+    ],
+    "urlAliases": [
+      "http://repository.jboss.org/licenses/edl-1.0.txt",
+      "http://www.eclipse.org/org/documents/edl-v10.php"
+    ]
+  },
+  {
+    "name": "BSD 2-clause \"Simplified\" License",
+    "url": "https://opensource.org/licenses/BSD-2-Clause/",
+    "aliases": [
+      "BSD 2-clause \"Simplified\" License",
+      "BSD-2-Clause"
+    ],
+    "urlAliases": [
+      "http://www.opensource.org/licenses/BSD-2-Clause",
+      "https://opensource.org/licenses/BSD-2-Clause",
+      "http://www.opensource.org/licenses/bsd-license.php"
+    ]
+  },
+  {
+    "name": "BSD 3-clause \"New\" or \"Revised\" License",
+    "url": "https://opensource.org/licenses/BSD-3-Clause/",
+    "aliases": [
+      "BSD 3-clause \"New\" or \"Revised\" License",
+      "BSD 3-Clause",
+      "BSD 3-Clause License"
+    ],
+    "urlAliases": [
+      "https://opensource.org/licenses/BSD-3-Clause",
+      "http://www.opensource.org/licenses/BSD-3-Clause",
+      "http://opensource.org/licenses/BSD-3-Clause",
+      "http://www.antlr.org/license.html",
+      "http://dom4j.sourceforge.net/dom4j-1.6.1/license.html"
+    ]
+  },
+  {
+    "name": "The Asm BSD License",
+    "url": "http://asm.ow2.org/license.html",
+    "aliases": [
+      "The Asm BSD License"
+    ],
+    "urlAliases": [
+      "http://asm.ow2.org/license.html",
+      "http://asm.objectweb.org/license.html"
+    ]
+  },
+  {
+    "name": "Mozilla Public License 1.1",
+    "url": "https://www.mozilla.org/en-US/MPL/1.1/",
+    "aliases": [
+      "Mozilla Public License 1.1",
+      "MPL 1.1"
+    ],
+    "urlAliases": [
+      "http://www.mozilla.org/MPL/MPL-1.1.html",
+      "https://www.mozilla.org/en-US/MPL/1.1"
+    ]
+  },
+  {
+    "name": "Mozilla Public License 2.0",
+    "url": "https://www.mozilla.org/en-US/MPL/2.0/",
+    "aliases": [
+      "Mozilla Public License 2.0"
+    ],
+    "urlAliases": [
+      "https://www.mozilla.org/en-US/MPL/2.0",
+      "http://www.mozilla.org/MPL/2.0",
+      "https://www.mozilla.org/media/MPL/2.0/index.txt",
+      "http://www.mozilla.org/MPL/2.0/index.txt"
+    ]
+  },
+  {
+    "name": "JSON License",
+    "url": "http://www.json.org/license.html",
+    "aliases": [
+      "JSON License",
+      "The JSON License"
+    ],
+    "urlAliases": [
+      "http://www.json.org/license.html"
+    ]
+  },
+  {
+    "name": "Bouncy Castle Licence",
+    "url": "http://www.bouncycastle.org/licence.html",
+    "aliases": [
+      "Bouncy Castle Licence"
+    ],
+    "urlAliases": [
+      "http://www.bouncycastle.org/licence.html"
+    ]
+  },
+  {
+    "name": "Common Public License, Version 1.0",
+    "url": "https://opensource.org/licenses/CPL-1.0",
+    "aliases": [
+      "Common Public License, Version 1.0",
+      "Common Public License Version 1.0"
+    ],
+    "urlAliases": [
+      "https://opensource.org/licenses/CPL-1.0",
+      "http://opensource.org/licenses/CPL-1.0",
+      "http://www.opensource.org/licenses/cpl1.0.txt"
+    ]
+  },
+  {
+    "name": "The W3C License",
+    "url": "https://www.w3.org/Consortium/Legal/2002/copyright-software-20021231.html",
+    "aliases": [],
+    "urlAliases": [
+      "http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/java-binding.zip",
+      "https://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/java-binding.zip"
+    ]
+  },
+  {
+    "name": "Creative Commons Zero 1.0 Universal",
+    "url": "http://creativecommons.org/publicdomain/zero/1.0/legalcode",
+    "aliases": [
+      "CC0"
+    ],
+    "urlAliases": [
+      "http://creativecommons.org/publicdomain/zero/1.0"
+    ]
+  }
+]

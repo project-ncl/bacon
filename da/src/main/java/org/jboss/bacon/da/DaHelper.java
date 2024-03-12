@@ -17,6 +17,8 @@
  */
 package org.jboss.bacon.da;
 
+import com.redhat.resilience.otel.OTelCLIHelper;
+import io.opentelemetry.api.trace.Span;
 import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
 import org.jboss.bacon.da.rest.endpoint.ReportsApi;
@@ -31,6 +33,7 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -68,8 +71,11 @@ public class DaHelper {
             DaConfig daConfig = Config.instance().getActiveProfile().getDa();
             daUrl = Utils.generateUrlPath(daConfig.getUrl(), DA_PATH);
         }
-
-        return builder.build().target(daUrl);
+        ResteasyClient resteasyClient = builder.build();
+        if (OTelCLIHelper.otelEnabled()) {
+            resteasyClient.register(new CustomRestHeaderFilter(Span.current().getSpanContext()));
+        }
+        return resteasyClient.target(daUrl);
     }
 
     private static ResteasyWebTarget getAuthenticatedClient() {
@@ -101,22 +107,31 @@ public class DaHelper {
      *
      * @param temporary whether the artifact is a temporary one
      * @param managedService whether the artifact is targetting a managed service
+     * @param mode explicitly specify the mode to use
      *
      * @return appropriate mode
      */
-    public static String getMode(boolean temporary, boolean managedService) {
-        if (managedService) {
-            if (temporary) {
-                return "SERVICE_TEMPORARY";
+    public static String getMode(boolean temporary, boolean managedService, String mode) {
+        if (mode == null) {
+            if (managedService) {
+                if (temporary) {
+                    return "SERVICE_TEMPORARY";
+                } else {
+                    return "SERVICE";
+                }
             } else {
-                return "SERVICE";
+                if (temporary) {
+                    return "TEMPORARY";
+                } else {
+                    return "PERSISTENT";
+                }
             }
         } else {
-            if (temporary) {
-                return "TEMPORARY";
-            } else {
-                return "PERSISTENT";
+            if (temporary || managedService) {
+                throw new IllegalArgumentException(
+                        "Don't specify temporary or managed service when specifying mode explicitly.");
             }
+            return mode;
         }
     }
 

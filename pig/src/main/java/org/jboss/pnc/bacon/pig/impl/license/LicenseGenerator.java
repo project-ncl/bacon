@@ -18,12 +18,12 @@
 
 package org.jboss.pnc.bacon.pig.impl.license;
 
-import me.snowdrop.licenses.LicensesGenerator;
-import me.snowdrop.licenses.LicensesGeneratorException;
-import me.snowdrop.licenses.properties.GeneratorProperties;
-import me.snowdrop.licenses.utils.Gav;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
+import org.jboss.pnc.bacon.licenses.LicensesGenerator;
+import org.jboss.pnc.bacon.licenses.LicensesGeneratorException;
+import org.jboss.pnc.bacon.licenses.properties.GeneratorProperties;
+import org.jboss.pnc.bacon.licenses.utils.Gav;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
@@ -58,11 +58,13 @@ public class LicenseGenerator {
             Collection<GAV> gavs,
             File archiveFile,
             String topLevelDirectoryName,
-            boolean strict) {
+            boolean strict,
+            String exceptionsPath,
+            String namesPath) {
         File temporaryDestination = FileUtils.mkTempDir("licenses");
         File topLevelDirectory = new File(temporaryDestination, topLevelDirectoryName);
 
-        generateLicenses(gavs, topLevelDirectory, PigContext.get().isTempBuild(), strict);
+        generateLicenses(gavs, topLevelDirectory, PigContext.get().isTempBuild(), strict, exceptionsPath, namesPath);
         FileUtils.zip(archiveFile, temporaryDestination, topLevelDirectory);
         log.debug("Generated zip archive {}", archiveFile);
     }
@@ -71,9 +73,12 @@ public class LicenseGenerator {
             Collection<GAV> gavs,
             File licensesDirectory,
             boolean useTempBuilds,
-            boolean strict) {
+            boolean strict,
+            String exceptionsPath,
+            String namesPath) {
         try {
-            LicensesGenerator generator = new LicensesGenerator(prepareGeneratorProperties(useTempBuilds));
+            LicensesGenerator generator = new LicensesGenerator(
+                    prepareGeneratorProperties(useTempBuilds, exceptionsPath, namesPath));
 
             generator.generateLicensesForGavs(gavsToLicenseGeneratorGavs(gavs), licensesDirectory.getAbsolutePath());
             // Checking if the URL for licenses are present and are valid
@@ -128,7 +133,10 @@ public class LicenseGenerator {
                 .collect(Collectors.toList());
     }
 
-    private static GeneratorProperties prepareGeneratorProperties(boolean useTempBuilds) {
+    private static GeneratorProperties prepareGeneratorProperties(
+            boolean useTempBuilds,
+            String exceptionsPath,
+            String namesPath) {
         Properties props = new Properties();
         PigConfig pig = Config.instance().getActiveProfile().getPig();
         String licenseServiceUrl = pig.getLicenseServiceUrl();
@@ -151,6 +159,11 @@ public class LicenseGenerator {
                 "license-generator",
                 ".properties",
                 props);
+        GeneratorProperties genProp = new GeneratorProperties(propertiesFile.getAbsolutePath());
+        if (exceptionsPath != null)
+            genProp.setExceptionsFilePath(exceptionsPath);
+        if (namesPath != null)
+            genProp.setAliasesFilePath(namesPath);
         return new GeneratorProperties(propertiesFile.getAbsolutePath());
     }
 }

@@ -28,11 +28,13 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.OperationClient;
 import org.jboss.pnc.client.ProductMilestoneClient;
 import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -65,13 +67,16 @@ import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.parseDateFormat;
                 ProductMilestoneCli.PerformedBuilds.class,
                 ProductMilestoneCli.MilestoneClose.class,
                 ProductMilestoneCli.AnalyzeDeliverables.class,
-                ProductMilestoneCli.ListDeliveredArtifacts.class })
+                ProductMilestoneCli.ListDeliveredArtifacts.class,
+                ProductMilestoneCli.GetDeliverableAnalysisOperation.class })
 public class ProductMilestoneCli {
 
     private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(
             ProductMilestoneClient::new);
     private static final ClientCreator<ProductVersionClient> VERSION_CREATOR = new ClientCreator<>(
             ProductVersionClient::new);
+
+    private static final ClientCreator<OperationClient> OPERATION_CREATOR = new ClientCreator<>(OperationClient::new);
 
     /**
      * Product Milestone version format is: <d>.<d>.<d>.<word> The first 2 digits must match the digit for the product
@@ -304,14 +309,17 @@ public class ProductMilestoneCli {
         }
     }
 
-    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables", hidden = true)
-    public static class AnalyzeDeliverables implements Callable<Integer> {
+    @Command(name = "analyze-deliverables", description = "Start analysis of deliverables")
+    public static class AnalyzeDeliverables extends JSONCommandHandler implements Callable<Integer> {
 
         @Parameters(description = "Milestone id")
         private String id;
 
-        @Option(names = "--source-link", required = true, description = "Source link to add, can add multiple links")
-        private List<URL> sourceLink;
+        @Option(
+                names = "--deliverables-link",
+                required = true,
+                description = "Link to deliverables to be analysed, can add multiple links")
+        private List<URL> deliverablesLink;
 
         /**
          * Computes a result, or throws an exception if unable to do so.
@@ -323,18 +331,17 @@ public class ProductMilestoneCli {
         public Integer call() throws Exception {
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
-                        .sourcesLink(sourceLink.stream().map(URL::toString).collect(Collectors.toList()))
+                        .deliverablesUrls(deliverablesLink.stream().map(URL::toString).collect(Collectors.toList()))
                         .build();
-                client.analyzeDeliverables(id, deliverablesAnalysisRequest);
+                DeliverableAnalyzerOperation deliverableAnalyzerOperation = client
+                        .analyzeDeliverables(id, deliverablesAnalysisRequest);
+                ObjectHelper.print(getJsonOutput(), deliverableAnalyzerOperation);
                 return 0;
             }
         }
     }
 
-    @Command(
-            name = "list-delivered-artifacts",
-            description = "List artifacts delivered in the specified milestone",
-            hidden = true)
+    @Command(name = "list-delivered-artifacts", description = "List artifacts delivered in the specified milestone")
     public static class ListDeliveredArtifacts extends AbstractListCommand<Artifact> {
 
         @Parameters(description = "Milestone id")
@@ -344,6 +351,18 @@ public class ProductMilestoneCli {
         public Collection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
             try (ProductMilestoneClient client = CREATOR.newClient()) {
                 return client.getDeliveredArtifacts(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
+            }
+        }
+    }
+
+    @Command(name = "get-deliverables-analysis", description = "Get a deliverables analysis operation status")
+    public static class GetDeliverableAnalysisOperation
+            extends AbstractGetSpecificCommand<DeliverableAnalyzerOperation> {
+
+        @Override
+        public DeliverableAnalyzerOperation getSpecific(String id) throws ClientException {
+            try (OperationClient client = OPERATION_CREATOR.newClient()) {
+                return client.getSpecificDeliverableAnalyzer(id);
             }
         }
     }

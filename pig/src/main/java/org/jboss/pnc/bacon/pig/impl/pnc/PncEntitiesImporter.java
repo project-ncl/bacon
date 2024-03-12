@@ -112,7 +112,7 @@ public class PncEntitiesImporter implements Closeable {
 
         milestone = pncConfigurator.getOrGenerateMilestone(version, PigContext.get().getFullVersion());
         pncConfigurator.markMilestoneCurrent(version, milestone);
-        buildGroup = getOrGenerateBuildGroup();
+        buildGroup = getUpdateOrGenerateBuildGroup(version);
 
         configs = getAddOrUpdateBuildConfigs(skipBranchCheck, temporaryBuild);
         checkForDeprecatedEnvironments(configs);
@@ -128,16 +128,17 @@ public class PncEntitiesImporter implements Closeable {
         try {
             Product product = maybeSingle(
                     productClient.getAll(empty(), findByNameQuery(this.pigConfiguration.getProduct().getName())))
-                            .orElseThrow(
-                                    () -> new RuntimeException(
-                                            "Error while retrieving current/latest Milestone. Product mentioned in build-config.yaml doesn't exist."));
+                    .orElseThrow(
+                            () -> new RuntimeException(
+                                    "Error while retrieving current/latest Milestone. Product mentioned in build-config.yaml doesn't exist."));
             ProductVersion productVersion = maybeSingle(
                     productClient.getProductVersions(
                             product.getId(),
                             empty(),
-                            query("version=='%s'", pigConfiguration.getMajorMinor()))).orElseThrow(
-                                    () -> new RuntimeException(
-                                            "Error while retrieving current/latest Milestone. Product Version mentioned in build-config.yaml doesn't exist for the Product."));
+                            query("version=='%s'", pigConfiguration.getMajorMinor())))
+                    .orElseThrow(
+                            () -> new RuntimeException(
+                                    "Error while retrieving current/latest Milestone. Product Version mentioned in build-config.yaml doesn't exist for the Product."));
 
             ProductMilestoneRef currentProductMilestone = productVersion.getCurrentProductMilestone();
             if (currentProductMilestone == null) {
@@ -393,6 +394,7 @@ public class PncEntitiesImporter implements Closeable {
         return builder.productVersion(version)
                 .parameters(buildConfig.getGenericParameters(null, false))
                 .name(buildConfig.getName())
+                .description(buildConfig.getDescription())
                 .project(project)
                 .environment(environment)
                 .scmRepository(repository)
@@ -485,9 +487,7 @@ public class PncEntitiesImporter implements Closeable {
         }
     }
 
-    private List<BuildConfiguration> dropConfigsFromInvalidVersion(
-            List<BuildConfiguration> currentConfigs,
-            List<BuildConfig> newConfigs) {
+    private void dropConfigsFromInvalidVersion(List<BuildConfiguration> currentConfigs, List<BuildConfig> newConfigs) {
         Map<String, BuildConfig> newConfigsByName = BuildConfig.mapByName(newConfigs);
 
         currentConfigs.stream().filter(config -> !newConfigsByName.containsKey(config.getName())).forEach(config -> {
@@ -499,33 +499,6 @@ public class PncEntitiesImporter implements Closeable {
                         "Failed to remove build config " + config.getId() + " from build group " + buildGroup.getId());
             }
         });
-
-        List<BuildConfiguration> incompatibleConfigs = currentConfigs.stream()
-                .filter(config -> newConfigsByName.containsKey(config.getName()))
-                .filter(config -> isModifiedInUnsupportedWay(config, newConfigsByName))
-                .collect(Collectors.toList());
-        if (!incompatibleConfigs.isEmpty()) {
-            throw new RuntimeException(
-                    "The following configurations should be updated "
-                            + "in an unsupported fashion, please drop or update them via PNC UI: " + incompatibleConfigs
-                            + ". Look above for the cause");
-        }
-        return incompatibleConfigs;
-    }
-
-    private boolean isModifiedInUnsupportedWay(
-            BuildConfiguration oldConfig,
-            Map<String, BuildConfig> newConfigsByName) {
-        String name = oldConfig.getName();
-        BuildConfig newConfig = newConfigsByName.get(name);
-        ProductVersionRef productVersion = oldConfig.getProductVersion();
-        boolean configMismatch = productVersion == null || !productVersion.getId().equals(version.getId());
-        if (configMismatch) {
-            log.warn(
-                    "Product version in the old config is different than the one in the new config for config {}",
-                    name);
-        }
-        return configMismatch || !newConfig.isUpgradableFrom(oldConfig);
     }
 
     private List<BuildConfiguration> getCurrentBuildConfigs() {
@@ -536,16 +509,30 @@ public class PncEntitiesImporter implements Closeable {
         }
     }
 
-    private GroupConfiguration getOrGenerateBuildGroup() {
+    private GroupConfiguration getUpdateOrGenerateBuildGroup(ProductVersion version) {
         Optional<GroupConfiguration> buildConfigSetId = getBuildGroup();
+        if (buildConfigSetId.isPresent()) {
+            GroupConfiguration update = buildConfigSetId.get();
+            // if build config set has no product version or if the product version doesn't match the one in the
+            // build-config.yaml: update it
+            if (update.getProductVersion() == null || !update.getProductVersion().equals(version)) {
+                update = update.toBuilder().productVersion(version).build();
+                try {
+                    groupConfigClient.update(update.getId(), update);
+                    buildConfigSetId = Optional.of(update);
+                } catch (ClientException e) {
+                    throw new RuntimeException("Failed to update group config: " + pigConfiguration.getGroup());
+                }
+            }
+        }
         return buildConfigSetId.orElseGet(() -> generateBuildGroup(version));
     }
 
-    private Optional<GroupConfiguration> getBuildGroup() {
+    public Optional<GroupConfiguration> getBuildGroup() {
         try {
             return toStream(
                     groupConfigClient.getAll(empty(), Optional.of("name=='" + pigConfiguration.getGroup() + "'")))
-                            .findAny();
+                    .findAny();
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to check if build group exists");
         }
@@ -610,6 +597,8 @@ public class PncEntitiesImporter implements Closeable {
         Product product = Product.builder()
                 .name(productConfig.getName())
                 .abbreviation(productConfig.getAbbreviation())
+                .productManagers(productConfig.getProductManagers())
+                .productPagesCode(productConfig.getProductPagesCode())
                 .build();
         try {
             return productClient.createNew(product);

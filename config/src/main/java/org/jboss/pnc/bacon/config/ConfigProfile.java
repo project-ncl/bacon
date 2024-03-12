@@ -31,6 +31,7 @@ public class ConfigProfile {
     private IndyConfig indy;
     private PigConfig pig;
     private KeycloakConfig keycloak;
+    private boolean enableExperimental;
 
     private Map<String, Map<String, ?>> addOns;
 }

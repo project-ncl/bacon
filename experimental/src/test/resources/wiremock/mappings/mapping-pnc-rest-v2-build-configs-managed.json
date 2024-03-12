@@ -1,0 +1,21 @@
+{
+  "id" : "abc456da-0007-3dd2-ae5b-1ce6ad56774a",
+  "request" : {
+    "url" : "/pnc-rest/v2/build-configs?pageSize=50&pageIndex=0&q=name%3D%3Dfoo.bar-managed-1.2.3-AUTOBUILDER",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-pnc-rest-v2-build-configs-managed.json",
+    "headers" : {
+      "access-control-allow-headers" : "accept, authorization,  content-type, x-requested-with",
+      "date" : "Tue, 20 Dec 2022 19:21:34 GMT",
+      "access-control-allow-origin" : "*",
+      "access-control-allow-credentials" : "true",
+      "content-type" : "application/json",
+      "access-control-max-age" : "1",
+      "access-control-allow-methods" : "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+    }
+  },
+  "uuid" : "abc456da-0007-3dd2-ae5b-1ce6ad56774a"
+}

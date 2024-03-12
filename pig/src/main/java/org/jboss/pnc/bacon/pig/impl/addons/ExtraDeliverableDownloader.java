@@ -42,7 +42,7 @@ public class ExtraDeliverableDownloader extends AddOn {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "extraDeliverablesDownloader";
     }
 

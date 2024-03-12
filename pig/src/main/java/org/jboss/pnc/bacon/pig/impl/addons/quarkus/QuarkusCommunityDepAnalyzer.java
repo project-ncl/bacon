@@ -16,7 +16,10 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.eclipse.aether.util.artifact.JavaScopes;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.CommunityDepAnalyzer;
@@ -94,7 +97,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return NAME;
     }
 
@@ -134,18 +137,23 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
                 if (skippedExtensions.contains(extension.getArtifactId())) {
                     continue;
                 }
-                DependencyResult dependencyResult = mvnResolver.resolveManagedDependencies(
-                        new DefaultArtifact(
-                                extension.getGroupId(),
-                                extension.getArtifactId(),
-                                extension.getPackaging(),
-                                extension.getVersion()), // runtime extension artifact
-                        Collections.emptyList(), // enforced direct dependencies, ignore this
-                        Collections.emptyList(), // enforced direct dependencies, ignore this
-                        Collections.emptyList(), // extra maven repos, ignore this
-                        "test",
-                        "provided" // dependency scopes that should be ignored
-                );
+                DependencyResult dependencyResult = mvnResolver.getSystem()
+                        .resolveDependencies(
+                                mvnResolver.getSession(),
+                                new DependencyRequest().setCollectRequest(
+                                        mvnResolver.newCollectManagedRequest(
+                                                new DefaultArtifact(
+                                                        extension.getGroupId(),
+                                                        extension.getArtifactId(),
+                                                        extension.getPackaging(),
+                                                        extension.getVersion()), // runtime extension artifact
+                                                List.of(), // enforced direct dependencies, ignore this
+                                                List.of(), // enforced direct dependencies, ignore this
+                                                List.of(), // extra maven repos, ignore this
+                                                List.of(), // exclusions
+                                                Set.of(JavaScopes.TEST, JavaScopes.PROVIDED) // dependency scopes that
+                                                                                             // should be ignored
+                                        )));
 
                 collectNonOptionalDependencies(
                         dependencyResult.getRoot(),
@@ -172,7 +180,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write problematic dependencies to the output file", e);
             }
-        } catch (BootstrapMavenException e) {
+        } catch (BootstrapMavenException | DependencyResolutionException e) {
             throw new RuntimeException("Failed to analyze community dependencies of Quarkus", e);
         }
     }

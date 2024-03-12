@@ -51,7 +51,7 @@ public abstract class AddOn {
         return pigConfiguration.getAddons().get(getName());
     }
 
-    protected abstract String getName();
+    public abstract String getName();
 
     public abstract void trigger();
 }

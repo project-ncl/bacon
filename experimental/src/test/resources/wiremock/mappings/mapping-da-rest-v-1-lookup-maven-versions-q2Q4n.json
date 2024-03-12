@@ -1,0 +1,26 @@
+{
+  "id" : "830e40d1-6670-3c13-8b00-2a0e27e84219",
+  "request" : {
+    "url" : "/da/rest/v-1/lookup/maven/versions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"filter\":\"ALL\",\"distanceRule\":\"CLOSEST_BY_PARTS\",\"mode\":\"PERSISTENT\",\"artifacts\":[{\"groupId\":\"toplevel-two\",\"artifactId\":\"bar\",\"version\":\"2.3.4\"},{\"groupId\":\"toplevel-two\",\"artifactId\":\"foo\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-two\",\"artifactId\":\"bar\",\"version\":\"2.3.4\"},{\"groupId\":\"toplevel-one\",\"artifactId\":\"bar\",\"version\":\"2.3.4\"},{\"groupId\":\"toplevel-two\",\"artifactId\":\"baz\",\"version\":\"2.3.4\"},{\"groupId\":\"toplevel-one\",\"artifactId\":\"foo\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-one\",\"artifactId\":\"foo\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-two\",\"artifactId\":\"baz\",\"version\":\"2.3.4\"},{\"groupId\":\"toplevel-one\",\"artifactId\":\"baz\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-common\",\"artifactId\":\"foo\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-common\",\"artifactId\":\"bar\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-one\",\"artifactId\":\"bar\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-two\",\"artifactId\":\"foo\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-common\",\"artifactId\":\"baz\",\"version\":\"2.3.4\"},{\"groupId\":\"dependency-one\",\"artifactId\":\"baz\",\"version\":\"2.3.4\"}],\"includeBad\":false,\"brewPullActive\":false}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-da-rest-v-1-lookup-maven-versions-q2Q4n.json",
+    "headers" : {
+      "access-control-allow-headers" : "accept, authorization,  content-type, x-requested-with",
+      "date" : "Tue, 20 Dec 2022 19:10:32 GMT",
+      "access-control-allow-origin" : "*",
+      "access-control-allow-credentials" : "true",
+      "content-type" : "application/json",
+      "access-control-max-age" : "1",
+      "access-control-allow-methods" : "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+    }
+  },
+  "uuid" : "830e40d1-6670-3c13-8b00-2a0e27e84219"
+}

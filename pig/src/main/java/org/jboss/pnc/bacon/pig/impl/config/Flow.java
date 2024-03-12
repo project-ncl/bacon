@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerationData;
 import org.jboss.pnc.bacon.pig.impl.validation.GenerationDataCheck;
@@ -27,6 +28,7 @@ import org.jboss.pnc.bacon.pig.impl.validation.GenerationDataCheck;
  *         Date: 11/28/17
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Flow {
     private @GenerationDataCheck LicenseGenerationData licensesGeneration;
 

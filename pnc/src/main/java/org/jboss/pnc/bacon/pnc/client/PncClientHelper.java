@@ -18,8 +18,7 @@
 package org.jboss.pnc.bacon.pnc.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.bacon.auth.DirectKeycloakClientImpl;
-import org.jboss.pnc.bacon.auth.KeycloakClientException;
+import org.jboss.pnc.bacon.auth.KeycloakClientImpl;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -81,15 +80,21 @@ public class PncClientHelper {
                 port = uri.getPort();
             }
 
-            Configuration configuration = Configuration.builder()
+            Configuration.ConfigurationBuilder builder = Configuration.builder()
                     .protocol(uri.getScheme())
                     .port(port)
                     .host(uri.getHost())
                     .bearerToken(bearerToken)
                     .pageSize(50)
-                    .build();
+                    .addDefaultMdcToHeadersMappings();
+
+            if (authenticationNeeded && keycloakConfig != null) {
+                builder = builder.bearerTokenSupplier(() -> getBearerToken(keycloakConfig));
+            }
+            Configuration configuration = builder.build();
 
             printBannerIfNecessary(configuration);
+
             return configuration;
 
         } catch (URISyntaxException e) {
@@ -109,7 +114,7 @@ public class PncClientHelper {
 
         try {
 
-            KeycloakClient client = new DirectKeycloakClientImpl();
+            KeycloakClient client = new KeycloakClientImpl();
 
             Credential credential;
 
@@ -125,11 +130,12 @@ public class PncClientHelper {
                         keycloakConfig.getRealm(),
                         keycloakConfig.getClientId(),
                         keycloakConfig.getUsername());
+
             }
 
             return credential.getAccessToken();
 
-        } catch (KeycloakClientException e) {
+        } catch (Exception e) {
             throw new FatalException("Keycloak authentication failed!", e);
         }
     }
@@ -145,7 +151,7 @@ public class PncClientHelper {
                     log.warn("***********************");
                 }
             } catch (RemoteResourceException e) {
-                log.error(e.getMessage());
+                log.error("Could not get announcements: " + e);
             }
 
             bannerChecked = true;
