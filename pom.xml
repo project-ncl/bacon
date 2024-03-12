@@ -902,37 +902,22 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>net.revelc.code</groupId>
-                <artifactId>impsort-maven-plugin</artifactId>
-                <version>1.8.0</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.22.8</version>
                 <configuration>
-                    <groups>*,javax.,java.</groups>
-                    <lineEnding>LF</lineEnding>
-                    <removeUnused>true</removeUnused>
-                    <staticAfter>true</staticAfter>
+                    <java>
+                        <removeUnusedImports />
+                        <eclipse>
+                            <file>eclipse-codeStyle.xml</file>
+                        </eclipse>
+                        <lineEndings>UNIX</lineEndings>
+                    </java>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>sort-imports</id>
                         <goals>
-                            <goal>sort</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.22.0</version>
-                <configuration>
-                    <configFile>../eclipse-codeStyle.xml</configFile>
-                    <lineEnding>LF</lineEnding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>java-format</id>
-                        <goals>
-                            <goal>format</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
