@@ -64,7 +64,7 @@ public class MavenProjectFactoryTest {
         when(
                 mockProjectBuilder
                         .build(eq(Collections.singletonList(mockFile)), eq(true), eq(mockProjectBuildingRequest)))
-                .thenReturn(Collections.singletonList(mockProjectBuildingResult));
+                                .thenReturn(Collections.singletonList(mockProjectBuildingResult));
         when(mockProjectBuildingResult.getProject()).thenReturn(mockMavenProject);
         when(mockMavenProject.getFile()).thenReturn(mockFile);
 
@@ -99,8 +99,8 @@ public class MavenProjectFactoryTest {
 
     @Test
     public void shouldNotGetProjectFromArtifactInCaseOfException() throws ProjectBuildingException {
-        when(mockProjectBuilder.build(any(Artifact.class), eq(mockProjectBuildingRequest))).thenThrow(
-                ProjectBuildingException.class);
+        when(mockProjectBuilder.build(any(Artifact.class), eq(mockProjectBuildingRequest)))
+                .thenThrow(ProjectBuildingException.class);
         Optional<MavenProject> mavenProjectOptional = mavenProjectFactory.getMavenProject(mockArtifact, true);
 
         assertThat(mavenProjectOptional.isPresent()).isFalse();
@@ -132,9 +132,10 @@ public class MavenProjectFactoryTest {
 
     @Test
     public void shouldGetMavenProjectsFromPomWithModules() throws ProjectBuildingException {
-        when(mockProjectBuilder.build(eq(Collections.singletonList(mockFile)), eq(true),
-                eq(mockProjectBuildingRequest))).thenReturn(
-                Arrays.asList(mockProjectBuildingResult, mockProjectBuildingResult));
+        when(
+                mockProjectBuilder
+                        .build(eq(Collections.singletonList(mockFile)), eq(true), eq(mockProjectBuildingRequest)))
+                                .thenReturn(Arrays.asList(mockProjectBuildingResult, mockProjectBuildingResult));
 
         List<MavenProject> mavenProjects = mavenProjectFactory.getMavenProjects(mockFile, true);
 
@@ -149,8 +150,10 @@ public class MavenProjectFactoryTest {
 
     @Test
     public void shouldNotGetProjectsFromPomInCaseOfException() throws ProjectBuildingException {
-        when(mockProjectBuilder.build(eq(Collections.singletonList(mockFile)), eq(true),
-                eq(mockProjectBuildingRequest))).thenThrow(ProjectBuildingException.class);
+        when(
+                mockProjectBuilder
+                        .build(eq(Collections.singletonList(mockFile)), eq(true), eq(mockProjectBuildingRequest)))
+                                .thenThrow(ProjectBuildingException.class);
         List<MavenProject> mavenProjects = mavenProjectFactory.getMavenProjects(mockFile, false);
 
         assertThat(mavenProjects).isEmpty();

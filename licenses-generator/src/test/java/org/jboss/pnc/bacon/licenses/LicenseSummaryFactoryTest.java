@@ -75,16 +75,13 @@ public class LicenseSummaryFactoryTest {
         assertThat(licenseSummary).isNotNull();
         assertThat(licenseSummary.getDependencies()).hasSize(1);
 
-        DependencyElement dependencyElement = licenseSummary.getDependencies()
-                .get(0);
+        DependencyElement dependencyElement = licenseSummary.getDependencies().get(0);
         assertThat(dependencyElement.getGroupId()).isEqualTo("testGroupId");
         assertThat(dependencyElement.getArtifactId()).isEqualTo("testArtifactId");
         assertThat(dependencyElement.getVersion()).isEqualTo("testVersion");
         assertThat(dependencyElement.getLicenses()).hasSize(1);
 
-        LicenseElement licenseElement = dependencyElement.getLicenses()
-                .iterator()
-                .next();
+        LicenseElement licenseElement = dependencyElement.getLicenses().iterator().next();
         assertThat(licenseElement.getName()).isEqualTo("testLicenseName");
         assertThat(licenseElement.getUrl()).isEqualTo("testLicenseUrl");
 

@@ -135,8 +135,7 @@ public class AliasLicenseSanitiserTest {
 
         List<LicenseElement> licenseElements = Arrays.asList(
                 new LicenseElement("Test License Alias", "http://test-license-alias.com"),
-                new LicenseElement("Unknown name", "http://unknown.com")
-        );
+                new LicenseElement("Unknown name", "http://unknown.com"));
 
         DependencyElement dependencyElement = new DependencyElement("", "", "", new HashSet<>(licenseElements));
         DependencyElement fixedDependencyElement = aliasLicenseSanitiser.fix(dependencyElement);
