@@ -101,7 +101,7 @@ public class BuildConfigGenerator {
         buildConfig.setEnvironmentName(config.getDefaultValues().getEnvironmentName());
         buildConfig.setName(name);
         buildConfig.setProject(gav.getGroupId() + "-" + gav.getArtifactId());
-        buildConfig.setDescription("Autobuild genearted config for " + gav);
+        buildConfig.setDescription("Autobuild generated config for " + gav);
         String scmUrl = processScmUrl(project.getSourceCodeURL());
         if (scmUrl == null) {
             setPlaceholderSCM(name, buildConfig);
