@@ -221,7 +221,7 @@ public class PncEntitiesImporter implements Closeable {
         try {
             buildConfigClient.addDependency(configId, dependency);
         } catch (RemoteResourceException e) {
-            throw new RuntimeException("Failed to add dependency " + dependency.getId() + " to " + configId, e);
+            throw new RuntimeException("Project " + dependency.getProject() + " build " + dependency.getName() + ", Failed to add dependency " + dependency.getId() + " to " + configId, e);
         }
     }
 
@@ -230,7 +230,7 @@ public class PncEntitiesImporter implements Closeable {
             buildConfigClient.removeDependency(buildConfigId, dependencyId);
         } catch (RemoteResourceException e) {
             throw new RuntimeException(
-                    "Failed to remove dependency" + dependencyId + " from config" + buildConfigId,
+                    "Failed to remove dependency " + dependencyId + " from config" + buildConfigId,
                     e);
         }
     }
