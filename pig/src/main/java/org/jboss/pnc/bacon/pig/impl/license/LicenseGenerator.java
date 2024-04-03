@@ -164,6 +164,6 @@ public class LicenseGenerator {
             genProp.setExceptionsFilePath(exceptionsPath);
         if (namesPath != null)
             genProp.setAliasesFilePath(namesPath);
-        return new GeneratorProperties(propertiesFile.getAbsolutePath());
+        return genProp;
     }
 }
