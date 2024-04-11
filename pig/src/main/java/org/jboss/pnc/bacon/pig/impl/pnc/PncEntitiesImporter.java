@@ -221,7 +221,10 @@ public class PncEntitiesImporter implements Closeable {
         try {
             buildConfigClient.addDependency(configId, dependency);
         } catch (RemoteResourceException e) {
-            throw new RuntimeException("Project " + dependency.getProject() + " build " + dependency.getName() + ", Failed to add dependency " + dependency.getId() + " to " + configId, e);
+            throw new RuntimeException(
+                    "Project " + dependency.getProject() + " build " + dependency.getName()
+                            + ", Failed to add dependency " + dependency.getId() + " to " + configId,
+                    e);
         }
     }
 
