@@ -31,7 +31,7 @@ public class Credential {
     private Instant refreshTokenExpiresIn;
 
     @JsonIgnore
-    public boolean isValid() {
+    public boolean isRefreshTokenValid() {
 
         if (accessToken == null || refreshToken == null || accessTokenExpiresIn == null
                 || refreshTokenExpiresIn == null) {
@@ -42,12 +42,13 @@ public class Credential {
         }
     }
 
-    public boolean needsNewAccessToken() {
+    @JsonIgnore
+    public boolean isAccessTokenValid() {
 
-        if (!isValid()) {
-            return true;
+        if (!isRefreshTokenValid()) {
+            return false;
         } else {
-            return Instant.now().until(accessTokenExpiresIn, ChronoUnit.MINUTES) < 1;
+            return Instant.now().until(accessTokenExpiresIn, ChronoUnit.MINUTES) > 1;
         }
     }
 

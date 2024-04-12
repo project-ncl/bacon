@@ -51,7 +51,7 @@ public class KeycloakClientImpl implements KeycloakClient {
         if (cachedCredential.isPresent()) {
 
             Credential cred = cachedCredential.get();
-            if (cred.isValid()) {
+            if (cred.isRefreshTokenValid()) {
                 Credential refreshed = cred;
                 keycloak = new KeycloakInstalled(
                         constructKeycloakSettings(
@@ -63,7 +63,7 @@ public class KeycloakClientImpl implements KeycloakClient {
                                 cred.getRefreshToken(),
                                 true));
                 try {
-                    if (cred.needsNewAccessToken()) {
+                    if (!cred.isAccessTokenValid()) {
                         keycloak.refreshToken(cred.getRefreshToken());
                         refreshed = tokenToCredential(keycloak, keycloakBaseUrl, client, realm);
                     }
@@ -71,7 +71,7 @@ public class KeycloakClientImpl implements KeycloakClient {
                     throw new KeycloakClientException(e);
                 }
 
-                if (!refreshed.needsNewAccessToken()) {
+                if (refreshed.isAccessTokenValid()) {
                     return refreshed;
                 } else {
                     /*
