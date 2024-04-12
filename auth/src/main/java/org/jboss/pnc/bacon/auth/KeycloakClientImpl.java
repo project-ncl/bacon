@@ -53,24 +53,33 @@ public class KeycloakClientImpl implements KeycloakClient {
             Credential cred = cachedCredential.get();
             if (cred.isRefreshTokenValid()) {
                 Credential refreshed = cred;
-                keycloak = new KeycloakInstalled(
-                        constructKeycloakSettings(
-                                realm,
-                                keycloakBaseUrl,
-                                client,
-                                false,
-
-                                cred.getRefreshToken(),
-                                true));
                 try {
                     if (!cred.isAccessTokenValid()) {
+                        log.debug("Refreshing access token");
+                        keycloak = new KeycloakInstalled(
+                                constructKeycloakSettings(
+                                        realm,
+                                        keycloakBaseUrl,
+                                        client,
+                                        false,
+
+                                        cred.getRefreshToken(),
+                                        true));
                         keycloak.refreshToken(cred.getRefreshToken());
                         refreshed = tokenToCredential(keycloak, keycloakBaseUrl, client, realm);
+
+                        // write refreshed credentials to cache file
+                        CacheFile.writeCredentialToCacheFile(
+                                keycloakBaseUrl,
+                                realm,
+                                keycloak.getToken().getPreferredUsername(),
+                                refreshed);
                     }
                 } catch (Exception e) {
                     throw new KeycloakClientException(e);
                 }
 
+                // we check if the token here (whether from cached or cached+refreshed) is valid again
                 if (refreshed.isAccessTokenValid()) {
                     return refreshed;
                 } else {
@@ -95,6 +104,8 @@ public class KeycloakClientImpl implements KeycloakClient {
             }
         }
 
+        // if we are here, there's either nothing in the cache file, or the refreshed token is not valid. let's get
+        // a new one
         if (keycloak == null) {
             keycloak = new KeycloakInstalled(
                     constructKeycloakSettings(realm, keycloakBaseUrl, client, true, null, false));

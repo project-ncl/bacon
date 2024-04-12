@@ -34,6 +34,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.function.Supplier;
 
 @Slf4j
 public class PncClientHelper {
@@ -41,6 +42,8 @@ public class PncClientHelper {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private static boolean bannerChecked = false;
+
+    private static PncClientTokenHolder pncClientTokenHolder;
 
     public static Configuration getPncConfiguration(boolean authenticationNeeded) {
         return setup(authenticationNeeded);
@@ -54,7 +57,6 @@ public class PncClientHelper {
         Config config = Config.instance();
 
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
-        String bearerToken = "";
 
         if (authenticationNeeded) {
             if (keycloakConfig == null) {
@@ -62,11 +64,6 @@ public class PncClientHelper {
             }
 
             keycloakConfig.validate();
-            bearerToken = getBearerToken(keycloakConfig);
-
-            if (bearerToken == null || bearerToken.isEmpty()) {
-                throw new FatalException("Credentials don't seem to be valid");
-            }
         }
 
         config.getActiveProfile().getPnc().validate();
@@ -84,12 +81,14 @@ public class PncClientHelper {
                     .protocol(uri.getScheme())
                     .port(port)
                     .host(uri.getHost())
-                    .bearerToken(bearerToken)
                     .pageSize(50)
                     .addDefaultMdcToHeadersMappings();
 
-            if (authenticationNeeded && keycloakConfig != null) {
-                builder = builder.bearerTokenSupplier(() -> getBearerToken(keycloakConfig));
+            if (authenticationNeeded) {
+                if (pncClientTokenHolder == null) {
+                    pncClientTokenHolder = new PncClientTokenHolder(() -> getCredential(keycloakConfig));
+                }
+                builder = builder.bearerTokenSupplier(() -> pncClientTokenHolder.getAccessToken());
             }
             Configuration configuration = builder.build();
 
@@ -103,12 +102,12 @@ public class PncClientHelper {
     }
 
     /**
-     * Return null if it couldn't get the authentication token. This generally means that the credentials are not valid
+     * Return credential based on keycloak config, making the choice between client secret auth or user auth
      *
      * @param keycloakConfig the keycloak config
      * @return the token, or null if we couldn't get it
      */
-    private static String getBearerToken(KeycloakConfig keycloakConfig) {
+    private static Credential getCredential(KeycloakConfig keycloakConfig) {
 
         log.debug("Authenticating to keycloak");
 
@@ -133,7 +132,7 @@ public class PncClientHelper {
 
             }
 
-            return credential.getAccessToken();
+            return credential;
 
         } catch (Exception e) {
             throw new FatalException("Keycloak authentication failed!", e);
@@ -175,5 +174,29 @@ public class PncClientHelper {
 
     public static String getTodayDayInYYYYMMDDFormat() {
         return sdf.format(new Date());
+    }
+
+    /**
+     * Private static class to contain the logic to automatically get a new access token when necessary
+     */
+    private static class PncClientTokenHolder {
+        Credential cached;
+        Supplier<Credential> credentialSupplier;
+
+        PncClientTokenHolder(Supplier<Credential> credentialSupplier) {
+            this.credentialSupplier = credentialSupplier;
+        }
+
+        public String getAccessToken() {
+            if (cached == null || !cached.isAccessTokenValid()) {
+                log.debug("Getting or Refreshing access token!");
+                cached = credentialSupplier.get();
+                if (cached.getAccessToken() == null || cached.getAccessToken().isEmpty()) {
+                    throw new FatalException("Credentials don't seem to be valid");
+                }
+            }
+
+            return cached.getAccessToken();
+        }
     }
 }
