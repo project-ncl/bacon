@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.repo;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
@@ -143,6 +144,12 @@ public class RepoBuilder {
         }
         repoDir.mkdirs();
         String baseCmd = cmd + " -s %s -Dmaven.repo.local=%s";
+
+        if (!ObjectHelper.isLogDebug()) {
+            // run in quiet mode for info
+            baseCmd += " -q";
+        }
+
         String command = String.format(baseCmd, settingsXml, repoDir.getAbsolutePath());
         List<String> output = OSCommandExecutor.runCommandIn(command, projectLocation.toPath());
         if (output.stream().anyMatch(line -> line.contains("BUILD SUCCESS"))) {

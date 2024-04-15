@@ -60,4 +60,16 @@ class ObjectHelperTest {
         ObjectHelper.setLoggingLevel("test", Level.ERROR);
         assertSame(Level.ERROR, logger.getLevel());
     }
+
+    @Test
+    void isLogDebug() {
+        ObjectHelper.setRootLoggingLevel(Level.INFO);
+        assertFalse(ObjectHelper.isLogDebug());
+
+        ObjectHelper.setRootLoggingLevel(Level.DEBUG);
+        assertTrue(ObjectHelper.isLogDebug());
+
+        ObjectHelper.setRootLoggingLevel(Level.TRACE);
+        assertTrue(ObjectHelper.isLogDebug());
+    }
 }

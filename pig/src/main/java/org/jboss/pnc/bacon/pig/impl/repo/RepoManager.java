@@ -40,6 +40,7 @@ import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.listener.ChainedRepositoryListener;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
@@ -461,15 +462,19 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         try {
             log.info("Generating maven repository");
             final File sourceDir = createMavenGenerationDir();
+
             final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
                     .setUserSettings(getIndyMavenSettings())
                     .setLocalRepository(sourceDir.getAbsolutePath())
+                    .setArtifactTransferLogging(ObjectHelper.isLogDebug())
                     .build();
             final Comparator<Artifact> artifactComparator = Comparator.comparing(Artifact::getGroupId)
                     .thenComparing(Artifact::getArtifactId)
                     .thenComparing(Artifact::getExtension)
                     .thenComparing(Artifact::getClassifier)
                     .thenComparing(Artifact::getVersion);
+
+            log.info("Downloading artifacts");
             if (generationData.getSteps().isEmpty()) {
                 resolveAndRepackage(generationData, sourceDir, mvnResolver, artifactComparator);
             } else {
