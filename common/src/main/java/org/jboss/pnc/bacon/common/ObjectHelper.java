@@ -42,6 +42,12 @@ public class ObjectHelper {
         root.setLevel(level);
     }
 
+    public static boolean isLogDebug() {
+        ch.qos.logback.classic.Logger root = getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        // INFO has level 20,000, DEBUG has level 10,000
+        return root.getLevel().levelInt <= Level.DEBUG_INT;
+    }
+
     public static void setLoggingLevel(String loggerName, Level level) {
         ch.qos.logback.classic.Logger logger = getLogger(loggerName);
         logger.setLevel(level);
