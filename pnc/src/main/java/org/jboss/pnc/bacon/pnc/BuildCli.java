@@ -27,6 +27,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.client.BuildClient;
@@ -45,9 +46,12 @@ import picocli.CommandLine.Parameters;
 
 import javax.ws.rs.core.Response;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -306,10 +310,15 @@ public class BuildCli {
          */
         @Override
         public Integer call() throws Exception {
-            String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
-            URI bifrostUri = URI.create(bifrostBase);
-            BifrostClient logProcessor = new BifrostClient(bifrostUri);
-            logProcessor.writeLog(buildId, false, log::info, BifrostClient.LogType.ALIGNMENT);
+            try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+                Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
+                if (streamLogs.isPresent()) {
+                    for (String line : new BufferedReader(
+                            new InputStreamReader(streamLogs.get(), StandardCharsets.UTF_8)).lines().toList()) {
+                        log.info(line);
+                    }
+                }
+            }
             return 0;
         }
     }
