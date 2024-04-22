@@ -806,6 +806,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
             dependencyInspector.complete();
         }
+        summary.assertNoErrors();
     }
 
     /**
@@ -924,22 +925,22 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             boolean jarResolved = resolved.isFlagSet(ResolvedGav.JAR_RESOLVED);
             var gav = resolved.getGav();
             if (!jarResolved) {
-                if (resolved.isPackagingJar()) {
-                    var jar = new DefaultArtifact(
-                            gav.getGroupId(),
-                            gav.getArtifactId(),
-                            ArtifactCoords.TYPE_JAR,
-                            gav.getVersion());
-                    try {
+                try {
+                    if (resolved.isPackagingJar()) {
+                        var jar = new DefaultArtifact(
+                                gav.getGroupId(),
+                                gav.getArtifactId(),
+                                ArtifactCoords.TYPE_JAR,
+                                gav.getVersion());
                         resolver.resolve(jar);
                         summary.addJarAccompanyingOrphanedPom(
                                 ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), gav.getVersion()));
-                    } catch (Exception e) {
-                        summary.addFailedToResolveJarAccompanyingOrphanedPom(
-                                ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), gav.getVersion()),
-                                e);
+                        jarResolved = true;
                     }
-                    jarResolved = true;
+                } catch (Exception e) {
+                    summary.addFailedToResolveJarAccompanyingOrphanedPom(
+                            ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), gav.getVersion()),
+                            e);
                 }
             }
             if (jarResolved && !resolved.isFlagSet(ResolvedGav.SOURCES_RESOLVED)) {
@@ -963,23 +964,24 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
             // delete _remote.repositories
             final Path artifactDir = resolved.getArtifactDirectory();
-            var remoteRepos = artifactDir.resolve("_remote.repositories");
-            try {
-                Files.deleteIfExists(remoteRepos);
-            } catch (IOException e) {
-                log.warn("Failed to delete " + remoteRepos, e);
-            }
-            // delete .lastUpdated
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(artifactDir)) {
-                for (var file : stream) {
-                    if (file.getFileName().toString().endsWith(".lastUpdated")) {
-                        Files.delete(file);
-                    }
+            if (artifactDir != null) {
+                var remoteRepos = artifactDir.resolve("_remote.repositories");
+                try {
+                    Files.deleteIfExists(remoteRepos);
+                } catch (IOException e) {
+                    log.warn("Failed to delete " + remoteRepos, e);
                 }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                // delete .lastUpdated
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(artifactDir)) {
+                    for (var file : stream) {
+                        if (file.getFileName().toString().endsWith(".lastUpdated")) {
+                            Files.delete(file);
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             }
-
             // generate md5 and sha1 checksums
             final List<CompletableFuture<Void>> checksums = new ArrayList<>(resolved.getArtifacts().size());
             for (var a : resolved.getArtifacts()) {
@@ -999,6 +1001,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         // remove community content
         return CompletableFuture.runAsync(() -> {
             var parent = resolved.getArtifactDirectory();
+            if (parent == null) {
+                return;
+            }
             try {
                 try (DirectoryStream<Path> stream = Files.newDirectoryStream(parent)) {
                     for (var file : stream) {
@@ -1128,6 +1133,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             progressTracker.setTotal(additionalArtifacts.size());
             CompletableFuture.allOf(additionalArtifacts.toArray(new CompletableFuture<?>[0])).join();
         }
+        summary.assertNoErrors();
     }
 
     /**
