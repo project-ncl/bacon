@@ -187,16 +187,16 @@ public class GAV {
 
     public static GAV fromColonSeparatedGAV(String colonSeparatedGav) {
         String[] split = colonSeparatedGav.split(":");
-        return new GAV(split[0], split[1], split[2], null);
+        return new GAV(split[0].trim(), split[1].trim(), split[2].trim(), null);
     }
 
     public static GAV fromColonSeparatedGAPV(String colonSeparatedGav) {
         String[] split = colonSeparatedGav.split(":");
         switch (split.length) {
             case 4:
-                return new GAV(split[0], split[1], split[3], split[2]);
+                return new GAV(split[0].trim(), split[1].trim(), split[3].trim(), split[2].trim());
             case 5:
-                return new GAV(split[0], split[1], split[3], split[2], split[4]);
+                return new GAV(split[0].trim(), split[1].trim(), split[3].trim(), split[2].trim(), split[4].trim());
             default:
                 throw new RuntimeException(
                         "Error parsing gav: " + colonSeparatedGav
