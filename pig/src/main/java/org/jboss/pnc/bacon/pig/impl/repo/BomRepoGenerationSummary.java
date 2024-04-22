@@ -56,22 +56,10 @@ class BomRepoGenerationSummary {
         jarsFailedToResolvedForOrphanedPoms.add(new ResolutionFailure(coords, e));
     }
 
-    void logSummary() {
-
-        if (!missingSources.isEmpty()) {
-            log.warn("= Sources JARs failed to resolve =");
-            for (var a : missingSources) {
-                log.warn(a.toCompactCoords());
-            }
-        }
-
-        if (!jarsFailedToResolvedForOrphanedPoms.isEmpty()) {
-            log.warn("= JARs for orphaned POMs failed to resolve =");
-            for (var a : jarsFailedToResolvedForOrphanedPoms) {
-                log.warn(a.coords.toCompactCoords());
-            }
-        }
-
+    /**
+     * Checks whether there have been failures and if so, logs them and throws a {@link RuntimeException}
+     */
+    void assertNoErrors() {
         boolean failed = false;
         if (!failedToResolveAdditionalArtifacts.isEmpty()) {
             failed = true;
@@ -97,16 +85,38 @@ class BomRepoGenerationSummary {
             }
         }
 
+        if (failed) {
+            throw new RuntimeException("Maven repository generation failed, please see the summary logged above");
+        }
+    }
+
+    /**
+     * Logs a summary of the performed operations, including warnings and errors by calling {@link #assertNoErrors()} at
+     * the end.
+     */
+    void logSummary() {
+
+        if (!missingSources.isEmpty()) {
+            log.warn("= Sources JARs failed to resolve =");
+            for (var a : missingSources) {
+                log.warn(a.toCompactCoords());
+            }
+        }
+
+        if (!jarsFailedToResolvedForOrphanedPoms.isEmpty()) {
+            log.warn("= JARs for orphaned POMs failed to resolve =");
+            for (var a : jarsFailedToResolvedForOrphanedPoms) {
+                log.warn(a.coords.toCompactCoords());
+            }
+        }
+
         if (!jarsAccompanyingOrphanedPoms.isEmpty()) {
             log.info("= JARs added to accompany orphaned POMs =");
             for (var a : jarsAccompanyingOrphanedPoms) {
                 log.info(a.toCompactCoords());
             }
         }
-
-        if (failed) {
-            throw new RuntimeException("Maven repository generation failed, please see the summary logged above");
-        }
+        assertNoErrors();
     }
 
     static class ResolutionFailure {

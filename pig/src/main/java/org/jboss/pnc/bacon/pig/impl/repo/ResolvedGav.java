@@ -42,7 +42,7 @@ public class ResolvedGav {
     }
 
     Path getArtifactDirectory() {
-        return artifacts.get(0).getFile().toPath().getParent();
+        return artifacts.isEmpty() ? null : artifacts.get(0).getFile().toPath().getParent();
     }
 
     boolean isPackagingJar() {
@@ -54,7 +54,7 @@ public class ResolvedGav {
             }
         }
         if (pom == null) {
-            throw new RuntimeException("Failed to locate POM for " + gav);
+            throw new RuntimeException("POM for " + gav + " was not resolved");
         }
         try (FileInputStream is = new FileInputStream(pom)) {
             var model = ModelUtils.readModel(is);
