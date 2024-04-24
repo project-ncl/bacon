@@ -29,7 +29,6 @@ import org.jboss.pnc.bacon.pig.impl.validation.ListBuildConfigCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -241,10 +240,10 @@ public class PigConfiguration implements Validate {
             buildVarsOverrides = Collections.emptyMap();
         }
 
-        Yaml yaml = new Yaml(new Constructor(PigConfiguration.class));
+        Yaml yaml = new Yaml();
 
         try (InputStream in = preProcess(configStream, buildVarsOverrides)) {
-            PigConfiguration pigConfiguration = (PigConfiguration) yaml.load(in);
+            PigConfiguration pigConfiguration = yaml.loadAs(in, PigConfiguration.class);
             pigConfiguration.init();
             return pigConfiguration;
         } catch (IOException e) {
