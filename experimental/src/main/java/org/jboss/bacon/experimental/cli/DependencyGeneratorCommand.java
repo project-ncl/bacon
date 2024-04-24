@@ -4,7 +4,6 @@ import org.jboss.bacon.experimental.impl.config.GeneratorConfig;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Validate;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import picocli.CommandLine;
 
 import javax.validation.ConstraintViolation;
@@ -36,9 +35,9 @@ public class DependencyGeneratorCommand extends ExperimentalCommand {
             throw new FatalException("You need to specify the configuration directory!");
         }
 
-        Yaml yaml = new Yaml(new Constructor(GeneratorConfig.class));
+        Yaml yaml = new Yaml();
         try (BufferedReader reader = Files.newBufferedReader(config)) {
-            GeneratorConfig config = yaml.load(reader);
+            GeneratorConfig config = yaml.loadAs(reader, GeneratorConfig.class);
             validate(config);
             return config;
         } catch (IOException e) {
