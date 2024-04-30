@@ -21,6 +21,7 @@ import org.jboss.da.lookup.model.MavenLookupRequest;
 import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
 
@@ -29,6 +30,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +57,13 @@ public class DependencyResolver {
 
     private void setupConfig(ProjectDependencyConfig.Mutable dominoConfig) {
         config.getExcludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
+        DependencyExcluder dependencyExcluder = new DependencyExcluder(Config.instance().getActiveProfile().getDa());
+        final String[] excludedGavs = DependencyExcluder.getExcludedGavs(dependencyExcluder.fetchExclusionFile());
+        log.info("There are {} dependencies to be excluded", excludedGavs.length);
+        Arrays.stream(excludedGavs)
+                .iterator()
+                .forEachRemaining(excludedGav -> dominoConfig.addExcludePattern(GACTVParser.parse(excludedGav)));
+        log.info("Analyzed project and found {} dependencies", dominoConfig.getExcludePatterns().size());
         config.getIncludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addIncludePattern);
         Set<ArtifactCoords> artifacts = config.getAnalyzeArtifacts()
                 .stream()
