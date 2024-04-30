@@ -27,8 +27,11 @@ import lombok.Data;
 public class DaConfig implements Validate {
     private String url;
 
+    private String gavExclusionUrl;
+
     @Override
     public void validate() {
         Validate.validateUrl(url, "Dependency Analysis URL");
+        Validate.validateUrl(gavExclusionUrl, "GAV Exclusion URL");
     }
 }
