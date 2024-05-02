@@ -80,6 +80,7 @@ public class ProjectFinderTest {
         GAV gav = new GAV("com.sun.xml.bind", "jaxb-bom-ext", "2.3.3-b02");
         Project project = new Project();
         project.setGavs(Set.of(gav));
+        project.setName("com.sun.xml.bind-jaxb-bom-ext-2.3.3-b02-AUTOBUILDER");
         project.setDependencies(Set.of());
         project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
         project.setSourceCodeRevision("2.3.3-b02-RI");
@@ -98,8 +99,6 @@ public class ProjectFinderTest {
 
     @Test
     public void shouldReuseAutobuilderConfig() throws RemoteResourceException {
-        config.setReuseAutobuilderConfigs(true);
-
         GAV gav = new GAV("foo.bar", "managed", "1.2.3");
         Project project = new Project();
         project.setGavs(Set.of(gav));
@@ -213,6 +212,7 @@ public class ProjectFinderTest {
     private Project generateProject(String groupId) {
         Project p = new Project();
         p.setGavs(generateGavs(groupId));
+        p.setName(groupId + "-bar-2.3.4-AUTOBUILDER");
         p.setDependencies(new HashSet<>());
         p.setSourceCodeURL("https://git.example.com/" + groupId + ".git");
         return p;

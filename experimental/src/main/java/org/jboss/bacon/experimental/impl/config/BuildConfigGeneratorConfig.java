@@ -60,9 +60,4 @@ public class BuildConfigGeneratorConfig {
      * defined by environmentName would not be found because it was deprecated.
      */
     private boolean allowDeprecatedEnvironments = false;
-
-    /**
-     * If true, will reuse existing autobuilder managed configs without change.
-     */
-    private boolean reuseAutobuilderConfigs = false;
 }
