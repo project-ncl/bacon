@@ -80,10 +80,7 @@ public class ProjectFinder {
 
         FoundProjects foundProjects = new FoundProjects();
         for (Project project : projects) {
-            FoundProject foundProject = null;
-            if (config.isReuseAutobuilderConfigs()) {
-                foundProject = findManagedProject(project);
-            }
+            FoundProject foundProject = findManagedProject(project);
             if (foundProject == null) {
                 foundProject = findPreviouslyBuiltProject(project, availableVersions);
             }
