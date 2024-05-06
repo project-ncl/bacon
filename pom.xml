@@ -82,7 +82,7 @@
         <compiler.plugin.version>3.12.1</compiler.plugin.version>
         <domino.version>0.0.105</domino.version>
         <enforcer.plugin.version>3.4.1</enforcer.plugin.version>
-        <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
+        <glassfish-jaxb.version>2.3.2</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
         <jackson.version>2.17.0</jackson.version>
         <jaxb.version>4.0.4</jaxb.version>
