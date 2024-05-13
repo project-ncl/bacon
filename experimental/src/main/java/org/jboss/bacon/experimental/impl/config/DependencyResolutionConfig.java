@@ -41,7 +41,8 @@ public class DependencyResolutionConfig {
     private Set<String> excludeArtifacts = Set.of();
 
     /**
-     * If set to true, all -redhat-X artifacts and their dependencies are omitted from the resulting build tree.
+     * If set to true, all -redhat-X artifacts and their dependencies are omitted from the resulting build tree. Note
+     * that this option has effect only when {@link #rebuildNonAutoBuilds} is true.
      */
     private boolean excludeProductizedArtifacts = false;
 
@@ -58,4 +59,11 @@ public class DependencyResolutionConfig {
      * project.
      */
     private List<String> recipeRepos = List.of();
+
+    /**
+     * When enabled, autobuilder will rebuild existing builds, if they are not managed by autobuilder (Build Configs
+     * with -AUTOBUILD suffix) and will manage them (create a copy of the existing build's Build Config with -AUTOBUILD
+     * suffix). This is useful to make sure whole dependency tree is build correctly.
+     */
+    private boolean rebuildNonAutoBuilds = false;
 }
