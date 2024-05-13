@@ -14,7 +14,11 @@ import io.quarkus.domino.ReleaseCollection;
 import io.quarkus.domino.ReleaseRepo;
 import io.quarkus.maven.dependency.ArtifactCoords;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.bacon.da.DaHelper;
+import org.jboss.bacon.da.rest.endpoint.LookupApi;
 import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
+import org.jboss.da.lookup.model.MavenLookupRequest;
+import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.common.version.SuffixedVersion;
@@ -39,11 +43,14 @@ public class DependencyResolver {
 
     private final DependencyResolutionConfig config;
     private final VersionParser versionParser = new VersionParser("redhat");
+    private final LookupApi lookupApi;
 
     public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig) {
         this.config = dependencyResolutionConfig;
         // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
         System.setProperty("quarkus-internal.maven-cmd-line-args", "-ntp");
+
+        lookupApi = DaHelper.createLookupApi();
     }
 
     private void setupConfig(ProjectDependencyConfig.Mutable dominoConfig) {
@@ -158,14 +165,61 @@ public class DependencyResolver {
     }
 
     /**
-     * Returns false if excludeProductizedArtifacts is true and the project version contains -redhat-X.
+     * Returns false if the project should be excluded.
      */
     private boolean filterProductized(Project releaseRepo) {
-        if (!config.isExcludeProductizedArtifacts()) {
-            return true;
+        boolean excludeAlreadyBuilt = !config.isRebuildNonAutoBuilds();
+        boolean excludeRedhatSuffix = config.isExcludeProductizedArtifacts() || excludeAlreadyBuilt;
+        if (excludeRedhatSuffix) {
+            SuffixedVersion version = versionParser.parse(releaseRepo.getFirstGAV().getVersion());
+            if (version.isSuffixed()) {
+                return false;
+            }
         }
-        SuffixedVersion version = versionParser.parse(releaseRepo.getFirstGAV().getVersion());
-        return !version.isSuffixed();
+        if (excludeAlreadyBuilt) {
+            MavenLookupRequest request = MavenLookupRequest.builder()
+                    .mode(DaHelper.getMode(false, false, null))
+                    .brewPullActive(false)
+                    .artifacts(releaseRepo.getGavs())
+                    .build();
+            Set<MavenLookupResult> mavenLookupResults = lookupApi.lookupMaven(request);
+            Set<String> versionsFound = mavenLookupResults.stream()
+                    .map(MavenLookupResult::getBestMatchVersion)
+                    .collect(Collectors.toSet());
+            boolean everythingBuilt = !versionsFound.contains(null);
+            int minVersionCount = everythingBuilt ? 1 : 2; // if null is present, null + single version = 2 items in set
+            boolean everythingInTheSameVersion = versionsFound.size() == minVersionCount;
+            boolean anythingBuilt = everythingBuilt || versionsFound.size() > 1;
+            if (everythingBuilt && everythingInTheSameVersion) {
+                return false;
+            }
+            if (anythingBuilt) {
+                String message = "";
+                if (!everythingBuilt) {
+                    message = " not all artifacts are built";
+                }
+                if (!everythingInTheSameVersion) {
+                    if (!message.isEmpty()) {
+                        message += " and";
+                    }
+                    message += " not all artifacts are built in the same version";
+                }
+                String debugOff = "";
+                if (log.isDebugEnabled()) {
+                    String artifacts = mavenLookupResults.stream()
+                            .map(r -> r.getGav() + " -> " + r.getBestMatchVersion())
+                            .collect(Collectors.joining("\n"));
+                    log.debug("Artifacts and their found versions:\n" + artifacts);
+                } else {
+                    debugOff = " (Enable debug output with -v to see what built artifact versions were found.)";
+                }
+                log.warn(
+                        "Excluding project " + releaseRepo.getFirstGAV() + " because some artifacts are build, however"
+                                + message + "." + debugOff);
+                return false;
+            }
+        }
+        return true;
     }
 
     private Map<ReleaseId, Set<ReleaseId>> processCircularDependencies(
