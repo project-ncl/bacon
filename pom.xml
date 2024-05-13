@@ -685,7 +685,7 @@
             <dependency>
                 <groupId>com.redhat.resilience.otel</groupId>
                 <artifactId>opentelemetry-ext-cli-java</artifactId>
-                <version>1.2.0</version>
+                <version>1.3.0</version>
             </dependency>
             <!-- To be removed once BuildeFinder has upgraded. -->
             <dependency>
