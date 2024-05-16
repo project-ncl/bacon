@@ -111,6 +111,18 @@ public class SourcesGenerator {
             log.info("Removing builds from sources generation " + sourcesGenerationData.getExcludeSourceBuilds());
             additionalBuildsForSources.keySet().removeAll(sourcesGenerationData.getExcludeSourceBuilds());
         }
+
+        // Set the name of the build to be more consistent, relying on user specified BC names yields some odd names
+        // in source directories. These attributes should be set but are BEST EFFORT and not guaranteed to be set
+        // for non-maven builds.
+        for (PncBuild build : additionalBuildsForSources.values()) {
+            String brewBuildName = build.getAttributes().get("BREW_BUILD_NAME");
+            String brewBuildVersion = build.getAttributes().get("BREW_BUILD_VERSION");
+            if (brewBuildName != null && brewBuildVersion != null) {
+                build.setName(brewBuildName.replaceAll(":", "-") + "-" + brewBuildVersion);
+            }
+        }
+
         downloadSourcesFromBuilds(additionalBuildsForSources, workDir, contentsDir);
 
         if (sourcesGenerationData.getStrategy() == SourcesGenerationStrategy.GENERATE_EXTENDED || sourcesGenerationData
@@ -137,8 +149,7 @@ public class SourcesGenerator {
                     try {
                         String buildName = a.getBuild().getBuildConfigRevision().getName();
                         PncBuild pncBuild = new PncBuild(a.getBuild());
-                        pncBuild.setName(pncBuild.getName().replaceAll("-AUTOBUILD", ""));
-                        completeBuilds.put(buildName, pncBuild);
+                        completeBuilds.put(pncBuild.getName(), pncBuild);
                     } catch (NullPointerException e) {
                         log.warn("Artifact " + a.getIdentifier() + " does not have build assigned! No sources added.");
                     }
