@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,6 +79,7 @@ public class Config {
             instance = mapper.readValue(new File(configFilePath), Config.class);
         }
         instance.setActiveProfile(getProfileByName(activeProfileName));
+        checkPNCURL(instance);
     }
 
     public static ConfigProfile getProfileByName(String name) {
@@ -106,5 +109,16 @@ public class Config {
     // for tests only
     public static void setInstance(Config instance) {
         Config.instance = instance;
+    }
+
+    private static void checkPNCURL(Config profile) {
+        try {
+            URL pncUrl = new URL(profile.activeProfile.getPnc().getUrl());
+            if (pncUrl.getPath() != "") {
+                log.warn("PNC URL should not contain path.");
+            }
+        } catch (MalformedURLException e) {
+            log.error("PNC URL is malformed.");
+        }
     }
 }
