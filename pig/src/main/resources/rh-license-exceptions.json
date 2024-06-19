@@ -1508,5 +1508,60 @@
           "url": "https://opensource.org/licenses/BSD-3-Clause"
         }
       ]
+  },
+  {
+    "groupId": "org.xerial.snappy",
+    "artifactId": "snappy-java",
+    "version-regexp": "1\\..+",
+    "licenses": [
+      {
+          "name": "Apache License 2.0",
+          "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      }
+    ]
+  },
+  {
+    "groupId": "jakarta.xml.bind",
+    "artifactId": "jakarta.xml.bind-api",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+          "name": "Eclipse Distribution License, Version 1.0",
+          "url": "http://repository.jboss.org/licenses/edl-1.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "jakarta.xml.bind",
+    "artifactId": "jakarta.xml.bind-api-parent",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+          "name": "Eclipse Distribution License, Version 1.0",
+          "url": "http://repository.jboss.org/licenses/edl-1.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "org.antlr",
+    "artifactId": "antlr4-master",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+        "name": "BSD 3-clause \"New\" or \"Revised\" License",
+        "url": "https://opensource.org/licenses/BSD-3-Clause"
+      }
+    ]
+  },
+  {
+    "groupId": "org.antlr",
+    "artifactId": "antlr4-runtime",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+        "name": "BSD 3-clause \"New\" or \"Revised\" License",
+        "url": "https://opensource.org/licenses/BSD-3-Clause"
+      }
+    ]      
   }
 ]
