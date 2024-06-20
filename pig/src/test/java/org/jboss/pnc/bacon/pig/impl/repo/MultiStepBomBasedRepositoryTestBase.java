@@ -115,6 +115,10 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
                 .addConstraint("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
                 // shaded jar should result in inclusion of the default jar in the Maven repo ZIP
                 .addConstraint("org.acme", "acme", "shaded", "jar", "1.2.3.redhat-30303")
+                // an annotation processor, as an example of an artifact that should be resolved with BOMs enforced and
+                // without
+                .addConstraint("org.acme", "acme-annotation-processor", "1.2.3.redhat-30303")
+                .addConstraint("org.acme", "acme-annotation-processor-dep", "1.2.3.redhat-00002")
                 .platform()
                 // install core artifacts
                 .installArtifact(
@@ -146,6 +150,11 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
                 .addDependency("org.acme", "acme-other-non-existent-excluded", "other", "jar", "2.2.4")
                 .platform()
                 .installArtifact("org.acme", "acme-excluded", "2.2.4.redhat-00005")
+                .installArtifactWithDependencies("org.acme", "acme-annotation-processor", "1.2.3.redhat-30303")
+                .addDependency("org.acme", "acme-annotation-processor-dep", "1.2.3.redhat-00001")
+                .platform()
+                .installArtifact("org.acme", "acme-annotation-processor-dep", "1.2.3.redhat-00001")
+                .installArtifact("org.acme", "acme-annotation-processor-dep", "1.2.3.redhat-00002")
                 // quarkus-camel-bom
                 .newBom(IO_QUARKUS_PLATFORM_TEST, "quarkus-camel-bom", "1.1.1.redhat-00001")
                 .addConstraint(
@@ -336,7 +345,10 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
                         "org.acme:acme-non-existent-excluded, org.acme:acme-other-non-existent-excluded:other:jar",
                         // we add the quarkus-bom to the default params, since it will have to be enabled for everyone
                         "bomGavs",
-                        IO_QUARKUS_PLATFORM_TEST + ":quarkus-bom:1.1.1.redhat-00001"));
+                        IO_QUARKUS_PLATFORM_TEST + ":quarkus-bom:1.1.1.redhat-00001",
+                        // this will resolve dependencies of the annotation processor w/o enforcing platform BOMs
+                        "nonManagedDependencies",
+                        "org.acme:acme-annotation-processor:1.2.3.redhat-30303"));
 
         // this quarkus-bom step is simply to generate the repo for the quarkus-bom
         final RepoGenerationData quarkusBomStep = new RepoGenerationData();
