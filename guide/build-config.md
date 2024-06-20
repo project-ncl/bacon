@@ -438,6 +438,13 @@ When to use which?
       artifacts is spotted in the local Maven repo, then the triggering artifact is logged
       and the generation fails.
 * `excludeTransitive` - a comma or whitespace separated list of `groupId:artifactId[:classifier:type]` artifact coordinates that should be excluded by the Maven artifact resolver when resolving dependencies of the root artifacts that should be added to the Maven repository ZIP. This parameter allows excluding artifacts that do not exist in Indy and that would fail to be resolved.
+* `nonManagedDependencies` - a space separated list of artifacts whose dependencies should be resolved w/o enforcing configured BOMs (this could be useful for annoration processor artifacts), for example
+ ```yaml
+         parameters:
+           nonManagedDependencies: >-
+            io.quarkus:quarkus-resteasy-reactive-kotlin:{{quarkusCoreVersion}}
+            io.quarkus:quarkus-panache-common:{{quarkusCoreVersion}}
+ ```
 
 ###### Multi step Maven repository generation
 
