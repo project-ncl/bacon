@@ -623,6 +623,40 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             throw new IllegalStateException("Banned artifacts found: " + bannedReport);
         }
 
+        final String nonManagedDepsStr = params.get("nonManagedDependencies");
+        if (nonManagedDepsStr != null) {
+            addResolveArtifacts(nonManagedDepsStr, artifact -> {
+                log.debug("Resolving dependencies of {}", artifact);
+                final DependencyNode root;
+                try {
+                    root = mvnResolver.getSystem()
+                            .resolveDependencies(
+                                    mvnResolver.getSession(),
+                                    new DependencyRequest().setCollectRequest(
+                                            mvnResolver.newCollectManagedRequest(
+                                                    artifact,
+                                                    List.of(
+                                                            new Dependency(
+                                                                    artifact,
+                                                                    JavaScopes.RUNTIME,
+                                                                    false,
+                                                                    transitiveExclusions)),
+                                                    List.of(), // version constraints from the BOM
+                                                    List.of(), // extra maven repos, ignore this
+                                                    List.of(), // exclusions
+                                                    Set.of(JavaScopes.TEST, JavaScopes.PROVIDED) // dependency scopes
+                    // that should be
+                    // ignored
+                    )))
+                            .getRoot();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                root.getChildren().forEach(n -> collectArtifacts(n, collectedArtifacts));
+
+            });
+        }
+
         addMissingJarsForPoms(mvnResolver);
     }
 
@@ -764,6 +798,15 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 dependencyInspector.inspectAsDependency(artifact, bomConstraints, transitiveExclusions);
             }
         }
+
+        final String nonManagedDepsStr = params.get("nonManagedDependencies");
+        if (nonManagedDepsStr != null) {
+            var di = dependencyInspector;
+            addResolveArtifacts(
+                    nonManagedDepsStr,
+                    coords -> di.inspectAsDependency(coords, List.of(), transitiveExclusions));
+        }
+
         dependencyInspector.complete();
 
         if (!retryRequests.isEmpty()) {
