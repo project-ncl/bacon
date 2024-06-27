@@ -75,7 +75,7 @@ public class DependencyExcluderTest {
 
     @Test
     void parseSampleFileFromHost() {
-        DependencyExcluder de = new DependencyExcluder(Config.instance().getActiveProfile().getDa());
+        DependencyExcluder de = new DependencyExcluder(Config.instance().getActiveProfile().getAutobuild());
         String exclusionFileContents = de.fetchExclusionFile();
         String[] excludedDependencies = DependencyExcluder.getExcludedGavs(exclusionFileContents);
         assertThat(excludedDependencies).isNotNull();
@@ -94,7 +94,7 @@ public class DependencyExcluderTest {
         Config.configure(file.getParent(), "config-missing-gavExclusionUrl.yaml", "default");
         try {
             Config.initialize();
-            DependencyExcluder de = new DependencyExcluder(Config.instance().getActiveProfile().getDa());
+            DependencyExcluder de = new DependencyExcluder(Config.instance().getActiveProfile().getAutobuild());
             String exclusionFileContents = de.fetchExclusionFile();
             String[] excludedDependencies = DependencyExcluder.getExcludedGavs(exclusionFileContents);
             assertThat(excludedDependencies).isNotNull();

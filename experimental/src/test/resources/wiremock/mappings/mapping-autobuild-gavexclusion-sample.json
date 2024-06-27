@@ -1,12 +1,12 @@
 {
   "id" : "bc7a1bf8-5ecb-4f66-a52d-ce195259540d",
   "request" : {
-    "url" : "/da/gavexclusion/excluded.txt",
+    "url" : "/autobuild/gavexclusion/excluded.txt",
     "method" : "GET"
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "body-da-gavexclusion-sample.txt",
+    "bodyFileName" : "body-autobuild-gavexclusion-sample.txt",
     "headers" : {
       "access-control-allow-headers" : "accept, authorization,  content-type, x-requested-with",
       "date" : "Tue, 20 Dec 2022 19:10:32 GMT",

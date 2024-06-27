@@ -8,7 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.jboss.pnc.bacon.config.DaConfig;
+import org.jboss.pnc.bacon.config.AutobuildConfig;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,11 +31,15 @@ public class DependencyExcluder {
 
     private final URI gavExclusionFileUrl;
 
-    public DependencyExcluder(final DaConfig daConfig) {
-        final String exclusionFileUrl = daConfig.getGavExclusionUrl();
-        log.warn("exclusionFileUrl: {}", exclusionFileUrl);
-        if (exclusionFileUrl != null) {
-            gavExclusionFileUrl = URI.create(exclusionFileUrl);
+    public DependencyExcluder(final AutobuildConfig autobuildConfig) {
+        if (autobuildConfig != null) {
+            final String exclusionFileUrl = autobuildConfig.getGavExclusionUrl();
+            log.info("exclusionFileUrl: {}", exclusionFileUrl);
+            if (exclusionFileUrl != null) {
+                gavExclusionFileUrl = URI.create(exclusionFileUrl);
+            } else {
+                gavExclusionFileUrl = null;
+            }
         } else {
             gavExclusionFileUrl = null;
         }
