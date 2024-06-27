@@ -14,9 +14,19 @@ public class ObjectHelper {
 
     public static Level LOG_LEVEL_SILENT = Level.ERROR;
 
+    private static YAMLFactory createYAMLFactory() {
+        YAMLFactory yamlFactory = new YAMLFactory();
+        return yamlFactory.configure(YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS, true)
+                .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true);
+    }
+
+    private static JsonFactory createJsonFactory() {
+        JsonFactory jsonFactory = new JsonFactory();
+        return jsonFactory;
+    }
+
     private static ObjectMapper getOutputMapper(boolean json) {
-        ObjectMapper om = json ? new ObjectMapper(new JsonFactory())
-                : new ObjectMapper(new YAMLFactory().configure(YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS, true));
+        ObjectMapper om = new ObjectMapper(json ? createJsonFactory() : createYAMLFactory());
         om.registerModule(new JavaTimeModule());
         om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return om;
