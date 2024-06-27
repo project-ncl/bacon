@@ -42,4 +42,4 @@ profile:
             url: "http://localhost:45656"
 
         autobuild:
-            gavExclusionUrl: "http://localhost:45656/da/gavexclusion/excluded.txt"
+            gavExclusionUrl: "http://localhost:45656/autobuild/gavexclusion/excluded.txt"
