@@ -19,20 +19,12 @@ package org.jboss.pnc.bacon.config;
 
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
-public class ConfigProfile {
+public class AutobuildConfig implements Validate {
+    private String gavExclusionUrl;
 
-    private String name;
-    private String keycloakUrl;
-    private PncConfig pnc;
-    private DaConfig da;
-    private IndyConfig indy;
-    private PigConfig pig;
-    private KeycloakConfig keycloak;
-    private AutobuildConfig autobuild;
-    private boolean enableExperimental;
-
-    private Map<String, Map<String, ?>> addOns;
+    @Override
+    public void validate() {
+        Validate.validateUrl(gavExclusionUrl, "GAV Exclusion file");
+    }
 }

@@ -107,6 +107,7 @@ public class DependencyGenerator {
                     config.getBuildConfigGeneratorConfig());
             // Analyze dependencies
             DependencyResult dependencies = dependencyResolver.resolve(projectDir, dominoConfig);
+            log.info("Analyzed project and found {} dependencies", dependencies.getCount());
             // Generate BCs
             // Generate project's names
             projectNameGenerator.nameProjects(dependencies.getTopLevelProjects());

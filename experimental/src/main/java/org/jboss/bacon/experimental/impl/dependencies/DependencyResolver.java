@@ -21,6 +21,7 @@ import org.jboss.da.lookup.model.MavenLookupRequest;
 import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.AutobuildConfig;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,13 +59,14 @@ public class DependencyResolver {
 
     private void setupConfig(ProjectDependencyConfig.Mutable dominoConfig) {
         config.getExcludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
-        DependencyExcluder dependencyExcluder = new DependencyExcluder(Config.instance().getActiveProfile().getDa());
+        AutobuildConfig autobuildConfig = Objects.requireNonNull(
+                Config.instance().getActiveProfile().getAutobuild(),
+                "Missing the 'autobuild' option in your config profile.");
+        autobuildConfig.validate();
+        DependencyExcluder dependencyExcluder = new DependencyExcluder(autobuildConfig);
         final String[] excludedGavs = DependencyExcluder.getExcludedGavs(dependencyExcluder.fetchExclusionFile());
         log.info("There are {} dependencies to be excluded", excludedGavs.length);
-        Arrays.stream(excludedGavs)
-                .iterator()
-                .forEachRemaining(excludedGav -> dominoConfig.addExcludePattern(GACTVParser.parse(excludedGav)));
-        log.info("Analyzed project and found {} dependencies", dominoConfig.getExcludePatterns().size());
+        Arrays.stream(excludedGavs).map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
         config.getIncludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addIncludePattern);
         Set<ArtifactCoords> artifacts = config.getAnalyzeArtifacts()
                 .stream()

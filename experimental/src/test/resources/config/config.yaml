@@ -40,4 +40,6 @@ profile:
             indyUrl: "http://indy.url"
         da:
             url: "http://localhost:45656"
-            gavExclusionUrl: "http://localhost:45656/da/gavexclusion/excluded.txt"
+
+        autobuild:
+            gavExclusionUrl: "http://localhost:45656/autobuild/gavexclusion/excluded.txt"
