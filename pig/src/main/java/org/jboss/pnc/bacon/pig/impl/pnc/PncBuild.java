@@ -24,21 +24,25 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.jboss.pnc.bacon.config.Config;
-import org.jboss.pnc.bacon.pnc.client.BifrostClient;
+import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -148,19 +152,15 @@ public class PncBuild {
             return buildLog;
         }
 
-        String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
-        URI bifrostUri = URI.create(bifrostBase);
-        BifrostClient logProcessor = new BifrostClient(bifrostUri);
-        try {
-            buildLog = logProcessor.getLog(id, BifrostClient.LogType.BUILD);
-
-            if (buildLog == null) {
-                log.debug("Couldn't find logs for build id: {} ( {} )", id, UrlGenerator.generateBuildUrl(id));
-                buildLog = Collections.emptyList();
-            }
+        try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+            Optional<InputStream> streamLogs = buildClient.getBuildLogs(id);
+            buildLog = Collections.emptyList();
+            streamLogs.ifPresent(
+                    inputStream -> buildLog = new BufferedReader(
+                            new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().toList());
 
             return buildLog;
-        } catch (IOException e) {
+        } catch (RemoteResourceException e) {
             throw new RuntimeException(
                     "Failed to get build log for " + id + " (" + UrlGenerator.generateBuildUrl(id) + ")",
                     e);
