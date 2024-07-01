@@ -21,4 +21,5 @@ public class DependencyResult {
             project.getDependencies().forEach(p -> fillAllProject(allProjects, p));
         }
     }
+
 }
