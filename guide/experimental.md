@@ -26,20 +26,24 @@ The `generate` command will output content that can be used in [PiG](pig.html) `
 Example of config file:
 ```yaml
 dependencyResolutionConfig: # Configuration for the dependency resolution by Domino
-    analyzeArtifacts: # List of toplevel artifacts that should be analyzed and built
+    analyzeArtifacts: # List of toplevel artifacts that should be analyzed and built.
         - foo:bar:1.0.0
-    analyzeBOM: "foo:bar-bom:1.0.0" # Bom that should be analyzed and which artifacts should be built
-    excludeArtifacts: # List of artifacts that should be excluded from the analysis
-        # The matching artifact and it's dependencies will be ommited from the resulting build tree
-        # The format is G:A:[C:T:]V where every part can be replaced with '*'
+    analyzeBOM: "foo:bar-bom:1.0.0" # Bom that should be analyzed and which artifacts should be built.
+    excludeArtifacts: # List of artifacts that should be excluded from the analysis.
+        # The matching artifact and it's dependencies will be omitted from the resulting build tree.
+        # The format is G:A:[C:T:]V where every part can be replaced with '*'.
         - org.apache.maven:*:*
-    excludeProductizedArtifacts: false # If set to true, all -redhat-X artifacts and their dependencies are ommited from the resulting build tree
-    includeArtifacts: # List of artifacts that should not be excluded from the analysis
-        # The format is G:A:[C:T:]V where every part can be replaced with '*'
+    excludeProductizedArtifacts: false # If set to true, all -redhat-X artifacts and their dependencies are omitted from the resulting build tree.
+                                       # Note that this option has effect only when rebuildNonAutoBuilds is true.
+    includeArtifacts: # List of artifacts that should not be excluded from the analysis.
+        # The format is G:A:[C:T:]V where every part can be replaced with '*'.
         - foo:*:*
-    includeOptionalDependencies: true # Wheather optional dependencies should be included in the analysis. Defaults to true
+    includeOptionalDependencies: true # Whether optional dependencies should be included in the analysis. Defaults to true.
     recipeRepos: # The list of URLs to use for the SCM recipes. The SCM recipes are used for determining SCM coordinates for project. Defaults to given example.
         - https://github.com/redhat-appstudio/jvm-build-data 
+    rebuildNonAutoBuilds: false # When enabled, autobuilder will rebuild existing builds, if they are not managed by autobuilder (Build Configs with -AUTOBUILD suffix)
+                                # and will manage them (create a copy of the existing build's Build Config with -AUTOBUILD suffix).
+                                # This is useful to make sure whole dependency tree is build correctly.
 
 buildConfigGeneratorConfig: # Configuration for how the new build configs should be created
     defaultValues: # Default values to be used when generating build config
