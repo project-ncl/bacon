@@ -35,6 +35,7 @@ import org.jboss.pnc.dto.BuildRef;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
+import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;
 
 import java.io.Closeable;
 import java.util.Collection;
@@ -148,10 +149,13 @@ public class BuildInfoCollector implements Closeable {
 
     private GroupBuild getLatestGroupBuild(String groupConfigurationId, boolean temporaryBuild)
             throws RemoteResourceException {
+        GroupBuildsFilterParameters groupBuildsFilterParameters = new GroupBuildsFilterParameters();
+        groupBuildsFilterParameters.setLatest(true);
         // we have to sort by startTime since group builds with 'NO_REBUILD_REQUIRED' don't have the endTime set
         Collection<GroupBuild> groupBuilds = anonymousGroupConfigurationClient
                 .getAllGroupBuilds(
                         groupConfigurationId,
+                        groupBuildsFilterParameters,
                         of("=desc=startTime"),
                         query("temporaryBuild==%s", temporaryBuild))
                 .getAll();

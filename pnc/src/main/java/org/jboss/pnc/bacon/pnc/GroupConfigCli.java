@@ -33,6 +33,7 @@ import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -276,8 +277,16 @@ public class GroupConfigCli {
         @Override
         public Integer call() throws Exception {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
+
+                GroupBuildsFilterParameters groupBuildsFilterParameters = new GroupBuildsFilterParameters();
+                groupBuildsFilterParameters.setLatest(true);
+
                 Collection<GroupBuild> groupBuilds = client
-                        .getAllGroupBuilds(id, of("=desc=startTime"), Optional.of("temporaryBuild==" + temporaryBuild))
+                        .getAllGroupBuilds(
+                                id,
+                                groupBuildsFilterParameters,
+                                of("=desc=startTime"),
+                                Optional.of("temporaryBuild==" + temporaryBuild))
                         .getAll();
                 Optional<GroupBuild> latest = groupBuilds.stream().findFirst();
                 if (latest.isPresent()) {
