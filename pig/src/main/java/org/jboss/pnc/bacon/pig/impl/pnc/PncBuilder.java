@@ -33,6 +33,7 @@ import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
+import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,6 +151,7 @@ public class PncBuilder implements Closeable {
             Collection<GroupBuild> groupBuilds = anonymousGroupConfigClient
                     .getAllGroupBuilds(
                             groupConfigurationId,
+                            new GroupBuildsFilterParameters(),
                             of("=desc=startTime"),
                             query("status==%s", BuildStatus.BUILDING))
                     .getAll();
