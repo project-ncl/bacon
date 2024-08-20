@@ -42,8 +42,8 @@ public class RepoDescriptor {
     public static final String MAVEN_REPOSITORY = "maven-repository/";
 
     /**
-     * Returns a collection of GAVs (that are actually groupId:artifactId:version, i.e. ignoring the classifier and the
-     * type attributes) found in a repository.
+     * Returns a collection of {@link GAV} (that are actually {@code groupId:artifactId:version}, i.e. ignoring the
+     * classifier and the type attributes) found in a repository.
      *
      * @param m2RepoDirectory local Maven repository directory
      * @return a list of GAVs found in a repository
@@ -56,8 +56,8 @@ public class RepoDescriptor {
     }
 
     /**
-     * Returns a collection of GAVs (that are include all the attributes of artifact coordinates, including the
-     * classifier and the type attributes).
+     * Returns a collection of {@link GAV} that include all the attributes of artifact coordinates, including the
+     * classifier and the type attributes.
      *
      * @param m2RepoDirectory local Maven repository directory
      * @return a list of GAVs found in a repository
@@ -110,12 +110,16 @@ public class RepoDescriptor {
     }
 
     private static boolean isInRepoDir(Path file) {
-        Path fileName = file == null ? null : file.getFileName();
-        if (fileName == null) {
+        if (file == null) {
             return false;
         }
-        return fileName.toString().equals(MAVEN_REPOSITORY.substring(0, MAVEN_REPOSITORY.length() - 1))
-                || isInRepoDir(file.getParent());
+        for (int i = 0; i < file.getNameCount(); ++i) {
+            var name = file.getName(i);
+            if (name.toString().regionMatches(0, MAVEN_REPOSITORY, 0, MAVEN_REPOSITORY.length() - 1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Collection<File> listFiles(File m2RepoDirectory) {

@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pig.impl.addons;
 
 import org.jboss.pnc.bacon.pig.impl.addons.camel.CamelRuntimeDependenciesToAlignTree;
 import org.jboss.pnc.bacon.pig.impl.addons.camel.RuntimeDependenciesToAlignTree;
+import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.microprofile.MicroProfileSmallRyeCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
@@ -73,6 +74,7 @@ public class AddOnFactory {
                         releasePath,
                         extrasPath,
                         deliverables));
+        resultList.add(new Cachi2LockfileAddon(pigConfiguration, builds, releasePath, extrasPath));
         return resultList;
     }
 

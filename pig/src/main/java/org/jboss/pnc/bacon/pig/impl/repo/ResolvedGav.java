@@ -33,7 +33,7 @@ public class ResolvedGav {
         this.gav = gav;
     }
 
-    GAV getGav() {
+    public GAV getGav() {
         return gav;
     }
 
@@ -82,7 +82,7 @@ public class ResolvedGav {
         }
     }
 
-    Collection<Artifact> getArtifacts() {
+    public Collection<Artifact> getArtifacts() {
         return artifacts;
     }
 }
