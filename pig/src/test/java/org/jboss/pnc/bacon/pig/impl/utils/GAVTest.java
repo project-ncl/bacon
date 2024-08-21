@@ -68,6 +68,16 @@ class GAVTest {
         assertThat(gav.getVersion()).isEqualTo("1.32.0.Final-redhat-00003");
         assertThat(gav.getPackaging()).isEqualTo("tar.gz");
         assertThat(gav.getClassifier()).isEqualTo("project-sources");
+
+        // Artifact with classifier matching the version
+        path = "io/quarkus/quarkus-bom-quarkus-platform-descriptor/3.8.5.redhat-00004/quarkus-bom-quarkus-platform-descriptor-3.8.5.redhat-00004-3.8.5.redhat-00004.json";
+        gav = new GAV(path);
+
+        assertThat(gav.getGroupId()).isEqualTo("io.quarkus");
+        assertThat(gav.getArtifactId()).isEqualTo("quarkus-bom-quarkus-platform-descriptor");
+        assertThat(gav.getVersion()).isEqualTo("3.8.5.redhat-00004");
+        assertThat(gav.getPackaging()).isEqualTo("json");
+        assertThat(gav.getClassifier()).isEqualTo("3.8.5.redhat-00004");
     }
 
     @Test
