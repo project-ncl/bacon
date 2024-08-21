@@ -20,9 +20,13 @@ package org.jboss.pnc.bacon.pig.impl.repo;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -34,27 +38,84 @@ import java.util.stream.Stream;
  */
 public class RepoDescriptor {
 
-    public static final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1", "maven-metadata.xml" };
+    public static final String[] CHECKSUM_EXTENSIONS = { ".md5", ".sha1" };
     public static final String MAVEN_REPOSITORY = "maven-repository/";
 
+    /**
+     * Returns a collection of GAVs (that are actually groupId:artifactId:version, i.e. ignoring the classifier and the
+     * type attributes) found in a repository.
+     *
+     * @param m2RepoDirectory local Maven repository directory
+     * @return a list of GAVs found in a repository
+     */
     public static Collection<GAV> listGavs(File m2RepoDirectory) {
-        List<GAV> allGavs = listFiles(m2RepoDirectory).stream()
-                .filter(RepoDescriptor::isInRepoDir)
-                .filter(f -> Stream.of(CHECKSUM_EXTENSIONS).noneMatch(ext -> f.getName().endsWith(ext)))
-                .map(f -> GAV.fromFileName(f.getAbsolutePath(), MAVEN_REPOSITORY))
-                .collect(Collectors.toList());
+        Collection<GAV> allGavs = listArtifacts(m2RepoDirectory.toPath());
         Set<GAV> resultSet = new TreeSet<>(Comparator.comparing(GAV::toGav));
         resultSet.addAll(allGavs);
         return resultSet;
     }
 
-    private static boolean isInRepoDir(File file) {
-        if (file == null) {
-            return false;
-        } else {
-            return file.getName().equals(MAVEN_REPOSITORY.substring(0, MAVEN_REPOSITORY.length() - 1))
-                    || isInRepoDir(file.getParentFile());
+    /**
+     * Returns a collection of GAVs (that are include all the attributes of artifact coordinates, including the
+     * classifier and the type attributes).
+     *
+     * @param m2RepoDirectory local Maven repository directory
+     * @return a list of GAVs found in a repository
+     */
+    public static Collection<GAV> listArtifacts(Path m2RepoDirectory) {
+        try (Stream<Path> stream = Files.walk(m2RepoDirectory, FileVisitOption.FOLLOW_LINKS)) {
+            return stream.filter(f -> !Files.isDirectory(f))
+                    .filter(RepoDescriptor::isInRepoDir)
+                    .filter(RepoDescriptor::isPotentialArtifact)
+                    .map(f -> GAV.fromFileName(f.toAbsolutePath().toString(), MAVEN_REPOSITORY))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
+    }
+
+    private static boolean isPotentialArtifact(Path file) {
+        // the parent must be the version directory
+        final Path versionDir = file.getParent();
+        final String version = getFileNameOrNull(versionDir);
+        if (version == null) {
+            return false;
+        }
+        // the parent of the version directory must be the artifact directory
+        final String artifactId = getFileNameOrNull(versionDir.getParent());
+        if (artifactId == null) {
+            return false;
+        }
+        // the file name must start with artifactId-version
+        final String fileName = file.getFileName().toString();
+        if (!fileName.startsWith(artifactId)
+                || !fileName.regionMatches(artifactId.length() + 1, version, 0, version.length())) {
+            return false;
+        }
+        // filter out checksums
+        for (var ext : CHECKSUM_EXTENSIONS) {
+            if (fileName.endsWith(ext)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String getFileNameOrNull(Path p) {
+        if (p == null) {
+            return null;
+        }
+        p = p.getFileName();
+        return p == null ? null : p.toString();
+    }
+
+    private static boolean isInRepoDir(Path file) {
+        Path fileName = file == null ? null : file.getFileName();
+        if (fileName == null) {
+            return false;
+        }
+        return fileName.toString().equals(MAVEN_REPOSITORY.substring(0, MAVEN_REPOSITORY.length() - 1))
+                || isInRepoDir(file.getParent());
     }
 
     public static Collection<File> listFiles(File m2RepoDirectory) {
