@@ -64,8 +64,7 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
                 List<String> bcLog = build.getBuildLog().stream().distinct().collect(Collectors.toList());
                 file.print("-------- [" + build.getId() + "] " + build.getName() + " --------\n");
                 for (String bcLine : bcLog) {
-                    if (bcLine.startsWith("[INFO] +") && (bcLine.endsWith(":runtime") || bcLine.endsWith(":compile"))
-                            && !bcLine.contains("redhat-")) {
+                    if (matchingDependencyLine(bcLine)) {
                         file.print(bcLine + "\n");
                     }
                 }
@@ -74,5 +73,18 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Error while creating NotYetAlignedFromDependencyTree report", e);
         }
+    }
+
+    /**
+     * See if the line matches the not yet aligned top-level dependency
+     *
+     * @param bcLine line to analyze
+     * @return whether it matches or not
+     */
+    static boolean matchingDependencyLine(String bcLine) {
+        // clean up the line first
+        bcLine = bcLine.strip();
+        return bcLine.contains("[INFO] +") && (bcLine.endsWith(":runtime") || bcLine.endsWith(":compile"))
+                && !bcLine.contains("redhat-");
     }
 }
