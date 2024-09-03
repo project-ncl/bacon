@@ -44,6 +44,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -243,19 +244,19 @@ public class RepositoryUtils {
      * @param excludedArtifacts
      */
     public static void removeExcludedArtifacts(File element, List<String> excludedArtifacts) {
-        List<String> excludedPaths = excludedArtifacts.stream()
-                .map(a -> convertMavenIdentifierToPathRegex(a))
-                .collect(Collectors.toList());
         if (element.isDirectory()) {
             Stream.of(element.listFiles()).forEach(file -> removeExcludedArtifacts(file, excludedArtifacts));
         } else {
-            for (String excludedPath : excludedPaths) {
-                Pattern matchesRegex = Pattern.compile(excludedPath);
-                if (matchesRegex.matcher(element.getAbsolutePath()).find()) {
+            for (String exclusionRegex : excludedArtifacts) {
+                Pattern matchesRegex = Pattern.compile(exclusionRegex);
+                var artifactIdentifier = convertArtifactPathToIdentifier(element.getAbsolutePath());
+
+                if (matchesRegex.matcher(artifactIdentifier).find()) {
                     log.debug(
-                            "Removing path {} from the repository since it matches regex: {}",
+                            "Removing path {} from the repository since the artifact {} matches regex: {}",
                             element.getAbsolutePath(),
-                            excludedPath);
+                            artifactIdentifier,
+                            exclusionRegex);
                     File parent = element.getParentFile();
                     element.delete();
                     recursivelyDeleteEmptyFolder(parent);
@@ -344,41 +345,34 @@ public class RepositoryUtils {
     }
 
     /**
-     * Method to transform a Maven identifier into a filesystem path
+     * Method to transform an artifact file path to Maven artifact identifier format
      *
-     * Transform <group-id>:<artifact-id>:<packaging>:<version> to
-     * <group-id>/<artifact-id>/<version>/<artifact-id>-<version>[-classifier].<packaging>
+     * Transforms <...>/<group-id>/<artifact-id>/<version>/<artifact-id>-<version>[-classifier].<packaging> to
+     * <group-id>:<artifact-id>:<packaging>:<version>[:classifier]
      *
-     * @param identifier
-     * @return
+     * @param artifactPath - artifact file path
+     * @return Maven artifact identifier
      */
-    public static String convertMavenIdentifierToPathRegex(String identifier) {
-        String[] sections = identifier.split(":");
-        if (sections.length != 4 && sections.length != 5) {
-            throw new IllegalArgumentException(
-                    identifier
-                            + " is wrongly formatted! It should be <group-id>:<artifact-id>:<packaging>:<version>:[classifier]");
-        }
-        String fileSeparator = System.getProperty("file.separator");
+    public static String convertArtifactPathToIdentifier(String artifactPath) {
+        String[] artifactPathSections = artifactPath.split(Pattern.quote(File.separator));
+        int artifactPathSectionsLastIndex = artifactPathSections.length - 1;
+        String groupId = artifactPathSections[artifactPathSectionsLastIndex - 3];
+        String artifactId = artifactPathSections[artifactPathSectionsLastIndex - 2];
+        String version = artifactPathSections[artifactPathSectionsLastIndex - 1];
+        String artifactFilename = artifactPathSections[artifactPathSectionsLastIndex];
 
-        String groupId = "";
-        // if groupId is only a catch-all regex, let it be a catch-all regex
-        if (sections[0].equals(".*")) {
-            groupId = sections[0];
-        } else {
-            // break down the group id into several paths
-            groupId = sections[0].replace(".", fileSeparator);
+        String[] artifactFilenameSplitByDot = artifactFilename.split("\\.");
+        String packaging = artifactFilenameSplitByDot[artifactFilenameSplitByDot.length - 1];
+
+        var artifactIdentifier = new ArrayList<>(Arrays.asList(groupId, artifactId, packaging, version));
+
+        String[] artifactFilenameSplitByVersion = artifactFilename.split(version + "-");
+        if (artifactFilenameSplitByVersion.length > 1) {
+            String classifier = artifactFilenameSplitByVersion[1].split("\\.")[0];
+            artifactIdentifier.add(classifier);
         }
-        String artifactId = sections[1];
-        String packaging = sections[2];
-        String version = sections[3];
-        String classifier = "";
-        if (sections.length == 5) {
-            classifier = "-" + sections[4];
-        }
-        // include the '$' at the end to make sure it matches the file extension, and nothing more!
-        return groupId + fileSeparator + artifactId + fileSeparator + version + fileSeparator + artifactId + "-"
-                + version + classifier + "\\." + packaging + "$";
+
+        return String.join(":", artifactIdentifier);
     }
 
     private static class RedHatArtifactVersion {
