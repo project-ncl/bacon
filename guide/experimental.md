@@ -12,6 +12,18 @@ These are experimental Bacon features. These commands are provided "as is" and t
 
 Automated dependency Build Config generator, also known as Autobuilder.
 
+## Before running
+
+Before you run the generator, you need to first configure the URL to the global exclusion list in your bacon config:
+```
+profile:
+    - name: "default"
+      autobuild:
+        gavExclusionUrl: https://example.com/
+```
+
+The format of the exclusion list is one exclusion per line, where exclusion is in the format `GROUP-ID:ARTIFACT-ID:[CLASSIFIER:[TYPE:]]VERSION`, where any part can be replaced with `*`.
+
 ## Running the generator
 
 To run it analyzing artifacts released to public repositories use this:
@@ -31,12 +43,12 @@ dependencyResolutionConfig: # Configuration for the dependency resolution by Dom
     analyzeBOM: "foo:bar-bom:1.0.0" # Bom that should be analyzed and which artifacts should be built.
     excludeArtifacts: # List of artifacts that should be excluded from the analysis.
         # The matching artifact and it's dependencies will be omitted from the resulting build tree.
-        # The format is G:A:[C:T:]V where every part can be replaced with '*'.
+        # The format is G:A:[C:[T:]]V where every part can be replaced with '*'.
         - org.apache.maven:*:*
     excludeProductizedArtifacts: false # If set to true, all -redhat-X artifacts and their dependencies are omitted from the resulting build tree.
                                        # Note that this option has effect only when rebuildNonAutoBuilds is true.
     includeArtifacts: # List of artifacts that should not be excluded from the analysis.
-        # The format is G:A:[C:T:]V where every part can be replaced with '*'.
+        # The format is G:A:[C:[T:]]V where every part can be replaced with '*'.
         - foo:*:*
     includeOptionalDependencies: true # Whether optional dependencies should be included in the analysis. Defaults to true.
     recipeRepos: # The list of URLs to use for the SCM recipes. The SCM recipes are used for determining SCM coordinates for project. Defaults to given example.
