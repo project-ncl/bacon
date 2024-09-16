@@ -318,13 +318,13 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.2.13</version>
+                <version>1.5.8</version>
             </dependency>
 
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.2.13</version>
+                <version>1.5.8</version>
             </dependency>
 
             <dependency>
@@ -336,7 +336,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.32</version>
+                <version>2.0.16</version>
             </dependency>
 
             <!-- unirest and family -->
