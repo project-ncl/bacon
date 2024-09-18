@@ -19,6 +19,8 @@ public class SourcesGenerationData extends GenerationData<SourcesGenerationStrat
 
     private List<String> excludeSourceBuilds;
 
+    private boolean oldBCNaming = false;
+
     /**
      * Add defaults to avoid having existing configurations having to define a sourceGeneration object in the flow
      * section

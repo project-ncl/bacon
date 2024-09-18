@@ -169,7 +169,8 @@ public final class PigFacade {
             String[] skippedAddons,
             Path configurationDirectory,
             String licenseExceptionsPath,
-            String licenseNamesPath) {
+            String licenseNamesPath,
+            boolean oldBCNaming) {
 
         // If skipping configure we need to check and compute full version, if configure is running it will take care of
         // it
@@ -235,7 +236,7 @@ public final class PigFacade {
                 .getFlow()
                 .getSourcesGeneration()
                 .getStrategy() == SourcesGenerationStrategy.IGNORE)) {
-            generateSources();
+            generateSources(oldBCNaming);
 
         } else {
             log.info("Skipping Source Generation");
@@ -382,7 +383,7 @@ public final class PigFacade {
         }
     }
 
-    public static void generateSources() {
+    public static void generateSources(boolean oldBCNaming) {
         beforeCommand(false);
         abortIfContextDataAbsent();
         PigContext context = context();
@@ -391,6 +392,7 @@ public final class PigFacade {
         Map<String, PncBuild> builds = context.getBuilds();
         RepositoryData repo = context.getRepositoryData();
         SourcesGenerator sourcesGenerator = new SourcesGenerator(
+                oldBCNaming,
                 pigConfiguration.getFlow().getSourcesGeneration(),
                 pigConfiguration.getTopLevelDirectoryPrefix() + "src",
                 context.getReleasePath() + context.getDeliverables().getSourceZipName());

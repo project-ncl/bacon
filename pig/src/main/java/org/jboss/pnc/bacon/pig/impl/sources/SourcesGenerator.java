@@ -58,6 +58,7 @@ public class SourcesGenerator {
     private final String targetZipFileName;
 
     public SourcesGenerator(
+            boolean oldBCNaming,
             SourcesGenerationData sourcesGenerationData,
             String topLevelDirectoryName,
             String targetZipFileName) {
@@ -65,6 +66,9 @@ public class SourcesGenerator {
         this.topLevelDirectoryName = topLevelDirectoryName;
         this.targetZipFileName = targetZipFileName;
         buildInfoCollector = new BuildInfoCollector();
+        if (oldBCNaming) {
+            this.sourcesGenerationData.setOldBCNaming(true);
+        }
     }
 
     public void generateSources(Map<String, PncBuild> builds, RepositoryData repo) {
@@ -115,11 +119,13 @@ public class SourcesGenerator {
         // Set the name of the build to be more consistent, relying on user specified BC names yields some odd names
         // in source directories. These attributes should be set but are BEST EFFORT and not guaranteed to be set
         // for non-maven builds.
-        for (PncBuild build : additionalBuildsForSources.values()) {
-            String brewBuildName = build.getAttributes().get("BREW_BUILD_NAME");
-            String brewBuildVersion = build.getAttributes().get("BREW_BUILD_VERSION");
-            if (brewBuildName != null && brewBuildVersion != null) {
-                build.setName(brewBuildName.replaceAll(":", "-") + "-" + brewBuildVersion);
+        if (!sourcesGenerationData.isOldBCNaming()) {
+            for (PncBuild build : additionalBuildsForSources.values()) {
+                String brewBuildName = build.getAttributes().get("BREW_BUILD_NAME");
+                String brewBuildVersion = build.getAttributes().get("BREW_BUILD_VERSION");
+                if (brewBuildName != null && brewBuildVersion != null) {
+                    build.setName(brewBuildName.replaceAll(":", "-") + "-" + brewBuildVersion);
+                }
             }
         }
 
@@ -149,7 +155,12 @@ public class SourcesGenerator {
                     try {
                         String buildName = a.getBuild().getBuildConfigRevision().getName();
                         PncBuild pncBuild = new PncBuild(a.getBuild());
-                        completeBuilds.put(pncBuild.getName(), pncBuild);
+                        if (sourcesGenerationData.isOldBCNaming()) {
+                            pncBuild.setName(pncBuild.getName().replaceAll("-AUTOBUILD", ""));
+                        } else {
+                            buildName = pncBuild.getName();
+                        }
+                        completeBuilds.put(buildName, pncBuild);
                     } catch (NullPointerException e) {
                         log.warn("Artifact " + a.getIdentifier() + " does not have build assigned! No sources added.");
                     }
