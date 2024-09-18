@@ -96,6 +96,11 @@ flow:
     strategy: DOWNLOAD # another option is IGNORE
     sourceBuild: 'my-app-a-7.1'
     sourceArtifact: '.*javadoc\.zip'
+  sourceGeneration:
+    oldBCNaming: false #old naming is based on BC names in pnc, new (default) is based on BREW_BUILD_NAME and BREW_BUILD_VERSION
+    strategy: GENERATE
+    excludeSourceBuilds:
+       - 'org.kie.kogito-kogito-images-1.40.0.Final'
 
 ###############################################################################
 # a place to define product-specific add-ons.

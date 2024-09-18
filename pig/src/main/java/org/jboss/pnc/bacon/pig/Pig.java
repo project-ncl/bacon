@@ -253,6 +253,12 @@ public class Pig {
                 description = "Path to file with license names for license generation. Usually rh-license-names.json.")
         private String licenseNamesPath;
 
+        @Option(
+                names = "--oldBCNaming",
+                defaultValue = "false",
+                description = "if set to true names used in source generation will be set in old way using BC names")
+        private boolean oldBCNaming;
+
         /**
          * addOns to skip. Specified in CLI by using the flag multiple times: --skipAddon=a --skipAddon=b
          *
@@ -290,7 +296,8 @@ public class Pig {
                     skippedAddons,
                     configurationDirectory,
                     licenseExceptionsPath,
-                    licenseNamesPath);
+                    licenseNamesPath,
+                    oldBCNaming);
 
             PigContext context = PigContext.get();
             return new PigRunOutput(
@@ -449,9 +456,15 @@ public class Pig {
     @Command(name = "sources", description = "GenerateSources")
     public static class GenerateSources extends PigCommand<String> {
 
+        @Option(
+                names = "--oldBCNaming",
+                defaultValue = "false",
+                description = "if set to true source names will be set in old way using BC names")
+        private boolean oldBCNaming;
+
         @Override
         public String doExecute() {
-            PigFacade.generateSources();
+            PigFacade.generateSources(oldBCNaming);
             return "Sources gathered successfully"; // TODO: better output
         }
     }
