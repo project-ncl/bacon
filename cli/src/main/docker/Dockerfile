@@ -14,8 +14,6 @@ ENV LANG en_US.UTF-8
 USER 0
 RUN microdnf install -y gettext wget && microdnf clean all
 
-WORKDIR /work/
-
 COPY --from=builder /work/cli/target/bacon.jar /home/jboss/
 
 USER 185
