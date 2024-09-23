@@ -110,7 +110,7 @@
         <qute.version>${quarkus.version}</qute.version>
         <surefire.plugin.version>3.2.5</surefire.plugin.version>
         <tagSuffix />
-        <undertow.version>2.3.15.Final</undertow.version>
+        <undertow.version>2.3.17.Final</undertow.version>
     </properties>
 
     <dependencyManagement>
