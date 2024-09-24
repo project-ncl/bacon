@@ -12,7 +12,7 @@ ENV TZ UTC
 ENV LANG en_US.UTF-8
 
 USER 0
-RUN microdnf install -y gettext wget && microdnf clean all
+RUN microdnf install -y gettext wget jq && microdnf clean all
 
 COPY --from=builder /work/cli/target/bacon.jar /home/jboss/
 
