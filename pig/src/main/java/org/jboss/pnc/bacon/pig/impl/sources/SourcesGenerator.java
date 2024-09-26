@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -187,11 +188,34 @@ public class SourcesGenerator {
             }
 
             String topLevelDirectoryName = untaredFiles.iterator().next();
-
             File topLevelDirectory = new File(contentsDir, topLevelDirectoryName);
+            cleanupSources(topLevelDirectory);
             File properTopLevelDirectory = new File(contentsDir, build.getName());
             topLevelDirectory.renameTo(properTopLevelDirectory);
         });
+    }
+
+    /**
+     * <p>
+     * Deletes unwanted files found on the sources folder.
+     * </p>
+     *
+     * @param topLevelDirectory
+     *        <p>
+     *        Root folder for searching the unwanted files.
+     *        </p>
+     */
+    private void cleanupSources(final File topLevelDirectory) {
+        final String cleanupRegex = "^repositories-backup.xml$";
+        try (Stream<Path> stream = Files.walk(topLevelDirectory.toPath())) {
+            stream.filter(path -> path.getFileName().toString().matches(cleanupRegex)).forEach(path -> {
+                log.debug("Deleting file: {}", path);
+                path.toFile().delete();
+            });
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            e.printStackTrace();
+        }
     }
 
     private boolean isNotANestedFile(String name) {
