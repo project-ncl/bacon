@@ -98,7 +98,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <picocli.version>4.7.6</picocli.version>
-        <pme.version>4.16</pme.version>
+        <pme.version>4.17</pme.version>
         <pnc-api.version>3.0.4</pnc-api.version>
         <pnc-common.version>3.0.1</pnc-common.version>
 
