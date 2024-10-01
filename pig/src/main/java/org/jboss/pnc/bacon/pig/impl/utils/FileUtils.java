@@ -45,6 +45,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -445,7 +446,7 @@ public final class FileUtils {
         try (final OutputStream out = Files.newOutputStream(output.toPath());
                 final ArchiveOutputStream os = new ArchiveStreamFactory()
                         .createArchiveOutputStream(ArchiveStreamFactory.ZIP, out)) {
-            try (final Stream<Path> stream = Files.walk(directory)) {
+            try (final Stream<Path> stream = Files.walk(directory, FileVisitOption.FOLLOW_LINKS)) {
                 final Iterator<Path> iterator = stream.iterator();
 
                 while (iterator.hasNext()) { // TODO get rid of iterator
