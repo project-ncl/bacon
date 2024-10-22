@@ -489,6 +489,29 @@ Note that the following configuration options are currently **not** supported by
 
 To test `BOM` strategy locally, an existing config using `RESOLVE_ONLY` should simply be updated to use the `BOM` strategy. Here is a sample command line that generates RHBQ 3.2.9 Maven repository ZIP:
 
+###### Cachi2 Lock File Generation
+
+The `BOM` strategy offers an option to capture the resolved artifacts with the `redhat` version qualifier and generate a Cachi2 Lock File that can be used later to prefetch the generated MRRC ZIP content into a Konflux pipeline for container image building or an MRRC release process.
+
+> [!NOTE]
+> It's also possible to configure the `cachi2LockFile` addon as an alternative. The difference between these options is that the addon will be deriving artifact coordinates (groupId, artifactId, classifier, extension and version) from the file names found in the ZIP (which in certain edge cases might not be reliable), while the BOM strategy will capture all the artifact coordinates during the resolution process.
+
+To enable Cachi2 Lock File generation the `cachi2LockFile` parameter has to be set to the desired target file path. For example
+
+```yaml
+flow:
+  licensesGeneration:
+    strategy: GENERATE
+  repositoryGeneration:
+    strategy: BOM
+    parameters:
+      bomGavs: >-
+        com.redhat.quarkus.platform:quarkus-bom:{{quarkusPlatformVersion}}
+      cachi2LockFile: extras/quarkus-platform-{{quarkusPlatformVersion}}-cachi2-lockfile.yaml
+```
+
+With the configuration above, the Cachi2 Lock File will be saved in the `{RELEASE_DIR}/extras/quarkus-platform-{QUARKUS_PLATFORM_VERSION}-cachi2-lockfile.yaml`.
+
 ```
 java -jar bacon.jar pig run --clean --skipBuilds --skipBranchCheck --skipPncUpdate --skipLicenses --skipSources --releaseStorageUrl https://download.eng.bos.redhat.com/rcm-guest/staging/quarkus config-dir/ --targetPath deliverables
 ```
