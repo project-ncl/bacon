@@ -40,7 +40,7 @@ public class TreeParserTest {
             File file = new File("src/test/resources/camel-build-log.txt");
             assertTrue(file.exists(), "Could not find file " + file.getName());
             ArrayList<TreeNode> al = treeparser.parse("src/test/resources/camel-build-log-2.txt");
-            assertTrue(al.size() == 169, "Expected to find 169 tree nodes, found " + al.size());
+            assertTrue(al.size() == 170, "Expected to find 170 tree nodes, found " + al.size());
             TreeNode tn = (TreeNode) al.get(0);
 
             ArrayList<String> dependencies = treeparser.collectFirstLevelDependencies(al);
