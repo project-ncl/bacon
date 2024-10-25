@@ -265,9 +265,35 @@ public class RepositoryUtils {
         }
     }
 
-    private static boolean isCommunity(File f) {
-        String absolutePath = f.getAbsolutePath();
-        return !absolutePath.contains("redhat-") && !absolutePath.contains("eap-runtime-artifacts");
+    /**
+     * Returns true if a file does not represent a Red Hat (re)build of an upstream Maven artifact. The current
+     * implementation checks whether the parent (the version) directory of the file contains the {@code redhat-} string.
+     * <p>
+     * The parent directory check is performed to catch files such as {@code 7.4.0.redhat-00001/_remote.repositories}.
+     *
+     * @param f file to check
+     * @return true, if the file is recognized as a Maven artifact (re)built by Red Hat, otherwise - false
+     */
+    static boolean isCommunity(File f) {
+        final String absolutePath = f.getAbsolutePath();
+        // look for <version>/<artifact-file-name> subpath
+        int index = absolutePath.lastIndexOf(File.separatorChar);
+        if (index < 0) {
+            // this is not a Maven artifact path
+            return true;
+        }
+        index = absolutePath.lastIndexOf(File.separatorChar, index - 1);
+        if (index < 0) {
+            // this is not a Maven artifact path
+            return true;
+        }
+        index = absolutePath.indexOf("redhat-", index + 1);
+        if (index >= 0) {
+            // the version contains redhat-
+            return false;
+        }
+        // this looks like a hack that should be removed
+        return !absolutePath.contains("eap-runtime-artifacts");
     }
 
     private static void removeMatchingCondition(File element, Function<File, Boolean> condition) {
