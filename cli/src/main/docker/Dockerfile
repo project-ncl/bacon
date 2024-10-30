@@ -12,7 +12,11 @@ ENV TZ UTC
 ENV LANG en_US.UTF-8
 
 USER 0
-RUN microdnf install -y gettext wget jq && microdnf clean all
+RUN microdnf install -y gettext wget jq && \
+    LATEST_YQ_VERSION=$(wget -qO- https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.tag_name') && \
+    wget https://github.com/mikefarah/yq/releases/download/${LATEST_YQ_VERSION}/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq && \
+    microdnf clean all
 
 COPY --from=builder /work/cli/target/bacon.jar /home/jboss/
 
