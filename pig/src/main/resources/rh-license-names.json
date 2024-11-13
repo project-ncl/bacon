@@ -117,6 +117,7 @@
             "GNU General Public License v2.0 only, with Classpath exception",
             "GPL-2.0-with-classpath-exception",
             "GPL2 w/ CPE",
+            "GNU General Public License",
             "gpl",
             "The GNU General Public License (GPL), Version 2, With Classpath Exception",
             "General Public License, version 2 with the GNU Classpath"
@@ -452,6 +453,17 @@
         ],
         "urlAliases": [
             "http://www.opensource.org/licenses/LGPL-2.1"
+        ]
+    },
+    {
+        "name": "Unicode-3.0",
+        "url": "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE",
+        "aliases": [
+          "Unicode/ICU License",
+          "Unicode-3.0"
+        ],
+        "urlAliases": [
+          "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE"
         ]
     }
 ]
