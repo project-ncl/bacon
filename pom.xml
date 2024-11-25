@@ -99,7 +99,7 @@
 
         <picocli.version>4.7.6</picocli.version>
         <pme.version>4.19</pme.version>
-        <pnc-api.version>3.0.4</pnc-api.version>
+        <pnc-api.version>3.0.5</pnc-api.version>
         <pnc-common.version>3.0.1</pnc-common.version>
 
         <pnc.version>3.0.4</pnc.version>
