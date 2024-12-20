@@ -33,6 +33,11 @@ The `configure` phase pushes all the settings in the YAML file to PNC, and the `
 bacon pig <phase> ...
 ```
 
+## Other PiG commands
+
+The following `pig` subcommands are available but not tied to any specific phase:
+
+- cachi2lockfile
 
 # Configuration
 
@@ -294,7 +299,40 @@ addons:
 #### Using Defaults
 To use default value for an optional parameter leave that parameter undefined in the addons section of your build-config.yaml file.
 
+### Cachi2 Lock File Generator
+
+This add-on generates a Cachi2 Lock File for the produced Maven repository ZIP (regardless which strategy was used to generate it). Cachi2 Lock Files can be used to prefetch Maven content to Konflux pipelines for container image and MRRC release processes. 
+
+The add-on can be configured in the following way:
+
+```
+addons:
+  cachi2LockFile:
+    filename: mrrc-cachi2-lockfile.yaml
+```
+
+The `filename` parameter is optional and defaults to `cachi2lockfile.yaml` if not configured. The file will be stored under the `extras` directory.
+
 {% endraw %}
+
+## cachi2lockfile command
+
+This `pig cachi2lockfile` CLI command allows generating a Cachi2 lockfile for a given Maven repository. The command will not perform any Maven artifact resolution, it will simply describe the content of a Maven repository in the Cachi2 lock file format.
+
+The command accepts ZIP files and/or directories that include Maven repository content under `maven-repository` subdirectory (to be compliant with the way Bacon generates Maven repository ZIPs). For example:
+
+```
+bacon pig cachi2lockfile rh-quarkus-platform-3.15.2.CR1-maven-repository.zip
+```
+
+Multiple repository paths (including a mix of directories and ZIPs) can be provided using comma as a separator.
+
+By default, the generated lock file will be named `artifacts.lock.yaml`, since this is what Cachi2 to will expect by default. A different file name can be specified by adding the `--output` argument with the desired value.
+
+Other command options include:
+
+* `--maven-repository-url` - the desired value of the Maven repository URL to record for each artifact. The default value will match the one configured in the local Bacon config;
+* `--preferred-checksum-alg` - the lock file format expects a single checksum. By default, the tool will use the highest version of the `SHA` checksum available in the Maven repository. This option allows to specify an alternative checksum algorithm (assuming it's available in the repository), if the default is not good enough. 
 
 ## PiG Export Feature
 
