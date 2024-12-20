@@ -106,7 +106,8 @@ public class GAV {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
-        this.classifier = classifier;
+        // other methods assume that a non-null classifer is a non-empty classifier
+        this.classifier = classifier == null || classifier.isEmpty() ? null : classifier;
     }
 
     public static GAV fromXml(Element xml, Map<String, String> properties) {

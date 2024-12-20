@@ -59,6 +59,7 @@ import java.util.concurrent.Callable;
         name = "pig",
         description = "PiG tool",
         subcommands = {
+                Cachi2Lockfile.class,
                 Pig.Configure.class,
                 Pig.Cancel.class,
                 Pig.Build.class,

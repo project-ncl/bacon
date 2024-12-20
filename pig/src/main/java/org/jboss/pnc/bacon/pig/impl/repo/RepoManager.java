@@ -43,6 +43,7 @@ import org.eclipse.aether.util.listener.ChainedRepositoryListener;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileGenerator;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -106,6 +107,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private static final String JAR = "jar";
     private static final Logger log = LoggerFactory.getLogger(RepoManager.class);
     private static final Pattern SPLIT_PATTERN = Pattern.compile("[, \t\n\r\f]+");
+    private static final String CACHI_2_LOCK_FILE = "cachi2LockFile";
 
     private final BuildInfoCollector buildInfoCollector;
     @Getter
@@ -693,7 +695,18 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         zip(targetTopLevelDirectory, targetZipPath);
 
+        cachi2LockfileForBom(artifactCollector);
         return result(targetTopLevelDirectory, targetZipPath);
+    }
+
+    private void cachi2LockfileForBom(ResolvedArtifactCollector artifactCollector) {
+        var cachi2LockFile = generationData.getParameters().get(CACHI_2_LOCK_FILE);
+        if (cachi2LockFile != null) {
+            Cachi2LockfileGenerator.newInstance()
+                    .setOutputFile(Path.of(releasePath).resolve(cachi2LockFile))
+                    .setMavenRepository(artifactCollector.toVisitableRepository())
+                    .generate();
+        }
     }
 
     /**

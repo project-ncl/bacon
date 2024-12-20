@@ -1,16 +1,19 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
+import io.quarkus.fs.util.ZipUtils;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.RepositoryPolicy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.DefaultSettingsReader;
 import org.apache.maven.settings.io.DefaultSettingsWriter;
-import org.assertj.core.api.Assertions;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
+import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2Lockfile;
 import org.jboss.pnc.bacon.pig.impl.config.Flow;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
@@ -19,6 +22,7 @@ import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.repo.visitor.VisitableArtifactRepository;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.junit.jupiter.api.AfterAll;
@@ -33,7 +37,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,6 +53,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 public abstract class MultiStepBomBasedRepositoryTestBase {
@@ -56,6 +63,8 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     private static final String TEST_PLATFORM_ARTIFACTS = "test-platform-artifacts";
     private static final String EXPECTED_ARTIFACT_LIST_TXT = "resolve-and-repackage-repo-artifact-list.txt";
     private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
+    private static final String MOCK_REPO_URL = "https://mock.indy.org/maven";
+    static final String CACHI2_LOCKFILE_NAME = "bom-strategy-generated-lockfile.yaml";
 
     private Path workDir;
     private File testMavenSettings;
@@ -88,6 +97,161 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         mockPigContextAndMethods();
         mockIndySettingsFile();
 
+        buildQuarkusPlatform();
+
+        PigConfiguration pigConfiguration = mockPigConfigurationAndMethods();
+
+        RepoGenerationData generationDataSpy = mockRepoGenerationDataAndMethods(pigConfiguration);
+
+        Map<String, PncBuild> buildsSpy = mockBuildsAndMethods(generationDataSpy);
+
+        Path configurationDirectory = Mockito.mock(Path.class);
+
+        mockResourceUtilsMethods(configurationDirectory);
+
+        Deliverables deliverables = mockDeliverables(pigConfiguration);
+
+        BuildInfoCollector buildInfoCollectorMock = Mockito.mock(BuildInfoCollector.class);
+
+        final String releasePath = workDir.toString();
+        RepoManager repoManager = new RepoManager(
+                pigConfiguration,
+                releasePath,
+                deliverables,
+                buildsSpy,
+                configurationDirectory,
+                false,
+                false,
+                false,
+                buildInfoCollectorMock,
+                false);
+
+        RepoManager repoManagerSpy = Mockito.spy(repoManager);
+
+        prepareFakeExtensionArtifactList(repoManagerSpy);
+
+        RepositoryData repoData = repoManagerSpy.prepare();
+
+        // run the addons
+        PigContext pigCtx = PigContext.get();
+        doReturn(repoData).when(pigCtx).getRepositoryData();
+        for (var addon : AddOnFactory.listAddOns(
+                pigConfiguration,
+                buildsSpy,
+                releasePath,
+                workDir.resolve("extras").toString(),
+                deliverables)) {
+            if (addon.shouldRun()) {
+                addon.trigger();
+            }
+        }
+
+        assertThat(repoData.getRepositoryPath()).isEqualTo(getGeneratedMavenRepoZip());
+
+        assertRepoZipContent(repoData);
+        assertCachi2LockFile("extras/artifacts.lock.yaml");
+        assertOutcome();
+    }
+
+    protected void assertCachi2LockFile(String lockFilePath) {
+        var zipArtifactChecksums = getZipArtifactChecksums();
+
+        var lockfilePath = getOutcomeResource(lockFilePath);
+        assertThat(lockfilePath).exists();
+        var lockfile = Cachi2Lockfile.readFrom(lockfilePath);
+        assertThat(lockfile).isNotNull();
+
+        for (var cachi2Artifact : lockfile.getArtifacts()) {
+            assertThat(cachi2Artifact.getType()).isEqualTo("maven");
+            final Map<String, String> attributes = cachi2Artifact.getAttributes();
+            var groupId = attributes.get("group_id");
+            var artifactId = attributes.get("artifact_id");
+            var version = attributes.get("version");
+            var type = attributes.get("type");
+            var classifier = attributes.get("classifier");
+
+            var key = groupId + ":" + artifactId + ":" + type + ":" + version;
+            if (classifier != null) {
+                key += ":" + classifier;
+            }
+            var zipArtifactChecksum = zipArtifactChecksums.remove(key);
+            assertThat(zipArtifactChecksum).isNotNull();
+            assertThat(cachi2Artifact.getChecksum()).isEqualTo("sha1:" + zipArtifactChecksum);
+            assertThat(attributes.get("repository_url")).isEqualTo(MOCK_REPO_URL);
+        }
+
+        // make sure no more ZIP artifacts left
+        assertThat(zipArtifactChecksums).isEmpty();
+    }
+
+    private Map<String, String> getZipArtifactChecksums() {
+        try (FileSystem zipFs = ZipUtils.newZip(getGeneratedMavenRepoZip())) {
+            final VisitableArtifactRepository visitableRepo = VisitableArtifactRepository.of(zipFs.getPath(""));
+            final Map<String, String> zipArtifacts = new HashMap<>(visitableRepo.getArtifactsTotal());
+            visitableRepo.visit(visit -> {
+                var sha1 = visit.getChecksums().get("sha1");
+                assertThat(sha1).isNotBlank();
+                zipArtifacts.put(visit.getGav().toGapvc(), sha1);
+            });
+            return zipArtifacts;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Returns the path to the generated Maven repository ZIP.
+     *
+     * @return path to the generated Maven repository ZIP
+     */
+    protected Path getGeneratedMavenRepoZip() {
+        return getOutcomeResource("rh-sample-maven-repository.zip");
+    }
+
+    /**
+     * Returns a path to a resource produced by the pig run. The returned path may or may not exist. It's the
+     * responsibility of the caller to perform the assertions.
+     *
+     * @param name name of the resource
+     * @return path to a resource, which may or may not exist
+     */
+    protected Path getOutcomeResource(String name) {
+        return workDir.resolve(name);
+    }
+
+    /**
+     * Allows subclasses to assert target strategy-specific outcomes
+     */
+    protected void assertOutcome() {
+    }
+
+    private void assertRepoZipContent(RepositoryData repoData) {
+        final Set<String> expectedFiles = repoZipContentList();
+
+        final Set<String> actualFiles = repoData.getFiles()
+                .stream()
+                .map(file -> file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "").replace('\\', '/'))
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        final Path actualArtifactList = workDir.resolve("resolve-and-repackage-repo-artifact-list-actual.txt");
+        try {
+            Files.write(
+                    actualArtifactList,
+                    (actualFiles.stream().collect(Collectors.joining("\n")) + "\n").getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write to " + actualArtifactList, e);
+        }
+
+        if (!actualFiles.equals(expectedFiles)) {
+            System.out.printf(
+                    "\nThe zipped repository has unexpected content. You may want to compare src/test/resources/%s with %s\n\n",
+                    EXPECTED_ARTIFACT_LIST_TXT,
+                    actualArtifactList);
+        }
+        assertThat(actualFiles).containsExactlyElementsOf(expectedFiles);
+    }
+
+    private void buildQuarkusPlatform() throws BootstrapMavenException {
         // initialize a Maven artifact resolver with the local Maven repo pointing
         // to a location we want to install the platform related artifacts below
         final MavenArtifactResolver resolver = MavenArtifactResolver.builder()
@@ -181,65 +345,6 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
                 .installArtifact(IO_QUARKUS_PLATFORM_TEST, "quarkus-maven-plugin", "1.1.1.redhat-00001")
                 .setMavenResolver(resolver)
                 .build();
-
-        PigConfiguration pigConfiguration = mockPigConfigurationAndMethods();
-
-        RepoGenerationData generationDataSpy = mockRepoGenerationDataAndMethods(pigConfiguration);
-
-        Map<String, PncBuild> buildsSpy = mockBuildsAndMethods(generationDataSpy);
-
-        Path configurationDirectory = Mockito.mock(Path.class);
-
-        mockResourceUtilsMethods(configurationDirectory);
-
-        Deliverables deliverables = mockDeliverables(pigConfiguration);
-
-        BuildInfoCollector buildInfoCollectorMock = Mockito.mock(BuildInfoCollector.class);
-
-        RepoManager repoManager = new RepoManager(
-                pigConfiguration,
-                workDir.toString(),
-                deliverables,
-                buildsSpy,
-                configurationDirectory,
-                false,
-                false,
-                false,
-                buildInfoCollectorMock,
-                false);
-
-        RepoManager repoManagerSpy = Mockito.spy(repoManager);
-
-        prepareFakeExtensionArtifactList(repoManagerSpy);
-
-        RepositoryData repoData = repoManagerSpy.prepare();
-
-        Assertions.assertThat(repoData.getRepositoryPath())
-                .isEqualTo(workDir.resolve("rh-sample-maven-repository.zip"));
-
-        final Set<String> expectedFiles = repoZipContentList();
-
-        final Set<String> actualFiles = repoData.getFiles()
-                .stream()
-                .map(file -> file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "").replace('\\', '/'))
-                .collect(Collectors.toCollection(TreeSet::new));
-
-        final Path actualArtifactList = workDir.resolve("resolve-and-repackage-repo-artifact-list-actual.txt");
-        try {
-            Files.write(
-                    actualArtifactList,
-                    (actualFiles.stream().collect(Collectors.joining("\n")) + "\n").getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException("Could not write to " + actualArtifactList, e);
-        }
-
-        if (!actualFiles.equals(expectedFiles)) {
-            System.out.printf(
-                    "\nThe zipped repository has unexpected content. You may want to compare src/test/resources/%s with %s\n\n",
-                    EXPECTED_ARTIFACT_LIST_TXT,
-                    actualArtifactList);
-        }
-        Assertions.assertThat(actualFiles).containsExactlyElementsOf(expectedFiles);
     }
 
     private void mockPigContextAndMethods() {
@@ -282,6 +387,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
         MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
         indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
+        indyMockedStatic.when(() -> Indy.getIndyUrl()).thenReturn("https://mock.indy.org/maven");
     }
 
     private Repository addLocalRepo(Settings settings, String id, Path localPath) {
@@ -326,6 +432,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         ProductConfig productConfig = Mockito.mock(ProductConfig.class);
         doReturn(productConfig).when(pigConfiguration).getProduct();
         doReturn("sample").when(productConfig).getName();
+        doReturn(Map.of("cachi2LockFile", Map.of())).when(pigConfiguration).getAddons();
         return pigConfiguration;
     }
 
@@ -348,7 +455,9 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
                         IO_QUARKUS_PLATFORM_TEST + ":quarkus-bom:1.1.1.redhat-00001",
                         // this will resolve dependencies of the annotation processor w/o enforcing platform BOMs
                         "nonManagedDependencies",
-                        "org.acme:acme-annotation-processor:1.2.3.redhat-30303"));
+                        "org.acme:acme-annotation-processor:1.2.3.redhat-30303",
+                        "cachi2LockFile",
+                        CACHI2_LOCKFILE_NAME));
 
         // this quarkus-bom step is simply to generate the repo for the quarkus-bom
         final RepoGenerationData quarkusBomStep = new RepoGenerationData();
