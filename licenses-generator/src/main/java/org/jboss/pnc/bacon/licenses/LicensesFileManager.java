@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
  */
 public class LicensesFileManager {
 
+    private static final int DOWNLOAD_RETRY_LIMIT = 5;
     private static final int DOWNLOAD_TIMEOUT = 60_000;
 
     private static final String CONTENTS_DIR = "contents";
@@ -193,12 +194,42 @@ public class LicensesFileManager {
 
     // TODO: optimize!
     private void downloadTo(String url, File file) throws IOException {
+        downloadTo(url, file, DOWNLOAD_RETRY_LIMIT);
+    }
+
+    private void downloadTo(String url, File file, int remainingRetries) throws IOException {
+
+        // make sure we don't retry above the maximum limit
+        if (remainingRetries > DOWNLOAD_RETRY_LIMIT) {
+            remainingRetries = DOWNLOAD_RETRY_LIMIT;
+        }
+
+        if (remainingRetries < 0) {
+            throw new IOException("Remaining retries to download " + url + " exceeded!");
+        }
+
         HttpGet request = new HttpGet(url);
         HttpResponse response = httpClient.execute(request);
-        HttpEntity entity = response.getEntity();
-        if (entity != null) {
-            try (OutputStream stream = new FileOutputStream(file)) {
-                entity.writeTo(stream);
+        if (response.getStatusLine().getStatusCode() == 429) {
+            // Too many retries: sleep a bit then retry
+            try {
+                int sleepMinutes = DOWNLOAD_RETRY_LIMIT - remainingRetries + 1;
+                logger.info(
+                        "Hit too many requests exception for url: {}, remaining retries: {}, sleeping for {} minutes",
+                        url,
+                        remainingRetries,
+                        sleepMinutes);
+                Thread.sleep(sleepMinutes * 1000 * 60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            downloadTo(url, file, remainingRetries - 1);
+        } else {
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                try (OutputStream stream = new FileOutputStream(file)) {
+                    entity.writeTo(stream);
+                }
             }
         }
     }
