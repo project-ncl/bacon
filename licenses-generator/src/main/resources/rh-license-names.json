@@ -54,12 +54,16 @@
   },
   {
     "name": "GNU Lesser General Public License, Version 3",
+    "textUrl": "https://repository.jboss.org/licenses/lgpl-3.0.txt",
     "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
     "aliases": [
       "GNU Lesser General Public License, Version 3",
-      "The GNU Lesser General Public License, version 3"
+      "The GNU Lesser General Public License, version 3",
+      "GNU Lesser General Public License v3.0 only",
+      "GNU Lesser General Public License v3.0 or later"
     ],
     "urlAliases": [
+      "https://repository.jboss.org/licenses/lgpl-3.0.txt",
       "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
       "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
       "https://www.gnu.org/licenses/lgpl.html",
@@ -70,12 +74,14 @@
   },
   {
     "name": "GNU General Public License v2.0 only",
+    "textUrl": "https://repository.jboss.org/licenses/gpl-2.0.txt",
     "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
     "aliases": [
       "GNU General Public License v2.0 only",
       "The GNU General Public License, Version 2"
     ],
     "urlAliases": [
+      "https://repository.jboss.org/licenses/gpl-2.0.txt",
       "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
       "http://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
       "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
@@ -89,7 +95,8 @@
     "url": "http://repository.jboss.org/licenses/gpl-2.0-ce.txt",
     "aliases": [
       "GNU General Public License, Version 2 with the Classpath Exception",
-      "GPL2 w/ CPE"
+      "GPL2 w/ CPE",
+      "GNU General Public License"
     ],
     "urlAliases": [
       "http://repository.jboss.org/licenses/gpl-2.0-ce.txt"
@@ -318,6 +325,17 @@
     ],
     "urlAliases": [
       "http://creativecommons.org/publicdomain/zero/1.0"
+    ]
+  },
+  {
+    "name": "Unicode-3.0",
+    "url": "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE",
+    "aliases": [
+      "Unicode/ICU License",
+      "Unicode-3.0"
+    ],
+    "urlAliases": [
+      "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE"
     ]
   }
 ]
