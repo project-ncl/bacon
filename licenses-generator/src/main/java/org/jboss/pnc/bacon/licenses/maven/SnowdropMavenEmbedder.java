@@ -16,12 +16,13 @@
 
 package org.jboss.pnc.bacon.licenses.maven;
 
-import hudson.maven.MavenEmbedder;
-import hudson.maven.MavenEmbedderException;
-import hudson.maven.MavenRequest;
 import org.apache.maven.DefaultMaven;
 import org.apache.maven.Maven;
 import org.eclipse.aether.RepositorySystemSession;
+
+import hudson.maven.MavenEmbedder;
+import hudson.maven.MavenEmbedderException;
+import hudson.maven.MavenRequest;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

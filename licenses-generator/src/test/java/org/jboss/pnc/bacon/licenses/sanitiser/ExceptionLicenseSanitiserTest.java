@@ -1,19 +1,19 @@
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Collection;
+import java.util.Collections;
+
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

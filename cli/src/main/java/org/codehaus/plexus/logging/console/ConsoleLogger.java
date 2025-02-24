@@ -18,6 +18,7 @@
 package org.codehaus.plexus.logging.console;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.codehaus.plexus.logging.AbstractLogger;
 import org.codehaus.plexus.logging.Logger;
 

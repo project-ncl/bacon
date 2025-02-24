@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import lombok.Data;
-
 import java.util.List;
+
+import lombok.Data;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

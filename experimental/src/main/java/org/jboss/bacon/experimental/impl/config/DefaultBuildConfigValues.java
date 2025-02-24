@@ -1,11 +1,13 @@
 package org.jboss.bacon.experimental.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-import org.jboss.pnc.dto.validation.constraints.SCMUrl;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+
+import lombok.Data;
+
+import org.jboss.pnc.dto.validation.constraints.SCMUrl;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Default values to be used when generating build config.

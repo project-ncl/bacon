@@ -16,15 +16,15 @@
 
 package org.jboss.pnc.bacon.licenses.maven;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.jboss.pnc.bacon.licenses.properties.GeneratorProperties;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

@@ -17,6 +17,14 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
+
+import java.io.Closeable;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Optional;
+
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductMilestoneClient;
@@ -29,14 +37,6 @@ import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Optional;
-
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

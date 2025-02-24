@@ -17,7 +17,16 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import static java.util.Optional.of;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -34,17 +43,10 @@ import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-
-import static java.util.Optional.of;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @Slf4j
 @Command(

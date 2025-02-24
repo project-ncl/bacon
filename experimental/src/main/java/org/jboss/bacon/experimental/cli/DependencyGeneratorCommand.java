@@ -1,21 +1,22 @@
 package org.jboss.bacon.experimental.cli;
 
-import org.jboss.bacon.experimental.impl.config.GeneratorConfig;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.config.Validate;
-import org.yaml.snakeyaml.Yaml;
-import picocli.CommandLine;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Set;
+import org.jboss.bacon.experimental.impl.config.GeneratorConfig;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Validate;
+import org.yaml.snakeyaml.Yaml;
+
+import picocli.CommandLine;
 
 public class DependencyGeneratorCommand extends ExperimentalCommand {
     @CommandLine.Option(names = { "--project-dir" }, description = "Project directory")

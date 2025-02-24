@@ -1,17 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.Getter;
-import lombok.Setter;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -25,7 +14,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.lang.String.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * PSSC scanning container interface

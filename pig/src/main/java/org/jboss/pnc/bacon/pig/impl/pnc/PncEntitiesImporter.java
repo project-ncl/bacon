@@ -17,6 +17,22 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import static java.util.Optional.empty;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.findByNameQuery;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.maybeSingle;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
+
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -53,22 +69,6 @@ import org.jboss.pnc.enums.BuildType;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import static java.util.Optional.empty;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.findByNameQuery;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.maybeSingle;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.toStream;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

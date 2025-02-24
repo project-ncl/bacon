@@ -1,6 +1,15 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
-import com.google.common.collect.Lists;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Collections;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
 import org.jboss.pnc.bacon.pig.impl.config.LicenseGenerationStrategy;
@@ -12,15 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
-import java.util.Collections;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.*;
+import com.google.common.collect.Lists;
 
 class PigConfigurationValidationTest {
 

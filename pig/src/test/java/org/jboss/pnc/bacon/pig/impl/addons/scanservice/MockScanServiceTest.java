@@ -1,25 +1,26 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import org.jboss.pnc.bacon.pig.impl.addons.scanservice.pssaas.ScanHelper;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.*;
-
-import javax.ws.rs.core.Response;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static org.junit.jupiter.api.Assertions.*;
+import javax.ws.rs.core.Response;
+
+import org.jboss.pnc.bacon.pig.impl.addons.scanservice.pssaas.ScanHelper;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.*;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class MockScanServiceTest {

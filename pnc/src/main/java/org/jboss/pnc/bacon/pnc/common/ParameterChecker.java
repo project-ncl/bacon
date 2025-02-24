@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc.common;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.enums.RebuildMode;
 

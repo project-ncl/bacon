@@ -17,14 +17,17 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.concurrent.Callable;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
+
 import picocli.CommandLine.Parameters;
 
-import java.util.concurrent.Callable;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Class used to get specific item from PNC. The subclass only has to implement 'getSpecific' to teach it how to

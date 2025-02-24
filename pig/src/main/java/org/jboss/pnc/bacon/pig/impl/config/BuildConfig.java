@@ -17,24 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
-import org.jboss.pnc.bacon.pnc.common.ClientCreator;
-import org.jboss.pnc.client.EnvironmentClient;
-import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.dto.BuildConfiguration;
-import org.jboss.pnc.dto.Environment;
-import org.jboss.pnc.dto.SCMRepository;
-import org.jboss.pnc.enums.BuildType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -52,9 +37,26 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
+import lombok.Data;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.pig.impl.pnc.GitRepoInspector;
+import org.jboss.pnc.bacon.pnc.common.ClientCreator;
+import org.jboss.pnc.client.EnvironmentClient;
+import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.Environment;
+import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.enums.BuildType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * DTO representing the build-config field in build-config.yaml

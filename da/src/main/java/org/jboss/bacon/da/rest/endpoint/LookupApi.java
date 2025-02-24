@@ -17,6 +17,13 @@
  */
 package org.jboss.bacon.da.rest.endpoint;
 
+import java.util.Set;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
 import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLatestResult;
 import org.jboss.da.lookup.model.MavenLookupRequest;
@@ -25,13 +32,6 @@ import org.jboss.da.lookup.model.MavenVersionsRequest;
 import org.jboss.da.lookup.model.MavenVersionsResult;
 import org.jboss.da.lookup.model.NPMLookupRequest;
 import org.jboss.da.lookup.model.NPMLookupResult;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import java.util.Set;
 
 @Path("/lookup")
 @Consumes({ "application/json" })

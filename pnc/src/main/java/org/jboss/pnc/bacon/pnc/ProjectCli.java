@@ -17,6 +17,12 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
@@ -31,15 +37,10 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Project;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @Command(
         name = "project",

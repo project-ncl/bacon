@@ -1,14 +1,14 @@
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import org.junit.jupiter.api.Test;
 
 public class RedHatLicenseTest {
 

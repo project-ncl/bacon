@@ -1,10 +1,11 @@
 package org.jboss.bacon.experimental.impl.dependencies;
 
+import java.util.Set;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.jboss.da.model.rest.GAV;
 
-import java.util.Set;
+import org.jboss.da.model.rest.GAV;
 
 @Data
 @EqualsAndHashCode(exclude = { "dependencies", "depth", "cutDependency", "name", "conflictingName" })

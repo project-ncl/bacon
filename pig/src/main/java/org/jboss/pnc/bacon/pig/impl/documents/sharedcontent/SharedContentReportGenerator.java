@@ -18,11 +18,6 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
-import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,6 +27,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

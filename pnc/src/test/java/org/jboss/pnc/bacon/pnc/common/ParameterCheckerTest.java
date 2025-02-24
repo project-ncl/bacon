@@ -1,9 +1,9 @@
 package org.jboss.pnc.bacon.pnc.common;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ParameterCheckerTest {
     @Test

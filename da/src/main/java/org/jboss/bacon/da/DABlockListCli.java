@@ -17,19 +17,21 @@
  */
 package org.jboss.bacon.da;
 
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.bacon.da.rest.endpoint.ListingsApi;
-import org.jboss.da.listings.model.rest.RestArtifact;
-import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import picocli.CommandLine;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jboss.bacon.da.rest.endpoint.ListingsApi;
+import org.jboss.da.listings.model.rest.RestArtifact;
+import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+
+import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "blocklist",

@@ -1,8 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.addons.vertx;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class NotYetAlignedFromDependencyTreeTest {
 

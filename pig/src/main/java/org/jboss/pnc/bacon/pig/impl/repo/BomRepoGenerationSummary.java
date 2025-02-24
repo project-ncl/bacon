@@ -1,12 +1,13 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.maven.dependency.ArtifactCoords;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.maven.dependency.ArtifactCoords;
 
 /**
  * Maven repository generation summary for the BOM resolution strategy

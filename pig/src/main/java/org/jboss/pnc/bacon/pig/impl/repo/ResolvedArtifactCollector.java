@@ -1,8 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.domino.RhVersionPattern;
-import io.quarkus.maven.dependency.ArtifactCoords;
-import io.quarkus.maven.dependency.GAV;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.aether.AbstractRepositoryListener;
 import org.eclipse.aether.RepositoryEvent;
 import org.jboss.pnc.bacon.pig.impl.repo.visitor.ArtifactVisit;
@@ -10,12 +14,9 @@ import org.jboss.pnc.bacon.pig.impl.repo.visitor.ArtifactVisitor;
 import org.jboss.pnc.bacon.pig.impl.repo.visitor.FileSystemArtifactVisit;
 import org.jboss.pnc.bacon.pig.impl.repo.visitor.VisitableArtifactRepository;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import io.quarkus.domino.RhVersionPattern;
+import io.quarkus.maven.dependency.ArtifactCoords;
+import io.quarkus.maven.dependency.GAV;
 
 /**
  * Collects all the artifacts resolved by a Maven artifact resolver

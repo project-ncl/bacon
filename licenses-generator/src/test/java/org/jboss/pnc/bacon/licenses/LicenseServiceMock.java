@@ -15,12 +15,12 @@
  */
 package org.jboss.pnc.bacon.licenses;
 
-import io.undertow.Undertow;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import io.undertow.Undertow;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

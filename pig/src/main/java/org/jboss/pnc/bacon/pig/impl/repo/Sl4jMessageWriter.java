@@ -1,7 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.devtools.messagewriter.MessageWriter;
 import org.slf4j.Logger;
+
+import io.quarkus.devtools.messagewriter.MessageWriter;
 
 class Sl4jMessageWriter implements MessageWriter {
 

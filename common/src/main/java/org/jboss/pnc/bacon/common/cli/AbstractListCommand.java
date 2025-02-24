@@ -17,16 +17,19 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteResourceException;
+
 import picocli.CommandLine.Option;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Class used to provide a default implementation for List* type commands.

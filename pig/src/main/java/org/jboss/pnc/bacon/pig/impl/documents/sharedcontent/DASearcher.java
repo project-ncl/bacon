@@ -18,18 +18,19 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DADao;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DAListArtifact;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.join;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DADao;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DAListArtifact;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

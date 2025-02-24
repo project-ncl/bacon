@@ -1,12 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.addons.runtime;
 
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CsvExportable;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.ThorntailCommunityDependency;
-
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CsvExportable;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.ThorntailCommunityDependency;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

@@ -1,8 +1,8 @@
 package org.jboss.pnc.bacon.licenses.sanitiser.exceptions;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 public class ExactVersionMatcherTest {
     private VersionMatcher matcher = new ExactVersionMatcher("1.0.0");

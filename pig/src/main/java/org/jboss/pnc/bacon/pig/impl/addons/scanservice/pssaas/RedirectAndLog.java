@@ -1,19 +1,19 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice.pssaas;
 
-import org.apache.commons.io.IOUtils;
-import org.jboss.pnc.bacon.pig.impl.addons.scanservice.PostBuildScanService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.commons.io.IOUtils.toInputStream;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.client.Entity;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-
-import static org.apache.commons.io.IOUtils.toInputStream;
+import org.apache.commons.io.IOUtils;
+import org.jboss.pnc.bacon.pig.impl.addons.scanservice.PostBuildScanService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RedirectAndLog implements ClientResponseFilter {
     private static final Logger log = LoggerFactory.getLogger(PostBuildScanService.class);

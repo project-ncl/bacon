@@ -1,13 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.addons.cachi2;
 
-import io.quarkus.fs.util.ZipUtils;
-import org.jboss.pnc.bacon.pig.impl.repo.visitor.ArtifactVisit;
-import org.jboss.pnc.bacon.pig.impl.repo.visitor.VisitableArtifactRepository;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileSystem;
@@ -25,6 +17,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.jboss.pnc.bacon.pig.impl.repo.visitor.ArtifactVisit;
+import org.jboss.pnc.bacon.pig.impl.repo.visitor.VisitableArtifactRepository;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.fs.util.ZipUtils;
 
 /**
  * Cachi2 lock file generator

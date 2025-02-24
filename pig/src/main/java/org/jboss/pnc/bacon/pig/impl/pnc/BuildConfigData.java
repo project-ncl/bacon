@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.pig.impl.pnc;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Delegate;
+
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.dto.BuildConfiguration;
 

@@ -1,7 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.repo.visitor;
 
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -9,6 +7,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 public class FileSystemArtifactVisit implements ArtifactVisit {
 

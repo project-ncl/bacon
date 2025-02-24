@@ -1,5 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.addons.microprofile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.CommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -7,13 +14,6 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Performs community dependency analysis on all builds (in "our" build group, that is). Assumes that each build

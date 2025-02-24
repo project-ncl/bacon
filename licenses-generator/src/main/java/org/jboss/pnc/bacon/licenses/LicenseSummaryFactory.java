@@ -16,17 +16,17 @@
 
 package org.jboss.pnc.bacon.licenses;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.maven.artifact.Artifact;
 import org.jboss.pnc.bacon.licenses.sanitiser.LicenseSanitiser;
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Class responsible for retrieving licenses information based on a provided GAV.

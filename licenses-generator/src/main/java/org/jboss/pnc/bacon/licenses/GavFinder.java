@@ -1,15 +1,15 @@
 package org.jboss.pnc.bacon.licenses;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.project.MavenProject;
-import org.jboss.pnc.bacon.licenses.maven.MavenProjectFactory;
-import org.jboss.pnc.bacon.licenses.utils.Gav;
-
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.project.MavenProject;
+import org.jboss.pnc.bacon.licenses.maven.MavenProjectFactory;
+import org.jboss.pnc.bacon.licenses.utils.Gav;
 
 public class GavFinder {
     private final MavenProjectFactory mavenProjectFactory;

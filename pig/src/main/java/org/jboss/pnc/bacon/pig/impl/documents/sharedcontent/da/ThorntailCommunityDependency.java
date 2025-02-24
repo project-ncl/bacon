@@ -1,10 +1,10 @@
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.List;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

@@ -1,9 +1,9 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
-import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 
 /**
  * Validation implementation for GenerationDataCheck

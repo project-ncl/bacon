@@ -1,18 +1,18 @@
 package org.jboss.pnc.bacon.pig.impl.mapping;
 
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.dto.BuildConfiguration;
-import org.jboss.pnc.dto.BuildConfigurationRevision;
-import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.BuildConfigurationRevision;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class BuildConfigMappingTest {
 

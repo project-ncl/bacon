@@ -18,6 +18,8 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
+import java.io.IOException;
+
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
@@ -26,8 +28,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

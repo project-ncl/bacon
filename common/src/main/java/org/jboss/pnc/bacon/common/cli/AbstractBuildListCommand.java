@@ -17,12 +17,13 @@
  */
 package org.jboss.pnc.bacon.common.cli;
 
+import java.util.Collection;
+
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
-import picocli.CommandLine.Option;
 
-import java.util.Collection;
+import picocli.CommandLine.Option;
 
 /**
  * Class used to provide a default implementation for List* type commands.

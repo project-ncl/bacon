@@ -17,6 +17,13 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import static java.util.Optional.of;
+import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
+import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
+
+import java.io.Closeable;
+import java.util.Collection;
+
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
@@ -36,13 +43,6 @@ import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
-import java.util.Collection;
-
-import static java.util.Optional.of;
-import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
-import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

@@ -1,11 +1,11 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice.pssaas;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
 
 public class AddAuthHeadersRequestFilter implements ClientRequestFilter {
     private Map<String, String> headers = new TreeMap<String, String>();

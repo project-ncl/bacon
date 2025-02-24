@@ -1,6 +1,12 @@
 package org.jboss.pnc.bacon.test.pnc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Collections;
+
 import org.jboss.pnc.bacon.test.AbstractTest;
 import org.jboss.pnc.bacon.test.ExecutionResult;
 import org.jboss.pnc.bacon.test.TestType;
@@ -15,12 +21,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  *

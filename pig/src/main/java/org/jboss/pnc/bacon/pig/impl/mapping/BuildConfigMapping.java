@@ -1,20 +1,21 @@
 package org.jboss.pnc.bacon.pig.impl.mapping;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.dto.BuildConfiguration;
-import org.jboss.pnc.dto.BuildConfigurationRevision;
-import org.jboss.pnc.dto.Environment;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.BuildConfigurationRevision;
+import org.jboss.pnc.dto.Environment;
 
 public class BuildConfigMapping {
 

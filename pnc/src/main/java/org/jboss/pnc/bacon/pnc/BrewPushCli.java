@@ -17,6 +17,10 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import java.util.Collections;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
@@ -28,13 +32,10 @@ import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
 import org.jboss.pnc.enums.BuildPushStatus;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 @Command(
         name = "brew-push",

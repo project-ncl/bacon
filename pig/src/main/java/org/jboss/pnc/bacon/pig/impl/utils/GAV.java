@@ -18,22 +18,24 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import org.apache.commons.io.FilenameUtils;
-import org.jboss.da.listings.model.rest.RestArtifact;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import org.apache.commons.io.FilenameUtils;
+import org.jboss.da.listings.model.rest.RestArtifact;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+
+import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

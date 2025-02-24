@@ -1,10 +1,11 @@
 package org.jboss.bacon.experimental.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
+import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -17,9 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import lombok.Data;
-
 import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
 
 /**
  *

@@ -17,14 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.script;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.jboss.pnc.bacon.pig.impl.PigContext;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +24,15 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Optional;
 import java.util.Set;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

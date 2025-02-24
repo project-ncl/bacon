@@ -15,6 +15,15 @@
 
 package org.jboss.pnc.bacon.pig.impl.addons.spring;
 
+import static java.util.Collections.emptyList;
+import static org.jboss.pnc.bacon.pig.impl.utils.XmlUtils.listNodes;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -26,15 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
-import static org.jboss.pnc.bacon.pig.impl.utils.XmlUtils.listNodes;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

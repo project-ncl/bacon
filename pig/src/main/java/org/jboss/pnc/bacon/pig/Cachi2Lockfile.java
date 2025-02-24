@@ -1,11 +1,12 @@
 package org.jboss.pnc.bacon.pig;
 
-import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileGenerator;
-import picocli.CommandLine;
-
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileGenerator;
+
+import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "cachi2lockfile",

@@ -17,13 +17,14 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import java.util.concurrent.Callable;
+
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.UserClient;
-import picocli.CommandLine.Command;
 
-import java.util.concurrent.Callable;
+import picocli.CommandLine.Command;
 
 @Command(name = "whoami", description = "Returns identity of current user")
 public class WhoAmICli extends JSONCommandHandler implements Callable<Integer> {

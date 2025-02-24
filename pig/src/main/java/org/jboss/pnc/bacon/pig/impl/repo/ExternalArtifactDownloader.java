@@ -17,15 +17,15 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
+
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Path;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

@@ -16,6 +16,12 @@
 
 package org.jboss.pnc.bacon.licenses;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.project.ProjectBuilder;
@@ -36,12 +42,6 @@ import org.jboss.pnc.bacon.licenses.utils.Gav;
 import org.jboss.pnc.bacon.licenses.xml.LicenseSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

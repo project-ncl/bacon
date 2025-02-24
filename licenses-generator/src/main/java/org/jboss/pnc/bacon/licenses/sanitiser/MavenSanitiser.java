@@ -15,6 +15,10 @@
  */
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.apache.maven.model.License;
 import org.apache.maven.project.MavenProject;
 import org.jboss.pnc.bacon.licenses.maven.MavenProjectFactory;
@@ -22,10 +26,6 @@ import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * A pass-through sanitiser. If the dependency element does not have a license, the sanitiser will try to get it from a

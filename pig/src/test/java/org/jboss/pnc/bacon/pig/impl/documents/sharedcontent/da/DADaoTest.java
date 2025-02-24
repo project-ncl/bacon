@@ -17,16 +17,16 @@
  */
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.testcommon.RemoteTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

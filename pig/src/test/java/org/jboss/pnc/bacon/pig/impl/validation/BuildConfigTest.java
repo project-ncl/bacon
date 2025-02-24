@@ -1,20 +1,20 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.enums.BuildType;
-import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.*;
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.enums.BuildType;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class BuildConfigTest {
 

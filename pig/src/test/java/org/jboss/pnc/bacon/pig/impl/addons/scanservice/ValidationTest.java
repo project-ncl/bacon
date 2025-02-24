@@ -1,14 +1,14 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.*;
+
 import org.jboss.pnc.bacon.config.Validate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidationTest {
 

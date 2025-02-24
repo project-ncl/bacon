@@ -17,19 +17,19 @@
  */
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
-import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
-import org.jboss.pnc.build.finder.koji.KojiBuild;
-import org.jboss.pnc.build.finder.report.NVRReport;
-import org.jboss.pnc.build.finder.report.Report;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.build.finder.report.NVRReport;
+import org.jboss.pnc.build.finder.report.Report;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class NvrListGenerator {
     private static final Logger log = LoggerFactory.getLogger(NvrListGenerator.class);

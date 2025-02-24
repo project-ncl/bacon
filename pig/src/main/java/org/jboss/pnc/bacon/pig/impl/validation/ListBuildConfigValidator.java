@@ -1,8 +1,7 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.enums.BuildType;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -10,8 +9,10 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.enums.BuildType;
 
 /**
  * Validation implementation for BuildConfig

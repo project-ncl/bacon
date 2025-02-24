@@ -1,22 +1,24 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
-import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.enums.BuildType;
-import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.List;
+import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import java.util.List;
-import java.util.Set;
+import lombok.AllArgsConstructor;
 
-import static org.assertj.core.api.Assertions.*;
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.enums.BuildType;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.google.common.collect.Lists;
 
 class ListBuildConfigCheckTest {
     static Validator validator;

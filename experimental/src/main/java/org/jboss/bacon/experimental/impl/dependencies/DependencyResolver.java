@@ -1,31 +1,5 @@
 package org.jboss.bacon.experimental.impl.dependencies;
 
-import io.quarkus.bom.decomposer.ReleaseId;
-import io.quarkus.bom.decomposer.ReleaseOrigin;
-import io.quarkus.bom.decomposer.ReleaseVersion;
-import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
-import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
-import io.quarkus.devtools.messagewriter.MessageWriter;
-import io.quarkus.domino.CircularReleaseDependency;
-import io.quarkus.domino.ProjectDependencyConfig;
-import io.quarkus.domino.ProjectDependencyConfigMapper;
-import io.quarkus.domino.ProjectDependencyResolver;
-import io.quarkus.domino.ReleaseCollection;
-import io.quarkus.domino.ReleaseRepo;
-import io.quarkus.maven.dependency.ArtifactCoords;
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.bacon.da.DaHelper;
-import org.jboss.bacon.da.rest.endpoint.LookupApi;
-import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
-import org.jboss.da.lookup.model.MavenLookupRequest;
-import org.jboss.da.lookup.model.MavenLookupResult;
-import org.jboss.da.model.rest.GAV;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.config.AutobuildConfig;
-import org.jboss.pnc.bacon.config.Config;
-import org.jboss.pnc.common.version.SuffixedVersion;
-import org.jboss.pnc.common.version.VersionParser;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -41,6 +15,34 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jboss.bacon.da.DaHelper;
+import org.jboss.bacon.da.rest.endpoint.LookupApi;
+import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
+import org.jboss.da.lookup.model.MavenLookupRequest;
+import org.jboss.da.lookup.model.MavenLookupResult;
+import org.jboss.da.model.rest.GAV;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.AutobuildConfig;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.common.version.SuffixedVersion;
+import org.jboss.pnc.common.version.VersionParser;
+
+import io.quarkus.bom.decomposer.ReleaseId;
+import io.quarkus.bom.decomposer.ReleaseOrigin;
+import io.quarkus.bom.decomposer.ReleaseVersion;
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
+import io.quarkus.devtools.messagewriter.MessageWriter;
+import io.quarkus.domino.CircularReleaseDependency;
+import io.quarkus.domino.ProjectDependencyConfig;
+import io.quarkus.domino.ProjectDependencyConfigMapper;
+import io.quarkus.domino.ProjectDependencyResolver;
+import io.quarkus.domino.ReleaseCollection;
+import io.quarkus.domino.ReleaseRepo;
+import io.quarkus.maven.dependency.ArtifactCoords;
 
 @Slf4j
 public class DependencyResolver {

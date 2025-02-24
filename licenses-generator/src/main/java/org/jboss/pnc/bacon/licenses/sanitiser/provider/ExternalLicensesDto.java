@@ -15,9 +15,9 @@
  */
 package org.jboss.pnc.bacon.licenses.sanitiser.provider;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com

@@ -17,13 +17,14 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
 import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.ProductMilestoneRef;
 import org.jboss.pnc.dto.ProductVersionRef;
-
-import java.util.List;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

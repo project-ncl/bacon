@@ -17,15 +17,8 @@
  */
 package org.jboss.bacon.da.rest.endpoint;
 
-import org.jboss.da.listings.model.ProductSupportStatus;
-import org.jboss.da.listings.model.rest.ContainsResponse;
-import org.jboss.da.listings.model.rest.RestArtifact;
-import org.jboss.da.listings.model.rest.RestProduct;
-import org.jboss.da.listings.model.rest.RestProductArtifact;
-import org.jboss.da.listings.model.rest.RestProductGAV;
-import org.jboss.da.listings.model.rest.RestProductInput;
-import org.jboss.da.listings.model.rest.SuccessResponse;
-import org.jboss.da.listings.model.rest.WLFill;
+import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -38,8 +31,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import java.util.Collection;
-import java.util.List;
+import org.jboss.da.listings.model.ProductSupportStatus;
+import org.jboss.da.listings.model.rest.ContainsResponse;
+import org.jboss.da.listings.model.rest.RestArtifact;
+import org.jboss.da.listings.model.rest.RestProduct;
+import org.jboss.da.listings.model.rest.RestProductArtifact;
+import org.jboss.da.listings.model.rest.RestProductGAV;
+import org.jboss.da.listings.model.rest.RestProductInput;
+import org.jboss.da.listings.model.rest.SuccessResponse;
+import org.jboss.da.listings.model.rest.WLFill;
 
 @Path("/listings")
 @javax.annotation.Generated(

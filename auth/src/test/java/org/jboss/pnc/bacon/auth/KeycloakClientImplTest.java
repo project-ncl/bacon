@@ -1,10 +1,10 @@
 package org.jboss.pnc.bacon.auth;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class KeycloakClientImplTest {
 

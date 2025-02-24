@@ -17,17 +17,18 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

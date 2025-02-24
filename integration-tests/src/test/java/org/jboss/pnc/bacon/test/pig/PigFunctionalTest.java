@@ -1,5 +1,8 @@
 package org.jboss.pnc.bacon.test.pig;
 
+import java.nio.file.Path;
+import java.util.Collections;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.exception.FatalException;
@@ -11,9 +14,6 @@ import org.jboss.pnc.bacon.test.CLIExecutor;
 import org.jboss.pnc.bacon.test.TestType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-
-import java.nio.file.Path;
-import java.util.Collections;
 
 @Tag(TestType.REAL_SERVICE_ONLY)
 public abstract class PigFunctionalTest {

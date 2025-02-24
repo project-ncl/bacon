@@ -17,8 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
