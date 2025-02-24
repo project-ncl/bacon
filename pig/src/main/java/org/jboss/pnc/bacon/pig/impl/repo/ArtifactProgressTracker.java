@@ -1,11 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.maven.dependency.GAV;
+import java.util.Formatter;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Formatter;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.quarkus.maven.dependency.GAV;
 
 /**
  * Artifact processing progress tracker

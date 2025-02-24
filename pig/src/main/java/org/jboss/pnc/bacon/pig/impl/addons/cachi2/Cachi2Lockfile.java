@@ -1,6 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.addons.cachi2;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import static org.jboss.pnc.bacon.pig.impl.addons.cachi2.YamlUtil.initYamlMapper;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.jboss.pnc.bacon.pig.impl.addons.cachi2.YamlUtil.initYamlMapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Cachi2 lockfile

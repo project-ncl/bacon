@@ -1,17 +1,7 @@
 package org.jboss.pnc.bacon.pig.impl.addons.rhba;
 
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
-import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
-import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
-import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.enums.RepositoryType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
+import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.IGNORE;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -25,8 +15,18 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
-import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.IGNORE;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
+import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.enums.RepositoryType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates the offline manifest text file, which contains all the dependencies, including third party, non-RH

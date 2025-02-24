@@ -17,6 +17,10 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
+import java.util.concurrent.Callable;
+
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -30,13 +34,10 @@ import org.jboss.pnc.client.ProductReleaseClient;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.enums.SupportLevel;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import java.util.concurrent.Callable;
-
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @Command(
         name = "product-release",

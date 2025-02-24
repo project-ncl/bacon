@@ -18,9 +18,8 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,8 +36,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.StringUtils.join;
+import lombok.Getter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * todo: clean up + possibly move out to a separate lib TODO: remove !!

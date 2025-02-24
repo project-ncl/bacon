@@ -17,10 +17,11 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.validation.constraints.NotBlank;
+
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

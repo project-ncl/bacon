@@ -1,13 +1,14 @@
 package org.jboss.pnc.bacon.common;
 
-import ch.qos.logback.classic.Level;
-import org.junit.jupiter.api.Test;
+import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import ch.qos.logback.classic.Level;
 
 class ObjectHelperTest {
 

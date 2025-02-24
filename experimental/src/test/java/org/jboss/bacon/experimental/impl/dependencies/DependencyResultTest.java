@@ -1,10 +1,10 @@
 package org.jboss.bacon.experimental.impl.dependencies;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashSet;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 public class DependencyResultTest {
 

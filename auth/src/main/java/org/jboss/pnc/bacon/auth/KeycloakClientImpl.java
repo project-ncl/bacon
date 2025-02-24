@@ -1,9 +1,12 @@
 package org.jboss.pnc.bacon.auth;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.Optional;
+
+import javax.net.ssl.SSLHandshakeException;
+
 import kong.unirest.HttpResponse;
 import kong.unirest.MultipartBody;
 import kong.unirest.Unirest;
@@ -12,6 +15,7 @@ import kong.unirest.jackson.JacksonObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bacon.auth.model.CacheFile;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.model.KeycloakResponse;
@@ -20,12 +24,10 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.keycloak.adapters.installed.KeycloakInstalled;
 import org.keycloak.representations.AccessToken;
 
-import javax.net.ssl.SSLHandshakeException;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.time.Instant;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Authenticates to Keycloak using direct flow!

@@ -17,13 +17,14 @@
  */
 package org.jboss.pnc.bacon.pnc.admin;
 
+import java.util.concurrent.Callable;
+
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GenericSettingClient;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
-
-import java.util.concurrent.Callable;
 
 @Command(
         name = "maintenance-mode",

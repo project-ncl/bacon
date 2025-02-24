@@ -16,12 +16,12 @@
 
 package org.jboss.pnc.bacon.licenses;
 
-import org.jboss.pnc.bacon.licenses.properties.GeneratorProperties;
-import org.jboss.pnc.bacon.licenses.properties.PropertyKeys;
-
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
+
+import org.jboss.pnc.bacon.licenses.properties.GeneratorProperties;
+import org.jboss.pnc.bacon.licenses.properties.PropertyKeys;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

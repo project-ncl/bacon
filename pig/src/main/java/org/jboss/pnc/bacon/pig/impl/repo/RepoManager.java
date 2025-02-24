@@ -17,51 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContext;
-import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
-import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
-import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
-import io.quarkus.bootstrap.util.IoUtils;
-import io.quarkus.devtools.messagewriter.MessageWriter;
-import io.quarkus.domino.inspect.DependencyTreeError;
-import io.quarkus.domino.inspect.DependencyTreeInspector;
-import io.quarkus.domino.inspect.DependencyTreeVisitor;
-import io.quarkus.maven.dependency.ArtifactCoords;
-import io.quarkus.maven.dependency.ArtifactKey;
-import lombok.Getter;
-import org.apache.maven.model.Model;
-import org.eclipse.aether.DefaultRepositorySystemSession;
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.graph.DependencyNode;
-import org.eclipse.aether.graph.Exclusion;
-import org.eclipse.aether.resolution.DependencyRequest;
-import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.listener.ChainedRepositoryListener;
-import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.pig.impl.PigContext;
-import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileGenerator;
-import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
-import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
-import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
-import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
-import org.jboss.pnc.bacon.pig.impl.license.LicenseGenerator;
-import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
-import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.bacon.pig.impl.utils.GavSet;
-import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -97,6 +52,53 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import lombok.Getter;
+
+import org.apache.maven.model.Model;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.graph.Exclusion;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.listener.ChainedRepositoryListener;
+import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileGenerator;
+import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
+import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
+import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
+import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
+import org.jboss.pnc.bacon.pig.impl.license.LicenseGenerator;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
+import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pig.impl.utils.GavSet;
+import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContext;
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
+import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
+import io.quarkus.bootstrap.util.IoUtils;
+import io.quarkus.devtools.messagewriter.MessageWriter;
+import io.quarkus.domino.inspect.DependencyTreeError;
+import io.quarkus.domino.inspect.DependencyTreeInspector;
+import io.quarkus.domino.inspect.DependencyTreeVisitor;
+import io.quarkus.maven.dependency.ArtifactCoords;
+import io.quarkus.maven.dependency.ArtifactKey;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

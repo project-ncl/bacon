@@ -17,14 +17,14 @@
  */
 package org.jboss.bacon.experimental.impl.generator;
 
-import org.jboss.bacon.experimental.impl.dependencies.Project;
-import org.jboss.da.model.rest.GAV;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.jboss.bacon.experimental.impl.dependencies.Project;
+import org.jboss.da.model.rest.GAV;
+import org.junit.jupiter.api.Test;
 
 public class ProjectNameGeneratorTest {
 

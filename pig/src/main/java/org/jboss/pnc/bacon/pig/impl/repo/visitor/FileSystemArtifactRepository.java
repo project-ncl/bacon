@@ -1,8 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.repo.visitor;
 
-import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
@@ -14,6 +11,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+
+import org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 class FileSystemArtifactRepository implements VisitableArtifactRepository {
 

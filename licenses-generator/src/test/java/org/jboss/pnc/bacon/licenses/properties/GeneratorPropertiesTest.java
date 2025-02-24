@@ -16,10 +16,10 @@
 
 package org.jboss.pnc.bacon.licenses.properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

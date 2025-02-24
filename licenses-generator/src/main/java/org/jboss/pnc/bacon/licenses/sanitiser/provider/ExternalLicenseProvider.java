@@ -15,17 +15,6 @@
  */
 package org.jboss.pnc.bacon.licenses.sanitiser.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.jboss.pnc.bacon.licenses.LicensesGeneratorException;
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +22,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
+
+import org.jboss.pnc.bacon.licenses.LicensesGeneratorException;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

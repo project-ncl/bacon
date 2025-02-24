@@ -16,12 +16,12 @@
 
 package org.jboss.pnc.bacon.licenses.sanitiser.exceptions;
 
+import java.util.Objects;
+
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.VersionConstraint;
 import org.eclipse.aether.version.VersionScheme;
-
-import java.util.Objects;
 
 class RangeVersionMatcher implements VersionMatcher {
     private final VersionScheme scheme;

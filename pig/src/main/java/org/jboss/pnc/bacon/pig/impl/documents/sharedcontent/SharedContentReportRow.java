@@ -18,10 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
-import lombok.Data;
-import lombok.experimental.Delegate;
-import org.apache.commons.lang3.StringUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -29,7 +26,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import lombok.Data;
+import lombok.experimental.Delegate;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

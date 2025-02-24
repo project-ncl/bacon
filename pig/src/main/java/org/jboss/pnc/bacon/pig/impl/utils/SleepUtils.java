@@ -18,10 +18,10 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Supplier;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

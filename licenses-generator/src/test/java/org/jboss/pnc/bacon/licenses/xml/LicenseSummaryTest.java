@@ -1,12 +1,12 @@
 package org.jboss.pnc.bacon.licenses.xml;
 
-import org.junit.jupiter.api.Test;
-
-import javax.xml.bind.JAXBException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.xml.bind.JAXBException;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

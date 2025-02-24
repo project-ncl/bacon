@@ -1,14 +1,16 @@
 package org.jboss.bacon.experimental.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import java.util.LinkedHashMap;
-import java.util.Set;
+import lombok.Data;
+
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Configuration for how the new build configs should be created.

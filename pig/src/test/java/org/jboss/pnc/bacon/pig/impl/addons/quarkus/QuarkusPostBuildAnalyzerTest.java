@@ -1,10 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import org.apache.commons.io.FileUtils;
-import org.jboss.pnc.bacon.common.exception.FatalException;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.junit.jupiter.api.Test;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.junit.jupiter.api.Test;
+
+import com.github.tomakehurst.wiremock.WireMockServer;
 
 public class QuarkusPostBuildAnalyzerTest {
     WireMockServer wireMockServer = new WireMockServer();

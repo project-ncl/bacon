@@ -1,14 +1,14 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.jboss.resteasy.util.Hex;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.jboss.resteasy.util.Hex;
 
 public class HashUtils {
     private HashUtils() {

@@ -16,7 +16,11 @@
 
 package org.jboss.pnc.bacon.licenses.xml;
 
-import org.apache.maven.artifact.Artifact;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlElement;
@@ -25,11 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.apache.maven.artifact.Artifact;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

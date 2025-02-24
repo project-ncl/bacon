@@ -16,14 +16,14 @@
 
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

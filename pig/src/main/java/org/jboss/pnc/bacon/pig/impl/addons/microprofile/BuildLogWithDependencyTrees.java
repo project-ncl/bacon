@@ -1,10 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.addons.microprofile;
 
-import com.google.common.collect.Sets;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +9,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 public class BuildLogWithDependencyTrees {
     private static final Logger log = LoggerFactory.getLogger(BuildLogWithDependencyTrees.class);

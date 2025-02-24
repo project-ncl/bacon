@@ -1,10 +1,10 @@
 package org.jboss.pnc.bacon.pig.impl.utils.pom;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 
 /**
  * @author Paul Gallagher, pgallagh@redhat <br>

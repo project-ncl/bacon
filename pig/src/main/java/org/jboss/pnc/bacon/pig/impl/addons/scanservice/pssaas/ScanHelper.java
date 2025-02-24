@@ -1,10 +1,10 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice.pssaas;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
 import java.net.URI;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 public class ScanHelper {
 

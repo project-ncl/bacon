@@ -17,10 +17,10 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
+import java.util.Map;
+
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-
-import java.util.Map;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

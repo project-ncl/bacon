@@ -1,12 +1,12 @@
 package org.jboss.pnc.bacon.config;
 
-import javax.validation.ConstraintViolation;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import javax.validation.ConstraintViolation;
 
 public interface Validate {
 

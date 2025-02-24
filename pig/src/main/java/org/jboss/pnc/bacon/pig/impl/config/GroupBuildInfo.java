@@ -17,12 +17,13 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.dto.GroupBuild;
-
-import java.util.Map;
 
 @Data
 @AllArgsConstructor

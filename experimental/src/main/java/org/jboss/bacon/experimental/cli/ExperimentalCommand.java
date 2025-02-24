@@ -1,11 +1,11 @@
 package org.jboss.bacon.experimental.cli;
 
+import java.util.concurrent.Callable;
+
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.ConfigProfile;
-
-import java.util.concurrent.Callable;
 
 public abstract class ExperimentalCommand extends JSONCommandHandler implements Callable<Integer> {
 

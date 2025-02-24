@@ -1,15 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jboss.pnc.bacon.pig.impl.PigContext;
-import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.MavenRepositoryUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.jboss.pnc.bacon.pig.impl.utils.FileUtils.mkTempDir;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.jboss.pnc.bacon.pig.impl.utils.FileUtils.mkTempDir;
+import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.MavenRepositoryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Saumya Singh, singhsaumyas150@gmail.com <br>

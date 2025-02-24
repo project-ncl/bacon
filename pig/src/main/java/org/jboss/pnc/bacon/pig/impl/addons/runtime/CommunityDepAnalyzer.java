@@ -17,19 +17,19 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons.runtime;
 
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CsvExportable;
-import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DADao;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CsvExportable;
+import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.DADao;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

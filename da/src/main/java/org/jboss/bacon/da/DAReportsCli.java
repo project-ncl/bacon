@@ -1,6 +1,14 @@
 package org.jboss.bacon.da;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.bacon.da.rest.endpoint.ReportsApi;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
@@ -18,14 +26,8 @@ import org.jboss.da.reports.model.response.striped.WLStripper;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
-import picocli.CommandLine;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
+import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "reports",

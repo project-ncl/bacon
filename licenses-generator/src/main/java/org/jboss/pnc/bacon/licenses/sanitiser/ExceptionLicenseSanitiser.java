@@ -16,11 +16,11 @@
 
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
+import java.util.Set;
+
 import org.jboss.pnc.bacon.licenses.sanitiser.exceptions.LicenseException;
 import org.jboss.pnc.bacon.licenses.utils.JsonUtils;
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
-
-import java.util.Set;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

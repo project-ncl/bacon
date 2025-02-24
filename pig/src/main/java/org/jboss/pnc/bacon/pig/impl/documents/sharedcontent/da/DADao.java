@@ -17,6 +17,11 @@
  */
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.bacon.da.DaHelper;
 import org.jboss.bacon.da.rest.endpoint.ListingsApi;
@@ -28,11 +33,6 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

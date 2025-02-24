@@ -1,5 +1,14 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -10,15 +19,6 @@ import org.jboss.pnc.dto.GroupConfiguration;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class PncBuilderTest {
 

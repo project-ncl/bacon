@@ -1,13 +1,14 @@
 package org.jboss.bacon.da;
 
-import io.opentelemetry.api.trace.SpanContext;
-import org.jboss.pnc.api.constants.MDCHeaderKeys;
-import org.jboss.pnc.common.otel.OtelUtils;
+import java.io.IOException;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
-import java.io.IOException;
+import org.jboss.pnc.api.constants.MDCHeaderKeys;
+import org.jboss.pnc.common.otel.OtelUtils;
+
+import io.opentelemetry.api.trace.SpanContext;
 
 public class CustomRestHeaderFilter implements ClientRequestFilter {
 

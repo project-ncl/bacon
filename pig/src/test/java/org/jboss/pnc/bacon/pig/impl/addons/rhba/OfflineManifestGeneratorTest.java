@@ -1,17 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.addons.rhba;
 
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
-import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.pnc.dto.TargetRepository;
-import org.jboss.pnc.enums.RepositoryType;
-import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,9 +17,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy.BUILD_GROUP;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
+import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.TargetRepository;
+import org.jboss.pnc.enums.RepositoryType;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class OfflineManifestGeneratorTest {
 

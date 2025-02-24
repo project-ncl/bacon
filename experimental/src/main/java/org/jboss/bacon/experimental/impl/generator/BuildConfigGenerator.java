@@ -1,6 +1,18 @@
 package org.jboss.bacon.experimental.impl.generator;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
@@ -16,17 +28,6 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class BuildConfigGenerator {

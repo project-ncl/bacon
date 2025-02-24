@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Delegate;
+
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 /**

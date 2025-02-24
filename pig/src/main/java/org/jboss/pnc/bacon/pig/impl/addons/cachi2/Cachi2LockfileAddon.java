@@ -1,13 +1,13 @@
 package org.jboss.pnc.bacon.pig.impl.addons.cachi2;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
 
 /**
  * An add-on that generates Cachi2 lock files.

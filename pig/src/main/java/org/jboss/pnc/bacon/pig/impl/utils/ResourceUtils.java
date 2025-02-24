@@ -18,10 +18,7 @@
 
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +27,10 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Properties;
 
-import static org.apache.commons.io.FileUtils.writeStringToFile;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

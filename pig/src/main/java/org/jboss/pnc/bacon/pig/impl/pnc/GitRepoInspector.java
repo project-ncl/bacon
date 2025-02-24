@@ -17,6 +17,16 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -29,16 +39,6 @@ import org.eclipse.jgit.transport.URIish;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * TODO: drop it once https://projects.engineering.redhat.com/browse/NCL-1322 is implemented

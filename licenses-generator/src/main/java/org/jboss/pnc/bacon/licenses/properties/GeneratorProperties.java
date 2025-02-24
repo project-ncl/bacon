@@ -16,15 +16,15 @@
 
 package org.jboss.pnc.bacon.licenses.properties;
 
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

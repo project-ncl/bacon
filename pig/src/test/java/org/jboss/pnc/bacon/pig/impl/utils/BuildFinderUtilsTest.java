@@ -1,12 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import org.jboss.pnc.bacon.config.Config;
-import org.jboss.pnc.build.finder.core.BuildConfig;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.build.finder.core.BuildConfig;
+import org.junit.jupiter.api.Test;
 
 class BuildFinderUtilsTest {
     @Test

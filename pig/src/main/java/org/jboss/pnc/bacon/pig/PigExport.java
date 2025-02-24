@@ -1,5 +1,7 @@
 package org.jboss.pnc.bacon.pig;
 
+import java.util.Optional;
+
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.mapping.BuildConfigMapping;
@@ -8,9 +10,8 @@ import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
-import picocli.CommandLine;
 
-import java.util.Optional;
+import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "export",

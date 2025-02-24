@@ -1,5 +1,14 @@
 package org.jboss.pnc.bacon.pig.impl.validation;
 
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
@@ -9,15 +18,6 @@ import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationData;
 import org.jboss.pnc.bacon.pig.impl.config.RepoGenerationStrategy;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.*;
 
 class GenerationDataCheckTest {
 

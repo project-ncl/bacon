@@ -18,7 +18,12 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
-import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
@@ -26,11 +31,7 @@ import org.jboss.pnc.build.finder.koji.KojiLocalArchive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 
 /**
  * TODO: 1. move out methods that manipulated on SharedContentReportRow TODO: 2. move to a dedicated package

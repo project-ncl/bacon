@@ -1,13 +1,6 @@
 package org.jboss.pnc.bacon.pig.impl.nvr;
 
-import org.apache.commons.io.FileUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
-import org.jboss.pnc.build.finder.core.BuildFinderObjectMapper;
-import org.jboss.pnc.build.finder.koji.KojiBuild;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +15,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
+import org.jboss.pnc.build.finder.core.BuildFinderObjectMapper;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class NvrListGeneratorTest {
     @Test

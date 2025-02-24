@@ -1,12 +1,12 @@
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
-import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

@@ -17,6 +17,14 @@
  */
 package org.jboss.bacon.da.rest.endpoint;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
 import org.jboss.da.reports.model.request.AlignReportRequest;
 import org.jboss.da.reports.model.request.BuiltReportRequest;
 import org.jboss.da.reports.model.request.LookupGAVsRequest;
@@ -28,14 +36,6 @@ import org.jboss.da.reports.model.response.BuiltReport;
 import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.da.reports.model.response.NPMVersionsReport;
 import org.jboss.da.reports.model.response.Report;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import java.util.List;
-import java.util.Set;
 
 @Path("/reports")
 @Consumes({ "application/json" })

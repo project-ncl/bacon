@@ -1,11 +1,11 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com 2020-06-05

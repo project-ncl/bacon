@@ -14,12 +14,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons.camel;
 
-import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -29,6 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Tom Cunningham, tcunning@redhat.com <br>

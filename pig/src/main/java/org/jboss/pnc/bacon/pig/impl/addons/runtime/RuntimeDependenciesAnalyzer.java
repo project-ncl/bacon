@@ -17,14 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons.runtime;
 
-import org.apache.commons.io.IOUtils;
-import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -33,6 +25,14 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
+import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
+import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

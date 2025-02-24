@@ -1,5 +1,7 @@
 package org.jboss.pnc.bacon.pig.impl.utils;
 
+import static org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor.MAVEN_REPOSITORY;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,8 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.jboss.pnc.bacon.pig.impl.repo.RepoDescriptor.MAVEN_REPOSITORY;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

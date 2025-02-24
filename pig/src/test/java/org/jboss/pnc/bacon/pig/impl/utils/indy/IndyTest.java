@@ -1,13 +1,13 @@
 package org.jboss.pnc.bacon.pig.impl.utils.indy;
 
-import org.jboss.pnc.bacon.config.Config;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.jboss.pnc.bacon.config.Config;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 class IndyTest {
 

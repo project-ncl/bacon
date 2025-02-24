@@ -1,8 +1,25 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
-import com.google.common.collect.Maps;
-import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
-import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import static org.jboss.pnc.bacon.pig.impl.utils.GerritUtils.gerritSnapshotDownloadUrl;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
@@ -21,25 +38,9 @@ import org.jboss.pnc.dto.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.jboss.pnc.bacon.pig.impl.utils.GerritUtils.gerritSnapshotDownloadUrl;
+import com.google.common.collect.Maps;
+import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
 public class SourcesGenerator {
     private static final Logger log = LoggerFactory.getLogger(SourcesGenerator.class);

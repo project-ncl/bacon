@@ -16,12 +16,12 @@
 
 package org.jboss.pnc.bacon.licenses.xml;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.model.License;
-
 import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.model.License;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

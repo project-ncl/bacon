@@ -1,11 +1,8 @@
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
-import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,9 +11,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

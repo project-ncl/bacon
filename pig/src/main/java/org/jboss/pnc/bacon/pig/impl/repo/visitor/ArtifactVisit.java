@@ -1,8 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.repo.visitor;
 
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-
 import java.util.Map;
+
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 /**
  * Information about a visited artifact

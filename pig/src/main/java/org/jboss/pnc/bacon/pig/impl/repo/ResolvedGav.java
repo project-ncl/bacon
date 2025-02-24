@@ -1,10 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.repo;
 
-import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
-import io.quarkus.maven.dependency.ArtifactCoords;
-import io.quarkus.maven.dependency.GAV;
-import org.eclipse.aether.artifact.Artifact;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,6 +8,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.eclipse.aether.artifact.Artifact;
+
+import io.quarkus.bootstrap.resolver.maven.workspace.ModelUtils;
+import io.quarkus.maven.dependency.ArtifactCoords;
+import io.quarkus.maven.dependency.GAV;
 
 /**
  * This class represent a set of resolved artifacts sharing the same GAV.

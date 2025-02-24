@@ -1,17 +1,17 @@
 package org.jboss.pnc.bacon.pnc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.spy;
+
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.jboss.pnc.bacon.config.Config;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.spy;
 
 class ProductReleaseCliTest {
     @Test

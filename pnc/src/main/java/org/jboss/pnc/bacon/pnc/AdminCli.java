@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.jboss.pnc.bacon.pnc.admin.AnnouncementBannerCli;
 import org.jboss.pnc.bacon.pnc.admin.MaintenanceModeCli;
+
 import picocli.CommandLine.Command;
 
 @Command(

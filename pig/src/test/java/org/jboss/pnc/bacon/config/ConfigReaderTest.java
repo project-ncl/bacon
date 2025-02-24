@@ -17,20 +17,21 @@
  */
 package org.jboss.pnc.bacon.config;
 
-import com.google.common.collect.ImmutableMap;
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
-import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.bacon.pig.impl.config.JavadocGenerationStrategy;
+import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
+import org.junit.jupiter.api.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

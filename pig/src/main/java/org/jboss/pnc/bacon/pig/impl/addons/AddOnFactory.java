@@ -17,9 +17,13 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.camel.CamelRuntimeDependenciesToAlignTree;
 import org.jboss.pnc.bacon.pig.impl.addons.camel.RuntimeDependenciesToAlignTree;
-import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.microprofile.MicroProfileSmallRyeCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
@@ -34,10 +38,6 @@ import org.jboss.pnc.bacon.pig.impl.addons.vertx.SaveBuildLogsLocally;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

@@ -1,14 +1,5 @@
 package org.jboss.pnc.bacon.auth.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.jboss.pnc.bacon.common.Constant;
-import org.jboss.pnc.bacon.config.Config;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +11,17 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.config.Config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Getter
 @Setter

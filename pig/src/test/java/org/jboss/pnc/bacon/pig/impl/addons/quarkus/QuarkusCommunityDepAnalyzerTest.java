@@ -1,5 +1,13 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
+import static java.util.Arrays.asList;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.assertj.core.util.Files;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.ConfigProfile;
@@ -13,14 +21,6 @@ import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Arrays.asList;
 
 public class QuarkusCommunityDepAnalyzerTest {
 

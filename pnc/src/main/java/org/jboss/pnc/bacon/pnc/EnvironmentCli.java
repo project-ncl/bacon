@@ -17,6 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -24,10 +27,8 @@ import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
-import picocli.CommandLine.Command;
 
-import java.util.Collection;
-import java.util.Optional;
+import picocli.CommandLine.Command;
 
 @Command(
         name = "environment",

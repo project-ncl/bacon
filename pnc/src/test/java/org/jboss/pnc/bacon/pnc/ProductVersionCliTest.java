@@ -1,8 +1,8 @@
 package org.jboss.pnc.bacon.pnc;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class ProductVersionCliTest {
 

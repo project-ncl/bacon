@@ -1,11 +1,11 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CommunityDependency;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da.CsvExportable;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class QuarkusCommunityDependency implements CsvExportable {
 

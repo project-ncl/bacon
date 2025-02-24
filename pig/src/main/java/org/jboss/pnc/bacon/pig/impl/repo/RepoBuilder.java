@@ -18,6 +18,17 @@
 
 package org.jboss.pnc.bacon.pig.impl.repo;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.common.ObjectHelper;
@@ -34,17 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * TODO: replace with programmatic maven api to remove OSCommandExecutor? TODO: CON: would mean that users have to stick

@@ -15,16 +15,16 @@
 
 package org.jboss.pnc.bacon.pig.impl.addons.vertx;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Paul Gallagher, pgallagh@redhat.com <br>

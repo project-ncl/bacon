@@ -1,7 +1,12 @@
 package org.jboss.pnc.bacon.pig.impl.addons.scanservice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.scanservice.pssaas.ScanHelper;
@@ -10,12 +15,8 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PostBuildScanService extends AddOn implements Validate {
     private static final Logger log = LoggerFactory.getLogger(PostBuildScanService.class);

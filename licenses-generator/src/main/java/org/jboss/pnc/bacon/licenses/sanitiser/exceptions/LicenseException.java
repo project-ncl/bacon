@@ -16,14 +16,14 @@
 
 package org.jboss.pnc.bacon.licenses.sanitiser.exceptions;
 
-import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-
-import javax.json.JsonObject;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.json.JsonObject;
+
+import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
 
 public class LicenseException {
     private String groupId;

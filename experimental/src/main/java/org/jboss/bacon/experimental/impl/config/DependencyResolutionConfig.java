@@ -1,12 +1,13 @@
 package org.jboss.bacon.experimental.impl.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
+import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.List;
-import java.util.Set;
+import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Configuration for the autobuilder dependency resolution.

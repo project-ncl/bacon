@@ -1,11 +1,12 @@
 package org.jboss.pnc.bacon.pnc.common;
 
+import java.util.function.Function;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientBase;
 import org.jboss.pnc.client.Configuration;
-
-import java.util.function.Function;
 
 /**
  * Helper class to create the PNC CLI client to use in the CLI objects. There are two variants, the unauthenticated one

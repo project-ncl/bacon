@@ -1,22 +1,23 @@
 package org.jboss.pnc.bacon.cli;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.core.pattern.color.ANSIConstants;
-import org.apache.commons.io.FilenameUtils;
-import org.jboss.pnc.bacon.common.ObjectHelper;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemProperties;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErr;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
+import org.jboss.pnc.bacon.common.ObjectHelper;
+import org.junit.jupiter.api.Test;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 
 class AppTest {
 

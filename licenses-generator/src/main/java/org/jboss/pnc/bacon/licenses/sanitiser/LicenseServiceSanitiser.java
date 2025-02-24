@@ -15,11 +15,11 @@
  */
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
+import java.util.Set;
+
 import org.jboss.pnc.bacon.licenses.sanitiser.provider.ExternalLicenseProvider;
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-
-import java.util.Set;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

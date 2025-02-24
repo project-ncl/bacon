@@ -16,13 +16,13 @@
 
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
-import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import static org.jboss.pnc.bacon.licenses.utils.JsonUtils.loadJsonToSet;
 
 import java.util.Optional;
 import java.util.Set;
 
-import static org.jboss.pnc.bacon.licenses.utils.JsonUtils.loadJsonToSet;
+import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

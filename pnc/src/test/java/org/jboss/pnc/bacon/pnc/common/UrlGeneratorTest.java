@@ -17,14 +17,14 @@
  */
 package org.jboss.pnc.bacon.pnc.common;
 
-import org.jboss.pnc.bacon.config.Config;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.jboss.pnc.bacon.config.Config;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * Stupid tests that check for accidental modifications in UrlGenerator

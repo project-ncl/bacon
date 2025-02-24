@@ -17,13 +17,13 @@
  */
 package org.jboss.pnc.bacon.pig.impl.utils;
 
-import org.jboss.pnc.client.RemoteCollection;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import org.jboss.pnc.client.RemoteCollection;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

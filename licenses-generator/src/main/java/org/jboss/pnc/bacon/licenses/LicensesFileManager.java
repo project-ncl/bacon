@@ -16,23 +16,6 @@
 
 package org.jboss.pnc.bacon.licenses;
 
-import io.quarkus.qute.Qute;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
-import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-import org.jboss.pnc.bacon.licenses.xml.LicenseSummary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.JAXBException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +31,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.xml.bind.JAXBException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
+import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+import org.jboss.pnc.bacon.licenses.xml.LicenseSummary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.qute.Qute;
 
 /**
  * Class responsible for persisting licenses information to XML and HTML files.

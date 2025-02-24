@@ -1,5 +1,30 @@
 package org.jboss.pnc.bacon.test.pig;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
+import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG;
+import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG_DEPENDENCIES;
+import static org.jboss.pnc.bacon.test.Endpoints.ENVIRONMENT;
+import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG;
+import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG_BUILD_CONFIGS;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_MILESTONE;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSIONS;
+import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION_MILESTONES;
+import static org.jboss.pnc.bacon.test.Endpoints.PROJECT;
+import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY;
+import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.jboss.pnc.bacon.test.AbstractTest;
 import org.jboss.pnc.bacon.test.ExecutionResult;
 import org.jboss.pnc.bacon.test.TestType;
@@ -19,31 +44,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.bacon.test.CLIExecutor.CONFIG_LOCATION;
-import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG;
-import static org.jboss.pnc.bacon.test.Endpoints.BUILD_CONFIG_DEPENDENCIES;
-import static org.jboss.pnc.bacon.test.Endpoints.ENVIRONMENT;
-import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG;
-import static org.jboss.pnc.bacon.test.Endpoints.GROUP_CONFIG_BUILD_CONFIGS;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_MILESTONE;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSIONS;
-import static org.jboss.pnc.bacon.test.Endpoints.PRODUCT_VERSION_MILESTONES;
-import static org.jboss.pnc.bacon.test.Endpoints.PROJECT;
-import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY;
-import static org.jboss.pnc.bacon.test.Endpoints.SCM_REPOSITORY_CREATE;
 
 /**
  *

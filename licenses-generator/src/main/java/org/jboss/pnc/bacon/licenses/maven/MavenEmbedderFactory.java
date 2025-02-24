@@ -16,9 +16,10 @@
 
 package org.jboss.pnc.bacon.licenses.maven;
 
+import org.apache.maven.model.building.ModelBuildingRequest;
+
 import hudson.maven.MavenEmbedderException;
 import hudson.maven.MavenRequest;
-import org.apache.maven.model.building.ModelBuildingRequest;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>

@@ -17,11 +17,6 @@
  */
 package org.jboss.pnc.bacon.pig.impl.documents;
 
-import freemarker.core.Environment;
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.TemplateException;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,6 +24,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Optional;
+
+import freemarker.core.Environment;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.TemplateException;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

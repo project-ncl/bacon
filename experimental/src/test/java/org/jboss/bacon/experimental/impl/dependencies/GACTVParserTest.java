@@ -1,10 +1,11 @@
 package org.jboss.bacon.experimental.impl.dependencies;
 
-import io.quarkus.maven.dependency.ArtifactCoords;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.quarkus.maven.dependency.ArtifactCoords;
 
 public class GACTVParserTest {
 

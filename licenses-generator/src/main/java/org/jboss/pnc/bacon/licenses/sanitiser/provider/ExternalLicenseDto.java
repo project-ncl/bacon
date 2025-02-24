@@ -15,10 +15,11 @@
  */
 package org.jboss.pnc.bacon.licenses.sanitiser.provider;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.codehaus.plexus.util.StringUtils;
 import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com

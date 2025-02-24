@@ -1,6 +1,11 @@
 package org.jboss.bacon.experimental.impl.projectfinder;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -8,10 +13,6 @@ import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 public class EnvironmentResolver {
@@ -65,8 +66,8 @@ public class EnvironmentResolver {
             log.error(
                     "Environment " + env.getName() + " #" + env.getId()
                             + " is deprecated, but does not have a DEPRECATION_REPLACEMENT provided.");// TODO: replace
-                                                                                                       // with constant
-                                                                                                       // from 2.5
+                                                                                                                                                                     // with constant
+                                                                                                                                                                     // from 2.5
             return env;
         }
         Environment replacement = environments.get(replacementID);

@@ -17,11 +17,11 @@
  */
 package org.jboss.bacon.da;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DaHelperTest {
 
