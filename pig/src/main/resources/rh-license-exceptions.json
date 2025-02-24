@@ -695,6 +695,17 @@
         ]
     },
     {
+        "groupId": "com.fasterxml.jackson",
+        "artifactId": "jackson-bom",
+        "version-regexp": "2\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
         "groupId": "org.reactivestreams",
         "artifactId": "reactive-streams",
         "version-regexp": ".*",
@@ -882,7 +893,7 @@
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v3.0 or later",
-                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
+                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
             },
             {
                 "name": "Apache License 2.0",
@@ -1270,7 +1281,7 @@
             },
             {
                 "name": "GNU General Public License v2.0 only",
-                "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+                "url": "https://repository.jboss.org/licenses/gpl-2.0.txt"
             },
             {
                 "name": "BSD 3-clause \"New\" or \"Revised\" License",
@@ -1563,5 +1574,87 @@
                 "url": "https://opensource.org/licenses/BSD-3-Clause"
             }
         ]
+    },
+    {
+        "groupId": "org.cryptacular",
+        "artifactId": "cryptacular",
+        "version-regexp": ".*",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            },
+            {
+                "name": "GNU Lesser General Public License v3.0 only",
+                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.avro",
+        "artifactId": "avro",
+        "version-regexp": "1\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.avro",
+        "artifactId": "avro-compiler",
+        "version-regexp": "1\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.avro",
+        "artifactId": "avro-parent",
+        "version-regexp": "1\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.avro",
+        "artifactId": "avro-toplevel",
+        "version-regexp": "1\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "org.jboss",
+        "artifactId": "jboss-parent",
+        "version-regexp": "^([0-3]?[0-9])\\..+",
+        "licenses": [
+            {
+                "name": "Public Domain",
+                "url": "http://repository.jboss.org/licenses/cc0-1.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.jboss",
+        "artifactId": "jboss-parent",
+        "version-regexp": "^([4-9]?[0-9])\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
     }
+
 ]

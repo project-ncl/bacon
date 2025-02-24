@@ -102,5 +102,64 @@
         "url": "https://www.mozilla.org/en-US/MPL/2.0/"
       }
     ]
+  },
+  {
+    "groupId": "org.apache.avro",
+    "artifactId": "avro",
+    "version-regexp": "1\\..+",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      }
+    ]
+  },
+  {
+    "groupId": "org.cryptacular",
+    "artifactId": "cryptacular",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      },
+      {
+        "name": "GNU Lesser General Public License v3.0 only",
+        "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+      }
+    ]
+  },
+  {
+    "groupId": "org.apache.avro",
+    "artifactId": "avro-parent",
+    "version-regexp": "1\\..+",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      }
+    ]
+  },
+  {
+    "groupId": "org.apache.avro",
+    "artifactId": "avro-toplevel",
+    "version-regexp": "1\\..+",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      }
+    ]
+  },
+  {
+    "groupId": "org.jboss",
+    "artifactId": "jboss-parent",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      }
+    ]
   }
 ]
