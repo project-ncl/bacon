@@ -91,6 +91,7 @@
         <jenkins-maven-embedder.version>3.15</jenkins-maven-embedder.version>
         <json.version>1.1.4</json.version>
         <junit.version>5.11.4</junit.version>
+        <logback.version>1.5.12</logback.version>
         <maven-core.version>3.9.9</maven-core.version>
         <maven-resolver.version>1.9.20</maven-resolver.version>
         <maven-wagon.version>3.5.3</maven-wagon.version>
@@ -318,13 +319,13 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.5.13</version>
+                <version>${logback.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.5.12</version>
+                <version>${logback.version}</version>
             </dependency>
 
             <dependency>
