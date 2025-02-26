@@ -71,7 +71,7 @@ public abstract class DeliverableManager<MetadataType extends GenerationData<?>,
         this.releasePath = releasePath;
         this.deliverables = deliverables;
         this.builds = builds;
-        workDir = FileUtils.mkTempDir("deliverable-generation");
+        workDir = FileUtils.mkTempDir("deliverable-generation-");
     }
 
     protected ResultType downloadAndRepackage() {

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 class GAVTest {
     @Test
     void shouldGetGavFromFileName() {
-        String absolutePath = "C:\\USERS\\GUEST\\APPDATA\\LOCAL\\TEMP\\deliverable-generation01234567890123456789\\cpaas-1.0.0.GA-maven-repository\\maven-repository\\org\\apache\\commons\\commons-lang3\\3.6.0.redhat-1\\commons-lang3-3.6.0.redhat-1.jar";
+        String absolutePath = "C:\\USERS\\GUEST\\APPDATA\\LOCAL\\TEMP\\deliverable-generation-01234567890123456789\\cpaas-1.0.0.GA-maven-repository\\maven-repository\\org\\apache\\commons\\commons-lang3\\3.6.0.redhat-1\\commons-lang3-3.6.0.redhat-1.jar";
         String repoRootName = "maven-repository/";
         GAV gav = GAV.fromFileName(absolutePath, repoRootName);
 
