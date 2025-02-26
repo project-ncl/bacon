@@ -123,7 +123,10 @@ public class ResolveOnlyRepositoryTest {
 
         final Set<String> actualFiles = repoData.getFiles()
                 .stream()
-                .map(file -> file.getAbsolutePath().replaceAll(".+/deliverable-generation\\d+/", "").replace('\\', '/'))
+                .map(
+                        file -> file.getAbsolutePath()
+                                .replaceAll(".+/deliverable-generation-\\d+/", "")
+                                .replace('\\', '/'))
                 .collect(Collectors.toCollection(TreeSet::new));
 
         final Path actualArtifactList = workDir.resolve("resolve-and-repackage-repo-artifact-list-actual.txt");
