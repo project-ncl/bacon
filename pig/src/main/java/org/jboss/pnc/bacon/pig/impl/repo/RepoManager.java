@@ -349,10 +349,13 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         ParentPomDownloader.addParentPoms(targetRepoContentsDir.toPath());
 
+        // TODO: testMode is need for ResolveOnlyRepositoryTest. These aren't mocked and cause the test to fail.
         if (!isTestMode) {
             RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
             RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
+        }
 
+        if (generationData.getStrategy().equals(RepoGenerationStrategy.RESOLVE_ONLY)) {
             // Delete excluded artifacts in the maven-repository. Needed for resolve only generation where filtering
             // can't be done before download
             List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
@@ -360,6 +363,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             // In case recursive delete from the exclude removes everything.
             targetRepoContentsDir.mkdirs();
         }
+
         RepositoryUtils.addMissingSources(targetRepoContentsDir);
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
         if (generationData.isIncludeMavenMetadata()) {
