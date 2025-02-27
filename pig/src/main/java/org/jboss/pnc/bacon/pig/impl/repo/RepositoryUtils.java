@@ -35,6 +35,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.util.ArtifactPathInfo;
 import org.commonjava.maven.atlas.ident.version.SingleVersion;
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,6 +137,22 @@ public class RepositoryUtils {
             }
         }
         log.debug("Finished generating maven-metadata.xml files");
+    }
+
+    static void addMissingSources(File targetRepoContentsDir) {
+        Collection<GAV> gavs = RepoDescriptor.listGavs(targetRepoContentsDir);
+
+        for (GAV gav : gavs) {
+            GAV sourceGav = gav.toSourcesJar();
+            GAV jarGav = gav.toJar();
+
+            File jarFile = ExternalArtifactDownloader.targetPath(jarGav, targetRepoContentsDir.toPath());
+            File sourceFile = ExternalArtifactDownloader.targetPath(sourceGav, targetRepoContentsDir.toPath());
+
+            if (jarFile.exists() && !sourceFile.exists()) {
+                ExternalArtifactDownloader.downloadExternalArtifact(sourceGav, sourceFile, true);
+            }
+        }
     }
 
     public static void addCheckSums(File mavenRepositoryDirectory) {

@@ -358,7 +358,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
             RepositoryUtils.removeExcludedArtifacts(targetRepoContentsDir, excludeArtifacts);
         }
-        addMissingSources();
+        RepositoryUtils.addMissingSources(targetRepoContentsDir);
 
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
         if (generationData.isIncludeMavenMetadata()) {
@@ -367,22 +367,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         zip(targetTopLevelDirectory, targetZipPath);
 
         return result(targetTopLevelDirectory, targetZipPath);
-    }
-
-    private void addMissingSources() {
-        Collection<GAV> gavs = RepoDescriptor.listGavs(targetRepoContentsDir);
-
-        for (GAV gav : gavs) {
-            GAV sourceGav = gav.toSourcesJar();
-            GAV jarGav = gav.toJar();
-
-            File jarFile = ExternalArtifactDownloader.targetPath(jarGav, targetRepoContentsDir.toPath());
-            File sourceFile = ExternalArtifactDownloader.targetPath(sourceGav, targetRepoContentsDir.toPath());
-
-            if (jarFile.exists() && !sourceFile.exists()) {
-                ExternalArtifactDownloader.downloadExternalArtifact(sourceGav, sourceFile, true);
-            }
-        }
     }
 
     private File download() {
