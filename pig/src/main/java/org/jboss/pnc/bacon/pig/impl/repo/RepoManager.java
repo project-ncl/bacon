@@ -349,17 +349,22 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         ParentPomDownloader.addParentPoms(targetRepoContentsDir.toPath());
 
+        // TODO: testMode is need for ResolveOnlyRepositoryTest. These aren't mocked and cause the test to fail.
         if (!isTestMode) {
             RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
             RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
+        }
 
+        if (generationData.getStrategy().equals(RepoGenerationStrategy.RESOLVE_ONLY)) {
             // Delete excluded artifacts in the maven-repository. Needed for resolve only generation where filtering
             // can't be done before download
             List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
             RepositoryUtils.removeExcludedArtifacts(targetRepoContentsDir, excludeArtifacts);
+            // In case recursive delete from the exclude removes everything.
+            targetRepoContentsDir.mkdirs();
         }
-        addMissingSources();
 
+        RepositoryUtils.addMissingSources(targetRepoContentsDir);
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
         if (generationData.isIncludeMavenMetadata()) {
             RepositoryUtils.generateMavenMetadata(targetRepoContentsDir);
@@ -367,22 +372,6 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         zip(targetTopLevelDirectory, targetZipPath);
 
         return result(targetTopLevelDirectory, targetZipPath);
-    }
-
-    private void addMissingSources() {
-        Collection<GAV> gavs = RepoDescriptor.listGavs(targetRepoContentsDir);
-
-        for (GAV gav : gavs) {
-            GAV sourceGav = gav.toSourcesJar();
-            GAV jarGav = gav.toJar();
-
-            File jarFile = ExternalArtifactDownloader.targetPath(jarGav, targetRepoContentsDir.toPath());
-            File sourceFile = ExternalArtifactDownloader.targetPath(sourceGav, targetRepoContentsDir.toPath());
-
-            if (jarFile.exists() && !sourceFile.exists()) {
-                ExternalArtifactDownloader.downloadExternalArtifact(sourceGav, sourceFile, true);
-            }
-        }
     }
 
     private File download() {
