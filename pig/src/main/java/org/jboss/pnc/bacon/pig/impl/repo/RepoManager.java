@@ -357,9 +357,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             // can't be done before download
             List<String> excludeArtifacts = pigConfiguration.getFlow().getRepositoryGeneration().getExcludeArtifacts();
             RepositoryUtils.removeExcludedArtifacts(targetRepoContentsDir, excludeArtifacts);
+            // In case recursive delete from the exclude removes everything.
+            targetRepoContentsDir.mkdirs();
         }
         RepositoryUtils.addMissingSources(targetRepoContentsDir);
-
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
         if (generationData.isIncludeMavenMetadata()) {
             RepositoryUtils.generateMavenMetadata(targetRepoContentsDir);
