@@ -140,6 +140,7 @@ public class RepositoryUtils {
     }
 
     static void addMissingSources(File targetRepoContentsDir) {
+        log.debug("Add missing sources");
         Collection<GAV> gavs = RepoDescriptor.listGavs(targetRepoContentsDir);
 
         for (GAV gav : gavs) {
@@ -258,28 +259,31 @@ public class RepositoryUtils {
      * Given a folder having maven artifacts stored in a maven repository formatted folders, remove from that folder the
      * excluded artifacts, specified with the Maven identifier format <group id>:<artifactid>:<packaging>:<version>
      *
-     * @param element
+     * @param element the artifact path relative to the maven repository root.
      * @param excludedArtifacts
      */
     public static void removeExcludedArtifacts(File element, List<String> excludedArtifacts) {
-        if (element.isDirectory()) {
-            Stream.of(element.listFiles()).forEach(file -> removeExcludedArtifacts(file, excludedArtifacts));
-        } else {
-            for (String exclusionRegex : excludedArtifacts) {
-                Pattern matchesRegex = Pattern.compile(exclusionRegex);
-                var artifactIdentifier = convertArtifactPathToIdentifier(element.getAbsolutePath());
-
-                if (matchesRegex.matcher(artifactIdentifier).find()) {
-                    log.debug(
-                            "Removing path {} from the repository since the artifact {} matches regex: {}",
-                            element.getAbsolutePath(),
-                            artifactIdentifier,
-                            exclusionRegex);
-                    File parent = element.getParentFile();
-                    element.delete();
-                    recursivelyDeleteEmptyFolder(parent);
+        log.debug("Removing excluded artifacts from the repository");
+        try (Stream<Path> stream = Files.walk(element.toPath())) {
+            stream.filter(Files::isRegularFile).forEach(path -> {
+                Path subpath = element.toPath().toAbsolutePath().relativize(path.toAbsolutePath());
+                for (String exclusionRegex : excludedArtifacts) {
+                    Pattern matchesRegex = Pattern.compile(exclusionRegex);
+                    var artifactIdentifier = convertArtifactPathToIdentifier(subpath.toString());
+                    if (matchesRegex.matcher(artifactIdentifier).find()) {
+                        log.debug(
+                                "Removing path {} from the repository since the artifact {} matches regex: {}",
+                                path,
+                                artifactIdentifier,
+                                exclusionRegex);
+                        File parent = path.toFile().getParentFile();
+                        path.toFile().delete();
+                        recursivelyDeleteEmptyFolder(parent);
+                    }
                 }
-            }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -397,10 +401,9 @@ public class RepositoryUtils {
      * @param artifactPath - artifact file path
      * @return Maven artifact identifier
      */
-    public static String convertArtifactPathToIdentifier(String artifactPath) {
+    static String convertArtifactPathToIdentifier(String artifactPath) {
         String[] artifactPathSections = artifactPath.split(Pattern.quote(File.separator));
         int artifactPathSectionsLastIndex = artifactPathSections.length - 1;
-        String groupId = artifactPathSections[artifactPathSectionsLastIndex - 3];
         String artifactId = artifactPathSections[artifactPathSectionsLastIndex - 2];
         String version = artifactPathSections[artifactPathSectionsLastIndex - 1];
         String artifactFilename = artifactPathSections[artifactPathSectionsLastIndex];
@@ -408,7 +411,11 @@ public class RepositoryUtils {
         String[] artifactFilenameSplitByDot = artifactFilename.split("\\.");
         String packaging = artifactFilenameSplitByDot[artifactFilenameSplitByDot.length - 1];
 
-        var artifactIdentifier = new ArrayList<>(Arrays.asList(groupId, artifactId, packaging, version));
+        // groupId is 0 -> artifactPathSectionsLastIndex - 3 but range is exclusive so subtract 1
+        var groupId = String.join(".", Arrays.copyOfRange(artifactPathSections, 0, artifactPathSectionsLastIndex - 2));
+
+        var artifactIdentifier = new ArrayList<>(List.of(groupId));
+        artifactIdentifier.addAll(Arrays.asList(artifactId, packaging, version));
 
         String[] artifactFilenameSplitByVersion = artifactFilename.split(version + "-");
         if (artifactFilenameSplitByVersion.length > 1) {

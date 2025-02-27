@@ -4,16 +4,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class RepositoryUtilsTest {
 
     @Test
-    void testRecursivelyDeleteEmptyFolder() throws IOException {
+    void testRecursivelyDeleteEmptyFolder(@TempDir Path tmpDir) {
         // temp dirs created
         // <tmpdir>/<test1>/<test2>/<test4>
         // <tmpdir>/<test3>
@@ -21,7 +22,6 @@ class RepositoryUtilsTest {
         // when running recursivelyDeleteEmptyFolder applied on test2, nothing should be deleted
         // when running recursivelyDeleteEmptyFolder applied on test4, only folders test1, test2 and test4 should be
         // deleted
-        Path tmpDir = Files.createTempDirectory("tmpDir");
         File test1 = new File(Paths.get(tmpDir.toFile().getAbsolutePath(), "test1").toAbsolutePath().toString());
         File test2 = new File(
                 Paths.get(tmpDir.toFile().getAbsolutePath(), "test1", "test2").toAbsolutePath().toString());
@@ -42,18 +42,42 @@ class RepositoryUtilsTest {
     }
 
     @Test
+    void testRemoveExcludedArtifacts(@TempDir Path tmpDir) throws IOException {
+        File toRemove = new File(
+                Paths.get(tmpDir.toFile().getAbsolutePath(), "test1", "com", "1.1").toAbsolutePath().toString());
+        File another = new File(
+                Paths.get(tmpDir.toFile().getAbsolutePath(), "test1", "org", "1.1").toAbsolutePath().toString());
+        toRemove.mkdirs();
+        another.mkdirs();
+        File sampleFile = new File(toRemove, "sample");
+        sampleFile.createNewFile();
+
+        RepositoryUtils.removeExcludedArtifacts(new File(tmpDir.toFile(), "test1"), Collections.singletonList("com.*"));
+
+        assertTrue(another.exists());
+    }
+
+    @Test
     void testConvertArtifactPathToIdentifier() {
-        String path = "/tmp/repository/test.me.here/letmego/1.2.3/letmego-1.2.3.tar";
+        String path = "test.me.here/letmego/1.2.3/letmego-1.2.3.tar";
         String identifier = RepositoryUtils.convertArtifactPathToIdentifier(path);
         assertEquals("test.me.here:letmego:tar:1.2.3", identifier);
 
-        path = "/tmp/repository/test.me.here/letmego/1.2.3/letmego-1.2.3-docs.zip";
+        path = "test.me.here/letmego/1.2.3/letmego-1.2.3-docs.zip";
         identifier = RepositoryUtils.convertArtifactPathToIdentifier(path);
         assertEquals("test.me.here:letmego:zip:1.2.3:docs", identifier);
 
-        path = "/tmp/repository/test-me-here/let-me-go/1.2.3-some/let-me-go-1.2.3-some-nice-docs.zip";
+        path = "test-me-here/let-me-go/1.2.3-some/let-me-go-1.2.3-some-nice-docs.zip";
         identifier = RepositoryUtils.convertArtifactPathToIdentifier(path);
         assertEquals("test-me-here:let-me-go:zip:1.2.3-some:nice-docs", identifier);
+
+        path = "org/jboss/jboss-parent/43.0.0.redhat-00001/jboss-parent-43.0.0.redhat-00001.pom";
+        identifier = RepositoryUtils.convertArtifactPathToIdentifier(path);
+        assertEquals("org.jboss:jboss-parent:pom:43.0.0.redhat-00001", identifier);
+
+        path = "io/hawt/examples/hawtio-example-quarkus-keycloak/4.1.0.redhat-00015/hawtio-example-quarkus-keycloak-4.1.0.redhat-00015.jar";
+        identifier = RepositoryUtils.convertArtifactPathToIdentifier(path);
+        assertEquals("io.hawt.examples:hawtio-example-quarkus-keycloak:jar:4.1.0.redhat-00015", identifier);
     }
 
     @Test
