@@ -39,6 +39,7 @@
 
     <!-- Make weld logs less noisy: only show WARN messages -->
     <logger name="org.jboss.weld" level="WARN"/>
+    <logger name="org.eclipse" level="WARN" />
 
     <logger name="org.jboss.logging" level="INFO"/>
     <logger name="org.jboss.pnc.client" level="WARN"/>
