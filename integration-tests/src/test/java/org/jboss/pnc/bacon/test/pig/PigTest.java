@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.test.AbstractTest;
 import org.jboss.pnc.bacon.test.ExecutionResult;
 import org.jboss.pnc.bacon.test.TestType;
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  *
@@ -69,7 +71,7 @@ class PigTest extends AbstractTest {
 
     @Test
     @Order(1)
-    void shouldCreateProduct() throws IOException {
+    void shouldCreateProduct(@TempDir Path contextDir) throws Exception {
         final Path configFile = CONFIG_LOCATION;
         replaceSuffixInConfigFile(configFile.resolve("build-config.yaml"));
 
@@ -146,7 +148,11 @@ class PigTest extends AbstractTest {
                 .post(GROUP_CONFIG_BUILD_CONFIGS.apply(UNIVERSAL_ID))
                 .then()
                 .getEntity(GROUP_CONFIG, groupConfigWithBuildConfig);
-        ExecutionResult output = executeAndGetResult("pig", "configure", configFile.toString());
+        ExecutionResult output = executeAndGetResult(
+                List.of(Constant.PIG_CONTEXT_DIR + "=" + contextDir.toString()),
+                "pig",
+                "configure",
+                configFile.toString());
         assertThat(output.getOutput()).contains("name: \"Product Foobar " + SUFFIX + "\"");
     }
 
