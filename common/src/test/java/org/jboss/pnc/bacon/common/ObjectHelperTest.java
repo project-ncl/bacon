@@ -1,45 +1,51 @@
 package org.jboss.pnc.bacon.common;
 
-import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
+import uk.org.webcompere.systemstubs.stream.SystemOut;
 import ch.qos.logback.classic.Level;
 
+@ExtendWith(SystemStubsExtension.class)
 class ObjectHelperTest {
+
+    @SystemStub
+    private SystemOut systemOut;
 
     @Test
     void printJson() throws Exception {
-        String actual = tapSystemOut(() -> {
-            Map<String, String> testSubject = new HashMap<>();
+        Map<String, String> testSubject = new HashMap<>();
 
-            testSubject.put("test", "subject");
+        testSubject.put("test", "subject");
 
-            ObjectHelper.print(true, testSubject);
-        });
+        ObjectHelper.print(true, testSubject);
 
         String expected = String.format("{\"test\":\"subject\"}%n");
 
-        assertEquals(expected, actual);
+        assertEquals(expected, systemOut.getText());
     }
 
     @Test
     void printYaml() throws Exception {
-        String actual = tapSystemOut(() -> {
-            Map<String, String> testSubject = new HashMap<>();
+        Map<String, String> testSubject = new HashMap<>();
 
-            testSubject.put("test", "subject");
+        testSubject.put("test", "subject");
 
-            ObjectHelper.print(false, testSubject);
-        });
+        ObjectHelper.print(false, testSubject);
 
         String expected = String.format("---%ntest: \"subject\"%n%n");
 
-        assertEquals(expected, actual);
+        assertEquals(expected, systemOut.getText());
     }
 
     @Test

@@ -125,9 +125,9 @@ class ProductTest extends AbstractTest {
 
         wmock.get(PRODUCT, productId);
 
-        ExecutionResult er = executeAndGetResult("pnc", "product", "get", productId);
+        ExecutionResult er = executeAndGetResult(Collections.emptyList(), "pnc", "product", "get", productId);
 
-        assertEquals(er.getRetval(), 1);
+        assertEquals(1, er.getRetval());
         assertTrue(er.getError().contains("HTTP 404 Not Found"));
     }
 }
