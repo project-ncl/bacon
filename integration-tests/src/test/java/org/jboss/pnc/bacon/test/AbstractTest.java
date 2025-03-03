@@ -9,6 +9,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterAll;
@@ -83,8 +84,8 @@ public class AbstractTest {
         return result.fromYAML(clazz);
     }
 
-    protected ExecutionResult executeAndGetResult(String... args) {
-        return CLIExecutor.runCommand(args);
+    protected ExecutionResult executeAndGetResult(List<String> env, String... args) {
+        return CLIExecutor.runCommand(env, args);
     }
 
 }

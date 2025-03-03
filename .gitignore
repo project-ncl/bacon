@@ -10,8 +10,6 @@ __pycache__
 **/.settings
 .vscode
 
-.bacon
-
 .cache
 
 cli/dependency-reduced-pom.xml
