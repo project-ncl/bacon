@@ -323,6 +323,11 @@ public class ProductMilestoneCli {
                 description = "Link to deliverables to be analysed, can add multiple links")
         private List<URL> deliverablesLink;
 
+        @Option(
+                names = "--scratch",
+                description = "Whether to run the analysis as scratch (default: false)")
+        private Boolean runAsScratchAnalysis;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -334,6 +339,7 @@ public class ProductMilestoneCli {
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 DeliverablesAnalysisRequest deliverablesAnalysisRequest = DeliverablesAnalysisRequest.builder()
                         .deliverablesUrls(deliverablesLink.stream().map(URL::toString).collect(Collectors.toList()))
+                        .runAsScratchAnalysis(runAsScratchAnalysis)
                         .build();
                 DeliverableAnalyzerOperation deliverableAnalyzerOperation = client
                         .analyzeDeliverables(id, deliverablesAnalysisRequest);
