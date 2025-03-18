@@ -112,6 +112,7 @@
         <surefire.plugin.version>3.2.5</surefire.plugin.version>
         <tagSuffix />
         <undertow.version>2.3.18.Final</undertow.version>
+        <build-finder.version>2.6.1</build-finder.version>
     </properties>
 
     <dependencyManagement>
@@ -424,7 +425,7 @@
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
                 <artifactId>core</artifactId>
-                <version>2.6.0</version>
+                <version>${build-finder.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>ch.qos.logback</groupId>
@@ -435,7 +436,7 @@
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
                 <artifactId>report</artifactId>
-                <version>2.6.0</version>
+                <version>${build-finder.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>ch.qos.logback</groupId>
