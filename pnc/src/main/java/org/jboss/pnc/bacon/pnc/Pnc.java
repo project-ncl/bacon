@@ -33,6 +33,7 @@ import picocli.CommandLine.Command;
                 BuildCli.class,
                 BuildConfigCli.class,
                 EnvironmentCli.class,
+                DependencyAnalysisCli.class,
                 GroupBuildCli.class,
                 GroupConfigCli.class,
                 ProductCli.class,
