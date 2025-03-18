@@ -60,6 +60,9 @@ public class DependencyAnalysisCli {
         @CommandLine.Parameters(description = "Label")
         private DeliverableAnalyzerReportLabel label;
 
+        @CommandLine.Option(names = "--reason", description = "Reason for Label change (default: ${DEFAULT-VALUE})")
+        private String labelReason = "CLI addition";
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -71,6 +74,7 @@ public class DependencyAnalysisCli {
             try (DeliverableAnalyzerReportClient client = CREATOR.newClient()) {
                 DeliverableAnalyzerReportLabelRequest request = DeliverableAnalyzerReportLabelRequest.builder()
                         .label(label)
+                        .reason(labelReason)
                         .build();
                 client.addLabel(deliverableId, request);
                 return 0;
@@ -99,7 +103,8 @@ public class DependencyAnalysisCli {
         @Override
         public Collection<AnalyzedArtifact> getAll(String sort, String query) throws RemoteResourceException {
             try (DeliverableAnalyzerReportClient client = CREATOR.newClient()) {
-                return client.getAnalyzedArtifacts(deliverableId).getAll();
+                return client.getAnalyzedArtifacts(deliverableId, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
@@ -114,7 +119,8 @@ public class DependencyAnalysisCli {
         public Collection<DeliverableAnalyzerLabelEntry> getAll(String sort, String query)
                 throws RemoteResourceException {
             try (DeliverableAnalyzerReportClient client = CREATOR.newClient()) {
-                return client.getLabelHistory(deliverableId).getAll();
+                return client.getLabelHistory(deliverableId, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
@@ -139,6 +145,9 @@ public class DependencyAnalysisCli {
         @CommandLine.Parameters(description = "Label")
         private DeliverableAnalyzerReportLabel label;
 
+        @CommandLine.Option(names = "--reason", description = "Reason for Label change (default: ${DEFAULT-VALUE})")
+        private String labelReason = "CLI removal";
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -150,6 +159,7 @@ public class DependencyAnalysisCli {
             try (DeliverableAnalyzerReportClient client = CREATOR.newClient()) {
                 DeliverableAnalyzerReportLabelRequest request = DeliverableAnalyzerReportLabelRequest.builder()
                         .label(label)
+                        .reason(labelReason)
                         .build();
                 client.removeLabel(deliverableId, request);
                 return 0;
