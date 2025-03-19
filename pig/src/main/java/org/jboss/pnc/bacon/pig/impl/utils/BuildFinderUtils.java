@@ -66,7 +66,7 @@ public final class BuildFinderUtils {
 
     public static BuildConfig getKojiBuildFinderConfigFromFile(File file) {
         try {
-            return BuildConfig.load(file);
+            return BuildConfig.load(file.toPath());
         } catch (IOException e) {
             throw new IllegalStateException(
                     "Failed read Koji Build Finder configuration from file: " + file.getAbsolutePath(),
