@@ -69,8 +69,8 @@
     },
     {
         "name": "GNU Lesser General Public License v3.0 or later",
-        "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
-        "textUrl": "http://www.gnu.org/licenses/lgpl-3.0.txt",
+        "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt",
+        "textUrl": "https://repository.jboss.org/licenses/lgpl-3.0.txt",
         "aliases": [
             "GNU Lesser General Public License, Version 3",
             "GNU Lesser General Public License",
@@ -460,7 +460,8 @@
         "url": "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE",
         "aliases": [
           "Unicode/ICU License",
-          "Unicode-3.0"
+          "Unicode-3.0",
+          "Unicode License v3"
         ],
         "urlAliases": [
           "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE"
