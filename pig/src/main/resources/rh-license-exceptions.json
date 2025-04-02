@@ -1347,11 +1347,11 @@
     {
         "groupId": "org.jfree",
         "artifactId": "jfreechart",
-        "version": "1.5.4.redhat-00004",
+        "version-regexp": "1.5\\..+",
         "licenses": [
             {
-                "name": "GNU Lesser General Public Licence",
-                "url": "http://www.gnu.org/licenses/lgpl.txt"
+                "name": "GNU Lesser General Public License v2.1 only",
+                "url": "http://repository.jboss.org/licenses/lgpl-2.1.txt"
             }
         ]
     },
