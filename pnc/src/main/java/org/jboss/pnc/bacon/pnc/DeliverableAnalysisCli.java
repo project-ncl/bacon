@@ -36,17 +36,17 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Command(
-        name = "dependency-analysis",
-        description = "Dependency Analysis",
+        name = "deliverable-analysis",
+        description = "Deliverable Analysis",
         subcommands = {
-                DependencyAnalysisCli.AddLabel.class,
-                DependencyAnalysisCli.Get.class,
-                DependencyAnalysisCli.GetAnalyzed.class,
-                DependencyAnalysisCli.GetLabelHistory.class,
-                DependencyAnalysisCli.List.class,
-                DependencyAnalysisCli.RemoveLabel.class
+                DeliverableAnalysisCli.AddLabel.class,
+                DeliverableAnalysisCli.Get.class,
+                DeliverableAnalysisCli.GetAnalyzed.class,
+                DeliverableAnalysisCli.GetLabelHistory.class,
+                DeliverableAnalysisCli.List.class,
+                DeliverableAnalysisCli.RemoveLabel.class
         })
-public class DependencyAnalysisCli {
+public class DeliverableAnalysisCli {
 
     private static final ClientCreator<DeliverableAnalyzerReportClient> CREATOR = new ClientCreator<>(
             DeliverableAnalyzerReportClient::new);
