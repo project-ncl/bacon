@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.ClientRequestContext;
@@ -83,7 +84,7 @@ public class DaHelper {
 
         ResteasyWebTarget target = getClient();
         Configuration pncConfiguration = PncClientHelper.getPncConfiguration();
-        target.register(new TokenAuthenticator(pncConfiguration.getBearerToken()));
+        target.register(new TokenAuthenticator(pncConfiguration.getBearerTokenSupplier()));
         return target;
     }
 
@@ -269,15 +270,15 @@ public class DaHelper {
 
     private static class TokenAuthenticator implements ClientRequestFilter {
 
-        private final String token;
+        private final Supplier<String> tokenSupplier;
 
-        TokenAuthenticator(String token) {
-            this.token = token;
+        TokenAuthenticator(Supplier<String> tokenSupplier) {
+            this.tokenSupplier = tokenSupplier;
         }
 
         public void filter(ClientRequestContext requestContext) throws IOException {
             MultivaluedMap<String, Object> headers = requestContext.getHeaders();
-            headers.add("Authorization", "Bearer " + this.token);
+            headers.add("Authorization", "Bearer " + this.tokenSupplier.get());
         }
     }
 }
