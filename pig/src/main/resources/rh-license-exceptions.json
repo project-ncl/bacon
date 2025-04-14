@@ -1659,7 +1659,7 @@
     {
         "groupId": "ca.uhn.hapi",
         "artifactId": "hapi",
-        "version-regexp": "2\\..+",
+        "version": "2\\..+",
         "licenses": [
             {
                 "name": "Mozilla Public License 1.1",
@@ -1674,7 +1674,7 @@
     {
         "groupId": "ca.uhn.hapi",
         "artifactId": "hapi-base",
-        "version-regexp": "2\\..+",
+        "version": "2\\..+",
         "licenses": [
             {
                 "name": "Mozilla Public License 1.1",
@@ -1689,7 +1689,7 @@
     {
         "groupId": "com.mysql",
         "artifactId": "mysql-connector-j",
-        "version-regexp": "8.3\\..+",
+        "version": "8.3\\..+",
         "licenses": [
             {
                 "name": "The GNU General Public License, v2 with Universal FOSS Exception, v1.0",
@@ -1700,7 +1700,7 @@
     {
         "groupId": "com.github.javaparser",
         "artifactId": "javaparser-parent",
-        "version-regexp": "3\\..+",
+        "version": "3\\..+",
         "licenses": [
             {
                 "name": "Apache License 2.0",
@@ -1715,7 +1715,7 @@
     {
         "groupId": "com.github.javaparser",
         "artifactId": "javaparser-core",
-        "version-regexp": "3\\..+",
+        "version": "3\\..+",
         "licenses": [
             {
                 "name": "Apache License 2.0",
@@ -1730,7 +1730,7 @@
     {
         "groupId": "org.javassist",
         "artifactId": "javassist",
-        "version-regexp": "3.[2-3][0-9]\\..+",
+        "version": "3.[2-3][0-9]\\..+",
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v2.1 only",
@@ -1749,7 +1749,7 @@
     {
         "groupId": "javax.annotation",
         "artifactId": "javax.annotation-api",
-        "version-regexp": "1.3\\..+",
+        "version": "1.3\\..+",
         "licenses": [
             {
                 "name": "CDDL + GPLv2 with classpath exception",
@@ -1760,7 +1760,7 @@
     {
         "groupId": "jakarta.annotation",
         "artifactId": "jakarta.annotation-api",
-        "version-regexp": "3\\..+",
+        "version": "3\\..+",
         "licenses": [
             {
                 "name": "GNU General Public License v2.0 w/Classpath exception",
@@ -1775,22 +1775,11 @@
     {
         "groupId": "org.mariadb.jdbc",
         "artifactId": "mariadb-java-client",
-        "version-regexp": "3.5\\..+",
+        "version": "3.5\\..+",
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v2.1 or later",
                 "url": "https://raw.githubusercontent.com/project-ncl/bacon/main/static-resources/deprecated_LGPL-2.1+.txt"
-            }
-        ]
-    },
-    {
-        "groupId": "org.jboss",
-        "artifactId": "jboss-transaction-spi",
-        "version-regexp": "8\\..+",
-        "licenses": [
-            {
-                "name": "GNU Lesser General Public License v2.1 only",
-                "url": "http://repository.jboss.org/licenses/lgpl-2.1.txt"
             }
         ]
     }
