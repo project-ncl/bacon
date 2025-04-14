@@ -1,5 +1,6 @@
 package org.jboss.pnc.bacon.resources;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -45,6 +46,25 @@ public class ResourcesValidationTest {
         for (LicenseEntry item : items) {
             if (item.versionRegexp != null) {
                 assertTrue(isRegexValid(item.versionRegexp));
+            }
+        }
+    }
+
+    /**
+     * The version section shouldn't contain any regex string
+     *
+     * @throws Exception
+     */
+    @Test
+    void testValidVersionInRhLicenseExceptionsJsonFile() throws Exception {
+        InputStream in = getClass().getClassLoader().getResourceAsStream("rh-license-exceptions.json");
+        List<LicenseEntry> items = jsonMapper.readValue(in, new TypeReference<List<LicenseEntry>>() {
+        });
+        for (LicenseEntry item : items) {
+            if (item.version != null) {
+                String version = item.version;
+                assertFalse(version.contains("+"));
+                assertFalse(version.contains("\\."));
             }
         }
     }
@@ -102,5 +122,8 @@ public class ResourcesValidationTest {
     private static class LicenseEntry {
         @JsonProperty("version-regexp")
         String versionRegexp;
+
+        @JsonProperty("version")
+        String version;
     }
 }
