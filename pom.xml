@@ -30,7 +30,7 @@
 
     <groupId>org.jboss.pnc.bacon</groupId>
     <artifactId>parent</artifactId>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.2</version>
     <packaging>pom</packaging>
 
     <name>bacon</name>
@@ -70,7 +70,7 @@
     <scm>
         <connection>scm:git:http://github.com/project-ncl/bacon.git</connection>
         <developerConnection>scm:git:git@github.com:project-ncl/bacon.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>3.0.2</tag>
         <url>http://github.com/project-ncl/bacon</url>
     </scm>
 
