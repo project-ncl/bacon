@@ -35,8 +35,8 @@
   },
   {
     "name": "GNU Lesser General Public License v2.1 only",
-    "textUrl": "http://repository.jboss.org/licenses/lgpl-2.1.txt",
-    "url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
+    "textUrl": "https://repository.jboss.org/licenses/lgpl-2.1.txt",
+    "url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
     "aliases": [
       "GNU Lesser General Public License (LGPL), Version 2.1",
       "GNU Lesser General Public License, Version 2.1",
@@ -46,10 +46,15 @@
     ],
     "urlAliases": [
       "http://repository.jboss.org/licenses/lgpl-2.1.txt",
+      "https://repository.jboss.org/licenses/lgpl-2.1.txt",
       "https://www.gnu.org/licenses/lgpl-2.1.html",
       "http://www.gnu.org/licenses/lgpl-2.1.html",
+      "https://www.gnu.org/licenses/lgpl-2.1-standalone.html",
+      "http://www.gnu.org/licenses/lgpl-2.1-standalone.html",
       "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
-      "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"
+      "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
+      "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
+      "http://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html"
     ]
   },
   {
