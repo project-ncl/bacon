@@ -45,6 +45,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseSummary;
+import org.jboss.pnc.bacon.licenses.xml.OfflineLicenseMirror;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,13 +171,20 @@ public class LicensesFileManager {
                 }
             }
             if (download) {
-                try {
-                    downloadTo(textUrl, file);
-                } catch (IOException e) {
-                    if (!textUrl.startsWith("https")) {
-                        downloadTo(textUrl.replace("http", "https"), file);
-                    } else {
-                        throw e;
+                Optional<InputStream> offlineLicense = OfflineLicenseMirror.find(textUrl);
+
+                if (offlineLicense.isPresent()) {
+                    logger.info("Using offline license file mirror in Bacon for: {}", textUrl);
+                    FileUtils.copyInputStreamToFile(offlineLicense.get(), file);
+                } else {
+                    try {
+                        downloadTo(textUrl, file);
+                    } catch (IOException e) {
+                        if (!textUrl.startsWith("https")) {
+                            downloadTo(textUrl.replace("http", "https"), file);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             }
