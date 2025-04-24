@@ -965,6 +965,7 @@
                     <excludes>
                         <exclude>.bacon/</exclude>
                         <exclude>.cache/</exclude>
+                        <exclude>src/main/resources/**/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

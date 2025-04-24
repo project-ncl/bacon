@@ -1,0 +1,21 @@
+Day RI License
+Version 2.0, May 2004
+
+AMENDMENTS
+The Day RI License, Version 2.0 (the "RI License"), consists of the Apache License, Version 2.0 (Exhibit A), as amended below to be consistent with the Java Specification Participation Agreement. This RI License applies only to Licensor's Reference Implementation and Derivative Works thereof; the Specification is made available separately at a location described by the NOTICE file and is not included within the Work made available under this RI License.
+I. Additional Definitions for Section 1.
+
+"Specification" shall mean the one or more current or proposed industry standards, developed as part of the Java Community Process, that are identified within the copyright notice by title, revision label (or date if no label has been assigned), and Uniform Resource Identifier.
+
+"Specification Lead" shall mean the individual or Legal Entity owning copyright on the identified Specification(s).
+
+"Technology Compatibility Kit" (or "TCK") shall mean the suite of tests, tools, and documentation made available by the Specification Lead that allows an implementor of a Specification to determine if their implementation is compliant with that Specification.
+
+"Restricted Name Space" shall mean public class or interface declarations whose names begin with "java", "javax", "com.sun", or any recognized successors or replacements thereof that are restricted as per the Java Specification Participation Agreement between Licensor and Sun Microsystems, Inc.
+
+II. Additional condition for Section 5.
+(e) Prior to distributing a Derivative Work, You must do one of the following:
+
+(1) Cause the Derivative Work to fully implement the Specification(s), or later revisions of the Specification(s) that are acknowledged by the Specification Lead as successors to the Specification(s), without modifying, subsetting, supersetting, or otherwise extending the Restricted Name Space or including any public or protected packages, classes, Java interfaces, fields, or methods within the Restricted Name Space other than those required/authorized by the Specification(s) being implemented, and pass the TCK for such Specification(s); or
+(2) Make no claims that the Derivative Work complies with the Specification(s) and remove any such claims from the Derivative Work that originated with the Work.
+END OF AMENDMENTS

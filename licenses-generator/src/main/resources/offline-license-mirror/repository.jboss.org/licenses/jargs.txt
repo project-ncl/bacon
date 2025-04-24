@@ -1,0 +1,29 @@
+ 1 Copyright (c) 2001-2003 Steve Purcell.
+    2 Copyright (c) 2002      Vidar Holen.
+    3 Copyright (c) 2002      Michal Ceresna.
+    4 Copyright (c) 2005      Ewan Mellor.
+    5 
+    6 All rights reserved.
+    7 
+    8 Redistribution and use in source and binary forms, with or without
+    9 modification, are permitted provided that the following conditions are
+   10 met: Redistributions of source code must retain the above copyright notice,
+   11 this list of conditions and the following disclaimer. Redistributions in
+   12 binary form must reproduce the above copyright notice, this list of
+   13 conditions and the following disclaimer in the documentation and/or other
+   14 materials provided with the distribution. Neither the name of the copyright
+   15 holder nor the names of its contributors may be used to endorse or promote
+   16 products derived from this software without specific prior written
+   17 permission.
+   18 
+   19 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   20 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   21 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   22 ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+   23 LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   24 CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   25 SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   26 INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   27 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   28 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   29 POSSIBILITY OF SUCH DAMAGE.
