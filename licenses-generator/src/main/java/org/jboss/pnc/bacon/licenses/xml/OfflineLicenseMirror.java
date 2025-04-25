@@ -25,7 +25,7 @@ public class OfflineLicenseMirror {
 
         // As a path separator for getResourceAsStream, we should always use a slash (“/”), not what the OS specific one uses.
         // Thanks to @aloubyansky for pointing this out
-        String resourcesPathOfLicense = OFFLINE_LICENSE_MIRROR_RESOURCE_FOLDER + "/" + uri.getAuthority() + "/"
+        String resourcesPathOfLicense = OFFLINE_LICENSE_MIRROR_RESOURCE_FOLDER + "/" + uri.getAuthority()
                 + uri.getPath();
 
         InputStream input = OfflineLicenseMirror.class.getClassLoader()
