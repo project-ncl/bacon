@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.96 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>The BSD License Problem
+- GNU Project - Free Software Foundation</title>
+<!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/bsd.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/bsd.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="ca" hreflang="ca" href="/licenses/bsd.ca.html" title="català" />
+<link rel="alternate" type="text/html" lang="de" hreflang="de" href="/licenses/bsd.de.html" title="Deutsch" />
+<link rel="alternate" type="text/html" lang="es" hreflang="es" href="/licenses/bsd.es.html" title="español" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/bsd.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="he" hreflang="he" href="/licenses/bsd.he.html" title="עברית" />
+<link rel="alternate" type="text/html" lang="id" hreflang="id" href="/licenses/bsd.id.html" title="Indonesia" />
+<link rel="alternate" type="text/html" lang="ja" hreflang="ja" href="/licenses/bsd.ja.html" title="日本語" />
+<link rel="alternate" type="text/html" lang="nl" hreflang="nl" href="/licenses/bsd.nl.html" title="Nederlands" />
+<link rel="alternate" type="text/html" lang="pl" hreflang="pl" href="/licenses/bsd.pl.html" title="polski" />
+<link rel="alternate" type="text/html" lang="pt-br" hreflang="pt-br" href="/licenses/bsd.pt-br.html" title="português" />
+<link rel="alternate" type="text/html" lang="ru" hreflang="ru" href="/licenses/bsd.ru.html" title="русский" />
+<link rel="alternate" type="text/html" lang="tr" hreflang="tr" href="/licenses/bsd.tr.html" title="Türkçe" />
+<link rel="alternate" type="text/html" lang="uk" hreflang="uk" href="/licenses/bsd.uk.html" title="українська" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/bsd.zh-cn.html" title="简体中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="article reduced-width">
+<h2>The BSD License Problem</h2>
+
+<address class="byline">by Richard Stallman</address>
+
+<p>
+    The two major categories of free software license are <a
+        href="/licenses/copyleft.html">copyleft</a> and <a
+        href="/philosophy/categories.html#Non-CopyleftedFreeSoftware">
+        non-copyleft</a>.  <a
+        href="/licenses/license-list.html#GPLCompatibleLicenses">Copyleft
+        licenses</a> such as the <a href="/licenses/gpl.html">GNU
+        GPL</a> insist that modified versions of the program must be
+    free software as well.  Non-copyleft licenses do not insist on this.
+    <a href="/philosophy/why-copyleft.html">We recommend copyleft</a>,
+    because it protects freedom for all users, but non-copylefted
+    software can still be free software, and useful to the free software
+    community.
+</p>
+
+<div class="announcement comment">
+<hr class="no-display" />
+<p>See <a href="/licenses/license-recommendations.html">&ldquo;How to
+choose a license for your own work&rdquo;</a> for general
+recommendations about choosing a license for your work.</p>
+<hr class="no-display" />
+</div>
+
+<p>There are many variants of simple <a
+href="/licenses/license-list.html#GPLCompatibleLicenses">non-copyleft
+free software licenses</a>, such as the Expat license, FreeBSD license,
+X10 license, the X11 license, and the two BSD (Berkeley Software
+Distribution) licenses.  Most of them are equivalent except for details
+of wording, but the license used for BSD until 1999 had a special
+problem: the &ldquo;obnoxious BSD advertising clause.&rdquo; It said that every
+advertisement mentioning the software must include a particular
+sentence:</p>
+
+<blockquote><p>
+3. All advertising materials mentioning features or use of this software
+   must display the following acknowledgement:
+     This product includes software developed by the University of
+     California, Berkeley and its contributors.
+</p></blockquote>
+
+<p>
+    Initially the obnoxious BSD advertising clause was used only in the
+    Berkeley Software Distribution.  That did not cause any particular
+    problem, because including one sentence in an ad is not a great
+    practical difficulty.
+</p>
+<p>
+    If other developers who used BSD-like licenses had copied the BSD
+    advertising clause verbatim&mdash;including the sentence that refers to
+    the University of California&mdash;then they would not have made the
+    problem any bigger.
+</p>
+<p>
+    But, as you might expect, other developers did not copy the clause
+    verbatim.  They changed it, replacing &ldquo;University of California&rdquo;
+    with their own institution or their own names.  The result is a
+    plethora of licenses, requiring a plethora of different sentences.
+</p>
+<p>
+    When people put many such programs together in an operating system,
+    the result is a serious problem.  Imagine if a software system
+    required 75 different sentences, each one naming a different author
+    or group of authors.  To advertise that, you would need a full-page
+    ad.
+</p>
+<p>
+    This might seem like extrapolation ad absurdum, but it is actual
+    fact.  In a 1997
+    version of NetBSD, I counted 75 of these sentences.  (Fortunately
+    NetBSD has decided to stop adding them, and to remove those it could.)
+</p>
+<p>
+    To address this problem, in my &ldquo;spare time&rdquo; I talk with
+    developers who have used BSD-style licenses, asking them if they would
+    please remove the advertising clause.  Around 1996 I spoke with the
+    developers of FreeBSD about this, and they decided to remove the
+    advertising clause from all of their own code.  In May 1998 the developers
+    of Flick, at the University of Utah, removed this clause.
+</p>
+<p>
+    Dean Hal Varian at the University of California took up the cause,
+    and championed it with the administration.  In June 1999, after two
+    years of discussions, the University of California removed this
+    clause from the license of BSD.
+</p>
+<p>
+    Thus, there is now a new BSD license which does not contain the
+    advertising clause.  Unfortunately, this does not eliminate the
+    legacy of the advertising clause: similar clauses are still present
+    in the licenses of many packages which are not part of BSD.  The
+    change in license for BSD has no effect on the other packages which
+    imitated the old BSD license; only the developers who made them can
+    change them.
+</p>
+<p>
+    But if they followed Berkeley's lead before, maybe Berkeley's
+    change in policy will convince some of them to change.  It's worth
+    asking.
+</p>
+<p>
+    So if you have a favorite package which still uses the BSD license
+    with the advertising clause, please ask the maintainer to look at
+    this web page, and consider making the change.
+</p>
+<p>
+    And if you want to release a program as non-copylefted free
+    software, please don't use the advertising clause.  Thus, instead of
+    copying the BSD license from some released package&mdash;which might
+    still have the old version of the license in it&mdash;please use one
+    of the other permissive licenses, such as Expat or FreeBSD.
+</p>
+<p>
+    You can also help spread awareness of the issue by not using the
+    term &ldquo;BSD-style,&rdquo; and not saying &ldquo;the BSD license&rdquo;
+    which implies there is only one.  You see, when people refer to all
+    non-copyleft free software licenses as &ldquo;BSD-style licenses,&rdquo;
+    some new free software developer who wants to use a non-copyleft free
+    software license might take for granted that the place to get it is from
+    BSD.  He or she might copy the license with the advertising clause, not by
+    specific intention, just by chance.
+</p>
+<p>
+    If you would like to cite one specific example of a non-copyleft
+    license, and you have no particular preference, please pick an
+    example which has no particular problem.  For instance, if you talk
+    about &ldquo;X11-style licenses,&rdquo; you will encourage people to copy the
+    license from X11, which avoids the advertising clause for certain,
+    rather than take a risk by randomly choosing one of the BSD
+    licenses.
+</p>
+<p>
+    Or you could mention the non-copyleft license
+    which <a href="/licenses/license-recommendations.html"> we
+    recommend over the other non-copyleft licenses</a>: the Apache 2.0
+    license, which has a clause to prevent treachery with patents.
+</p>
+<p>
+    When you want to refer specifically to one of the BSD licenses,
+    please always state which one: the &ldquo;original BSD license&rdquo; or the
+    &ldquo;modified BSD license.&rdquo;
+</p>
+
+<hr class="column-limit" />
+
+<p>
+    Later a third BSD license variant was introduced, with only the
+    first two of the original BSD license's four clauses.  We call it
+    the &ldquo;FreeBSD license.&rdquo; It is a lax, noncopyleft free
+    license, compatible with the GNU GPL, much like the modified BSD
+    license.
+</p>
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/bsd" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/bsd.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[ca]&nbsp;<a lang="ca" hreflang="ca" href="/licenses/bsd.ca.html">català</a> &nbsp;</span>
+<span dir="ltr">[de]&nbsp;<a lang="de" hreflang="de" href="/licenses/bsd.de.html">Deutsch</a> &nbsp;</span>
+<span dir="ltr">[es]&nbsp;<a lang="es" hreflang="es" href="/licenses/bsd.es.html">español</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/bsd.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[he]&nbsp;<a lang="he" hreflang="he" href="/licenses/bsd.he.html">עברית</a> &nbsp;</span>
+<span dir="ltr">[id]&nbsp;<a lang="id" hreflang="id" href="/licenses/bsd.id.html">Indonesia</a> &nbsp;</span>
+<span dir="ltr">[ja]&nbsp;<a lang="ja" hreflang="ja" href="/licenses/bsd.ja.html">日本語</a> &nbsp;</span>
+<span dir="ltr">[nl]&nbsp;<a lang="nl" hreflang="nl" href="/licenses/bsd.nl.html">Nederlands</a> &nbsp;</span>
+<span dir="ltr">[pl]&nbsp;<a lang="pl" hreflang="pl" href="/licenses/bsd.pl.html">polski</a> &nbsp;</span>
+<span dir="ltr">[pt-br]&nbsp;<a lang="pt-br" hreflang="pt-br" href="/licenses/bsd.pt-br.html">português</a> &nbsp;</span>
+<span dir="ltr">[ru]&nbsp;<a lang="ru" hreflang="ru" href="/licenses/bsd.ru.html">русский</a> &nbsp;</span>
+<span dir="ltr">[tr]&nbsp;<a lang="tr" hreflang="tr" href="/licenses/bsd.tr.html">Türkçe</a> &nbsp;</span>
+<span dir="ltr">[uk]&nbsp;<a lang="uk" hreflang="uk" href="/licenses/bsd.uk.html">українська</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/bsd.zh-cn.html">简体中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:webmasters@gnu.org">&lt;webmasters@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing" translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<p>Copyright &copy; 1998, 1999, 2002, 2003, 2006, 2008, 2009, 2012, 2015, 2021
+Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2021/12/25 21:08:46 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>

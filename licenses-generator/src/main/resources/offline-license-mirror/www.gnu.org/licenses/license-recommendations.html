@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.97 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>How to Choose a License for Your Own Work
+- GNU Project - Free Software Foundation</title>
+<style type="text/css" media="screen"><!--
+.note#fsf-licensing {
+   float: none;
+   width: 47em; max-width: 93%;
+   margin: 2em auto 3em;
+}
+--></style>
+<!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/license-recommendations.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/license-recommendations.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="es" hreflang="es" href="/licenses/license-recommendations.es.html" title="español" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/license-recommendations.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="it" hreflang="it" href="/licenses/license-recommendations.it.html" title="italiano" />
+<link rel="alternate" type="text/html" lang="ja" hreflang="ja" href="/licenses/license-recommendations.ja.html" title="日本語" />
+<link rel="alternate" type="text/html" lang="pt-br" hreflang="pt-br" href="/licenses/license-recommendations.pt-br.html" title="português" />
+<link rel="alternate" type="text/html" lang="ru" hreflang="ru" href="/licenses/license-recommendations.ru.html" title="русский" />
+<link rel="alternate" type="text/html" lang="sq" hreflang="sq" href="/licenses/license-recommendations.sq.html" title="Shqip" />
+<link rel="alternate" type="text/html" lang="tr" hreflang="tr" href="/licenses/license-recommendations.tr.html" title="Türkçe" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/license-recommendations.zh-cn.html" title="简体中文" />
+<link rel="alternate" type="text/html" lang="zh-tw" hreflang="zh-tw" href="/licenses/license-recommendations.zh-tw.html" title="繁體中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="article reduced-width">
+<h2>How to Choose a License for Your Own Work</h2>
+<div class="thin"></div>
+
+<p id="intro">People often ask us what license we recommend they use for their
+project.  We've written about this publicly before, but the
+information has been scattered around between different essays, FAQ
+entries, and license commentaries.  This article collects all that
+information into a single source, to make it easier for people to
+follow and refer back to.</p>
+
+<p>These recommendations are for works designed to do practical jobs.
+Those include software, documentation, and some other things.  Works of
+art, and works that state a point of view, are different issues; the GNU
+Project has no general stand about how they should be released, except
+that they should all be usable without nonfree software (in
+particular, <a href="http://defectivebydesign.org/">without DRM</a>).
+However, you might want to follow these recommendations for art works
+that go with a particular program.</p>
+
+<p>The recommendations apply to licensing a work that you
+create&mdash;whether that's a modification of an existing work, or a
+new original work.  They do not address the issue of combining
+existing material under different licenses.  If you're looking for
+help with that, please check <a href="/licenses/gpl-faq.html">our GPL
+FAQ</a>.</p>
+
+<p>After you see what we recommend here, if you'd like advice, you can
+write
+to <a href="mailto:licensing@gnu.org">&lt;licensing@gnu.org&gt;</a>.
+Note that it will probably take a few weeks for the licensing team to
+get back to you; if you get no response in a month, please write
+again.</p>
+
+<div class="announcement comment" role="complementary">
+<hr class="no-display" />
+<p>To see whether a given license is free or not,
+see <a href="/licenses/license-list.html">our license list page</a>
+and the <a href="/philosophy/free-sw.html">definition of free software</a>.</p>
+<hr class="no-display" />
+</div>
+
+<h3 id="contributing">Contributing to an existing project</h3>
+
+<p>When you contribute to an existing project, you should usually release
+your modified versions under the same license as the original work.
+It's good to cooperate with the project's maintainers, and using a
+different license for your modifications often makes that cooperation
+very difficult.  You should only do that when there is a strong reason
+to justify it.</p>
+
+<p>One case where using a different license can be justified is when you make
+major changes to a work under a non-copyleft license.  If the version you've
+created is considerably more useful than the original, then it's worth
+copylefting your work, for all the same
+<a href="/licenses/copyleft.html">reasons we normally recommend
+copyleft</a>.  If you are in this situation, please follow the
+recommendations below for licensing a new project.</p>
+
+<p>If you choose to release your contributions under a different
+license for whatever reason, you must make sure that the original
+license allows use of the material under your chosen license.  For
+honesty's sake, show explicitly which parts of the work are under
+which license.</p>
+
+<h3 id="software">Software</h3>
+
+<p>We recommend different licenses for different projects, depending
+mostly on the software's purpose.  In general, we recommend using the
+strongest copyleft license that doesn't interfere with that purpose.
+Our essay &ldquo;<a href="/licenses/copyleft.html">What
+is Copyleft?</a>&rdquo; explains the
+concept of copyleft in more detail, and why it is generally the best
+licensing strategy.</p>
+
+<p>For most programs, we recommend that you use the most recent
+version of the <a href="/licenses/gpl.html">GNU General Public License
+(GPL)</a> for your project.  Its strong copyleft is appropriate for
+all kinds of software, and includes numerous protections for users'
+freedom.  To allow for future license
+upgrades, <a href="/licenses/identify-licenses-clearly.html"> please
+specify &ldquo;version 3 or any later version&rdquo;</a> so that your
+program will be <a href="/licenses/license-compatibility.html">
+license-compatible</a> with code that may be released, in the future,
+under subsequent GPL versions.</p>
+
+<p>Here is more advice about <a href="/licenses/gpl-howto.html">how
+to release a program under the GNU GPL</a>.</p>
+
+<p>Now for the exceptions, where it is better to use some other
+licenses instead of the GNU GPL.</p>
+
+<h4 id="small">Small programs</h4>
+
+<p>It is not worth the trouble to use copyleft for most small
+programs.  We use 300 lines as our benchmark: when a software
+package's source code is shorter than that, the benefits provided by
+copyleft are usually too small to justify the inconvenience of making
+sure a copy of the license always accompanies the software.</p>
+
+<p>For those programs, we recommend
+the <a href="https://directory.fsf.org/wiki/License:Apache2.0">Apache
+License 2.0</a>.  This is a weak, lax, &ldquo;pushover&rdquo; (non-copyleft)
+software license
+that has terms to prevent contributors and distributors from suing for
+patent infringement.  This doesn't make the software immune to threats
+from patents (no software license can achieve that), but it does prevent
+patent holders from setting up a &ldquo;bait and switch&rdquo; where
+they release the software under free terms then require recipients to
+agree to nonfree terms in a patent license.</p>
+
+<p>Among the weak (pushover) licenses, Apache 2.0 is best; so if you
+are going to use a weak license, whatever the reason,
+we recommend using that one.</p>
+
+<h4 id="libraries">Libraries</h4>
+
+<p>For libraries, we distinguish three kind of cases.</p>
+
+<p>Some libraries implement free data formats that are competing
+against restricted data formats, such as Ogg Vorbis (which competes
+against MP3 audio) and WebM (which competes against MPEG-4 video).
+The success of the free format requires allowing many proprietary
+application programs to link in the code to handle the format.  For
+instance, we wanted nonfree media players, especially appliances, to
+include the code for Ogg Vorbis as well as MP3.</p>
+
+<p>In these special situations, if you are aiming to convince
+proprietary application developers to use the library for the free
+format, you would need to make that easy by licensing the library
+under a weak license, such as
+the <a href="https://directory.fsf.org/wiki/License:Apache2.0">Apache
+License 2.0</a>.</p>
+
+<p>However, we must recognize that this strategy did not succeed for
+Ogg Vorbis.  Even after changing the copyright license to permit easy
+inclusion of that library code in proprietary applications,
+proprietary developers generally did not include it.  The sacrifice
+made in the choice of license ultimately won us little.</p>
+
+<p>For all other libraries, we recommend some kind of copyleft.  If
+developers are already using an established alternative library
+released under a nonfree license or a lax pushover license, then we
+recommend using the <a href="/licenses/lgpl.html">GNU Lesser General
+Public License (LGPL)</a>.</p>
+
+<p>Unlike the first case, where the library implements an ethically
+superior standard, here adoption for its own sake will not accomplish
+any special objective goal, so there's no reason to avoid copyleft
+entirely.  However, if you require developers who use your library to
+release their whole programs under copyleft, they'll simply use one of
+the alternatives available, and that won't advance our cause either.
+The Lesser GPL was designed to fill the middle ground between these
+cases, allowing proprietary software developers to use the covered
+library, but providing a weak copyleft that gives users freedom
+regarding the library code itself.</p>
+
+<p>For libraries that provide specialized facilities, and which do not
+face entrenched noncopylefted or nonfree competition, we recommend
+using the plain GNU GPL.  For the reasons why,
+read &ldquo;<a href="/licenses/why-not-lgpl.html">Why you shouldn't
+use the Lesser GPL for your next library</a>.&rdquo;</p>
+
+<h4 id="server">Server Software</h4>
+
+<p>If it is likely that others will make improved versions of your
+program to run on servers and not distribute their versions to anyone
+else, and you're concerned that this will put your released version at
+a disadvantage, we recommend the <a href="/licenses/agpl.html">GNU
+Affero General Public License (AGPL)</a>.  The AGPL's terms are almost
+identical to the GPL's; the sole substantive difference is that it has
+an extra condition to ensure that people who use the software over a
+network will be able to get the source code for it.</p>
+
+<p>The AGPL's requirement doesn't address the problems that can arise
+<em>for users</em> when they entrust their computing or their data to
+someone else's server.  For instance, it won't stop
+<a href="/philosophy/who-does-that-server-really-serve.html">Service
+as a Software Substitute (SaaSS)</a> from denying users'
+freedom&mdash;but most servers don't do SaaSS.  For more about these
+issues, read &ldquo;<a href="/licenses/why-affero-gpl.html">Why the
+Affero GPL</a>.&rdquo;</p>
+
+<h3 id="documentation">Documentation</h3>
+
+<p>We recommend the <a href="/licenses/fdl.html">GNU Free
+Documentation License (GFDL)</a> for tutorials, reference manuals and
+other large works of documentation.  It's a strong copyleft license
+for educational works, initially written for software manuals, and
+includes terms which specifically address common issues that arise
+when those works are distributed or modified.</p>
+
+<p>For short, secondary documentation works, such as a reference card,
+it is better to use
+the <a href="/licenses/license-list.html#GNUAllPermissive"> GNU
+all-permissive license</a>, since a copy of the GFDL could hardly fit
+in a reference card.  Don't use CC&nbsp;BY, since it is incompatible with
+the GFDL.</p>
+
+<p>For man pages, we recommend the GFDL if the page is long, and
+the <a href="/licenses/license-list.html#GNUAllPermissive"> GNU
+all-permissive license</a> if it is short.</p>
+
+<p>Some documentation includes software source code.  For instance, a manual
+for a programming language might include examples for readers to follow.
+You should both include these in the manual under the FDL's terms, and
+release them under another license that's appropriate for software.  Doing
+so helps make it easy to use the code in other projects.  We recommend that
+you dedicate small pieces of code to the public domain using <a
+href="https://creativecommons.org/share-your-work/public-domain/cc0">CC0</a>, and
+distribute larger pieces under the same license that the associated
+software project uses.</p>
+
+<h3 id="data">Other data for programs</h3>
+
+<p>This section discusses all other works for practical use that you
+might include with software.  To give you some examples, this includes
+icons and other functional or useful graphics, fonts, and geographic
+data.  You can also follow them for art, though we wouldn't criticize
+if you don't.</p>
+
+<p>If you are creating these works specifically for use with a software
+project, we generally recommend that you release your work under the
+same license as the software.  There is no problem in doing so
+with the licenses we have recommended:
+GPLv3, LGPLv3, AGPLv3, and GPLv2 can all be applied to any kind of
+work&mdash;not just software&mdash;that is copyrightable and has a clear
+preferred form for modification.  Using the same license as the
+software will help make compliance easier for distributors, and avoids
+any doubt about potential compatibility issues.  Using a different
+free license may be appropriate if it provides some specific practical
+benefit, like better cooperation with other free projects.</p>
+
+<p>If your work is not being created for use with a particular software
+project, or if it wouldn't be appropriate to use the same license as
+the project, then we only recommend that you choose a copyleft license
+that's appropriate for your work.  We have some of these <a href="/licenses/license-list.html#OtherLicenses">listed on
+our license list</a>.  If no license seems especially
+appropriate, the <a href="/licenses/license-list.html#ccbysa">Creative Commons Attribution-ShareAlike</a>
+license is a copyleft that can be used for many different kinds of
+works.</p>
+
+<div id="fsf-licensing" class="note" role="complementary">
+<p style="font-size: 80%">This page is maintained by the Free Software
+Foundation's Licensing and Compliance Lab. You can support our efforts by
+<a href="http://donate.fsf.org">making a donation</a> to the FSF.
+</p>
+<p style="font-size: 80%">You can use our publications to understand how GNU licenses work or help
+you advocate for free software, but they are not legal advice. The FSF
+cannot give legal advice. Legal advice is personalized advice from a
+lawyer who has agreed to work for you. Our answers address general
+questions and may not apply in your specific legal situation.</p>
+<p style="font-size: 80%"> Have a
+question not answered here? Check out some of our other <a
+href="https://www.fsf.org/licensing">licensing resources</a> or contact the
+Compliance Lab at <a href="mailto:licensing@fsf.org">licensing@fsf.org</a>.</p>
+</div>
+
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/license-recommendations.html" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/license-recommendations.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[es]&nbsp;<a lang="es" hreflang="es" href="/licenses/license-recommendations.es.html">español</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/license-recommendations.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[it]&nbsp;<a lang="it" hreflang="it" href="/licenses/license-recommendations.it.html">italiano</a> &nbsp;</span>
+<span dir="ltr">[ja]&nbsp;<a lang="ja" hreflang="ja" href="/licenses/license-recommendations.ja.html">日本語</a> &nbsp;</span>
+<span dir="ltr">[pt-br]&nbsp;<a lang="pt-br" hreflang="pt-br" href="/licenses/license-recommendations.pt-br.html">português</a> &nbsp;</span>
+<span dir="ltr">[ru]&nbsp;<a lang="ru" hreflang="ru" href="/licenses/license-recommendations.ru.html">русский</a> &nbsp;</span>
+<span dir="ltr">[sq]&nbsp;<a lang="sq" hreflang="sq" href="/licenses/license-recommendations.sq.html">Shqip</a> &nbsp;</span>
+<span dir="ltr">[tr]&nbsp;<a lang="tr" hreflang="tr" href="/licenses/license-recommendations.tr.html">Türkçe</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/license-recommendations.zh-cn.html">简体中文</a> &nbsp;</span>
+<span dir="ltr">[zh-tw]&nbsp;<a lang="zh-tw" hreflang="zh-tw" href="/licenses/license-recommendations.zh-tw.html">繁體中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:webmasters@gnu.org">&lt;webmasters@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<!-- Regarding copyright, in general, standalone pages (as opposed to
+     files generated as part of manuals) on the GNU web server should
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
+     without talking with the webmasters or licensing team first.
+     Please make sure the copyright date is consistent with the
+     document.  For web pages, it is ok to list just the latest year the
+     document was modified, or published.
+     
+     If you wish to list earlier years, that is ok too.
+     Either "2001, 2002, 2003" or "2001-2003" are ok for specifying
+     years, as long as each year in the range is in fact a copyrightable
+     year, i.e., a year in which the document was published (including
+     being publicly visible on the web or in a revision control system).
+     
+     There is more detail about copyright years in the GNU Maintainers
+     Information document, www.gnu.org/prep/maintain. -->
+
+<p>Copyright &copy; 2011-2014, 2017, 2019, 2020, 2022 Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2022/01/22 18:22:54 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>

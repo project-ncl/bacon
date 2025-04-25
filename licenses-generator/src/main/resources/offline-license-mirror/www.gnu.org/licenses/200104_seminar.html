@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.97 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>FSF Seminar: Detailed Study and Analysis of GPL and LGPL
+- GNU Project - Free Software Foundation</title>
+<meta name="CREATED" content="20031124;15182100" />
+<style type="text/css" media="screen"><!--
+  #venue { margin: 2em 6%; }
+  #content .emph-box { margin-bottom: 2.5em; }
+  #content .emph-box dl { margin: 1em 0 0; }
+--></style>
+<!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/200104_seminar.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/200104_seminar.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="de" hreflang="de" href="/licenses/200104_seminar.de.html" title="Deutsch" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/200104_seminar.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/200104_seminar.zh-cn.html" title="简体中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="article reduced-width">
+<h2>FSF Seminar: Detailed Study and Analysis of GPL and LGPL</h2>
+
+<div id="venue">
+<p><i>Columbia Law School, Columbia University<br />
+New York, NY<br />
+January 20, 2004 (9:00 am - 6:00 pm)</i></p>
+</div>
+
+<p>This one-day course gives a section-by-section explanation of the
+most popular Free Software copyright license, the GNU General Public
+License (GNU GPL), and teaches lawyers, software developers, managers
+and business people how to use the GPL (and GPL'd software)
+successfully in a new Free Software business and in existing,
+successful enterprises.
+</p>
+
+<h3>Prerequisites</h3>
+
+<p>Attendees should have a general
+familiarity with software development processes.  A basic
+understanding of how copyright law typically applies to software is
+also helpful.</p>
+
+<h3>Audience</h3>
+
+<p>The
+course is of most interest to lawyers, software developers and
+managers who run (or have clients who run) software businesses that
+modify and/or redistribute software under terms of the GNU GPL or
+LGPL, or who wish to make use of existing GPL'd and LGPL'd software in
+their enterprise.
+</p>
+<p>The course will include the topics listed below, along with ample
+time for questions and discussions.
+</p>
+
+<h3>Lunchtime Speaker</h3>
+
+<p><a href="https://web.archive.org/web/20220423181543/http://emoglen.law.columbia.edu/">Eben
+Moglen</a> will be the lunchtime speaker.  Professor Moglen is
+Professor of Law and Legal History at Columbia Law School and one of
+the nation's foremost scholars on copyright, patents and the proposed
+&ldquo;Broadcast Flag.&rdquo;  He is also a member of FSF's Board of
+Directors and the foundation's General Counsel.  Professor Moglen has
+also written extensively on the SCO vs IBM lawsuit.
+</p>
+
+<div class="emph-box">
+<dl>
+<dt>Free Software
+Principles and the Free Software Definition
+</dt>
+<dd>
+<p>The ethical
+principles that motivated the creation of these licenses are
+presented.  Unlike licenses that seek to lock up software in a
+proprietary fashion, the GPL and LGPL are designed to grant freedom to
+innovate, learn and improve. Those principles influence licensing
+policy decisions.  We present the specific definition of the concept
+of &ldquo;Free Software&rdquo; (software whose license grants freedoms
+to copy, share, modify and redistribute the software either gratis or
+for a fee) for for-profit companies.
+</p>
+</dd>
+<dt>Preamble of the GNU
+General Public License (GPL)
+</dt>
+<dd>
+<p> The preamble
+presents the intent of the license.  The preamble puts forth the
+motivations for the detailed terms and conditions that follow in the
+license.  We discuss the language of the preamble in detail to show
+how it frames the legal details that follow.
+</p>
+</dd>
+<dt> GPL, Section 0:
+Definitions, etc.
+</dt>
+<dd>
+<p> GPL's Section 0
+defines and presents the terms that make the basis of this copyright
+license.  We discuss those definitions and the copyright scope of the
+license.</p>
+</dd>
+<dt>GPL, Section 1:
+Grant for Verbatim Source Copying
+</dt>
+<dd>
+<p> Section 1 defines the terms for making
+source-only copies of software programs.  We discuss how those rules
+work and the requirements and obligations for distributors of GPL'd
+source, whether they choose to distribute at no charge or for
+fees.</p>
+</dd>
+<dt>Derivative Works:
+Statute and Case Law</dt>
+<dd>
+<p> Free Software
+licensing in general, and the GPL and LGPL in particular, relies
+critically on the concept of derivative work since software that is
+independent (i.e., not derivative) of Free Software need not abide by
+any of the terms of the applicable Free Software license.  If a work
+is a derivative work of Free Software, then the terms of the license
+are triggered, and one has obligations to comply with the terms of the
+Free Software license under which the original work is distributed.
+Therefore, one is left to ask, just what is a &ldquo;derivative
+work?&rdquo; We will show how the answer to that question depends on
+which court is being asked.  We also present the best background
+information available to build a working understanding of what is
+generally considered a derivate work in the rapidly changing field of
+software copyright law.</p>
+</dd>
+<dt> GPL, Section 2:
+Grants for Source Derivative Works</dt>
+<dd>
+<p> Section 2 sets
+forth the rules for creation of derivative works of GPL'd software.
+We discuss the intent of this section of GPL and how it relates to the
+copyright situation discussed in our discussion of derivative works.
+We also explain the details of preparing derivative source in a
+GPL-compliant way.</p>
+</dd>
+<dt> GPL, Section 3:
+Grants for Creating Binary Derivative Works</dt>
+<dd>
+<p> Source-only
+distribution works well for technically savvy clients and users, but
+most want runnable binary programs as well.  Section 3 gives
+permission for the creation and distribution of such binary works.  We
+explain how GPL's requirement for corresponding source code operates,
+and detail what distribution options are available to distributors of
+binary GPL'd software.  We explore the benefits and downsides of each
+of those options.</p>
+</dd>
+<dt>The Implied Patent
+Grant in GPL</dt>
+<dd>
+<p> Patent rights are
+most often granted expressly, through detailed language in a license.
+However, express patent grants are not the exclusive way rights in
+patents are granted by patentees.  Even without express language,
+patent rights can be granted by a patentee's actions or behavior.  The
+GPL contains no express patent grant.  Does that mean it grants less
+rights in the licensor's patents than other licenses which do? Or,
+does the GPL, in its silence, actually result in a grant of patent
+rights to the licensee greater than what occurs through many other
+Free Software and &ldquo;Open Source&rdquo; licenses?
+</p>
+<p>We will consider these questions and
+provide detailed answers to them.</p>
+</dd>
+<dt>GPL, Section 4:
+Termination of License
+</dt>
+<dd>
+<p> Section 4
+terminates rights under the GPL for those who violate it.  We discuss
+how such termination works, what it means for violators, what risks
+one takes in violating, and how rights are typically restored.  We
+briefly mention how Section 4 is used as the central tool in GPL
+enforcement.
+</p>
+</dd>
+<dt>GPL, Section 5:
+Acceptance of License
+</dt>
+<dd>
+<p> GPL is not a
+contract, so acceptance of the license works differently than it does
+for contracts.  We discuss how this acceptance works under the copyright
+rules that govern the GPL.</p>
+</dd>
+<dt>GPL, Section 6:
+Prohibition on Further Restrictions</dt>
+<dd>
+<p> Other licensing
+terms cannot be placed on GPL'd software that would trump the rights
+granted under GPL.  We discuss how Section 6 is used to ensure that no
+such additional restrictions occur.  We briefly discuss how this leads
+to the concept of GPL-incompatible Free Software licenses.</p>
+</dd>
+<dt>GPL, Section 7:
+Conflicts with Other Agreements or Orders</dt>
+<dd>
+<p> Just as additional
+licensing restrictions cannot trump the GPL, outside agreements,
+patent licenses or court orders cannot do so either.  We discuss how
+Section 7 ensures that other rules outside of the direct software
+license cannot take rights away from users, distributors, and
+modifiers of GPL'd software.
+</p>
+</dd>
+<dt>GPL, Section 8:
+International Licensing Issues</dt>
+<dd>
+<p> Section 8 is a
+rarely used part of the GPL that helps copyright holders when certain
+technologies are prohibited from full international distribution due
+to draconian rules elsewhere in the world.  We explain how Section 8
+helps such copyright holders.
+</p>
+</dd>
+<dt>GPL, Section 9: FSF
+as GPL's Stewards</dt>
+<dd>
+<p> We discuss how the
+update process and release of new GPL versions happens.</p>
+</dd>
+<dt>GPL, Section 10:
+Copyright Holder's Exceptions to GPL</dt>
+<dd>
+<p> Section 10 reminds
+licensees that under copyright law, other relicensing arrangements can
+be made.  We discuss how this can often be used as a business model
+and we explicate that model's benefits and downsides.</p>
+</dd>
+<dt>GPL, Section 11:
+Disclaimer of Warranties</dt>
+<dd></dd>
+<dt>GPL, Section 12:
+Limitation of Liability</dt>
+<dd>
+<p> Almost all software
+licenses, including Free Software licenses such as the GPL, contain
+sections, typically in all caps, regarding warranties and liability.
+The purposes of these sections are lost on most non-lawyers, but
+attorneys understand the importance their language provides to both
+the licensor and the licensee.  Some have argued that the GPL's
+Sections 11 and 12 render it entirely unenforceable.  We consider
+whether that is true, and present the likely interpretation and
+implementation of the GPL's Warranty Disclaimer and Liability
+Limitation provisions.</p>
+</dd>
+<dt>Lesser General
+Public License (LGPL)</dt>
+<dd>
+<p> The LGPL is a
+&ldquo;scaled back&rdquo; version of GPL, designed specifically to
+allow creation of a very well-defined class of proprietary derivative
+works.  However, it does prohibit turning the LGPL'd software itself
+directly into proprietary software.
+</p>
+<p> We discuss the
+basic design of LGPL and how it compares and contrasts with GPL.  We
+introduce the two classes of derivative works covered by LGPL,
+&ldquo;works that use the library&rdquo; and &ldquo;works based on the
+library,&rdquo; and give some concrete examples of what proprietary
+derivative works are prohibited and permitted when basing the software
+on an LGPL'd work.
+</p>
+</dd>
+</dl>
+</div>
+
+<h3>Pricing (Book by December 24, 2003 for early registration
+discount)</h3>
+<p>$495 for registrations on or before
+December 24, 2003 and $595 after December 24</p>
+<p>
+<b>Financial Aid
+Policy:</b> Applicants with annual incomes of up to $15,000 are
+entitled to a 75% discount.  People with incomes between $15,000 and
+$30,000 receive a 50% discount.  Any member of the judiciary,
+academics or attorneys from non-profit organizations receive a 10%
+discount.  If you fall within one of these categories, please contact
+John at <a href="mailto:johns@fsf.org">&lt;johns@fsf.org&gt;</a> or
+Ravi at <a href="mailto:ravi@fsf.org">&lt;ravi@fsf.org&gt;</a> or by
+phone at 617.620.9640.</p>
+<p>To register for the
+seminar, please download
+the registration form,
+fill it in and fax it to FSF.</p>
+<p><b>CLE
+Credits: </b>Attorneys who successfully complete the day long course
+will be entitled to 7 New York Transitional CLE credits toward the
+area of Professional Practice.</p>
+<p>Companies that have
+signed up as Corporate Patrons of FSF receive two complimentary seats
+per year at FSF seminars and reduced rates for additional
+participants.  Please
+contact <a href="mailto:patron@fsf.org">&lt;patron@fsf.org&gt;</a> for
+more details.  You can find out more about the Corporate Patron
+Program at <a
+href="https://www.fsf.org/patrons/">www.fsf.org/patrons/</a>.</p>
+<p>The seminar will be
+held at Columbia Law School in New York.  Directions will be sent
+following registration.  For more information, please contact Ravi
+Khanna, FSF's Director of Communication
+at <a href="mailto:ravi@fsf.org">&lt;ravi@fsf.org&gt;</a> or by
+calling 1+617-620-9640.</p>
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/200104_seminar.html" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/200104_seminar.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[de]&nbsp;<a lang="de" hreflang="de" href="/licenses/200104_seminar.de.html">Deutsch</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/200104_seminar.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/200104_seminar.zh-cn.html">简体中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:webmasters@gnu.org">&lt;webmasters@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<!-- Regarding copyright, in general, standalone pages (as opposed to
+     files generated as part of manuals) on the GNU web server should
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
+     without talking with the webmasters or licensing team first.
+     Please make sure the copyright date is consistent with the
+     document.  For web pages, it is ok to list just the latest year the
+     document was modified, or published.
+     
+     If you wish to list earlier years, that is ok too.
+     Either "2001, 2002, 2003" or "2001-2003" are ok for specifying
+     years, as long as each year in the range is in fact a copyrightable
+     year, i.e., a year in which the document was published (including
+     being publicly visible on the web or in a revision control system).
+     
+     There is more detail about copyright years in the GNU Maintainers
+     Information document, www.gnu.org/prep/maintain. -->
+
+<p>Copyright &copy; 2003, 2004, 2022 Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2022/07/09 07:00:44 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>

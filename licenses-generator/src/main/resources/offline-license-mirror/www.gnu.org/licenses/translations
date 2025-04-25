@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.99 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>Unofficial Translations
+- GNU Project - Free Software Foundation</title>
+<meta http-equiv="keywords" content="GNU, FSF, Free Software Foundation, Linux, Copyleft, Licenses" />
+<!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/translations.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/translations.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="ca" hreflang="ca" href="/licenses/translations.ca.html" title="català" />
+<link rel="alternate" type="text/html" lang="de" hreflang="de" href="/licenses/translations.de.html" title="Deutsch" />
+<link rel="alternate" type="text/html" lang="es" hreflang="es" href="/licenses/translations.es.html" title="español" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/translations.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="ja" hreflang="ja" href="/licenses/translations.ja.html" title="日本語" />
+<link rel="alternate" type="text/html" lang="pl" hreflang="pl" href="/licenses/translations.pl.html" title="polski" />
+<link rel="alternate" type="text/html" lang="pt-br" hreflang="pt-br" href="/licenses/translations.pt-br.html" title="português" />
+<link rel="alternate" type="text/html" lang="ru" hreflang="ru" href="/licenses/translations.ru.html" title="русский" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/translations.zh-cn.html" title="简体中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="reduced-width">
+<h2>Unofficial Translations</h2>
+<div class="thin"></div>
+
+<h3 id="UnofficialTranslations">Information about unofficial
+translations</h3>
+
+<p>
+The FSF does not approve license translations as officially valid.
+The reason is that checking them would be difficult and expensive
+(needing the help of bilingual lawyers in other countries).  Even
+worse, if an error did slip through, the results could be disastrous
+for the whole free software community.  As long as the translations
+are unofficial, they can't do any legal harm.</p>
+
+<p>To underscore the fact that these translations are not officially
+valid, we do not publish translations.  To help make that clear, we don't
+post them on gnu.org, or on other GNU and FSF web sites; we only link
+to them.</p>
+
+<p>The purpose of linking to translations is to help more people
+understand our licenses.  In order for them to do that, translations
+need to be basically accurate even if not perfect.  To produce a good
+translation, it is essential to have fully understood fundamental
+concepts such as <a href="/licenses/copyleft.html">copyleft</a> and
+the <a href="/philosophy/free-sw.html">free software definition</a>.
+For this reason, those who wish to contribute translations should make
+sure they are well acquainted with these concepts as well as other
+philosophical principles that may appear in the document.</p>
+
+<p>We give permission to publish translations of GNU licenses
+into other languages, provided that:</p>
+
+<div class="emph-box" >
+<ol id="rules">
+
+<li>You label your translation as unofficial to inform people that
+they do not count legally as substitutes for the authentic version
+(see below for how to do this).</li>
+
+<li>You agree to install changes at our request, if we learn from other
+friends of GNU that changes are necessary to make the translation
+clearer.</li>
+
+<li>The translation is not hosted on a commercial site and does not
+refer to any company.</li>
+
+<li>The page containing the translation should have no links
+except to fsf.org and gnu.org.  We might accept links about
+other free software packages, but we prefer to avoid them.</li>
+
+<li>You permit others to copy, modify, and republish your translation (and
+modified versions of your translation) subject to these terms by placing
+the following notice: &ldquo;You may publish this translation, modified or
+unmodified, only under the terms at 
+<a href="/licenses/translations.html">
+http://www.gnu.org/licenses/translations.html</a>.&rdquo;</li>
+
+</ol>
+</div>
+
+<p>We may accept small exceptions to these rules in
+legacy cases that are hard to fix.</p>
+
+<p>We do not necessarily link to all the unofficial translations that
+we know of in any given language.  For instance, if one unofficial
+translation was made by a free software organization that we know and
+have confidence in, we will link to that translation rather than others.
+We still can't make it official, but we expect it is probably mostly
+correct.</p>
+
+<p>
+To label your translations as unofficial, please add the
+following text at the beginning,
+both in English and in the language of the translation.  Replace
+&ldquo;<var>language</var>&rdquo; with the name of that language, and &ldquo;GNU
+General Public License&rdquo; and &ldquo;GPL&rdquo; with the name and
+abbreviation of the license you're translating, if it's not the
+GPL:</p>
+
+<blockquote class="emph-box"><p dir="ltr" style="text-align:left">
+<!--TRANSLATORS: If you translate this paragraph, retain the English
+text and put your translation below.  The entire <blockquote> element
+has <p dir="ltr" style="text-align:left"> to work by default with RTL
+languages when the notice is not translated, so if your language is RTL,
+you *must* put your translation within
+</p><p dir="rtl" style="text-align:right">......</p><p> -->
+This is an unofficial translation of the GNU General Public License
+into <var>language</var>.  It was not published by the Free Software
+Foundation, and does not legally state the distribution terms for
+software that uses the GNU GPL&mdash;only the original English text of
+the GNU GPL does that.  However, we hope that this translation will
+help <var>language</var> speakers understand the GNU GPL better.
+</p></blockquote>
+
+<p>If you make a translation (of any license), please inform the GNU
+Translation Managers <a
+href="mailto:web-translators@gnu.org">&lt;web-translators@gnu.org&gt;</a>.
+They will check to make sure that your translation follows the above
+guidelines and make a link to it from this page.</p>
+
+<h3 id="GPL">The GNU General Public License, version 3</h3>
+
+<!-- Please keep entries alphabetical by language code RT #908353.  -->
+<!-- And to help users, include the language code in brackets.  -->
+
+<ul>
+  <li><code>[ar]</code> <!-- RT #816348 -->
+  <a href="http://fairsultan.files.wordpress.com/2013/03/gpl-3-0-ar1.pdf">
+  Arabic</a> translation of the GPL (PDF)</li>
+  <li><code>[cs]</code> <!-- RT #710854 -->
+  <a href="http://jxself.org/translations/gpl-3.cz.shtml">Czech</a>
+  translation of the GPL</li>
+  <li><code>[da]</code> <!-- RT #1184539, #1348329 -->
+  <a href="https://raw.githubusercontent.com/scootergrisen/licenser/master/gpl-3.0.da.txt">
+  Danish</a> translation of the GPL (TXT)</li>
+<!-- This translation has links other than to www.fsf.org and www.gnu.org
+  <li><code>[de]</code> <a href="http://www.gnu.de/documents/gpl-3.0.de.html">
+  German</a> translation of the GPL</li>
+  -->
+  <li><code>[el]</code> <!-- RT #1891745 -->
+  <a href="https://mathe.ellak.gr/gpl-3-0-txt/">
+  Greek</a> translation of the GPL</li>
+  <li><code>[eu]</code><!-- RT #1210844 -->
+  Basque translation of the GPL
+  (<a href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-gpl-v3.eu.html">HTML</a>, <a
+   href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-gpl-v3.eu.txt">
+   TXT</a>, <a
+   href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-gpl-v3.eu.pdf">
+   PDF</a>, <a
+   href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-gpl-v3.eu.odt">
+   ODT</a>)</li>
+  <li><code>[gl]</code> <!-- RT #1966393 -->
+  <a href="https://mancomun.gal/wp-content/uploads/2023/08/gplv3_gl.txt">
+  Galician</a> translation of the GPL (TXT)</li>
+  <li><!-- RT #1316961 -->
+  <code>[ja]</code> Japanese translation of the GPL
+  (<a href="http://gpl.mhatta.org/./gpl.ja.html">HTML</a>,
+   <a href="http://gpl.mhatta.org/./gpl.ja.md">Markdown</a>)</li> 
+  <li><code>[it]</code> Italian translation of the GPL 
+  (<a href="http://homeunix.katolaz.net/gplv3/gplv3-it-final.html">HTML</a>, 
+<a href="http://homeunix.katolaz.net/gplv3/gplv3-it-final.ps">PS</a>, 
+<a href="http://homeunix.katolaz.net/gplv3/gplv3-it-final.pdf">PDF</a>, 
+<a href="http://homeunix.katolaz.net/gplv3/gplv3-it.tex">LaTeX</a>)
+</li>
+  <li><!-- RT #1680078 -->
+  <code>[lt]</code> <a href="https://jxself.org/translations/gpl-3.lt.shtml">
+  Lithuanian</a> translation of the GPL</li>
+  <li><code>[nl]</code> <a href="http://bartbeuving.files.wordpress.com/2008/07/gpl-v3-nl-101.pdf">
+  Dutch</a> translation of the GPL (PDF)</li>
+  <li><!-- RT #2060637 --><code>[pt-br]</code>
+   Brazilian Portuguese translation of the GPL
+  (<a href="http://licencas.gitlab.io/gpl-3.0.pt-br.html">HTML</a>,
+   <a href="http://licencas.gitlab.io/gpl-3.0.pt-br.md">Markdown</a>,
+   <a href="http://licencas.gitlab.io/gpl-3.0.pt-br.pdf">PDF</a>,
+   <a href="http://licencas.gitlab.io/gpl-3.0.pt-br.odt">ODT</a>)
+  </li>
+  <li><code>[ro]</code> <!-- RT #1664056 -->
+  Romanian translation of the GPL
+  (<a href="http://staff.cs.upt.ro/~gnu/Licenta_GPL-3-0_RO.html">HTML</a>,
+   <a href="http://staff.cs.upt.ro/~gnu/Licenta_GPL-3-0_RO.txt">TXT</a>,
+   <a href="http://staff.cs.upt.ro/~gnu/Licenta_GPL-3-0_RO.pdf">PDF</a>,
+   <a href="http://staff.cs.upt.ro/~gnu/Licenta_GPL-3-0_RO.odt">ODT</a>)
+  </li>
+  <li><code>[ru]</code> <!-- RT #1198511 -->
+  <a href="https://www.duralex.org/licenses/gplru.pdf">Russian</a> translation
+  of the GPL (PDF)</li>
+  <li><code>[sk]</code> <!-- RT #710854 -->
+  <a href="http://jxself.org/translations/gpl-3.sk.shtml">Slovak</a>
+  translation of the GPL</li>
+  <li><!-- RT #977716 -->
+      <code>[zh-cn]</code>
+         <a href="//jxself.org/translations/gpl-3.zh.shtml">
+         Chinese (Simplified)</a> translation of the GPL</li>
+  <li><code>[zh-tw]</code> <!-- RT #715288 and #1198827 -->
+  <a href="http://www.chinasona.org/gnu/gnuv3-tc.html">
+  Chinese (Traditional)</a> translation of the GPL</li>
+</ul>
+
+<h3 id="AGPL">The GNU Affero General Public License, version 3</h3>
+
+<ul>
+  <li><code>[ar]</code> <!-- RT #816657 -->
+  <a href="http://fairsultan.files.wordpress.com/2013/03/agpl-3-0-ar.pdf">
+  Arabic</a> translation of the AGPL (PDF)</li>
+  <li><code>[el]</code> <!-- RT #1891745 -->
+  <a href="https://mathe.ellak.gr/agpl-3-0-txt/">
+  Greek</a> translation of the AGPL</li>
+  <li><!-- RT #1316961 -->
+  <code>[ja]</code> Japanese translation of the AGPL
+  (<a href="http://gpl.mhatta.org/./agpl.ja.html">HTML</a>,
+   <a href="http://gpl.mhatta.org/./agpl.ja.md">Markdown</a>)</li> 
+  <li><!-- RT #1680078 -->
+  <code>[lt]</code> <a href="https://jxself.org/translations/agpl-3.lt.shtml">
+  Lithuanian</a> translation of the AGPL</li>
+  <li><!-- RT #2060637 --><code>[pt-br]</code>
+   Brazilian Portuguese translation of the AGPL
+  (<a href="http://licencas.gitlab.io/agpl-3.0.pt-br.html">HTML</a>,
+   <a href="http://licencas.gitlab.io/agpl-3.0.pt-br.md">Markdown</a>,
+   <a href="http://licencas.gitlab.io/agpl-3.0.pt-br.pdf">PDF</a>,
+   <a href="http://licencas.gitlab.io/agpl-3.0.pt-br.odt">ODT</a>)
+  </li>
+  <li><code>[ru]</code> <!-- RT #1198511 -->
+  <a href="https://www.duralex.org/licenses/agplru.pdf">Russian</a> translation
+  of the AGPL (PDF)</li>
+  <li><code>[zh-cn]</code> <!-- RT #1797188 -->
+  <a href="https://www.chinasona.org/gnu/agpl-3.0-cn.html">Chinese (Simplified)</a>
+  translation of the AGPL</li>
+  <li><code>[zh-tw]</code> <!-- RT #1797188 -->
+  <a href="https://www.chinasona.org/gnu/agpl-3.0-tw.html">Chinese (Traditional)</a>
+  translation of the AGPL</li>
+</ul>
+
+<h3 id="LGPL">The GNU Lesser General Public License, version 3</h3>
+
+<ul>
+<!-- TODO: the page should say it is CC-BY-ND -->
+  <li><code>[de]</code> <a href="http://www.gnu.de/documents/lgpl-3.0.de.html">
+  German</a> translation of the LGPL</li>
+  <li><code>[el]</code> <!-- RT #1891745 -->
+  <a href="https://mathe.ellak.gr/lgpl-3-0-txt/">
+  Greek</a> translation of the LGPL</li>
+  <li><code>[eu]</code><!-- RT #1210844 -->
+  Basque translation of the LGPL
+  (<a href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-lgpl-v3.eu.html">HTML</a>, <a
+   href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-lgpl-v3.eu.txt">
+   TXT</a>, <a
+   href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-lgpl-v3.eu.pdf">
+   PDF</a>, <a
+   href="//www.euskadi.eus/contenidos/informacion/software_lizentziak_2018/eu_def/adjuntos/gnu-lgpl-v3.eu.odt">
+   ODT</a>)</li>
+  <li><!-- RT #1680078 -->
+  <code>[lt]</code> <a href="https://jxself.org/translations/lgpl-3.lt.shtml">
+  Lithuanian</a> translation of the LGPL</li>
+  <li><!-- RT #2060637 --><code>[pt-br]</code>
+   Brazilian Portuguese translation of the LGPL
+  (<a href="http://licencas.gitlab.io/lgpl-3.0.pt-br.html">HTML</a>,
+   <a href="http://licencas.gitlab.io/lgpl-3.0.pt-br.md">Markdown</a>,
+   <a href="http://licencas.gitlab.io/lgpl-3.0.pt-br.pdf">PDF</a>,
+   <a href="http://licencas.gitlab.io/lgpl-3.0.pt-br.odt">ODT</a>)
+  </li>
+  <li><code>[ru]</code> <!-- RT #1198511 -->
+  <a href="https://www.duralex.org/licenses/lgplru.pdf">Russian</a> translation
+  of the LGPL (PDF)</li>
+  <li><code>[zh-cn]</code> <!-- RT #1892261 -->
+  <a href="https://licenses.peaksol.org/lgplv3-zh.html">
+  Chinese (Simplified)</a> translation of the LGPL</li>
+  <li><code>[zh-tw]</code> <!-- RT #715288 and #1198827-->
+  <a href="http://www.chinasona.org/gnu/gnulgpl-v3-tc.html">
+  Chinese (Traditional)</a> translation of the LGPL</li>
+</ul>
+<p>We hope someone will write new unofficial translations in Czech and 
+Slovak. Some were made, but the translator used them to advertise a 
+commercial site, so we are not willing to link to them.</p>
+
+<h3 id="FDL">The GNU Free Documentation License, version 1.3</h3>
+
+<!-- PLEASE DO NOT HOST TRANSLATIONS OF ANY OF OUR LICENSES ON OUR WEBSERVER -->
+<!-- THIS MAY LEAD THEM TO BEING CONSTRUED AS 'OFFICIAL'   -->
+
+<p>FDL 1.3 was released on November 3, 2008, and is a relatively minor
+modification of FDL 1.2; the only major changes are the revision of
+section 9 and the addition of section 11.  Thus,
+the <a href="/licenses/old-licenses/fdl-1.2-translations.html">
+translations of FDL 1.2</a> may help you understand FDL 1.3 as well.
+You can learn more about the differences between these two versions
+in <a href="/licenses/fdl-1.3-faq.html">our FAQ</a>.</p>
+
+<!-- Please keep entries alphabetical by language code RT #908353. -->
+<ul>
+  <li><code>[el]</code> <!-- RT #1891745 -->
+  <a href="https://mathe.ellak.gr/fdl-1-3-txt/">
+  Greek</a> translation of the GFDL</li>
+  <li><code>[fr]</code> <!-- RT #922239 -->
+  <a href="https://www.april.org/files/gfdl.1.3-js.fr.html">
+  French</a> translation of the GFDL</li>
+  <li><!-- RT #1680078 -->
+  <code>[lt]</code> <a href="https://jxself.org/translations/fdl-1.3.lt.shtml">
+  Lithuanian</a> translation of the GFDL</li>
+  <li><!-- RT #2060637 --><code>[pt-br]</code>
+   Brazilian Portuguese translation of the GFDL
+  (<a href="http://licencas.gitlab.io/fdl-1.3.pt-br.html">HTML</a>,
+   <a href="http://licencas.gitlab.io/fdl-1.3.pt-br.md">Markdown</a>,
+   <a href="http://licencas.gitlab.io/fdl-1.3.pt-br.pdf">PDF</a>,
+   <a href="http://licencas.gitlab.io/fdl-1.3.pt-br.odt">ODT</a>)
+  </li>
+  <li><code>[ro]</code> <!-- RT #1664056 -->
+  Romanian translation of the GFDL
+  (<a href="http://staff.cs.upt.ro/~gnu/Licenta-GFDL-GNU_RO.html">HTML</a>,
+   <a href="http://staff.cs.upt.ro/~gnu/Licenta-GFDL-GNU_RO.txt">TXT</a>,
+   <a href="http://staff.cs.upt.ro/~gnu/Licenta-GFDL-GNU_RO.pdf">PDF</a>,
+   <a href="http://staff.cs.upt.ro/~gnu/Licenta-GFDL-GNU_RO.odt">ODT</a>)
+  </li>
+
+  <li><code>[ru]</code> <!-- RT #1198511 -->
+  <a href="https://www.duralex.org/licenses/fdlru.pdf">Russian</a> translation
+  of the GFDL (PDF)</li>
+  <li><code>[zh-cn]</code> <!-- RT #1959423 -->
+  <a href="https://licenses.peaksol.org/fdlv1.3-zh.html">
+  Chinese (Simplified)</a> translation of the GFDL</li>
+  <li><code>[zh-tw]</code> <!-- RT #715288 and 1198827 -->
+  <a href="http://www.chinasona.org/gnu/gnufdl-v13-tc.html">
+  Chinese (Traditional)</a> translation of the GFDL</li>
+</ul>
+<p>We hope someone will write new unofficial translations in Czech and 
+Slovak. Some were made, but the translator used them to advertise a 
+commercial site, so we are not willing to link to them.</p>
+<!-- RT #716430 -->
+
+<h4>Translations Underway</h4>
+
+<p>The following translation efforts are underway, please contact the
+  person/team if you are willing to help.</p>
+
+<ul>
+  <li><code>[id]</code> <!-- contact the OP from RT #715051 -->
+  Indonesian, <a href="mailto:web-translators@gnu.org">
+  &lt;web-translators@gnu.org&gt;</a></li>
+</ul>
+
+<h3 id="Exceptions">Unofficial translations of exceptions to GNU
+licenses</h3>
+
+<h4 id="GCC-RLE">GCC Runtime Library Exception, version 3.1</h4>
+
+<ul>
+  <li><code>[el]</code> <!-- RT #1891745 -->
+  <a href="https://mathe.ellak.gr/gcc-exception-3-1-txt/">
+  Greek</a> translation of the GCC RLE</li>
+  <li><!-- RT #2060637 --><code>[pt-br]</code>
+   Brazilian Portuguese translation of the GCC RLE
+  (<a href="http://licencas.gitlab.io/gcc-exception-3.1.pt-br.html">HTML</a>,
+   <a href="http://licencas.gitlab.io/gcc-exception-3.1.pt-br.md">
+     Markdown</a>,
+   <a href="http://licencas.gitlab.io/gcc-exception-3.1.pt-br.pdf">
+     PDF</a>,
+   <a href="http://licencas.gitlab.io/gcc-exception-3.1.pt-br.odt">
+     ODT</a>)
+  </li>
+  <li><code>[zh-cn]</code> <!-- RT #1932602 -->
+    Chinese (Simplified) translation of the GCC RLE
+    (<a href="https://github.com/narukeu/GCC_RLE_3.1_ZH_CN/raw/main/GCC_RLE_3.1_ZH_CN.md">Markdown</a>,
+     <a href="https://github.com/narukeu/GCC_RLE_3.1_ZH_CN/raw/main/GCC_RLE_3.1_ZH_CN.pdf">
+     PDF</a>)
+   </li>
+</ul>
+<p>GCC RLE 3.1 was released on March 31, 2009, and is a relatively minor
+modification of GCC RLE 3.0.  Thus, the <a
+href="/licenses/old-licenses/gcc-exception-translations.html">translations
+of GCC RLE 3.0</a> may help you understand version 3.1 as well.</p>
+
+<!-- RT #716430 -->
+<p>We hope someone will write new unofficial translations in Czech and 
+Slovak. Some were made, but the translator used them to advertise a 
+commercial site, so we are not willing to link to them.</p>
+
+<h4 id="ACSE">GNU Autoconf Configure Script Exception, version 3</h4>
+<ul>
+  <li><code>[el]</code> <!-- RT #1891745 -->
+  <a href="https://mathe.ellak.gr/autoconf-exception-3-0-txt/">
+  Greek</a> translation of GNU Autoconf Configure Script Exception</li>
+  <li><!-- RT #2060637 --><code>[pt-br]</code>
+   Brazilian Portuguese translation of GNU Autoconf Configure Script Exception
+  (<a href="http://licencas.gitlab.io/autoconf-exception-3.0.pt-br.html">HTML</a>,
+   <a href="http://licencas.gitlab.io/autoconf-exception-3.0.pt-br.md">
+     Markdown</a>,
+   <a href="http://licencas.gitlab.io/autoconf-exception-3.0.pt-br.pdf">
+     PDF</a>,
+   <a href="http://licencas.gitlab.io/autoconf-exception-3.0.pt-br.odt">
+     ODT</a>)
+  </li>
+</ul>
+<!-- RT #716430 -->
+<p>We hope someone will write new unofficial translations in Czech and 
+Slovak. Some were made, but the translator used them to advertise a 
+commercial site, so we are not willing to link to them.</p>
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/translations" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/translations.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[ca]&nbsp;<a lang="ca" hreflang="ca" href="/licenses/translations.ca.html">català</a> &nbsp;</span>
+<span dir="ltr">[de]&nbsp;<a lang="de" hreflang="de" href="/licenses/translations.de.html">Deutsch</a> &nbsp;</span>
+<span dir="ltr">[es]&nbsp;<a lang="es" hreflang="es" href="/licenses/translations.es.html">español</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/translations.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[ja]&nbsp;<a lang="ja" hreflang="ja" href="/licenses/translations.ja.html">日本語</a> &nbsp;</span>
+<span dir="ltr">[pl]&nbsp;<a lang="pl" hreflang="pl" href="/licenses/translations.pl.html">polski</a> &nbsp;</span>
+<span dir="ltr">[pt-br]&nbsp;<a lang="pt-br" hreflang="pt-br" href="/licenses/translations.pt-br.html">português</a> &nbsp;</span>
+<span dir="ltr">[ru]&nbsp;<a lang="ru" hreflang="ru" href="/licenses/translations.ru.html">русский</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/translations.zh-cn.html">简体中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to <a
+href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.  There are also <a
+href="/contact/">other ways to contact</a> the FSF.  Broken links and other
+corrections or suggestions can be sent to <a
+href="mailto:webmasters@gnu.org">&lt;webmasters@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<p>Copyright &copy; 1996-1999, 2008, 2011, 2015, 2022, 2023, 2024 Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2024/07/01 09:06:20 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>
