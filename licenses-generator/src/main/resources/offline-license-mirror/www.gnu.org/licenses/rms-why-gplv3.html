@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.97 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>Why Upgrade to GPLv3
+- GNU Project - Free Software Foundation</title>
+<!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/rms-why-gplv3.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/rms-why-gplv3.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="ca" hreflang="ca" href="/licenses/rms-why-gplv3.ca.html" title="català" />
+<link rel="alternate" type="text/html" lang="es" hreflang="es" href="/licenses/rms-why-gplv3.es.html" title="español" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/rms-why-gplv3.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="ja" hreflang="ja" href="/licenses/rms-why-gplv3.ja.html" title="日本語" />
+<link rel="alternate" type="text/html" lang="ko" hreflang="ko" href="/licenses/rms-why-gplv3.ko.html" title="한국어" />
+<link rel="alternate" type="text/html" lang="pt-br" hreflang="pt-br" href="/licenses/rms-why-gplv3.pt-br.html" title="português" />
+<link rel="alternate" type="text/html" lang="ru" hreflang="ru" href="/licenses/rms-why-gplv3.ru.html" title="русский" />
+<link rel="alternate" type="text/html" lang="tr" hreflang="tr" href="/licenses/rms-why-gplv3.tr.html" title="Türkçe" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/rms-why-gplv3.zh-cn.html" title="简体中文" />
+<link rel="alternate" type="text/html" lang="zh-tw" hreflang="zh-tw" href="/licenses/rms-why-gplv3.zh-tw.html" title="繁體中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="article reduced-width">
+<h2>Why Upgrade to GPLv3</h2>
+
+<address class="byline">by Richard Stallman</address>
+
+<p><a href="/licenses/gpl.html">Version 3 of the GNU General Public
+License</a> (GNU GPL) has been released, enabling free software packages to
+upgrade from GPL version 2.  This article explains why upgrading the
+license is important.</p>
+
+<p id="choice">
+First of all, it is important to note that upgrading is a choice.  GPL
+version 2 will remain a valid license, and no disaster will happen if
+some programs remain under GPLv2 while others advance to GPLv3.  These
+two licenses are incompatible, but that isn't a fundamental problem.</p>
+
+<p id="incompatibility">
+When we say that GPLv2 and GPLv3 are incompatible, it means there is
+no legal way to combine code under GPLv2 with code under GPLv3 in a
+single program.  This is because both GPLv2 and GPLv3 are copyleft
+licenses: each of them says, &ldquo;If you include code under this license
+in a larger program, the larger program must be under this license
+too.&rdquo;  There is no way to make them compatible.  We could add a
+GPLv2-compatibility clause to GPLv3, but it wouldn't do the job,
+because GPLv2 would need a similar clause.</p>
+
+<p>Fortunately, license incompatibility matters only when you want to
+link, merge or combine code from two different programs into a single
+program.  There is no problem in having GPLv3-covered and
+GPLv2-covered programs side by side in an operating system.  For
+instance, the TeX license and the Apache license are incompatible with
+GPLv2, but that doesn't stop us from running TeX and Apache in the
+same system with Linux, Bash and GCC.  This is because they are all
+separate programs.  Likewise, if Bash and GCC move to GPLv3, while
+Linux remains under GPLv2, there is no conflict.</p>
+
+<p>Keeping a program under GPLv2 won't create problems.  The reason to
+migrate is because of the existing problems that GPLv3 will address.</p>
+
+<p id="tivoization">
+One major danger that GPLv3 will block is tivoization.  Tivoization
+means certain &ldquo;appliances&rdquo; (which have computers inside)
+contain GPL-covered software that you can't effectively change, because the
+appliance shuts down if it detects modified software.  The usual
+motive for tivoization is that the software has features the
+manufacturer knows people will want to change, and aims
+to stop people from changing them.  The manufacturers of
+these computers take advantage of the freedom that free software
+provides, but they don't let you do likewise.</p>
+
+<p>Some argue that competition between appliances in a free market should
+suffice to keep nasty features to a low level.  Perhaps competition
+alone would avoid arbitrary, pointless misfeatures like &ldquo;Must shut
+down between 1pm and 5pm every Tuesday,&rdquo; but even so, a choice of
+masters isn't freedom.  Freedom means <em>you</em> control what your software
+does, not merely that you can beg or threaten someone else who decides
+for you.</p>
+
+<p id="drm">
+In the crucial area of Digital Restrictions Management (DRM)&mdash;nasty
+features designed to restrict your use of the data in your
+computer&mdash;competition is no help, because relevant competition is
+forbidden.  Under the Digital Millennium Copyright Act and similar
+laws, it is illegal, in the US and many other countries, to distribute
+DVD players unless they restrict the user according to the official
+rules of the DVD conspiracy (its web site is <a
+href="https://web.archive.org/web/20241204194614/http://www.dvdcca.org/">www.dvdcca.org/</a>,
+but the rules do not seem to be published there).  The public can't
+reject DRM by buying non-DRM players because none are available.  No
+matter how many products you can choose from, they all have equivalent
+digital handcuffs.</p>
+
+<p>GPLv3 ensures you are free to remove the handcuffs.  It doesn't forbid
+DRM, or any kind of feature.  It places no limits on the substantive
+functionality you can add to a program, or remove from it.  Rather, it
+makes sure that you are just as free to remove nasty features as the
+distributor of your copy was to add them.  Tivoization is the way they
+deny you that freedom; to protect your freedom, GPLv3 forbids
+tivoization.</p>
+
+<p>The ban on tivoization applies to any product whose use by consumers
+is to be expected, even occasionally.  GPLv3 tolerates tivoization
+only for products that are almost exclusively meant for businesses and
+organizations.</p>
+
+<p id="patent-deals">
+Another threat that GPLv3 resists is that of patent deals like the
+Novell-Microsoft pact.  Microsoft wants to use its thousands of
+patents to make users pay Microsoft for the privilege of running
+GNU/Linux, and made this pact to try to achieve that.  The deal offers
+rather limited protection from Microsoft patents to Novell's customers.</p>
+
+<p>Microsoft made a few mistakes in the Novell-Microsoft deal, and GPLv3
+is designed to turn them against Microsoft, extending that limited
+patent protection to the whole community.  In order to take advantage
+of this protection, programs need to use GPLv3.</p>
+
+<p>Microsoft's lawyers are not stupid, and next time they may manage to
+avoid those mistakes.  GPLv3 therefore says they don't get a &ldquo;next
+time.&rdquo;  Releasing a program under GPL version 3 protects it from
+Microsoft's future attempts to make redistributors collect Microsoft
+royalties from the program's users.</p>
+
+<p id="patent-protection">
+GPLv3 also provides users with explicit patent protection from
+the program's contributors and redistributors.  With GPLv2, users rely
+on an implicit patent license to make sure that the company which
+provided them a copy won't sue them, or the people they redistribute
+copies to, for patent infringement.</p>
+
+<p>The explicit patent license in GPLv3 does not go as far as we might
+have liked.  Ideally, we would make everyone who redistributes
+GPL-covered code give up all software patents, along with everyone
+who does not redistribute GPL-covered code, because there should be
+no software patents.  Software patents are a
+vicious and absurd system that puts all software developers in danger
+of being sued by companies they have never heard of, as well as by all
+the megacorporations in the field.  Large programs typically combine
+thousands of ideas, so it is no surprise if they implement ideas
+covered by hundreds of patents.  Megacorporations collect thousands of
+patents, and use those patents to bully smaller developers.  Patents
+already obstruct free software development.</p>
+
+<p>The only way to make software development safe is to abolish software
+patents, and we aim to achieve this some day.  But we cannot do this
+through a software license.  Any program, free or not, can be killed
+by a software patent in the hands of an unrelated party, and the
+program's license cannot prevent that.  Only court decisions or
+changes in patent law can make software development safe from patents.
+If we tried to do this with GPLv3, it would fail.</p>
+
+<p>Therefore, GPLv3 seeks to limit and channel the danger.  In
+particular, we have tried to save free software from a fate worse than
+death: to be made effectively proprietary, through patents.  The
+explicit patent license of GPLv3 makes sure companies that use the GPL
+to give users the four freedoms cannot turn around and use their
+patents to tell some users, &ldquo;That doesn't include you.&rdquo;
+It also stops them from colluding with other patent holders to do this.</p>
+
+<p id="further-advantages">
+Further advantages of GPLv3 include better internationalization, gentler
+termination, support for BitTorrent, and compatibility with the Apache
+license.  All in all, plenty of reason to upgrade.</p>
+
+<p id="gpl4">
+Change is unlikely to cease once GPLv3 is released.  If new threats to
+users' freedom develop, we will have to develop GPL version 4.  It is
+important to make sure that programs will have no trouble upgrading to
+GPLv4 if and when we write one.</p>
+
+<p id="future-proofing">
+One way to do this is to release a program under &ldquo;GPL version 3 or any
+later version.&rdquo;  Another way is for all the contributors to a program
+to state a proxy who can decide on upgrading to future GPL versions.
+The third way is for all the contributors to assign copyright to one
+designated copyright holder, who will be in a position to upgrade the
+license version.  One way or another, programs should provide this
+flexibility for future GPL versions.</p>
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/rms-why-gplv3.html" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/rms-why-gplv3.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[ca]&nbsp;<a lang="ca" hreflang="ca" href="/licenses/rms-why-gplv3.ca.html">català</a> &nbsp;</span>
+<span dir="ltr">[es]&nbsp;<a lang="es" hreflang="es" href="/licenses/rms-why-gplv3.es.html">español</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/rms-why-gplv3.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[ja]&nbsp;<a lang="ja" hreflang="ja" href="/licenses/rms-why-gplv3.ja.html">日本語</a> &nbsp;</span>
+<span dir="ltr">[ko]&nbsp;<a lang="ko" hreflang="ko" href="/licenses/rms-why-gplv3.ko.html">한국어</a> &nbsp;</span>
+<span dir="ltr">[pt-br]&nbsp;<a lang="pt-br" hreflang="pt-br" href="/licenses/rms-why-gplv3.pt-br.html">português</a> &nbsp;</span>
+<span dir="ltr">[ru]&nbsp;<a lang="ru" hreflang="ru" href="/licenses/rms-why-gplv3.ru.html">русский</a> &nbsp;</span>
+<span dir="ltr">[tr]&nbsp;<a lang="tr" hreflang="tr" href="/licenses/rms-why-gplv3.tr.html">Türkçe</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/rms-why-gplv3.zh-cn.html">简体中文</a> &nbsp;</span>
+<span dir="ltr">[zh-tw]&nbsp;<a lang="zh-tw" hreflang="zh-tw" href="/licenses/rms-why-gplv3.zh-tw.html">繁體中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:webmasters@gnu.org">&lt;webmasters@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<!-- Regarding copyright, in general, standalone pages (as opposed to
+     files generated as part of manuals) on the GNU web server should
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
+     without talking with the webmasters or licensing team first.
+     Please make sure the copyright date is consistent with the
+     document.  For web pages, it is ok to list just the latest year the
+     document was modified, or published.
+     
+     If you wish to list earlier years, that is ok too.
+     Either "2001, 2002, 2003" or "2001-2003" are ok for specifying
+     years, as long as each year in the range is in fact a copyrightable
+     year, i.e., a year in which the document was published (including
+     being publicly visible on the web or in a revision control system).
+     
+     There is more detail about copyright years in the GNU Maintainers
+     Information document, www.gnu.org/prep/maintain. -->
+
+<p>Copyright &copy; 2007, 2009, 2022, 2024 Richard Stallman</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2024/12/28 14:25:17 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>

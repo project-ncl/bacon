@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.96 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>License Compatibility and Relicensing
+- GNU Project - Free Software Foundation</title>
+ <!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/license-compatibility.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/license-compatibility.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="es" hreflang="es" href="/licenses/license-compatibility.es.html" title="español" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/license-compatibility.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="it" hreflang="it" href="/licenses/license-compatibility.it.html" title="italiano" />
+<link rel="alternate" type="text/html" lang="pt-br" hreflang="pt-br" href="/licenses/license-compatibility.pt-br.html" title="português" />
+<link rel="alternate" type="text/html" lang="ru" hreflang="ru" href="/licenses/license-compatibility.ru.html" title="русский" />
+<link rel="alternate" type="text/html" lang="tr" hreflang="tr" href="/licenses/license-compatibility.tr.html" title="Türkçe" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/license-compatibility.zh-cn.html" title="简体中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="article reduced-width">
+<h2>License Compatibility and Relicensing</h2>
+
+<address class="byline">by Richard Stallman</address>
+
+<p>If you want to combine two free programs into one, or merge code from
+one into the other, this raises the question of whether their licenses
+allow combining them, or prohibit combining them.<a href="#f1">[1]</a></p>
+
+<p>There is no problem merging programs that have the same license, if it
+is a reasonably behaved license, as nearly all free licenses
+are.<a href="#f2">[2]</a></p>
+
+<p>What then when the licenses are different?  In general we say that
+several licenses are <em>compatible</em> if there is a way to merge
+code under those various licenses while complying with all of them.
+The result, often, is a program with parts under various different
+compatible licenses&mdash;but not always.  Such combinability, or the
+absence of it, is a characteristic of a given set of licenses, and is
+not dependent on what order you mention them in.  The set of licenses
+also controls which license is required for the combined program.</p>
+
+<p>We divide licenses into three classes: lax (also
+&ldquo;permissive&rdquo; or &ldquo;pushover&rdquo;), intermediate, and
+copyleft.  A lax license does nothing to interfere with putting the
+code into proprietary software.  A copyleft license prohibits that, by
+requiring all reuse to be in programs under the same license.  An
+intermediate license puts some conditions on adding proprietary code
+but does not try to prohibit it.</p>
+
+<p>In general, lax permissive licenses (modified BSD, X11, Expat, Apache,
+Python, etc.) are compatible with each other.  That's because they
+have no requirements about other code that is added to the program.
+They even permit putting the entire program (perhaps with changes)
+into a proprietary software product; thus, we call them
+&ldquo;pushover licenses&rdquo; because they can't say
+&ldquo;no&rdquo; when one user tries to deny freedom to others.</p>
+
+<p>In a combination of programs under lax licenses, each part carries the
+license it came with.  When the code is merged to the point that the
+parts can't be distinguished any more, that merged code should carry
+all the licenses of the merged parts.  Since all the licenses are lax
+anyway, this causes no practical problem except that the list of
+licenses gets long.<a href="#f3">[3]</a></p>
+
+<p>By the same token, lax licenses are usually compatible with any
+copyleft license.  In the combined program, the parts that came in
+under lax licenses still carry them, and the combined program as a
+whole carries the copyleft license.  One lax license, Apache 2.0, has
+patent clauses which are incompatible with GPL version 2; since I
+think those patent clauses are good, I made GPL version 3 compatible
+with them.</p>
+
+<p>The one important exception is the original BSD license, because of
+the &ldquo;obnoxious advertising clause.&rdquo;  This condition required a
+specific notice in <em>all</em> advertising of <em>any</em> product
+containing <em>any</em> code released under the original BSD license.
+This was, and is, incompatible with all actual copyleft licenses.  It
+was also a pain in the neck for every distro, as programs accumulated
+with similar but different advertising requirements.  At one point, a
+BSD distro required over 70 different notices.</p>
+
+<p>I mostly eliminated this problem by convincing a dean, Hal Varian, to
+arrange for UC Berkeley to publish the &ldquo;modified BSD
+license&rdquo; (without the advertising clause) and rerelease the code
+of the Berkeley System Distribution under that.  Nowadays the original
+BSD license is (fortunately) rarely used, but we must still take care
+<a href="/licenses/bsd.html">not to talk about &ldquo;the&rdquo; BSD
+license</a>.</p>
+
+<p>In general, two different copyleft licenses are unavoidably
+incompatible unless they have explicit compatibility provisions.  This
+is not due to a mistake in the details; it's inherent in the idea of
+copyleft.  The idea of copyleft is that &ldquo;Modified and extended
+versions must be under the same license.&rdquo; If license A (on
+program P) says extended programs must be under license A, and license
+B (on program Q) says extended programs must be under license B, they
+have an irreconcilable disagreement; the license of the combined
+program which includes code from P plus code from Q would have to be
+A, <em>and</em> it would have to be B.</p>
+
+<p>This is why GPL version 2 is
+incompatible with GPL version 3; it could not be avoided.  Likewise,
+the conditions of CC-BY-SA 4.0 would be inherently incompatible with
+those of CC-BY-SA 3.0, and the authors could not have avoided
+this.</p>
+
+<p>There are two approaches for avoiding the incompatibility problem
+caused by different versions of copyleft licenses.</p>
+
+<p>The FSF uses the approach of asking people to release programs under
+&ldquo;GNU GPL version N or any later version.&rdquo;  This licensing is
+compatible with version N, and also with N+1 (because it offers
+version N+1 as an option).  When you combine code under &ldquo;GPL 3 or
+later&rdquo; with code under &ldquo;GPL 2 or later,&rdquo; the license
+of the combination is their intersection, which is &ldquo;GPL 3 or
+later.&rdquo;</p>
+
+<p>We hope we will never need to make a GNU GPL version 4, but nothing is
+perfect and we can't assume we have anticipated all the issues.  By
+releasing your code under GNU GPL 3 or later, you permit your code to
+upgrade to GNU GPL version 4 if we ever need one.</p>
+
+<p>The other approach is to make each version of the license
+explicitly allow upgrading to later versions.  The Mozilla Foundation
+uses this approach, as does PHP.  Creative Commons, uses it for
+CC-BY-SA: version 4.0 (the current version) explicitly permits any
+user to upgrade to later versions of CC-BY-SA for modified works.</p>
+
+<p>Only the GNU licenses give authors a choice about whether to permit
+upgrades to future license versions.  When I wrote the first version
+of the GNU GPL, in 1989, I considered including a license upgrade
+option as is found now in CC licenses, but I thought it more correct
+to give that choice to each author.  Thus, the author could release a
+program either under &ldquo;GPL 1 only&rdquo; or &ldquo;GPL 1 or
+later.&rdquo;</p>
+
+<p>Since then, I have come to question the wisdom of that decision.
+Programs such as Linux, which allow only one GNU GPL version and
+reject license upgrades, cause practical
+incompatibility.<a href="#f4">[4]</a>  If we ever make a GPL version
+4, perhaps we should include an upgrade clause that automatically
+permits relicensing to higher-numbered versions, 5 and up.</p>
+
+<p>Some copyleft licenses allow cross-copyleft combinations with an
+explicit relicensing clause giving permission to put the code under a
+different copyleft license.  For instance, the CeCILL gives explicit
+permission to relicense code to GNU GPL version 2 and later versions.
+If program P is under the CeCILL, and you want to combine it with
+program Q that's under GPL version 3 or later, the CeCILL says you can
+do that and put the combination or merged code under GPL version 3 or
+later.</p>
+
+<p>Explicit relicensing permission is not the same thing as compatibility
+(though relicensing code can make it compatible with other code) and
+it is not symmetrical.  For instance, the CeCILL gives explicit
+permission to relicense code to GNU GPL, but the GNU GPL does not
+permit relicensing to the CeCILL.  Thus, you can't combine those two
+programs P and Q and distribute the combination under the CeCILL; that
+would violate the GPL in its use of program Q.  The only permitted way
+to release that combined program is under the appropriate GPL
+version(s).</p>
+
+<p>Likewise, CC BY-SA 4.0 explicitly permits relicensing modified
+versions to GNU GPL version 3, but GPL version 3 does not permit
+relicensing to CC BY-SA.  This issue should never arise for software
+code; Creative Commons says its licenses are not meant for code, and
+says that the license to use for code is the GNU GPL.  But there are
+other kinds of works, such as hardware designs or game art, where you
+might have occasion to merge material released under CC-BY-SA with
+material released under the GNU GPL.  This can be done through
+CC BY-SA's explicit relicensing permission.</p>
+
+<p>Unfortunately, CC BY-SA 4.0 does not permit relicensing to future GPL
+versions.  What you should do, when you relicense material under
+CC BY-SA 4.0 to the GPL, is <a
+href="/licenses/rms-why-gplv3.html#future-proofing">specify
+yourself as a license version proxy</a> to indicate whether future GPL
+versions have been authorized for that material.  If someday there is
+a GPL version 4 and Creative Commons decides to allow relicensing from
+CC BY-SA to GPL version 4, you as proxy will be able to retroactively
+authorize use of that relicensed material under GPL version 4.
+(Alternatively, you can ask the authors of that material to give
+permission right away.)</p>
+
+<p>The ordinary GNU General Public License and the GNU Affero General
+Public License are two different copyleft licenses, so they are
+naturally incompatible.  We have set up a special kind of explicit
+compatibility between them: you can include source code under the GNU
+GPL version 3 together with other source code under the GNU Affero GPL
+in a single combined program.  This is permitted because both of those
+licenses explicitly say so, and the effect is that the GNU AGPL
+applies to the combined program.  However, you can't simply relicense
+code from the GNU GPL (with or without &ldquo;or later&rdquo;) to the
+GNU Affero GPL, or vice versa; neither of these licenses gives
+permission for that.  Note also that the GNU Affero GPL version 3 is
+not a &ldquo;later version&rdquo; of the ordinary GNU GPL version 2,
+because the GNU Affero GPL and the GNU GPL are two different series of
+licenses.</p>
+
+<p>The GNU Lesser General Public License, version 3, is really the GNU
+General Public License version 3 plus some added extra permissions.
+GPL version 3 (section 7) says you can always remove added
+permissions, and by doing so you get the same code under the ordinary
+GNU GPL version 3.  If a program permits use under GNU LGPL
+version 3 or later, you can relicense it to GPL version 3 or later;
+for each future GPL version N (N &gt; 3), we will make an LGPL version
+N which consists of the GPL version N plus added permissions.</p>
+
+<p>As for GNU Lesser GPL version 2.1, that explicitly permits relicensing
+to GNU GPL version 2 or later.</p>
+
+<p>Intermediate licenses are those which have substantive requirements
+on redistribution but are not copyleft licenses.  Examples include the
+Eclipse Public License and the Mozilla Public License.  Intermediate
+licenses tend to be incompatible with any copyleft licenses because
+their requirements don't permit the combined program to be under the
+copyleft license.  The Mozilla Public License permits relicensing to
+the GNU GPL except when the code explicitly denies this
+permission.</p>
+
+<p>Finally, what about dual licensing?<a href="#f5">[5]</a> A dual
+license is a disjunction: it means that the same program carries a
+choice of two or more different licenses.  For instance, older
+versions of Perl carried a dual license: the disjunction of the
+Artistic License and the GNU General Public License.  This meant that
+each user could choose to use and redistribute Perl under one license
+or the other, or under both in disjunction like the Perl release
+itself.  A disjunction is compatible with a set of other licenses if
+any one of the license choices in the disjunction is compatible with
+that set.</p>
+
+<p>When you choose a license for your code, please choose GNU GPL version
+3 or later, or some license compatible with that.  This is the way to
+make your code combinable with nearly all the corpus of free software.
+Choosing GPL or AGPL, version 3 or later, will also do the utmost to
+defend freedom for all users of all versions of your code.</p>
+
+<h3 id="combining">Combining code</h3>
+
+<p>When a set of licenses are compatible, that means you can legally
+combine or merge a number of programs each licensed under one of those
+licenses.  How, then, is the combined program licensed?</p>
+
+<p>Each free software license says you must keep the license with the
+code that is covered by it.  So in a strict sense, the licensing of
+the combined program includes the licenses of all its parts.  However,
+sometimes you want a <em>summary</em> answer to the question of how
+the combined program is licensed.  Which licenses does someone using
+the combined program <em>need to pay attention to?</em></p>
+
+<p>To compute that, you start with a list of all the pertinent
+licenses.  Then you can delete from the list any license which is
+subsumed by another in the list.</p>
+
+<p>We say that a license A <em>subsumes</em> license B when compliance with
+license A implies compliance with license B.</p>
+
+<p>For instance, the GNU GPL version N and the GNU Affero GPL version
+N both subsume the GNU Lesser GPL version N, and all three of those
+subsume the GNU Lesser GPL version 2.1.</p>
+
+<p>Any GNU license, version N, subsumes the Apache 2.0 license provided
+N is at least 3.</p>
+
+<p>The GNU GPL, version N, subsumes all versions of the Mozilla Public
+License that are compatible with it.</p>
+
+<p>The Apache 2.0 license subsumes the BSD, Expat, X11, ISC and CC-0
+licenses.  BSD 3 clause subsumes BSD 2 clause.  The BSD licenses
+subsume the Expat, X11 and ISC licenses and CC0.</p>
+
+<p>This is not meant to be a complete list, but if we are informed of
+other cases worth mentioning, we will add them.</p>
+
+<p>When some license is subsumed, you still need to include a copy
+of it with all distribution of the combined program.</p>
+<div class="column-limit"></div>
+
+<h3 id="footnotes" class="footnote">Footnotes</h3>
+<ol>
+<li id="f1"><p>It is not inconceivable that other legal issues
+might arise about a specific combination of programs, issues not
+related to the copyright licenses of the programs to be combined.  We
+discuss only the implications of the licenses themselves.</p></li>
+
+<li id="f2"><p>The main license in actual use that isn't
+reasonably behaved is the license of TeX: if two programs are licensed
+just the way TeX is, there is no authorized way to distribute a merged
+version of them.</p>
+
+<p>The TeX license permits distribution of a modified version only in
+the form of the original version plus a differences file.  If A and B
+are separately released that way, then merged, distributing the merged
+program as A plus a change file violates the license of B.
+Distributing this as B plus a change file violates the license of A.
+Distributing this in any other way violates both licenses.</p>
+
+<p>It is no coincidence that TeX was released in 1982: our community has
+learned, since then, to write reasonably behaved licenses.</p>
+</li>
+
+<li id="f3"><p>When distributing in source code
+form, it is usually sufficient to leave the license notices in the
+source code as they stand; extra license notice requirements typically
+only come up for lax licenses when distributing binaries without the
+source code.</p></li>
+
+<li id="f4"><p>In addition, GPL version 2 still allows
+binaries to be made nonfree by hardware that rejects all but special
+signed binaries, and still does not allow distribution of binaries by
+torrent.  <a href="/licenses/rms-why-gplv3.html">We fixed those
+problems, and others, in version 3</a>, but we can't change version 2.</p></li>
+
+<li id="f5"><p>Some use the term &ldquo;dual licensing&rdquo;
+to refer to selling exceptions, but that is a misnomer.
+See <a href="/philosophy/selling-exceptions.html"> Selling
+Exceptions</a>.  Note that if the program on which the license is sold
+includes any code that is not in the free (libre) release, that's not
+selling exceptions, that's nonfree software.</p></li>
+</ol>
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/license-compatibility.html" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/license-compatibility.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[es]&nbsp;<a lang="es" hreflang="es" href="/licenses/license-compatibility.es.html">español</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/license-compatibility.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[it]&nbsp;<a lang="it" hreflang="it" href="/licenses/license-compatibility.it.html">italiano</a> &nbsp;</span>
+<span dir="ltr">[pt-br]&nbsp;<a lang="pt-br" hreflang="pt-br" href="/licenses/license-compatibility.pt-br.html">português</a> &nbsp;</span>
+<span dir="ltr">[ru]&nbsp;<a lang="ru" hreflang="ru" href="/licenses/license-compatibility.ru.html">русский</a> &nbsp;</span>
+<span dir="ltr">[tr]&nbsp;<a lang="tr" hreflang="tr" href="/licenses/license-compatibility.tr.html">Türkçe</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/license-compatibility.zh-cn.html">简体中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:webmasters@gnu.org">&lt;webmasters@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<!-- Regarding copyright, in general, standalone pages (as opposed to
+     files generated as part of manuals) on the GNU web server should
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
+     without talking with the webmasters or licensing team first.
+     Please make sure the copyright date is consistent with the
+     document.  For web pages, it is ok to list just the latest year the
+     document was modified, or published.
+     
+     If you wish to list earlier years, that is ok too.
+     Either "2001, 2002, 2003" or "2001-2003" are ok for specifying
+     years, as long as each year in the range is in fact a copyrightable
+     year, i.e., a year in which the document was published (including
+     being publicly visible on the web or in a revision control system).
+     
+     There is more detail about copyright years in the GNU Maintainers
+     Information document, www.gnu.org/prep/maintain. -->
+
+<p>Copyright &copy; 2016, 2018, 2020, 2021 Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2021/12/29 15:55:34 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>

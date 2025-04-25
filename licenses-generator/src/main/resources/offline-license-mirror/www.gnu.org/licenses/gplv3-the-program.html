@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="author" href="mailto:webmasters@gnu.org" />
+<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
+<meta name="ICBM" content="42.355469,-71.058627" />
+<link rel="stylesheet" type="text/css" href="/layout.min.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/print.min.css" media="print" />
+
+
+
+<!-- Parent-Version: 1.96 -->
+<!-- This page is derived from /server/standards/boilerplate.html -->
+<title>What Does &ldquo;The Program&rdquo; Mean in GPLv3?
+- GNU Project - Free Software Foundation</title>
+<!-- begin translist file -->
+
+<link rel="alternate" type="text/html" href="/licenses/gplv3-the-program.html" hreflang="x-default" />
+<link rel="alternate" type="text/html" lang="en" hreflang="en" href="/licenses/gplv3-the-program.en.html" title="English" />
+<link rel="alternate" type="text/html" lang="de" hreflang="de" href="/licenses/gplv3-the-program.de.html" title="Deutsch" />
+<link rel="alternate" type="text/html" lang="es" hreflang="es" href="/licenses/gplv3-the-program.es.html" title="español" />
+<link rel="alternate" type="text/html" lang="fr" hreflang="fr" href="/licenses/gplv3-the-program.fr.html" title="français" />
+<link rel="alternate" type="text/html" lang="ja" hreflang="ja" href="/licenses/gplv3-the-program.ja.html" title="日本語" />
+<link rel="alternate" type="text/html" lang="pt-br" hreflang="pt-br" href="/licenses/gplv3-the-program.pt-br.html" title="português" />
+<link rel="alternate" type="text/html" lang="ru" hreflang="ru" href="/licenses/gplv3-the-program.ru.html" title="русский" />
+<link rel="alternate" type="text/html" lang="tr" hreflang="tr" href="/licenses/gplv3-the-program.tr.html" title="Türkçe" />
+<link rel="alternate" type="text/html" lang="zh-cn" hreflang="zh-cn" href="/licenses/gplv3-the-program.zh-cn.html" title="简体中文" />
+<!-- end translist file -->
+
+<!-- start of server/banner.html -->
+<!-- start of head-include-2.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- end of head-include-2.html -->
+
+</head>
+<body>
+<div class="inner">
+<!-- start of server/body-include-1.html -->
+<div id="top">
+<a class="skip" href="#content"><b>Skip to main text</b></a>
+</div>
+
+<div id="fsf-frame" role="complementary">
+<form id="fssbox" action="https://my.fsf.org/civicrm/profile/create?reset=1&amp;gid=31"
+      method="post">
+ <div>
+  <input name="postURL" type="hidden" value="" />
+  <input type="hidden" name="group[25]" value="1" />
+  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
+  <input name="_qf_default" type="hidden" value="Edit:cancel" />
+  <label for="frmEmail">
+   <a href="//www.fsf.org/fss">Free Software Supporter</a>:
+  </label>
+  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
+         value="email address" onfocus="this.value=''"/>
+  <input type="submit" name="_qf_Edit_next" value="Sign up" />
+ </div>
+</form>
+
+<div id="join-fsf" class="button"><a
+href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a>
+</div>
+</div>
+
+<div id="header" role="banner">
+<p id="gnu-banner">
+ <a href="/">
+ <img src="/graphics/heckert_gnu.transp.small.png" height="48" width="49"
+      alt="&nbsp;[A GNU head]&nbsp;" /><strong>GNU</strong> <span
+ class="hide">Operating System</span></a><br />
+ <small id="fsf-support">Supported by the
+ <a href="#mission-statement">Free Software Foundation</a></small>
+</p>
+
+<div id="switches">
+<!-- begin search button -->
+ <div  id="search-button" class="switch">
+  <a href="//www.gnu.org/cgi-bin/estseek.cgi">
+  <img id="search-icon" height="30" width="30"
+       src="/graphics/icons/search.png"
+       alt="&nbsp;[Search www.gnu.org]&nbsp;" /></a>
+ </div>
+<!-- end search button -->
+
+ <div id="language-button" class="switch">
+  <a href="#language-container">
+  <img id="language-icon" height="30" width="37"
+       src="/graphics/icons/translations.png"
+       alt="&nbsp;[Other languages]&nbsp;" /></a>
+ </div>
+
+</div>
+</div>
+<!-- end of server/body-include-1.html -->
+
+<!-- start of server/body-include-2 -->
+
+
+<div style="clear: both"></div>
+
+<div id="navigation" role="navigation">
+ <a id="more-links" href="#navigation" title="More...">
+   <span>Site navigation</span></a>
+ <a id="less-links" href="#content"><b>Skip</b></a>
+ <ul>
+
+   <li id="tabAboutGNU"><a href="/gnu/gnu.html">ABOUT&nbsp;GNU</a></li>
+
+
+  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">PHILOSOPHY</a></li>
+
+
+  <li id="tabLicenses" class="active">
+     <span class='no-display'>=</span> 
+    <a href="/licenses/licenses.html">LICENSES</a>
+    <span class="gnun-split"></span>
+     <span class='no-display'>=</span> 
+  </li>
+
+
+  <li id="tabEducation"><a href="/education/education.html">EDUCATION</a></li>
+
+
+  <li id="tabSoftware"><a href="/software/software.html">SOFTWARE</a></li>
+
+
+  <li id="tabDistros"><a href="/distros/distros.html">DISTROS</a></li>
+
+
+  <li id="tabDoc"><a href="/doc/doc.html">DOCS</a></li>
+
+
+  <li id="tabMalware"><a href="/proprietary/proprietary.html">MALWARE</a></li>
+
+
+  <li id="tabHelp"><a href="/help/help.html">HELP&nbsp;GNU</a></li>
+
+
+  <li id="tabAV"><a href="/audio-video/audio-video.html">AUDIO&nbsp;&amp;&nbsp;VIDEO</a></li>
+
+
+  <li id="tabArt"><a href="/graphics/graphics.html">GNU&nbsp;ART</a></li>
+
+
+  <li id="tabFun"><a href="/fun/humor.html">FUN</a></li>
+
+
+  <li id="tabPeople"><a href="/people/people.html">GNU'S&nbsp;WHO?</a></li>
+
+  <li><a href="//directory.fsf.org">SOFTWARE&nbsp;DIRECTORY</a></li>
+  <li><a href="https://h-node.org/">HARDWARE</a></li>
+  <li><a href="/server/sitemap.html">SITEMAP</a></li>
+ </ul>
+ <div style="clear: both"></div>
+</div><!-- /"navigation -->
+<!-- end of server/body-include-2 -->
+
+<div id="content" role="main">
+<!-- end of server/banner.html -->
+
+<div class="article reduced-width">
+<h2>What Does &ldquo;The Program&rdquo; Mean in GPLv3?</h2>
+<div class="thin"></div>
+
+<h3>Summary</h3>
+
+<p>In version 3 of the GNU General Public License (GPLv3), the term &rdquo;the
+Program&rdquo; means one particular work that is licensed under GPLv3 and is
+received by a particular licensee from an upstream licensor or
+distributor.  The Program is the particular work of software that you
+received in a given instance of GPLv3 licensing, as you received it.</p>
+
+<p>&ldquo;The Program&rdquo; cannot mean &ldquo;all the works ever licensed
+under GPLv3&rdquo;; that interpretation makes no sense, because &ldquo;the
+Program&rdquo; is singular: those many different programs do not constitute
+one program.</p>
+
+<p>In particular, this applies to the clause in section 10, paragraph 3
+of GPLv3 which states:</p>
+
+<blockquote><p>[Y]ou may not initiate litigation (including a cross-claim or
+  counterclaim in a lawsuit) alleging that any patent claim is
+  infringed by making, using, selling, offering for sale, or importing
+  the Program or any portion of it.</p></blockquote>
+
+<p>This is a condition that limits the ability of a GPLv3 licensee to
+bring a lawsuit accusing the particular GPLv3-covered software
+received by the licensee of patent infringement.  It does not speak to
+the situation in which a party who is a licensee of GPLv3-covered
+program A, but not of unrelated GPLv3-covered program B, initiates
+litigation accusing program B of patent infringement.  If the party is
+a licensee of both A and B, that party would potentially lose rights
+to B, but not to A.</p>
+
+<p>Since software patents pose an unjust threat to all software
+developers, all software distributors, and all software users, we
+would abolish them if we could.  Indeed, we campaign to do so.  But we
+think it would have been self-defeating to make the license conditions
+for any one GPL-covered program go so far as to require a promise
+to never attack any GPL-covered program.</p>
+
+<h3>Further analysis</h3>
+
+<p>GPLv3 defines &ldquo;the Program&rdquo; as follows:</p>
+
+<blockquote><p>&ldquo;The Program&rdquo; refers to any copyrightable work
+  licensed under this License.</p></blockquote>
+
+<p>Some have contended that this definition can be read to mean all
+GPLv3-licensed works, rather than the one particular GPLv3-licensed
+work received by a licensee in a given licensing context.  These
+readers have expressed particular concern about the consequences of
+such an interpretation for the new patent provisions of GPLv3,
+especially the patent termination condition found in the third
+paragraph of section 10 and the express patent license grant made by upstream
+contributors under the third paragraph of section 11.  This overbroad
+reading of &ldquo;the Program&rdquo; is incorrect, and contrary to our intent as
+the drafters of GPLv3.</p>
+
+<p>The word &ldquo;any&rdquo; is susceptible to multiple, subtly different
+shades of meaning in English.  In some contexts, &ldquo;any&rdquo; means
+&ldquo;every&rdquo; or &ldquo;all&rdquo;; in others, including the definition
+of &ldquo;the Program&rdquo; in GPLv3, it suggests &ldquo;one particular
+instance of, selected from many possibilities.&rdquo;  This variability has
+to be resolved by the context.  This context resolves it, but it requires
+some thought.</p>
+
+<p>We could have worded the definition of &ldquo;the Program&rdquo;
+differently, such as by using &ldquo;a particular&rdquo; instead of
+&ldquo;any,&rdquo; but that would not have eliminated the need for thought.
+The phrase &ldquo;a particular work licensed under this License,&rdquo;
+regarded in isolation, would not necessarily signify <em>the</em> particular work
+received by a particular &ldquo;you&rdquo; in a particular act of licensing
+or distribution.  Our review of other free software licenses shows that
+they raise similar issues of interpretation, with words of general
+reference used in order to facilitate license reuse.</p>
+
+<p>Given that no choice is so clear that all other candidate meanings
+must be rejected, &ldquo;any&rdquo; has certain advantages.  It is a somewhat
+more informal and less legalistic usage than the possible
+alternatives, an appropriate register for the developers reading
+and applying the license.  Moreover, the usage of &ldquo;any,&rdquo; through
+its suggestion of selection out of many qualifying possibilities,
+has the effect of emphasizing the reusability of GPLv3 for
+multiple works of software and in multiple licensing situations.
+The GNU GPL is intended to be used by many developers on their programs
+and that too needs to be clear.</p>
+
+<p>The same use of &ldquo;any&rdquo; that has given rise to interpretive
+concerns under GPLv3 exists in GPLv2, in its corresponding definition.
+Section 0 of GPLv2 states:</p>
+
+<blockquote><p>This License applies to any program or other work which
+  contains a notice placed by the copyright holder saying it may be
+  distributed under the terms of this General Public License. The
+  &ldquo;Program,&rdquo; below, refers to any such program or work, and a
+  &ldquo;work based on the Program&rdquo; means either the Program or any
+  derivative work under copyright law &hellip;</p></blockquote>
+
+<p>However, it has always been the understanding of the FSF and others in
+the GPL-using community that &ldquo;the Program&rdquo; in GPLv2 means the
+particular GPL-covered work that you receive, before you make any
+possible modifications to it.  The definition of &ldquo;the Program&rdquo; in
+GPLv3 is intended to preserve this meaning.</p>
+
+<p>We can find no clause in GPLv3 in which applying the suggested broad
+interpretation of &ldquo;the Program&rdquo; (and the superset term
+&ldquo;covered work&rdquo;) would make sense or have any practical
+significance, consistent with the wording of the clause and its drafting
+history.  The patent provisions of GPLv3 are a case in point.</p>
+
+<p>The third paragraph of section 11 states:</p>
+
+<blockquote><p>Each contributor grants you a non-exclusive, worldwide,
+  royalty-free patent license under the contributor's essential patent
+  claims, to make, use, sell, offer for sale, import and otherwise run,
+  modify and propagate the contents of its contributor
+  version.</p></blockquote>
+
+<p>A &ldquo;contributor&rdquo; is defined as &ldquo;a copyright holder who
+authorizes use under this License of the Program or a work on which the
+Program is based.&rdquo;</p>
+
+<p>The broad reading of &ldquo;the Program,&rdquo; it has been suggested,
+gives rise to an unreasonably broad patent license grant.  The reasoning is
+that, for a given GPLv3 licensee, the set of contributors granting patent
+licenses becomes all GPLv3 licensors of all GPLv3-covered works in the
+world, and not merely licensors of the specific work received by that
+licensee in a particular act of licensing.</p>
+
+<p>Close attention to the wording of the patent license grant, however,
+shows that these concerns are unfounded.  In order to exercise the
+permissions of the patent license grant, a GPLv3 licensee must have
+&ldquo;the contents of [the contributor's] contributor version&rdquo; in his
+possession.  If he does, then he is necessarily a recipient of that
+material, licensed to him under GPLv3.</p>
+
+<p>Therefore, contributors are always the actual copyright licensors of the
+material that is the subject of the patent license grant.  The user
+benefiting from the patent license grant has ultimately received the
+material covered by the grant from those contributors.  If it were
+otherwise, the patent license grant would be meaningless, because the
+exercise of its permissions is tied to the contributor's &ldquo;contributor
+version.&rdquo;  The contributors and the section 11 patent licensee stand
+in a direct or indirect distribution relationship. Therefore, section 11,
+paragraph 3 does not require you to grant a patent license to anyone who is
+not also your copyright licensee.  (Non-contributor redistributors remain
+subject to applicable implied patent license doctrine and to the special
+&ldquo;automatic extension&rdquo; provision of section 11, paragraph 6.)</p>
+
+<p>There is similarly no basis for the broad reading of &ldquo;the
+Program&rdquo; when one considers the patent-related clause in the third
+paragraph of section 10.  This clause provides:</p>
+
+<blockquote><p>[Y]ou may not initiate litigation (including a cross-claim
+  or counterclaim in a lawsuit) alleging that any patent claim is infringed
+  by making, using, selling, offering for sale, or importing the Program or
+  any portion of it.</p></blockquote>
+
+<p>Coupled with the patent license grant of section 11, paragraph 3, and
+the termination clause of section 8, this section 10 clause gives rise
+to a patent termination condition similar in scope to that contained
+in the Apache License version 2.0.</p>
+
+<p>The FSF sympathizes with the intent of broad patent retaliation
+clauses in some free software licenses, since the abolition of
+software patents is greatly to be desired.  However, we think that
+broad patent retaliation provisions in software licenses are unlikely
+to benefit the community, especially those clauses which can be
+triggered by patent litigation concerning other programs unrelated to
+the software whose license permissions are being terminated.  We were
+very cautious in taking steps to incorporate patent retaliation into
+GPLv3, and the section 10, paragraph 3 clause is intended to be
+narrower than patent retaliation clauses in several other well-known
+licenses, notably the Mozilla Public License version 1.1, with respect
+to termination of patent licenses.</p>
+
+<p>If the suggested interpretation of &ldquo;the Program&rdquo; applied to the
+section 10, paragraph 3 clause, the result would be a radical
+departure from our consistent past statements and policies concerning
+patent retaliation, which we clearly did not intend.</p>
+
+<p>Other text in GPL version 3 shows the same policy.  The patent
+litigation clause in section 10 was added to Draft 3 of GPLv3 as a
+replacement for part of the previous clause 7(b)(5) (in Draft 2).
+Clause 7(b)(5) permitted the placement of two categories of patent
+termination provisions on GPLv3-licensed works:</p>
+
+<blockquote><p>terms that wholly or partially terminate, or allow
+  termination of, permission for use of the material they cover, for a user
+  who files a software patent lawsuit (that is, a lawsuit alleging that
+  some software infringes a patent) not filed in retaliation or defense
+  against the earlier filing of another software patent lawsuit, or in
+  which the allegedly infringing software includes some of the covered
+  material, possibly in combination with other software
+  &hellip;</p></blockquote>
+
+<p>Section 7 does not state the GPL's own policy; instead it says how far
+other compatible licenses can go.  Thus, that text in section 7 would
+not have established broad patent retaliation; it only would have
+permitted combining GPL-covered code with other licenses that do such
+broad patent retaliation.</p>
+
+<p>Nonetheless, as explained in the Rationale for Draft 3, such broad
+retaliation was criticized because it could apply to software patent
+lawsuits in which the accused software was unrelated to the software
+that was the subject of the license.  Seeing that there were no widely
+used licenses with which this would provide compatibility, in Draft 3
+we dropped broad patent retaliation from the range of GPL
+compatibility.</p>
+
+<p>We did so by replacing 7(b)(5) with text in section 10, in which we
+kept only what corresponded to the second category.  The first
+category therefore reverted to being a GPL-incompatible &ldquo;further
+restriction&rdquo; in Draft 3, and likewise in GPL version 3 as actually
+published.
+</p>
+
+<p class="back"><a href="/licenses/gpl-faq.html">Return to the FAQ</a></p>
+</div>
+
+</div><!-- for id="content", starts in the include above -->
+
+              <!-- begin server/footer-text.html -->
+
+
+
+
+
+<div style="clear:both"></div>
+
+
+<div id="language-container">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#top"><b>&#9650;</b></a>
+ </div>
+ <div id="languages" class="rounded-corners">
+  <div class="button">
+   <a href="#top" class="close"><span>BACK TO TOP</span></a>
+  </div>
+  <div id="set-language" class="button">
+   <span class="gnun-split"></span>
+   <a href="/server/select-language.html?callback=/licenses/gplv3-the-program.html" rel="nofollow">
+   Set language
+   <span class="gnun-split"></span>
+   </a>
+  </div>
+  <p>Available for this page:</p>
+  <div id="translations">
+<p>
+<span dir="ltr" class="original">[en]&nbsp;<a lang="en" hreflang="en" href="/licenses/gplv3-the-program.en.html">English</a> &nbsp;</span>
+<span dir="ltr">[de]&nbsp;<a lang="de" hreflang="de" href="/licenses/gplv3-the-program.de.html">Deutsch</a> &nbsp;</span>
+<span dir="ltr">[es]&nbsp;<a lang="es" hreflang="es" href="/licenses/gplv3-the-program.es.html">español</a> &nbsp;</span>
+<span dir="ltr">[fr]&nbsp;<a lang="fr" hreflang="fr" href="/licenses/gplv3-the-program.fr.html">français</a> &nbsp;</span>
+<span dir="ltr">[ja]&nbsp;<a lang="ja" hreflang="ja" href="/licenses/gplv3-the-program.ja.html">日本語</a> &nbsp;</span>
+<span dir="ltr">[pt-br]&nbsp;<a lang="pt-br" hreflang="pt-br" href="/licenses/gplv3-the-program.pt-br.html">português</a> &nbsp;</span>
+<span dir="ltr">[ru]&nbsp;<a lang="ru" hreflang="ru" href="/licenses/gplv3-the-program.ru.html">русский</a> &nbsp;</span>
+<span dir="ltr">[tr]&nbsp;<a lang="tr" hreflang="tr" href="/licenses/gplv3-the-program.tr.html">Türkçe</a> &nbsp;</span>
+<span dir="ltr">[zh-cn]&nbsp;<a lang="zh-cn" hreflang="zh-cn" href="/licenses/gplv3-the-program.zh-cn.html">简体中文</a> &nbsp;</span>
+</p>
+</div>
+ </div>
+</div>
+
+<div id="mission-statement" role="complementary">
+ <div class="backtotop">
+  <hr class="no-display" />
+  <a href="#header"><span>BACK TO TOP </span>&#9650;</a>
+ </div>
+<div style="clear: both"></div>
+<blockquote>
+<p style="direction:ltr; text-align:left"><a href="//www.fsf.org"><img id="fsfbanner"
+src="/graphics/fsf-logo-notext-small.png" alt="&nbsp;[FSF logo]&nbsp;"
+width="75" height="25" /></a><strong>
+&ldquo;The Free Software Foundation (FSF) is a nonprofit with a worldwide
+mission to promote computer user freedom. We defend the rights of all
+software users.&rdquo;</strong></p>
+</blockquote>
+
+<div id="support-the-fsf" class="button">
+ <a class="join" href="//www.fsf.org/associate/support_freedom?referrer=4052">JOIN</a>
+ <a class="donate" href="//donate.fsf.org/">DONATE</a>
+ <a class="shop" href="//shop.fsf.org/">SHOP</a>
+</div>
+</div>
+<!-- end server/footer-text.html -->
+
+
+<div id="footer" role="contentinfo">
+<div class="unprintable">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:licensing@gnu.org">&lt;licensing@gnu.org&gt;</a>.</p>
+
+<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
+        replace it with the translation of these two:
+
+        We work hard and do our best to provide accurate, good quality
+        translations.  However, we are not exempt from imperfection.
+        Please send your comments and general suggestions in this regard
+        to <a href="mailto:web-translators@gnu.org">
+        &lt;web-translators@gnu.org&gt;</a>.</p>
+
+        <p>For information on coordinating and contributing translations of
+        our web pages, see <a
+        href="/server/standards/README.translations.html">Translations
+        README</a>. -->
+Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and contributing translations
+of this article.</p>
+</div>
+
+<!-- Regarding copyright, in general, standalone pages (as opposed to
+     files generated as part of manuals) on the GNU web server should
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
+     without talking with the webmasters or licensing team first.
+     Please make sure the copyright date is consistent with the
+     document.  For web pages, it is ok to list just the latest year the
+     document was modified, or published.
+     
+     If you wish to list earlier years, that is ok too.
+     Either "2001, 2002, 2003" or "2001-2003" are ok for specifying
+     years, as long as each year in the range is in fact a copyrightable
+     year, i.e., a year in which the document was published (including
+     being publicly visible on the web or in a revision control system).
+     
+     There is more detail about copyright years in the GNU Maintainers
+     Information document, www.gnu.org/prep/maintain. -->
+
+<p>Copyright &copy; 2007, 2021 Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+<!-- start of server/bottom-notes.html -->
+<div id="bottom-notes" class="unprintable">
+<p><a href="//www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
+<div id="generic">
+
+
+</div>
+</div>
+<!-- end of server/bottom-notes.html -->
+
+
+<p class="unprintable">Updated:
+<!-- timestamp start -->
+$Date: 2021/12/18 08:49:02 $
+<!-- timestamp end -->
+</p>
+</div>
+</div><!-- for class="inner", starts in the banner include -->
+</body>
+</html>

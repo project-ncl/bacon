@@ -24,6 +24,18 @@ class OfflineLicenseMirrorTest {
     }
 
     @Test
+    void testLgpl21IsPresentWithAnchorInUrl() throws IOException {
+        // the OfflineLicenseMirror should ignore the anchor part (PublicDomain)
+        Optional<InputStream> license = OfflineLicenseMirror
+                .find("http://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html#PublicDomain");
+        assertTrue(license.isPresent());
+        String value = IOUtils.toString(license.get(), StandardCharsets.UTF_8);
+        assertNotNull(value);
+        assertFalse(value.isBlank());
+        assertTrue(value.contains("2.1"));
+    }
+
+    @Test
     void testLgpl21IsPresentWithHttps() throws IOException {
         Optional<InputStream> license = OfflineLicenseMirror
                 .find("https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html");
