@@ -2,8 +2,6 @@ package org.jboss.pnc.bacon.licenses.xml;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -25,15 +23,13 @@ public class OfflineLicenseMirror {
         // try to parse the url to extract values
         URI uri = URI.create(url);
 
-        Path resourcesPathOfLicense = Paths.get(OFFLINE_LICENSE_MIRROR_RESOURCE_FOLDER, uri.getAuthority());
-
-        // consider each path in the url as a sub-folder
-        for (String subPath : uri.getPath().split("/")) {
-            resourcesPathOfLicense = resourcesPathOfLicense.resolve(subPath);
-        }
+        // As a path separator for getResourceAsStream, we should always use a slash (“/”), not what the OS specific one uses.
+        // Thanks to @aloubyansky for pointing this out
+        String resourcesPathOfLicense = OFFLINE_LICENSE_MIRROR_RESOURCE_FOLDER + "/" + uri.getAuthority() + "/"
+                + uri.getPath();
 
         InputStream input = OfflineLicenseMirror.class.getClassLoader()
-                .getResourceAsStream(resourcesPathOfLicense.toString());
+                .getResourceAsStream(resourcesPathOfLicense);
         return Optional.ofNullable(input);
     }
 }
