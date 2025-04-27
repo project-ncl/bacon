@@ -95,7 +95,8 @@ public class TreeParser {
                     continue;
                 }
 
-                if ((line.contains("maven-dependency-plugin:") || line.contains("dependency:")) && line.contains("tree")) {
+                if ((line.contains("maven-dependency-plugin:") || line.contains("dependency:"))
+                        && line.contains("tree")) {
                     rootNode = true;
                     parsing = true;
                     continue;
