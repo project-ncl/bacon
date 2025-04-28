@@ -103,7 +103,7 @@
         <pnc-api.version>3.0.6</pnc-api.version>
         <pnc-common.version>3.0.1</pnc-common.version>
 
-        <pnc.version>3.1.4</pnc.version>
+        <pnc.version>3.1.5</pnc.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.resolver.version>${quarkus.version}</quarkus.resolver.version>
