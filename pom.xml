@@ -101,7 +101,7 @@
         <picocli.version>4.7.7</picocli.version>
         <pme.version>4.20</pme.version>
         <pnc-api.version>3.0.7</pnc-api.version>
-        <pnc-common.version>3.0.1</pnc-common.version>
+        <pnc-common.version>3.0.2</pnc-common.version>
 
         <pnc.version>3.1.5</pnc.version>
 
