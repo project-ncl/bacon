@@ -47,10 +47,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
@@ -61,6 +57,10 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

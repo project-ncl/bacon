@@ -18,12 +18,12 @@
 
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
+import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Delegate;
-
-import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

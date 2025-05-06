@@ -1,8 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.addons.quarkus;
 
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

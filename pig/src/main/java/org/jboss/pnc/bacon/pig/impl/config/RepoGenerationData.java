@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

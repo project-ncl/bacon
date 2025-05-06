@@ -7,15 +7,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 public class BuildConfigMapping {
 

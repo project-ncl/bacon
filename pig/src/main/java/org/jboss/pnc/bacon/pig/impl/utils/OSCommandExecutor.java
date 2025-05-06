@@ -36,10 +36,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import lombok.Getter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import lombok.Getter;
 
 /**
  * todo: clean up + possibly move out to a separate lib TODO: remove !!

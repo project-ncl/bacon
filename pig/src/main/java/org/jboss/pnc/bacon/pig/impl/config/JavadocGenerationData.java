@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import lombok.Data;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Data;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

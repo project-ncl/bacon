@@ -22,13 +22,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.experimental.impl.dependencies.Project;
 import org.jboss.da.model.rest.GA;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ProjectNameGenerator {

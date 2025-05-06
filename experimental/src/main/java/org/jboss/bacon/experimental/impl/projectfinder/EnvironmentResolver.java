@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
@@ -13,6 +11,8 @@ import org.jboss.pnc.client.EnvironmentClient;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EnvironmentResolver {

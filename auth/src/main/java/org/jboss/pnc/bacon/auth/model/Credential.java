@@ -3,13 +3,13 @@ package org.jboss.pnc.bacon.auth.model;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Builder(toBuilder = true, builderClassName = "Builder")

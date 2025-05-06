@@ -22,15 +22,15 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.enums.RepositoryType;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

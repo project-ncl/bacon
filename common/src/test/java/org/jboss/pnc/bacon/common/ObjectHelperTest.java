@@ -11,10 +11,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import ch.qos.logback.classic.Level;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.stream.SystemOut;
-import ch.qos.logback.classic.Level;
 
 @ExtendWith(SystemStubsExtension.class)
 class ObjectHelperTest {

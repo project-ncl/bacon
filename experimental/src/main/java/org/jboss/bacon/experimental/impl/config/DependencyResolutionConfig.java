@@ -5,9 +5,9 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Data;
 
 /**
  * Configuration for the autobuilder dependency resolution.

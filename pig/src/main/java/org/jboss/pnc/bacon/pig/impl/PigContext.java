@@ -33,9 +33,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -49,6 +46,9 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed

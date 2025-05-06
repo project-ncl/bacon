@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
@@ -27,6 +25,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ProjectFinderTest {

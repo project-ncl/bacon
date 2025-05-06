@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.experimental.cli.DependencyGeneratorCommand;
 import org.jboss.bacon.experimental.impl.config.GeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResolver;
@@ -39,9 +36,11 @@ import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 
-import picocli.CommandLine;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "dependency-generator",

@@ -19,11 +19,11 @@ package org.jboss.pnc.bacon.pig.impl.out;
 
 import java.util.Collection;
 
-import lombok.Data;
-
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.dto.GroupBuild;
+
+import lombok.Data;
 
 @Data
 public class PigRunOutput {

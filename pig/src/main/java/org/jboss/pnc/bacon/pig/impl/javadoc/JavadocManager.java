@@ -36,8 +36,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import lombok.Getter;
-
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.commonjava.maven.ext.cli.Cli;
 import org.eclipse.jgit.api.Git;
@@ -59,6 +57,8 @@ import org.jboss.pnc.bacon.pig.impl.utils.pom.Profile;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import lombok.Getter;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

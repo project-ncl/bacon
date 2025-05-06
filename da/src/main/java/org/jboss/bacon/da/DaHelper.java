@@ -50,6 +50,7 @@ import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import com.redhat.resilience.otel.OTelCLIHelper;
+
 import io.opentelemetry.api.trace.Span;
 
 /**

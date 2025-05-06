@@ -2,11 +2,11 @@ package org.jboss.bacon.experimental.impl.projectfinder;
 
 import java.util.Set;
 
-import lombok.Data;
-
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
+
+import lombok.Data;
 
 @Data
 public class FoundProject {

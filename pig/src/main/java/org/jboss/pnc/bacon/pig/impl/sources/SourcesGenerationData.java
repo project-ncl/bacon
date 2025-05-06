@@ -3,9 +3,9 @@ package org.jboss.pnc.bacon.pig.impl.sources;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
+
+import lombok.Data;
 
 @Data
 public class SourcesGenerationData extends GenerationData<SourcesGenerationStrategy> {

@@ -16,8 +16,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.da.DaHelper;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
 import org.jboss.bacon.experimental.impl.config.DependencyResolutionConfig;
@@ -43,6 +41,7 @@ import io.quarkus.domino.ProjectDependencyResolver;
 import io.quarkus.domino.ReleaseCollection;
 import io.quarkus.domino.ReleaseRepo;
 import io.quarkus.maven.dependency.ArtifactCoords;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DependencyResolver {

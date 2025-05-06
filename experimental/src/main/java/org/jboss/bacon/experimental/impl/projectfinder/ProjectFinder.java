@@ -10,9 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.commonjava.atlas.maven.ident.ref.SimpleArtifactRef;
 import org.jboss.bacon.da.DaHelper;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
@@ -39,6 +36,9 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ProjectFinder {

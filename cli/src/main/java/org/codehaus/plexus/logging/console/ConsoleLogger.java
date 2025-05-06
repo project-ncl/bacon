@@ -17,10 +17,10 @@
  */
 package org.codehaus.plexus.logging.console;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.codehaus.plexus.logging.AbstractLogger;
 import org.codehaus.plexus.logging.Logger;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Massive hack to override the default plexus logging implementation, ConsoleLogger, is adapted to Slf4j, rather than

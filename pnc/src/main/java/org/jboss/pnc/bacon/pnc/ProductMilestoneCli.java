@@ -28,8 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
@@ -53,6 +51,7 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
