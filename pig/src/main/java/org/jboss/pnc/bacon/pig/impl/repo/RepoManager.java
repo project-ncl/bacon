@@ -53,8 +53,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import lombok.Getter;
-
 import org.apache.maven.model.Model;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
@@ -99,6 +97,7 @@ import io.quarkus.domino.inspect.DependencyTreeInspector;
 import io.quarkus.domino.inspect.DependencyTreeVisitor;
 import io.quarkus.maven.dependency.ArtifactCoords;
 import io.quarkus.maven.dependency.ArtifactKey;
+import lombok.Getter;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

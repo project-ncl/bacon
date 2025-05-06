@@ -64,7 +64,7 @@ public class MavenProjectFactoryTest {
         when(
                 mockProjectBuilder
                         .build(eq(Collections.singletonList(mockFile)), eq(true), eq(mockProjectBuildingRequest)))
-                                .thenReturn(Collections.singletonList(mockProjectBuildingResult));
+                .thenReturn(Collections.singletonList(mockProjectBuildingResult));
         when(mockProjectBuildingResult.getProject()).thenReturn(mockMavenProject);
         when(mockMavenProject.getFile()).thenReturn(mockFile);
 
@@ -135,7 +135,7 @@ public class MavenProjectFactoryTest {
         when(
                 mockProjectBuilder
                         .build(eq(Collections.singletonList(mockFile)), eq(true), eq(mockProjectBuildingRequest)))
-                                .thenReturn(Arrays.asList(mockProjectBuildingResult, mockProjectBuildingResult));
+                .thenReturn(Arrays.asList(mockProjectBuildingResult, mockProjectBuildingResult));
 
         List<MavenProject> mavenProjects = mavenProjectFactory.getMavenProjects(mockFile, true);
 
@@ -153,7 +153,7 @@ public class MavenProjectFactoryTest {
         when(
                 mockProjectBuilder
                         .build(eq(Collections.singletonList(mockFile)), eq(true), eq(mockProjectBuildingRequest)))
-                                .thenThrow(ProjectBuildingException.class);
+                .thenThrow(ProjectBuildingException.class);
         List<MavenProject> mavenProjects = mavenProjectFactory.getMavenProjects(mockFile, false);
 
         assertThat(mavenProjects).isEmpty();

@@ -3,9 +3,9 @@ package org.jboss.bacon.experimental.impl.config;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -6,11 +6,11 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
-
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Data;
 
 /**
  * Configuration for how the new build configs should be created.

@@ -25,8 +25,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.bacon.auth.KeycloakClientImpl;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
@@ -36,6 +34,8 @@ import org.jboss.pnc.bacon.config.KeycloakConfig;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.GenericSettingClient;
 import org.jboss.pnc.client.RemoteResourceException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PncClientHelper {

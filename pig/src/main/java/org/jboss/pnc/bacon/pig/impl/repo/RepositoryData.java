@@ -21,9 +21,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 
-import lombok.Data;
-
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+
+import lombok.Data;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

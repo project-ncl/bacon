@@ -26,8 +26,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
 import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLatestResult;
@@ -41,6 +39,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @CommandLine.Command(

@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import lombok.Data;
-import lombok.experimental.Delegate;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+
+import lombok.Data;
+import lombok.experimental.Delegate;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

@@ -7,15 +7,6 @@ import java.util.Optional;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import kong.unirest.HttpResponse;
-import kong.unirest.MultipartBody;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestException;
-import kong.unirest.jackson.JacksonObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.bacon.auth.model.CacheFile;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.model.KeycloakResponse;
@@ -28,6 +19,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import kong.unirest.HttpResponse;
+import kong.unirest.MultipartBody;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
+import kong.unirest.jackson.JacksonObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Authenticates to Keycloak using direct flow!

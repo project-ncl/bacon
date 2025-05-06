@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.Response;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
@@ -58,6 +56,7 @@ import org.jboss.pnc.rest.api.parameters.BuildParameters;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
 
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;

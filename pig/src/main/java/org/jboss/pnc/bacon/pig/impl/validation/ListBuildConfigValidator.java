@@ -9,10 +9,10 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.enums.BuildType;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Validation implementation for BuildConfig

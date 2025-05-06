@@ -11,8 +11,6 @@ import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.bacon.experimental.impl.config.BuildConfigGeneratorConfig;
 import org.jboss.bacon.experimental.impl.dependencies.DependencyResult;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
@@ -28,6 +26,8 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class BuildConfigGenerator {

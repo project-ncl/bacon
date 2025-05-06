@@ -10,8 +10,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import lombok.AllArgsConstructor;
-
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.enums.BuildType;
 import org.jeasy.random.EasyRandom;
@@ -19,6 +17,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
+
+import lombok.AllArgsConstructor;
 
 class ListBuildConfigCheckTest {
     static Validator validator;

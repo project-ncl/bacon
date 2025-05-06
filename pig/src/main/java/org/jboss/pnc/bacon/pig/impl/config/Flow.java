@@ -17,12 +17,12 @@
  */
 package org.jboss.pnc.bacon.pig.impl.config;
 
-import lombok.Data;
-
 import org.jboss.pnc.bacon.pig.impl.sources.SourcesGenerationData;
 import org.jboss.pnc.bacon.pig.impl.validation.GenerationDataCheck;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Data;
 
 /**
  *

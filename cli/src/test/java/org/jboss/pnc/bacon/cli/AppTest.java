@@ -15,14 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 import uk.org.webcompere.systemstubs.stream.SystemErr;
 import uk.org.webcompere.systemstubs.stream.SystemOut;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.core.pattern.color.ANSIConstants;
 
 @ExtendWith(SystemStubsExtension.class)
 class AppTest {
@@ -133,7 +133,7 @@ class AppTest {
                 Arrays.asList(systemErr.getText().split(System.lineSeparator()))
                         .subList(2, 10)
                         .toString())
-                                .contains(ANSIConstants.ESC_START);
+                .contains(ANSIConstants.ESC_START);
     }
 
     @Test

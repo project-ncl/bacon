@@ -17,12 +17,12 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
+import org.jboss.pnc.dto.BuildConfiguration;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Delegate;
-
-import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
-import org.jboss.pnc.dto.BuildConfiguration;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>

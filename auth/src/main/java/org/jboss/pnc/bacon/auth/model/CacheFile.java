@@ -12,16 +12,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.config.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Setter
