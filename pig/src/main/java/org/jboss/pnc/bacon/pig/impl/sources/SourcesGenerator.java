@@ -1,7 +1,5 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
-import static org.jboss.pnc.bacon.pig.impl.utils.GerritUtils.gerritSnapshotDownloadUrl;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,11 +174,17 @@ public class SourcesGenerator {
 
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
         builds.values().forEach(build -> {
-            URI url = gerritSnapshotDownloadUrl(build.getInternalScmUrl(), build.getScmRevision());
-
             File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
             try (BuildClient client = CREATOR.newClient();
                     Response response = client.getInternalScmArchiveLink(build.getId())) {
+
+                if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                    // NCLSUP-1269: check if the download link is valid or has some issues
+                    StringBuilder errorMessage = new StringBuilder();
+                    errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
+                    errorMessage.append("HTTP Status: ").append(response.getStatus()).append("\n");
+                    throw new RuntimeException(errorMessage.toString());
+                }
                 InputStream in = (InputStream) response.getEntity();
                 Files.copy(in, targetPath.toPath());
             } catch (IOException | RemoteResourceException e) {
