@@ -5,7 +5,7 @@
         "version": "6.0.41",
         "licenses": [
             {
-                "name": "Apache License, Version 2.0",
+                "name": "Apache License 2.0",
                 "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
             },
             {
@@ -20,7 +20,7 @@
         "version": "3.9.0.redhat-3",
         "licenses": [
             {
-                "name": "Apache License, Version 2.0",
+                "name": "Apache License 2.0",
                 "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         ]
@@ -31,7 +31,7 @@
         "version": "6.0.41-redhat",
         "licenses": [
             {
-                "name": "Apache License, Version 2.0",
+                "name": "Apache License 2.0",
                 "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
             },
             {
@@ -1276,7 +1276,7 @@
         "version-regexp": "[67]\\..+",
         "licenses": [
             {
-                "name": "Apache License, Version 2.0",
+                "name": "Apache License 2.0",
                 "url": "http://www.apache.org/licenses/LICENSE-2.0"
             },
             {
