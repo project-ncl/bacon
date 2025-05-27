@@ -324,7 +324,8 @@ public class ProductMilestoneCli {
 
         @Option(
                 names = "--scratch",
-                description = "Whether to run the analysis as scratch (default: false)")
+                description = "Whether to run the analysis as scratch (default: false)",
+                defaultValue = "false")
         private Boolean runAsScratchAnalysis;
 
         /**
