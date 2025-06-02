@@ -32,6 +32,7 @@ public class ConfigProfile {
     private PigConfig pig;
     private KeycloakConfig keycloak;
     private AutobuildConfig autobuild;
+    private RexConfig rex;
     private boolean enableExperimental;
 
     private Map<String, Map<String, ?>> addOns;

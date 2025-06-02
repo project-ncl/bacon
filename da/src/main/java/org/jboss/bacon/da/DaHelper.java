@@ -17,17 +17,11 @@
  */
 package org.jboss.bacon.da;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
@@ -38,6 +32,8 @@ import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.lookup.model.NPMLookupResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
+import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
+import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
@@ -267,19 +263,5 @@ public class DaHelper {
         }
 
         return ordered;
-    }
-
-    private static class TokenAuthenticator implements ClientRequestFilter {
-
-        private final Supplier<String> tokenSupplier;
-
-        TokenAuthenticator(Supplier<String> tokenSupplier) {
-            this.tokenSupplier = tokenSupplier;
-        }
-
-        public void filter(ClientRequestContext requestContext) throws IOException {
-            MultivaluedMap<String, Object> headers = requestContext.getHeaders();
-            headers.add("Authorization", "Bearer " + this.tokenSupplier.get());
-        }
     }
 }

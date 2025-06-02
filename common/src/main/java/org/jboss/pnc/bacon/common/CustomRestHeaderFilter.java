@@ -1,4 +1,4 @@
-package org.jboss.bacon.da;
+package org.jboss.pnc.bacon.common;
 
 import java.io.IOException;
 
