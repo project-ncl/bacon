@@ -32,6 +32,8 @@ profile:
       indyUrl: ""
   da:
       url: ""
+  rex:
+      url: ""
 # ******************************************************************************
 # Authentication information
 #

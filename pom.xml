@@ -112,6 +112,7 @@
         <surefire.plugin.version>3.2.5</surefire.plugin.version>
         <tagSuffix />
         <undertow.version>2.3.18.Final</undertow.version>
+        <version.rex>1.1.0-SNAPSHOT</version.rex>
     </properties>
 
     <dependencyManagement>
@@ -704,6 +705,23 @@
                         <artifactId>jboss-annotations-api_1.3_spec</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.pnc.rex</groupId>
+                <artifactId>rex-api</artifactId>
+                <version>${version.rex}</version>
+                <classifier>javax</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.rex</groupId>
+                <artifactId>rex-model</artifactId>
+                <version>${version.rex}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.rex</groupId>
+                <artifactId>rex-common</artifactId>
+                <version>${version.rex}</version>
             </dependency>
 
             <dependency>
