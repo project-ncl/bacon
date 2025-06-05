@@ -1,5 +1,6 @@
 package org.jboss.bacon.experimental.impl.config;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -67,4 +68,9 @@ public class DependencyResolutionConfig {
      * suffix). This is useful to make sure whole dependency tree is build correctly.
      */
     private boolean rebuildNonAutoBuilds = false;
+
+    /**
+     * Path to the maven settings.xml file to use instead of the system one.
+     */
+    private Path mavenSettings;
 }
