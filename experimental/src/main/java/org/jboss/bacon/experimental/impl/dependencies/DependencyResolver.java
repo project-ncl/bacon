@@ -28,11 +28,6 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.common.version.SuffixedVersion;
 import org.jboss.pnc.common.version.VersionParser;
 
-import io.quarkus.bom.decomposer.ReleaseId;
-import io.quarkus.bom.decomposer.ReleaseOrigin;
-import io.quarkus.bom.decomposer.ReleaseVersion;
-import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContext;
-import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContextConfig;
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.devtools.messagewriter.MessageWriter;
@@ -42,6 +37,8 @@ import io.quarkus.domino.ProjectDependencyConfigMapper;
 import io.quarkus.domino.ProjectDependencyResolver;
 import io.quarkus.domino.ReleaseCollection;
 import io.quarkus.domino.ReleaseRepo;
+import io.quarkus.domino.scm.ScmRepository;
+import io.quarkus.domino.scm.ScmRevision;
 import io.quarkus.maven.dependency.ArtifactCoords;
 import lombok.extern.slf4j.Slf4j;
 
@@ -88,7 +85,6 @@ public class DependencyResolver {
                 .setWarnOnMissingScm(true)
                 .setRecipeRepos(config.getRecipeRepos())
                 .setProjectArtifacts(artifacts)
-                .setValidateCodeRepoTags(false) // TODO
                 .setIncludeAlreadyBuilt(true); // TODO
     }
 
@@ -175,15 +171,15 @@ public class DependencyResolver {
         return result;
     }
 
-    private void setupDependencies(Map<ReleaseRepo, Project> mapping, Map<ReleaseId, Set<ReleaseId>> depsToCut) {
+    private void setupDependencies(Map<ReleaseRepo, Project> mapping, Map<ScmRevision, Set<ScmRevision>> depsToCut) {
         for (var entry : mapping.entrySet()) {
             ReleaseRepo repo = entry.getKey();
             Project project = entry.getValue();
-            Set<ReleaseId> toCut = depsToCut.getOrDefault(repo.id(), Collections.emptySet());
+            Set<ScmRevision> toCut = depsToCut.getOrDefault(repo.getRevision(), Collections.emptySet());
             project.setDependencies(
                     repo.getDependencies()
                             .stream()
-                            .filter(d -> !toCut.contains(d.id()))
+                            .filter(d -> !toCut.contains(d.getRevision()))
                             .map(mapping::get)
                             .filter(this::filterProductized)
                             .collect(Collectors.toSet()));
@@ -248,9 +244,9 @@ public class DependencyResolver {
         return true;
     }
 
-    private Map<ReleaseId, Set<ReleaseId>> processCircularDependencies(
+    private Map<ScmRevision, Set<ScmRevision>> processCircularDependencies(
             Collection<CircularReleaseDependency> circularDependencies) {
-        Map<ReleaseId, Set<ReleaseId>> depsToCut = new HashMap<>();
+        Map<ScmRevision, Set<ScmRevision>> depsToCut = new HashMap<>();
         if (!circularDependencies.isEmpty()) {
             log.error(
                     "Detected circular dependencies. This may be caused by incorrect SCM information, "
@@ -258,17 +254,17 @@ public class DependencyResolver {
                             + "but this will lead to broken build config.");
             for (CircularReleaseDependency circularDependency : circularDependencies) {
                 log.error("Detected loop: " + circularDependency);
-                List<ReleaseId> releaseDependencyChain = circularDependency.getReleaseDependencyChain();
-                ReleaseId child = releaseDependencyChain.get(releaseDependencyChain.size() - 1);
-                ReleaseId parent = releaseDependencyChain.get(releaseDependencyChain.size() - 2);
-                Set<ReleaseId> releaseIds = depsToCut.computeIfAbsent(parent, k -> new HashSet<>());
+                List<ScmRevision> releaseDependencyChain = circularDependency.getDependencyChain();
+                ScmRevision child = releaseDependencyChain.get(releaseDependencyChain.size() - 1);
+                ScmRevision parent = releaseDependencyChain.get(releaseDependencyChain.size() - 2);
+                Set<ScmRevision> releaseIds = depsToCut.computeIfAbsent(parent, k -> new HashSet<>());
                 releaseIds.add(child);
             }
         }
         return depsToCut;
     }
 
-    private Project mapToProject(ReleaseRepo repo, Map<ReleaseId, Set<ReleaseId>> depsToCut) {
+    private Project mapToProject(ReleaseRepo repo, Map<ScmRevision, Set<ScmRevision>> depsToCut) {
         Project project = new Project();
         Set<GAV> gavs = repo.getArtifacts()
                 .keySet()
@@ -276,9 +272,9 @@ public class DependencyResolver {
                 .map(a -> new GAV(a.getGroupId(), a.getArtifactId(), a.getVersion()))
                 .collect(Collectors.toSet());
         project.setGavs(gavs);
-        project.setSourceCodeURL(getSourceCodeURL(repo.id()));
-        project.setSourceCodeRevision(getSourceCodeRevision(repo.id()));
-        if (depsToCut.containsKey(repo.id())) {
+        project.setSourceCodeURL(getSourceCodeURL(repo.getRevision()));
+        project.setSourceCodeRevision(getSourceCodeRevision(repo.getRevision()));
+        if (depsToCut.containsKey(repo.getRevision())) {
             GAV firstGAV = project.getFirstGAV();
             log.warn("Project " + firstGAV + " has cut some dependency(ies).");
             project.setCutDependency(true);
@@ -301,20 +297,16 @@ public class DependencyResolver {
         }
     }
 
-    private String getSourceCodeURL(ReleaseId releaseId) {
-        ReleaseOrigin origin = releaseId.origin(); // TODO: this API will probably change
+    private String getSourceCodeURL(ScmRevision releaseId) {
+        ScmRepository origin = releaseId.getRepository();
         if (origin.isUrl()) {
-            return origin.toString();
+            return origin.getUrl();
         }
         return null;
     }
 
-    private String getSourceCodeRevision(ReleaseId releaseId) {
-        ReleaseVersion version = releaseId.version(); // TODO: this API will probably change
-        if (version.isTag()) {
-            return version.asString();
-        }
-        return null;
+    private String getSourceCodeRevision(ScmRevision releaseId) {
+        return releaseId.getValue();
     }
 
     private static class Slf4jMessageWriter implements MessageWriter {
