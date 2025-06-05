@@ -31,6 +31,8 @@ import org.jboss.pnc.common.version.VersionParser;
 import io.quarkus.bom.decomposer.ReleaseId;
 import io.quarkus.bom.decomposer.ReleaseOrigin;
 import io.quarkus.bom.decomposer.ReleaseVersion;
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContext;
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenContextConfig;
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.devtools.messagewriter.MessageWriter;
@@ -91,6 +93,16 @@ public class DependencyResolver {
     }
 
     public DependencyResult resolve(Path projectDir, Path dominoConfigFile) {
+        ProjectDependencyResolver resolver = configureResolver(projectDir, dominoConfigFile);
+
+        PrintStream origOut = System.out;
+        System.setOut(new PrintStream(new LogOutputStream()));
+        ReleaseCollection releaseCollection = resolver.getReleaseCollection();
+        System.setOut(origOut);
+        return parseReleaseCollection(releaseCollection);
+    }
+
+    private ProjectDependencyResolver configureResolver(Path projectDir, Path dominoConfigFile) {
         ProjectDependencyConfig.Mutable dominoConfig;
         if (dominoConfigFile == null) {
             dominoConfig = ProjectDependencyConfig.builder();
@@ -102,6 +114,9 @@ public class DependencyResolver {
             }
         }
         ProjectDependencyResolver.Builder resolverBuilder = ProjectDependencyResolver.builder();
+        if (config.getMavenSettings() != null) {
+            resolverBuilder.setUserMavenSettings(config.getMavenSettings());
+        }
         if (projectDir != null) {
             dominoConfig.setProjectDir(projectDir);
             resolverBuilder.setArtifactResolver(getArtifactResolver(projectDir));
@@ -109,14 +124,9 @@ public class DependencyResolver {
         setupConfig(dominoConfig);
         ProjectDependencyConfig conf = dominoConfig.build();
         logDominoConfig(conf);
-        ProjectDependencyResolver resolver = resolverBuilder.setMessageWriter(new Slf4jMessageWriter())
+        return resolverBuilder.setMessageWriter(new Slf4jMessageWriter())
                 .setDependencyConfig(conf)
                 .build();
-        PrintStream origOut = System.out;
-        System.setOut(new PrintStream(new LogOutputStream()));
-        ReleaseCollection releaseCollection = resolver.getReleaseCollection();
-        System.setOut(origOut);
-        return parseReleaseCollection(releaseCollection);
     }
 
     private void logDominoConfig(ProjectDependencyConfig conf) {
@@ -132,11 +142,14 @@ public class DependencyResolver {
 
     protected MavenArtifactResolver getArtifactResolver(Path projectDir) {
         try {
-            return MavenArtifactResolver.builder()
+            MavenArtifactResolver.Builder builder = MavenArtifactResolver.builder()
                     .setCurrentProject(projectDir.toAbsolutePath().toString())
                     .setEffectiveModelBuilder(true)
-                    .setPreferPomsFromWorkspace(true)
-                    .build();
+                    .setPreferPomsFromWorkspace(true);
+            if (config.getMavenSettings() != null) {
+                builder.setUserSettings(config.getMavenSettings().toFile());
+            }
+            return builder.build();
         } catch (BootstrapMavenException e) {
             throw new RuntimeException("Failed to initialize Maven artifact resolver", e);
         }
