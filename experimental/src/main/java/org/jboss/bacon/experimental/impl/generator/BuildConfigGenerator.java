@@ -39,6 +39,14 @@ public class BuildConfigGenerator {
         environments = new EnvironmentResolver(buildConfigGeneratorConfig);
     }
 
+    /**
+     * Generates build configs for each of the projects in the dependency tree.
+     * <p>
+     * If the config for a project already exists and has name with -AUTOBUILD suffix, it's reused.<br>
+     * If the config for a project already exists without the suffix or for a different project version, it's copied and
+     * updated.<br>
+     * If the config does not exist yet, a dummy config is generated.
+     */
     public List<BuildConfig> generateConfigs(DependencyResult dependencies, FoundProjects foundProjects) {
         Map<Project, BuildConfig> buildConfigMap = new TreeMap<>(new ProjectDepthComparator());
         for (Project project : dependencies.getTopLevelProjects()) {
@@ -48,7 +56,7 @@ public class BuildConfigGenerator {
             log.info(
                     "Some Build Configs might have been generated or modified. Autobuilder appended command `false` to "
                             + "build scripts of such Build Configs and a human should review the Build Configs before "
-                            + "removig the command `false`. The generated build-config.yaml can still be run in PNC "
+                            + "removing the command `false`. The generated build-config.yaml can still be run in PNC "
                             + "even with the command `false` present, as it will provide you with information about "
                             + "alignment and the build run.");
         } else {
@@ -77,7 +85,7 @@ public class BuildConfigGenerator {
         return buildConfig;
     }
 
-    public BuildConfig processProject(Project project, FoundProject found) {
+    private BuildConfig processProject(Project project, FoundProject found) {
         String name = project.getName();
         // Strategy
         if (found.isManaged()) {

@@ -48,29 +48,18 @@ public class ProjectFinder {
     private final BuildClient buildClient;
     private final BuildConfigurationClient buildConfigClient;
     private final VersionParser versionParser = new VersionParser("redhat", "temporary-redhat");
-    private final BuildConfigGeneratorConfig config;
 
-    public ProjectFinder(BuildConfigGeneratorConfig config) {
-        this.config = config;
+    public ProjectFinder() {
         lookupApi = DaHelper.createLookupApi();
         artifactClient = new ClientCreator<>(ArtifactClient::new).newClient();
         buildClient = new ClientCreator<>(BuildClient::new).newClient();
         buildConfigClient = new ClientCreator<>(BuildConfigurationClient::new).newClient();
     }
 
-    ProjectFinder(
-            BuildConfigGeneratorConfig config,
-            LookupApi lookupApi,
-            ArtifactClient artifactClient,
-            BuildClient buildClient,
-            BuildConfigurationClient buildConfigClient) {
-        this.config = config;
-        this.lookupApi = lookupApi;
-        this.artifactClient = artifactClient;
-        this.buildClient = buildClient;
-        this.buildConfigClient = buildConfigClient;
-    }
-
+    /**
+     * Tries to find existing Build Configs for each of the projects. It tries to find Build Config that built the
+     * closest version of the project to version we are interested in.
+     */
     public FoundProjects findProjects(DependencyResult dependencies) {
         Set<Project> projects = new HashSet<>();
         traverseTree(projects, dependencies.getTopLevelProjects());
@@ -281,7 +270,7 @@ public class ProjectFinder {
      * Compares Build Config Revisions by modification time. If the modification times are the same or some is null, it
      * compares the Revisions by revision (rev) number.
      */
-    private class BuildConfigRevisionAgeComparator implements Comparator<BuildConfigurationRevision> {
+    private static class BuildConfigRevisionAgeComparator implements Comparator<BuildConfigurationRevision> {
 
         @Override
         public int compare(BuildConfigurationRevision one, BuildConfigurationRevision two) {
