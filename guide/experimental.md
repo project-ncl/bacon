@@ -56,6 +56,7 @@ dependencyResolutionConfig: # Configuration for the dependency resolution by Dom
     rebuildNonAutoBuilds: false # When enabled, autobuilder will rebuild existing builds, if they are not managed by autobuilder (Build Configs with -AUTOBUILD suffix)
                                 # and will manage them (create a copy of the existing build's Build Config with -AUTOBUILD suffix).
                                 # This is useful to make sure whole dependency tree is build correctly.
+    mavenSettings: "/path/to/maven/settings.xml" # Path to maven settings.xml file to use instead of the system one.
 
 buildConfigGeneratorConfig: # Configuration for how the new build configs should be created
     defaultValues: # Default values to be used when generating build config
