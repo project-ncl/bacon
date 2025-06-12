@@ -41,7 +41,6 @@ public class ProjectFinderTest {
 
     private static WireMockServer mockServer;
 
-    private BuildConfigGeneratorConfig config;
     private ProjectFinder finder;
     public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
 
@@ -52,8 +51,7 @@ public class ProjectFinderTest {
 
     @BeforeEach
     public void initProjectFinder() {
-        config = new BuildConfigGeneratorConfig();
-        finder = new ProjectFinder(config);
+        finder = new ProjectFinder();
     }
 
     @Test

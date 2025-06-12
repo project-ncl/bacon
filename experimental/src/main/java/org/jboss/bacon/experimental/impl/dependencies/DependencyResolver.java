@@ -57,6 +57,19 @@ public class DependencyResolver {
         lookupApi = DaHelper.createLookupApi();
     }
 
+    /**
+     * Resolve the dependencies for project specified in the autobuilder config or by the projectDir property.
+     *
+     * @param projectDir Optional path to the directory with the project to analyze.
+     * @param dominoConfigFile Optional path to domino config file.
+     * @return The dependency tree(s) of the analyzed project.
+     */
+    public DependencyResult resolve(Path projectDir, Path dominoConfigFile) {
+        ProjectDependencyResolver resolver = configureResolver(projectDir, dominoConfigFile);
+        ReleaseCollection releaseCollection = resolveDependencies(resolver);
+        return parseReleaseCollection(releaseCollection);
+    }
+
     private void setupConfig(ProjectDependencyConfig.Mutable dominoConfig) {
         config.getExcludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
         AutobuildConfig autobuildConfig = Objects.requireNonNull(
@@ -88,14 +101,12 @@ public class DependencyResolver {
                 .setIncludeAlreadyBuilt(true); // TODO
     }
 
-    public DependencyResult resolve(Path projectDir, Path dominoConfigFile) {
-        ProjectDependencyResolver resolver = configureResolver(projectDir, dominoConfigFile);
-
-        PrintStream origOut = System.out;
+    private static ReleaseCollection resolveDependencies(ProjectDependencyResolver resolver) {
+        PrintStream origOut = System.out;  // workaround System.out usage by libraries and redirect it to logger
         System.setOut(new PrintStream(new LogOutputStream()));
         ReleaseCollection releaseCollection = resolver.getReleaseCollection();
         System.setOut(origOut);
-        return parseReleaseCollection(releaseCollection);
+        return releaseCollection;
     }
 
     private ProjectDependencyResolver configureResolver(Path projectDir, Path dominoConfigFile) {

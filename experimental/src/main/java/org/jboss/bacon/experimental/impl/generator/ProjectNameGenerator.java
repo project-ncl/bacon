@@ -37,6 +37,9 @@ public class ProjectNameGenerator {
     private Set<Project> allProjects;
     private Map<GA, Set<Project>> projectsByGA;
 
+    /**
+     * Generates names from the project artifacts to be used as the Build Configs' names.
+     */
     public void nameProjects(Set<Project> projects) {
         allProjects = new HashSet<>();
         projectsByGA = new HashMap<>();
