@@ -21,16 +21,17 @@ import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.pnc.api.enums.OperationResult;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.RemoteResourceNotFoundException;
-import org.jboss.pnc.dto.BuildPushResult;
+import org.jboss.pnc.dto.BuildPushOperation;
+import org.jboss.pnc.dto.BuildPushReport;
 import org.jboss.pnc.dto.requests.BuildPushParameters;
 import org.jboss.pnc.dto.requests.GroupBuildPushRequest;
-import org.jboss.pnc.enums.BuildPushStatus;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
 
 import picocli.CommandLine.Command;
@@ -85,20 +86,20 @@ public class BrewPushCli {
                         .build();
 
                 if (timeout != null) {
-                    BuildPushResult bpr = buildClient
+                    BuildPushReport bpr = buildClient
                             .executeBrewPush(id, request, Long.parseLong(timeout), TimeUnit.MINUTES);
                     ObjectHelper.print(getJsonOutput(), bpr);
-                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                    return bpr.getResult() == OperationResult.SUCCESSFUL ? 0 : bpr.getResult().ordinal();
                 }
 
                 if (wait) {
-                    BuildPushResult bpr = buildClient.executeBrewPush(id, request).join();
+                    BuildPushReport bpr = buildClient.executeBrewPush(id, request).join();
                     ObjectHelper.print(getJsonOutput(), bpr);
-                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                    return bpr.getResult() == OperationResult.SUCCESSFUL ? 0 : bpr.getResult().ordinal();
                 } else {
-                    BuildPushResult bpr = buildClient.push(id, request);
+                    BuildPushOperation bpr = buildClient.push(id, request);
                     ObjectHelper.print(getJsonOutput(), bpr);
-                    return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                    return bpr.getResult() == OperationResult.SUCCESSFUL ? 0 : bpr.getResult().ordinal();
                 }
             }
         }
@@ -150,9 +151,9 @@ public class BrewPushCli {
         @Override
         public Integer call() throws Exception {
             try (AdvancedBuildClient client = BUILD_CREATOR.newClient()) {
-                BuildPushResult bpr = client.getPushResult(id);
+                BuildPushReport bpr = client.getPushResult(id);
                 ObjectHelper.print(getJsonOutput(), bpr);
-                return bpr.getStatus() == BuildPushStatus.SUCCESS ? 0 : bpr.getStatus().ordinal();
+                return bpr.getResult() == OperationResult.SUCCESSFUL ? 0 : bpr.getResult().ordinal();
             } catch (RemoteResourceNotFoundException e) {
                 // NCL-6110: print status that there are no brew push records
                 ObjectHelper.print(getJsonOutput(), Collections.singletonMap("status", "NO_BREW-PUSH_RECORDS"));

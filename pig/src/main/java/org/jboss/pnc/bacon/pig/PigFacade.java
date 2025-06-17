@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
 
+import org.jboss.pnc.api.enums.OperationResult;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
@@ -65,12 +66,11 @@ import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.ProductVersionClient;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.dto.BuildPushResult;
+import org.jboss.pnc.dto.BuildPushReport;
 import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.requests.BuildPushParameters;
-import org.jboss.pnc.enums.BuildPushStatus;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
 import org.slf4j.Logger;
@@ -341,11 +341,11 @@ public final class PigFacade {
 
             // TODO: customize the timeout
             try (AdvancedBuildClient pushingClient = new AdvancedBuildClient(PncClientHelper.getPncConfiguration())) {
-                BuildPushResult pushResult = pushingClient
+                BuildPushReport pustReport = pushingClient
                         .executeBrewPush(build.getId(), request, 15L, TimeUnit.MINUTES);
-                if (pushResult.getStatus() != BuildPushStatus.SUCCESS) {
+                if (pustReport.getResult() != OperationResult.SUCCESSFUL) {
                     throw new RuntimeException(
-                            "Failed to push build " + build.getId() + " to brew. Push result: " + pushResult);
+                            "Failed to push build " + build.getId() + " to brew. Push report: " + pustReport);
                 }
                 log.info("{} pushed to brew ( {} ) ", build.getId(), UrlGenerator.generateBuildUrl(build.getId()));
             } catch (RemoteResourceException e) {
@@ -424,9 +424,9 @@ public final class PigFacade {
 
     private static boolean notPushedToBrew(PncBuild build) {
         try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration())) { // todo factory or sth
-            BuildPushResult pushResult;
+            BuildPushReport pushReport;
             try {
-                pushResult = buildClient.getPushResult(build.getId());
+                pushReport = buildClient.getPushResult(build.getId());
             } catch (ClientException e) {
                 // Didn't find results with 404 exception, therefore it's not pushed
                 if (e.getCause().getClass().isAssignableFrom(NotFoundException.class)) {
@@ -435,7 +435,7 @@ public final class PigFacade {
                     throw new RuntimeException("Failed to get push info of build " + build.getId(), e);
                 }
             }
-            return pushResult == null || pushResult.getStatus() != BuildPushStatus.SUCCESS;
+            return pushReport == null || pushReport.getResult() != OperationResult.SUCCESSFUL;
         }
     }
 
