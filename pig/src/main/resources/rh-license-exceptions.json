@@ -833,7 +833,7 @@
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v3.0 or later",
-                "url": "https://spdx.org/licenses/LGPL-3.0+.html"
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             },
             {
                 "name": "Apache License 2.0",
@@ -848,7 +848,7 @@
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v3.0 or later",
-                "url": "https://spdx.org/licenses/LGPL-3.0+.html"
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             },
             {
                 "name": "Apache License 2.0",
@@ -893,7 +893,7 @@
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v3.0 or later",
-                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             },
             {
                 "name": "Apache License 2.0",
@@ -923,7 +923,7 @@
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v3.0 or later",
-                "url": "https://spdx.org/licenses/LGPL-3.0+.html"
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             },
             {
                 "name": "Apache License 2.0",
@@ -1585,8 +1585,8 @@
                 "url": "http://www.apache.org/licenses/LICENSE-2.0"
             },
             {
-                "name": "GNU Lesser General Public License v3.0 only",
-                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
+                "name": "GNU Lesser General Public License v3.0 or later",
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             }
         ]
     },
@@ -1707,8 +1707,8 @@
                 "url": "https://repository.jboss.org/licenses/apache-2.0.txt"
             },
             {
-                "name": "GNU Lesser General Public License v3.0 only",
-                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
+                "name": "GNU Lesser General Public License v3.0 or later",
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             }
         ]
     },
@@ -1722,8 +1722,8 @@
                 "url": "https://repository.jboss.org/licenses/apache-2.0.txt"
             },
             {
-                "name": "GNU Lesser General Public License v3.0 only",
-                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
+                "name": "GNU Lesser General Public License v3.0 or later",
+                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
             }
         ]
     },
