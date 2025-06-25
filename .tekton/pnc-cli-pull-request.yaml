@@ -28,6 +28,11 @@ spec:
     value: 5d
   - name: dockerfile
     value: cli/src/main/docker/Dockerfile
+  - name: build-args
+    value:
+      - IT_ROOT_CA_2015_BASE64=${{ secrets.IT_ROOT_CA_2015_BASE64 }}
+      - IT_ROOT_CA_2022_BASE64=${{ secrets.IT_ROOT_CA_2022_BASE64 }}
+
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
