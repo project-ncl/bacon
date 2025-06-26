@@ -49,6 +49,7 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
+import org.jboss.pnc.dto.requests.MilestoneCloseRequest;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import lombok.extern.slf4j.Slf4j;
@@ -247,6 +248,12 @@ public class ProductMilestoneCli {
         @Parameters(description = "Milestone id")
         private String id;
 
+        @Option(
+                names = "--skipBrewPush",
+                description = "Skip brew push for milestone close operation",
+                defaultValue = "false")
+        private boolean skipBrewPush;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -256,7 +263,8 @@ public class ProductMilestoneCli {
         @Override
         public Integer call() throws Exception {
             try (ProductMilestoneClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
-                clientAuthenticated.closeMilestone(id);
+                clientAuthenticated
+                        .closeMilestone(id, MilestoneCloseRequest.builder().skipBrewPush(skipBrewPush).build());
                 return 0;
             }
         }
