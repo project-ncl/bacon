@@ -482,6 +482,11 @@ spec:
       optional: true
     - name: netrc
       optional: true
+    - name: source
+      description: Workspace used as the Docker build context (used by buildah-oci-ta)
+    - name: certs
+      description: Workspace holding the mounted certificate secret
+      
   taskRunTemplate:
     serviceAccountName: build-pipeline-pnc-cli
   workspaces:
@@ -493,5 +498,6 @@ spec:
       secretName: it-certificates
   - name: source
     emptyDir: {}
+
 status: {}
 
