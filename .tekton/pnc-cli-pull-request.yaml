@@ -200,27 +200,28 @@ spec:
           - name: copy
             image: registry.access.redhat.com/ubi8/openjdk-17
             script: |
-              mkdir -p /workspace/source/certs
+              #!/bin/bash
+              set -eu
+              set -o pipefail
+
+              echo "Listing content of /workspace/ ...."
               ls -la /workspace/
+
+              echo "Listing content of /workspace/certs ...."
               ls -la /workspace/certs
+              cat /workspace/certs/IT_ROOT_CA_2015
+              cat /workspace/certs/IT_ROOT_CA_2022
+
+              echo "Copying certs to sourtce workspace ...."
+              mkdir -p /workspace/source/certs
               cp /workspace/certs/* /workspace/source/certs/
               ls -la /workspace/source/certs/
+
       workspaces:
         - name: certs
           workspace: certs
         - name: source
           workspace: source
-
-
-
-
-
-
-
-
-
-
-
 
 
 
