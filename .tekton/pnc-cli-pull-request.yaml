@@ -216,8 +216,8 @@ spec:
             echo ${PWD}
             
             ls -l ${PWD}
-            ls -l /var/shared
-            ls -l /var/shared/*/
+            ls -l /shared
+            ls -l /mnt
 
 
 
