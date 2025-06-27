@@ -25,6 +25,20 @@ spec:
     value: quay.io/redhat-user-workloads/konflux-jbs-pnc-tenant/pnc/pnc-cli:on-pr-{{revision}}
   - name: image-expires-after
     value: 5d
+  - name: IT_ROOT_CA_2015
+    valueFrom:
+      secretKeyRef:
+        name: it-certificates
+        key: IT_ROOT_CA_2015
+  - name: IT_ROOT_CA_2022
+    valueFrom:
+      secretKeyRef:
+        name: it-certificates
+        key: IT_ROOT_CA_2022
+  - name: build-args
+      value:
+        - IT_ROOT_CA_2015=$(params.IT_ROOT_CA_2015)
+        - IT_ROOT_CA_2022=$(params.IT_ROOT_CA_2022)
   - name: dockerfile
     value: cli/src/main/docker/Dockerfile
   pipelineSpec:
@@ -100,6 +114,12 @@ spec:
     - default: ''
       description: Path to a file with build arguments for buildah, see https://www.mankier.com/1/buildah-build#--build-arg-file
       name: build-args-file
+      type: string
+    - default: ''
+      name: IT_ROOT_CA_2015
+      type: string
+    - default: ''
+      name: IT_ROOT_CA_2022
       type: string
     results:
     - description: ''
