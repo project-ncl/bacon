@@ -256,7 +256,7 @@ spec:
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
-      - copy-cert
+      - copy-it-certificates
       workspaces:
         - name: workdir
           workspace: workdir
