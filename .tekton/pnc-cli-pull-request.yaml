@@ -36,9 +36,9 @@ spec:
         name: it-certificates
         key: IT_ROOT_CA_2022
   - name: build-args
-      value:
-        - IT_ROOT_CA_2015=$(params.IT_ROOT_CA_2015)
-        - IT_ROOT_CA_2022=$(params.IT_ROOT_CA_2022)
+    value:
+      - IT_ROOT_CA_2015=$(params.IT_ROOT_CA_2015)
+      - IT_ROOT_CA_2022=$(params.IT_ROOT_CA_2022)
   - name: dockerfile
     value: cli/src/main/docker/Dockerfile
   pipelineSpec:
