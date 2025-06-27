@@ -104,6 +104,7 @@ spec:
     - default: ''
       name: IT_ROOT_CA_2015
       type: string
+
     - default: ''
       name: IT_ROOT_CA_2022
       type: string
