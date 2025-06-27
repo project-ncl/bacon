@@ -210,9 +210,10 @@ spec:
               echo "Listing content of /workspace/certs ...."
               ls -la /workspace/certs
               cat /workspace/certs/IT_ROOT_CA_2015
+              echo -n "\n"
               cat /workspace/certs/IT_ROOT_CA_2022
 
-              echo "Copying certs to sourtce workspace ...."
+              echo "\nCopying certs to sourtce workspace ...."
               mkdir -p /workspace/source/certs
               cp /workspace/certs/* /workspace/source/certs/
               ls -la /workspace/source/certs/
@@ -222,8 +223,6 @@ spec:
           workspace: certs
         - name: source
           workspace: source
-
-
 
     - name: build-container
       params:
@@ -251,7 +250,10 @@ spec:
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
-      - prefetch-dependencies
+      - copy-certs
+      workspaces:
+        - name: source
+          workspace: source
       taskRef:
         params:
         - name: name

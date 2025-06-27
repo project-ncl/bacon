@@ -11,8 +11,13 @@ FROM registry.access.redhat.com/ubi8/openjdk-17-runtime
 ENV TZ UTC
 ENV LANG en_US.UTF-8
 
-ARG IT_ROOT_CA_2015
-ARG IT_ROOT_CA_2022
+
+RUN echo ${PWD}
+RUN ls -la
+RUN ls -la certs  
+
+#COPY certs/IT_ROOT_CA_2015 /tmp/ca1.pem
+#COPY certs/IT_ROOT_CA_2022 /tmp/ca2.pem
 
 USER 0
 RUN microdnf install -y gettext wget jq && \
