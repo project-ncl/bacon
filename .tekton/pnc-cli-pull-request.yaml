@@ -206,7 +206,7 @@ spec:
               name: workdir
         steps:
         - name: copy-certs
-          image: busybox
+          image: registry.access.redhat.com/ubi8/openjdk-17
           workingDir: /var/workdir
           script: |
             #!/bin/bash
