@@ -208,26 +208,17 @@ spec:
           script: |
             #!/bin/bash
             set -eu
-            set -o pipefail
+            set -eux
 
-            echo "Listing content of /workspace/certs ...."
-            ls -la /workspace/certs
-
-            echo "Copying to /var/workdir/certs/ ..."
-            mkdir -p /var/workdir/certs
-            cp /workspace/certs/* /var/workdir/certs/
-
-            echo "Copying to /workspace/source/certs/ ..."
             mkdir -p /workspace/source/certs
             cp /workspace/certs/* /workspace/source/certs/
-
             ls -la /workspace/source/certs
 
       workspaces:
         - name: certs
           workspace: certs
         - name: source
-          workspace: workdir 
+          workspace: source 
 
     - name: build-container
       params:
@@ -265,6 +256,9 @@ spec:
         - name: kind
           value: task
         resolver: bundles
+      workspaces:
+        - name: source
+          workspace: source
       when:
       - input: $(tasks.init.results.build)
         operator: in
@@ -488,6 +482,7 @@ spec:
       description: Workspace used as the Docker build context (used by buildah-oci-ta)
     - name: certs
       description: Workspace holding the mounted certificate secret
+    - name: source
       
   taskRunTemplate:
     serviceAccountName: build-pipeline-pnc-cli
@@ -499,6 +494,8 @@ spec:
     secret:
       secretName: it-certificates
   - name: workdir
+    emptyDir: {}
+  - name: source
     emptyDir: {}
 
 status: {}
