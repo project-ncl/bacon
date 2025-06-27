@@ -209,20 +209,9 @@ spec:
         value: $(params.image-expires-after)
       - name: COMMIT_SHA
         value: $(tasks.clone-repository.results.commit)
-      - name: IT_ROOT_CA_2015
-        valueFrom:
-          secretKeyRef:
-            name: it-certificates
-            key: IT_ROOT_CA_2015
-      - name: IT_ROOT_CA_2022
-        valueFrom:
-          secretKeyRef:
-            name: it-certificates
-            key: IT_ROOT_CA_2022
       - name: BUILD_ARGS
         value:
-          - IT_ROOT_CA_2015=$(params.IT_ROOT_CA_2015)
-          - IT_ROOT_CA_2022=$(params.IT_ROOT_CA_2022)
+        - $(params.build-args[*])
       - name: BUILD_ARGS_FILE
         value: $(params.build-args-file)
       - name: SOURCE_ARTIFACT
@@ -240,6 +229,9 @@ spec:
         - name: kind
           value: task
         resolver: bundles
+      workspaces:
+      - name: certs
+        workspace: certs
       when:
       - input: $(tasks.init.results.build)
         operator: in
@@ -459,10 +451,16 @@ spec:
       optional: true
     - name: netrc
       optional: true
+    - name: certs
+      optional: true
   taskRunTemplate:
     serviceAccountName: build-pipeline-pnc-cli
   workspaces:
   - name: git-auth
     secret:
       secretName: '{{ git_auth_secret }}'
+  - name: certs
+    secret:
+      secretName: it-certificates
+
 status: {}
