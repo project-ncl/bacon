@@ -200,10 +200,10 @@ spec:
             emptyDir: {}
         stepTemplate:
           volumeMounts:
-            - mountPath: /shared
-              name: shared
             - mountPath: /var/workdir
               name: workdir
+            - mountPath: /mnt/trusted-ca
+              name: trusted-ca
         steps:
         - name: copy-certs
           image: registry.access.redhat.com/ubi8/openjdk-17
@@ -216,7 +216,6 @@ spec:
             echo ${PWD}
             
             ls -l ${PWD}
-            ls -l /shared
             ls -l /mnt
 
 
