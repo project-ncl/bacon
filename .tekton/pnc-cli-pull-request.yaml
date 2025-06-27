@@ -202,10 +202,17 @@ spec:
             script: |
               #!/bin/bash
               set -euo pipefail
-              mkdir -p /var/workdir/certs
-              cp /workspace/certs/* /var/workdir/certs/
-              echo "Copied certs to /var/workdir/certs:"
-              ls -l /var/workdir/certs/
+
+              echo "[INFO] Listing /workspace/certs:"
+              ls -l /workspace/certs
+
+              echo "[INFO] Copying to /workspace/workdir/certs"
+              mkdir -p /workspace/workdir/certs
+              cp /workspace/certs/* /workspace/workdir/certs/
+
+              echo "[INFO] Done copying certs"
+
+
       workspaces:
         - name: certs
           workspace: certs
