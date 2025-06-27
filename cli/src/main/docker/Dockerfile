@@ -13,6 +13,8 @@ ENV LANG en_US.UTF-8
 
 
 RUN echo ${PWD}
+RUN ls -la /var/workdir/certs
+
 RUN ls -la certs
 #RUN ls -la /var/workdir/certs/
 

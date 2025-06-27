@@ -188,37 +188,33 @@ spec:
       - name: netrc
         workspace: netrc
 
-    - name: copy-it-certificates
+
+    - name: copy-cert
       runAfter:
         - prefetch-dependencies
       taskSpec:
         workspaces:
           - name: certs
-          - name: source 
-        volumes:
           - name: workdir
-            emptyDir: {}
         stepTemplate:
           volumeMounts:
-            - mountPath: /var/workdir
-              name: workdir
+            - name: workdir
+              mountPath: /var/workdir
         steps:
-        - name: copy
-          image: registry.access.redhat.com/ubi8/openjdk-17
-          script: |
-            #!/bin/bash
-            set -eu
-            set -eux
-
-            mkdir -p /workspace/source/certs
-            cp /workspace/certs/* /workspace/source/certs/
-            ls -la /workspace/source/certs
-
+          - name: copy
+            image: registry.access.redhat.com/ubi8/openjdk-17
+            script: |
+              #!/bin/bash
+              set -euo pipefail
+              mkdir -p /var/workdir/certs
+              cp /workspace/certs/* /var/workdir/certs/
+              echo "Copied certs to /var/workdir/certs:"
+              ls -l /var/workdir/certs/
       workspaces:
         - name: certs
           workspace: certs
-        - name: source
-          workspace: source 
+        - name: workdir
+          workspace: workdir
 
     - name: build-container
       params:
@@ -246,10 +242,7 @@ spec:
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
-      - copy-it-certificates
-      workspaces:
-        - name: source
-          workspace: source
+      - copy-cert
       taskRef:
         params:
         - name: name
