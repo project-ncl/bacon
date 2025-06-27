@@ -215,21 +215,18 @@ spec:
             
             echo "Listing content of /workspace/certs ...."
             ls -la /workspace/certs
-            ls -la /workdir/certs
-
 
             echo "Listing content of workdir ...."
             ls -la /var/workdir/
 
-            
-            ##cat /workspace/certs/IT_ROOT_CA_2015
-            ##echo -n "\n"
-            ##cat /workspace/certs/IT_ROOT_CA_2022
+            cat /workspace/certs/IT_ROOT_CA_2015
+            echo -n "\n"
+            cat /workspace/certs/IT_ROOT_CA_2022
 
-            ##echo "\nCopying certs to sourtce workspace ...."
-            ##mkdir -p /workspace/source/certs
-            ##cp /workspace/certs/* /workspace/source/certs/
-            ##ls -la /workspace/source/certs/
+            echo "\nCopying certs to sourtce workspace ...."
+            mkdir -p /var/workdir/certs/
+            cp /workspace/certs/* /var/workdir/certs/
+            ls -la /var/workdir/certs/
 
       workspaces:
         - name: certs
