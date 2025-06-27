@@ -227,7 +227,7 @@ spec:
       - name: DOCKERFILE
         value: $(params.dockerfile)
       - name: CONTEXT
-        value: $(params.path-context)
+        value: .
       - name: HERMETIC
         value: $(params.hermetic)
       - name: PREFETCH_INPUT
@@ -247,6 +247,9 @@ spec:
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
       - copy-it-certificates
+      workspaces:
+        - name: source
+          workspace: source
       taskRef:
         params:
         - name: name
@@ -256,9 +259,7 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-      workspaces:
-        - name: source
-          workspace: source
+
       when:
       - input: $(tasks.init.results.build)
         operator: in
