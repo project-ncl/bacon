@@ -212,11 +212,14 @@ spec:
             echo ${PWD}
             ls -la ${PWD}
 
-            ##echo "Listing content of /workdir/ ...."
-            ##ls -la /workdir/
+            echo "Listing content of /workdir/ ...."
+            ls -la /workdir/
+            ls -la workdir/
             
-            ##echo "Listing content of /workspace/certs ...."
-            ##ls -la /workspace/certs
+            echo "Listing content of /workspace/certs ...."
+            ls -la /workspace/certs
+            ls -la /workdir/certs
+            
             ##cat /workspace/certs/IT_ROOT_CA_2015
             ##echo -n "\n"
             ##cat /workspace/certs/IT_ROOT_CA_2022
