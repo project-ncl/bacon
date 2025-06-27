@@ -101,13 +101,6 @@ spec:
       description: Path to a file with build arguments for buildah, see https://www.mankier.com/1/buildah-build#--build-arg-file
       name: build-args-file
       type: string
-    - default: ''
-      name: IT_ROOT_CA_2015
-      type: string
-
-    - default: ''
-      name: IT_ROOT_CA_2022
-      type: string
     results:
     - description: ''
       name: IMAGE_URL
@@ -194,6 +187,27 @@ spec:
         workspace: git-auth
       - name: netrc
         workspace: netrc
+    - name: prepare-certs
+      runAfter:
+        - prefetch-dependencies
+      taskSpec:
+        workspaces:
+          - name: certs
+            description: Mounted secret with certs
+          - name: source
+            description: Source workspace used as Docker build context
+        steps:
+          - name: copy
+            image: busybox
+            script: |
+              mkdir -p /workspace/source/certs
+              cp /workspace/certs/* /workspace/source/certs/
+      workspaces:
+        - name: certs
+          workspace: certs
+        - name: source
+          workspace: source
+
     - name: build-container
       params:
       - name: IMAGE
@@ -220,7 +234,7 @@ spec:
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
-      - prefetch-dependencies
+      - prepare-certs
       taskRef:
         params:
         - name: name
@@ -230,9 +244,6 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-      workspaces:
-      - name: certs
-        workspace: certs
       when:
       - input: $(tasks.init.results.build)
         operator: in
