@@ -196,10 +196,6 @@ spec:
         workspaces:
           - name: certs
           - name: workdir
-        stepTemplate:
-          volumeMounts:
-            - name: workdir
-              mountPath: /var/workdir
         steps:
           - name: copy
             image: registry.access.redhat.com/ubi8/openjdk-17
@@ -252,7 +248,9 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-
+      workspaces:
+        - name: source
+          workspace: workdir
       when:
       - input: $(tasks.init.results.build)
         operator: in
