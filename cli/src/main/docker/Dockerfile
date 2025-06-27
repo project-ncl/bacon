@@ -14,6 +14,7 @@ ENV LANG en_US.UTF-8
 
 RUN echo ${PWD}
 RUN ls -la
+RUN ls -la /workspace
 RUN ls -la certs  
 
 #COPY certs/IT_ROOT_CA_2015 /tmp/ca1.pem

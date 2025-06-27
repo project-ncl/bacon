@@ -251,9 +251,6 @@ spec:
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
       - copy-cert
-      workspaces:
-        - name: source
-          workspace: source
       taskRef:
         params:
         - name: name
