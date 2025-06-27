@@ -191,22 +191,16 @@ spec:
       runAfter:
         - prefetch-dependencies
       taskSpec:
-        workspaces:
-          - name: certs
-            description: Mounted secret with certs
-          - name: source
-            description: Source workspace used as Docker build context
         steps:
           - name: copy
             image: busybox
             script: |
+              #!/bin/bash
+              echo $PWD
+              ls -la 
+              
               mkdir -p /workspace/source/certs
               cp /workspace/certs/* /workspace/source/certs/
-      workspaces:
-        - name: certs
-          workspace: certs
-        - name: source
-          workspace: source
 
     - name: build-container
       params:
@@ -234,7 +228,7 @@ spec:
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
-      - prepare-certs
+        - prefetch-dependencies
       taskRef:
         params:
         - name: name
