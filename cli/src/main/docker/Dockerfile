@@ -13,8 +13,8 @@ ENV LANG en_US.UTF-8
 
 
 RUN echo ${PWD}
-RUN ls -la /var/workdir
-RUN ls -la /var/workdir/certs/
+RUN ls -la certs
+#RUN ls -la /var/workdir/certs/
 
 
 #COPY certs/IT_ROOT_CA_2015 /tmp/ca1.pem
