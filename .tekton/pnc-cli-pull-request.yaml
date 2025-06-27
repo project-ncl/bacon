@@ -215,8 +215,7 @@ spec:
             echo -e "\n=== Build config ==="
             echo ${PWD}
             
-            ls -l /var/workdir/source
-            ls -l /var/workdir/source/*/
+            ls -l ${PWD}
             ls -l /var/shared
             ls -l /var/shared/*/
 
