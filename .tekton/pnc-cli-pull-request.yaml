@@ -188,41 +188,47 @@ spec:
       - name: netrc
         workspace: netrc
 
-
-    - name: copy-cert
+    - name: copy-it-certificates
       runAfter:
         - prefetch-dependencies
       taskSpec:
         workspaces:
           - name: certs
-          - name: source
+        volumes:
+          - name: workdir
+            emptyDir: {}
+        stepTemplate:
+          volumeMounts:
+            - mountPath: /var/workdir
+              name: workdir
         steps:
-          - name: copy
-            image: registry.access.redhat.com/ubi8/openjdk-17
-            script: |
-              #!/bin/bash
-              set -eu
-              set -o pipefail
+        - name: copy
+          image: registry.access.redhat.com/ubi8/openjdk-17
+          script: |
+            #!/bin/bash
+            set -eu
+            set -o pipefail
 
-              echo "Listing content of /workspace/ ...."
-              ls -la /workspace/
+            echo ${PWD}
+            ls -la ${PWD}
 
-              echo "Listing content of /workspace/certs ...."
-              ls -la /workspace/certs
-              cat /workspace/certs/IT_ROOT_CA_2015
-              echo -n "\n"
-              cat /workspace/certs/IT_ROOT_CA_2022
+            ##echo "Listing content of /workdir/ ...."
+            ##ls -la /workdir/
+            
+            ##echo "Listing content of /workspace/certs ...."
+            ##ls -la /workspace/certs
+            ##cat /workspace/certs/IT_ROOT_CA_2015
+            ##echo -n "\n"
+            ##cat /workspace/certs/IT_ROOT_CA_2022
 
-              echo "\nCopying certs to sourtce workspace ...."
-              mkdir -p /workspace/source/certs
-              cp /workspace/certs/* /workspace/source/certs/
-              ls -la /workspace/source/certs/
+            ##echo "\nCopying certs to sourtce workspace ...."
+            ##mkdir -p /workspace/source/certs
+            ##cp /workspace/certs/* /workspace/source/certs/
+            ##ls -la /workspace/source/certs/
 
       workspaces:
         - name: certs
           workspace: certs
-        - name: source
-          workspace: source
 
     - name: build-container
       params:
@@ -251,6 +257,9 @@ spec:
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
       - copy-cert
+      workspaces:
+        - name: workdir
+          workspace: workdir
       taskRef:
         params:
         - name: name
@@ -479,7 +488,7 @@ spec:
       optional: true
     - name: netrc
       optional: true
-    - name: source
+    - name: workdir
       description: Workspace used as the Docker build context (used by buildah-oci-ta)
     - name: certs
       description: Workspace holding the mounted certificate secret
@@ -493,7 +502,7 @@ spec:
   - name: certs
     secret:
       secretName: it-certificates
-  - name: source
+  - name: workdir
     emptyDir: {}
 
 status: {}
