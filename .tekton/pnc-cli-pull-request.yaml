@@ -189,34 +189,35 @@ spec:
         workspace: netrc
 
 
-    - name: prepare-certs
-      runAfter:
-        - prefetch-dependencies
-      taskSpec:
-        volumes:
-          - name: shared
-            emptyDir: {}
-          - name: workdir
-            emptyDir: {}
-        stepTemplate:
-          volumeMounts:
-            - mountPath: /var/workdir
-              name: workdir
-            - mountPath: /mnt/trusted-ca
-              name: trusted-ca
-        steps:
-        - name: copy-certs
-          image: registry.access.redhat.com/ubi8/openjdk-17
-          workingDir: /var/workdir
-          script: |
-            #!/bin/bash
-            set -e
+      - name: copy-cert
+        runAfter:
+          - prefetch-dependencies
+        taskSpec:
+          workspaces:
+            - name: certs
+            - name: source
+          steps:
+            - name: copy
+              image: registry.access.redhat.com/ubi8/openjdk-17
+              script: |
+                mkdir -p /workspace/source/certs
+                ls -la /workspace/
+                ls -la /workspace/certs
+                cp /workspace/certs/* /workspace/source/certs/
+                ls -la /workspace/source/certs/
+        workspaces:
+          - name: certs
+            workspace: certs
+          - name: source
+            workspace: source
 
-            echo -e "\n=== Build config ==="
-            echo ${PWD}
-            
-            ls -l ${PWD}
-            ls -l /mnt
+
+
+
+
+
+
+
 
 
 
@@ -478,8 +479,6 @@ spec:
       optional: true
     - name: netrc
       optional: true
-    - name: certs
-      optional: true
   taskRunTemplate:
     serviceAccountName: build-pipeline-pnc-cli
   workspaces:
@@ -489,5 +488,7 @@ spec:
   - name: certs
     secret:
       secretName: it-certificates
-
+  - name: source
+    emptyDir: {}
 status: {}
+
