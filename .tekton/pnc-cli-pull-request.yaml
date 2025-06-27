@@ -189,27 +189,27 @@ spec:
         workspace: netrc
 
 
-      - name: copy-cert
-        runAfter:
-          - prefetch-dependencies
-        taskSpec:
-          workspaces:
-            - name: certs
-            - name: source
-          steps:
-            - name: copy
-              image: registry.access.redhat.com/ubi8/openjdk-17
-              script: |
-                mkdir -p /workspace/source/certs
-                ls -la /workspace/
-                ls -la /workspace/certs
-                cp /workspace/certs/* /workspace/source/certs/
-                ls -la /workspace/source/certs/
+    - name: copy-cert
+      runAfter:
+        - prefetch-dependencies
+      taskSpec:
         workspaces:
           - name: certs
-            workspace: certs
           - name: source
-            workspace: source
+        steps:
+          - name: copy
+            image: registry.access.redhat.com/ubi8/openjdk-17
+            script: |
+              mkdir -p /workspace/source/certs
+              ls -la /workspace/
+              ls -la /workspace/certs
+              cp /workspace/certs/* /workspace/source/certs/
+              ls -la /workspace/source/certs/
+      workspaces:
+        - name: certs
+          workspace: certs
+        - name: source
+          workspace: source
 
 
 
