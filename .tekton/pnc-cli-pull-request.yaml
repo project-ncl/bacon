@@ -233,9 +233,9 @@ spec:
                 exit 1
               fi
 
-              cat /tekton/results/CERT_FILE_2015_B64
+              cat $TKN_RESULT_CERT_2015
               echo -e "\n"
-              cat /tekton/results/CERT_FILE_2022_B64
+              cat $TKN_RESULT_CERT_2022
 
               echo "[INFO] Done copying certs"
       workspaces:
