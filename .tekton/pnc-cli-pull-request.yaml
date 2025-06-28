@@ -188,23 +188,50 @@ spec:
       - name: netrc
         workspace: netrc
 
-    - name: copy-cert
+    - name: copy-certificates
       runAfter:
         - prefetch-dependencies
       taskSpec:
         workspaces:
           - name: certs
+        results:
+          - name: cert2015
+            description: Base64-encoded 2015 root CA certificate
+          - name: cert2022
+            description: Base64-encoded 2022 root CA certificate
         steps:
-          - name: copy
+          - name: extract-certs
             image: registry.access.redhat.com/ubi8/openjdk-17
             script: |
               #!/bin/bash
               set -euo pipefail
 
-              echo "[INFO] Encoding certs to base64 and writing them to results ..."
+              # File paths
+              CERT_2015="/workspace/certs/IT_ROOT_CA_2015"
+              CERT_2022="/workspace/certs/IT_ROOT_CA_2022"
 
-              base64 -w0 /workspace/certs/IT_ROOT_CA_2015 > /tekton/results/CERT_FILE_2015_B64
-              base64 -w0 /workspace/certs/IT_ROOT_CA_2022 > /tekton/results/CERT_FILE_2022_B64
+              # Output result paths
+              TKN_RESULT_CERT_2015="/tekton/results/cert2015"
+              TKN_RESULT_CERT_2022="/tekton/results/cert2022"
+ 
+              echo "[INFO] Encoding certs to base64 and writing to results ..."
+
+              # Check and encode 2015 cert
+              if [[ -f "$CERT_2015" ]]; then
+                echo "[INFO] Encoding 2015 cert to result"
+                base64 -w0 "$CERT_2015" > "$TKN_RESULT_CERT_2015"
+              else
+                echo "[ERROR] Missing 2015 cert at $CERT_2015" >&2
+                exit 1
+              fi
+              # Check and encode 2022 cert
+              if [[ -f "$CERT_2022" ]]; then
+                echo "[INFO] Encoding 2022 cert to result"
+                base64 -w0 "$CERT_2022" > "$TKN_RESULT_CERT_2022"
+              else
+                echo "[ERROR] Missing 2022 cert at $CERT_2022" >&2
+                exit 1
+              fi
 
               cat /tekton/results/CERT_FILE_2015_B64
               echo -e "\n"
@@ -214,6 +241,7 @@ spec:
       workspaces:
         - name: certs
           workspace: certs
+
 
     - name: build-container
       params:
