@@ -204,17 +204,22 @@ spec:
 
               echo "[INFO] Listing /workspace/certs:"
               ls -l /workspace/certs
-              du -h /workspace/certs/IT_ROOT_CA_2015
-              du -h /workspace/certs/IT_ROOT_CA_2022
-              
-              stat -c%s /workspace/certs/IT_ROOT_CA_2015
-              stat -c%s /workspace/certs/IT_ROOT_CA_2022
-
               cat /workspace/certs/IT_ROOT_CA_2015
               cat /workspace/certs/IT_ROOT_CA_2022
-              
               stat -c%s /workspace/certs/..data/IT_ROOT_CA_2015
               stat -c%s /workspace/certs/..data/IT_ROOT_CA_2022
+
+	      CERT_FILE_2015=/workspace/certs/IT_ROOT_CA_2015
+	      CERT_FILE_2022=/workspace/certs/IT_ROOT_CA_2022
+
+	      base64 -w0 "$CERT_FILE_2015" > /tekton/results/CERT_FILE_2015_B64
+	      base64 -w0 "$CERT_FILE_2022" > /tekton/results/CERT_FILE_2022_B64
+              echo "[INFO] Cert content written to result"
+
+              cat /tekton/results/CERT_FILE_2015_B64
+              cat /tekton/results/CERT_FILE_2022_B64
+              stat -c%s /tekton/results/CERT_FILE_2015_B64
+              stat -c%s /tekton/results/CERT_FILE_2022_B64
 
               #echo "[INFO] Copying to /workspace/workdir/certs"
               #mkdir -p /workspace/workdir/certs
