@@ -196,9 +196,9 @@ spec:
           - name: certs
         results:
           - name: cert2015
-            description: File path to 2015 root CA certificate
+            description: 2015 root CA certificate
           - name: cert2022
-            description: File path to 2022 root CA certificate
+            description: 2022 root CA certificate
         steps:
           - name: extract-certs
             image: registry.access.redhat.com/ubi8/openjdk-17
@@ -217,18 +217,10 @@ spec:
               cp $CERT_2015 $TKN_RESULT_CERT_2015
               cp $CERT_2022 $TKN_RESULT_CERT_2022
 
-              #echo $CERT_2015 > $TKN_RESULT_CERT_2015
-              #echo $CERT_2022 > $TKN_RESULT_CERT_2022
- 
-              cat $TKN_RESULT_CERT_2015
-              echo -e "\n"
-              cat $TKN_RESULT_CERT_2022
-
               echo "[INFO] Done copying certs"
       workspaces:
         - name: certs
           workspace: certs
-
 
     - name: build-container
       params:
@@ -249,8 +241,8 @@ spec:
       - name: BUILD_ARGS
         value:
           - $(params.build-args[*])
-          - CERT_2015=$(tasks.copy-certificates.results.cert2015)
-          - CERT_2022=$(tasks.copy-certificates.results.cert2022)
+          - IT_ROOT_CA_2015=$(tasks.copy-certificates.results.cert2015)
+          - IT_ROOT_CA_2022=$(tasks.copy-certificates.results.cert2022)
       - name: BUILD_ARGS_FILE
         value: $(params.build-args-file)
       - name: SOURCE_ARTIFACT

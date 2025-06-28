@@ -12,11 +12,8 @@ ENV TZ UTC
 ENV LANG en_US.UTF-8
 
 
-ARG CERT_2015
-ARG CERT_2022
-
-RUN echo "$CERT_2015"
-RUN echo "$CERT_2022"
+ARG IT_ROOT_CA_2015
+ARG IT_ROOT_CA_2022
 
 USER 0
 RUN microdnf install -y gettext wget jq && \
@@ -28,7 +25,6 @@ RUN microdnf install -y gettext wget jq && \
 # Install the certs
 RUN if [ -n "$IT_ROOT_CA_2015" ]; then \
       echo "$IT_ROOT_CA_2015" && \
-      #echo "$IT_ROOT_CA_2015" | base64 -d > /tmp/IT_ROOT_CA_2015.pem && \
       echo "$IT_ROOT_CA_2015" > /tmp/IT_ROOT_CA_2015.pem && \
       keytool -importcert -trustcacerts \
         -keystore "$JAVA_HOME/lib/security/cacerts" \
@@ -41,7 +37,6 @@ RUN if [ -n "$IT_ROOT_CA_2015" ]; then \
 
 RUN if [ -n "$IT_ROOT_CA_2022" ]; then \
       echo "$IT_ROOT_CA_2022" && \
-      #echo "$IT_ROOT_CA_2022" | base64 -d > /tmp/IT_ROOT_CA_2022.pem && \
       echo "$IT_ROOT_CA_2022" > /tmp/IT_ROOT_CA_2022.pem && \
       keytool -importcert -trustcacerts \
         -keystore "$JAVA_HOME/lib/security/cacerts" \
