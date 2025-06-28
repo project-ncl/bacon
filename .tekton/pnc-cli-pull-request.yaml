@@ -188,7 +188,6 @@ spec:
       - name: netrc
         workspace: netrc
 
-
     - name: copy-cert
       runAfter:
         - prefetch-dependencies
@@ -202,31 +201,16 @@ spec:
               #!/bin/bash
               set -euo pipefail
 
-              echo "[INFO] Listing /workspace/certs:"
-              ls -l /workspace/certs
-              cat /workspace/certs/IT_ROOT_CA_2015
-              cat /workspace/certs/IT_ROOT_CA_2022
-              stat -c%s /workspace/certs/..data/IT_ROOT_CA_2015
-              stat -c%s /workspace/certs/..data/IT_ROOT_CA_2022
+              echo "[INFO] Encoding certs to base64 and writing them to results ..."
 
-              CERT_FILE_2015=/workspace/certs/IT_ROOT_CA_2015
-              CERT_FILE_2022=/workspace/certs/IT_ROOT_CA_2022
-
-              base64 -w0 "$CERT_FILE_2015" > /tekton/results/CERT_FILE_2015_B64
-              base64 -w0 "$CERT_FILE_2022" > /tekton/results/CERT_FILE_2022_B64
-              echo "[INFO] Cert content written to result"
+              base64 -w0 /workspace/certs/IT_ROOT_CA_2015 > /tekton/results/CERT_FILE_2015_B64
+              base64 -w0 /workspace/certs/IT_ROOT_CA_2022 > /tekton/results/CERT_FILE_2022_B64
 
               cat /tekton/results/CERT_FILE_2015_B64
+              echo -e "\n"
               cat /tekton/results/CERT_FILE_2022_B64
-              stat -c%s /tekton/results/CERT_FILE_2015_B64
-              stat -c%s /tekton/results/CERT_FILE_2022_B64
 
-              #echo "[INFO] Copying to /workspace/workdir/certs"
-              #mkdir -p /workspace/workdir/certs
-              #cp /workspace/certs/* /workspace/workdir/certs/
-
-              #echo "[INFO] Done copying certs"
-
+              echo "[INFO] Done copying certs"
 
       workspaces:
         - name: certs
