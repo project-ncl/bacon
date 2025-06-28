@@ -210,11 +210,11 @@ spec:
               stat -c%s /workspace/certs/IT_ROOT_CA_2015
               stat -c%s /workspace/certs/IT_ROOT_CA_2022
 
-              cat /workspace/certs/IT_ROOT_CA_2022
+              cat /workspace/certs/IT_ROOT_CA_2015
               cat /workspace/certs/IT_ROOT_CA_2022
               
               stat -c%s /workspace/certs/..data/IT_ROOT_CA_2015
-              stat -c%s /workspace/certs/..data/IT_ROOT_CA_2015
+              stat -c%s /workspace/certs/..data/IT_ROOT_CA_2022
 
               #echo "[INFO] Copying to /workspace/workdir/certs"
               #mkdir -p /workspace/workdir/certs
