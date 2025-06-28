@@ -24,22 +24,19 @@ RUN microdnf install -y gettext wget jq && \
 
 # Install the certs
 RUN if [ -n "$IT_ROOT_CA_2015" ]; then \
-      echo "$IT_ROOT_CA_2015" && \
       echo "$IT_ROOT_CA_2015" > /tmp/IT_ROOT_CA_2015.pem && \
       keytool -importcert -trustcacerts \
-        -keystore "$JAVA_HOME/lib/security/cacerts" \
+        -cacerts \
         -storepass changeit -noprompt \
         -alias 2015-IT-Root-CA \
         -file /tmp/IT_ROOT_CA_2015.pem && \
       rm /tmp/IT_ROOT_CA_2015.pem; \
     fi
 
-
 RUN if [ -n "$IT_ROOT_CA_2022" ]; then \
-      echo "$IT_ROOT_CA_2022" && \
       echo "$IT_ROOT_CA_2022" > /tmp/IT_ROOT_CA_2022.pem && \
       keytool -importcert -trustcacerts \
-        -keystore "$JAVA_HOME/lib/security/cacerts" \
+        -cacerts \
         -storepass changeit -noprompt \
         -alias 2022-IT-Root-CA \
         -file /tmp/IT_ROOT_CA_2022.pem && \
