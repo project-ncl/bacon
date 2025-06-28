@@ -12,11 +12,11 @@ ENV TZ UTC
 ENV LANG en_US.UTF-8
 
 
-ARG CERT_PATH_2015
-ARG CERT_PATH_2022
+ARG CERT_2015
+ARG CERT_2022
 
-RUN echo "$CERT_PATH_2015"
-RUN echo "$CERT_PATH_2022"
+RUN echo "$CERT_2015"
+RUN echo "$CERT_2022"
 
 USER 0
 RUN microdnf install -y gettext wget jq && \
