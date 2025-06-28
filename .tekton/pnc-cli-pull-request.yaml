@@ -195,10 +195,10 @@ spec:
         workspaces:
           - name: certs
         results:
-          - name: cert2015
-            description: Base64-encoded 2015 root CA certificate
-          - name: cert2022
-            description: Base64-encoded 2022 root CA certificate
+          - name: cert2015-path
+            description: File path to 2015 root CA certificate
+          - name: cert2022-path
+            description: File path to 2022 root CA certificate
         steps:
           - name: extract-certs
             image: registry.access.redhat.com/ubi8/openjdk-17
@@ -211,28 +211,12 @@ spec:
               CERT_2022="/workspace/certs/IT_ROOT_CA_2022"
 
               # Output result paths
-              TKN_RESULT_CERT_2015="/tekton/results/cert2015"
-              TKN_RESULT_CERT_2022="/tekton/results/cert2022"
+              TKN_RESULT_CERT_2015="/tekton/results/cert2015-path"
+              TKN_RESULT_CERT_2022="/tekton/results/cert2022-path"
+
+              echo $CERT_2015 > $TKN_RESULT_CERT_2015
+              echo $CERT_2022 > $TKN_RESULT_CERT_2022
  
-              echo "[INFO] Encoding certs to base64 and writing to results ..."
-
-              # Check and encode 2015 cert
-              if [[ -f "$CERT_2015" ]]; then
-                echo "[INFO] Encoding 2015 cert to result"
-                base64 -w0 "$CERT_2015" > "$TKN_RESULT_CERT_2015"
-              else
-                echo "[ERROR] Missing 2015 cert at $CERT_2015" >&2
-                exit 1
-              fi
-              # Check and encode 2022 cert
-              if [[ -f "$CERT_2022" ]]; then
-                echo "[INFO] Encoding 2022 cert to result"
-                base64 -w0 "$CERT_2022" > "$TKN_RESULT_CERT_2022"
-              else
-                echo "[ERROR] Missing 2022 cert at $CERT_2022" >&2
-                exit 1
-              fi
-
               cat $TKN_RESULT_CERT_2015
               echo -e "\n"
               cat $TKN_RESULT_CERT_2022
@@ -262,8 +246,8 @@ spec:
       - name: BUILD_ARGS
         value:
           - $(params.build-args[*])
-          - CERT_FILE_2015_B64=$(tasks.copy-certificates.results.cert2015)
-          - CERT_FILE_2022_B64=$(tasks.copy-certificates.results.cert2022)
+          - CERT_PATH_2015=$(tasks.copy-certificates.results.cert2015-path)
+          - CERT_PATH_2022=$(tasks.copy-certificates.results.cert2022-path)
       - name: BUILD_ARGS_FILE
         value: $(params.build-args-file)
       - name: SOURCE_ARTIFACT
