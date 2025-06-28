@@ -195,7 +195,6 @@ spec:
       taskSpec:
         workspaces:
           - name: certs
-          - name: workdir
         steps:
           - name: copy
             image: registry.access.redhat.com/ubi8/openjdk-17
@@ -206,18 +205,16 @@ spec:
               echo "[INFO] Listing /workspace/certs:"
               ls -l /workspace/certs
 
-              echo "[INFO] Copying to /workspace/workdir/certs"
-              mkdir -p /workspace/workdir/certs
-              cp /workspace/certs/* /workspace/workdir/certs/
+              #echo "[INFO] Copying to /workspace/workdir/certs"
+              #mkdir -p /workspace/workdir/certs
+              #cp /workspace/certs/* /workspace/workdir/certs/
 
-              echo "[INFO] Done copying certs"
+              #echo "[INFO] Done copying certs"
 
 
       workspaces:
         - name: certs
           workspace: certs
-        - name: workdir
-          workspace: workdir
 
     - name: build-container
       params:
@@ -226,7 +223,7 @@ spec:
       - name: DOCKERFILE
         value: $(params.dockerfile)
       - name: CONTEXT
-        value: .
+        value: $(params.path-context)
       - name: HERMETIC
         value: $(params.hermetic)
       - name: PREFETCH_INPUT
@@ -255,9 +252,6 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-      workspaces:
-        - name: source
-          workspace: workdir
       when:
       - input: $(tasks.init.results.build)
         operator: in
@@ -477,11 +471,8 @@ spec:
       optional: true
     - name: netrc
       optional: true
-    - name: workdir
-      description: Workspace used as the Docker build context (used by buildah-oci-ta)
     - name: certs
       description: Workspace holding the mounted certificate secret
-    - name: source
       
   taskRunTemplate:
     serviceAccountName: build-pipeline-pnc-cli
@@ -492,10 +483,6 @@ spec:
   - name: certs
     secret:
       secretName: it-certificates
-  - name: workdir
-    emptyDir: {}
-  - name: source
-    emptyDir: {}
 
 status: {}
 
