@@ -12,15 +12,11 @@ ENV TZ UTC
 ENV LANG en_US.UTF-8
 
 
-RUN echo ${PWD}
-RUN ls -la /var/workdir/certs
+ARG CERT_FILE_2015_B64
+ARG CERT_FILE_2022_B64
 
-RUN ls -la certs
-#RUN ls -la /var/workdir/certs/
-
-
-#COPY certs/IT_ROOT_CA_2015 /tmp/ca1.pem
-#COPY certs/IT_ROOT_CA_2022 /tmp/ca2.pem
+echo "$CERT_FILE_2015_B64"
+echo "$CERT_FILE_2022_B64"
 
 USER 0
 RUN microdnf install -y gettext wget jq && \
