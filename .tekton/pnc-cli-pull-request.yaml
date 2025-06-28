@@ -211,7 +211,6 @@ spec:
               cat /tekton/results/CERT_FILE_2022_B64
 
               echo "[INFO] Done copying certs"
-
       workspaces:
         - name: certs
           workspace: certs
