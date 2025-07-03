@@ -815,14 +815,6 @@
             <id>jboss-nexus</id>
             <url>https://repository.jboss.org/nexus/content/groups/public/</url>
         </repository>
-
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>Nexus Staging</id>
-            <url>https://oss.sonatype.org/content/groups/staging</url>
-        </repository>
     </repositories>
 
     <build>
@@ -1003,18 +995,16 @@
                     <tagNameFormat>@{project.version}${tagSuffix}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <releaseProfiles>release</releaseProfiles>
-                    <stagingRepository>https://oss.sonatype.org/service/local/staging/deploy/maven2/</stagingRepository>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    <!-- as defined in your settings.xml -->
+                    <publishingServerId>central-publisher</publishingServerId>
                 </configuration>
             </plugin>
             <plugin>

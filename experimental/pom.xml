@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>experimental</artifactId>
+    <name>experimental</name>
 
     <dependencies>
         <dependency>

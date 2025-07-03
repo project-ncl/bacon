@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>auth</artifactId>
+    <name>auth</name>
 
     <dependencies>
         <dependency>

@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>pig</artifactId>
+    <name>pig</name>
 
     <properties>
         <excludeTestTags>remote-test</excludeTestTags>
