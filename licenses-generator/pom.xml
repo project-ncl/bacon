@@ -23,6 +23,7 @@
         <version>3.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>licenses-generator</artifactId>
+    <name>licenses-generator</name>
 
     <description>Licenses Generator to gather dependency licenses and generate licenses.xml|html files</description>
 

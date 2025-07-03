@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>config</artifactId>
+    <name>config</name>
 
     <dependencies>
 

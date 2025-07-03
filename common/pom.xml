@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>common</artifactId>
+    <name>common</name>
 
     <dependencies>
         <dependency>

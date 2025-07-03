@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>da</artifactId>
+    <name>da</name>
 
     <dependencies>
         <dependency>

@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>cli</artifactId>
+    <name>cli</name>
 
     <dependencies>
         <dependency>

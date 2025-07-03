@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>pnc</artifactId>
+    <name>pnc</name>
 
     <dependencies>
         <dependency>

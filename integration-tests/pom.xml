@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>integration-tests</artifactId>
+    <name>integration-tests</name>
 
     <properties>
         <keycloak-realm>example</keycloak-realm>
