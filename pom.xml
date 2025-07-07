@@ -84,7 +84,7 @@
         <enforcer.plugin.version>3.5.0</enforcer.plugin.version>
         <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
-        <jackson.version>2.19.0</jackson.version>
+        <jackson.version>2.19.1</jackson.version>
         <jaxb.version>4.0.4</jaxb.version>
         <jdk.max.version>17</jdk.max.version>
 
