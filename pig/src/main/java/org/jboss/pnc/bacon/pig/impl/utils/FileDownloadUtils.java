@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
 
 import javax.ws.rs.NotFoundException;
 
@@ -58,12 +59,36 @@ public class FileDownloadUtils {
             .setSocketTimeout(READ_TIMEOUT)
             .build();
 
+    public static final String FILE_CACHE_LOCATION = System.getProperty("user.home") + File.separator + ".cache"
+            + File.separator + "pnc-bacon" + File.separator + "pnc-bacon-artifact-cache.db";
+    private static final FileCache FILE_CACHE = new FileCache(Path.of(FILE_CACHE_LOCATION));
+
     public static void downloadTo(URI downloadUrl, File targetPath) {
-        log.debug("Downloading {} to {}", downloadUrl, targetPath);
-        doDownload(downloadUrl, targetPath, attempts);
+        downloadTo(downloadUrl, targetPath, false);
     }
 
-    private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft) {
+    public static void downloadTo(URI downloadUrl, File targetPath, boolean cache) {
+
+        if (cache) {
+            boolean isCached = FILE_CACHE.copyTo(downloadUrl.toString(), targetPath);
+            if (isCached) {
+                log.info("Retrieved {} from cache and put to {}", downloadUrl, targetPath);
+                // no need to download anything, file retrieved from cache
+                return;
+            }
+        }
+
+        log.debug("Downloading {} to {}", downloadUrl, targetPath);
+        doDownload(downloadUrl, targetPath, attempts, cache);
+
+        if (cache) {
+            log.debug("Writing content of {} to cache!", targetPath);
+            FILE_CACHE.put(downloadUrl.toString(), targetPath);
+        }
+    }
+
+    private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft, boolean cache) {
+
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
             downloadWithClient(httpClient, downloadUrl, targetPath);
         } catch (NotFoundException nfe) {
@@ -80,7 +105,7 @@ public class FileDownloadUtils {
                 int sleepTimeInSeconds = (int) Math.ceil(Math.pow(30, (double) 1 / attemptsLeft));
                 log.debug("Sleeping for : {}", sleepTimeInSeconds);
                 SleepUtils.sleep(sleepTimeInSeconds);
-                doDownload(downloadUrl, targetPath, attemptsLeft);
+                doDownload(downloadUrl, targetPath, attemptsLeft, cache);
             }
         }
     }
