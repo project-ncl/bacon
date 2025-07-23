@@ -58,6 +58,7 @@ public interface ReportsApi {
     @Path("/built")
     Set<BuiltReport> builtReport(BuiltReportRequest builtReportRequest);
 
+    @Deprecated() //use /lookup/maven endpoint instead
     @POST
     @Path("/lookup/gavs")
     List<LookupReport> lookupGav(LookupGAVsRequest gavRequest);

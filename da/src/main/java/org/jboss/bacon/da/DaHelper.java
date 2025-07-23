@@ -29,7 +29,9 @@ import org.jboss.bacon.da.rest.endpoint.ReportsApi;
 import org.jboss.da.listings.model.rest.RestArtifact;
 import org.jboss.da.lookup.model.MavenLatestResult;
 import org.jboss.da.lookup.model.MavenLookupResult;
+import org.jboss.da.lookup.model.MavenVersionsResult;
 import org.jboss.da.lookup.model.NPMLookupResult;
+import org.jboss.da.lookup.model.NPMVersionsResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
 import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
@@ -241,6 +243,30 @@ public class DaHelper {
     }
 
     /**
+     * Based on the order in the gavSet, order the 'result' the same way based on the GAV, and return as a list
+     *
+     * @param gavSet order of gav
+     * @param result set of result to order
+     *
+     * @return list of the ordered result
+     */
+    public static List<MavenVersionsResult> orderedMavenVersionsResult(
+            Iterable<GAV> gavSet,
+            Set<MavenVersionsResult> result) {
+
+        Map<GAV, MavenVersionsResult> gavToMavenVersionsResult = result.stream()
+                .collect(Collectors.toMap(MavenVersionsResult::getGav, x -> x));
+
+        List<MavenVersionsResult> ordered = new ArrayList<>();
+
+        for (GAV gav : gavSet) {
+            ordered.add(gavToMavenVersionsResult.get(gav));
+        }
+
+        return ordered;
+    }
+
+    /**
      * Based on the order in the npmPackageSet, order the 'result' the same way based on the npm package, and return as
      * a list
      *
@@ -260,6 +286,31 @@ public class DaHelper {
 
         for (NPMPackage npmPackage : npmPackageSet) {
             ordered.add(gavToNPMLookupResult.get(npmPackage));
+        }
+
+        return ordered;
+    }
+
+    /**
+     * Based on the order in the npmPackageSet, order the 'result' the same way based on the npm package, and return as
+     * a list
+     *
+     * @param npmPackageSet order of npm package
+     * @param result set of result to order
+     *
+     * @return list of the ordered result
+     */
+    public static List<NPMVersionsResult> orderedNPMVersionsResult(
+            Iterable<NPMPackage> npmPackageSet,
+            Set<NPMVersionsResult> result) {
+
+        Map<NPMPackage, NPMVersionsResult> gavToNPMVersionsResult = result.stream()
+                .collect(Collectors.toMap(NPMVersionsResult::getNpmPackage, x -> x));
+
+        List<NPMVersionsResult> ordered = new ArrayList<>();
+
+        for (NPMPackage npmPackage : npmPackageSet) {
+            ordered.add(gavToNPMVersionsResult.get(npmPackage));
         }
 
         return ordered;

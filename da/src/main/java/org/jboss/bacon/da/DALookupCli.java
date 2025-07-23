@@ -31,8 +31,14 @@ import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLatestResult;
 import org.jboss.da.lookup.model.MavenLookupRequest;
 import org.jboss.da.lookup.model.MavenLookupResult;
+import org.jboss.da.lookup.model.MavenVersionsRequest;
+import org.jboss.da.lookup.model.MavenVersionsResult;
 import org.jboss.da.lookup.model.NPMLookupRequest;
 import org.jboss.da.lookup.model.NPMLookupResult;
+import org.jboss.da.lookup.model.NPMVersionsRequest;
+import org.jboss.da.lookup.model.NPMVersionsResult;
+import org.jboss.da.lookup.model.VersionDistanceRule;
+import org.jboss.da.lookup.model.VersionFilter;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
 import org.jboss.pnc.bacon.common.ObjectHelper;
@@ -47,8 +53,10 @@ import picocli.CommandLine;
         description = "DA Lookup endpoint",
         subcommands = {
                 DALookupCli.LookupMaven.class,
+                DALookupCli.LookupMavenVersions.class,
                 DALookupCli.LookupMavenLatest.class,
-                DALookupCli.LookupNPM.class })
+                DALookupCli.LookupNPM.class,
+                DALookupCli.LookupNPMVersions.class })
 @Slf4j
 public class DALookupCli {
 
@@ -103,6 +111,82 @@ public class DALookupCli {
             try {
                 Set<MavenLookupResult> result = lookupApi.lookupMaven(request);
                 List<MavenLookupResult> orderedResult = DaHelper.orderedMavenLookupResult(gavSet, result);
+                ObjectHelper.print(getJsonOutput(), orderedResult);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return 0;
+        }
+    }
+
+    @CommandLine.Command(
+            name = "maven-versions",
+            description = "Lookup and filter available versions for the given Maven artifact coordinates (GAV).")
+    public static class LookupMavenVersions extends JSONCommandHandler implements Callable<Integer> {
+
+        @CommandLine.Option(
+                names = "--filter",
+                description = "Specifies what part of a version string should be used when filtering versions by " +
+                        "similarity. Version parts are: MAJOR.MINOR.MICRO.QUALIFIER-SUFFIX. Available filters: ALL,MAJOR,"
+                        +
+                        "MAJOR_MINOR,MAJOR_MINOR_MICRO,MAJOR_MINOR_MICRO_QUALIFIER")
+        private VersionFilter filter;
+
+        @CommandLine.Option(
+                names = "--distance-rule",
+                description = "Rules for determining comparative distance of two versions toward a base version." +
+                        "\nRECOMMENDED_REPLACEMENT - This rule tries to suggest the best replacement version." +
+                        "\nCLOSEST_BY_PARTS - This rule orders the version by closeness of their parts.",
+                defaultValue = "RECOMMENDED_REPLACEMENT",
+                showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+        private String distanceRule;
+
+        @CommandLine.Option(
+                names = "--lookup-mode",
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+        private String lookupMode;
+
+        @CommandLine.Option(
+                names = "--include-bad",
+                description = "Include bad versions in the results",
+                defaultValue = "false",
+                showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+        private boolean includeBad;
+
+        @CommandLine.Option(
+                names = "--brew-pull-active",
+                description = "Check for versions also in Brew",
+                defaultValue = "false",
+                showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+        private boolean brewPullActive;
+
+        @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
+        private String[] gavs;
+
+        @Override
+        public Integer call() throws Exception {
+
+            if (gavs == null) {
+                throw new FatalException("You didn't specify any GAVs!");
+            }
+
+            LinkedHashSet<GAV> gavSet = new LinkedHashSet<>();
+            for (String gav : gavs) {
+                gavSet.add(DaHelper.toGAV(gav));
+            }
+
+            MavenVersionsRequest request = MavenVersionsRequest.builder()
+                    .filter(filter)
+                    .distanceRule(VersionDistanceRule.valueOf(distanceRule))
+                    .mode(lookupMode)
+                    .brewPullActive(brewPullActive)
+                    .artifacts(gavSet)
+                    .build();
+
+            LookupApi lookupApi = DaHelper.createLookupApi();
+            try {
+                Set<MavenVersionsResult> result = lookupApi.versionsMaven(request);
+                List<MavenVersionsResult> orderedResult = DaHelper.orderedMavenVersionsResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -236,6 +320,74 @@ public class DALookupCli {
             try {
                 Set<NPMLookupResult> result = lookupApi.lookupNPM(request);
                 List<NPMLookupResult> orderedResult = DaHelper.orderedNPMLookupResult(pkgs, result);
+                ObjectHelper.print(getJsonOutput(), orderedResult);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return 0;
+        }
+    }
+
+    @CommandLine.Command(
+            name = "npm-versions",
+            description = "Lookup and filter available versions for the given NPM artifact coordinates (name, version).")
+    public static class LookupNPMVersions extends JSONCommandHandler implements Callable<Integer> {
+
+        @CommandLine.Option(
+                names = "--filter",
+                description = "Specifies what part of a version string should be used when filtering versions by " +
+                        "similarity. Version parts are: MAJOR.MINOR.MICRO.QUALIFIER-SUFFIX. Available filters: ALL,MAJOR,"
+                        +
+                        "MAJOR_MINOR,MAJOR_MINOR_MICRO,MAJOR_MINOR_MICRO_QUALIFIER")
+        private VersionFilter filter;
+
+        @CommandLine.Option(
+                names = "--distance-rule",
+                description = "Rules for determining comparative distance of two versions toward a base version." +
+                        "\nRECOMMENDED_REPLACEMENT - This rule tries to suggest the best replacement version." +
+                        "\nCLOSEST_BY_PARTS - This rule orders the version by closeness of their parts.",
+                defaultValue = "RECOMMENDED_REPLACEMENT",
+                showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+        private String distanceRule;
+
+        @CommandLine.Option(
+                names = "--include-bad",
+                description = "Include bad versions in the results",
+                defaultValue = "false",
+                showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+        private boolean includeBad;
+
+        @CommandLine.Option(
+                names = "--lookup-mode",
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+        private String lookupMode;
+
+        @CommandLine.Parameters(description = "package:version of the artifact to lookup")
+        private String[] npmVersions;
+
+        @Override
+        public Integer call() throws Exception {
+            if (npmVersions == null) {
+                throw new FatalException("You didn't specify any npm versions!");
+            }
+
+            LinkedHashSet<NPMPackage> pkgs = new LinkedHashSet<>();
+            for (String npmVersion : npmVersions) {
+                pkgs.add(DaHelper.toNPMPackage(npmVersion));
+            }
+
+            NPMVersionsRequest request = NPMVersionsRequest.builder()
+                    .filter(filter)
+                    .distanceRule(VersionDistanceRule.valueOf(distanceRule))
+                    .mode(lookupMode)
+                    .includeBad(includeBad)
+                    .packages(pkgs)
+                    .build();
+
+            LookupApi lookupApi = DaHelper.createLookupApi();
+            try {
+                Set<NPMVersionsResult> result = lookupApi.versionsNPM(request);
+                List<NPMVersionsResult> orderedResult = DaHelper.orderedNPMVersionsResult(pkgs, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
