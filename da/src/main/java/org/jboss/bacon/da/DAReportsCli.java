@@ -227,7 +227,7 @@ public class DAReportsCli {
         }
     }
 
-    @CommandLine.Command(name = "lookup-gav", description = "Get built artifacts for GAVs specified.")
+    @CommandLine.Command(name = "lookup-gav", description = "Get built artifacts for GAVs specified.", hidden = true)
     public static class LookupGAVReport extends JSONCommandHandler implements Callable<Integer> {
 
         @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
@@ -243,6 +243,7 @@ public class DAReportsCli {
 
         @Override
         public Integer call() {
+            log.warn("This command is deprecated and will be removed in future. Use `bacon da lookup maven`.");
 
             if (gavs == null) {
                 throw new FatalException("You didn't specify any GAVs!");

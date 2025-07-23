@@ -32,25 +32,50 @@ import org.jboss.da.lookup.model.MavenVersionsRequest;
 import org.jboss.da.lookup.model.MavenVersionsResult;
 import org.jboss.da.lookup.model.NPMLookupRequest;
 import org.jboss.da.lookup.model.NPMLookupResult;
+import org.jboss.da.lookup.model.NPMVersionsRequest;
+import org.jboss.da.lookup.model.NPMVersionsResult;
 
 @Path("/lookup")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 public interface LookupApi {
 
+    /**
+     * Finds best matching versions for given Maven artifact coordinates (GAV).
+     */
     @POST
     @Path(value = "/maven")
     Set<MavenLookupResult> lookupMaven(MavenLookupRequest request);
 
+    /**
+     * Lookup and filter available versions for the given Maven artifact coordinates (GAV).
+     */
     @POST
     @Path(value = "/maven/versions")
     Set<MavenVersionsResult> versionsMaven(MavenVersionsRequest request);
 
+    /**
+     * Finds latest matching versions for given Maven artifact coordinates (GAV), including bad versions.
+     *
+     * This endpoint is used for version increment so it will search all possible places and qualities of artifacts,
+     * including deleted and blocklisted artifacts.
+     */
     @POST
     @Path(value = "/maven/latest")
     Set<MavenLatestResult> lookupMaven(MavenLatestRequest request);
 
+    /**
+     * Finds best matching versions for given NPM artifact coordinates (name, version).
+     */
     @POST
     @Path(value = "/npm")
     Set<NPMLookupResult> lookupNPM(NPMLookupRequest request);
+
+    /**
+     * Lookup and filter available versions for the given NPM artifact coordinates (name, version).
+     */
+    @POST
+    @Path(value = "/npm/versions")
+    Set<NPMVersionsResult> versionsNPM(NPMVersionsRequest request);
+
 }
