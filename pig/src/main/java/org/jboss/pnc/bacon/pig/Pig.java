@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -139,6 +140,12 @@ public class Pig {
                 description = "Override the variables in the build-config.yaml. e.g -eVariable1=value1 -e Variable2=value2 --env=Variable3=value3")
         Map<String, String> overrides = Collections.emptyMap();
 
+        @Option(
+                names = "--artifactCacheDownload",
+                defaultValue = "true",
+                description = "If set to false, all artifact downloads will be forcefully done and no cache store will be used")
+        boolean artifactCacheDownload;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -158,6 +165,11 @@ public class Pig {
             pig.validate();
 
             FileDownloadUtils.setAttempts(downloadAttempts);
+
+            // Setting up artifact cache: we only want to cache downloads from Indy
+            FileDownloadUtils.controlCache(
+                    artifactCacheDownload,
+                    List.of(pig.getIndyUrl()));
 
             PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl, overrides);
             PigContext.get().setTempBuild(tempBuild);

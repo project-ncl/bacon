@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.List;
 
 import javax.ws.rs.NotFoundException;
 
@@ -62,6 +63,9 @@ public class FileDownloadUtils {
     public static final String FILE_CACHE_LOCATION = System.getProperty("user.home") + File.separator + ".cache"
             + File.separator + "pnc-bacon" + File.separator + "pnc-bacon-artifact-cache.db";
 
+    private static boolean enableCache = false;
+    private static List<String> urlsToCache = List.of();
+
     /**
      * Please use it via getFileCache() method, not directly
      */
@@ -79,13 +83,18 @@ public class FileDownloadUtils {
         return fileCache;
     }
 
+    public static void controlCache(boolean enableCacheTemp, List<String> urlsToCacheTemp) {
+        enableCache = enableCacheTemp;
+        urlsToCache = urlsToCacheTemp;
+    }
+
     public static void downloadTo(URI downloadUrl, File targetPath) {
-        downloadTo(downloadUrl, targetPath, false);
+        downloadTo(downloadUrl, targetPath, enableCache);
     }
 
     public static void downloadTo(URI downloadUrl, File targetPath, boolean cache) {
 
-        if (cache) {
+        if (cache && inUrlsToCache(downloadUrl)) {
             boolean isCached = getFileCache().copyTo(downloadUrl.toString(), targetPath);
             if (isCached) {
                 log.info("Retrieved {} from cache and put to {}", downloadUrl, targetPath);
@@ -158,6 +167,10 @@ public class FileDownloadUtils {
         }
 
         FileDownloadUtils.attempts = attempts;
+    }
+
+    private static boolean inUrlsToCache(URI downloadUrl) {
+        return urlsToCache.stream().anyMatch(url -> url.contains(downloadUrl.getHost()));
     }
 
     private FileDownloadUtils() {
