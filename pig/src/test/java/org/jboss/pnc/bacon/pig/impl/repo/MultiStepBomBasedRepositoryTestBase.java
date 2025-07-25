@@ -391,6 +391,10 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
         MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
         indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
+        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, true))
+                .thenReturn(pathToTestSettingsFile);
+        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, false))
+                .thenReturn(pathToTestSettingsFile);
         indyMockedStatic.when(() -> Indy.getIndyUrl()).thenReturn("https://mock.indy.org/maven");
     }
 

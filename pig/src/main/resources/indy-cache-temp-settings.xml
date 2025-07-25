@@ -58,8 +58,24 @@
                 </pluginRepository>
             </pluginRepositories>
         </profile>
+        <profile>
+            <id>local-m2-cache</id>
+            <repositories>
+                <repository>
+                    <id>local-m2-cache</id>
+                    <url>file://${user.home}/.cache/bacon/m2-cache</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>local-m2-cache</id>
+                    <url>file://${user.home}/.cache/bacon/m2-cache</url>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
     </profiles>
     <activeProfiles>
+        <activeProfile>local-m2-cache</activeProfile>
         <activeProfile>indy-repositories</activeProfile>
         <activeProfile>maven-central</activeProfile>
     </activeProfiles>

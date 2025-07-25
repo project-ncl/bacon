@@ -166,6 +166,7 @@ public final class PigFacade {
             boolean skipBranchCheck,
             boolean strictLicenseCheck,
             boolean strictDownloadSource,
+            boolean useLocalM2Cache,
             String[] skippedAddons,
             Path configurationDirectory,
             String licenseExceptionsPath,
@@ -224,7 +225,8 @@ public final class PigFacade {
                         removeGeneratedM2Dups,
                         configurationDirectory,
                         strictLicenseCheck,
-                        strictDownloadSource);
+                        strictDownloadSource,
+                        useLocalM2Cache);
             }
             context.setRepositoryData(repo);
             context.storeContext();
@@ -515,7 +517,8 @@ public final class PigFacade {
             boolean removeGeneratedM2Dups,
             Path configurationDirectory,
             boolean strictLicenseCheck,
-            boolean strictSourceDownload) {
+            boolean strictSourceDownload,
+            boolean useLocalM2Cache) {
         beforeCommand(false);
         abortIfBuildDataAbsentFromContext();
         PigContext context = context();
@@ -527,7 +530,8 @@ public final class PigFacade {
                 configurationDirectory,
                 removeGeneratedM2Dups,
                 strictLicenseCheck,
-                strictSourceDownload)) {
+                strictSourceDownload,
+                useLocalM2Cache)) {
 
             RepositoryData repositoryData = repoManager.prepare();
 

@@ -160,6 +160,10 @@ public class ResolveOnlyRepositoryTest {
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
         MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
         indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
+        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, true))
+                .thenReturn(pathToTestSettingsFile);
+        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, false))
+                .thenReturn(pathToTestSettingsFile);
     }
 
     private PigConfiguration mockPigConfigurationAndMethods() {

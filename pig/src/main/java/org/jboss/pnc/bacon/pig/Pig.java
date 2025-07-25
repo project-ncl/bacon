@@ -146,6 +146,12 @@ public class Pig {
                 description = "If set to false, all artifact downloads will be forcefully done and no cache store will be used")
         boolean artifactCacheDownload;
 
+        @Option(
+                names = "--useLocalM2Cache",
+                defaultValue = "true",
+                description = "If set to false, RESOLVE_ONLY Maven Repository generation will only download from Indy instead of relying on local m2 cache")
+        boolean useLocalM2Cache;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -307,6 +313,7 @@ public class Pig {
                     skipBranchCheck,
                     strictLicenseCheck,
                     strictDownloadSource,
+                    useLocalM2Cache,
                     skippedAddons,
                     configurationDirectory,
                     licenseExceptionsPath,
@@ -425,7 +432,8 @@ public class Pig {
                     removeGeneratedM2Dups,
                     configurationDirectory,
                     strictLicenseCheck,
-                    strictDownloadSource);
+                    strictDownloadSource,
+                    useLocalM2Cache);
             PigContext.get().setRepositoryData(result);
             PigContext.get().storeContext();
             return result;
