@@ -38,12 +38,24 @@ public class Indy {
     }
 
     public static String getConfiguredIndySettingsXmlPath(boolean tempBuild) {
+        return getConfiguredIndySettingsXmlPath(tempBuild, false);
+    }
+
+    public static String getConfiguredIndySettingsXmlPath(boolean tempBuild, boolean useLocalM2Cache) {
         String settingsXml;
+
+        String filename;
+        if (useLocalM2Cache) {
+            filename = "/indy-cache";
+        } else {
+            filename = "/indy";
+        }
         if (tempBuild) {
-            settingsXml = ResourceUtils.extractToTmpFile("/indy-temp-settings.xml", "settings", ".xml")
+            settingsXml = ResourceUtils.extractToTmpFile(filename + "-temp-settings.xml", "settings", ".xml")
                     .getAbsolutePath();
         } else {
-            settingsXml = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml").getAbsolutePath();
+            settingsXml = ResourceUtils.extractToTmpFile(filename + "-settings.xml", "settings", ".xml")
+                    .getAbsolutePath();
         }
         FileUtils.replaceFileString("\\$\\{INDY_TMP_URL}", Indy.getIndyTempUrl(), settingsXml);
         FileUtils.replaceFileString("\\$\\{INDY_URL}", Indy.getIndyUrl(), settingsXml);

@@ -119,6 +119,13 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private final boolean strictLicenseCheck;
     private final boolean strictDownloadSource;
     private final boolean isTestMode;
+    private final boolean useLocalM2Cache;
+
+    /**
+     * If you change this value, change it also on indy-settings.xml and indy-temp-settings.xml
+     */
+    private static final Path RESOLVE_M2_CACHE = Path
+            .of(org.apache.commons.io.FileUtils.getUserDirectoryPath(), ".cache", "bacon", "m2-cache");
 
     public RepoManager(
             PigConfiguration pigConfiguration,
@@ -128,7 +135,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             Path configurationDirectory,
             boolean removeGeneratedM2Dups,
             boolean strictLicenseCheck,
-            boolean strictDownloadSource) {
+            boolean strictDownloadSource,
+            boolean useLocalM2Cache) {
         super(pigConfiguration, releasePath, deliverables, builds);
         generationData = pigConfiguration.getFlow().getRepositoryGeneration();
         this.removeGeneratedM2Dups = removeGeneratedM2Dups;
@@ -137,6 +145,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         this.strictDownloadSource = strictDownloadSource;
         buildInfoCollector = new BuildInfoCollector();
         isTestMode = false;
+        this.useLocalM2Cache = useLocalM2Cache;
     }
 
     public RepoManager(
@@ -158,6 +167,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         this.strictDownloadSource = strictDownloadSource;
         this.buildInfoCollector = buildInfoCollector;
         this.isTestMode = isTestMode;
+        this.useLocalM2Cache = false;
     }
 
     public RepositoryData prepare() {
@@ -455,11 +465,12 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             log.info("Generating maven repository");
             final File sourceDir = createMavenGenerationDir();
 
-            final MavenArtifactResolver mvnResolver = MavenArtifactResolver.builder()
-                    .setUserSettings(getIndyMavenSettings())
+            MavenArtifactResolver.Builder mvnResolverBuilder = MavenArtifactResolver.builder()
+                    .setUserSettings(getIndyMavenSettings(useLocalM2Cache))
                     .setLocalRepository(sourceDir.getAbsolutePath())
-                    .setArtifactTransferLogging(ObjectHelper.isLogDebug())
-                    .build();
+                    .setArtifactTransferLogging(ObjectHelper.isLogDebug());
+            final MavenArtifactResolver mvnResolver = mvnResolverBuilder.build();
+
             final Comparator<Artifact> artifactComparator = Comparator.comparing(Artifact::getGroupId)
                     .thenComparing(Artifact::getArtifactId)
                     .thenComparing(Artifact::getExtension)
@@ -475,6 +486,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     resolveAndRepackage(mergedData, sourceDir, mvnResolver, artifactComparator);
                 }
             }
+            copyGeneratedMavenRepositoryToCache(sourceDir);
             return repackage(sourceDir);
         } catch (Exception bme) {
             throw new RuntimeException(
@@ -710,7 +722,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         try {
             var mvnCtx = new BootstrapMavenContext(
                     BootstrapMavenContext.config()
-                            .setUserSettings(getIndyMavenSettings())
+                            .setUserSettings(getIndyMavenSettings(useLocalM2Cache))
                             .setLocalRepository(repoDir.getAbsolutePath())
                             .setWorkspaceDiscovery(false)
                             .setArtifactTransferLogging(false));
@@ -1521,6 +1533,29 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         addExtraFiles(targetTopLevelDirectory);
     }
 
+    /**
+     * Copy the generated maven repository to the Resolve m2 cache. The next time it is run again, the cache is checked
+     * before trying to download from Indy
+     *
+     * @param sourceDir
+     * @throws IOException
+     */
+    private void copyGeneratedMavenRepositoryToCache(File sourceDir) throws IOException {
+        try {
+            log.info("Copying generated maven repository to {} as a cache", RESOLVE_M2_CACHE);
+            if (!Files.exists(RESOLVE_M2_CACHE)) {
+                Files.createDirectories(RESOLVE_M2_CACHE);
+            }
+            if (sourceDir.exists() && sourceDir.isDirectory()) {
+                for (File subfile : sourceDir.listFiles()) {
+                    FileUtils.copy(subfile, RESOLVE_M2_CACHE.toFile());
+                }
+            }
+        } catch (IOException e) {
+            log.warn("Something happened. Not caching", e);
+        }
+    }
+
     private void addExtraFiles(File m2Repo) {
         log.debug("Adding repository documents");
         Properties properties = new Properties();
@@ -1556,8 +1591,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         IoUtils.recursiveDelete(workDir.toPath());
     }
 
-    private static File getIndyMavenSettings() {
-        final String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(PigContext.get().isTempBuild());
+    private static File getIndyMavenSettings(boolean useLocalM2Cache) {
+        final String settingsXmlPath = Indy
+                .getConfiguredIndySettingsXmlPath(PigContext.get().isTempBuild(), useLocalM2Cache);
         final File settings = new File(settingsXmlPath);
         if (!settings.exists()) {
             throw new RuntimeException("Failed to locate the Indy Maven settings at " + settings);
