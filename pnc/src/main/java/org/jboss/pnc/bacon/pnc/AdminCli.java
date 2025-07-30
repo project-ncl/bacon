@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.jboss.pnc.bacon.pnc.admin.AnnouncementBannerCli;
 import org.jboss.pnc.bacon.pnc.admin.MaintenanceModeCli;
+import org.jboss.pnc.bacon.pnc.admin.PncStatusCli;
 import org.jboss.pnc.bacon.pnc.admin.RexCli;
 
 import picocli.CommandLine.Command;
@@ -26,6 +27,6 @@ import picocli.CommandLine.Command;
 @Command(
         name = "admin",
         description = "Admin related tasks",
-        subcommands = { AnnouncementBannerCli.class, MaintenanceModeCli.class, RexCli.class })
+        subcommands = { AnnouncementBannerCli.class, MaintenanceModeCli.class, PncStatusCli.class, RexCli.class })
 public class AdminCli {
 }

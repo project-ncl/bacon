@@ -104,8 +104,11 @@ class AppTest {
         App app = new App();
         assertEquals(
                 0,
-                app.run(new String[] { "--verbose", "pnc", "admin", "maintenance-mode", "activate", "-h" }));
-        assertThat(systemOut.getText()).contains("bacon pnc admin maintenance-mode activate \"Switching");
+                app.run(new String[] { "--verbose", "pnc", "admin", "pnc-status", "set", "-h" }));
+        assertThat(systemOut.getText()).contains("""
+                bacon pnc admin pnc-status set \\
+                	--banner="Switching to maintenance mode for upcoming migration" \\
+                	--eta="2025-07-30T15:00:00.000Z" isMaintenanceMode""");
     }
 
     @Test
@@ -229,27 +232,34 @@ class AppTest {
                                 "--profile",
                                 "foobar",
                                 "admin",
-                                "maintenance-mode",
-                                "activate",
+                                "pnc-status",
+                                "set",
                                 "-h" }));
 
-        String expected = String.format(
-                "Usage: bacon pnc admin maintenance-mode activate [-hoqvV] [--no-color]%n"
-                        + "       [-p=<configurationFileLocation>] [--profile=<profile>] <reason>%n"
-                        + "This will disable any new builds from being accepted%n"
-                        + "      <reason>              Reason%n"
-                        + "  -h, --help                Show this help message and exit.%n"
-                        + "      --no-color            Disable color output. Useful when running in a%n"
-                        + "                              non-ANSI environment%n"
-                        + "  -o, --jsonOutput          use json for output (default to yaml)%n"
-                        + "  -p, --configPath=<configurationFileLocation>%n"
-                        + "                            Path to PNC configuration folder%n"
-                        + "      --profile=<profile>   PNC Configuration profile%n"
-                        + "  -q, --quiet               Silent output%n"
-                        + "  -v, --verbose             Verbose output%n"
-                        + "  -V, --version             Print version information and exit.%n" + "%n" + "Example:%n"
-                        + "$ bacon pnc admin maintenance-mode activate \"Switching to maintenance mode for%n"
-                        + "upcoming migration\"%n");
+        String expected = """
+                Usage: bacon pnc admin pnc-status set [-hoqvV] [--no-color] [--banner=<banner>]
+                                                      [--eta=<eta>]
+                                                      [-p=<configurationFileLocation>]
+                                                      [--profile=<profile>] <isMaintenanceMode>
+                This will set the PNC status
+                      <isMaintenanceMode>   Is maintenance mode ON or OFF?
+                      --banner=<banner>     Banner
+                      --eta=<eta>           ETA
+                  -h, --help                Show this help message and exit.
+                      --no-color            Disable color output. Useful when running in a
+                                              non-ANSI environment
+                  -o, --jsonOutput          use json for output (default to yaml)
+                  -p, --configPath=<configurationFileLocation>
+                                            Path to PNC configuration folder
+                      --profile=<profile>   PNC Configuration profile
+                  -q, --quiet               Silent output
+                  -v, --verbose             Verbose output
+                  -V, --version             Print version information and exit.
+
+                Example:
+                $ bacon pnc admin pnc-status set \\
+                	--banner="Switching to maintenance mode for upcoming migration" \\
+                	--eta="2025-07-30T15:00:00.000Z" isMaintenanceMode""";
         assertThat(systemOut.getText()).contains(expected);
 
         assertEquals(
