@@ -706,6 +706,17 @@
         ]
     },
     {
+        "groupId": "com.fasterxml.jackson",
+        "artifactId": "jackson-base",
+        "version-regexp": "2\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
         "groupId": "org.reactivestreams",
         "artifactId": "reactive-streams",
         "version-regexp": ".*",
