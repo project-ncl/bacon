@@ -1,0 +1,100 @@
+#!vertxStackVersion=3.5.1
+#!redhatSuffix=redhat-005
+#!vertxVersion={{vertxStackVersion}}.{{redhatSuffix}}
+#!productName=Vert.X
+#!milestone=ER1
+
+product:
+  name: Quarkus Platform
+  abbreviation: qrksp
+  stage: GA
+  issueTrackerUrl: https://host.com/projects/my-project
+version: 3.20.0
+milestone: "milestone"
+group: Quarkus Platform 3.20 all
+# defaultBuildParameters:
+#   environmentName: "OpenJDK 17.0; RHEL 8; Mvn 3.9.3"
+#   buildScript: mvn deploy
+builds:
+  - name: io.quarkus-quarkus-platform-3.20.0
+    project: quarkusio/quarkus-platform
+    scmUrl: git@repo.com:path/to.git
+    scmRevision: {{platformScmRevision}}
+    environmentName: "OpenJDK 17.0; RHEL 8; Mvn 3.9.3"
+    buildScript: mvn deploy
+    alignmentParameters:
+      - '-Dmanipulation.disable=true'
+outputPrefixes:
+  releaseFile: rh-quarkus-platform
+  releaseDir: rh-quarkus-platform
+flow:
+  licensesGeneration:
+    strategy: GENERATE
+  repositoryGeneration:
+    strategy: DOWNLOAD
+    sourceBuild: wildfly-swarm-7.1
+    sourceArtifact: '.*maven-repository\.zip'
+    additionalArtifacts:
+     - from: 'wildfly-swarm-7.1'
+       download:
+         - '^org.wildfly.swarm:wildfly-swarm-plugin:jar:7.1.0.redhat-\d+:sources'
+         - '^org.wildfly.swarm:tools:jar:7.1.0.redhat-\d\d:sources'
+     - from: 'aether-core-7.1'
+       download:
+         - 'org.eclipse.aether:aether-util:jar:1.0.0.v20140518-redhat-\d+:sources'
+    externalAdditionalArtifacts:
+        - 'org.jboss.spec.javax.rmi:jboss-rmi-api_1.0_spec:pom:1.0.5.Final-redhat-1'
+        - 'org.jboss.spec.javax.rmi:jboss-rmi-api_1.0_spec:jar:1.0.5.Final-redhat-1'
+  javadocGeneration:
+    strategy: IGNORE
+    sourceBuild: 'wildfly-swarm-7.1'
+    sourceArtifact: '.*javadoc\.zip'
+
+addons:
+  releaseHandover:
+    document:
+      owner: user@ibm.com
+      product:
+        id: quarkus
+        name: Red Hat Build of Quarkus
+        version: 3.20
+        release: GA
+        releaseDate: 2025-04-29T00:00:00Z
+      signoffs:
+        - actor: QE
+          refs:
+            - https://path-to-doc
+      advisory:
+        - id: "RH12345"
+          contentType: text-only
+        - type: "RHSA"
+          issues:
+            RHQ-1234: Issue title
+          cves:
+            CVE-1234: Cve title
+          references:
+            - http://domain.org/
+          synopsis: Some synopsis
+          topic: Some topic
+          description: Some description
+          solution: Some solution
+
+      refUrlPrefix: https://file-server.com/product/version/
+      refsMetadata:
+        # map of filename search part - refsMetadata
+        maven-repository:
+          description: "Red Hat build of Quarkus 3.20 Repository"
+          destinations:
+            - MRRC
+        src:
+          description: "Red Hat build of Quarkus 3.20 Source Code"
+          destinations:
+            - CSP
+
+      releaseNotes: |
+        <p>
+        <ul>
+          <li>foo</li>
+          <li>bar</li>
+        </ul>
+        </p>
