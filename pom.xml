@@ -211,7 +211,7 @@
             <dependency>
                 <groupId>org.jline</groupId>
                 <artifactId>jline</artifactId>
-                <version>3.21.0</version>
+                <version>3.30.5</version>
             </dependency>
             <dependency>
                 <groupId>org.jline</groupId>
