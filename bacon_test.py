@@ -46,11 +46,13 @@ class TestBacon(unittest.TestCase):
         bacon_jar_location = tempfile.mkdtemp()
         shell_location = tempfile.mkdtemp()
         maven_link = "https://repo1.maven.org/maven2/org/jboss/pnc/bacon/cli/"
+        autocomplete_link = "https://github.com/project-ncl/bacon/raw/refs/heads/main/bacon_completion"
 
         install = bacon_install.BaconInstall(
                 bacon_jar_location,
                 shell_location,
-                maven_link)
+                maven_link,
+                autocomplete_link)
         install.run()
 
         self.assertTrue(os.path.exists(os.path.join(bacon_jar_location, "bacon.jar")))
@@ -79,11 +81,14 @@ class TestBacon(unittest.TestCase):
         bacon_jar_location = tempfile.mkdtemp()
         shell_location = tempfile.mkdtemp()
         maven_link = "https://repo1.maven.org/maven2/org/jboss/pnc/bacon/cli/"
+        autocomplete_link = "https://github.com/project-ncl/bacon/raw/refs/tags/3.2.1/bacon_completion"
+
 
         install = bacon_install.BaconInstall(
                 bacon_jar_location,
                 shell_location,
                 maven_link,
+                autocomplete_link,
                 version="2.1.8")
         install.run()
 

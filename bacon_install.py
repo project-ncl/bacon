@@ -43,6 +43,10 @@ import xml.etree.ElementTree as ET
 
 MAVEN_CENTRAL_LINK = "https://repo1.maven.org/maven2/org/jboss/pnc/bacon/cli/"
 MAVEN_SNAPSHOT_LINK = "https://repository.jboss.org/nexus/content/repositories/snapshots/org/jboss/pnc/bacon/cli/"
+GITHUB_LINK = "https://github.com/project-ncl/bacon/raw/refs"
+
+GITHUB_SNAPSHOT_AUTOCOMPLETE_PATH = GITHUB_LINK + "/heads/main/bacon_completion"
+GITHUB_RELEASE_AUTOCOMPLETE_PATH = GITHUB_LINK + "/tags/{0}/bacon_completion"
 
 USER_BACON_JAR_FOLDER_LOCATION = os.getenv("HOME") + "/.pnc-bacon/bin"
 ROOT_BACON_JAR_FOLDER_LOCATION = "/opt/bacon/bin"
@@ -124,7 +128,7 @@ def download_maven_metadata_xml(url, folder):
     download_link(link, folder, "maven-metadata.xml")
 
 
-def download_link(link, folder, filename, retries=7):
+def download_link(link, folder, filename, fail=True, retries=7):
     """
     Download the link into the folder with name 'filename'
 
@@ -150,10 +154,12 @@ def download_link(link, folder, filename, retries=7):
             time_to_sleep = 30 ** (1 / retries)
             print("Something went wrong while downloading the link. Waiting {:.1f} seconds before retrying...".format(time_to_sleep))
             time.sleep(time_to_sleep)
-            download_link(link, folder, filename, retries=retries - 1)
+            download_link(link, folder, filename, fail, retries=retries - 1)
         else:
-            raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
-
+            if fail:
+                raise Exception("Something wrong happened while downloading the link: " + link + " :: " + str(error))
+            else:
+                print("Can't download link: " + link + " " + str(error) + " but we can continue...")
 
 def get_sha1_of_jar(url_of_jar):
     """
@@ -200,13 +206,14 @@ class BaconInstall:
     """
     Object responsible with installing bacon
     """
-    def __init__(self, bacon_jar_location, shell_location, maven_url, version=None):
+    def __init__(self, bacon_jar_location, shell_location, maven_url, autocomplete_url, version=None):
 
         self.bacon_jar_location = bacon_jar_location
         self.shell_location = shell_location
         self.maven_url = maven_url
         self.latest_version = None
         self.version = version
+        self.autocomplete_url = autocomplete_url
 
     def __is_snapshot(self):
         if self.version and self.version == "snapshot":
@@ -240,7 +247,7 @@ class BaconInstall:
         """
         Read the maven-metadata.xml of bacon and download the latest version
         """
-
+        autocomplete_url = self.autocomplete_url
         if self.version and "latest" != self.version:
             if self.__is_snapshot():
                 snapshot_version = self.__get_latest_snapshot_version()
@@ -249,9 +256,11 @@ class BaconInstall:
             else:
                 url = self.maven_url + \
                     self.version + "/cli-" + self.version + "-shaded.jar"
+                autocomplete_url = self.autocomplete_url.format(self.version)
         else:
             url = self.maven_url + \
                 self.latest_version + "/cli-" + self.latest_version + "-shaded.jar"
+            autocomplete_url = self.autocomplete_url.format(self.latest_version)
 
         sha1_from_maven = get_sha1_of_jar(url)
         sha1_of_existing_jar = calculate_sha1(self.bacon_jar_location + "/bacon.jar")
@@ -260,6 +269,7 @@ class BaconInstall:
             print("Skipping download since latest bacon.jar is already installed")
             return
 
+        download_link(autocomplete_url,self.shell_location, "bacon_completion", False)
         download_link(url, self.bacon_jar_location, "bacon.jar")
         sha1_of_new_jar = calculate_sha1(self.bacon_jar_location + "/bacon.jar")
 
@@ -339,6 +349,7 @@ def main():
     Main entry point to the program
     """
     maven_link = MAVEN_CENTRAL_LINK
+    autocomplete_link = GITHUB_RELEASE_AUTOCOMPLETE_PATH
 
     parser = argparse.ArgumentParser("Bacon installation tool")
     parser.add_argument('--location', required=False, help="Specify a directory root to install to")
@@ -347,6 +358,7 @@ def main():
 
     if args.version == 'snapshot':
         maven_link = MAVEN_SNAPSHOT_LINK
+        autocomplete_link = GITHUB_SNAPSHOT_AUTOCOMPLETE_PATH
     if args.location:
         bacon_jar_location = args.location + "/.pnc-bacon/bin"
         shell_location = args.location + "/bin"
@@ -364,6 +376,7 @@ def main():
         bacon_jar_location,
         shell_location,
         maven_link,
+        autocomplete_link,
         version=args.version)
     try:
         bacon_install.run()
