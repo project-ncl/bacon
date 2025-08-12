@@ -110,7 +110,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenLookupResult> result = lookupApi.lookupMaven(request);
-                List<MavenLookupResult> orderedResult = DaHelper.orderedMavenLookupResult(gavSet, result);
+                List<MavenLookupResult> orderedResult = DaHelper.orderMavenResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -129,7 +129,8 @@ public class DALookupCli {
                 description = "Specifies what part of a version string should be used when filtering versions by " +
                         "similarity. Version parts are: MAJOR.MINOR.MICRO.QUALIFIER-SUFFIX. Available filters: ALL,MAJOR,"
                         +
-                        "MAJOR_MINOR,MAJOR_MINOR_MICRO,MAJOR_MINOR_MICRO_QUALIFIER")
+                        "MAJOR_MINOR,MAJOR_MINOR_MICRO,MAJOR_MINOR_MICRO_QUALIFIER",
+                defaultValue = "ALL")
         private VersionFilter filter;
 
         @CommandLine.Option(
@@ -143,7 +144,9 @@ public class DALookupCli {
 
         @CommandLine.Option(
                 names = "--lookup-mode",
-                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes,
+                defaultValue = "PERSISTENT",
+                showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
         private String lookupMode;
 
         @CommandLine.Option(
@@ -186,7 +189,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenVersionsResult> result = lookupApi.versionsMaven(request);
-                List<MavenVersionsResult> orderedResult = DaHelper.orderedMavenVersionsResult(gavSet, result);
+                List<MavenVersionsResult> orderedResult = DaHelper.orderMavenResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -259,7 +262,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<MavenLatestResult> result = lookupApi.lookupMaven(request);
-                List<MavenLatestResult> orderedResult = DaHelper.orderedMavenLatestResult(gavSet, result);
+                List<MavenLatestResult> orderedResult = DaHelper.orderMavenResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -319,7 +322,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<NPMLookupResult> result = lookupApi.lookupNPM(request);
-                List<NPMLookupResult> orderedResult = DaHelper.orderedNPMLookupResult(pkgs, result);
+                List<NPMLookupResult> orderedResult = DaHelper.orderNPMResult(pkgs, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -338,7 +341,8 @@ public class DALookupCli {
                 description = "Specifies what part of a version string should be used when filtering versions by " +
                         "similarity. Version parts are: MAJOR.MINOR.MICRO.QUALIFIER-SUFFIX. Available filters: ALL,MAJOR,"
                         +
-                        "MAJOR_MINOR,MAJOR_MINOR_MICRO,MAJOR_MINOR_MICRO_QUALIFIER")
+                        "MAJOR_MINOR,MAJOR_MINOR_MICRO,MAJOR_MINOR_MICRO_QUALIFIER",
+                defaultValue = "ALL")
         private VersionFilter filter;
 
         @CommandLine.Option(
@@ -359,7 +363,8 @@ public class DALookupCli {
 
         @CommandLine.Option(
                 names = "--lookup-mode",
-                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
+                description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes,
+                defaultValue = "PERSISTENT")
         private String lookupMode;
 
         @CommandLine.Parameters(description = "package:version of the artifact to lookup")
@@ -387,7 +392,7 @@ public class DALookupCli {
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
                 Set<NPMVersionsResult> result = lookupApi.versionsNPM(request);
-                List<NPMVersionsResult> orderedResult = DaHelper.orderedNPMVersionsResult(pkgs, result);
+                List<NPMVersionsResult> orderedResult = DaHelper.orderNPMResult(pkgs, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
                 throw new RuntimeException(e);
