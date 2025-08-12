@@ -164,6 +164,20 @@
                             <skip>${skipTests}</skip>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-autocomplete</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>install</phase>
+                        <configuration>
+                            <mainClass>picocli.AutoComplete</mainClass>
+                            <arguments>
+                                <argument>org.jboss.pnc.bacon.cli.App</argument>
+                            </arguments>
+                            <classpathScope>compile</classpathScope>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
