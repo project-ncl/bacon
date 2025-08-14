@@ -28,6 +28,7 @@ import org.jboss.pnc.bacon.pig.impl.addons.microprofile.MicroProfileSmallRyeComm
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusCommunityDepAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.VertxArtifactFinder;
+import org.jboss.pnc.bacon.pig.impl.addons.releasehandover.ReleaseHandoverAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.rhba.OfflineManifestGenerator;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.scanservice.PostBuildScanService;
@@ -75,6 +76,7 @@ public class AddOnFactory {
                         extrasPath,
                         deliverables));
         resultList.add(new Cachi2LockfileAddon(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new ReleaseHandoverAddon(pigConfiguration, builds, releasePath, extrasPath));
         return resultList;
     }
 
