@@ -94,6 +94,17 @@ bacon update 2.0.1
 bacon update snapshot
 ```
 
+#### Autocompletion
+
+Since Bacon 3.2.1 there is autocompletion available for bacon commands in command line. 
+After Bacon installation you should have `bacon_completion` file available in `~/bin` location or in custom location picked during installation.
+To initiate autocompletion you just need to add 
+```
+. ~/bin/bacon_completion
+``` 
+line into your `~/.bashrc` file.
+
+
 #### Pre-requisite for MacOs
 1. Ensure `~/bin`  is added to your shell's $PATH, unlike Fedora this is not added by default. Depending on which shell you run you can add it by running:
 
