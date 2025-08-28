@@ -26,21 +26,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * PSSC scanning container interface
  * <p>
- *
- *
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "product-id", "event-id", "is-managed-service", "cpaas-version", "job-url", "component-list" })
-
 public class ScanServiceDTO {
     private static final Logger log = LoggerFactory.getLogger(ScanServiceDTO.class);
-
     public static final String EVENT_ID_DFT_VALUE = "dft-event-id";
     public static final Boolean IS_MANAGED_SERVICE_DFT_VALUE = false;
     public static final String CPAAS_VERSION_DFT_VALUE = "latest";
@@ -58,72 +51,49 @@ public class ScanServiceDTO {
      * For each build the type (brew, pnc or git [scmurl])
      */
     public enum buildType {
-        brew, pnc, git
+        brew, pnc, git;
     }
 
     /**
      * The product ID associated with the scan. (Required)
-     *
      */
     @JsonProperty("product-id")
     @JsonPropertyDescription("The product ID associated with the scan")
-    @Getter
-    @Setter
     private String productId;
-
     /**
      * The submission event ID associated with the scan.
-     *
      */
     @JsonProperty("event-id")
     @JsonPropertyDescription("The submission event ID associated with the scan")
-    @Getter
-    @Setter
     private String eventId;
-
     /**
      * Indicates whether or not the product is a managed service. (Required)
-     *
      */
     @JsonProperty("is-managed-service")
     @JsonPropertyDescription("Indicates whether or not the product is a managed service")
-    @Getter
-    @Setter
     private Boolean isManagedService;
-
     /**
      * The version of CPaaS that submitted the scan.
-     *
      */
     @JsonProperty("cpaas-version")
     @JsonPropertyDescription("The version of CPaaS that submitted the scan")
-    @Getter
-    @Setter
     private String cpaasVersion;
-
     /**
      * URL of Jenkins job that submitted the scan
-     *
      */
     @JsonProperty("job-url")
     @JsonPropertyDescription("URL of Jenkins job that submitted the scan")
-    @Getter
-    @Setter
     private String jobUrl;
-
     /**
      * The Additional Builds associated with the scan
-     *
      */
     @JsonProperty("component-list")
     @JsonPropertyDescription("The builds associated with the scan")
     private List<Object> componentList = new ArrayList<>();
-
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
 
     /**
-     *
      * @param productId (mandatory) The product ID as defined in product pages, this is used for sorting generated scan
      *        reports
      * @param eventId (optional) CPaaS eventId
@@ -136,9 +106,7 @@ public class ScanServiceDTO {
      *
      *        For non-provided optional parameters in the build-config.yaml file default values will be passed-in by the
      *        caller of this constructor.
-     *
      */
-
     public ScanServiceDTO(
             String productId,
             String eventId,
@@ -208,7 +176,6 @@ public class ScanServiceDTO {
 
     /**
      * The product ID associated with the scan. (Required)
-     *
      */
     public ScanServiceDTO withProductId(String productId) {
         this.productId = productId;
@@ -217,7 +184,6 @@ public class ScanServiceDTO {
 
     /**
      * The submission event ID associated with the scan
-     *
      */
     public ScanServiceDTO withEventId(String eventId) {
         this.eventId = eventId;
@@ -226,7 +192,6 @@ public class ScanServiceDTO {
 
     /**
      * Indicates whether or not the product is a managed service
-     *
      */
     public ScanServiceDTO withIsManagedService(Boolean isManagedService) {
         this.isManagedService = isManagedService;
@@ -235,7 +200,6 @@ public class ScanServiceDTO {
 
     /**
      * The version of CPaaS that submitted the scan
-     *
      */
     public ScanServiceDTO withCpaasVersion(String cpaasVersion) {
         this.cpaasVersion = cpaasVersion;
@@ -244,7 +208,6 @@ public class ScanServiceDTO {
 
     /**
      * URL of Jenkins job that submitted the scan
-     *
      */
     public ScanServiceDTO withJobUrl(String jobUrl) {
         this.jobUrl = jobUrl;
@@ -279,7 +242,6 @@ public class ScanServiceDTO {
 
         @JsonProperty("type")
         private buildType type;
-
         @JsonProperty("build-id")
         private String buildId;
     }
@@ -287,10 +249,8 @@ public class ScanServiceDTO {
     private final class git {
         @JsonProperty("type")
         private buildType type;
-
         @JsonProperty("repo")
         private String repo;
-
         @JsonProperty("ref")
         private String ref;
 
@@ -317,5 +277,90 @@ public class ScanServiceDTO {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /**
+     * The product ID associated with the scan. (Required)
+     */
+    @java.lang.SuppressWarnings("all")
+    public String getProductId() {
+        return this.productId;
+    }
+
+    /**
+     * The product ID associated with the scan. (Required)
+     */
+    @JsonProperty("product-id")
+    @java.lang.SuppressWarnings("all")
+    public void setProductId(final String productId) {
+        this.productId = productId;
+    }
+
+    /**
+     * The submission event ID associated with the scan.
+     */
+    @java.lang.SuppressWarnings("all")
+    public String getEventId() {
+        return this.eventId;
+    }
+
+    /**
+     * The submission event ID associated with the scan.
+     */
+    @JsonProperty("event-id")
+    @java.lang.SuppressWarnings("all")
+    public void setEventId(final String eventId) {
+        this.eventId = eventId;
+    }
+
+    /**
+     * Indicates whether or not the product is a managed service. (Required)
+     */
+    @java.lang.SuppressWarnings("all")
+    public Boolean getIsManagedService() {
+        return this.isManagedService;
+    }
+
+    /**
+     * Indicates whether or not the product is a managed service. (Required)
+     */
+    @JsonProperty("is-managed-service")
+    @java.lang.SuppressWarnings("all")
+    public void setIsManagedService(final Boolean isManagedService) {
+        this.isManagedService = isManagedService;
+    }
+
+    /**
+     * The version of CPaaS that submitted the scan.
+     */
+    @java.lang.SuppressWarnings("all")
+    public String getCpaasVersion() {
+        return this.cpaasVersion;
+    }
+
+    /**
+     * The version of CPaaS that submitted the scan.
+     */
+    @JsonProperty("cpaas-version")
+    @java.lang.SuppressWarnings("all")
+    public void setCpaasVersion(final String cpaasVersion) {
+        this.cpaasVersion = cpaasVersion;
+    }
+
+    /**
+     * URL of Jenkins job that submitted the scan
+     */
+    @java.lang.SuppressWarnings("all")
+    public String getJobUrl() {
+        return this.jobUrl;
+    }
+
+    /**
+     * URL of Jenkins job that submitted the scan
+     */
+    @JsonProperty("job-url")
+    @java.lang.SuppressWarnings("all")
+    public void setJobUrl(final String jobUrl) {
+        this.jobUrl = jobUrl;
     }
 }

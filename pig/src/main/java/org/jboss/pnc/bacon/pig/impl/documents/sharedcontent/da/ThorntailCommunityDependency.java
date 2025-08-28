@@ -2,19 +2,11 @@ package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 13/08/2019
  */
-@Getter
-@Setter
-@ToString
 public class ThorntailCommunityDependency implements CsvExportable {
-
     private final CommunityDependency communityDependency;
     private List<String> usedForThorntail;
 
@@ -29,5 +21,22 @@ public class ThorntailCommunityDependency implements CsvExportable {
 
     public List<String> getUsedForThorntail() {
         return usedForThorntail;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public CommunityDependency getCommunityDependency() {
+        return this.communityDependency;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setUsedForThorntail(final List<String> usedForThorntail) {
+        this.usedForThorntail = usedForThorntail;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "ThorntailCommunityDependency(communityDependency=" + this.getCommunityDependency()
+                + ", usedForThorntail=" + this.getUsedForThorntail() + ")";
     }
 }

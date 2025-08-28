@@ -27,10 +27,9 @@ import org.jboss.pnc.dto.BuildConfigurationRef;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class BuildConfigGenerator {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BuildConfigGenerator.class);
     private final BuildConfigGeneratorConfig config;
     private final EnvironmentResolver environments;
 
@@ -159,8 +158,8 @@ public class BuildConfigGenerator {
     }
 
     private boolean isTainted(Project project) {
-        return project.isCutDependency() // Cut dependency means that the project will miss linked dependencies
-                || project.isConflictingName(); // Conflict means there are multiple BCs building the same thing
+        return // Cut dependency means that the project will miss linked dependencies
+        project.isCutDependency() || project.isConflictingName(); // Conflict means there are multiple BCs building the same thing
     }
 
     private String taintedMessage(Project project) {
@@ -247,7 +246,6 @@ public class BuildConfigGenerator {
     public BuildConfig copyManaged(BuildConfiguration bc, String name) {
         Environment env = environments.resolve(bc.getEnvironment());
         boolean useEnvironmentName = shouldUseEnvironmentName(name, env);
-
         BuildConfigMapping.GeneratorOptions opts = BuildConfigMapping.GeneratorOptions.builder()
                 .nameOverride(Optional.of(name))
                 .useEnvironmentName(useEnvironmentName)
@@ -267,7 +265,6 @@ public class BuildConfigGenerator {
     public BuildConfig copyExisting(BuildConfiguration bc, BuildConfigurationRevision bcr, String name) {
         Environment env = environments.resolve(bcr.getEnvironment());
         boolean useEnvironmentName = shouldUseEnvironmentName(name, env);
-
         BuildConfigMapping.GeneratorOptions opts = BuildConfigMapping.GeneratorOptions.builder()
                 .nameOverride(Optional.of(name))
                 .useEnvironmentName(useEnvironmentName)
@@ -365,5 +362,4 @@ public class BuildConfigGenerator {
         }
         return updatedUrl;
     }
-
 }

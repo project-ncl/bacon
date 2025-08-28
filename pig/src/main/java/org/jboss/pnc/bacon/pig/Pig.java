@@ -48,7 +48,6 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -77,7 +76,6 @@ import picocli.CommandLine.Parameters;
                 Pig.TriggerAddOns.class,
                 PigExport.class })
 public class Pig {
-
     private Pig() {
     }
 
@@ -87,65 +85,54 @@ public class Pig {
     public static final String TEMP_BUILD_TIME_STAMP = "--tempBuildTimeStamp";
     public static final String TEMP_BUILD_TIME_STAMP_DEFAULT = "false";
     public static final String TEMP_BUILD_TIME_STAMP_DESC = "NOT SUPPORTED - If specified, artifacts from temporary builds will have timestamp in versions";
-
     public static final String REMOVE_M2_DUPLICATES_DESC = "If enabled, only the newest versions of each of the dependencies (groupId:artifactId) "
             + "are kept in the generated repository zip";
     public static final String REMOVE_M2_DUPLICATES = "--removeGeneratedM2Dups";
-
     public static final String SKIP_BRANCH_CHECK = "--skipBranchCheck";
     public static final String SKIP_BRANCH_CHECK_DEFAULT = "false";
-    public static final String SKIP_BRANCH_CHECK_DESC = "If set to true, pig won't try to determine if the branch that is used to build from is modified. "
+    public static final String SKIP_BRANCH_CHECK_DESC = "If set to true, pig won\'t try to determine if the branch that is used to build from is modified. "
             + "Branch modification check takes a lot of time, if you use tag, this switch can speed up the build.";
 
-    public abstract static class PigCommand<T> extends JSONCommandHandler implements Callable<Integer> {
+    public static abstract class PigCommand<T> extends JSONCommandHandler implements Callable<Integer> {
         @Parameters(description = "Directory containing the Pig configuration file")
         String configDir;
-
         @Option(
                 names = { "-t", "--tempBuild" },
                 defaultValue = "false",
                 description = "If specified, PNC will perform temporary builds.")
         boolean tempBuild;
-
         @Option(
                 names = { "--tempBuildAlignment" },
                 description = "Alignment preference for temporary build. Options: (default)TEMPORARY, PERSISTENT")
         AlignmentType tempAlign = AlignmentType.TEMPORARY;
-
         @Option(
                 names = "--releaseStorageUrl",
                 description = "Location of the release storage, typically on rcm-guest staging. Required for auto-incremented milestones, e.g. DR*")
         protected String releaseStorageUrl;
-
         @Option(
                 names = "--clean",
                 defaultValue = "false",
                 description = "If enabled, the pig execution will not attempt to continue the previous execution")
         private boolean clean;
-
         @Option(
                 names = "--downloadAttempts",
                 defaultValue = "5",
                 description = "How many times should attempts to download files (e.g. from Indy to repo zip) be made")
         private int downloadAttempts;
-
         @Option(
                 names = "--targetPath",
                 defaultValue = "target",
                 description = "The directory where the deliverables will be put")
         private String targetPath;
-
         @Option(
                 names = { "-e", "--env" },
                 description = "Override the variables in the build-config.yaml. e.g -eVariable1=value1 -e Variable2=value2 --env=Variable3=value3")
         Map<String, String> overrides = Collections.emptyMap();
-
         @Option(
                 names = "--artifactCacheDownload",
                 defaultValue = "true",
                 description = "If set to false, all artifact downloads will be forcefully done and no cache store will be used")
         boolean artifactCacheDownload;
-
         @Option(
                 names = "--useLocalM2Cache",
                 defaultValue = "true",
@@ -169,14 +156,9 @@ public class Pig {
                 throw new Validate.ConfigMissingException("Pig configuration missing");
             }
             pig.validate();
-
             FileDownloadUtils.setAttempts(downloadAttempts);
-
             // Setting up artifact cache: we only want to cache downloads from Indy
-            FileDownloadUtils.controlCache(
-                    artifactCacheDownload,
-                    List.of(pig.getIndyUrl()));
-
+            FileDownloadUtils.controlCache(artifactCacheDownload, List.of(pig.getIndyUrl()));
             PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl, overrides);
             PigContext.get().setTempBuild(tempBuild);
             ObjectHelper.print(getJsonOutput(), doExecute());
@@ -193,92 +175,74 @@ public class Pig {
     /* System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "10"); */
     @Command(name = "run", description = "Run all the steps, except the release & pre-process-yaml phases")
     public static class Run extends PigCommand<PigRunOutput> {
-
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
-
         @Option(
                 names = TEMP_BUILD_TIME_STAMP,
                 defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
                 description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
-
         @Option(names = REBUILD_MODE, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
         private String rebuildMode;
-
         @Option(
                 names = "--skipPncUpdate",
                 defaultValue = "false",
                 description = "Skip updating PNC entities. Use only if you have all entities created properly.")
         private boolean skipPncUpdate;
-
         @Option(
                 names = "--skipBuilds",
                 defaultValue = "false",
                 description = "Skip PNC builds. Use when all your builds went fine, something failed later "
                         + "and you want to retry generating deliverables without rebuilding.")
         private boolean skipBuilds;
-
         @Option(names = "--skipSources", defaultValue = "false", description = "Skip sources generation.")
         private boolean skipSources;
-
         @Option(names = "--skipJavadoc", defaultValue = "false", description = "Skip Javadoc generation.")
         private boolean skipJavadoc;
-
         @Option(names = "--skipLicenses", defaultValue = "false", description = "Skip Licenses generation.")
         private boolean skipLicenses;
-
         @Option(
                 names = "--skipSharedContent",
                 defaultValue = "false",
                 description = "Skip generating shared content request input.")
         private boolean skipSharedContent;
-
         @Option(names = REMOVE_M2_DUPLICATES, description = REMOVE_M2_DUPLICATES_DESC)
         private boolean removeGeneratedM2Dups;
-
         @Option(
                 names = SKIP_BRANCH_CHECK,
                 defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
                 description = SKIP_BRANCH_CHECK_DESC)
         private boolean skipBranchCheck;
-
         @Option(
                 names = { "-r", "--repoZip" },
                 description = "Repository zip. "
                         + "Might be used if you have already downloaded repository zip to speed up the process.")
         private String repoZipPath;
-
         @Option(
                 names = "--strictLicenseCheck",
                 defaultValue = "true",
                 description = "if set to true will fail on license zip with missing/invalid entries")
         private boolean strictLicenseCheck;
-
         @Option(
                 names = "--strictDownloadSource",
                 defaultValue = "false",
                 description = "If set, any missing source jars will throw an error")
         private boolean strictDownloadSource;
-
         @Option(
                 names = "--licenseExceptionsPath",
                 description = "Path to file with exceptions for license generation. Usually rh-license-exceptions.json.")
         private String licenseExceptionsPath;
-
         @Option(
                 names = "--licenseNamesPath",
                 description = "Path to file with license names for license generation. Usually rh-license-names.json.")
         private String licenseNamesPath;
-
         @Option(
                 names = "--oldBCNaming",
                 defaultValue = "false",
                 description = "if set to true names used in source generation will be set in old way using BC names")
         private boolean oldBCNaming;
-
         /**
          * addOns to skip. Specified in CLI by using the flag multiple times: --skipAddon=a --skipAddon=b
          *
@@ -292,11 +256,9 @@ public class Pig {
 
         @Override
         public PigRunOutput doExecute() {
-
             PigFacade.exitIfSkippedAddonsInvalid(skippedAddons);
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             Path configurationDirectory = Paths.get(configDir);
-
             GroupBuildInfo groupBuildInfo = PigFacade.run(
                     skipPncUpdate,
                     skipBuilds,
@@ -319,7 +281,6 @@ public class Pig {
                     licenseExceptionsPath,
                     licenseNamesPath,
                     oldBCNaming);
-
             PigContext context = PigContext.get();
             return new PigRunOutput(
                     context.getFullVersion(),
@@ -336,7 +297,6 @@ public class Pig {
 
     @Command(name = "cancel", description = "Cancel running group build")
     public static class Cancel extends PigCommand<String> {
-
         @Override
         public String doExecute() {
             return PigFacade.cancel();
@@ -345,7 +305,6 @@ public class Pig {
 
     @Command(name = "configure", description = "Configure PNC entities")
     public static class Configure extends PigCommand<ImportResult> {
-
         @Option(
                 names = SKIP_BRANCH_CHECK,
                 defaultValue = SKIP_BRANCH_CHECK_DEFAULT,
@@ -368,27 +327,22 @@ public class Pig {
 
     @Command(name = "build", description = "Build")
     public static class Build extends PigCommand<PigBuildOutput> {
-
         // TODO: it is doable to do this step with build group id only, add this functionality
         // @Option(shortName = 'b',
         // description = "id of the group to build. Exactly one of {config, build-group} has to be provided")
         // private Integer buildGroupId;
-
         @Option(
                 names = { TEMP_BUILD_TIME_STAMP },
                 defaultValue = TEMP_BUILD_TIME_STAMP_DEFAULT,
                 description = TEMP_BUILD_TIME_STAMP_DESC)
         private boolean tempBuildTS;
-
         @Option(names = REBUILD_MODE, defaultValue = REBUILD_MODE_DEFAULT, description = REBUILD_MODE_DESC)
         private String rebuildMode;
-
-        @Option(names = "--noWait", defaultValue = "true", description = "Start build and don't wait for result.")
+        @Option(names = "--noWait", defaultValue = "true", description = "Start build and don\'t wait for result.")
         private boolean wait;
 
         @Override
         public PigBuildOutput doExecute() {
-
             ParameterChecker.checkRebuildModeOption(rebuildMode);
             GroupBuildInfo groupBuildInfo = PigFacade
                     .build(tempBuild, tempBuildTS, RebuildMode.valueOf(rebuildMode), wait, tempAlign);
@@ -396,7 +350,6 @@ public class Pig {
                 PigContext context = PigContext.get();
                 context.setBuilds(groupBuildInfo.getBuilds());
                 context.storeContext();
-
                 return new PigBuildOutput(
                         "Build started, waited for result.",
                         new PigRunOutput(
@@ -418,7 +371,6 @@ public class Pig {
                 defaultValue = "true",
                 description = "if set to true will fail on license zip with missing/invalid entries")
         private boolean strictLicenseCheck;
-
         @Option(
                 names = "--strictDownloadSource",
                 defaultValue = "false",
@@ -447,12 +399,10 @@ public class Pig {
                 defaultValue = "true",
                 description = "if set to true will fail on license zip with missing/invalid entries")
         private boolean strictLicenseCheck;
-
         @Option(
                 names = "--licenseExceptionsPath",
                 description = "Path to file with exceptions for license generation. Usually rh-license-exceptions.json.")
         private String licenseExceptionsPath;
-
         @Option(
                 names = "--licenseNamesPath",
                 description = "Path to file with license names for license generation. Usually rh-license-names.json.")
@@ -467,7 +417,6 @@ public class Pig {
 
     @Command(name = "javadocs", description = "GenerateJavadocs")
     public static class GenerateJavadocs extends PigCommand<String> {
-
         @Override
         public String doExecute() {
             PigFacade.generateJavadoc();
@@ -477,7 +426,6 @@ public class Pig {
 
     @Command(name = "sources", description = "GenerateSources")
     public static class GenerateSources extends PigCommand<String> {
-
         @Option(
                 names = "--oldBCNaming",
                 defaultValue = "false",
@@ -493,7 +441,6 @@ public class Pig {
 
     @Command(name = "shared-content", description = "GenerateSharedContentAnalysis")
     public static class GenerateSharedContentAnalysis extends PigCommand<String> {
-
         @Override
         public String doExecute() {
             PigFacade.prepareSharedContentAnalysis();
@@ -503,7 +450,6 @@ public class Pig {
 
     @Command(name = "docs", description = "GenerateDocuments")
     public static class GenerateDocuments extends PigCommand<String> {
-
         @Override
         public String doExecute() {
             PigFacade.generateDocuments();
@@ -513,7 +459,6 @@ public class Pig {
 
     @Command(name = "addons", description = "Addons")
     public static class TriggerAddOns extends PigCommand<String> {
-
         /**
          * addOns to skip. Specified in CLI by using the flag multiple times: --skipAddon=a --skipAddon=b
          *
@@ -538,7 +483,6 @@ public class Pig {
             description = "Push builds to brew, generate the NVR list, "
                     + "close the PNC milestone, generate the upload to candidates script if repository generated")
     public static class Release extends PigCommand<PigReleaseOutput> {
-
         @Override
         public PigReleaseOutput doExecute() {
             return PigFacade.release();
@@ -546,23 +490,21 @@ public class Pig {
     }
 
     @Command(name = "pre-process-yaml", description = "Show the final YAML content with variables injected")
-    @Slf4j
     public static class PreProcessYaml extends PigCommand<String> {
+        @java.lang.SuppressWarnings("all")
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PreProcessYaml.class);
 
         @Override
         public String doExecute() {
             try {
                 File configFile = Paths.get(configDir).resolve("build-config.yaml").toFile();
                 InputStream preProcessed = PigConfiguration.preProcess(new FileInputStream(configFile), overrides);
-
                 String contents = "";
                 Scanner s = new Scanner(preProcessed);
                 s.useDelimiter("\\A");
-
                 if (s.hasNext()) {
                     contents = s.next();
                 }
-
                 // Yeah we'll violate the normal rules and just print to stdout. The JSON/YAML output has no effect here
                 System.out.println(contents);
             } catch (FileNotFoundException e) {

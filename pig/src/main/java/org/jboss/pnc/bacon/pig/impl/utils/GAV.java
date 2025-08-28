@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.utils;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -33,20 +32,12 @@ import org.w3c.dom.Element;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
-@Getter
-@EqualsAndHashCode(exclude = { "packaging", "classifier", "scope" })
-@ToString
 public class GAV {
     private static final Logger log = LoggerFactory.getLogger(GAV.class);
-
     public static final Comparator<GAV> gapvcComparator = Comparator.comparing(GAV::toGapvc);
     /**
      * See NCL-7238. Some gavs have no packaging due to weird Maven behaviour. In PNC, we need to specify a packaging to
@@ -55,7 +46,6 @@ public class GAV {
      * Also specified in repository-driver
      */
     public static final String FILE_NO_EXTENSION_PACKAGING = "empty";
-
     private String packaging; // not final for jackson
     private String groupId; // not final for jackson
     private String artifactId; // not final for jackson
@@ -65,25 +55,21 @@ public class GAV {
     // Extensions with no "standard" format, like having a dot on it
     List<String> extensionExceptions = Arrays.asList("tar.gz", "tar.bz2");
 
-    @Deprecated // for jackson
+    // for jackson
+    @Deprecated
     public GAV() {
-
     }
 
     public GAV(String artifactPath) {
         log.debug("parsing artifact path {}", artifactPath);
-
         final String path = FilenameUtils.normalizeNoEndSeparator(artifactPath, true);
-
         int versionEnd = path.lastIndexOf('/');
         int artifactEnd = path.lastIndexOf('/', versionEnd - 1);
         int groupEnd = path.lastIndexOf('/', artifactEnd - 1);
-
         try {
             version = path.substring(artifactEnd + 1, versionEnd);
             artifactId = path.substring(groupEnd + 1, artifactEnd);
             groupId = path.substring(0, groupEnd).replaceAll("/", ".");
-
             int fileNameVersionEnd = versionEnd + artifactId.length() + version.length() + 2;
             if (path.charAt(fileNameVersionEnd) == '.') {
                 packaging = path.substring(fileNameVersionEnd + 1);
@@ -204,7 +190,6 @@ public class GAV {
                 throw new RuntimeException(
                         "Error parsing gav: " + colonSeparatedGav
                                 + ". Expected groupId:artifactId:packaging:classifier:version or groupId:artifactId:packaging:version");
-
         }
     }
 
@@ -213,7 +198,6 @@ public class GAV {
         if ("import".equals(scope)) {
             return "";
         }
-
         return String.format(
                 "      <dependency>\n" + "         <groupId>%s</groupId>\n" + "         <artifactId>%s</artifactId>\n"
                         + "         <type>%s</type>\n"
@@ -230,7 +214,6 @@ public class GAV {
         repoRootName = FilenameUtils.normalize(repoRootName, true);
         int repoDirNameIdx = absolutePath.lastIndexOf(repoRootName);
         String gavPart = absolutePath.substring(repoDirNameIdx + repoRootName.length());
-
         return new GAV(gavPart);
     }
 
@@ -272,5 +255,100 @@ public class GAV {
 
     public static boolean isTempVersion(String v) {
         return v.contains("temporary-redhat") || v.matches(".*\\.t\\d{8}-\\d+-\\d+-redhat-\\d+");
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getPackaging() {
+        return this.packaging;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getGroupId() {
+        return this.groupId;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getArtifactId() {
+        return this.artifactId;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getVersion() {
+        return this.version;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getScope() {
+        return this.scope;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getClassifier() {
+        return this.classifier;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public List<String> getExtensionExceptions() {
+        return this.extensionExceptions;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public boolean equals(final java.lang.Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof GAV))
+            return false;
+        final GAV other = (GAV) o;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        final java.lang.Object this$groupId = this.getGroupId();
+        final java.lang.Object other$groupId = other.getGroupId();
+        if (this$groupId == null ? other$groupId != null : !this$groupId.equals(other$groupId))
+            return false;
+        final java.lang.Object this$artifactId = this.getArtifactId();
+        final java.lang.Object other$artifactId = other.getArtifactId();
+        if (this$artifactId == null ? other$artifactId != null : !this$artifactId.equals(other$artifactId))
+            return false;
+        final java.lang.Object this$version = this.getVersion();
+        final java.lang.Object other$version = other.getVersion();
+        if (this$version == null ? other$version != null : !this$version.equals(other$version))
+            return false;
+        final java.lang.Object this$extensionExceptions = this.getExtensionExceptions();
+        final java.lang.Object other$extensionExceptions = other.getExtensionExceptions();
+        if (this$extensionExceptions == null ? other$extensionExceptions != null
+                : !this$extensionExceptions.equals(other$extensionExceptions))
+            return false;
+        return true;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    protected boolean canEqual(final java.lang.Object other) {
+        return other instanceof GAV;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final java.lang.Object $groupId = this.getGroupId();
+        result = result * PRIME + ($groupId == null ? 43 : $groupId.hashCode());
+        final java.lang.Object $artifactId = this.getArtifactId();
+        result = result * PRIME + ($artifactId == null ? 43 : $artifactId.hashCode());
+        final java.lang.Object $version = this.getVersion();
+        result = result * PRIME + ($version == null ? 43 : $version.hashCode());
+        final java.lang.Object $extensionExceptions = this.getExtensionExceptions();
+        result = result * PRIME + ($extensionExceptions == null ? 43 : $extensionExceptions.hashCode());
+        return result;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "GAV(packaging=" + this.getPackaging() + ", groupId=" + this.getGroupId() + ", artifactId="
+                + this.getArtifactId() + ", version=" + this.getVersion() + ", scope=" + this.getScope()
+                + ", classifier=" + this.getClassifier() + ", extensionExceptions=" + this.getExtensionExceptions()
+                + ")";
     }
 }

@@ -40,7 +40,6 @@ import org.jboss.pnc.dto.ProductRef;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.dto.ProductVersion;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -56,9 +55,9 @@ import picocli.CommandLine.Parameters;
                 ProductVersionCli.ListGroupConfigs.class,
                 ProductVersionCli.ListMilestones.class,
                 ProductVersionCli.ListReleases.class })
-@Slf4j
 public class ProductVersionCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductVersionCli.class);
     private static final ClientCreator<ProductVersionClient> CREATOR = new ClientCreator<>(ProductVersionClient::new);
 
     /**
@@ -68,9 +67,7 @@ public class ProductVersionCli {
      * @return
      */
     public static boolean validateProductVersion(String version) {
-
         String[] items = version.split("\\.");
-
         if (items.length != 2) {
             return false;
         } else {
@@ -88,7 +85,6 @@ public class ProductVersionCli {
             description = "Create a product version",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-version create --product-id 20 2.1")
     public static class Create extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Version of product version")
         private String productVersion;
         @Option(required = true, names = "--product-id", description = "Product ID of product version")
@@ -104,17 +100,14 @@ public class ProductVersionCli {
         public Integer call() throws Exception {
             if (!validateProductVersion(productVersion)) {
                 throw new FatalException(
-                        "Version specified '" + productVersion + "' is not valid! "
+                        "Version specified \'" + productVersion + "\' is not valid! "
                                 + "The version should consist of two numeric parts separated by a dot (e.g 7.0)");
             }
-
             ProductRef productRef = ProductRef.refBuilder().id(productId).build();
-
             ProductVersion productVersion = ProductVersion.builder()
                     .product(productRef)
                     .version(this.productVersion)
                     .build();
-
             try (ProductVersionClient client = CREATOR.newClientAuthenticated()) {
                 ObjectHelper.print(getJsonOutput(), client.createNew(productVersion));
                 return 0;
@@ -124,7 +117,6 @@ public class ProductVersionCli {
 
     @Command(name = "get", description = "Get a product version by its id")
     public static class Get extends AbstractGetSpecificCommand<ProductVersion> {
-
         @Override
         public ProductVersion getSpecific(String id) throws ClientException {
             try (ProductVersionClient client = CREATOR.newClient()) {
@@ -135,13 +127,11 @@ public class ProductVersionCli {
 
     @Command(name = "list-build-configs", description = "List Build configs for a particular product version")
     public static class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
-
         @Parameters(description = "Product version id")
         private String id;
 
         @Override
         public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-
             try (ProductVersionClient client = CREATOR.newClient()) {
                 return client.getBuildConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
@@ -150,13 +140,11 @@ public class ProductVersionCli {
 
     @Command(name = "list-group-configs", description = "List Group configs for a particular product version")
     public static class ListGroupConfigs extends AbstractListCommand<GroupConfiguration> {
-
         @Parameters(description = "Product version id")
         private String id;
 
         @Override
         public Collection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
-
             try (ProductVersionClient client = CREATOR.newClient()) {
                 return client.getGroupConfigs(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
@@ -165,13 +153,11 @@ public class ProductVersionCli {
 
     @Command(name = "list-milestones", description = "List milestones for a particular product version")
     public static class ListMilestones extends AbstractListCommand<ProductMilestone> {
-
         @Parameters(description = "Product version id")
         private String id;
 
         @Override
         public Collection<ProductMilestone> getAll(String sort, String query) throws RemoteResourceException {
-
             try (ProductVersionClient client = CREATOR.newClient()) {
                 return client.getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
@@ -180,13 +166,11 @@ public class ProductVersionCli {
 
     @Command(name = "list-releases", description = "List releases for a particular product version")
     public static class ListReleases extends AbstractListCommand<ProductRelease> {
-
         @Parameters(description = "Product version id")
         private String id;
 
         @Override
         public Collection<ProductRelease> getAll(String sort, String query) throws RemoteResourceException {
-
             try (ProductVersionClient client = CREATOR.newClient()) {
                 return client.getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
             }
@@ -198,10 +182,8 @@ public class ProductVersionCli {
             description = "Update a particular product version",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc product-version update --product-version 2.2 42")
     public static class Update implements Callable<Integer> {
-
         @Parameters(description = "Product Version ID to update")
         private String id;
-
         @Option(names = "--product-version", description = "Version of product version")
         private String productVersion;
 
@@ -219,7 +201,7 @@ public class ProductVersionCli {
                 if (isNotEmpty(productVersion)) {
                     if (!validateProductVersion(productVersion)) {
                         throw new FatalException(
-                                "Version specified ('{}') is not valid! The version should consist of two numeric parts separated by a dot (e.g 7.0)",
+                                "Version specified (\'{}\') is not valid! The version should consist of two numeric parts separated by a dot (e.g 7.0)",
                                 productVersion);
                     }
                     updated.version(productVersion);

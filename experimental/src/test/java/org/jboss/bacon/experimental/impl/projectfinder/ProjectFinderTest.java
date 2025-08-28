@@ -26,11 +26,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class ProjectFinderTest {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProjectFinderTest.class);
     @RegisterExtension
     static WireMockExtension wireMock = WireMockExtension.newInstance()
             .options(
@@ -38,9 +36,7 @@ public class ProjectFinderTest {
                             .usingFilesUnderDirectory("src/test/resources/wiremock")
                             .notifier(new ConsoleNotifier(false)))
             .build();
-
     private static WireMockServer mockServer;
-
     private BuildConfigGeneratorConfig config;
     private ProjectFinder finder;
     public static final Path CONFIG_LOCATION = Paths.get("target", "test-config");
@@ -59,9 +55,7 @@ public class ProjectFinderTest {
     @Test
     public void testFindProjects() throws RemoteResourceException {
         DependencyResult dependencyResult = generateDependencyResult();
-
         FoundProjects projects = finder.findProjects(dependencyResult);
-
         assertThat(projects).isNotNull();
         assertThat(projects.getFoundProjects()).hasSize(5);
         FoundProject toplevelOne = null;
@@ -88,9 +82,7 @@ public class ProjectFinderTest {
         project.setSourceCodeRevision("2.3.3-b02-RI");
         DependencyResult dependencyResult = new DependencyResult();
         dependencyResult.setTopLevelProjects(Set.of(project));
-
         FoundProjects projects = finder.findProjects(dependencyResult);
-
         assertThat(projects).isNotNull();
         assertThat(projects.getFoundProjects()).hasSize(1);
         FoundProject found = projects.getFoundProjects().iterator().next();
@@ -108,12 +100,9 @@ public class ProjectFinderTest {
         project.setDependencies(Set.of());
         project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
         project.setSourceCodeRevision("2.3.3-b02-RI");
-
         DependencyResult dependencyResult = new DependencyResult();
         dependencyResult.setTopLevelProjects(Set.of(project));
-
         FoundProjects projects = finder.findProjects(dependencyResult);
-
         assertThat(projects).isNotNull();
         assertThat(projects.getFoundProjects()).hasSize(1);
         FoundProject found = projects.getFoundProjects().iterator().next();
@@ -132,12 +121,9 @@ public class ProjectFinderTest {
         project.setDependencies(Set.of());
         project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
         project.setSourceCodeRevision("2.3.3-b02-RI");
-
         DependencyResult dependencyResult = new DependencyResult();
         dependencyResult.setTopLevelProjects(Set.of(project));
-
         FoundProjects projects = finder.findProjects(dependencyResult);
-
         assertThat(projects).isNotNull();
         assertThat(projects.getFoundProjects()).hasSize(1);
         FoundProject found = projects.getFoundProjects().iterator().next();
@@ -155,12 +141,9 @@ public class ProjectFinderTest {
         project.setDependencies(Set.of());
         project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
         project.setSourceCodeRevision("2.3.3-b02-RI");
-
         DependencyResult dependencyResult = new DependencyResult();
         dependencyResult.setTopLevelProjects(Set.of(project));
-
         FoundProjects projects = finder.findProjects(dependencyResult);
-
         assertThat(projects).isNotNull();
         assertThat(projects.getFoundProjects()).hasSize(1);
         FoundProject found = projects.getFoundProjects().iterator().next();
@@ -178,12 +161,9 @@ public class ProjectFinderTest {
         project.setDependencies(Set.of());
         project.setSourceCodeURL("https://github.com/eclipse-ee4j/jaxb-ri.git");
         project.setSourceCodeRevision("2.3.3-b02-RI");
-
         DependencyResult dependencyResult = new DependencyResult();
         dependencyResult.setTopLevelProjects(Set.of(project));
-
         FoundProjects projects = finder.findProjects(dependencyResult);
-
         assertThat(projects).isNotNull();
         assertThat(projects.getFoundProjects()).hasSize(1);
         FoundProject found = projects.getFoundProjects().iterator().next();
@@ -197,12 +177,10 @@ public class ProjectFinderTest {
         Project dep1 = generateProject("dependency-one");
         Project dep2 = generateProject("dependency-two");
         Project depCommon = generateProject("dependency-common");
-
         dep1.setDependencies(Collections.singleton(depCommon));
         dep2.setDependencies(Collections.singleton(depCommon));
         toplevel1.setDependencies(Collections.singleton(dep1));
         toplevel2.setDependencies(Collections.singleton(dep2));
-
         DependencyResult result = new DependencyResult();
         Set<Project> toplevels = new HashSet<>();
         toplevels.add(toplevel1);
@@ -231,5 +209,4 @@ public class ProjectFinderTest {
         gavs.add(new GAV(groupId, "baz", version));
         return gavs;
     }
-
 }

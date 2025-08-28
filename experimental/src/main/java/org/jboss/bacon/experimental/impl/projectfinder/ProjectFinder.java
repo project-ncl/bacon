@@ -37,12 +37,9 @@ import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class ProjectFinder {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProjectFinder.class);
     private final LookupApi lookupApi;
     private final ArtifactClient artifactClient;
     private final BuildClient buildClient;
@@ -74,11 +71,8 @@ public class ProjectFinder {
     public FoundProjects findProjects(DependencyResult dependencies) {
         Set<Project> projects = new HashSet<>();
         traverseTree(projects, dependencies.getTopLevelProjects());
-
         Set<GAV> allGAVs = projects.stream().flatMap(p -> p.getGavs().stream()).collect(Collectors.toSet());
-
         Map<GAV, List<String>> availableVersions = findAvailableVersions(allGAVs);
-
         FoundProjects foundProjects = new FoundProjects();
         for (Project project : projects) {
             FoundProject foundProject = findManagedProject(project);
@@ -87,7 +81,6 @@ public class ProjectFinder {
             }
             foundProjects.getFoundProjects().add(foundProject);
         }
-
         return foundProjects;
     }
 
@@ -113,13 +106,11 @@ public class ProjectFinder {
         Set<GAV> gavs = project.getGavs();
         GAV gav = project.getFirstGAV();
         BuildVersion buildVersion = findBuild(gav, availableVersions.get(gav));
-
         if (buildVersion == null) {
             log.debug("Project " + gav + " was not built in PNC before.");
             found.setFound(false);
             return found;
         }
-
         found.setFound(true);
         found.setComplete(validateBuild(gavs, buildVersion.build));
         found.setExactMatch(isExactVersion(gav.getVersion(), buildVersion.version));
@@ -128,7 +119,6 @@ public class ProjectFinder {
         found.setBuildConfig(getBuildConfiguration(buildVersion.build));
         int latestRev = getLatestBuildConfigurationRevision(buildConfigurationRevision.getId()).getRev();
         found.setLatestRevision(buildConfigurationRevision.getRev() == latestRev);
-
         if (log.isDebugEnabled()) {
             String how = found.isExactMatch() ? "exactly" : "in different version";
             log.debug("Project " + gav + " was built in PNC before " + how + " by " + buildVersion.build.getId());
@@ -140,7 +130,6 @@ public class ProjectFinder {
         try {
             RemoteCollection<BuildConfiguration> all = buildConfigClient
                     .getAll(Optional.empty(), Optional.of("name==" + name));
-
             return StreamSupport.stream(all.spliterator(), false)
                     .filter(bc -> bc.getName().equals(name))
                     .findAny()
@@ -271,10 +260,15 @@ public class ProjectFinder {
         }
     }
 
-    @AllArgsConstructor
     private static class BuildVersion {
         private Build build;
         private String version;
+
+        @java.lang.SuppressWarnings("all")
+        public BuildVersion(final Build build, final String version) {
+            this.build = build;
+            this.version = version;
+        }
     }
 
     /**
@@ -282,7 +276,6 @@ public class ProjectFinder {
      * compares the Revisions by revision (rev) number.
      */
     private class BuildConfigRevisionAgeComparator implements Comparator<BuildConfigurationRevision> {
-
         @Override
         public int compare(BuildConfigurationRevision one, BuildConfigurationRevision two) {
             if (one.getModificationTime() == null || two.getModificationTime() == null) {

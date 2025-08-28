@@ -17,14 +17,64 @@
  */
 package org.jboss.pnc.bacon.config;
 
-import lombok.Data;
-
-@Data
 public class AutobuildConfig implements Validate {
     private String gavExclusionUrl;
 
     @Override
     public void validate() {
         Validate.validateUrl(gavExclusionUrl, "GAV Exclusion file");
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public AutobuildConfig() {
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getGavExclusionUrl() {
+        return this.gavExclusionUrl;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setGavExclusionUrl(final String gavExclusionUrl) {
+        this.gavExclusionUrl = gavExclusionUrl;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public boolean equals(final java.lang.Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof AutobuildConfig))
+            return false;
+        final AutobuildConfig other = (AutobuildConfig) o;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        final java.lang.Object this$gavExclusionUrl = this.getGavExclusionUrl();
+        final java.lang.Object other$gavExclusionUrl = other.getGavExclusionUrl();
+        if (this$gavExclusionUrl == null ? other$gavExclusionUrl != null
+                : !this$gavExclusionUrl.equals(other$gavExclusionUrl))
+            return false;
+        return true;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    protected boolean canEqual(final java.lang.Object other) {
+        return other instanceof AutobuildConfig;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final java.lang.Object $gavExclusionUrl = this.getGavExclusionUrl();
+        result = result * PRIME + ($gavExclusionUrl == null ? 43 : $gavExclusionUrl.hashCode());
+        return result;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "AutobuildConfig(gavExclusionUrl=" + this.getGavExclusionUrl() + ")";
     }
 }

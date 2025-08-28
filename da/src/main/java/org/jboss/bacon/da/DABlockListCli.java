@@ -29,22 +29,20 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "blocklist",
         description = "DA blocklist",
         subcommands = { DABlockListCli.List.class, DABlockListCli.Add.class })
-@Slf4j
 public class DABlockListCli {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DABlockListCli.class);
 
     @CommandLine.Command(name = "list", description = "List the GAVs in the blocklist")
     public static class List extends JSONCommandHandler implements Callable<Integer> {
-
         @Override
         public Integer call() {
-
             ListingsApi listingsApi = DaHelper.createListingsApi();
             try {
                 Collection<RestArtifact> artifacts = listingsApi.getAllBlackArtifacts();
@@ -58,22 +56,18 @@ public class DABlockListCli {
 
     @CommandLine.Command(name = "add", description = "Add GAVs to the blocklist")
     public static class Add extends JSONCommandHandler implements Callable<Integer> {
-
         @CommandLine.Parameters(description = "groupId:artifactId:version of the artifact to lookup")
         private String[] gavs;
 
         @Override
         public Integer call() {
-
             if (gavs == null) {
-                throw new FatalException("You didn't specify any GAVs!");
+                throw new FatalException("You didn\'t specify any GAVs!");
             }
-
             Set<RestArtifact> gavSet = new HashSet<>();
             for (String gav : gavs) {
                 gavSet.add(DaHelper.toRestArtifact(gav));
             }
-
             ListingsApi listingsApi = DaHelper.createAuthenticatedListingsApi();
             try {
                 for (RestArtifact artifact : gavSet) {

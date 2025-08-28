@@ -1,3 +1,16 @@
+package org.jboss.bacon.experimental.impl.generator;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.jboss.bacon.experimental.impl.dependencies.Project;
+import org.jboss.da.model.rest.GA;
+import org.jboss.da.model.rest.GAV;
+import org.jboss.pnc.common.version.SuffixedVersion;
+import org.jboss.pnc.common.version.VersionParser;
+
 /**
  * JBoss, Home of Professional Open Source.
  * Copyright 2021 Red Hat, Inc., and individual contributors
@@ -15,25 +28,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.bacon.experimental.impl.generator;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.jboss.bacon.experimental.impl.dependencies.Project;
-import org.jboss.da.model.rest.GA;
-import org.jboss.da.model.rest.GAV;
-import org.jboss.pnc.common.version.SuffixedVersion;
-import org.jboss.pnc.common.version.VersionParser;
-
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class ProjectNameGenerator {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProjectNameGenerator.class);
     private final VersionParser versionParser = new VersionParser("redhat", "temporary-redhat");
-
     private Set<Project> allProjects;
     private Map<GA, Set<Project>> projectsByGA;
 
@@ -59,7 +57,6 @@ public class ProjectNameGenerator {
         GAV gav = project.getFirstGAV();
         String version = resolveVersionForName(project, gav);
         String name = gav.getGroupId() + "-" + gav.getArtifactId() + "-" + version + "-AUTOBUILD";
-
         project.setName(name);
     }
 
@@ -92,5 +89,4 @@ public class ProjectNameGenerator {
         }
         return false;
     }
-
 }

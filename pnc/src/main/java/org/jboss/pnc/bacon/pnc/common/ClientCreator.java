@@ -6,14 +6,13 @@ import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.ClientBase;
 import org.jboss.pnc.client.Configuration;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Helper class to create the PNC CLI client to use in the CLI objects. There are two variants, the unauthenticated one
  * and the authenticated one.
  */
-@Slf4j
 public class ClientCreator<T extends ClientBase<?>> {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClientCreator.class);
     private final Function<Configuration, T> constructor;
 
     /**

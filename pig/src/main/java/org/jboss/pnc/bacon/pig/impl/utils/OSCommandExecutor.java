@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.utils;
 
 import static java.util.Arrays.asList;
@@ -38,8 +37,6 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import lombok.Getter;
 
 /**
  * todo: clean up + possibly move out to a separate lib TODO: remove !!
@@ -66,7 +63,6 @@ public class OSCommandExecutor {
         return new CommandExecutor(command);
     }
 
-    @Getter
     public static class CommandExecutor {
         private final String command;
         private Path directory;
@@ -140,7 +136,6 @@ public class OSCommandExecutor {
                     builder.redirectErrorStream(redirectErrorStream);
                     log.debug("Invoking command {}", builder.command());
                     Process process = builder.start();
-
                     CompletableFuture<Boolean> processExitWaiter = waitFor(process);
                     if (printOutputInOneLine) {
                         writeToStdoutInOneLine(process.getInputStream());
@@ -148,7 +143,6 @@ public class OSCommandExecutor {
                         read(process.getInputStream(), out);
                     }
                     timedOut = processExitWaiter.get();
-
                     if (!timedOut) {
                         status = process.exitValue();
                         if (outputFile != null) {
@@ -162,7 +156,6 @@ public class OSCommandExecutor {
                         }
                     }
                     attempts--;
-
                 } while ((timedOut || status != 0) && attempts > 0);
                 if (failOnStatusCode && status != 0) {
                     log.error(
@@ -228,20 +221,19 @@ public class OSCommandExecutor {
         }
 
         private static String stripQuoteMarks(String s) {
-            for (String quoteMark : asList("\"", "'")) {
+            for (String quoteMark : asList("\"", "\'")) {
                 if (s.startsWith(quoteMark) && s.endsWith(quoteMark)) {
                     s = s.substring(1, s.length() - 1);
                 }
             }
-
             s = s.replaceAll("\\\\\"", "\"");
-            s = s.replaceAll("\\\\'", "'");
-
+            s = s.replaceAll("\\\\\'", "\'");
             return s;
         }
 
         private static void consumeInputStream(InputStream inputStream, Consumer<String> consumer) throws IOException {
-            try (InputStreamReader streamReader = new InputStreamReader(inputStream);
+            try (
+                    InputStreamReader streamReader = new InputStreamReader(inputStream);
                     BufferedReader reader = new BufferedReader(streamReader)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -284,6 +276,61 @@ public class OSCommandExecutor {
 
         protected String prepareCommand(String command) {
             return command;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public String getCommand() {
+            return this.command;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public Path getDirectory() {
+            return this.directory;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public boolean isFailOnStatusCode() {
+            return this.failOnStatusCode;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public boolean isPrintOutputInOneLine() {
+            return this.printOutputInOneLine;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public int getStatus() {
+            return this.status;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public boolean isTimedOut() {
+            return this.timedOut;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public int getAttempts() {
+            return this.attempts;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public List<String> getOut() {
+            return this.out;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public String getOutputFile() {
+            return this.outputFile;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public boolean isRedirectErrorStream() {
+            return this.redirectErrorStream;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public Integer getTimeout() {
+            return this.timeout;
         }
     }
 

@@ -48,7 +48,6 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -69,9 +68,9 @@ import picocli.CommandLine.Parameters;
                 BuildConfigCli.CreateRevision.class,
                 BuildConfigCli.AddDependency.class,
                 BuildConfigCli.RemoveDependency.class })
-@Slf4j
 public class BuildConfigCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BuildConfigCli.class);
     private static final ClientCreator<BuildConfigurationClient> CREATOR = new ClientCreator<>(
             BuildConfigurationClient::new);
 
@@ -84,10 +83,8 @@ public class BuildConfigCli {
                     + "\t-PTEST=TRUE -PALIGNMENT_PARAMETERS=\"-Dignore=true\" \\%n"
                     + "\t--build-type MVN buildconfigname")
     public static class Create extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Name of build config")
         private String buildConfigName;
-
         @Option(names = "--description", description = "Description of build config")
         private String description;
         @Option(required = true, names = "--environment-id", description = "Environment ID of build config")
@@ -133,7 +130,6 @@ public class BuildConfigCli {
                     .buildType(BuildType.valueOf(buildType))
                     .brewPullActive(brewPullActive)
                     .parameters(parameters);
-
             if (isNotEmpty(productVersionId)) {
                 buildConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
             }
@@ -154,10 +150,8 @@ public class BuildConfigCli {
                     + "\t--scm-url=http://github.com/project-ncl/pnc.git \\%n\t--scm-revision=main"
                     + "\t--no-prebuild-sync")
     public static class CreateWithSCM extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Name of build config")
         private String buildConfigName;
-
         @Option(names = "--description", description = "Description of build config")
         private String description;
         @Option(required = true, names = "--environment-id", description = "Environment ID of build config")
@@ -175,7 +169,6 @@ public class BuildConfigCli {
                 description = "Build Type. Options are: MVN,GRADLE,NPM,SBT. Default: MVN",
                 defaultValue = "MVN")
         private String buildType;
-
         @Option(required = true, names = "--scm-url", description = "SCM URL")
         private String scmUrl;
         @Option(required = true, names = "--scm-revision", description = "SCM Revision")
@@ -206,13 +199,11 @@ public class BuildConfigCli {
                     .brewPullActive(brewPullActive)
                     .parameters(parameters)
                     .build();
-
             BuildConfigWithSCMRequest request = BuildConfigWithSCMRequest.builder()
                     .scmUrl(scmUrl)
                     .buildConfig(buildConfiguration)
                     .preBuildSyncEnabled(!noPreBuildSync)
                     .build();
-
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
                 ObjectHelper.print(getJsonOutput(), client.createWithSCM(request));
                 return 0;
@@ -226,13 +217,10 @@ public class BuildConfigCli {
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc build-config update --description \"new me new description\" 50")
     public static class Update extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Build config ID")
         protected String buildConfigId;
-
         @Option(names = "--buildConfigName", description = "Build config name")
         private String buildConfigName;
-
         @Option(names = "--description", description = "Description of build config")
         private String description;
         @Option(names = "--environment-id", description = "Environment ID of build config")
@@ -324,13 +312,10 @@ public class BuildConfigCli {
             description = "Clone a build configuration and optionally set a new name and scm revision",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build-config clone 5 --scmRevision newTag")
     public static class Clone extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Build config ID to clone")
         protected String buildConfigId;
-
         @Option(names = "--buildConfigName", description = "Set a new name for the cloned build configuration")
         private String buildConfigName;
-
         @Option(names = "--scmRevision", description = "Set a new SCM Revision to the cloned build configuration")
         private String scmRevision;
 
@@ -338,26 +323,20 @@ public class BuildConfigCli {
         public Integer call() throws Exception {
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
                 BuildConfiguration buildConfiguration = client.clone(buildConfigId);
-
                 BuildConfiguration.Builder updated = buildConfiguration.toBuilder();
-
                 boolean changed = false;
                 if (isNotEmpty(buildConfigName)) {
                     updated.name(buildConfigName);
                     changed = true;
                 }
-
                 if (isNotEmpty(scmRevision)) {
                     updated.scmRevision(scmRevision);
                     changed = true;
                 }
-
                 BuildConfiguration newBuildConfiguration = updated.build();
-
                 if (changed) {
                     client.update(buildConfiguration.getId(), newBuildConfiguration);
                 }
-
                 ObjectHelper.print(getJsonOutput(), newBuildConfiguration);
                 return 0;
             }
@@ -370,7 +349,6 @@ public class BuildConfigCli {
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc build-config create-revision --description \"new me new description\" 50")
     public static class CreateRevision extends Update implements Callable<Integer> {
-
         @Override
         protected void callUpdate(BuildConfiguration updated) throws JsonProcessingException, RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
@@ -381,7 +359,6 @@ public class BuildConfigCli {
 
     @Command(name = "get", description = "Get a build config by its id")
     public static class Get extends AbstractGetSpecificCommand<BuildConfiguration> {
-
         @Override
         public BuildConfiguration getSpecific(String id) throws ClientException {
             try (BuildConfigurationClient client = CREATOR.newClient()) {
@@ -392,7 +369,6 @@ public class BuildConfigCli {
 
     @Command(name = "get-revision", description = "Get build config revision")
     public static class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
-
         @Option(names = "--revisionId", description = "Revision Id of build configuration")
         private int revisionId;
 
@@ -406,7 +382,6 @@ public class BuildConfigCli {
 
     @Command(name = "list", description = "List build configs")
     public static class List extends AbstractListCommand<BuildConfiguration> {
-
         @Override
         public Collection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (BuildConfigurationClient client = CREATOR.newClient()) {
@@ -417,7 +392,6 @@ public class BuildConfigCli {
 
     @Command(name = "list-revisions", description = "List revisions of build config")
     public static class ListRevision extends AbstractListCommand<BuildConfigurationRevision> {
-
         @Parameters(description = "Build configuration id")
         private String id;
 
@@ -431,7 +405,6 @@ public class BuildConfigCli {
 
     @Command(name = "list-builds", description = "List builds of build configs")
     public static class ListBuilds extends AbstractBuildListCommand {
-
         @Parameters(description = "Build config id")
         private String buildConfigId;
 
@@ -448,10 +421,8 @@ public class BuildConfigCli {
 
     @Command(name = "add-dependency", description = "Adds a dependency to a BuildConfig")
     public static class AddDependency implements Callable<Integer> {
-
         @Parameters(description = "Build config id")
         private String buildConfigId;
-
         @Option(names = "--dependency-id", required = true, description = "ID of BuildConfig to add as dependency")
         private String dependencyConfigId;
 
@@ -472,10 +443,8 @@ public class BuildConfigCli {
 
     @Command(name = "remove-dependency", description = "Removes a dependency from a BuildConfig")
     public static class RemoveDependency implements Callable<Integer> {
-
         @Parameters(description = "Build config id")
         private String buildConfigId;
-
         @Option(names = "--dependency-id", required = true, description = "ID of BuildConfig to remove as dependency")
         private String dependencyConfigId;
 

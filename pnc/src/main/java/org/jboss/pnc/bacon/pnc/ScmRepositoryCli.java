@@ -41,7 +41,6 @@ import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient;
 import org.jboss.pnc.restclient.AdvancedSCMRepositoryClient.SCMCreationResult;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -54,10 +53,10 @@ import picocli.CommandLine.Parameters;
                 ScmRepositoryCli.Get.class,
                 ScmRepositoryCli.List.class,
                 ScmRepositoryCli.Update.class,
-                ScmRepositoryCli.ListBuildConfigs.class, })
-@Slf4j
+                ScmRepositoryCli.ListBuildConfigs.class })
 public class ScmRepositoryCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScmRepositoryCli.class);
     private static final ClientCreator<AdvancedSCMRepositoryClient> CREATOR = new ClientCreator<>(
             AdvancedSCMRepositoryClient::new);
 
@@ -69,7 +68,6 @@ public class ScmRepositoryCli {
     public static class CreateAndSync extends JSONCommandHandler implements Callable<Integer> {
         @Parameters(description = "SCM URL")
         private String scmUrl;
-
         @Option(names = "--no-pre-build-sync", description = "Disable the pre-build sync of external repo.")
         private boolean noPreBuildSync = false;
 
@@ -83,10 +81,8 @@ public class ScmRepositoryCli {
         public Integer call() throws Exception {
             try (SCMRepositoryClient client = CREATOR.newClient()) {
                 RemoteCollection<SCMRepository> existing = client.getAll(scmUrl, null);
-
                 // if already exists, don't try to create!
                 if (existing != null && existing.size() > 0) {
-
                     log.info("Repository already exists in PNC! No creation needed");
                     ObjectHelper.print(getJsonOutput(), existing.getAll().iterator());
                     return 0;
@@ -95,12 +91,11 @@ public class ScmRepositoryCli {
                         .preBuildSyncEnabled(!noPreBuildSync)
                         .scmUrl(scmUrl)
                         .build();
-
                 try (AdvancedSCMRepositoryClient clientAdvanced = CREATOR.newClientAuthenticated()) {
                     CompletableFuture<SCMCreationResult> futureResult = clientAdvanced
                             .createNewAndWait(createAndSyncSCMRequest);
                     if (!futureResult.isDone()) {
-                        log.info("Waiting for repository '{}' to be created on PNC...", scmUrl);
+                        log.info("Waiting for repository \'{}\' to be created on PNC...", scmUrl);
                     }
                     final SCMCreationResult result = futureResult.join();
                     if (result.isSuccess()) {
@@ -119,7 +114,6 @@ public class ScmRepositoryCli {
 
     @Command(name = "get", description = "Get a repository by its id")
     public static class Get extends AbstractGetSpecificCommand<SCMRepository> {
-
         @Override
         public SCMRepository getSpecific(String id) throws ClientException {
             try (SCMRepositoryClient client = CREATOR.newClient()) {
@@ -136,15 +130,12 @@ public class ScmRepositoryCli {
     public static class Update implements Callable<Integer> {
         @Parameters(description = "SCM Repository Id")
         private String id;
-
         @Option(
                 names = "--external-scm",
                 description = "External SCM URL: e.g --external-scm=\"https://github.com/project-ncl/bacon.git\"")
         private String externalScm;
-
         @Option(names = "--no-external-scm", description = "Specify no external scm")
         private boolean noExternalScmSpecified;
-
         @Option(names = "--pre-build", description = "Enable / Disable pre-build")
         private Boolean preBuild;
 
@@ -159,24 +150,20 @@ public class ScmRepositoryCli {
             try (SCMRepositoryClient client = CREATOR.newClient()) {
                 SCMRepository scmRepository = client.getSpecific(id);
                 SCMRepository.Builder updated = scmRepository.toBuilder();
-
                 if (preBuild != null) {
                     updated.preBuildSyncEnabled(preBuild);
                 }
-
                 if (noExternalScmSpecified && isNotEmpty(externalScm)) {
                     throw new FatalException(
-                            "You cannot specify both the 'external-scm' and 'no-external-scm' options at the same time");
+                            "You cannot specify both the \'external-scm\' and \'no-external-scm\' options at the same time");
                 } else if (isNotEmpty(externalScm)) {
                     updated.externalUrl(externalScm);
                 } else if (noExternalScmSpecified) {
                     updated.externalUrl(null);
-                    log.debug("Since we're removing the external-scm, pre-build set to fals");
+                    log.debug("Since we\'re removing the external-scm, pre-build set to fals");
                     updated.preBuildSyncEnabled(false);
                 }
-
                 log.debug("SCM Repository updated to: {}", updated);
-
                 try (AdvancedSCMRepositoryClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
                     clientAuthenticated.update(id, updated.build());
                     return 0;
@@ -187,10 +174,8 @@ public class ScmRepositoryCli {
 
     @Command(name = "list", description = "List repositories")
     public static class List extends AbstractListCommand<SCMRepository> {
-
         @Option(names = "--match-url", description = "Exact URL to search")
         private String matchUrl;
-
         @Option(names = "--search-url", description = "Part of the URL to search")
         private String searchUrl;
 
@@ -205,7 +190,6 @@ public class ScmRepositoryCli {
 
     @Command(name = "list-build-configs", description = "List build configs that use a particular SCM repository")
     public static class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
-
         @Parameters(description = "SCM Repository ID")
         private String scmRepositoryId;
 

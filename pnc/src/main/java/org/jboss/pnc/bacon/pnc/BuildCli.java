@@ -56,7 +56,6 @@ import org.jboss.pnc.rest.api.parameters.BuildParameters;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -75,9 +74,9 @@ import picocli.CommandLine.Parameters;
                 BuildCli.GetLog.class,
                 BuildCli.GetAlignLog.class,
                 BuildCli.DownloadSources.class })
-@Slf4j
 public class BuildCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BuildCli.class);
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
     private static final ClientCreator<AdvancedBuildConfigurationClient> BC_CREATOR = new ClientCreator<>(
             AdvancedBuildConfigurationClient::new);
@@ -88,10 +87,8 @@ public class BuildCli {
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build start \\%n"
                     + "\t--rebuild-mode=FORCE --temporary-build --wait 27")
     public static class Start extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Build Config ID")
         private String buildConfigId;
-
         @Option(
                 names = "--rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
@@ -108,7 +105,6 @@ public class BuildCli {
         private boolean wait = false;
         @Option(names = "--no-build-dependencies", description = "Skip building of dependencies")
         private boolean noBuildDependencies = false;
-
         @Option(names = "--timeout", description = "Time in minutes the command waits for Build completion")
         private Integer timeout;
         @Option(names = "--revision", description = "Build Config revision to build.")
@@ -138,14 +134,11 @@ public class BuildCli {
             buildParams.setKeepPodOnFailure(keepPodOnFailure);
             buildParams.setTemporaryBuild(temporaryBuild);
             buildParams.setBuildDependencies(!noBuildDependencies);
-
             if (dryRun) {
                 buildParams.setTemporaryBuild(true);
                 buildParams.setAlignmentPreference(AlignmentPreference.PREFER_PERSISTENT);
             }
-
             try (AdvancedBuildConfigurationClient client = BC_CREATOR.newClientAuthenticated()) {
-
                 final Build build;
                 if (revision == null) {
                     if (timeout != null) {
@@ -175,7 +168,6 @@ public class BuildCli {
             description = "Cancel build",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build cancel 10000")
     public static class Cancel implements Callable<Integer> {
-
         @Parameters(description = "Build ID")
         private String buildId;
 
@@ -196,7 +188,6 @@ public class BuildCli {
 
     @Command(name = "list", description = "List builds")
     public static class List extends AbstractBuildListCommand {
-
         @Option(
                 names = "--attributes",
                 description = "Get only builds with given attributes. Format: KEY=VALUE,KEY=VALUE")
@@ -217,7 +208,6 @@ public class BuildCli {
             description = "List built artifacts",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build list-built-artifacts 10000")
     public static class ListBuildArtifacts extends AbstractListCommand<Artifact> {
-
         @Parameters(description = "Build ID")
         private String buildId;
 
@@ -235,7 +225,6 @@ public class BuildCli {
             description = "List dependencies",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc build list-dependencies 10000")
     public static class ListDependencies extends AbstractListCommand<Artifact> {
-
         @Parameters(description = "Build ID")
         private String buildId;
 
@@ -250,7 +239,6 @@ public class BuildCli {
 
     @Command(name = "get", description = "Get a build by its id")
     public static class Get extends AbstractGetSpecificCommand<Build> {
-
         @Override
         public Build getSpecific(String id) throws ClientException {
             try (BuildClient client = CREATOR.newClient()) {
@@ -261,7 +249,6 @@ public class BuildCli {
 
     @Command(name = "get-revision", description = "Get build-config revision of build")
     public static class GetRevision extends AbstractGetSpecificCommand<BuildConfigurationRevision> {
-
         @Override
         public BuildConfigurationRevision getSpecific(String id) throws ClientException {
             try (BuildClient client = CREATOR.newClient()) {
@@ -274,7 +261,6 @@ public class BuildCli {
     public static class GetLog implements Callable<Integer> {
         @Parameters(description = "Build id.")
         private String buildId;
-
         @Option(names = "--follow", description = "Follow the live log.")
         private boolean follow;
 
@@ -326,7 +312,6 @@ public class BuildCli {
 
     @Command(name = "download-sources", description = "Download SCM sources used for the build")
     public static class DownloadSources implements Callable<Integer> {
-
         @Parameters(description = "Id of build")
         private String id;
 
@@ -339,12 +324,11 @@ public class BuildCli {
         @Override
         public Integer call() throws Exception {
             String filename = id + "-sources.tar.gz";
-
-            try (BuildClient client = CREATOR.newClient(); Response response = client.getInternalScmArchiveLink(id)) {
+            try (
+                    BuildClient client = CREATOR.newClient();
+                    Response response = client.getInternalScmArchiveLink(id)) {
                 InputStream in = (InputStream) response.getEntity();
-
                 Path path = Paths.get(filename);
-
                 try {
                     Files.copy(in, path);
                 } catch (IOException e) {

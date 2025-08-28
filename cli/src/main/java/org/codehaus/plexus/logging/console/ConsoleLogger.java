@@ -20,8 +20,6 @@ package org.codehaus.plexus.logging.console;
 import org.codehaus.plexus.logging.AbstractLogger;
 import org.codehaus.plexus.logging.Logger;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Massive hack to override the default plexus logging implementation, ConsoleLogger, is adapted to Slf4j, rather than
  * the actual implementation that just prints to stdout
@@ -38,8 +36,10 @@ import lombok.extern.slf4j.Slf4j;
  * <p/>
  * This re-implementation replaces the default one to use Slf4j for logging instead.
  */
-@Slf4j
 public class ConsoleLogger extends AbstractLogger {
+
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConsoleLogger.class);
 
     public ConsoleLogger() {
         super(1, "console");
@@ -48,7 +48,6 @@ public class ConsoleLogger extends AbstractLogger {
     @Override
     public void debug(String s, Throwable throwable) {
         log.debug(s, throwable);
-
     }
 
     @Override
@@ -69,7 +68,6 @@ public class ConsoleLogger extends AbstractLogger {
     @Override
     public void fatalError(String s, Throwable throwable) {
         log.error(s, throwable);
-
     }
 
     @Override

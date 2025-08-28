@@ -19,14 +19,79 @@ package org.jboss.pnc.bacon.pig.impl.config;
 
 import java.util.List;
 
-import lombok.Data;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 2/5/18
  */
-@Data
 public class AdditionalArtifactsFromBuild {
     private String from;
     private List<String> download;
+
+    @java.lang.SuppressWarnings("all")
+    public AdditionalArtifactsFromBuild() {
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getFrom() {
+        return this.from;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public List<String> getDownload() {
+        return this.download;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setFrom(final String from) {
+        this.from = from;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setDownload(final List<String> download) {
+        this.download = download;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public boolean equals(final java.lang.Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof AdditionalArtifactsFromBuild))
+            return false;
+        final AdditionalArtifactsFromBuild other = (AdditionalArtifactsFromBuild) o;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        final java.lang.Object this$from = this.getFrom();
+        final java.lang.Object other$from = other.getFrom();
+        if (this$from == null ? other$from != null : !this$from.equals(other$from))
+            return false;
+        final java.lang.Object this$download = this.getDownload();
+        final java.lang.Object other$download = other.getDownload();
+        if (this$download == null ? other$download != null : !this$download.equals(other$download))
+            return false;
+        return true;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    protected boolean canEqual(final java.lang.Object other) {
+        return other instanceof AdditionalArtifactsFromBuild;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final java.lang.Object $from = this.getFrom();
+        result = result * PRIME + ($from == null ? 43 : $from.hashCode());
+        final java.lang.Object $download = this.getDownload();
+        result = result * PRIME + ($download == null ? 43 : $download.hashCode());
+        return result;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "AdditionalArtifactsFromBuild(from=" + this.getFrom() + ", download=" + this.getDownload() + ")";
+    }
 }

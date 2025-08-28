@@ -12,16 +12,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jboss.pnc.bacon.config.AutobuildConfig;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Collects the dependencies to be excluded.
  */
-@Slf4j
 public class DependencyExcluder {
-
-    private static final int DOWNLOAD_TIMEOUT = 60_000;
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DependencyExcluder.class);
+    private static final int DOWNLOAD_TIMEOUT = 60000;
     private final CloseableHttpClient httpClient = HttpClientBuilder.create()
             .setDefaultRequestConfig(
                     RequestConfig.custom()
@@ -29,7 +26,6 @@ public class DependencyExcluder {
                             .setSocketTimeout(DOWNLOAD_TIMEOUT)
                             .build())
             .build();
-
     private final URI gavExclusionFileUrl;
 
     public DependencyExcluder(final AutobuildConfig autobuildConfig) {
@@ -80,7 +76,7 @@ public class DependencyExcluder {
      * @return {@link String[]} with the exclusions split.
      */
     public static String[] getExcludedGavs(final String exclusions) {
-        String lines[] = new String[0];
+        String[] lines = new String[0];
         if (exclusions != null && exclusions.length() > 0) {
             lines = exclusions.split("\\r?\\n");
         }

@@ -15,10 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.documents;
-
-import lombok.Getter;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -31,16 +28,28 @@ public enum Template {
     BUILD_LIST("BUILD_LIST.ftl", "build-list.json", true),
     DUPLICATE_ARTIFACT_LIST("DUPLICATE_ARTIFACT_LIST.ftl", "repository-duplicate-artifact-list.txt", true);
 
-    @Getter
     private final String filename;
-    @Getter
     private final String templateName;
-    @Getter
     private final boolean extrasPath;
 
     Template(String template, String filename, boolean extrasPath) {
         templateName = template;
         this.filename = filename;
         this.extrasPath = extrasPath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getFilename() {
+        return this.filename;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getTemplateName() {
+        return this.templateName;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public boolean isExtrasPath() {
+        return this.extrasPath;
     }
 }

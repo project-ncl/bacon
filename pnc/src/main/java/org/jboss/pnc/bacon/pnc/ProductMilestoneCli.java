@@ -52,12 +52,10 @@ import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.pnc.dto.requests.MilestoneCloseRequest;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Slf4j
 @Command(
         name = "product-milestone",
         description = "Product Milestones",
@@ -72,12 +70,12 @@ import picocli.CommandLine.Parameters;
                 ProductMilestoneCli.ListDeliveredArtifacts.class,
                 ProductMilestoneCli.GetDeliverableAnalysisOperation.class })
 public class ProductMilestoneCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductMilestoneCli.class);
     private static final ClientCreator<ProductMilestoneClient> CREATOR = new ClientCreator<>(
             ProductMilestoneClient::new);
     private static final ClientCreator<ProductVersionClient> VERSION_CREATOR = new ClientCreator<>(
             ProductVersionClient::new);
-
     private static final ClientCreator<OperationClient> OPERATION_CREATOR = new ClientCreator<>(OperationClient::new);
 
     /**
@@ -92,19 +90,14 @@ public class ProductMilestoneCli {
             throws ClientException {
         try (ProductVersionClient client = VERSION_CREATOR.newClient()) {
             ProductVersion productVersionDTO = client.getSpecific(productVersionId);
-
             String productVersion = productVersionDTO.getVersion();
-
             if (!milestoneVersion.startsWith(productVersion)) {
                 return false;
             }
-
             String[] items = milestoneVersion.split("\\.");
-
             if (items.length != 4) {
                 return false;
             }
-
             return items[2].matches("\\d+");
         }
     }
@@ -116,7 +109,6 @@ public class ProductMilestoneCli {
                     + "\t--product-version-id 3 \\%n" + "\t--issue-tracker-url http://example.com \\%n"
                     + "\t--end-date 2030-12-26 1.2.0.CR1")
     public static class Create extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Version of product milestone: Format: <d>.<d>.<d>.<word>")
         private String productMilestoneVersion;
         @Option(required = true, names = "--product-version-id", description = "Product Version ID")
@@ -139,23 +131,18 @@ public class ProductMilestoneCli {
             if (!validateProductMilestoneVersion(productVersionId, productMilestoneVersion)) {
                 throw new FatalException("The version does not fit the proper format");
             }
-
             if (startDate == null) {
                 startDate = PncClientHelper.getTodayDayInYYYYMMDDFormat();
             }
-
             Instant startDateInstant = parseDateFormat(startDate);
             Instant endDateInstant = parseDateFormat(endDate);
-
             ProductVersionRef productVersionRef = ProductVersionRef.refBuilder().id(productVersionId).build();
-
             ProductMilestone milestone = ProductMilestone.builder()
                     .version(productMilestoneVersion)
                     .productVersion(productVersionRef)
                     .startingDate(startDateInstant)
                     .plannedEndDate(endDateInstant)
                     .build();
-
             ProductMilestone createdMilestone = null;
             try (ProductMilestoneClient client = CREATOR.newClientAuthenticated()) {
                 createdMilestone = client.createNew(milestone);
@@ -179,10 +166,8 @@ public class ProductMilestoneCli {
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc product-milestone update --issue-tracker-url http://lakaz.org 5")
     public static class Update implements Callable<Integer> {
-
         @Parameters(description = "Product Milestone ID")
         private String productMilestoneId;
-
         @Option(names = "--product-milestone-version", description = "Product Milestone Version")
         private String productMilestoneVersion;
         @Option(names = "--starting-date", description = "Starting date, default is today: Format: <yyyy>-<mm>-<dd>")
@@ -203,7 +188,6 @@ public class ProductMilestoneCli {
             try (ProductMilestoneClient client = CREATOR.newClient()) {
                 ProductMilestone productMilestone = client.getSpecific(productMilestoneId);
                 ProductMilestone.Builder updated = productMilestone.toBuilder();
-
                 if (isNotEmpty(productMilestoneVersion)) {
                     if (validateProductMilestoneVersion(
                             productMilestone.getProductVersion().getId(),
@@ -211,7 +195,7 @@ public class ProductMilestoneCli {
                         updated.version(productMilestoneVersion);
                     } else {
                         throw new FatalException(
-                                "The version ('{}') does not fit the proper format",
+                                "The version (\'{}\') does not fit the proper format",
                                 productMilestoneVersion);
                     }
                 }
@@ -223,7 +207,6 @@ public class ProductMilestoneCli {
                     Instant endDateInstant = parseDateFormat(endDate);
                     updated.plannedEndDate(endDateInstant);
                 }
-
                 try (ProductMilestoneClient clientAuthenticated = CREATOR.newClientAuthenticated()) {
                     clientAuthenticated.update(productMilestoneId, updated.build());
                 }
@@ -244,10 +227,8 @@ public class ProductMilestoneCli {
 
     @Command(name = "close", description = "Close milestone")
     public static class MilestoneClose implements Callable<Integer> {
-
         @Parameters(description = "Milestone id")
         private String id;
-
         @Option(
                 names = "--skipBrewPush",
                 description = "Skip brew push for milestone close operation",
@@ -272,7 +253,6 @@ public class ProductMilestoneCli {
 
     @Command(name = "cancel-milestone-close", description = "Cancel milestone close")
     public static class CancelMilestoneClose implements Callable<Integer> {
-
         @Parameters(description = "Milestone id")
         private String id;
 
@@ -293,7 +273,6 @@ public class ProductMilestoneCli {
 
     @Command(name = "get", description = "Get a product milestone by its id")
     public static class Get extends AbstractGetSpecificCommand<ProductMilestone> {
-
         @Override
         public ProductMilestone getSpecific(String id) throws ClientException {
             try (ProductMilestoneClient client = CREATOR.newClient()) {
@@ -304,7 +283,6 @@ public class ProductMilestoneCli {
 
     @Command(name = "list-performed-builds", description = "List performed builds")
     public static class PerformedBuilds extends AbstractBuildListCommand {
-
         @Parameters(description = "Milestone id")
         private String id;
 
@@ -320,16 +298,13 @@ public class ProductMilestoneCli {
 
     @Command(name = "analyze-deliverables", description = "Start analysis of deliverables")
     public static class AnalyzeDeliverables extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Milestone id")
         private String id;
-
         @Option(
                 names = "--deliverables-link",
                 required = true,
                 description = "Link to deliverables to be analysed, can add multiple links")
         private List<URL> deliverablesLink;
-
         @Option(
                 names = "--scratch",
                 description = "Whether to run the analysis as scratch (default: false)",
@@ -359,7 +334,6 @@ public class ProductMilestoneCli {
 
     @Command(name = "list-delivered-artifacts", description = "List artifacts delivered in the specified milestone")
     public static class ListDeliveredArtifacts extends AbstractListCommand<Artifact> {
-
         @Parameters(description = "Milestone id")
         private String id;
 
@@ -374,7 +348,6 @@ public class ProductMilestoneCli {
     @Command(name = "get-deliverables-analysis", description = "Get a deliverables analysis operation status")
     public static class GetDeliverableAnalysisOperation
             extends AbstractGetSpecificCommand<DeliverableAnalyzerOperation> {
-
         @Override
         public DeliverableAnalyzerOperation getSpecific(String id) throws ClientException {
             try (OperationClient client = OPERATION_CREATOR.newClient()) {

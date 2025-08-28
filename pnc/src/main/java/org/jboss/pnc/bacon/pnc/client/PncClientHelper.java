@@ -35,15 +35,12 @@ import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.GenericSettingClient;
 import org.jboss.pnc.client.RemoteResourceException;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class PncClientHelper {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PncClientHelper.class);
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
     private static boolean bannerChecked = false;
-
     private static PncClientTokenHolder pncClientTokenHolder;
 
     public static Configuration getPncConfiguration(boolean authenticationNeeded) {
@@ -56,35 +53,27 @@ public class PncClientHelper {
 
     public static Configuration setup(boolean authenticationNeeded) {
         Config config = Config.instance();
-
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
-
         if (authenticationNeeded) {
             if (keycloakConfig == null) {
                 throw new FatalException("Keycloak section is needed in the configuration file!");
             }
-
             keycloakConfig.validate();
         }
-
         config.getActiveProfile().getPnc().validate();
         String url = config.getActiveProfile().getPnc().getUrl();
-
         try {
             URI uri = new URI(url);
-
             Integer port = null;
             if (uri.getPort() != -1) {
                 port = uri.getPort();
             }
-
             Configuration.ConfigurationBuilder builder = Configuration.builder()
                     .protocol(uri.getScheme())
                     .port(port)
                     .host(uri.getHost())
                     .pageSize(50)
                     .addDefaultMdcToHeadersMappings();
-
             if (authenticationNeeded) {
                 if (pncClientTokenHolder == null) {
                     pncClientTokenHolder = new PncClientTokenHolder(() -> getCredential(keycloakConfig));
@@ -92,11 +81,8 @@ public class PncClientHelper {
                 builder = builder.bearerTokenSupplier(() -> pncClientTokenHolder.getAccessToken());
             }
             Configuration configuration = builder.build();
-
             printBannerIfNecessary(configuration);
-
             return configuration;
-
         } catch (URISyntaxException e) {
             throw new FatalException("URI syntax issue", e);
         }
@@ -109,15 +95,10 @@ public class PncClientHelper {
      * @return the token, or null if we couldn't get it
      */
     private static Credential getCredential(KeycloakConfig keycloakConfig) {
-
         log.debug("Authenticating to keycloak");
-
         try {
-
             KeycloakClient client = new KeycloakClientImpl();
-
             Credential credential;
-
             if (keycloakConfig.isServiceAccount()) {
                 credential = client.getCredentialServiceAccount(
                         keycloakConfig.getUrl(),
@@ -130,18 +111,14 @@ public class PncClientHelper {
                         keycloakConfig.getRealm(),
                         keycloakConfig.getClientId(),
                         keycloakConfig.getUsername());
-
             }
-
             return credential;
-
         } catch (Exception e) {
             throw new FatalException("Keycloak authentication failed!", e);
         }
     }
 
     private static void printBannerIfNecessary(Configuration configuration) {
-
         if (!bannerChecked) {
             try (GenericSettingClient genericSettingClient = new GenericSettingClient(configuration)) {
                 String banner = genericSettingClient.getAnnouncementBanner().getBanner();
@@ -153,7 +130,6 @@ public class PncClientHelper {
             } catch (RemoteResourceException e) {
                 log.error("Could not get announcements: " + e);
             }
-
             bannerChecked = true;
         }
     }
@@ -164,7 +140,6 @@ public class PncClientHelper {
      * @param date the date format
      */
     public static Instant parseDateFormat(String date) {
-
         try {
             Date ret = sdf.parse(date);
             return ret.toInstant();
@@ -193,10 +168,9 @@ public class PncClientHelper {
                 log.debug("Getting or Refreshing access token!");
                 cached = credentialSupplier.get();
                 if (cached.getAccessToken() == null || cached.getAccessToken().isEmpty()) {
-                    throw new FatalException("Credentials don't seem to be valid");
+                    throw new FatalException("Credentials don\'t seem to be valid");
                 }
             }
-
             return cached.getAccessToken();
         }
     }

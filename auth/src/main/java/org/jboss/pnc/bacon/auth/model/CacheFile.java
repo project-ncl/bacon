@@ -19,15 +19,9 @@ import org.jboss.pnc.bacon.config.Config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
-@Getter
-@Setter
-@Slf4j
 public class CacheFile {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CacheFile.class);
     private Map<String, Credential> cachedData;
     private static final ObjectMapper mapper;
 
@@ -110,5 +104,15 @@ public class CacheFile {
 
     private static String getCacheFile() {
         return Config.getConfigLocation() + File.separator + Constant.CACHE_FILE;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Map<String, Credential> getCachedData() {
+        return this.cachedData;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setCachedData(final Map<String, Credential> cachedData) {
+        this.cachedData = cachedData;
     }
 }

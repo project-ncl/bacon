@@ -61,7 +61,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.IExecutionExceptionHandler;
@@ -72,8 +71,6 @@ import picocli.shell.jline3.PicocliCommands;
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/13/18
  */
-
-@Slf4j
 @Command(
         name = "bacon",
         scope = INHERIT,
@@ -82,8 +79,10 @@ import picocli.shell.jline3.PicocliCommands;
         subcommands = { Da.class, Pig.class, Pnc.class, Experimental.class })
 public class App {
 
-    private String profile = "default";
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(App.class);
 
+    private String profile = "default";
     private String configPath = null;
 
     public static void main(String[] args) {
@@ -101,7 +100,6 @@ public class App {
      */
     @Option(names = { "-v", "--verbose" }, description = "Verbose output", scope = INHERIT)
     public static void setVerbosityIfPresent(boolean verbose) {
-
         if (verbose) {
             ObjectHelper.setRootLoggingLevel(Level.DEBUG);
 
@@ -117,7 +115,6 @@ public class App {
      */
     @Option(names = { "-q", "--quiet" }, description = "Silent output", scope = INHERIT)
     public static void setQuietIfPresent(boolean quiet) {
-
         if (quiet) {
             ObjectHelper.setRootLoggingLevel(ObjectHelper.LOG_LEVEL_SILENT);
         }
@@ -146,11 +143,9 @@ public class App {
     private boolean nocolor;
 
     public int run(String[] args) {
-
         CommandLine commandLine = new CommandLine(this);
         commandLine.setExecutionExceptionHandler(new ExceptionMessageHandler());
         commandLine.setUsageHelpAutoWidth(true);
-
         if (args.length == 0) {
             // From https://github.com/remkop/picocli/wiki/JLine-3-Examples and
             // https://github.com/remkop/picocli/tree/master/picocli-shell-jline3
@@ -160,24 +155,21 @@ public class App {
             builtins.rename(Builtins.Command.TTOP, "top");
             builtins.alias("zle", "widget");
             builtins.alias("bindkey", "keymap");
-
             PicocliCommands picocliCommands = new PicocliCommands(commandLine);
             init(null);
-
             Parser parser = new DefaultParser();
-
             try (Terminal terminal = TerminalBuilder.builder().build()) {
                 SystemRegistry systemRegistry = new SystemRegistryImpl(parser, terminal, App::workDir, null);
                 systemRegistry.setCommandRegistries(builtins, picocliCommands);
-
-                LineReader reader = LineReaderBuilder.builder()
-                        .terminal(terminal)
-                        .completer(systemRegistry.completer())
-                        .parser(parser)
-                        .variable(LineReader.HISTORY_FILE, Constant.HISTORY)
-                        .variable(LineReader.HISTORY_FILE_SIZE, 100)
-                        .variable(LineReader.LIST_MAX, 50) // max tab completion candidates
-                        .build();
+                LineReader reader = // max tab completion candidates
+                        LineReaderBuilder.builder()
+                                .terminal(terminal)
+                                .completer(systemRegistry.completer())
+                                .parser(parser)
+                                .variable(LineReader.HISTORY_FILE, Constant.HISTORY)
+                                .variable(LineReader.HISTORY_FILE_SIZE, 100)
+                                .variable(LineReader.LIST_MAX, 50)
+                                .build();
                 builtins.setLineReader(reader);
                 TailTipWidgets tailTipWidgets = new TailTipWidgets(
                         reader,
@@ -187,10 +179,8 @@ public class App {
                 tailTipWidgets.enable();
                 KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
                 keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
-
                 log.info("Tooltips enabled ; press Alt-s to disable");
                 String prompt = "prompt> ";
-
                 // start the shell and process input until the user quits with Ctrl-D
                 String line;
                 while (true) {
@@ -199,8 +189,9 @@ public class App {
                         line = reader.readLine(prompt, null, (MaskingCallback) null, null);
                         systemRegistry.execute(line);
                     } catch (UserInterruptException e) {
-                        // Ignore
-                    } catch (EndOfFileException e) {
+                    } catch (
+                    // Ignore
+                    EndOfFileException e) {
                         AnsiConsole.systemUninstall();
                         return 0;
                     } catch (Exception e) {
@@ -226,32 +217,25 @@ public class App {
          */
         if (System.getenv().containsKey("NO_COLOR") || nocolor) {
             log.debug("Reconfiguring logger for NO_COLOR");
-
             // Documentation: https://picocli.info/#_forcing_ansi_onoff
             System.setProperty("picocli.ansi", "false");
-
             // Now reconfigure logback to remove any highlighting.
             final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
                     .getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-
             root.detachAppender("STDERR");
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-
             PatternLayoutEncoder ple = new PatternLayoutEncoder();
             ple.setPattern("[%-5level] - %msg%n");
             ple.setContext(loggerContext);
             ple.start();
-
             ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
             consoleAppender.setName("STDERR");
             consoleAppender.setTarget("System.err");
             consoleAppender.setContext(loggerContext);
             consoleAppender.setEncoder(ple);
             consoleAppender.start();
-
             root.addAppender(consoleAppender);
         }
-
         if (configPath != null) {
             setConfigLocation(configPath, "flag");
         } else if (System.getenv(Constant.CONFIG_ENV) != null) {
@@ -259,7 +243,6 @@ public class App {
         } else {
             setConfigLocation(Constant.DEFAULT_CONFIG_FOLDER, "constant");
         }
-
         String endpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
         String service = System.getenv("OTEL_SERVICE_NAME");
         if (endpoint != null) {
@@ -295,7 +278,6 @@ public class App {
     }
 
     private static class ExceptionMessageHandler implements IExecutionExceptionHandler {
-
         /**
          * Handles an {@code Exception} that occurred while executing the {@code Runnable} or {@code Callable} command
          * and returns an exit code suitable for returning from {@link picocli.CommandLine#execute(String...)}.
@@ -310,7 +292,6 @@ public class App {
         public int handleExecutionException(Exception ex, CommandLine cmd, CommandLine.ParseResult parseResult) {
             log.error(ex.getMessage() + ", Error: " + ex.getCause());
             log.debug("Full trace", ex);
-
             return cmd.getExitCodeExceptionMapper() != null ? cmd.getExitCodeExceptionMapper().getExitCode(ex)
                     : cmd.getCommandSpec().exitCodeOnExecutionException();
         }
