@@ -38,18 +38,28 @@ The `generate` command will output content that can be used in [PiG](pig.html) `
 Example of config file:
 ```yaml
 dependencyResolutionConfig: # Configuration for the dependency resolution by Domino
-    analyzeArtifacts: # List of toplevel artifacts that should be analyzed and built.
+    analyzeBOM: "foo:bar-bom:1.0.0" # The BOM that should be analyzed
+    analyzeArtifacts: # List of top level artifacts that should be analyzed and built.
+        # If analyzeBOM is provided but analyzeArtifacts is empty or not present,
+        # then analyzeArtifacts will be implicitly set to the set of
+        # managed dependencies present in the effective BOM (with parents and BOM imports resolved)
+        # having groupId equal to the groupId of the BOM
         - foo:bar:1.0.0
-    analyzeBOM: "foo:bar-bom:1.0.0" # Bom that should be analyzed and which artifacts should be built.
+    includeArtifacts: # List of artifact patterns that can be used to further reduce the set of artifacts
+        # defined by analyzeBOM and analyzeArtifacts. 
+        # In other words, transitives of only those artifacts will be analyzed which are both 
+        # (1) part of the set defined by analyzeBOM and analyzeArtifacts and 
+        # (2) which match some of the includeArtifacts pattern.
+        # If includeArtifacts is not specified, then all artifacts from the set defined by 
+        # analyzeBOM and analyzeArtifacts will be included in the analysis
+        # The format is G:A:[C:[T:]]V where every part can be replaced with '*'.
+        - foo:*:*
     excludeArtifacts: # List of artifacts that should be excluded from the analysis.
         # The matching artifact and it's dependencies will be omitted from the resulting build tree.
         # The format is G:A:[C:[T:]]V where every part can be replaced with '*'.
         - org.apache.maven:*:*
     excludeProductizedArtifacts: false # If set to true, all -redhat-X artifacts and their dependencies are omitted from the resulting build tree.
                                        # Note that this option has effect only when rebuildNonAutoBuilds is true.
-    includeArtifacts: # List of artifacts that should not be excluded from the analysis.
-        # The format is G:A:[C:[T:]]V where every part can be replaced with '*'.
-        - foo:*:*
     includeOptionalDependencies: true # Whether optional dependencies should be included in the analysis. Defaults to true.
     recipeRepos: # The list of URLs to use for the SCM recipes. The SCM recipes are used for determining SCM coordinates for project. Defaults to given example.
         - https://github.com/redhat-appstudio/jvm-build-data 
