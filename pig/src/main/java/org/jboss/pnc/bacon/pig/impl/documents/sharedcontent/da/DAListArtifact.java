@@ -15,22 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
-import lombok.Getter;
-import lombok.experimental.Delegate;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/20/17
  */
-@Getter
 public class DAListArtifact {
-    @Delegate
     private GAV gav;
     private String productName;
     private String productVersion;
@@ -41,5 +35,25 @@ public class DAListArtifact {
         productName = daGavWithProduct.getName();
         productVersion = daGavWithProduct.getVersion();
         state = daGavWithProduct.getSupportStatus().name();
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public GAV getGav() {
+        return this.gav;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getProductName() {
+        return this.productName;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getProductVersion() {
+        return this.productVersion;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getState() {
+        return this.state;
     }
 }

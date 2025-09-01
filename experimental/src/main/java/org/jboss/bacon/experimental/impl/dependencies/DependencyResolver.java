@@ -40,11 +40,10 @@ import io.quarkus.domino.ReleaseRepo;
 import io.quarkus.domino.scm.ScmRepository;
 import io.quarkus.domino.scm.ScmRevision;
 import io.quarkus.maven.dependency.ArtifactCoords;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class DependencyResolver {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DependencyResolver.class);
     private final DependencyResolutionConfig config;
     private final VersionParser versionParser = new VersionParser("redhat");
     private final LookupApi lookupApi;
@@ -53,7 +52,6 @@ public class DependencyResolver {
         this.config = dependencyResolutionConfig;
         // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
         System.setProperty("quarkus-internal.maven-cmd-line-args", "-ntp");
-
         lookupApi = DaHelper.createLookupApi();
     }
 
@@ -61,7 +59,7 @@ public class DependencyResolver {
         config.getExcludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
         AutobuildConfig autobuildConfig = Objects.requireNonNull(
                 Config.instance().getActiveProfile().getAutobuild(),
-                "Missing the 'autobuild' option in your config profile.");
+                "Missing the \'autobuild\' option in your config profile.");
         autobuildConfig.validate();
         DependencyExcluder dependencyExcluder = new DependencyExcluder(autobuildConfig);
         final String[] excludedGavs = DependencyExcluder.getExcludedGavs(dependencyExcluder.fetchExclusionFile());
@@ -72,13 +70,13 @@ public class DependencyResolver {
                 .stream()
                 .map(ArtifactCoords::fromString)
                 .collect(Collectors.toSet());
-
         if (config.getAnalyzeBOM() != null) {
             dominoConfig.setProjectBom(ArtifactCoords.fromString(config.getAnalyzeBOM()));
         }
-
-        dominoConfig.setExcludeBomImports(false) // TODO
-                .setExcludeParentPoms(false) // TODO
+        // TODO
+        // TODO
+        dominoConfig.setExcludeBomImports(false)
+                .setExcludeParentPoms(false)
                 .setLevel(-1)
                 .setIncludeOptionalDeps(config.isIncludeOptionalDependencies())
                 .setWarnOnResolutionErrors(true)
@@ -90,7 +88,6 @@ public class DependencyResolver {
 
     public DependencyResult resolve(Path projectDir, Path dominoConfigFile) {
         ProjectDependencyResolver resolver = configureResolver(projectDir, dominoConfigFile);
-
         PrintStream origOut = System.out;
         System.setOut(new PrintStream(new LogOutputStream()));
         ReleaseCollection releaseCollection = resolver.getReleaseCollection();
@@ -120,9 +117,7 @@ public class DependencyResolver {
         setupConfig(dominoConfig);
         ProjectDependencyConfig conf = dominoConfig.build();
         logDominoConfig(conf);
-        return resolverBuilder.setMessageWriter(new Slf4jMessageWriter())
-                .setDependencyConfig(conf)
-                .build();
+        return resolverBuilder.setMessageWriter(new Slf4jMessageWriter()).setDependencyConfig(conf).build();
     }
 
     private void logDominoConfig(ProjectDependencyConfig conf) {
@@ -153,7 +148,6 @@ public class DependencyResolver {
 
     private DependencyResult parseReleaseCollection(ReleaseCollection releaseCollection) {
         var depsToCut = processCircularDependencies(releaseCollection.getCircularDependencies());
-
         Map<ReleaseRepo, Project> mapping = new HashMap<>();
         Set<Project> rootProjects = new HashSet<>();
         for (ReleaseRepo repo : releaseCollection) {
@@ -165,7 +159,6 @@ public class DependencyResolver {
         }
         setupDependencies(mapping, depsToCut);
         setDepth(rootProjects);
-
         DependencyResult result = new DependencyResult();
         result.setTopLevelProjects(rootProjects);
         return result;
@@ -340,7 +333,6 @@ public class DependencyResolver {
 
     private static class LogOutputStream extends OutputStream {
         protected boolean closed = false;
-
         private StringBuffer stringBuffer = new StringBuffer();
 
         @Override
@@ -372,6 +364,5 @@ public class DependencyResolver {
             }
             stringBuffer.append((char) b);
         }
-
     }
 }

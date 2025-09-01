@@ -38,20 +38,18 @@ import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "dependency-generator",
         description = "Automated dependency Build Config generator",
         subcommands = { DependencyGenerator.Generate.class, DependencyGenerator.DepTree.class })
-@Slf4j
 public class DependencyGenerator {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DependencyGenerator.class);
 
     @CommandLine.Command(name = "dependency-tree", description = "Outputs the analyzed dependency tree")
     public static class DepTree extends DependencyGeneratorCommand {
-
         @Override
         public void run() {
             GeneratorConfig config = loadConfig();
@@ -79,16 +77,20 @@ public class DependencyGenerator {
             }
         }
 
-        @AllArgsConstructor
         private static class StackElem {
             Project project;
             String prefix;
+
+            @java.lang.SuppressWarnings("all")
+            public StackElem(final Project project, final String prefix) {
+                this.project = project;
+                this.prefix = prefix;
+            }
         }
     }
 
     @CommandLine.Command(name = "generate", description = "Generates build config")
     public static class Generate extends DependencyGeneratorCommand {
-
         @Override
         public void run() {
             try {
@@ -123,7 +125,5 @@ public class DependencyGenerator {
             template.setDraft(true);
             return template;
         }
-
     }
-
 }

@@ -58,23 +58,17 @@ import org.jboss.pnc.bacon.pig.impl.utils.pom.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.Getter;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/5/17
  */
 public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> {
     private static final Logger log = LoggerFactory.getLogger(JavadocManager.class);
-
     private static final String project_gid = "org.jboss.prod";
     private static final String project_aid = "pfg-javadoc-dep-profile-injection";
     private static final String project_version = "1.0.0";
-
-    @Getter
     private final JavadocGenerationData generationData;
     private final boolean tempBuild;
-
     private String generationProject;
     private List<String> sourceBuilds;
     private String settingsXml;
@@ -134,10 +128,10 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         boolean ret = true;
         if (generationData.getSourceArtifact() == null || generationData.getSourceArtifact().isEmpty()) {
             ret = false;
-            log.error("Invalid Javadoc generation yaml - 'sourceArtifact' required");
+            log.error("Invalid Javadoc generation yaml - \'sourceArtifact\' required");
         }
         if (generationData.getGenerationProject() == null || generationData.getGenerationProject().isEmpty()) {
-            log.error("Invalid Javadoc generation yaml - 'generationProject' required");
+            log.error("Invalid Javadoc generation yaml - \'generationProject\' required");
             ret = false;
         }
         return ret;
@@ -150,7 +144,6 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         this.localRepo.mkdir();
         this.topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());
         this.archiveFile = getTargetZipPath().toFile();
-
         this.generationProject = generationData.getGenerationProject();
         this.sourceBuilds = generationData.getSourceBuilds();
         if (this.sourceBuilds == null || this.sourceBuilds.isEmpty()) {
@@ -201,11 +194,11 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                 dep.setScope("import");
                 profile.getDependencyManagement().addDependency(dep);
             } else {
-                log.error("Error no artifacts in build for 'importBom' {}", generationData.getImportBom());
+                log.error("Error no artifacts in build for \'importBom\' {}", generationData.getImportBom());
                 return false;
             }
         } else {
-            log.error("Error no build found for 'importBom' {}", generationData.getImportBom());
+            log.error("Error no build found for \'importBom\' {}", generationData.getImportBom());
             return false;
         }
         return true;
@@ -238,10 +231,8 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
             File file = new File(dir.getPath() + File.separator + project_aid + "-" + project_version + ".pom");
             JAXBContext jaxbContext = JAXBContext.newInstance(Project.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
             // output pretty printed
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
             jaxbMarshaller.marshal(project, file);
         } catch (JAXBException e) {
             log.error("Error while creating profile pom", e);
@@ -301,7 +292,6 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
         profile.setId("pfg-redhat-javadoc");
         project.getProfiles().addProfile(profile);
         addSourceBuildsDeps(profile, srcBuilds);
-
         if (!addImportBOM(profile)) {
             return false;
         } else {
@@ -380,7 +370,6 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                                 found.add(file);
                             }
                         }
-
                         if (found.size() == 0) {
                             log.error("No generated files with pattern [{}] found", generationData.getSourceArtifact());
                             return;
@@ -402,5 +391,10 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                 }
             }
         }
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public JavadocGenerationData getGenerationData() {
+        return this.generationData;
     }
 }

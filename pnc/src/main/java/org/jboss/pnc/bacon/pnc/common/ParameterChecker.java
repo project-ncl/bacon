@@ -20,19 +20,17 @@ package org.jboss.pnc.bacon.pnc.common;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.enums.RebuildMode;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Helper class to check for parameter validity
  */
-@Slf4j
 public class ParameterChecker {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ParameterChecker.class);
 
     /**
      * Check that the rebuild mode provided by the user is valid or not
      */
     public static void checkRebuildModeOption(String rebuildMode) throws FatalException {
-
         try {
             RebuildMode.valueOf(rebuildMode);
         } catch (IllegalArgumentException | NullPointerException e) {
@@ -40,7 +38,7 @@ public class ParameterChecker {
             for (RebuildMode mode : RebuildMode.values()) {
                 log.error(mode.toString());
             }
-            throw new FatalException("Illegal option ('{}') for rebuild mode", rebuildMode);
+            throw new FatalException("Illegal option (\'{}\') for rebuild mode", rebuildMode);
         }
     }
 }

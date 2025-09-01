@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -29,32 +28,28 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 
-import lombok.Data;
-import lombok.experimental.Delegate;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/19/17
  */
-@Data
 public class SharedContentReportRow {
-    @Delegate
     private final GAV gav;
-    // private String classifier; TODO?
 
+    public String toGav() {
+        return gav.toGav();
+    }
+
+    // private String classifier; TODO?
     private String productName;
     private String productVersion;
     private Boolean released;
-
     private String buildAuthor;
     private String buildId;
     private List<String> buildTags;
-
     private Path filePath;
 
     public SharedContentReportRow(File file, String repoDirName) {
         gav = GAV.fromFileName(file.getAbsolutePath(), repoDirName);
-
         filePath = file.toPath();
     }
 
@@ -110,4 +105,93 @@ public class SharedContentReportRow {
     public int hashCode() {
         return Objects.hash(gav);
     }
+
+    @java.lang.SuppressWarnings("all")
+    public GAV getGav() {
+        return this.gav;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getProductName() {
+        return this.productName;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getProductVersion() {
+        return this.productVersion;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Boolean getReleased() {
+        return this.released;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getBuildAuthor() {
+        return this.buildAuthor;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getBuildId() {
+        return this.buildId;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public List<String> getBuildTags() {
+        return this.buildTags;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Path getFilePath() {
+        return this.filePath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setProductName(final String productName) {
+        this.productName = productName;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setProductVersion(final String productVersion) {
+        this.productVersion = productVersion;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setReleased(final Boolean released) {
+        this.released = released;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setBuildAuthor(final String buildAuthor) {
+        this.buildAuthor = buildAuthor;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setBuildId(final String buildId) {
+        this.buildId = buildId;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setBuildTags(final List<String> buildTags) {
+        this.buildTags = buildTags;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setFilePath(final Path filePath) {
+        this.filePath = filePath;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "SharedContentReportRow(gav=" + this.getGav() + ", productName=" + this.getProductName()
+                + ", productVersion=" + this.getProductVersion() + ", released=" + this.getReleased() + ", buildAuthor="
+                + this.getBuildAuthor() + ", buildId=" + this.getBuildId() + ", buildTags=" + this.getBuildTags()
+                + ", filePath=" + this.getFilePath() + ")";
+    }
+
+    public String toGapv() {
+        return this.gav.toGapv();
+    }
+
 }

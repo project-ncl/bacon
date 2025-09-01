@@ -3,13 +3,13 @@ package org.jboss.pnc.bacon.common.cli;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
-@Slf4j
 public class JSONCommandHandler {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JSONCommandHandler.class);
     @Spec
     public CommandSpec commandSpec;
 

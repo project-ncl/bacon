@@ -18,12 +18,10 @@ import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Slf4j
 @Command(
         name = "artifact",
         description = "Artifact",
@@ -34,12 +32,12 @@ import picocli.CommandLine.Option;
                 ArtifactCli.Usage.class,
                 ArtifactCli.UsageGav.class })
 public class ArtifactCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ArtifactCli.class);
     private static final ClientCreator<ArtifactClient> CREATOR = new ClientCreator<>(ArtifactClient::new);
-
     private static final String IDENTIFIER_GAV_DESCRIPTION = "Identifier is usually in format of "
-            + "'groupId:artifactId:classifier:version'. If a GAV "
-            + "is used, it is transformed as an identifier with the classifier set to 'pom'";
+            + "\'groupId:artifactId:classifier:version\'. If a GAV "
+            + "is used, it is transformed as an identifier with the classifier set to \'pom\'";
     private static final String GET_GAV_DESCRIPTION = "Get artifact by its identifier/GAV. "
             + IDENTIFIER_GAV_DESCRIPTION;
     private static final String USAGE_GAV_DESCRIPTION = "Get the list of builds using the artifact by artifact identifier/gav. "
@@ -57,14 +55,13 @@ public class ArtifactCli {
         if (identifier == null) {
             log.error("You need to specify artifact identifier/gav");
         }
-
         String[] gatv = identifier.split(":");
         if (gatv.length == 3) {
             // assuming only GAV mentioned
             identifier = String.format("%s:%s:%s:%s", gatv[0], gatv[1], "pom", gatv[2]);
         } else if (gatv.length < 3) {
             log.error(
-                    "You need to specify a valid artifact identifier/gav in the format: 'groupId:artifactId:classifier:version' or 'groupId:artifactId:version'");
+                    "You need to specify a valid artifact identifier/gav in the format: \'groupId:artifactId:classifier:version\' or \'groupId:artifactId:version\'");
         }
         return identifier;
     }
@@ -74,7 +71,6 @@ public class ArtifactCli {
             description = "Get an artifact by its id",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact get 10")
     public static class Get extends AbstractGetSpecificCommand<Artifact> {
-
         @Override
         public Artifact getSpecific(String id) throws ClientException {
             try (ArtifactClient client = CREATOR.newClient()) {
@@ -88,14 +84,12 @@ public class ArtifactCli {
             description = GET_GAV_DESCRIPTION,
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifacts get-gav args4j:args4j:jar:2.0.16")
     public static class GetGav extends JSONCommandHandler implements Callable<Integer> {
-
         @CommandLine.Parameters(description = "Identifier/GAV of artifact")
         private String identifier;
 
         @Override
         public Integer call() throws Exception {
             identifier = transformIdentifierIfGAV(identifier);
-
             try (ArtifactClient client = CREATOR.newClient()) {
                 RemoteCollection<Artifact> result = client
                         .getAll(null, null, null, Optional.empty(), Optional.ofNullable("identifier==" + identifier));
@@ -116,10 +110,8 @@ public class ArtifactCli {
     public static class ListFromHash extends JSONCommandHandler implements Callable<Integer> {
         @Option(names = "--md5")
         private String md5;
-
         @Option(names = "--sha1")
         private String sha1;
-
         @Option(names = "--sha256")
         private String sha256;
 
@@ -148,7 +140,6 @@ public class ArtifactCli {
             description = "Get the list of builds using the artifact",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact usage 10")
     public static class Usage extends AbstractListCommand<Build> {
-
         @CommandLine.Parameters(description = "Id of artifact")
         private String id;
 
@@ -165,15 +156,12 @@ public class ArtifactCli {
             description = USAGE_GAV_DESCRIPTION,
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc artifact usage-gav args4j:args4j:jar:2.0.16")
     public static class UsageGav extends AbstractListCommand<Build> {
-
         @CommandLine.Parameters(description = "Identifier/GAV of artifact")
         private String identifier;
 
         @Override
         public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
-
             identifier = transformIdentifierIfGAV(identifier);
-
             try (ArtifactClient client = CREATOR.newClient()) {
                 Artifact a = client
                         .getAll(null, null, null, Optional.empty(), Optional.ofNullable("identifier==" + identifier))

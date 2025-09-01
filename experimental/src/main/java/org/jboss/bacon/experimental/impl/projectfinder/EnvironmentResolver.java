@@ -12,11 +12,9 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Environment;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class EnvironmentResolver {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnvironmentResolver.class);
     private final Map<String, Environment> environments = new HashMap<>();
 
     public EnvironmentResolver(BuildConfigGeneratorConfig config) {
@@ -61,13 +59,13 @@ public class EnvironmentResolver {
             return env;
         }
         String replacementID = env.getAttributes().get("DEPRECATION_REPLACEMENT");// TODO: replace with constant from
-                                                                                  // 2.5
+        // 2.5
         if (replacementID == null) {
             log.error(
                     "Environment " + env.getName() + " #" + env.getId()
                             + " is deprecated, but does not have a DEPRECATION_REPLACEMENT provided.");// TODO: replace
-                                                                                                                                                                     // with constant
-                                                                                                                                                                     // from 2.5
+            // with constant
+            // from 2.5
             return env;
         }
         Environment replacement = environments.get(replacementID);

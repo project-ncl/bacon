@@ -28,24 +28,18 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/14/18
  */
-@Data
-@Slf4j
 public class Config {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Config.class);
     private static String configLocation;
     private static String configFilePath;
     private static String activeProfileName;
-
     private ConfigProfile activeProfile;
     private List<ConfigProfile> profile;
-
     private static Config instance;
 
     public static Config instance() throws RuntimeException {
@@ -90,9 +84,9 @@ public class Config {
                 .filter(ConfigProfile -> ConfigProfile.getName().equals(name))
                 .collect(Collectors.toList());
         if (potentialConfig.size() == 0 && name.equals("default"))
-            throw new IllegalArgumentException("Default configuration profile doesn't exist");
+            throw new IllegalArgumentException("Default configuration profile doesn\'t exist");
         if (potentialConfig.size() == 0)
-            throw new IllegalArgumentException("Configuration profile with this name doesn't exist");
+            throw new IllegalArgumentException("Configuration profile with this name doesn\'t exist");
         if (potentialConfig.size() > 1)
             throw new IllegalArgumentException("There are multiple configuration profiles with same name!");
         return potentialConfig.get(0);
@@ -106,8 +100,8 @@ public class Config {
         return configFilePath;
     }
 
-    @Deprecated
     // for tests only
+    @Deprecated
     public static void setInstance(Config instance) {
         Config.instance = instance;
     }
@@ -121,5 +115,73 @@ public class Config {
         } catch (MalformedURLException e) {
             log.error("PNC URL is malformed.");
         }
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Config() {
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public ConfigProfile getActiveProfile() {
+        return this.activeProfile;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public List<ConfigProfile> getProfile() {
+        return this.profile;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setActiveProfile(final ConfigProfile activeProfile) {
+        this.activeProfile = activeProfile;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setProfile(final List<ConfigProfile> profile) {
+        this.profile = profile;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public boolean equals(final java.lang.Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Config))
+            return false;
+        final Config other = (Config) o;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        final java.lang.Object this$activeProfile = this.getActiveProfile();
+        final java.lang.Object other$activeProfile = other.getActiveProfile();
+        if (this$activeProfile == null ? other$activeProfile != null : !this$activeProfile.equals(other$activeProfile))
+            return false;
+        final java.lang.Object this$profile = this.getProfile();
+        final java.lang.Object other$profile = other.getProfile();
+        if (this$profile == null ? other$profile != null : !this$profile.equals(other$profile))
+            return false;
+        return true;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    protected boolean canEqual(final java.lang.Object other) {
+        return other instanceof Config;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final java.lang.Object $activeProfile = this.getActiveProfile();
+        result = result * PRIME + ($activeProfile == null ? 43 : $activeProfile.hashCode());
+        final java.lang.Object $profile = this.getProfile();
+        result = result * PRIME + ($profile == null ? 43 : $profile.hashCode());
+        return result;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "Config(activeProfile=" + this.getActiveProfile() + ", profile=" + this.getProfile() + ")";
     }
 }

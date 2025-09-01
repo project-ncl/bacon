@@ -42,12 +42,10 @@ import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Slf4j
 @Command(
         name = "group-config",
         description = "Group config",
@@ -61,20 +59,17 @@ import picocli.CommandLine.Parameters;
                 GroupConfigCli.RemoveBuildConfig.class,
                 GroupConfigCli.ShowLatestBuild.class })
 public class GroupConfigCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupConfigCli.class);
     private static final ClientCreator<GroupConfigurationClient> CREATOR = new ClientCreator<>(
             GroupConfigurationClient::new);
 
     private static java.util.Map<String, BuildConfigurationRef> addBuildConfigs(String buildConfigIds) {
-
         java.util.Map<String, BuildConfigurationRef> buildConfigurationRefList = new HashMap<>();
-
         for (String id : buildConfigIds.split(",")) {
-
             id = id.trim();
             buildConfigurationRefList.put(id, BuildConfigurationRef.refBuilder().id(id).build());
         }
-
         return buildConfigurationRefList;
     }
 
@@ -84,13 +79,10 @@ public class GroupConfigCli {
             footer = Constant.EXAMPLE_TEXT
                     + "$ bacon pnc group-config create --build-config-ids 100,200,300 group-config-new-name")
     public static class Create extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Name of group config")
         private String groupConfigName;
-
         @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
-
         @Option(names = "--build-config-ids", description = "Build config ids in Group Config. Comma separated")
         private String buildConfigIds;
 
@@ -103,7 +95,6 @@ public class GroupConfigCli {
         @Override
         public Integer call() throws Exception {
             GroupConfiguration.Builder groupConfigurationBuilder = GroupConfiguration.builder().name(groupConfigName);
-
             if (isNotEmpty(productVersionId)) {
                 groupConfigurationBuilder.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
             }
@@ -122,16 +113,12 @@ public class GroupConfigCli {
             description = "Update a group config",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-config update --name group-config-updated 503")
     public static class Update implements Callable<Integer> {
-
         @Parameters(description = "Group Config ID")
         private String groupConfigId;
-
         @Option(names = "--name", description = "Name of group config")
         private String groupConfigName;
-
         @Option(names = "--product-version-id", description = "Product Version ID")
         private String productVersionId;
-
         @Option(names = "--build-config-ids", description = "Build config ids in Group Config. Comma separated")
         private String buildConfigIds;
 
@@ -146,7 +133,6 @@ public class GroupConfigCli {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
                 GroupConfiguration groupConfiguration = client.getSpecific(groupConfigId);
                 GroupConfiguration.Builder updated = groupConfiguration.toBuilder();
-
                 if (isNotEmpty(groupConfigName)) {
                     updated.name(groupConfigName);
                 }
@@ -166,7 +152,6 @@ public class GroupConfigCli {
 
     @Command(name = "get", description = "Get a group config by its id")
     public static class Get extends AbstractGetSpecificCommand<GroupConfiguration> {
-
         @Override
         public GroupConfiguration getSpecific(String id) throws ClientException {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
@@ -177,7 +162,6 @@ public class GroupConfigCli {
 
     @Command(name = "list", description = "List group configs")
     public static class List extends AbstractListCommand<GroupConfiguration> {
-
         @Override
         public Collection<GroupConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
@@ -188,7 +172,6 @@ public class GroupConfigCli {
 
     @Command(name = "list-build-configs", description = "List build configs of group config")
     public static class ListBuildConfig extends AbstractListCommand<BuildConfiguration> {
-
         @Parameters(description = "Group Config id")
         private String id;
 
@@ -202,10 +185,8 @@ public class GroupConfigCli {
 
     @Command(name = "add-build-config", description = "Add build config to group config")
     public static class AddBuildConfig implements Callable<Integer> {
-
         @Parameters(description = "Group config id")
         private String id;
-
         @Option(
                 names = "--bc-id",
                 required = true,
@@ -231,10 +212,8 @@ public class GroupConfigCli {
 
     @Command(name = "remove-build-config", description = "Remove build config from group config")
     public static class RemoveBuildConfig implements Callable<Integer> {
-
         @Parameters(description = "Group config id")
         private String id;
-
         @Option(
                 names = "--bc-id",
                 required = true,
@@ -262,10 +241,8 @@ public class GroupConfigCli {
             name = "show-latest-build",
             description = "Show the progress of the latest group build for the group config")
     public static class ShowLatestBuild extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Group config id")
         private String id;
-
         @Option(names = "--temporary-build", description = "Build is temporary")
         private boolean temporaryBuild;
 
@@ -278,10 +255,8 @@ public class GroupConfigCli {
         @Override
         public Integer call() throws Exception {
             try (GroupConfigurationClient client = CREATOR.newClient()) {
-
                 GroupBuildsFilterParameters groupBuildsFilterParameters = new GroupBuildsFilterParameters();
                 groupBuildsFilterParameters.setLatest(true);
-
                 Collection<GroupBuild> groupBuilds = client
                         .getAllGroupBuilds(
                                 id,
@@ -295,7 +270,7 @@ public class GroupConfigCli {
                     return 0;
                 } else {
                     log.error(
-                            "Couldn't find any group build from group config id: {} ( {} )",
+                            "Couldn\'t find any group build from group config id: {} ( {} )",
                             id,
                             UrlGenerator.generateGroupConfigUrl(id));
                     return 1;

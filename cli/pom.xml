@@ -40,10 +40,6 @@
             <artifactId>opentelemetry-ext-cli-java</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
         </dependency>

@@ -15,25 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.Delegate;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/1/17
  */
-@Getter
-@Setter
-@ToString
 public class CommunityDependency implements CsvExportable {
-    @Delegate
     final GAV gav;
     String recommendation;
     String availableVersions;
@@ -73,5 +63,63 @@ public class CommunityDependency implements CsvExportable {
 
     public org.jboss.da.model.rest.GAV toDaGav() {
         return new org.jboss.da.model.rest.GAV(getGroupId(), getArtifactId(), getVersion());
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public GAV getGav() {
+        return this.gav;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getRecommendation() {
+        return this.recommendation;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getAvailableVersions() {
+        return this.availableVersions;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public DependencyState getState() {
+        return this.state;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setRecommendation(final String recommendation) {
+        this.recommendation = recommendation;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setAvailableVersions(final String availableVersions) {
+        this.availableVersions = availableVersions;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setState(final DependencyState state) {
+        this.state = state;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "CommunityDependency(gav=" + this.getGav() + ", recommendation=" + this.getRecommendation()
+                + ", availableVersions=" + this.getAvailableVersions() + ", state=" + this.getState() + ")";
+    }
+
+    public String getGroupId() {
+        return gav.getGroupId();
+    }
+
+    public String getArtifactId() {
+        return gav.getArtifactId();
+    }
+
+    public String getVersion() {
+        return gav.getVersion();
+    }
+
+    public String getClassifier() {
+        return gav.getClassifier();
     }
 }

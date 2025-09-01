@@ -12,35 +12,29 @@ import javax.validation.ValidatorFactory;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.enums.BuildType;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Validation implementation for BuildConfig
  */
-@Slf4j
 public class ListBuildConfigValidator implements ConstraintValidator<ListBuildConfigCheck, List<BuildConfig>> {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ListBuildConfigValidator.class);
     private ListBuildConfigCheck constraintAnnotation;
     private Validator validator;
 
     @Override
     public boolean isValid(List<BuildConfig> values, ConstraintValidatorContext context) {
-
         List<String> errors = new ArrayList<>();
-
         for (BuildConfig value : values) {
             if (value == null) {
                 // we do nothing if value is null?
                 errors.add("is null");
                 continue;
             }
-
             if (value.getExternalScmUrl() != null) {
                 log.warn(
                         "Build config " + value.getName()
                                 + " is using deprecated externalScmUrl property that is not used when creating pnc configurations anymore, use scmUrl instead.");
             }
-
             if (value.getScmUrl() == null) {
                 errors.add(
                         "Build config " + value.getName() + " has scmUrl not specified. Specify the key with a value");
@@ -57,7 +51,6 @@ public class ListBuildConfigValidator implements ConstraintValidator<ListBuildCo
                 errors.add("Build config " + value.getName() + " has wrong buildType");
             }
         }
-
         if (errors.isEmpty()) {
             // everything is good!
             return true;

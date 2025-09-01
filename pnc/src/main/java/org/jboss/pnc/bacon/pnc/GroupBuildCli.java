@@ -41,7 +41,6 @@ import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -55,9 +54,9 @@ import picocli.CommandLine.Parameters;
                 GroupBuildCli.List.class,
                 GroupBuildCli.ListBuilds.class,
                 GroupBuildCli.Get.class })
-@Slf4j
 public class GroupBuildCli {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupBuildCli.class);
     private static final ClientCreator<GroupBuildClient> CREATOR = new ClientCreator<>(GroupBuildClient::new);
     private static final ClientCreator<AdvancedGroupConfigurationClient> GC_CREATOR = new ClientCreator<>(
             AdvancedGroupConfigurationClient::new);
@@ -67,10 +66,8 @@ public class GroupBuildCli {
             description = "Start a new Group build",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-build start --temporary-build 23")
     public static class Start extends JSONCommandHandler implements Callable<Integer> {
-
         @Parameters(description = "Group Build Config ID")
         private String groupBuildConfigId;
-
         @Option(
                 names = "--rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
@@ -105,14 +102,12 @@ public class GroupBuildCli {
                         "Temporary builds with timestamp alignment are not supported, running temporary builds instead...");
             }
             ParameterChecker.checkRebuildModeOption(rebuildMode);
-
             groupBuildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
             groupBuildParams.setTemporaryBuild(temporaryBuild);
             if (dryRun) {
                 groupBuildParams.setTemporaryBuild(true);
                 groupBuildParams.setAlignmentPreference(AlignmentPreference.PREFER_PERSISTENT);
             }
-
             // TODO add GroupBuildRequest with an option to specify BC revisions
             try (AdvancedGroupConfigurationClient advancedGroupConfigurationClient = GC_CREATOR
                     .newClientAuthenticated()) {
@@ -125,7 +120,6 @@ public class GroupBuildCli {
                     ObjectHelper.print(getJsonOutput(), gb);
                     return gb.getStatus().completedSuccessfully() ? 0 : gb.getStatus().ordinal();
                 }
-
                 if (wait) {
                     GroupBuild gb = advancedGroupConfigurationClient
                             .executeGroupBuild(groupBuildConfigId, groupBuildParams)
@@ -147,7 +141,6 @@ public class GroupBuildCli {
             description = "Cancel a group build",
             footer = Constant.EXAMPLE_TEXT + "$ bacon pnc group-build cancel 42")
     public static class Cancel implements Callable<Integer> {
-
         @Parameters(description = "Group Build ID")
         private String groupBuildId;
 
@@ -168,7 +161,6 @@ public class GroupBuildCli {
 
     @Command(name = "list", description = "List group builds")
     public static class List extends AbstractListCommand<GroupBuild> {
-
         @Override
         public Collection<GroupBuild> getAll(String sort, String query) throws RemoteResourceException {
             try (GroupBuildClient client = CREATOR.newClient()) {
@@ -179,7 +171,6 @@ public class GroupBuildCli {
 
     @Command(name = "list-builds", description = "List builds associated with the group build")
     public static class ListBuilds extends AbstractBuildListCommand {
-
         @Parameters(description = "Group Build ID")
         private String groupBuildId;
 
@@ -196,7 +187,6 @@ public class GroupBuildCli {
 
     @Command(name = "get", description = "Get a group build by its id")
     public static class Get extends AbstractGetSpecificCommand<GroupBuild> {
-
         @Override
         public GroupBuild getSpecific(String id) throws ClientException {
             try (GroupBuildClient client = CREATOR.newClient()) {

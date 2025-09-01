@@ -47,18 +47,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * TODO: consider saving the latest reached state to not repeat the steps already performed
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 4/1/19
  */
-@Data
-@Slf4j
 public class PigContext {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PigContext.class);
     private static final ObjectMapper jsonMapper;
 
     static {
@@ -75,20 +72,15 @@ public class PigContext {
     private Map<String, PncBuild> builds;
     private RepositoryData repositoryData;
     private Deliverables deliverables;
-
     private String targetPath;
     private String releaseDirName;
     private String releasePath;
     private String extrasPath;
     private String configSha;
-
     private boolean tempBuild;
-
     private String contextLocation;
-
     private String prefix;
     private String fullVersion; // version like 1.3.2.DR7
-
     private Map<String, Collection<String>> checksums;
 
     public void initConfig(Path configDir, String targetPath, String releaseStorageUrl, Map<String, String> overrides) {
@@ -111,7 +103,6 @@ public class PigContext {
         if (releaseStorageUrl != null) {
             pigConfiguration.setReleaseStorageUrl(releaseStorageUrl);
         }
-
         this.targetPath = targetPath;
     }
 
@@ -155,28 +146,21 @@ public class PigContext {
             if (pigConfiguration.getOutputSuffix() != null && !pigConfiguration.getOutputSuffix().isBlank()) {
                 suffix = "-" + pigConfiguration.getOutputSuffix();
             }
-
             prefix = String
                     .format("%s-%s%s", pigConfiguration.getOutputPrefixes().getReleaseFile(), fullVersion, suffix);
-
             deliverables = new Deliverables();
-
             deliverables.setRepositoryZipName(prefix + "-maven-repository.zip");
-
             deliverables.setNvrListName(prefix + "-nvr-list.txt");
         }
-
         String productPrefix = this.pigConfiguration.getProduct().prefix();
         releaseDirName = productPrefix + "-" + fullVersion;
         releasePath = targetPath + File.separator + releaseDirName + File.separator;
-
         File releaseDirectory = Paths.get(releasePath).toFile();
         if (!releaseDirectory.isDirectory()) {
             releaseDirectory.mkdirs();
         }
         releasePath = releaseDirectory.getAbsolutePath();
         releasePath = releasePath.endsWith(File.separator) ? releasePath : releasePath + File.separator;
-
         File extrasDirectory = Paths.get(releasePath, "extras").toFile();
         if (!extrasDirectory.isDirectory()) {
             extrasDirectory.mkdirs();
@@ -227,7 +211,6 @@ public class PigContext {
             return tempPath.startsWith(Paths.get(".bacon", "pig-context.json"))
                     || tempPath.startsWith(Paths.get("target"));
         });
-
         PigContext result;
         String ctxLocationEnv = System.getenv(PIG_CONTEXT_DIR);
         Path contextDir = ctxLocationEnv == null ? Paths.get(".bacon") : Paths.get(ctxLocationEnv);
@@ -245,7 +228,6 @@ public class PigContext {
         } else {
             result = new PigContext();
         }
-
         if (!Files.exists(contextDir)) {
             try {
                 Files.createDirectories(contextDir);
@@ -256,13 +238,297 @@ public class PigContext {
         }
         result.setContextLocation(contextJson.toAbsolutePath().toString());
         result.setConfigSha(sha);
-
         return result;
     }
 
-    @Deprecated
     // for tests only!
+    @Deprecated
     public static void setInstance(PigContext instance) {
         PigContext.instance = instance;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public PigContext() {
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public PigConfiguration getPigConfiguration() {
+        return this.pigConfiguration;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public ImportResult getPncImportResult() {
+        return this.pncImportResult;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Map<String, PncBuild> getBuilds() {
+        return this.builds;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public RepositoryData getRepositoryData() {
+        return this.repositoryData;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Deliverables getDeliverables() {
+        return this.deliverables;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getTargetPath() {
+        return this.targetPath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getReleaseDirName() {
+        return this.releaseDirName;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getReleasePath() {
+        return this.releasePath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getExtrasPath() {
+        return this.extrasPath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getConfigSha() {
+        return this.configSha;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public boolean isTempBuild() {
+        return this.tempBuild;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getContextLocation() {
+        return this.contextLocation;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getFullVersion() {
+        return this.fullVersion;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Map<String, Collection<String>> getChecksums() {
+        return this.checksums;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setPigConfiguration(final PigConfiguration pigConfiguration) {
+        this.pigConfiguration = pigConfiguration;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setPncImportResult(final ImportResult pncImportResult) {
+        this.pncImportResult = pncImportResult;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setBuilds(final Map<String, PncBuild> builds) {
+        this.builds = builds;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setRepositoryData(final RepositoryData repositoryData) {
+        this.repositoryData = repositoryData;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setDeliverables(final Deliverables deliverables) {
+        this.deliverables = deliverables;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setTargetPath(final String targetPath) {
+        this.targetPath = targetPath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setReleaseDirName(final String releaseDirName) {
+        this.releaseDirName = releaseDirName;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setReleasePath(final String releasePath) {
+        this.releasePath = releasePath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setExtrasPath(final String extrasPath) {
+        this.extrasPath = extrasPath;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setConfigSha(final String configSha) {
+        this.configSha = configSha;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setTempBuild(final boolean tempBuild) {
+        this.tempBuild = tempBuild;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setContextLocation(final String contextLocation) {
+        this.contextLocation = contextLocation;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setPrefix(final String prefix) {
+        this.prefix = prefix;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setFullVersion(final String fullVersion) {
+        this.fullVersion = fullVersion;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setChecksums(final Map<String, Collection<String>> checksums) {
+        this.checksums = checksums;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public boolean equals(final java.lang.Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof PigContext))
+            return false;
+        final PigContext other = (PigContext) o;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        if (this.isTempBuild() != other.isTempBuild())
+            return false;
+        final java.lang.Object this$pigConfiguration = this.getPigConfiguration();
+        final java.lang.Object other$pigConfiguration = other.getPigConfiguration();
+        if (this$pigConfiguration == null ? other$pigConfiguration != null
+                : !this$pigConfiguration.equals(other$pigConfiguration))
+            return false;
+        final java.lang.Object this$pncImportResult = this.getPncImportResult();
+        final java.lang.Object other$pncImportResult = other.getPncImportResult();
+        if (this$pncImportResult == null ? other$pncImportResult != null
+                : !this$pncImportResult.equals(other$pncImportResult))
+            return false;
+        final java.lang.Object this$builds = this.getBuilds();
+        final java.lang.Object other$builds = other.getBuilds();
+        if (this$builds == null ? other$builds != null : !this$builds.equals(other$builds))
+            return false;
+        final java.lang.Object this$repositoryData = this.getRepositoryData();
+        final java.lang.Object other$repositoryData = other.getRepositoryData();
+        if (this$repositoryData == null ? other$repositoryData != null
+                : !this$repositoryData.equals(other$repositoryData))
+            return false;
+        final java.lang.Object this$deliverables = this.getDeliverables();
+        final java.lang.Object other$deliverables = other.getDeliverables();
+        if (this$deliverables == null ? other$deliverables != null : !this$deliverables.equals(other$deliverables))
+            return false;
+        final java.lang.Object this$targetPath = this.getTargetPath();
+        final java.lang.Object other$targetPath = other.getTargetPath();
+        if (this$targetPath == null ? other$targetPath != null : !this$targetPath.equals(other$targetPath))
+            return false;
+        final java.lang.Object this$releaseDirName = this.getReleaseDirName();
+        final java.lang.Object other$releaseDirName = other.getReleaseDirName();
+        if (this$releaseDirName == null ? other$releaseDirName != null
+                : !this$releaseDirName.equals(other$releaseDirName))
+            return false;
+        final java.lang.Object this$releasePath = this.getReleasePath();
+        final java.lang.Object other$releasePath = other.getReleasePath();
+        if (this$releasePath == null ? other$releasePath != null : !this$releasePath.equals(other$releasePath))
+            return false;
+        final java.lang.Object this$extrasPath = this.getExtrasPath();
+        final java.lang.Object other$extrasPath = other.getExtrasPath();
+        if (this$extrasPath == null ? other$extrasPath != null : !this$extrasPath.equals(other$extrasPath))
+            return false;
+        final java.lang.Object this$configSha = this.getConfigSha();
+        final java.lang.Object other$configSha = other.getConfigSha();
+        if (this$configSha == null ? other$configSha != null : !this$configSha.equals(other$configSha))
+            return false;
+        final java.lang.Object this$contextLocation = this.getContextLocation();
+        final java.lang.Object other$contextLocation = other.getContextLocation();
+        if (this$contextLocation == null ? other$contextLocation != null
+                : !this$contextLocation.equals(other$contextLocation))
+            return false;
+        final java.lang.Object this$prefix = this.getPrefix();
+        final java.lang.Object other$prefix = other.getPrefix();
+        if (this$prefix == null ? other$prefix != null : !this$prefix.equals(other$prefix))
+            return false;
+        final java.lang.Object this$fullVersion = this.getFullVersion();
+        final java.lang.Object other$fullVersion = other.getFullVersion();
+        if (this$fullVersion == null ? other$fullVersion != null : !this$fullVersion.equals(other$fullVersion))
+            return false;
+        final java.lang.Object this$checksums = this.getChecksums();
+        final java.lang.Object other$checksums = other.getChecksums();
+        if (this$checksums == null ? other$checksums != null : !this$checksums.equals(other$checksums))
+            return false;
+        return true;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    protected boolean canEqual(final java.lang.Object other) {
+        return other instanceof PigContext;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + (this.isTempBuild() ? 79 : 97);
+        final java.lang.Object $pigConfiguration = this.getPigConfiguration();
+        result = result * PRIME + ($pigConfiguration == null ? 43 : $pigConfiguration.hashCode());
+        final java.lang.Object $pncImportResult = this.getPncImportResult();
+        result = result * PRIME + ($pncImportResult == null ? 43 : $pncImportResult.hashCode());
+        final java.lang.Object $builds = this.getBuilds();
+        result = result * PRIME + ($builds == null ? 43 : $builds.hashCode());
+        final java.lang.Object $repositoryData = this.getRepositoryData();
+        result = result * PRIME + ($repositoryData == null ? 43 : $repositoryData.hashCode());
+        final java.lang.Object $deliverables = this.getDeliverables();
+        result = result * PRIME + ($deliverables == null ? 43 : $deliverables.hashCode());
+        final java.lang.Object $targetPath = this.getTargetPath();
+        result = result * PRIME + ($targetPath == null ? 43 : $targetPath.hashCode());
+        final java.lang.Object $releaseDirName = this.getReleaseDirName();
+        result = result * PRIME + ($releaseDirName == null ? 43 : $releaseDirName.hashCode());
+        final java.lang.Object $releasePath = this.getReleasePath();
+        result = result * PRIME + ($releasePath == null ? 43 : $releasePath.hashCode());
+        final java.lang.Object $extrasPath = this.getExtrasPath();
+        result = result * PRIME + ($extrasPath == null ? 43 : $extrasPath.hashCode());
+        final java.lang.Object $configSha = this.getConfigSha();
+        result = result * PRIME + ($configSha == null ? 43 : $configSha.hashCode());
+        final java.lang.Object $contextLocation = this.getContextLocation();
+        result = result * PRIME + ($contextLocation == null ? 43 : $contextLocation.hashCode());
+        final java.lang.Object $prefix = this.getPrefix();
+        result = result * PRIME + ($prefix == null ? 43 : $prefix.hashCode());
+        final java.lang.Object $fullVersion = this.getFullVersion();
+        result = result * PRIME + ($fullVersion == null ? 43 : $fullVersion.hashCode());
+        final java.lang.Object $checksums = this.getChecksums();
+        result = result * PRIME + ($checksums == null ? 43 : $checksums.hashCode());
+        return result;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "PigContext(pigConfiguration=" + this.getPigConfiguration() + ", pncImportResult="
+                + this.getPncImportResult() + ", builds=" + this.getBuilds() + ", repositoryData="
+                + this.getRepositoryData() + ", deliverables=" + this.getDeliverables() + ", targetPath="
+                + this.getTargetPath() + ", releaseDirName=" + this.getReleaseDirName() + ", releasePath="
+                + this.getReleasePath() + ", extrasPath=" + this.getExtrasPath() + ", configSha=" + this.getConfigSha()
+                + ", tempBuild=" + this.isTempBuild() + ", contextLocation=" + this.getContextLocation() + ", prefix="
+                + this.getPrefix() + ", fullVersion=" + this.getFullVersion() + ", checksums=" + this.getChecksums()
+                + ")";
     }
 }

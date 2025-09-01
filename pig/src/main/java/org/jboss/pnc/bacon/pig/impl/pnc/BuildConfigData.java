@@ -17,29 +17,23 @@
  */
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
+import java.util.List;
+
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.dto.BuildConfiguration;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Delegate;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/2/17
  */
-@Getter
 public class BuildConfigData {
-    @Delegate
     private BuildConfig newConfig;
-    @Setter
     private String id;
-    @Setter
     private BuildConfiguration oldConfig;
-    @Setter
     private boolean modified = false;
 
-    @Deprecated // for jackson
+    // for jackson
+    @Deprecated
     public BuildConfigData() {
     }
 
@@ -50,4 +44,52 @@ public class BuildConfigData {
     public boolean shouldBeUpdated(boolean skipBranchCheck, boolean temporaryBuild) {
         return !newConfig.isTheSameAs(oldConfig, skipBranchCheck, temporaryBuild);
     }
+
+    @java.lang.SuppressWarnings("all")
+    public BuildConfig getNewConfig() {
+        return this.newConfig;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getId() {
+        return this.id;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public BuildConfiguration getOldConfig() {
+        return this.oldConfig;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public boolean isModified() {
+        return this.modified;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setOldConfig(final BuildConfiguration oldConfig) {
+        this.oldConfig = oldConfig;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setModified(final boolean modified) {
+        this.modified = modified;
+    }
+
+    public String getEnvironmentId() {
+        return newConfig.getEnvironmentId();
+    }
+
+    public String getName() {
+        return newConfig.getName();
+    }
+
+    public List<String> getDependencies() {
+        return newConfig.getDependencies();
+    }
+
 }

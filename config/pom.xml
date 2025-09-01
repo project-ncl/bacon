@@ -12,11 +12,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
         <!-- logging -->
         <dependency>
             <groupId>org.slf4j</groupId>

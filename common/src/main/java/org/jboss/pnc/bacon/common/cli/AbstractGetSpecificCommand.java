@@ -25,7 +25,6 @@ import org.jboss.pnc.client.ClientException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Parameters;
 
 /**
@@ -34,8 +33,9 @@ import picocli.CommandLine.Parameters;
  *
  * @param <T>
  */
-@Slf4j
 public abstract class AbstractGetSpecificCommand<T> extends JSONCommandHandler implements Callable<Integer> {
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractGetSpecificCommand.class);
     @Parameters(description = "Id of item")
     private String id;
 

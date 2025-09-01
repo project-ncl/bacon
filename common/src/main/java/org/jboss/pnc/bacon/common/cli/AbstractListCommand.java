@@ -27,7 +27,6 @@ import org.jboss.pnc.client.RemoteResourceException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Option;
 
 /**
@@ -37,15 +36,13 @@ import picocli.CommandLine.Option;
  *
  * @param <T>
  */
-@Slf4j
 public abstract class AbstractListCommand<T> extends JSONCommandHandler implements Callable<Integer> {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractListCommand.class);
     @Option(names = "--sort", description = "Sort order (using RSQL)")
     private String sort;
-
     @Option(names = "--query", description = "Query parameter (using RSQL)")
     private String query;
-
     protected boolean print = true;
 
     @Override

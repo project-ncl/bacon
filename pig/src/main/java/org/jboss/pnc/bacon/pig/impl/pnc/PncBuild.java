@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import static java.util.Arrays.asList;
@@ -45,25 +44,14 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 6/3/17
  */
-@Getter
-@Setter
-@ToString(exclude = "buildLog")
-@AllArgsConstructor
-@JsonIgnoreProperties(value = { "startTime", "endTime" })
+@JsonIgnoreProperties({ "startTime", "endTime" })
 public class PncBuild {
     private static final Logger log = LoggerFactory.getLogger(PncBuild.class);
-
     public static final String SUCCESSFUL_STATUS = "DONE";
-
     private String internalScmUrl;
     private String scmRevision;
     private String scmTag;
@@ -71,16 +59,15 @@ public class PncBuild {
     private String name;
     private Map<String, String> attributes;
     private BuildStatus buildStatus;
-
     // Don't print huge build logs in the user's output. It's usually not that useful
     @JsonIgnore
     private List<String> buildLog;
     private List<ArtifactWrapper> builtArtifacts;
     private List<ArtifactWrapper> dependencyArtifacts;
 
-    @Deprecated // only for jackson
+    // only for jackson
+    @Deprecated
     public PncBuild() {
-
     }
 
     public PncBuild(Build build) {
@@ -130,13 +117,11 @@ public class PncBuild {
     public void downloadArtifact(String pattern, File downloadedZip) {
         Predicate<ArtifactWrapper> query = a -> a.getFileName().matches(pattern);
         List<ArtifactWrapper> artifacts = findArtifactsMatching(query);
-
         if (artifacts.size() != 1) {
             throw new RuntimeException(
                     "Unexpected number of artifacts to download found.\n" + "Expecting one artifact matching " + pattern
                             + " in build " + id + " , found: " + artifacts);
         }
-
         ArtifactWrapper artifact = artifacts.get(0);
         artifact.downloadTo(downloadedZip);
     }
@@ -148,19 +133,16 @@ public class PncBuild {
      * @return the logs of the build
      */
     public List<String> getBuildLog() {
-
         // use cached buildLog if present
         if (buildLog != null) {
             return buildLog;
         }
-
         try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
             Optional<InputStream> streamLogs = buildClient.getBuildLogs(id);
             buildLog = Collections.emptyList();
             streamLogs.ifPresent(
                     inputStream -> buildLog = new BufferedReader(
                             new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().toList());
-
             return buildLog;
         } catch (RemoteResourceException e) {
             throw new RuntimeException(
@@ -171,5 +153,134 @@ public class PncBuild {
 
     private List<ArtifactWrapper> findArtifactsMatching(Predicate<ArtifactWrapper> query) {
         return builtArtifacts.stream().filter(query).collect(Collectors.toList());
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getInternalScmUrl() {
+        return this.internalScmUrl;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getScmRevision() {
+        return this.scmRevision;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getScmTag() {
+        return this.scmTag;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getId() {
+        return this.id;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public String getName() {
+        return this.name;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public Map<String, String> getAttributes() {
+        return this.attributes;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public BuildStatus getBuildStatus() {
+        return this.buildStatus;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public List<ArtifactWrapper> getBuiltArtifacts() {
+        return this.builtArtifacts;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public List<ArtifactWrapper> getDependencyArtifacts() {
+        return this.dependencyArtifacts;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setInternalScmUrl(final String internalScmUrl) {
+        this.internalScmUrl = internalScmUrl;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setScmRevision(final String scmRevision) {
+        this.scmRevision = scmRevision;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setScmTag(final String scmTag) {
+        this.scmTag = scmTag;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setAttributes(final Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setBuildStatus(final BuildStatus buildStatus) {
+        this.buildStatus = buildStatus;
+    }
+
+    @JsonIgnore
+    @java.lang.SuppressWarnings("all")
+    public void setBuildLog(final List<String> buildLog) {
+        this.buildLog = buildLog;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setBuiltArtifacts(final List<ArtifactWrapper> builtArtifacts) {
+        this.builtArtifacts = builtArtifacts;
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public void setDependencyArtifacts(final List<ArtifactWrapper> dependencyArtifacts) {
+        this.dependencyArtifacts = dependencyArtifacts;
+    }
+
+    @java.lang.Override
+    @java.lang.SuppressWarnings("all")
+    public java.lang.String toString() {
+        return "PncBuild(internalScmUrl=" + this.getInternalScmUrl() + ", scmRevision=" + this.getScmRevision()
+                + ", scmTag=" + this.getScmTag() + ", id=" + this.getId() + ", name=" + this.getName() + ", attributes="
+                + this.getAttributes() + ", buildStatus=" + this.getBuildStatus() + ", builtArtifacts="
+                + this.getBuiltArtifacts() + ", dependencyArtifacts=" + this.getDependencyArtifacts() + ")";
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public PncBuild(
+            final String internalScmUrl,
+            final String scmRevision,
+            final String scmTag,
+            final String id,
+            final String name,
+            final Map<String, String> attributes,
+            final BuildStatus buildStatus,
+            final List<String> buildLog,
+            final List<ArtifactWrapper> builtArtifacts,
+            final List<ArtifactWrapper> dependencyArtifacts) {
+        this.internalScmUrl = internalScmUrl;
+        this.scmRevision = scmRevision;
+        this.scmTag = scmTag;
+        this.id = id;
+        this.name = name;
+        this.attributes = attributes;
+        this.buildStatus = buildStatus;
+        this.buildLog = buildLog;
+        this.builtArtifacts = builtArtifacts;
+        this.dependencyArtifacts = dependencyArtifacts;
     }
 }

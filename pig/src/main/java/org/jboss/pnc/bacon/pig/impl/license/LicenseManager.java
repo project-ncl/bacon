@@ -35,24 +35,17 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.Getter;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 12/5/17
  */
 public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> {
     private static final Logger log = LoggerFactory.getLogger(LicenseGenerator.class);
-
     private final RepositoryData repositoryData;
-    @Getter
     private final GenerationData<LicenseGenerationStrategy> generationData;
-
     private final boolean useTempBuilds;
     private final boolean strict;
-
     private String exceptionsPath;
-
     private String namesPath;
 
     public LicenseManager(
@@ -65,10 +58,8 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
         super(pigConfiguration, releasePath, deliverables, builds);
         this.repositoryData = repositoryData;
         this.strict = strict;
-
         generationData = pigConfiguration.getFlow().getLicensesGeneration();
         useTempBuilds = PigContext.get().isTempBuild();
-
         exceptionsPath = pigConfiguration.getFlow().getLicensesGeneration().getLicenseExceptionsPath();
         namesPath = pigConfiguration.getFlow().getLicensesGeneration().getLicenseNamesPath();
     }
@@ -123,5 +114,10 @@ public class LicenseManager extends DeliverableManager<GenerationData<?>, Void> 
                     exceptionsPath,
                     namesPath);
         }
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public GenerationData<LicenseGenerationStrategy> getGenerationData() {
+        return this.generationData;
     }
 }

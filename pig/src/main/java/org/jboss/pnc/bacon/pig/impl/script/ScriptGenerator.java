@@ -31,16 +31,12 @@ import org.jboss.pnc.bacon.pig.impl.documents.FileGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
  *         Date: 1/4/18
  */
 public class ScriptGenerator {
     private static final Logger log = LoggerFactory.getLogger(ScriptGenerator.class);
-
     private final PigConfiguration pigConfiguration;
 
     public ScriptGenerator(PigConfiguration pigConfiguration) {
@@ -50,18 +46,14 @@ public class ScriptGenerator {
     public void generateReleaseScripts(Path targetDir) {
         String version = PigContext.get().getFullVersion();
         String productWithVersion = pigConfiguration.getProduct().prefix() + "-" + version;
-
         ReleaseScriptData dataRoot = new ReleaseScriptData(productWithVersion);
         generateUploadToCandidatesScript(targetDir, dataRoot);
     }
 
     private static void generateUploadToCandidatesScript(Path targetDir, ReleaseScriptData dataRoot) {
         FileGenerator generator = new FileGenerator(Optional.empty());
-
         File uploadScriptLocation = targetDir.resolve("upload-to-candidates.sh").toFile();
-
         generator.generateFileFromResource(dataRoot, "uploadToCandidates.sh", uploadScriptLocation);
-
         makeScriptExecutable(uploadScriptLocation.toPath());
     }
 
@@ -73,13 +65,65 @@ public class ScriptGenerator {
             permissions.add(PosixFilePermission.OTHERS_EXECUTE);
             Files.setPosixFilePermissions(script, permissions);
         } catch (IOException | UnsupportedOperationException e) {
-            log.info("Couldn't make script {} executable: {}", script, e.getMessage());
+            log.info("Couldn\'t make script {} executable: {}", script, e.getMessage());
         }
     }
 
-    @Data
-    @AllArgsConstructor
     public static class ReleaseScriptData {
         private String productWithVersion;
+
+        @java.lang.SuppressWarnings("all")
+        public String getProductWithVersion() {
+            return this.productWithVersion;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public void setProductWithVersion(final String productWithVersion) {
+            this.productWithVersion = productWithVersion;
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("all")
+        public boolean equals(final java.lang.Object o) {
+            if (o == this)
+                return true;
+            if (!(o instanceof ScriptGenerator.ReleaseScriptData))
+                return false;
+            final ScriptGenerator.ReleaseScriptData other = (ScriptGenerator.ReleaseScriptData) o;
+            if (!other.canEqual((java.lang.Object) this))
+                return false;
+            final java.lang.Object this$productWithVersion = this.getProductWithVersion();
+            final java.lang.Object other$productWithVersion = other.getProductWithVersion();
+            if (this$productWithVersion == null ? other$productWithVersion != null
+                    : !this$productWithVersion.equals(other$productWithVersion))
+                return false;
+            return true;
+        }
+
+        @java.lang.SuppressWarnings("all")
+        protected boolean canEqual(final java.lang.Object other) {
+            return other instanceof ScriptGenerator.ReleaseScriptData;
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("all")
+        public int hashCode() {
+            final int PRIME = 59;
+            int result = 1;
+            final java.lang.Object $productWithVersion = this.getProductWithVersion();
+            result = result * PRIME + ($productWithVersion == null ? 43 : $productWithVersion.hashCode());
+            return result;
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("all")
+        public java.lang.String toString() {
+            return "ScriptGenerator.ReleaseScriptData(productWithVersion=" + this.getProductWithVersion() + ")";
+        }
+
+        @java.lang.SuppressWarnings("all")
+        public ReleaseScriptData(final String productWithVersion) {
+            this.productWithVersion = productWithVersion;
+        }
     }
 }
