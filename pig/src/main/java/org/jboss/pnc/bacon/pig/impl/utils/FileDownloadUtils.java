@@ -60,8 +60,8 @@ public class FileDownloadUtils {
             .setSocketTimeout(READ_TIMEOUT)
             .build();
 
-    public static final String FILE_CACHE_LOCATION = System.getProperty("user.home") + File.separator + ".cache"
-            + File.separator + "pnc-bacon" + File.separator + "pnc-bacon-artifact-cache.db";
+    public static final Path CACHE_DIRECTORY = Path.of(System.getProperty("user.home") + "/.cache/pnc-bacon");
+    public static final String FILE_CACHE_LOCATION = CACHE_DIRECTORY.resolve("pnc-bacon-artifact-cache.db").toString();
 
     private static boolean enableCache = false;
     private static List<String> urlsToCache = List.of();
@@ -81,6 +81,10 @@ public class FileDownloadUtils {
             fileCache = new FileCache(Path.of(FILE_CACHE_LOCATION));
         }
         return fileCache;
+    }
+
+    public static Path getCacheDirectory() {
+        return CACHE_DIRECTORY;
     }
 
     public static void controlCache(boolean enableCacheTemp, List<String> urlsToCacheTemp) {
