@@ -1,5 +1,6 @@
 package org.jboss.bacon.experimental.impl.dependencies;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -111,7 +112,7 @@ public class DependencyResolver {
         }
         ProjectDependencyResolver.Builder resolverBuilder = ProjectDependencyResolver.builder();
         if (config.getMavenSettings() != null) {
-            resolverBuilder.setUserMavenSettings(config.getMavenSettings());
+            resolverBuilder.setUserMavenSettings(Path.of(config.getMavenSettings()));
         }
         if (projectDir != null) {
             dominoConfig.setProjectDir(projectDir);
@@ -143,7 +144,7 @@ public class DependencyResolver {
                     .setEffectiveModelBuilder(true)
                     .setPreferPomsFromWorkspace(true);
             if (config.getMavenSettings() != null) {
-                builder.setUserSettings(config.getMavenSettings().toFile());
+                builder.setUserSettings(new File(config.getMavenSettings()));
             }
             return builder.build();
         } catch (BootstrapMavenException e) {
