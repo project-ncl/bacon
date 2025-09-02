@@ -1,6 +1,5 @@
 package org.jboss.bacon.experimental.impl.config;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -72,5 +71,5 @@ public class DependencyResolutionConfig {
     /**
      * Path to the maven settings.xml file to use instead of the system one.
      */
-    private Path mavenSettings;
+    private String mavenSettings;
 }
