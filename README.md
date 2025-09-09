@@ -1,3 +1,6 @@
+# This branch is no longer used for documentation and will be removed in the future!!! 
+Please use /docs folder in main branch for all your github pages documentation.
+
 
 # GH-Pages Branch
 
