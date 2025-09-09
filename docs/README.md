@@ -1,7 +1,7 @@
 
-# GH-Pages Branch
+# GH-Pages Folder
 
-This branch contains the github pages content for https://github.com/project-ncl/bacon and the pages are hosted at https://project-ncl.github.io/bacon
+This folder contains the github pages content for https://github.com/project-ncl/bacon and the pages are hosted at https://project-ncl.github.io/bacon
 
 It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`
 
