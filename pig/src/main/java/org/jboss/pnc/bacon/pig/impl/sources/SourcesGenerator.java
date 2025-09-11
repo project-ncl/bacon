@@ -179,54 +179,56 @@ public class SourcesGenerator {
     }
 
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
-        builds.values().forEach(build -> {
-            final String fileName = build.getName() + "-" + build.getId() + ".tar.gz";
-            final Path targetPath = workDir.toPath().resolve(fileName);
+        builds.values()
+                .parallelStream()
+                .forEach(build -> {
+                    final String fileName = build.getName() + "-" + build.getId() + ".tar.gz";
+                    final Path targetPath = workDir.toPath().resolve(fileName);
 
-            final Path cachedFile = sourcesCache.get(build.getName(), build.getId(), (Path lf) -> {
-                try (BuildClient client = CREATOR.newClient();
-                        Response response = client.getInternalScmArchiveLink(build.getId())) {
-                    log.info("Downloading source archive " + fileName);
-                    if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                        // NCLSUP-1269: check if the download link is valid or has some issues
-                        StringBuilder errorMessage = new StringBuilder();
-                        errorMessage.append("Failed to download sources for build: ")
-                                .append(build.getId())
-                                .append("\n");
-                        errorMessage.append("HTTP Status: ").append(response.getStatus()).append("\n");
-                        throw new RuntimeException(errorMessage.toString());
+                    final Path cachedFile = sourcesCache.get(build.getName(), build.getId(), (Path lf) -> {
+                        try (BuildClient client = CREATOR.newClient();
+                                Response response = client.getInternalScmArchiveLink(build.getId())) {
+                            log.info("Downloading source archive " + fileName);
+                            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                                // NCLSUP-1269: check if the download link is valid or has some issues
+                                StringBuilder errorMessage = new StringBuilder();
+                                errorMessage.append("Failed to download sources for build: ")
+                                        .append(build.getId())
+                                        .append("\n");
+                                errorMessage.append("HTTP Status: ").append(response.getStatus()).append("\n");
+                                throw new RuntimeException(errorMessage.toString());
+                            }
+                            InputStream in = (InputStream) response.getEntity();
+                            Files.copy(in, lf);
+                        } catch (IOException | RemoteResourceException e) {
+                            throw new RuntimeException("Could not download " + fileName, e);
+                        }
+                    });
+                    try {
+                        Files.copy(cachedFile, targetPath);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Could not copy " + cachedFile + " -> " + targetPath, e);
                     }
-                    InputStream in = (InputStream) response.getEntity();
-                    Files.copy(in, lf);
-                } catch (IOException | RemoteResourceException e) {
-                    throw new RuntimeException("Could not download " + fileName, e);
-                }
-            });
-            try {
-                Files.copy(cachedFile, targetPath);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not copy " + cachedFile + " -> " + targetPath, e);
-            }
 
-            Collection<String> untaredFiles = FileUtils.untar(targetPath.toFile(), contentsDir);
-            List<String> topLevelDirectories = untaredFiles.stream()
-                    .filter(this::isNotANestedFile)
-                    .collect(Collectors.toList());
+                    Collection<String> untaredFiles = FileUtils.untar(targetPath.toFile(), contentsDir);
+                    List<String> topLevelDirectories = untaredFiles.stream()
+                            .filter(this::isNotANestedFile)
+                            .collect(Collectors.toList());
 
-            if (topLevelDirectories.size() != 1) {
-                throw new RuntimeException(
-                        "Found more than one top-level directory (" + topLevelDirectories.size()
-                                + ") untared for build " + build + ", the untared archive: "
-                                + targetPath.toAbsolutePath() + ", the top level directories:"
-                                + topLevelDirectories);
-            }
+                    if (topLevelDirectories.size() != 1) {
+                        throw new RuntimeException(
+                                "Found more than one top-level directory (" + topLevelDirectories.size()
+                                        + ") untared for build " + build + ", the untared archive: "
+                                        + targetPath.toAbsolutePath() + ", the top level directories:"
+                                        + topLevelDirectories);
+                    }
 
-            String topLevelDirectoryName = untaredFiles.iterator().next();
-            File topLevelDirectory = new File(contentsDir, topLevelDirectoryName);
-            cleanupSources(topLevelDirectory);
-            File properTopLevelDirectory = new File(contentsDir, build.getName());
-            topLevelDirectory.renameTo(properTopLevelDirectory);
-        });
+                    String topLevelDirectoryName = untaredFiles.iterator().next();
+                    File topLevelDirectory = new File(contentsDir, topLevelDirectoryName);
+                    cleanupSources(topLevelDirectory);
+                    File properTopLevelDirectory = new File(contentsDir, build.getName());
+                    topLevelDirectory.renameTo(properTopLevelDirectory);
+                });
     }
 
     /**
