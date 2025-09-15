@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
@@ -218,6 +219,8 @@ public class BuildInfoCollector implements Closeable {
                     .getId();
         } catch (RemoteResourceException e) {
             throw new RuntimeException(e);
+        } catch (NoSuchElementException e) {
+            throw new RuntimeException("No build config found for build config name: " + buildConfigName, e);
         }
     }
 
