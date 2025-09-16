@@ -414,6 +414,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         additionalBuilds.forEach(configName -> {
             buildInfoCollector.getLatestBuild(buildInfoCollector.ConfigNametoId(configName), type)
                     .getBuiltArtifacts()
+                    .stream()
+                    .filter(artifact -> !isArtifactExcluded(artifact.toGAV().toGapv()))
                     .forEach(artifact -> downloadExternalArtifact(artifact.toGAV()));
         });
     }
