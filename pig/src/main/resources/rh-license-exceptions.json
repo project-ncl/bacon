@@ -1284,7 +1284,7 @@
     {
         "groupId": "org.rocksdb",
         "artifactId": "rocksdbjni",
-        "version-regexp": "[67]\\..+",
+        "version-regexp": "[6789]\\..+",
         "licenses": [
             {
                 "name": "Apache License 2.0",
