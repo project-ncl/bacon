@@ -82,7 +82,7 @@ if [ "$1" == "update" ]; then
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
         usage
     else
-        curl -fsSL https://raw.github.com/project-ncl/bacon/main/bacon_install.py | python3 - "$@"
+        curl -fsSL https://raw.githubusercontent.com/project-ncl/bacon/refs/heads/main/bacon_install.py | python3 - "$@"
     fi
 else
     check_if_java_installed
