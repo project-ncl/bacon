@@ -161,5 +161,49 @@
         "url": "http://www.apache.org/licenses/LICENSE-2.0"
       }
     ]
+  },
+  {
+      "groupId": "io.smallrye.reactive",
+      "artifactId": "smallrye-reactive-converter-api",
+      "version": "3\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+          }
+      ]
+  },
+  {
+      "groupId": "io.smallrye.reactive",
+      "artifactId": "smallrye-reactive-converter-mutiny",
+      "version": "3\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+          }
+      ]
+  },
+  {
+      "groupId": "io.smallrye.reactive",
+      "artifactId": "smallrye-reactive-converters",
+      "version": "3\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+          }
+      ]
+  },
+  {
+      "groupId": "io.smallrye.reactive",
+      "artifactId": "smallrye-reactive-converters-projects",
+      "version": "3\\..+",
+      "licenses": [
+          {
+              "name": "Apache License 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+          }
+      ]
   }
 ]
