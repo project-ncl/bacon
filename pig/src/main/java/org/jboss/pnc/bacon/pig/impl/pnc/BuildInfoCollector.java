@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;

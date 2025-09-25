@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.config.BuildConfig;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -40,7 +41,6 @@ import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
 import org.jboss.pnc.bacon.pig.impl.utils.CollectionUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.EnvironmentClient;

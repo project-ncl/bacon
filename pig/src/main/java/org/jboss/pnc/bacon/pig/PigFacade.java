@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.NotFoundException;
 
 import org.jboss.pnc.api.enums.OperationResult;
+import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
@@ -60,7 +61,6 @@ import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.BuildFinderUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.ClientException;
