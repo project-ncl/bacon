@@ -17,24 +17,14 @@
  */
 package org.jboss.pnc.bacon.config;
 
-import java.util.Map;
-
 import lombok.Data;
 
 @Data
-public class ConfigProfile {
+public class ReqourConfig implements Validate {
+    private String url;
 
-    private String name;
-    private String keycloakUrl;
-    private PncConfig pnc;
-    private DaConfig da;
-    private IndyConfig indy;
-    private PigConfig pig;
-    private KeycloakConfig keycloak;
-    private AutobuildConfig autobuild;
-    private RexConfig rex;
-    private ReqourConfig reqour;
-    private boolean enableExperimental;
-
-    private Map<String, Map<String, ?>> addOns;
+    @Override
+    public void validate() {
+        Validate.validateUrl(url, "Reqour URL");
+    }
 }

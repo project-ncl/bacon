@@ -185,6 +185,17 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc</groupId>
+                <artifactId>rest-api</artifactId>
+                <version>${pnc.version}</version>
+                <classifier>java-client</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc</groupId>
+                <artifactId>common</artifactId>
+                <version>${pnc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc</groupId>
                 <artifactId>dto</artifactId>
                 <version>${pnc.version}</version>
             </dependency>
