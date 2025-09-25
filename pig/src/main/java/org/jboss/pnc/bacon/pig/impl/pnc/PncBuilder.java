@@ -18,8 +18,8 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import static java.util.Optional.of;
+import static org.jboss.pnc.bacon.auth.client.PncClientHelper.getPncConfiguration;
 import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
-import static org.jboss.pnc.bacon.pnc.client.PncClientHelper.getPncConfiguration;
 
 import java.io.Closeable;
 import java.util.Collection;

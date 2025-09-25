@@ -9,11 +9,11 @@ import java.util.concurrent.Callable;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
 import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.RexConfig;
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.rex.api.MaintenanceEndpoint;
 import org.jboss.pnc.rex.api.TaskEndpoint;

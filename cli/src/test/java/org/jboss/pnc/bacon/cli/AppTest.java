@@ -211,7 +211,7 @@ class AppTest {
                                 "--tempBuild",
                                 buildConfig.toString() }));
         assertThat(systemErr.getText()).contains("Keycloak authentication failed!");
-        assertThat(systemErr.getText()).contains("at org.jboss.pnc.bacon.pnc.client.PncClientHelper.getCredential");
+        assertThat(systemErr.getText()).contains("at org.jboss.pnc.bacon.auth.client.PncClientHelper.getCredential");
         assertThat(systemErr.getText()).doesNotContain("Unknown option: '--tempBuild'");
         System.out.println("### GOT TXT " + systemErr.getText());
     }
