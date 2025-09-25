@@ -25,7 +25,6 @@ import lombok.Data;
 public class ConfigProfile {
 
     private String name;
-    private String keycloakUrl;
     private PncConfig pnc;
     private DaConfig da;
     private IndyConfig indy;
@@ -35,6 +34,7 @@ public class ConfigProfile {
     private RexConfig rex;
     private ReqourConfig reqour;
     private boolean enableExperimental;
+    private boolean noBanner;
 
     private Map<String, Map<String, ?>> addOns;
 }
