@@ -93,7 +93,7 @@ public class PncClientHelper {
             }
             Configuration configuration = builder.build();
 
-            printBannerIfNecessary(configuration);
+            printBannerIfNecessary(config.getActiveProfile().isNoBanner(), configuration);
 
             return configuration;
 
@@ -140,9 +140,9 @@ public class PncClientHelper {
         }
     }
 
-    private static void printBannerIfNecessary(Configuration configuration) {
+    private static void printBannerIfNecessary(boolean noBanner, Configuration configuration) {
 
-        if (!bannerChecked) {
+        if (!noBanner && !bannerChecked) {
             try (GenericSettingClient genericSettingClient = new GenericSettingClient(configuration)) {
                 String banner = genericSettingClient.getAnnouncementBanner().getBanner();
                 if (banner != null && !banner.isEmpty()) {
