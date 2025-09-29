@@ -244,7 +244,7 @@
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-client</artifactId>
-                <version>3.14.0.Final</version>
+                <version>7.0.0.Final</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.sun.activation</groupId>
