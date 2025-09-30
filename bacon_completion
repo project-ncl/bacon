@@ -206,10 +206,12 @@ function _complete_bacon() {
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc whoami" ];    then _picocli_bacon_pnc; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin pnc-status" ];    then _picocli_bacon_pnc_admin; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin rex" ];    then _picocli_bacon_pnc_admin; return $?; fi
+  if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin token" ];    then _picocli_bacon_pnc_admin; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin pnc-status set" ];    then _picocli_bacon_pnc_admin_pncstatus; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin pnc-status get" ];    then _picocli_bacon_pnc_admin_pncstatus; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin rex clear-all" ];    then _picocli_bacon_pnc_admin_rex; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin rex get" ];    then _picocli_bacon_pnc_admin_rex; return $?; fi
+  if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc admin token get" ];    then _picocli_bacon_pnc_admin_token; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc artifact get" ];    then _picocli_bacon_pnc_artifact; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc artifact get-gav" ];    then _picocli_bacon_pnc_artifact; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pnc artifact list-from-hash" ];    then _picocli_bacon_pnc_artifact; return $?; fi
@@ -351,189 +353,193 @@ function _complete_bacon() {
   local cmds49=(pnc whoami)
   local cmds50=(pnc admin pnc-status)
   local cmds51=(pnc admin rex)
-  local cmds52=(pnc admin pnc-status set)
-  local cmds53=(pnc admin pnc-status get)
-  local cmds54=(pnc admin rex clear-all)
-  local cmds55=(pnc admin rex get)
-  local cmds56=(pnc artifact get)
-  local cmds57=(pnc artifact get-gav)
-  local cmds58=(pnc artifact list-from-hash)
-  local cmds59=(pnc artifact usage)
-  local cmds60=(pnc artifact usage-gav)
-  local cmds61=(pnc brew-push build)
-  local cmds62=(pnc brew-push group-build)
-  local cmds63=(pnc brew-push status)
-  local cmds64=(pnc build start)
-  local cmds65=(pnc build cancel)
-  local cmds66=(pnc build list)
-  local cmds67=(pnc build list-built-artifacts)
-  local cmds68=(pnc build list-dependencies)
-  local cmds69=(pnc build get)
-  local cmds70=(pnc build get-revision)
-  local cmds71=(pnc build get-log)
-  local cmds72=(pnc build get-align-log)
-  local cmds73=(pnc build download-sources)
-  local cmds74=(pnc build-config create)
-  local cmds75=(pnc build-config create-with-scm)
-  local cmds76=(pnc build-config get)
-  local cmds77=(pnc build-config get-revision)
-  local cmds78=(pnc build-config list)
-  local cmds79=(pnc build-config list-revisions)
-  local cmds80=(pnc build-config list-builds)
-  local cmds81=(pnc build-config update)
-  local cmds82=(pnc build-config clone)
-  local cmds83=(pnc build-config create-revision)
-  local cmds84=(pnc build-config add-dependency)
-  local cmds85=(pnc build-config remove-dependency)
-  local cmds86=(pnc environment get)
-  local cmds87=(pnc environment list)
-  local cmds88=(pnc deliverable-analysis add-label)
-  local cmds89=(pnc deliverable-analysis get)
-  local cmds90=(pnc deliverable-analysis get-analyzed)
-  local cmds91=(pnc deliverable-analysis get-label-history)
-  local cmds92=(pnc deliverable-analysis list)
-  local cmds93=(pnc deliverable-analysis remove-label)
-  local cmds94=(pnc group-build start)
-  local cmds95=(pnc group-build cancel)
-  local cmds96=(pnc group-build list)
-  local cmds97=(pnc group-build list-builds)
-  local cmds98=(pnc group-build get)
-  local cmds99=(pnc group-config create)
-  local cmds100=(pnc group-config update)
-  local cmds101=(pnc group-config list)
-  local cmds102=(pnc group-config list-build-configs)
-  local cmds103=(pnc group-config get)
-  local cmds104=(pnc group-config add-build-config)
-  local cmds105=(pnc group-config remove-build-config)
-  local cmds106=(pnc group-config show-latest-build)
-  local cmds107=(pnc product create)
-  local cmds108=(pnc product get)
-  local cmds109=(pnc product list)
-  local cmds110=(pnc product list-versions)
-  local cmds111=(pnc product update)
-  local cmds112=(pnc product-milestone create)
-  local cmds113=(pnc product-milestone update)
-  local cmds114=(pnc product-milestone cancel-milestone-close)
-  local cmds115=(pnc product-milestone get)
-  local cmds116=(pnc product-milestone list-performed-builds)
-  local cmds117=(pnc product-milestone close)
-  local cmds118=(pnc product-milestone analyze-deliverables)
-  local cmds119=(pnc product-milestone list-delivered-artifacts)
-  local cmds120=(pnc product-milestone get-deliverables-analysis)
-  local cmds121=(pnc product-release create)
-  local cmds122=(pnc product-release update)
-  local cmds123=(pnc product-release --get)
-  local cmds124=(pnc product-release list-support-levels)
-  local cmds125=(pnc product-version create)
-  local cmds126=(pnc product-version get)
-  local cmds127=(pnc product-version update)
-  local cmds128=(pnc product-version list-build-configs)
-  local cmds129=(pnc product-version list-group-configs)
-  local cmds130=(pnc product-version list-milestones)
-  local cmds131=(pnc product-version list-releases)
-  local cmds132=(pnc project create)
-  local cmds133=(pnc project get)
-  local cmds134=(pnc project list)
-  local cmds135=(pnc project list-build-configs)
-  local cmds136=(pnc project list-builds)
-  local cmds137=(pnc project update)
-  local cmds138=(pnc scm-repository create-and-sync)
-  local cmds139=(pnc scm-repository get)
-  local cmds140=(pnc scm-repository list)
-  local cmds141=(pnc scm-repository update)
-  local cmds142=(pnc scm-repository list-build-configs)
+  local cmds52=(pnc admin token)
+  local cmds53=(pnc admin pnc-status set)
+  local cmds54=(pnc admin pnc-status get)
+  local cmds55=(pnc admin rex clear-all)
+  local cmds56=(pnc admin rex get)
+  local cmds57=(pnc admin token get)
+  local cmds58=(pnc artifact get)
+  local cmds59=(pnc artifact get-gav)
+  local cmds60=(pnc artifact list-from-hash)
+  local cmds61=(pnc artifact usage)
+  local cmds62=(pnc artifact usage-gav)
+  local cmds63=(pnc brew-push build)
+  local cmds64=(pnc brew-push group-build)
+  local cmds65=(pnc brew-push status)
+  local cmds66=(pnc build start)
+  local cmds67=(pnc build cancel)
+  local cmds68=(pnc build list)
+  local cmds69=(pnc build list-built-artifacts)
+  local cmds70=(pnc build list-dependencies)
+  local cmds71=(pnc build get)
+  local cmds72=(pnc build get-revision)
+  local cmds73=(pnc build get-log)
+  local cmds74=(pnc build get-align-log)
+  local cmds75=(pnc build download-sources)
+  local cmds76=(pnc build-config create)
+  local cmds77=(pnc build-config create-with-scm)
+  local cmds78=(pnc build-config get)
+  local cmds79=(pnc build-config get-revision)
+  local cmds80=(pnc build-config list)
+  local cmds81=(pnc build-config list-revisions)
+  local cmds82=(pnc build-config list-builds)
+  local cmds83=(pnc build-config update)
+  local cmds84=(pnc build-config clone)
+  local cmds85=(pnc build-config create-revision)
+  local cmds86=(pnc build-config add-dependency)
+  local cmds87=(pnc build-config remove-dependency)
+  local cmds88=(pnc environment get)
+  local cmds89=(pnc environment list)
+  local cmds90=(pnc deliverable-analysis add-label)
+  local cmds91=(pnc deliverable-analysis get)
+  local cmds92=(pnc deliverable-analysis get-analyzed)
+  local cmds93=(pnc deliverable-analysis get-label-history)
+  local cmds94=(pnc deliverable-analysis list)
+  local cmds95=(pnc deliverable-analysis remove-label)
+  local cmds96=(pnc group-build start)
+  local cmds97=(pnc group-build cancel)
+  local cmds98=(pnc group-build list)
+  local cmds99=(pnc group-build list-builds)
+  local cmds100=(pnc group-build get)
+  local cmds101=(pnc group-config create)
+  local cmds102=(pnc group-config update)
+  local cmds103=(pnc group-config list)
+  local cmds104=(pnc group-config list-build-configs)
+  local cmds105=(pnc group-config get)
+  local cmds106=(pnc group-config add-build-config)
+  local cmds107=(pnc group-config remove-build-config)
+  local cmds108=(pnc group-config show-latest-build)
+  local cmds109=(pnc product create)
+  local cmds110=(pnc product get)
+  local cmds111=(pnc product list)
+  local cmds112=(pnc product list-versions)
+  local cmds113=(pnc product update)
+  local cmds114=(pnc product-milestone create)
+  local cmds115=(pnc product-milestone update)
+  local cmds116=(pnc product-milestone cancel-milestone-close)
+  local cmds117=(pnc product-milestone get)
+  local cmds118=(pnc product-milestone list-performed-builds)
+  local cmds119=(pnc product-milestone close)
+  local cmds120=(pnc product-milestone analyze-deliverables)
+  local cmds121=(pnc product-milestone list-delivered-artifacts)
+  local cmds122=(pnc product-milestone get-deliverables-analysis)
+  local cmds123=(pnc product-release create)
+  local cmds124=(pnc product-release update)
+  local cmds125=(pnc product-release --get)
+  local cmds126=(pnc product-release list-support-levels)
+  local cmds127=(pnc product-version create)
+  local cmds128=(pnc product-version get)
+  local cmds129=(pnc product-version update)
+  local cmds130=(pnc product-version list-build-configs)
+  local cmds131=(pnc product-version list-group-configs)
+  local cmds132=(pnc product-version list-milestones)
+  local cmds133=(pnc product-version list-releases)
+  local cmds134=(pnc project create)
+  local cmds135=(pnc project get)
+  local cmds136=(pnc project list)
+  local cmds137=(pnc project list-build-configs)
+  local cmds138=(pnc project list-builds)
+  local cmds139=(pnc project update)
+  local cmds140=(pnc scm-repository create-and-sync)
+  local cmds141=(pnc scm-repository get)
+  local cmds142=(pnc scm-repository list)
+  local cmds143=(pnc scm-repository update)
+  local cmds144=(pnc scm-repository list-build-configs)
 
-  if CompWordsContainsArray "${cmds142[@]}"; then _picocli_bacon_pnc_scmrepository_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds141[@]}"; then _picocli_bacon_pnc_scmrepository_update; return $?; fi
-  if CompWordsContainsArray "${cmds140[@]}"; then _picocli_bacon_pnc_scmrepository_list; return $?; fi
-  if CompWordsContainsArray "${cmds139[@]}"; then _picocli_bacon_pnc_scmrepository_get; return $?; fi
-  if CompWordsContainsArray "${cmds138[@]}"; then _picocli_bacon_pnc_scmrepository_createandsync; return $?; fi
-  if CompWordsContainsArray "${cmds137[@]}"; then _picocli_bacon_pnc_project_update; return $?; fi
-  if CompWordsContainsArray "${cmds136[@]}"; then _picocli_bacon_pnc_project_listbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds135[@]}"; then _picocli_bacon_pnc_project_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds134[@]}"; then _picocli_bacon_pnc_project_list; return $?; fi
-  if CompWordsContainsArray "${cmds133[@]}"; then _picocli_bacon_pnc_project_get; return $?; fi
-  if CompWordsContainsArray "${cmds132[@]}"; then _picocli_bacon_pnc_project_create; return $?; fi
-  if CompWordsContainsArray "${cmds131[@]}"; then _picocli_bacon_pnc_productversion_listreleases; return $?; fi
-  if CompWordsContainsArray "${cmds130[@]}"; then _picocli_bacon_pnc_productversion_listmilestones; return $?; fi
-  if CompWordsContainsArray "${cmds129[@]}"; then _picocli_bacon_pnc_productversion_listgroupconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds128[@]}"; then _picocli_bacon_pnc_productversion_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds127[@]}"; then _picocli_bacon_pnc_productversion_update; return $?; fi
-  if CompWordsContainsArray "${cmds126[@]}"; then _picocli_bacon_pnc_productversion_get; return $?; fi
-  if CompWordsContainsArray "${cmds125[@]}"; then _picocli_bacon_pnc_productversion_create; return $?; fi
-  if CompWordsContainsArray "${cmds124[@]}"; then _picocli_bacon_pnc_productrelease_listsupportlevels; return $?; fi
-  if CompWordsContainsArray "${cmds123[@]}"; then _picocli_bacon_pnc_productrelease_get; return $?; fi
-  if CompWordsContainsArray "${cmds122[@]}"; then _picocli_bacon_pnc_productrelease_update; return $?; fi
-  if CompWordsContainsArray "${cmds121[@]}"; then _picocli_bacon_pnc_productrelease_create; return $?; fi
-  if CompWordsContainsArray "${cmds120[@]}"; then _picocli_bacon_pnc_productmilestone_getdeliverablesanalysis; return $?; fi
-  if CompWordsContainsArray "${cmds119[@]}"; then _picocli_bacon_pnc_productmilestone_listdeliveredartifacts; return $?; fi
-  if CompWordsContainsArray "${cmds118[@]}"; then _picocli_bacon_pnc_productmilestone_analyzedeliverables; return $?; fi
-  if CompWordsContainsArray "${cmds117[@]}"; then _picocli_bacon_pnc_productmilestone_close; return $?; fi
-  if CompWordsContainsArray "${cmds116[@]}"; then _picocli_bacon_pnc_productmilestone_listperformedbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds115[@]}"; then _picocli_bacon_pnc_productmilestone_get; return $?; fi
-  if CompWordsContainsArray "${cmds114[@]}"; then _picocli_bacon_pnc_productmilestone_cancelmilestoneclose; return $?; fi
-  if CompWordsContainsArray "${cmds113[@]}"; then _picocli_bacon_pnc_productmilestone_update; return $?; fi
-  if CompWordsContainsArray "${cmds112[@]}"; then _picocli_bacon_pnc_productmilestone_create; return $?; fi
-  if CompWordsContainsArray "${cmds111[@]}"; then _picocli_bacon_pnc_product_update; return $?; fi
-  if CompWordsContainsArray "${cmds110[@]}"; then _picocli_bacon_pnc_product_listversions; return $?; fi
-  if CompWordsContainsArray "${cmds109[@]}"; then _picocli_bacon_pnc_product_list; return $?; fi
-  if CompWordsContainsArray "${cmds108[@]}"; then _picocli_bacon_pnc_product_get; return $?; fi
-  if CompWordsContainsArray "${cmds107[@]}"; then _picocli_bacon_pnc_product_create; return $?; fi
-  if CompWordsContainsArray "${cmds106[@]}"; then _picocli_bacon_pnc_groupconfig_showlatestbuild; return $?; fi
-  if CompWordsContainsArray "${cmds105[@]}"; then _picocli_bacon_pnc_groupconfig_removebuildconfig; return $?; fi
-  if CompWordsContainsArray "${cmds104[@]}"; then _picocli_bacon_pnc_groupconfig_addbuildconfig; return $?; fi
-  if CompWordsContainsArray "${cmds103[@]}"; then _picocli_bacon_pnc_groupconfig_get; return $?; fi
-  if CompWordsContainsArray "${cmds102[@]}"; then _picocli_bacon_pnc_groupconfig_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds101[@]}"; then _picocli_bacon_pnc_groupconfig_list; return $?; fi
-  if CompWordsContainsArray "${cmds100[@]}"; then _picocli_bacon_pnc_groupconfig_update; return $?; fi
-  if CompWordsContainsArray "${cmds99[@]}"; then _picocli_bacon_pnc_groupconfig_create; return $?; fi
-  if CompWordsContainsArray "${cmds98[@]}"; then _picocli_bacon_pnc_groupbuild_get; return $?; fi
-  if CompWordsContainsArray "${cmds97[@]}"; then _picocli_bacon_pnc_groupbuild_listbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds96[@]}"; then _picocli_bacon_pnc_groupbuild_list; return $?; fi
-  if CompWordsContainsArray "${cmds95[@]}"; then _picocli_bacon_pnc_groupbuild_cancel; return $?; fi
-  if CompWordsContainsArray "${cmds94[@]}"; then _picocli_bacon_pnc_groupbuild_start; return $?; fi
-  if CompWordsContainsArray "${cmds93[@]}"; then _picocli_bacon_pnc_deliverableanalysis_removelabel; return $?; fi
-  if CompWordsContainsArray "${cmds92[@]}"; then _picocli_bacon_pnc_deliverableanalysis_list; return $?; fi
-  if CompWordsContainsArray "${cmds91[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getlabelhistory; return $?; fi
-  if CompWordsContainsArray "${cmds90[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getanalyzed; return $?; fi
-  if CompWordsContainsArray "${cmds89[@]}"; then _picocli_bacon_pnc_deliverableanalysis_get; return $?; fi
-  if CompWordsContainsArray "${cmds88[@]}"; then _picocli_bacon_pnc_deliverableanalysis_addlabel; return $?; fi
-  if CompWordsContainsArray "${cmds87[@]}"; then _picocli_bacon_pnc_environment_list; return $?; fi
-  if CompWordsContainsArray "${cmds86[@]}"; then _picocli_bacon_pnc_environment_get; return $?; fi
-  if CompWordsContainsArray "${cmds85[@]}"; then _picocli_bacon_pnc_buildconfig_removedependency; return $?; fi
-  if CompWordsContainsArray "${cmds84[@]}"; then _picocli_bacon_pnc_buildconfig_adddependency; return $?; fi
-  if CompWordsContainsArray "${cmds83[@]}"; then _picocli_bacon_pnc_buildconfig_createrevision; return $?; fi
-  if CompWordsContainsArray "${cmds82[@]}"; then _picocli_bacon_pnc_buildconfig_clone; return $?; fi
-  if CompWordsContainsArray "${cmds81[@]}"; then _picocli_bacon_pnc_buildconfig_update; return $?; fi
-  if CompWordsContainsArray "${cmds80[@]}"; then _picocli_bacon_pnc_buildconfig_listbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds79[@]}"; then _picocli_bacon_pnc_buildconfig_listrevisions; return $?; fi
-  if CompWordsContainsArray "${cmds78[@]}"; then _picocli_bacon_pnc_buildconfig_list; return $?; fi
-  if CompWordsContainsArray "${cmds77[@]}"; then _picocli_bacon_pnc_buildconfig_getrevision; return $?; fi
-  if CompWordsContainsArray "${cmds76[@]}"; then _picocli_bacon_pnc_buildconfig_get; return $?; fi
-  if CompWordsContainsArray "${cmds75[@]}"; then _picocli_bacon_pnc_buildconfig_createwithscm; return $?; fi
-  if CompWordsContainsArray "${cmds74[@]}"; then _picocli_bacon_pnc_buildconfig_create; return $?; fi
-  if CompWordsContainsArray "${cmds73[@]}"; then _picocli_bacon_pnc_build_downloadsources; return $?; fi
-  if CompWordsContainsArray "${cmds72[@]}"; then _picocli_bacon_pnc_build_getalignlog; return $?; fi
-  if CompWordsContainsArray "${cmds71[@]}"; then _picocli_bacon_pnc_build_getlog; return $?; fi
-  if CompWordsContainsArray "${cmds70[@]}"; then _picocli_bacon_pnc_build_getrevision; return $?; fi
-  if CompWordsContainsArray "${cmds69[@]}"; then _picocli_bacon_pnc_build_get; return $?; fi
-  if CompWordsContainsArray "${cmds68[@]}"; then _picocli_bacon_pnc_build_listdependencies; return $?; fi
-  if CompWordsContainsArray "${cmds67[@]}"; then _picocli_bacon_pnc_build_listbuiltartifacts; return $?; fi
-  if CompWordsContainsArray "${cmds66[@]}"; then _picocli_bacon_pnc_build_list; return $?; fi
-  if CompWordsContainsArray "${cmds65[@]}"; then _picocli_bacon_pnc_build_cancel; return $?; fi
-  if CompWordsContainsArray "${cmds64[@]}"; then _picocli_bacon_pnc_build_start; return $?; fi
-  if CompWordsContainsArray "${cmds63[@]}"; then _picocli_bacon_pnc_brewpush_status; return $?; fi
-  if CompWordsContainsArray "${cmds62[@]}"; then _picocli_bacon_pnc_brewpush_groupbuild; return $?; fi
-  if CompWordsContainsArray "${cmds61[@]}"; then _picocli_bacon_pnc_brewpush_build; return $?; fi
-  if CompWordsContainsArray "${cmds60[@]}"; then _picocli_bacon_pnc_artifact_usagegav; return $?; fi
-  if CompWordsContainsArray "${cmds59[@]}"; then _picocli_bacon_pnc_artifact_usage; return $?; fi
-  if CompWordsContainsArray "${cmds58[@]}"; then _picocli_bacon_pnc_artifact_listfromhash; return $?; fi
-  if CompWordsContainsArray "${cmds57[@]}"; then _picocli_bacon_pnc_artifact_getgav; return $?; fi
-  if CompWordsContainsArray "${cmds56[@]}"; then _picocli_bacon_pnc_artifact_get; return $?; fi
-  if CompWordsContainsArray "${cmds55[@]}"; then _picocli_bacon_pnc_admin_rex_get; return $?; fi
-  if CompWordsContainsArray "${cmds54[@]}"; then _picocli_bacon_pnc_admin_rex_clearall; return $?; fi
-  if CompWordsContainsArray "${cmds53[@]}"; then _picocli_bacon_pnc_admin_pncstatus_get; return $?; fi
-  if CompWordsContainsArray "${cmds52[@]}"; then _picocli_bacon_pnc_admin_pncstatus_set; return $?; fi
+  if CompWordsContainsArray "${cmds144[@]}"; then _picocli_bacon_pnc_scmrepository_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds143[@]}"; then _picocli_bacon_pnc_scmrepository_update; return $?; fi
+  if CompWordsContainsArray "${cmds142[@]}"; then _picocli_bacon_pnc_scmrepository_list; return $?; fi
+  if CompWordsContainsArray "${cmds141[@]}"; then _picocli_bacon_pnc_scmrepository_get; return $?; fi
+  if CompWordsContainsArray "${cmds140[@]}"; then _picocli_bacon_pnc_scmrepository_createandsync; return $?; fi
+  if CompWordsContainsArray "${cmds139[@]}"; then _picocli_bacon_pnc_project_update; return $?; fi
+  if CompWordsContainsArray "${cmds138[@]}"; then _picocli_bacon_pnc_project_listbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds137[@]}"; then _picocli_bacon_pnc_project_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds136[@]}"; then _picocli_bacon_pnc_project_list; return $?; fi
+  if CompWordsContainsArray "${cmds135[@]}"; then _picocli_bacon_pnc_project_get; return $?; fi
+  if CompWordsContainsArray "${cmds134[@]}"; then _picocli_bacon_pnc_project_create; return $?; fi
+  if CompWordsContainsArray "${cmds133[@]}"; then _picocli_bacon_pnc_productversion_listreleases; return $?; fi
+  if CompWordsContainsArray "${cmds132[@]}"; then _picocli_bacon_pnc_productversion_listmilestones; return $?; fi
+  if CompWordsContainsArray "${cmds131[@]}"; then _picocli_bacon_pnc_productversion_listgroupconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds130[@]}"; then _picocli_bacon_pnc_productversion_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds129[@]}"; then _picocli_bacon_pnc_productversion_update; return $?; fi
+  if CompWordsContainsArray "${cmds128[@]}"; then _picocli_bacon_pnc_productversion_get; return $?; fi
+  if CompWordsContainsArray "${cmds127[@]}"; then _picocli_bacon_pnc_productversion_create; return $?; fi
+  if CompWordsContainsArray "${cmds126[@]}"; then _picocli_bacon_pnc_productrelease_listsupportlevels; return $?; fi
+  if CompWordsContainsArray "${cmds125[@]}"; then _picocli_bacon_pnc_productrelease_get; return $?; fi
+  if CompWordsContainsArray "${cmds124[@]}"; then _picocli_bacon_pnc_productrelease_update; return $?; fi
+  if CompWordsContainsArray "${cmds123[@]}"; then _picocli_bacon_pnc_productrelease_create; return $?; fi
+  if CompWordsContainsArray "${cmds122[@]}"; then _picocli_bacon_pnc_productmilestone_getdeliverablesanalysis; return $?; fi
+  if CompWordsContainsArray "${cmds121[@]}"; then _picocli_bacon_pnc_productmilestone_listdeliveredartifacts; return $?; fi
+  if CompWordsContainsArray "${cmds120[@]}"; then _picocli_bacon_pnc_productmilestone_analyzedeliverables; return $?; fi
+  if CompWordsContainsArray "${cmds119[@]}"; then _picocli_bacon_pnc_productmilestone_close; return $?; fi
+  if CompWordsContainsArray "${cmds118[@]}"; then _picocli_bacon_pnc_productmilestone_listperformedbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds117[@]}"; then _picocli_bacon_pnc_productmilestone_get; return $?; fi
+  if CompWordsContainsArray "${cmds116[@]}"; then _picocli_bacon_pnc_productmilestone_cancelmilestoneclose; return $?; fi
+  if CompWordsContainsArray "${cmds115[@]}"; then _picocli_bacon_pnc_productmilestone_update; return $?; fi
+  if CompWordsContainsArray "${cmds114[@]}"; then _picocli_bacon_pnc_productmilestone_create; return $?; fi
+  if CompWordsContainsArray "${cmds113[@]}"; then _picocli_bacon_pnc_product_update; return $?; fi
+  if CompWordsContainsArray "${cmds112[@]}"; then _picocli_bacon_pnc_product_listversions; return $?; fi
+  if CompWordsContainsArray "${cmds111[@]}"; then _picocli_bacon_pnc_product_list; return $?; fi
+  if CompWordsContainsArray "${cmds110[@]}"; then _picocli_bacon_pnc_product_get; return $?; fi
+  if CompWordsContainsArray "${cmds109[@]}"; then _picocli_bacon_pnc_product_create; return $?; fi
+  if CompWordsContainsArray "${cmds108[@]}"; then _picocli_bacon_pnc_groupconfig_showlatestbuild; return $?; fi
+  if CompWordsContainsArray "${cmds107[@]}"; then _picocli_bacon_pnc_groupconfig_removebuildconfig; return $?; fi
+  if CompWordsContainsArray "${cmds106[@]}"; then _picocli_bacon_pnc_groupconfig_addbuildconfig; return $?; fi
+  if CompWordsContainsArray "${cmds105[@]}"; then _picocli_bacon_pnc_groupconfig_get; return $?; fi
+  if CompWordsContainsArray "${cmds104[@]}"; then _picocli_bacon_pnc_groupconfig_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds103[@]}"; then _picocli_bacon_pnc_groupconfig_list; return $?; fi
+  if CompWordsContainsArray "${cmds102[@]}"; then _picocli_bacon_pnc_groupconfig_update; return $?; fi
+  if CompWordsContainsArray "${cmds101[@]}"; then _picocli_bacon_pnc_groupconfig_create; return $?; fi
+  if CompWordsContainsArray "${cmds100[@]}"; then _picocli_bacon_pnc_groupbuild_get; return $?; fi
+  if CompWordsContainsArray "${cmds99[@]}"; then _picocli_bacon_pnc_groupbuild_listbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds98[@]}"; then _picocli_bacon_pnc_groupbuild_list; return $?; fi
+  if CompWordsContainsArray "${cmds97[@]}"; then _picocli_bacon_pnc_groupbuild_cancel; return $?; fi
+  if CompWordsContainsArray "${cmds96[@]}"; then _picocli_bacon_pnc_groupbuild_start; return $?; fi
+  if CompWordsContainsArray "${cmds95[@]}"; then _picocli_bacon_pnc_deliverableanalysis_removelabel; return $?; fi
+  if CompWordsContainsArray "${cmds94[@]}"; then _picocli_bacon_pnc_deliverableanalysis_list; return $?; fi
+  if CompWordsContainsArray "${cmds93[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getlabelhistory; return $?; fi
+  if CompWordsContainsArray "${cmds92[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getanalyzed; return $?; fi
+  if CompWordsContainsArray "${cmds91[@]}"; then _picocli_bacon_pnc_deliverableanalysis_get; return $?; fi
+  if CompWordsContainsArray "${cmds90[@]}"; then _picocli_bacon_pnc_deliverableanalysis_addlabel; return $?; fi
+  if CompWordsContainsArray "${cmds89[@]}"; then _picocli_bacon_pnc_environment_list; return $?; fi
+  if CompWordsContainsArray "${cmds88[@]}"; then _picocli_bacon_pnc_environment_get; return $?; fi
+  if CompWordsContainsArray "${cmds87[@]}"; then _picocli_bacon_pnc_buildconfig_removedependency; return $?; fi
+  if CompWordsContainsArray "${cmds86[@]}"; then _picocli_bacon_pnc_buildconfig_adddependency; return $?; fi
+  if CompWordsContainsArray "${cmds85[@]}"; then _picocli_bacon_pnc_buildconfig_createrevision; return $?; fi
+  if CompWordsContainsArray "${cmds84[@]}"; then _picocli_bacon_pnc_buildconfig_clone; return $?; fi
+  if CompWordsContainsArray "${cmds83[@]}"; then _picocli_bacon_pnc_buildconfig_update; return $?; fi
+  if CompWordsContainsArray "${cmds82[@]}"; then _picocli_bacon_pnc_buildconfig_listbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds81[@]}"; then _picocli_bacon_pnc_buildconfig_listrevisions; return $?; fi
+  if CompWordsContainsArray "${cmds80[@]}"; then _picocli_bacon_pnc_buildconfig_list; return $?; fi
+  if CompWordsContainsArray "${cmds79[@]}"; then _picocli_bacon_pnc_buildconfig_getrevision; return $?; fi
+  if CompWordsContainsArray "${cmds78[@]}"; then _picocli_bacon_pnc_buildconfig_get; return $?; fi
+  if CompWordsContainsArray "${cmds77[@]}"; then _picocli_bacon_pnc_buildconfig_createwithscm; return $?; fi
+  if CompWordsContainsArray "${cmds76[@]}"; then _picocli_bacon_pnc_buildconfig_create; return $?; fi
+  if CompWordsContainsArray "${cmds75[@]}"; then _picocli_bacon_pnc_build_downloadsources; return $?; fi
+  if CompWordsContainsArray "${cmds74[@]}"; then _picocli_bacon_pnc_build_getalignlog; return $?; fi
+  if CompWordsContainsArray "${cmds73[@]}"; then _picocli_bacon_pnc_build_getlog; return $?; fi
+  if CompWordsContainsArray "${cmds72[@]}"; then _picocli_bacon_pnc_build_getrevision; return $?; fi
+  if CompWordsContainsArray "${cmds71[@]}"; then _picocli_bacon_pnc_build_get; return $?; fi
+  if CompWordsContainsArray "${cmds70[@]}"; then _picocli_bacon_pnc_build_listdependencies; return $?; fi
+  if CompWordsContainsArray "${cmds69[@]}"; then _picocli_bacon_pnc_build_listbuiltartifacts; return $?; fi
+  if CompWordsContainsArray "${cmds68[@]}"; then _picocli_bacon_pnc_build_list; return $?; fi
+  if CompWordsContainsArray "${cmds67[@]}"; then _picocli_bacon_pnc_build_cancel; return $?; fi
+  if CompWordsContainsArray "${cmds66[@]}"; then _picocli_bacon_pnc_build_start; return $?; fi
+  if CompWordsContainsArray "${cmds65[@]}"; then _picocli_bacon_pnc_brewpush_status; return $?; fi
+  if CompWordsContainsArray "${cmds64[@]}"; then _picocli_bacon_pnc_brewpush_groupbuild; return $?; fi
+  if CompWordsContainsArray "${cmds63[@]}"; then _picocli_bacon_pnc_brewpush_build; return $?; fi
+  if CompWordsContainsArray "${cmds62[@]}"; then _picocli_bacon_pnc_artifact_usagegav; return $?; fi
+  if CompWordsContainsArray "${cmds61[@]}"; then _picocli_bacon_pnc_artifact_usage; return $?; fi
+  if CompWordsContainsArray "${cmds60[@]}"; then _picocli_bacon_pnc_artifact_listfromhash; return $?; fi
+  if CompWordsContainsArray "${cmds59[@]}"; then _picocli_bacon_pnc_artifact_getgav; return $?; fi
+  if CompWordsContainsArray "${cmds58[@]}"; then _picocli_bacon_pnc_artifact_get; return $?; fi
+  if CompWordsContainsArray "${cmds57[@]}"; then _picocli_bacon_pnc_admin_token_get; return $?; fi
+  if CompWordsContainsArray "${cmds56[@]}"; then _picocli_bacon_pnc_admin_rex_get; return $?; fi
+  if CompWordsContainsArray "${cmds55[@]}"; then _picocli_bacon_pnc_admin_rex_clearall; return $?; fi
+  if CompWordsContainsArray "${cmds54[@]}"; then _picocli_bacon_pnc_admin_pncstatus_get; return $?; fi
+  if CompWordsContainsArray "${cmds53[@]}"; then _picocli_bacon_pnc_admin_pncstatus_set; return $?; fi
+  if CompWordsContainsArray "${cmds52[@]}"; then _picocli_bacon_pnc_admin_token; return $?; fi
   if CompWordsContainsArray "${cmds51[@]}"; then _picocli_bacon_pnc_admin_rex; return $?; fi
   if CompWordsContainsArray "${cmds50[@]}"; then _picocli_bacon_pnc_admin_pncstatus; return $?; fi
   if CompWordsContainsArray "${cmds49[@]}"; then _picocli_bacon_pnc_whoami; return $?; fi
@@ -598,7 +604,7 @@ function _picocli_bacon() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="da pig pnc"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -628,7 +634,7 @@ function _picocli_bacon_da() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="blocklist lookup reports"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -658,7 +664,7 @@ function _picocli_bacon_pig() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="cachi2lockfile configure cancel build run repo licenses javadocs sources shared-content docs release pre-process-yaml addons export"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -688,7 +694,7 @@ function _picocli_bacon_pnc() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="admin artifact brew-push build build-config environment deliverable-analysis group-build group-config product product-milestone product-release product-version project scm-repository whoami"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -718,7 +724,7 @@ function _picocli_bacon_da_blocklist() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="list add"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -748,7 +754,7 @@ function _picocli_bacon_da_lookup() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="maven maven-versions maven-latest npm npm-versions"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -778,7 +784,7 @@ function _picocli_bacon_da_reports() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="scm scm-advanced align built lookup-versions-npm"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -808,7 +814,7 @@ function _picocli_bacon_da_blocklist_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -838,7 +844,7 @@ function _picocli_bacon_da_blocklist_add() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -868,7 +874,7 @@ function _picocli_bacon_da_lookup_maven() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--lookup-mode' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -901,7 +907,7 @@ function _picocli_bacon_da_lookup_mavenversions() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--include-bad' '--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--include-bad' '--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--filter' '--distance-rule' '--lookup-mode' '-p' '--configPath' '--profile'"
   local filter_option_args=("ALL" "MAJOR" "MAJOR_MINOR" "MAJOR_MINOR_MICRO" "MAJOR_MINOR_MICRO_QUALIFIER") # --filter values
 
@@ -943,7 +949,7 @@ function _picocli_bacon_da_lookup_mavenlatest() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--lookup-mode' '--filename' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -979,7 +985,7 @@ function _picocli_bacon_da_lookup_npm() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--lookup-mode' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1012,7 +1018,7 @@ function _picocli_bacon_da_lookup_npmversions() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--include-bad' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--include-bad' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--filter' '--distance-rule' '--lookup-mode' '-p' '--configPath' '--profile'"
   local filter_option_args=("ALL" "MAJOR" "MAJOR_MINOR" "MAJOR_MINOR_MICRO" "MAJOR_MINOR_MICRO_QUALIFIER") # --filter values
 
@@ -1054,7 +1060,7 @@ function _picocli_bacon_da_reports_scm() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--repositories' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1087,7 +1093,7 @@ function _picocli_bacon_da_reports_scmadvanced() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--repositories' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1120,7 +1126,7 @@ function _picocli_bacon_da_reports_align() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--repositories' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1153,7 +1159,7 @@ function _picocli_bacon_da_reports_built() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--repositories' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1186,7 +1192,7 @@ function _picocli_bacon_da_reports_lookupversionsnpm() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--includeAll' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--includeAll' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--mode' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1219,7 +1225,7 @@ function _picocli_bacon_pig_cachi2lockfile() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--output' '--maven-repository-url' '--preferred-checksum-alg' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1268,7 +1274,7 @@ function _picocli_bacon_pig_configure() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--skipBranchCheck' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--skipBranchCheck' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1316,7 +1322,7 @@ function _picocli_bacon_pig_cancel() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1364,7 +1370,7 @@ function _picocli_bacon_pig_build() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--tempBuildTimeStamp' '--noWait' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--tempBuildTimeStamp' '--noWait' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '--mode' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1415,7 +1421,7 @@ function _picocli_bacon_pig_run() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--tempBuildTimeStamp' '--skipPncUpdate' '--skipBuilds' '--skipSources' '--skipJavadoc' '--skipLicenses' '--skipSharedContent' '--removeGeneratedM2Dups' '--skipBranchCheck' '--strictLicenseCheck' '--strictDownloadSource' '--oldBCNaming' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--tempBuildTimeStamp' '--skipPncUpdate' '--skipBuilds' '--skipSources' '--skipJavadoc' '--skipLicenses' '--skipSharedContent' '--removeGeneratedM2Dups' '--skipBranchCheck' '--strictLicenseCheck' '--strictDownloadSource' '--oldBCNaming' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '--mode' '-r' '--repoZip' '--licenseExceptionsPath' '--licenseNamesPath' '--skipAddon' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1478,7 +1484,7 @@ function _picocli_bacon_pig_repo() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--removeGeneratedM2Dups' '--strictLicenseCheck' '--strictDownloadSource' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--removeGeneratedM2Dups' '--strictLicenseCheck' '--strictDownloadSource' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1526,7 +1532,7 @@ function _picocli_bacon_pig_licenses() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--strictLicenseCheck' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--strictLicenseCheck' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '--licenseExceptionsPath' '--licenseNamesPath' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1580,7 +1586,7 @@ function _picocli_bacon_pig_javadocs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1628,7 +1634,7 @@ function _picocli_bacon_pig_sources() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--oldBCNaming' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '--oldBCNaming' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1676,7 +1682,7 @@ function _picocli_bacon_pig_sharedcontent() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1724,7 +1730,7 @@ function _picocli_bacon_pig_docs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1772,7 +1778,7 @@ function _picocli_bacon_pig_release() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1820,7 +1826,7 @@ function _picocli_bacon_pig_preprocessyaml() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1868,7 +1874,7 @@ function _picocli_bacon_pig_addons() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-t' '--tempBuild' '--clean' '--artifactCacheDownload' '--useLocalM2Cache' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tempBuildAlignment' '--releaseStorageUrl' '--downloadAttempts' '--targetPath' '-e' '--env' '--skipAddon' '-p' '--configPath' '--profile'"
   local tempAlign_option_args=("TEMPORARY" "PERSISTENT") # --tempBuildAlignment values
 
@@ -1919,7 +1925,7 @@ function _picocli_bacon_pig_export() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="build-config"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1949,7 +1955,7 @@ function _picocli_bacon_pig_export_buildconfig() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--environment-by-name' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--environment-by-name' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--revision' '--rename' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -1984,8 +1990,8 @@ function _picocli_bacon_pnc_admin() {
   local curr_word=${COMP_WORDS[COMP_CWORD]}
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
-  local commands="pnc-status rex"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local commands="pnc-status rex token"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2015,7 +2021,7 @@ function _picocli_bacon_pnc_artifact() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="get get-gav list-from-hash usage usage-gav"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2045,7 +2051,7 @@ function _picocli_bacon_pnc_brewpush() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="build group-build status"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2075,7 +2081,7 @@ function _picocli_bacon_pnc_build() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="start cancel list list-built-artifacts list-dependencies get get-revision get-log get-align-log download-sources"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2105,7 +2111,7 @@ function _picocli_bacon_pnc_buildconfig() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create create-with-scm get get-revision list list-revisions list-builds update clone create-revision add-dependency remove-dependency"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2135,7 +2141,7 @@ function _picocli_bacon_pnc_environment() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="get list"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2165,7 +2171,7 @@ function _picocli_bacon_pnc_deliverableanalysis() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="add-label get get-analyzed get-label-history list remove-label"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2195,7 +2201,7 @@ function _picocli_bacon_pnc_groupbuild() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="start cancel list list-builds get"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2225,7 +2231,7 @@ function _picocli_bacon_pnc_groupconfig() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create update list list-build-configs get add-build-config remove-build-config show-latest-build"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2255,7 +2261,7 @@ function _picocli_bacon_pnc_product() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create get list list-versions update"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2285,7 +2291,7 @@ function _picocli_bacon_pnc_productmilestone() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create update cancel-milestone-close get list-performed-builds close analyze-deliverables list-delivered-artifacts get-deliverables-analysis"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2315,7 +2321,7 @@ function _picocli_bacon_pnc_productrelease() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create update --get list-support-levels"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2345,7 +2351,7 @@ function _picocli_bacon_pnc_productversion() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create get update list-build-configs list-group-configs list-milestones list-releases"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2375,7 +2381,7 @@ function _picocli_bacon_pnc_project() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create get list list-build-configs list-builds update"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2405,7 +2411,7 @@ function _picocli_bacon_pnc_scmrepository() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="create-and-sync get list update list-build-configs"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2435,7 +2441,7 @@ function _picocli_bacon_pnc_whoami() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2465,7 +2471,7 @@ function _picocli_bacon_pnc_admin_pncstatus() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="set get"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2495,7 +2501,37 @@ function _picocli_bacon_pnc_admin_rex() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands="clear-all get"
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
+  local arg_opts="'-p' '--configPath' '--profile'"
+
+  type compopt &>/dev/null && compopt +o default
+
+  case ${prev_word} in
+    '-p'|'--configPath')
+      return
+      ;;
+    '--profile')
+      return
+      ;;
+  esac
+
+  if [[ "${curr_word}" == -* ]]; then
+    COMPREPLY=( $(compgen -W "${flag_opts} ${arg_opts}" -- "${curr_word}") )
+  else
+    local positionals=""
+    local IFS=$'\n'
+    COMPREPLY=( $(compgen -W "${commands// /$'\n'}${IFS}${positionals}" -- "${curr_word}") )
+  fi
+}
+
+# Generates completions for the options and subcommands of the `token` subcommand.
+function _picocli_bacon_pnc_admin_token() {
+  # Get completion data
+  local curr_word=${COMP_WORDS[COMP_CWORD]}
+  local prev_word=${COMP_WORDS[COMP_CWORD-1]}
+
+  local commands="get"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2525,7 +2561,7 @@ function _picocli_bacon_pnc_admin_pncstatus_set() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--banner' '--eta' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2561,7 +2597,7 @@ function _picocli_bacon_pnc_admin_pncstatus_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2591,7 +2627,7 @@ function _picocli_bacon_pnc_admin_rex_clearall() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2621,7 +2657,37 @@ function _picocli_bacon_pnc_admin_rex_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
+  local arg_opts="'-p' '--configPath' '--profile'"
+
+  type compopt &>/dev/null && compopt +o default
+
+  case ${prev_word} in
+    '-p'|'--configPath')
+      return
+      ;;
+    '--profile')
+      return
+      ;;
+  esac
+
+  if [[ "${curr_word}" == -* ]]; then
+    COMPREPLY=( $(compgen -W "${flag_opts} ${arg_opts}" -- "${curr_word}") )
+  else
+    local positionals=""
+    local IFS=$'\n'
+    COMPREPLY=( $(compgen -W "${commands// /$'\n'}${IFS}${positionals}" -- "${curr_word}") )
+  fi
+}
+
+# Generates completions for the options and subcommands of the `get` subcommand.
+function _picocli_bacon_pnc_admin_token_get() {
+  # Get completion data
+  local curr_word=${COMP_WORDS[COMP_CWORD]}
+  local prev_word=${COMP_WORDS[COMP_CWORD-1]}
+
+  local commands=""
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2651,7 +2717,7 @@ function _picocli_bacon_pnc_artifact_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2681,7 +2747,7 @@ function _picocli_bacon_pnc_artifact_getgav() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2711,7 +2777,7 @@ function _picocli_bacon_pnc_artifact_listfromhash() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--md5' '--sha1' '--sha256' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2750,7 +2816,7 @@ function _picocli_bacon_pnc_artifact_usage() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2786,7 +2852,7 @@ function _picocli_bacon_pnc_artifact_usagegav() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2822,7 +2888,7 @@ function _picocli_bacon_pnc_brewpush_build() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--reimport' '--wait' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--reimport' '--wait' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tag-prefix' '--timeout' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2858,7 +2924,7 @@ function _picocli_bacon_pnc_brewpush_groupbuild() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--tag-prefix' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2891,7 +2957,7 @@ function _picocli_bacon_pnc_brewpush_status() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2921,7 +2987,7 @@ function _picocli_bacon_pnc_build_start() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--keep-pod-on-failure' '--timestamp-alignment' '--temporary-build' '--wait' '--no-build-dependencies' '--dry-run' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--keep-pod-on-failure' '--timestamp-alignment' '--temporary-build' '--wait' '--no-build-dependencies' '--dry-run' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--rebuild-mode' '--timeout' '--revision' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2960,7 +3026,7 @@ function _picocli_bacon_pnc_build_cancel() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -2990,7 +3056,7 @@ function _picocli_bacon_pnc_build_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '--attributes' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3029,7 +3095,7 @@ function _picocli_bacon_pnc_build_listbuiltartifacts() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3065,7 +3131,7 @@ function _picocli_bacon_pnc_build_listdependencies() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3101,7 +3167,7 @@ function _picocli_bacon_pnc_build_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3131,7 +3197,7 @@ function _picocli_bacon_pnc_build_getrevision() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3161,7 +3227,7 @@ function _picocli_bacon_pnc_build_getlog() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--follow' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--follow' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3191,7 +3257,7 @@ function _picocli_bacon_pnc_build_getalignlog() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3221,7 +3287,7 @@ function _picocli_bacon_pnc_build_downloadsources() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3251,7 +3317,7 @@ function _picocli_bacon_pnc_buildconfig_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--description' '--environment-id' '--project-id' '--build-script' '--scm-repository-id' '--scm-revision' '-P' '--parameter' '--product-version-id' '--build-type' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3308,7 +3374,7 @@ function _picocli_bacon_pnc_buildconfig_createwithscm() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--no-pre-build-sync' '--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--no-pre-build-sync' '--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--description' '--environment-id' '--project-id' '--build-script' '-P' '--parameter' '--product-version-id' '--build-type' '--scm-url' '--scm-revision' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3365,7 +3431,7 @@ function _picocli_bacon_pnc_buildconfig_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3395,7 +3461,7 @@ function _picocli_bacon_pnc_buildconfig_getrevision() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--revisionId' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3428,7 +3494,7 @@ function _picocli_bacon_pnc_buildconfig_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3464,7 +3530,7 @@ function _picocli_bacon_pnc_buildconfig_listrevisions() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3500,7 +3566,7 @@ function _picocli_bacon_pnc_buildconfig_listbuilds() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3536,7 +3602,7 @@ function _picocli_bacon_pnc_buildconfig_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--buildConfigName' '--description' '--environment-id' '--build-script' '--scm-repository-id' '--scm-revision' '-P' '--parameter' '--remove-parameters' '--build-type' '--product-version-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3596,7 +3662,7 @@ function _picocli_bacon_pnc_buildconfig_clone() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--buildConfigName' '--scmRevision' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3632,7 +3698,7 @@ function _picocli_bacon_pnc_buildconfig_createrevision() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--brew-pull-active' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--buildConfigName' '--description' '--environment-id' '--build-script' '--scm-repository-id' '--scm-revision' '-P' '--parameter' '--remove-parameters' '--build-type' '--product-version-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3692,7 +3758,7 @@ function _picocli_bacon_pnc_buildconfig_adddependency() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--dependency-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3725,7 +3791,7 @@ function _picocli_bacon_pnc_buildconfig_removedependency() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--dependency-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3758,7 +3824,7 @@ function _picocli_bacon_pnc_environment_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3788,7 +3854,7 @@ function _picocli_bacon_pnc_environment_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3824,7 +3890,7 @@ function _picocli_bacon_pnc_deliverableanalysis_addlabel() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--reason' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3863,7 +3929,7 @@ function _picocli_bacon_pnc_deliverableanalysis_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3893,7 +3959,7 @@ function _picocli_bacon_pnc_deliverableanalysis_getanalyzed() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3929,7 +3995,7 @@ function _picocli_bacon_pnc_deliverableanalysis_getlabelhistory() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3965,7 +4031,7 @@ function _picocli_bacon_pnc_deliverableanalysis_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4001,7 +4067,7 @@ function _picocli_bacon_pnc_deliverableanalysis_removelabel() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--reason' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4040,7 +4106,7 @@ function _picocli_bacon_pnc_groupbuild_start() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--timestamp-alignment' '--temporary-build' '--wait' '--dry-run' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--timestamp-alignment' '--temporary-build' '--wait' '--dry-run' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--rebuild-mode' '--timeout' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4076,7 +4142,7 @@ function _picocli_bacon_pnc_groupbuild_cancel() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4106,7 +4172,7 @@ function _picocli_bacon_pnc_groupbuild_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4142,7 +4208,7 @@ function _picocli_bacon_pnc_groupbuild_listbuilds() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4178,7 +4244,7 @@ function _picocli_bacon_pnc_groupbuild_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4208,7 +4274,7 @@ function _picocli_bacon_pnc_groupconfig_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--product-version-id' '--build-config-ids' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4244,7 +4310,7 @@ function _picocli_bacon_pnc_groupconfig_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--name' '--product-version-id' '--build-config-ids' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4283,7 +4349,7 @@ function _picocli_bacon_pnc_groupconfig_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4319,7 +4385,7 @@ function _picocli_bacon_pnc_groupconfig_listbuildconfigs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4355,7 +4421,7 @@ function _picocli_bacon_pnc_groupconfig_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4385,7 +4451,7 @@ function _picocli_bacon_pnc_groupconfig_addbuildconfig() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--bc-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4418,7 +4484,7 @@ function _picocli_bacon_pnc_groupconfig_removebuildconfig() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--bc-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4451,7 +4517,7 @@ function _picocli_bacon_pnc_groupconfig_showlatestbuild() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--temporary-build' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--temporary-build' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4481,7 +4547,7 @@ function _picocli_bacon_pnc_product_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--abbreviation' '--description' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4517,7 +4583,7 @@ function _picocli_bacon_pnc_product_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4547,7 +4613,7 @@ function _picocli_bacon_pnc_product_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4583,7 +4649,7 @@ function _picocli_bacon_pnc_product_listversions() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4619,7 +4685,7 @@ function _picocli_bacon_pnc_product_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--name' '--abbreviation' '--description' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4658,7 +4724,7 @@ function _picocli_bacon_pnc_productmilestone_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--set-current' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--set-current' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--product-version-id' '--starting-date' '--end-date' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4697,7 +4763,7 @@ function _picocli_bacon_pnc_productmilestone_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--set-current' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--set-current' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--product-milestone-version' '--starting-date' '--end-date' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4736,7 +4802,7 @@ function _picocli_bacon_pnc_productmilestone_cancelmilestoneclose() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4766,7 +4832,7 @@ function _picocli_bacon_pnc_productmilestone_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4796,7 +4862,7 @@ function _picocli_bacon_pnc_productmilestone_listperformedbuilds() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4832,7 +4898,7 @@ function _picocli_bacon_pnc_productmilestone_close() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--skipBrewPush' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--skipBrewPush' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4862,7 +4928,7 @@ function _picocli_bacon_pnc_productmilestone_analyzedeliverables() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--scratch' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--scratch' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--deliverables-link' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4895,7 +4961,7 @@ function _picocli_bacon_pnc_productmilestone_listdeliveredartifacts() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4931,7 +4997,7 @@ function _picocli_bacon_pnc_productmilestone_getdeliverablesanalysis() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -4961,7 +5027,7 @@ function _picocli_bacon_pnc_productrelease_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--release-date' '--milestone-id' '--support-level' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5000,7 +5066,7 @@ function _picocli_bacon_pnc_productrelease_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--product-release-version' '--release-date' '--support-level' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5039,7 +5105,7 @@ function _picocli_bacon_pnc_productrelease_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5069,7 +5135,7 @@ function _picocli_bacon_pnc_productrelease_listsupportlevels() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5099,7 +5165,7 @@ function _picocli_bacon_pnc_productversion_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--product-id' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5132,7 +5198,7 @@ function _picocli_bacon_pnc_productversion_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5162,7 +5228,7 @@ function _picocli_bacon_pnc_productversion_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--product-version' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5195,7 +5261,7 @@ function _picocli_bacon_pnc_productversion_listbuildconfigs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5231,7 +5297,7 @@ function _picocli_bacon_pnc_productversion_listgroupconfigs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5267,7 +5333,7 @@ function _picocli_bacon_pnc_productversion_listmilestones() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5303,7 +5369,7 @@ function _picocli_bacon_pnc_productversion_listreleases() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5339,7 +5405,7 @@ function _picocli_bacon_pnc_project_create() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--description' '--project-url' '--issue-tracker-url' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5378,7 +5444,7 @@ function _picocli_bacon_pnc_project_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5408,7 +5474,7 @@ function _picocli_bacon_pnc_project_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5444,7 +5510,7 @@ function _picocli_bacon_pnc_project_listbuildconfigs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5480,7 +5546,7 @@ function _picocli_bacon_pnc_project_listbuilds() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5516,7 +5582,7 @@ function _picocli_bacon_pnc_project_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--name' '--description' '--project-url' '--issue-tracker-url' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5558,7 +5624,7 @@ function _picocli_bacon_pnc_scmrepository_createandsync() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--no-pre-build-sync' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--no-pre-build-sync' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5588,7 +5654,7 @@ function _picocli_bacon_pnc_scmrepository_get() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5618,7 +5684,7 @@ function _picocli_bacon_pnc_scmrepository_list() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '--match-url' '--search-url' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5660,7 +5726,7 @@ function _picocli_bacon_pnc_scmrepository_update() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'--no-external-scm' '--pre-build' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--no-external-scm' '--pre-build' '-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--external-scm' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -5693,7 +5759,7 @@ function _picocli_bacon_pnc_scmrepository_listbuildconfigs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-q' '--quiet' '-v' '--verbose' '-h' '--help' '-V' '--version'"
   local arg_opts="'--sort' '--query' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
