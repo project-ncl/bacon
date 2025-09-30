@@ -137,16 +137,15 @@ def download_link(link, folder, filename, fail=True, retries=7):
     """
 
     print("Downloading: " + link)
-    if sys.version_info[0] >= 3:
-        import urllib.request as request
-    else:
-        import urllib2 as request
+    import urllib3
+    http = urllib3.PoolManager()
+
 
     try:
-        r = request.urlopen(link).read()
+        response = http.request("GET", link)
 
         with open(folder + "/" + filename, "wb") as f:
-            f.write(r)
+            f.write(response.data)
     except Exception as error:
         if retries > 0:
             # exponential backoff time based on 1/retries
