@@ -1804,7 +1804,27 @@
                 "url": "http://repository.jboss.org/licenses/lgpl-2.1.txt"
             }
         ]
+    },
+    {
+        "groupId": "commons-logging",
+        "artifactId": "commons-logging",
+        "version-regexp": "1\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
+    },
+    {
+        "groupId": "org.apache.santuario",
+        "artifactId": "xmlsec",
+        "version-regexp": "[2-4]\\..+",
+        "licenses": [
+            {
+                "name": "Apache License 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ]
     }
-
-
 ]
