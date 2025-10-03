@@ -2,7 +2,7 @@ package org.jboss.pnc.bacon.pnc.common;
 
 import java.util.function.Function;
 
-import org.jboss.pnc.bacon.pnc.client.PncClientHelper;
+import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.client.ClientBase;
 import org.jboss.pnc.client.Configuration;
 
