@@ -112,6 +112,7 @@
         <surefire.plugin.version>3.2.5</surefire.plugin.version>
         <tagSuffix />
         <undertow.version>2.3.18.Final</undertow.version>
+        <unirestVersion>3.14.5</unirestVersion>
         <version.rex>1.1.0</version.rex>
     </properties>
 
@@ -356,7 +357,12 @@
             <dependency>
                 <groupId>com.konghq</groupId>
                 <artifactId>unirest-java</artifactId>
-                <version>3.14.5</version>
+                <version>${unirestVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.konghq</groupId>
+                <artifactId>unirest-objectmapper-jackson</artifactId>
+                <version>${unirestVersion}</version>
             </dependency>
 
             <dependency>
@@ -492,12 +498,9 @@
                 <version>${pme.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.sun</groupId>
-                        <artifactId>tools</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
+                        <!-- Only want ManifestUtils/ExceptionHelper and this brings in other deps otherwise -->
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
