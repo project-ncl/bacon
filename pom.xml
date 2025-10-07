@@ -94,7 +94,7 @@
         <jenkins-maven-embedder.version>3.15</jenkins-maven-embedder.version>
         <json.version>1.1.4</json.version>
         <junit.version>6.0.0</junit.version>
-        <logback.version>1.5.18</logback.version>
+        <logback.version>1.5.19</logback.version>
         <maven-core.version>3.9.11</maven-core.version>
         <maven-resolver.version>1.9.20</maven-resolver.version>
         <maven-wagon.version>3.5.3</maven-wagon.version>
