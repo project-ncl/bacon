@@ -46,6 +46,18 @@ public class PncClientHelper {
 
     private static PncClientTokenHolder pncClientTokenHolder;
 
+    private static boolean resteasyAvailable = true;
+
+    static {
+        // If this component is used externally in Quarkus based applications they will not
+        // have access to resteasy clients (which cause a clash).
+        try {
+            Class.forName("org.jboss.resteasy.client.jaxrs.ClientHttpEngine");
+        } catch (ClassNotFoundException e) {
+            resteasyAvailable = false;
+        }
+    }
+
     public static Configuration getPncConfiguration(boolean authenticationNeeded) {
         return setup(authenticationNeeded);
     }
@@ -93,7 +105,7 @@ public class PncClientHelper {
             }
             Configuration configuration = builder.build();
 
-            printBannerIfNecessary(config.getActiveProfile().isNoBanner(), configuration);
+            printBannerIfNecessary(configuration);
 
             return configuration;
 
@@ -140,9 +152,8 @@ public class PncClientHelper {
         }
     }
 
-    private static void printBannerIfNecessary(boolean noBanner, Configuration configuration) {
-
-        if (!noBanner && !bannerChecked) {
+    private static void printBannerIfNecessary(Configuration configuration) {
+        if (resteasyAvailable && !bannerChecked) {
             try (GenericSettingClient genericSettingClient = new GenericSettingClient(configuration)) {
                 String banner = genericSettingClient.getAnnouncementBanner().getBanner();
                 if (banner != null && !banner.isEmpty()) {
