@@ -34,7 +34,6 @@ public class ConfigProfile {
     private RexConfig rex;
     private ReqourConfig reqour;
     private boolean enableExperimental;
-    private boolean noBanner;
 
     private Map<String, Map<String, ?>> addOns;
 }
