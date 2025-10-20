@@ -107,7 +107,7 @@
         <pnc.version>3.2.4</pnc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.resolver.version>${quarkus.version}</quarkus.resolver.version>
-        <quarkus.version>3.28.2</quarkus.version>
+        <quarkus.version>3.28.4</quarkus.version>
         <qute.version>${quarkus.version}</qute.version>
         <surefire.plugin.version>3.2.5</surefire.plugin.version>
         <tagSuffix />
