@@ -92,6 +92,7 @@
         <jboss.snapshots.repo.url>https://central.sonatype.com/repository/maven-snapshots</jboss.snapshots.repo.url>
         <jdk.max.version>17</jdk.max.version>
         <jenkins-maven-embedder.version>3.15</jenkins-maven-embedder.version>
+        <jline.version>3.30.6</jline.version>
         <json.version>1.1.4</json.version>
         <junit.version>6.0.0</junit.version>
         <logback.version>1.5.20</logback.version>
@@ -223,12 +224,12 @@
             <dependency>
                 <groupId>org.jline</groupId>
                 <artifactId>jline</artifactId>
-                <version>3.21.0</version>
+                <version>${jline.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jline</groupId>
                 <artifactId>jline-console</artifactId>
-                <version>3.30.6</version>
+                <version>${jline.version}</version>
             </dependency>
 
             <dependency>
@@ -919,6 +920,9 @@
                             <rules>
                                 <enforceBytecodeVersion>
                                     <maxJdkVersion>${jdk.max.version}</maxJdkVersion>
+                                    <excludes>
+                                        <exclude>org.jline:jline</exclude>
+                                    </excludes>
                                 </enforceBytecodeVersion>
                             </rules>
                             <fail>true</fail>
