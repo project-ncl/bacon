@@ -18,7 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import static java.util.Optional.of;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;

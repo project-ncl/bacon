@@ -42,8 +42,7 @@ public final class NvrListGenerator {
 
         List<KojiBuild> builds = BuildFinderUtils.findBuilds(checksums, false);
         File outputDirectory = targetPath.normalize().getParent().toFile();
-        Report nvrReport = new NVRReport(outputDirectory, builds);
-        nvrReport.setBaseFilename(baseFileName(targetPath));
+        Report nvrReport = new NVRReport(outputDirectory.toPath(), baseFileName(targetPath), builds);
 
         try {
             nvrReport.outputText();

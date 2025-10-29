@@ -7,7 +7,7 @@ import static org.mockito.Mockito.spy;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jboss.pnc.bacon.config.Config;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;

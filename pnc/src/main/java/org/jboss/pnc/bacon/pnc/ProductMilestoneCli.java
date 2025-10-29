@@ -17,7 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.jboss.pnc.bacon.auth.client.PncClientHelper.parseDateFormat;
 
 import java.net.URL;
