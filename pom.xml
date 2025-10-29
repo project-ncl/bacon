@@ -76,6 +76,7 @@
 
     <properties>
         <assertj.version>3.27.6</assertj.version>
+        <build.finder>2.6.7</build.finder>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-configuration2.version>2.12.0</commons-configuration2.version>
         <commons-io.version>2.19.0</commons-io.version>
@@ -421,6 +422,11 @@
 
             <!-- pig and others -->
             <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.19.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>1.14.0</version>
@@ -443,24 +449,12 @@
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
                 <artifactId>core</artifactId>
-                <version>2.6.0</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>${build.finder}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.build.finder</groupId>
                 <artifactId>report</artifactId>
-                <version>2.6.0</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>${build.finder}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -703,12 +697,6 @@
                 <groupId>com.redhat.resilience.otel</groupId>
                 <artifactId>opentelemetry-ext-cli-java</artifactId>
                 <version>1.4.0</version>
-            </dependency>
-            <!-- To be removed once BuildeFinder has upgraded. -->
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-hdfs-client</artifactId>
-                <version>3.4.2</version>
             </dependency>
             <dependency>
                 <groupId>io.undertow</groupId>
