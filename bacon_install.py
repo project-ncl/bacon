@@ -42,7 +42,7 @@ import xml.etree.ElementTree as ET
 
 
 MAVEN_CENTRAL_LINK = "https://repo1.maven.org/maven2/org/jboss/pnc/bacon/cli/"
-MAVEN_SNAPSHOT_LINK = "https://repository.jboss.org/nexus/content/repositories/snapshots/org/jboss/pnc/bacon/cli/"
+MAVEN_SNAPSHOT_LINK = "https://central.sonatype.com/repository/maven-snapshots/org/jboss/pnc/bacon/cli/"
 GITHUB_LINK = "https://github.com/project-ncl/bacon/raw/refs"
 
 GITHUB_SNAPSHOT_AUTOCOMPLETE_PATH = GITHUB_LINK + "/heads/main/bacon_completion"
