@@ -149,6 +149,8 @@ builds:
 
   parameters: #generic parameters
     parameter: "value"
+    BUILDER_POD_MEMORY: "3" # Optional way of setting builder pod memory
+    ALIGNMENT_POD_MEMORY: "1" # Optional: setting alignment pod memory
 ...
 ```
 
@@ -220,6 +222,8 @@ builds:
 - name: build-1
   parameters:
      BPM_SERVER: "RH-DEV"
+     BUILDER_POD_MEMORY: "3"
+     ALIGNMENT_POD_MEMORY: "1"
 ```
 
 You can specify generic parameters without specific property to set them directly.
