@@ -37,7 +37,7 @@ public class FileCache {
                 .make();
 
         cachedMap = db.hashMap("file-map", Serializer.STRING, Serializer.BYTE_ARRAY)
-                .expireStoreSize(MAX_SIZE_GB * 1024L * 1024L) // max size in bytes,
+                .expireStoreSize(MAX_SIZE_GB * 1024L * 1024L * 1024L) // max size in bytes,
                 .expireAfterGet()
                 .expireAfterCreate()
                 .createOrOpen();
@@ -50,6 +50,10 @@ public class FileCache {
         } catch (IOException e) {
             log.warn("Error writing file {} for cache. Skipping!", file.getAbsolutePath(), e);
         }
+    }
+
+    public void listContent() {
+        cachedMap.keySet().forEach(System.out::println);
     }
 
     public boolean copyTo(String key, File targetPath) {
