@@ -1826,5 +1826,16 @@
                 "url": "http://www.apache.org/licenses/LICENSE-2.0"
             }
         ]
+    },
+    {
+        "groupId": "org.latencyutils",
+        "artifactId": "LatencyUtils",
+        "version-regexp": "[1-2]\\..+",
+        "licenses": [
+            {
+                "name": "Creative Commons Zero 1.0 Universal",
+                "url": "http://creativecommons.org/publicdomain/zero/1.0/legalcode"
+            }
+        ]
     }
 ]
