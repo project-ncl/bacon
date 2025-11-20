@@ -98,7 +98,7 @@
         <junit.version>6.0.1</junit.version>
         <logback.version>1.5.21</logback.version>
         <maven-core.version>3.9.11</maven-core.version>
-        <maven-resolver.version>1.9.20</maven-resolver.version>
+        <maven-resolver.version>1.9.24</maven-resolver.version>
         <maven-wagon.version>3.5.3</maven-wagon.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
