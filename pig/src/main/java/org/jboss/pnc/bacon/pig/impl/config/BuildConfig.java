@@ -104,6 +104,7 @@ public class BuildConfig {
      * build pod memory in GB
      */
     private Double buildPodMemory;
+    private Double alignmentPodMemory;
     private String pigYamlMetadata;
 
     /** deprecated: use alignmentParameters instead */
@@ -265,6 +266,10 @@ public class BuildConfig {
 
         if (buildPodMemory != null) {
             result.put("BUILDER_POD_MEMORY", buildPodMemory.toString());
+        }
+
+        if (alignmentPodMemory != null) {
+            result.put("ALIGNMENT_POD_MEMORY", alignmentPodMemory.toString());
         }
 
         if (buildCategory != null) {

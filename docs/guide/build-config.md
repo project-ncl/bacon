@@ -130,6 +130,7 @@ builds:
   - <dependency 2 by name>
 
   buildPodMemory: <number> # Optional: use if you want to override the default memory inside a builder pod. e.g buildPodMemory: 6
+  alignmentPodMemory: <number> # Optional: use if you want to override the default memory inside an alignment pod. e.g alignmentPodMemory: 2
 
   alignmentParameters: # Optional: if you want to add parameters to the alignment invocation - see https://github.com/project-ncl/project-manipulator/blob/master/README.md#usage for syntax and other flags
   # These 3 flags are the default behaviour if none are set. BREW_BUILD_VERSION in build-config will match x.y.z-redhat-00001
@@ -150,7 +151,7 @@ builds:
   parameters: #generic parameters
     parameter: "value"
     BUILDER_POD_MEMORY: "3" # Optional way of setting builder pod memory
-    ALIGNMENT_POD_MEMORY: "1" # Optional: setting alignment pod memory
+    ALIGNMENT_POD_MEMORY: "1" # Optional way of setting alignment pod memory
 ...
 ```
 
