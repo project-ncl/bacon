@@ -115,7 +115,7 @@
         <tagSuffix />
         <undertow.version>2.3.20.Final</undertow.version>
         <unirestVersion>3.14.5</unirestVersion>
-        <version.rex>1.1.0</version.rex>
+        <version.rex>1.2.2</version.rex>
     </properties>
 
     <dependencyManagement>
