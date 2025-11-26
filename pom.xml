@@ -78,7 +78,7 @@
         <assertj.version>3.27.6</assertj.version>
         <build.finder>2.6.7</build.finder>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <commons-configuration2.version>2.12.0</commons-configuration2.version>
+        <commons-configuration2.version>2.13.0</commons-configuration2.version>
         <commons-io.version>2.19.0</commons-io.version>
         <compiler.plugin.version>3.14.1</compiler.plugin.version>
         <domino.version>0.0.126</domino.version>
