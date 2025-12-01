@@ -9,7 +9,7 @@ import javax.net.ssl.SSLHandshakeException;
 
 import org.jboss.pnc.bacon.auth.model.KeycloakCacheFile;
 import org.jboss.pnc.bacon.auth.model.KeycloakCredential;
-import org.jboss.pnc.bacon.auth.model.KeycloakResponse;
+import org.jboss.pnc.bacon.auth.model.OidcResponse;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.keycloak.adapters.installed.KeycloakInstalled;
@@ -42,6 +42,21 @@ public class KeycloakClientImpl implements KeycloakClient {
         Unirest.config().setObjectMapper(new JacksonObjectMapper());
     }
 
+    /**
+     * Using the Out-of-Band process to grab the token to use. This method is nowadays considered insecure and
+     * deprecated. We can think of using the device code flow in the future, if the Keycloak server supports it
+     *
+     * Another more secure way is to use Authorization code flow, but the user can only use Bacon in the same machine
+     * as the browser
+     *
+     * @param keycloakBaseUrl
+     * @param realm
+     * @param client
+     * @param username
+     *
+     * @return
+     * @throws KeycloakClientException
+     */
     @Override
     public KeycloakCredential getCredential(String keycloakBaseUrl, String realm, String client, String username)
             throws KeycloakClientException {
@@ -132,6 +147,17 @@ public class KeycloakClientImpl implements KeycloakClient {
         }
     }
 
+    /**
+     * Using the client credential flow for machine to machine communication
+     *
+     * @param keycloakBaseUrl
+     * @param realm
+     * @param serviceAccountUsername
+     * @param secret
+     *
+     * @return
+     * @throws KeycloakClientException
+     */
     @Override
     public KeycloakCredential getCredentialServiceAccount(
             String keycloakBaseUrl,
@@ -150,7 +176,7 @@ public class KeycloakClientImpl implements KeycloakClient {
                     .field("client_id", serviceAccountUsername)
                     .field("client_secret", secret);
 
-            KeycloakResponse response = getKeycloakResponseWithRetries(body);
+            OidcResponse response = getKeycloakResponseWithRetries(body);
             Instant now = Instant.now();
 
             return KeycloakCredential.builder()
@@ -180,13 +206,13 @@ public class KeycloakClientImpl implements KeycloakClient {
      * @return The KeycloakResponse object
      * @throws UnirestException when all hope is lost to recover
      */
-    private KeycloakResponse getKeycloakResponseWithRetries(MultipartBody body) throws UnirestException {
+    private OidcResponse getKeycloakResponseWithRetries(MultipartBody body) throws UnirestException {
 
         int retries = 0;
 
         while (true) {
             try {
-                HttpResponse<KeycloakResponse> postResponse = body.asObject(KeycloakResponse.class);
+                HttpResponse<OidcResponse> postResponse = body.asObject(OidcResponse.class);
                 return postResponse.getBody();
             } catch (UnirestException e) {
                 if (e.getCause().getClass().equals(SSLHandshakeException.class)) {
