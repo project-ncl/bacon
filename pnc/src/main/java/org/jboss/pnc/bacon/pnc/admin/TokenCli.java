@@ -3,7 +3,7 @@ package org.jboss.pnc.bacon.pnc.admin;
 import java.util.concurrent.Callable;
 
 import org.jboss.pnc.bacon.auth.KeycloakClientImpl;
-import org.jboss.pnc.bacon.auth.model.Credential;
+import org.jboss.pnc.bacon.auth.model.KeycloakCredential;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.KeycloakConfig;
@@ -24,18 +24,18 @@ public class TokenCli {
         public Integer call() throws Exception {
             KeycloakClientImpl clientImpl = new KeycloakClientImpl();
             KeycloakConfig config = Config.instance().getActiveProfile().getKeycloak();
-            Credential credential;
+            KeycloakCredential keycloakCredential;
             if (config.isServiceAccount()) {
-                credential = clientImpl.getCredentialServiceAccount(
+                keycloakCredential = clientImpl.getCredentialServiceAccount(
                         config.getUrl(),
                         config.getRealm(),
                         config.getUsername(),
                         config.getClientSecret());
             } else {
-                credential = clientImpl
+                keycloakCredential = clientImpl
                         .getCredential(config.getUrl(), config.getRealm(), config.getClientId(), config.getUsername());
             }
-            System.out.println(credential.getAccessToken());
+            System.out.println(keycloakCredential.getAccessToken());
             return 0;
         }
     }

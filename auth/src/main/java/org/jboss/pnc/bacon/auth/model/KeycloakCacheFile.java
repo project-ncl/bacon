@@ -26,9 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
-public class CacheFile {
+public class KeycloakCacheFile {
 
-    private Map<String, Credential> cachedData;
+    private Map<String, KeycloakCredential> cachedData;
     private static final ObjectMapper mapper;
 
     static {
@@ -40,7 +40,7 @@ public class CacheFile {
             String keycloakUrl,
             String realm,
             String username,
-            Credential credential) {
+            KeycloakCredential keycloakCredential) {
         File file = new File(getCacheFile());
 
         log.debug("Writing credential to cache file {}", file);
@@ -48,18 +48,21 @@ public class CacheFile {
         try {
             createConfigFolderIfAbsent();
 
-            Map<String, Credential> data = Collections
-                    .singletonMap(generateUsernameMd5(keycloakUrl, realm, username), credential);
-            CacheFile cacheFile = new CacheFile();
-            cacheFile.setCachedData(data);
-            mapper.writeValue(file, cacheFile);
+            Map<String, KeycloakCredential> data = Collections
+                    .singletonMap(generateUsernameMd5(keycloakUrl, realm, username), keycloakCredential);
+            KeycloakCacheFile keycloakCacheFile = new KeycloakCacheFile();
+            keycloakCacheFile.setCachedData(data);
+            mapper.writeValue(file, keycloakCacheFile);
             setOwnerFilePermissions(file.toPath());
         } catch (IOException e) {
             log.error("Error saving credential to file {}", file, e);
         }
     }
 
-    public static Optional<Credential> getCredentialFromCacheFile(String keycloakUrl, String realm, String username) {
+    public static Optional<KeycloakCredential> getCredentialFromCacheFile(
+            String keycloakUrl,
+            String realm,
+            String username) {
         Path path = Paths.get(getCacheFile());
 
         if (!Files.isRegularFile(path)) {
@@ -68,8 +71,8 @@ public class CacheFile {
         }
 
         try {
-            CacheFile cacheFile = mapper.readValue(new File(getCacheFile()), CacheFile.class);
-            Map<String, Credential> data = cacheFile.getCachedData();
+            KeycloakCacheFile keycloakCacheFile = mapper.readValue(new File(getCacheFile()), KeycloakCacheFile.class);
+            Map<String, KeycloakCredential> data = keycloakCacheFile.getCachedData();
 
             if (data != null) {
                 String key = generateUsernameMd5(keycloakUrl, realm, username);

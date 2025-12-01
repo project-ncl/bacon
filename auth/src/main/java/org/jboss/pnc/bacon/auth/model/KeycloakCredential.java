@@ -13,9 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Builder(toBuilder = true, builderClassName = "Builder")
-@JsonDeserialize(builder = Credential.Builder.class)
+@JsonDeserialize(builder = KeycloakCredential.Builder.class)
 @Slf4j
-public class Credential {
+public class KeycloakCredential {
 
     private String keycloakBaseUrl;
 
