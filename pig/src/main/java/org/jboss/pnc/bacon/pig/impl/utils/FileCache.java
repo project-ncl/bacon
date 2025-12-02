@@ -15,7 +15,8 @@ import org.slf4j.LoggerFactory;
 public class FileCache {
 
     private static final Logger log = LoggerFactory.getLogger(FileCache.class);
-    private static final int MAX_SIZE_GB = 5;
+    private static final int MAX_SIZE_CACHE_GB = 5;
+    private static final int MAX_SIZE_INDIVIDUAL_FILE_CACHE_MB = 50;
 
     private DB db;
     private ConcurrentMap<String, byte[]> cachedMap;
@@ -37,7 +38,7 @@ public class FileCache {
                 .make();
 
         cachedMap = db.hashMap("file-map", Serializer.STRING, Serializer.BYTE_ARRAY)
-                .expireStoreSize(MAX_SIZE_GB * 1024L * 1024L * 1024L) // max size in bytes,
+                .expireStoreSize(MAX_SIZE_CACHE_GB * 1024L * 1024L * 1024L) // max size in bytes,
                 .expireAfterGet()
                 .expireAfterCreate()
                 .createOrOpen();
@@ -45,8 +46,13 @@ public class FileCache {
 
     public void put(String key, File file) {
         try {
-            cachedMap.put(key, Files.readAllBytes(file.toPath()));
-            db.commit();
+            if (file.length() < MAX_SIZE_INDIVIDUAL_FILE_CACHE_MB * 1024L * 1024L) {
+                // This is done to prevent OutOfMemory issues because readAllBytes load everything in memory
+                cachedMap.put(key, Files.readAllBytes(file.toPath()));
+                db.commit();
+            } else {
+                log.warn("File {} is too big for the cache ({}). Skipping!", file.getAbsolutePath(), file.length());
+            }
         } catch (IOException e) {
             log.warn("Error writing file {} for cache. Skipping!", file.getAbsolutePath(), e);
         }
