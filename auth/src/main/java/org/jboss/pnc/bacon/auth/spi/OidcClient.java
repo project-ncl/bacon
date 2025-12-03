@@ -10,26 +10,25 @@ public interface OidcClient {
     /**
      * Authenticate based on username and password
      *
-     * @param authServerTokenEndpoint
+     * @param authServerUrl
      * @param client
-     * @param username
      *
      * @return Credential object that contains all the information
      */
-    OidcCredential getCredential(String authServerTokenEndpoint, String client, String username)
+    OidcCredential getCredential(String authServerUrl, String client)
             throws OidcClientException;
 
     /**
      * Authenticate based on service account and service account secret
      *
-     * @param authServerTokenEndpoint
+     * @param authServerUrl
      * @param serviceAccountUsername
      * @param secret
      *
      * @return Credential object that contains all the information
      */
     OidcCredential getCredentialServiceAccount(
-            String authServerTokenEndpoint,
+            String authServerUrl,
             String serviceAccountUsername,
             String secret) throws OidcClientException;
 }

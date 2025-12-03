@@ -20,12 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OidcCredential {
 
-    /** contains the OIDC endpoint to get a token */
-    private String authServerTokenEndpoint;
+    /** contains the OIDC url */
+    private String authServerUrl;
 
     private String client;
-
-    private String username;
 
     private String accessToken;
     private String refreshToken;
