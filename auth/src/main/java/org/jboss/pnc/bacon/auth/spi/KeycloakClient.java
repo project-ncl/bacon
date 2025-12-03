@@ -1,7 +1,7 @@
 package org.jboss.pnc.bacon.auth.spi;
 
 import org.jboss.pnc.bacon.auth.KeycloakClientException;
-import org.jboss.pnc.bacon.auth.model.Credential;
+import org.jboss.pnc.bacon.auth.model.KeycloakCredential;
 
 public interface KeycloakClient {
 
@@ -15,7 +15,7 @@ public interface KeycloakClient {
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredential(String keycloakBaseUrl, String realm, String client, String username)
+    KeycloakCredential getCredential(String keycloakBaseUrl, String realm, String client, String username)
             throws KeycloakClientException;
 
     /**
@@ -28,7 +28,7 @@ public interface KeycloakClient {
      *
      * @return Credential object that contains all the information
      */
-    Credential getCredentialServiceAccount(
+    KeycloakCredential getCredentialServiceAccount(
             String keycloakBaseUrl,
             String realm,
             String serviceAccountUsername,
