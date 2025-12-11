@@ -114,7 +114,7 @@
         <surefire.plugin.version>3.5.4</surefire.plugin.version>
         <tagSuffix />
         <undertow.version>2.3.20.Final</undertow.version>
-        <unirestVersion>3.14.5</unirestVersion>
+        <unirestVersion>4.2.9</unirestVersion>
         <version.rex>1.2.2</version.rex>
     </properties>
 
