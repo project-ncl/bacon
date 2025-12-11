@@ -1,6 +1,6 @@
 package org.jboss.pnc.bacon.common.exception;
 
-import org.commonjava.maven.ext.common.ExceptionHelper;
+import org.jboss.pnc.mavenmanipulator.common.ExceptionHelper;
 import org.slf4j.helpers.MessageFormatter;
 
 /**

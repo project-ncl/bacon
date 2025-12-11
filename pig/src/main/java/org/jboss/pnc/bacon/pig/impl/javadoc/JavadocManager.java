@@ -37,7 +37,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.commonjava.maven.ext.cli.Cli;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
@@ -55,6 +54,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Dependency;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Profile;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Project;
+import org.jboss.pnc.mavenmanipulator.cli.Cli;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

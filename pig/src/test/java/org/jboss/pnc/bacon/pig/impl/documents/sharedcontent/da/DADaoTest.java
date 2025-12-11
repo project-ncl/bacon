@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.testcommon.RemoteTest;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,7 +38,7 @@ class DADaoTest {
     private static DADao daDao;
 
     @BeforeAll
-    private static void init() throws IOException {
+    public static void init() throws IOException {
         String testConfigLocation = System.getProperty("configLocation");
         if (StringUtils.isBlank(testConfigLocation)) {
             fail(

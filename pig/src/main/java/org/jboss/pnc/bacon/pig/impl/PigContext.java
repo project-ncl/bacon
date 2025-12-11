@@ -17,7 +17,7 @@
  */
 package org.jboss.pnc.bacon.pig.impl;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.jboss.pnc.bacon.common.Constant.PIG_CONTEXT_DIR;
 import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.hashDirectory;
 
