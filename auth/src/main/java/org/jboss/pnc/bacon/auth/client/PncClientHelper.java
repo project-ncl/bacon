@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.function.Supplier;
 
 import org.jboss.pnc.bacon.auth.KeycloakClientImpl;
-import org.jboss.pnc.bacon.auth.model.Credential;
+import org.jboss.pnc.bacon.auth.model.KeycloakCredential;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
@@ -120,7 +120,7 @@ public class PncClientHelper {
      * @param keycloakConfig the keycloak config
      * @return the token, or null if we couldn't get it
      */
-    private static Credential getCredential(KeycloakConfig keycloakConfig) {
+    private static KeycloakCredential getCredential(KeycloakConfig keycloakConfig) {
 
         log.debug("Authenticating to keycloak");
 
@@ -128,16 +128,16 @@ public class PncClientHelper {
 
             KeycloakClient client = new KeycloakClientImpl();
 
-            Credential credential;
+            KeycloakCredential keycloakCredential;
 
             if (keycloakConfig.isServiceAccount()) {
-                credential = client.getCredentialServiceAccount(
+                keycloakCredential = client.getCredentialServiceAccount(
                         keycloakConfig.getUrl(),
                         keycloakConfig.getRealm(),
                         keycloakConfig.getUsername(),
                         keycloakConfig.getClientSecret());
             } else {
-                credential = client.getCredential(
+                keycloakCredential = client.getCredential(
                         keycloakConfig.getUrl(),
                         keycloakConfig.getRealm(),
                         keycloakConfig.getClientId(),
@@ -145,7 +145,7 @@ public class PncClientHelper {
 
             }
 
-            return credential;
+            return keycloakCredential;
 
         } catch (Exception e) {
             throw new FatalException("Keycloak authentication failed!", e);
@@ -192,10 +192,10 @@ public class PncClientHelper {
      * Private static class to contain the logic to automatically get a new access token when necessary
      */
     private static class PncClientTokenHolder {
-        Credential cached;
-        Supplier<Credential> credentialSupplier;
+        KeycloakCredential cached;
+        Supplier<KeycloakCredential> credentialSupplier;
 
-        PncClientTokenHolder(Supplier<Credential> credentialSupplier) {
+        PncClientTokenHolder(Supplier<KeycloakCredential> credentialSupplier) {
             this.credentialSupplier = credentialSupplier;
         }
 
