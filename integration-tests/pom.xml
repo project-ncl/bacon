@@ -65,8 +65,8 @@
             <artifactId>assertj-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.org.webcompere</groupId>
