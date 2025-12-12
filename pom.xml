@@ -472,7 +472,7 @@
                 <version>2.3.34</version>
             </dependency>
             <dependency>
-                <groupId>org.commonjava.maven.ext</groupId>
+                <groupId>org.jboss.pnc.maven-manipulator</groupId>
                 <artifactId>pom-manipulation-cli</artifactId>
                 <version>${pme.version}</version>
                 <classifier>minimal</classifier>
@@ -488,7 +488,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.commonjava.maven.ext</groupId>
+                <groupId>org.jboss.pnc.maven-manipulator</groupId>
                 <artifactId>pom-manipulation-common</artifactId>
                 <version>${pme.version}</version>
                 <exclusions>

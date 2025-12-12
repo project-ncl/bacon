@@ -53,7 +53,7 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.commonjava.maven.ext</groupId>
+            <groupId>org.jboss.pnc.maven-manipulator</groupId>
             <artifactId>pom-manipulation-common</artifactId>
         </dependency>
 
