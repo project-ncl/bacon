@@ -33,5 +33,7 @@ import lombok.Data;
 public class RepositoryData {
     private Collection<GAV> gavs;
     private Collection<File> files;
+
+    /** Path to repository zip. */
     private Path repositoryPath;
 }
