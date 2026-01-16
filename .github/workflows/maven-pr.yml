@@ -17,4 +17,4 @@ jobs:
       uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@v0.0.3
       with:
         java_version: '17'
-        build_comman: 'mvn clean install'
+        build_command: 'mvn clean install'
