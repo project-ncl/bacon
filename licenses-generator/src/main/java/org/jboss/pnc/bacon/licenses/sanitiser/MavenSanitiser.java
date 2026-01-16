@@ -18,14 +18,13 @@ package org.jboss.pnc.bacon.licenses.sanitiser;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.maven.model.License;
 import org.apache.maven.project.MavenProject;
 import org.jboss.pnc.bacon.licenses.maven.MavenProjectFactory;
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
 import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A pass-through sanitiser. If the dependency element does not have a license, the sanitiser will try to get it from a
@@ -36,8 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MavenSanitiser implements LicenseSanitiser {
 
-    private final Logger logger = LoggerFactory.getLogger(MavenSanitiser.class);
-
+    private static final java.util.logging.Logger logger = Logger.getLogger(MavenSanitiser.class.getSimpleName());
     private final MavenProjectFactory mavenProjectFactory;
 
     private final LicenseSanitiser next;
@@ -49,17 +47,17 @@ public class MavenSanitiser implements LicenseSanitiser {
 
     @Override
     public DependencyElement fix(DependencyElement dependencyElement) {
-        logger.info("license greater than 0: {}", dependencyElement.getArtifact());
+        logger.info("license greater than 0: " + dependencyElement.getArtifact());
         if (dependencyElement.getLicenses().size() > 0) {
-            logger.warn("license greater than 0: {}", dependencyElement.getArtifact());
+            logger.info("license greater than 0: " + dependencyElement.getArtifact());
             return next.fix(dependencyElement);
         }
-        logger.info("no license, finding it: {}", dependencyElement.getArtifact());
+        logger.info("no license, finding it: " + dependencyElement.getArtifact());
         return next.fix(new DependencyElement(dependencyElement, getMavenProjectLicenses(dependencyElement)));
     }
 
     private Set<LicenseElement> getMavenProjectLicenses(DependencyElement dependencyElement) {
-        logger.warn("Getting license for: {}", dependencyElement.getArtifact().toString());
+        logger.info("Getting license for: " + dependencyElement.getArtifact().toString());
         Set<LicenseElement> licenses = new HashSet<>();
         Optional<MavenProject> mavenProject = mavenProjectFactory
                 .getMavenProject(dependencyElement.getArtifact(), false);
@@ -68,7 +66,7 @@ public class MavenSanitiser implements LicenseSanitiser {
                 licenses.add(new LicenseElement(license));
             }
         } else {
-            logger.warn("Could not get maven project for {}", dependencyElement);
+            logger.info("Could not get maven project for " + dependencyElement);
         }
         return licenses;
     }
