@@ -56,6 +56,7 @@ public class MavenSanitiser implements LicenseSanitiser {
     }
 
     private Set<LicenseElement> getMavenProjectLicenses(DependencyElement dependencyElement) {
+        logger.warn("Getting license for: {}", dependencyElement.getArtifact().toString());
         Set<LicenseElement> licenses = new HashSet<>();
         Optional<MavenProject> mavenProject = mavenProjectFactory
                 .getMavenProject(dependencyElement.getArtifact(), false);
