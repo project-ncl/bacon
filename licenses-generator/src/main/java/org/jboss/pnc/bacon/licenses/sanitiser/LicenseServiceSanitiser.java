@@ -38,6 +38,7 @@ public class LicenseServiceSanitiser implements LicenseSanitiser {
     @Override
     public DependencyElement fix(DependencyElement dependencyElement) {
         Set<LicenseElement> licenses = provider.getLicenses(dependencyElement.toGavString());
+        logger.info("licenses size: {}", licenses.isEmpty());
         if (!licenses.isEmpty()) {
             return new DependencyElement(dependencyElement, licenses);
         } else {
