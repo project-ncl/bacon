@@ -49,12 +49,12 @@ public class MavenSanitiser implements LicenseSanitiser {
 
     @Override
     public DependencyElement fix(DependencyElement dependencyElement) {
-        logger.warn("license greater than 0: {}", dependencyElement.getArtifact());
+        logger.info("license greater than 0: {}", dependencyElement.getArtifact());
         if (dependencyElement.getLicenses().size() > 0) {
             logger.warn("license greater than 0: {}", dependencyElement.getArtifact());
             return next.fix(dependencyElement);
         }
-        logger.warn("no license, finding it: {}", dependencyElement.getArtifact());
+        logger.info("no license, finding it: {}", dependencyElement.getArtifact());
         return next.fix(new DependencyElement(dependencyElement, getMavenProjectLicenses(dependencyElement)));
     }
 
