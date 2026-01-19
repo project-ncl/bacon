@@ -85,7 +85,7 @@
         <enforcer.plugin.version>3.6.2</enforcer.plugin.version>
         <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
-        <jackson.version>2.19.2</jackson.version>
+        <jackson.version>2.21.0</jackson.version>
         <jaxb.version>4.0.6</jaxb.version>
         <jboss.releases.repo.id>central</jboss.releases.repo.id>
         <jboss.releases.repo.url>https://ossrh-staging-api.central.sonatype.com/service/local/</jboss.releases.repo.url>
