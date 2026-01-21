@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KeycloakResponse {
+public class OidcResponse {
 
     @JsonProperty("access_token")
     private String accessToken;
