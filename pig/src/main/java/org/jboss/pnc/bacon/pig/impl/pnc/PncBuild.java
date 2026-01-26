@@ -71,6 +71,7 @@ public class PncBuild {
     private String name;
     private Map<String, String> attributes;
     private BuildStatus buildStatus;
+    private String scmRepository;
 
     // Don't print huge build logs in the user's output. It's usually not that useful
     @JsonIgnore
@@ -91,6 +92,7 @@ public class PncBuild {
         scmTag = build.getScmTag();
         buildStatus = build.getStatus();
         attributes = build.getAttributes();
+        scmRepository = build.getScmUrl();
     }
 
     public void addBuiltArtifacts(List<Artifact> artifacts) {

@@ -31,6 +31,7 @@ public class ConfigProfile {
     private PigConfig pig;
     private KeycloakConfig keycloak;
     private AutobuildConfig autobuild;
+    private String githubToken;
     private RexConfig rex;
     private ReqourConfig reqour;
     private boolean enableExperimental;
