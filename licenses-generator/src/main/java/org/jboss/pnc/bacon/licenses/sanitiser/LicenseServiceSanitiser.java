@@ -16,6 +16,7 @@
 package org.jboss.pnc.bacon.licenses.sanitiser;
 
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.jboss.pnc.bacon.licenses.sanitiser.provider.ExternalLicenseProvider;
 import org.jboss.pnc.bacon.licenses.xml.DependencyElement;
@@ -27,6 +28,7 @@ import org.jboss.pnc.bacon.licenses.xml.LicenseElement;
  */
 public class LicenseServiceSanitiser implements LicenseSanitiser {
 
+    private static final Logger logger = Logger.getLogger(LicenseSanitiser.class.getSimpleName());
     private final LicenseSanitiser next;
     private final ExternalLicenseProvider provider;
 
@@ -38,6 +40,7 @@ public class LicenseServiceSanitiser implements LicenseSanitiser {
     @Override
     public DependencyElement fix(DependencyElement dependencyElement) {
         Set<LicenseElement> licenses = provider.getLicenses(dependencyElement.toGavString());
+        logger.info("licenses size: " + licenses.isEmpty());
         if (!licenses.isEmpty()) {
             return new DependencyElement(dependencyElement, licenses);
         } else {
