@@ -36,6 +36,10 @@
             <artifactId>test-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jboss.pnc</groupId>
+            <artifactId>pnc-common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
         </dependency>

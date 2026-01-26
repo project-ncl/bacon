@@ -1,9 +1,16 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
+import static org.jboss.pnc.common.scm.ScmUrlGeneratorProvider.determineScmProvider;
+import static org.jboss.pnc.common.scm.ScmUrlGeneratorProvider.getScmUrlGenerator;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -16,9 +23,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.io.FilenameUtils;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.MRRCSearcher;
@@ -32,7 +38,9 @@ import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.common.scm.ScmException;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +88,7 @@ public class SourcesGenerator {
             log.info("Ignoring source zip generation");
             return;
         }
+        log.info("Generating sources");
 
         File workDir = FileUtils.mkTempDir("sources");
 
@@ -175,19 +184,31 @@ public class SourcesGenerator {
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
         builds.values().forEach(build -> {
             File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
-            try (BuildClient client = CREATOR.newClient();
-                    Response response = client.getInternalScmArchiveLink(build.getId())) {
 
-                if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                    // NCLSUP-1269: check if the download link is valid or has some issues
+            try {
+                var provider = determineScmProvider(build.getScmRepository(), build.getInternalScmUrl());
+                URI uri = new URI(
+                        getScmUrlGenerator(provider)
+                                .generateTarballDownloadUrl(build.getScmRepository(), build.getScmRevision()));
+
+                HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(uri)
+                        .header("Authorization", "Bearer " + Config.instance().getActiveProfile().getGithubToken())
+                        .GET()
+                        .build();
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                if (response.statusCode() != HttpResponseCodes.SC_OK) {
                     StringBuilder errorMessage = new StringBuilder();
                     errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
-                    errorMessage.append("HTTP Status: ").append(response.getStatus()).append("\n");
+                    errorMessage.append("HTTP Status: ").append(response.statusCode()).append("\n");
                     throw new RuntimeException(errorMessage.toString());
                 }
-                InputStream in = (InputStream) response.getEntity();
-                Files.copy(in, targetPath.toPath());
-            } catch (IOException | RemoteResourceException e) {
+                try (InputStream responseStream = response.body()) {
+                    Files.copy(responseStream, targetPath.toPath());
+                }
+
+            } catch (ScmException | URISyntaxException | IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
