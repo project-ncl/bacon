@@ -75,7 +75,7 @@
     </scm>
 
     <properties>
-        <assertj.version>3.27.6</assertj.version>
+        <assertj.version>3.27.7</assertj.version>
         <build.finder>2.6.7</build.finder>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <commons-configuration2.version>2.13.0</commons-configuration2.version>
