@@ -105,7 +105,7 @@
         <picocli.version>4.7.7</picocli.version>
         <pme.version>5.0</pme.version>
         <pnc-api.version>3.2.4</pnc-api.version>
-        <pnc-common.version>3.3.4</pnc-common.version>
+        <pnc-common.version>3.4.0</pnc-common.version>
         <pnc.version>3.3.1</pnc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.resolver.version>${quarkus.version}</quarkus.resolver.version>
