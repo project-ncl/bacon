@@ -32,9 +32,14 @@ import org.apache.maven.settings.io.DefaultSettingsReader;
 import org.apache.maven.settings.io.DefaultSettingsWriter;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableRecord;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableRegistry;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableType;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOnFactory;
 import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2Lockfile;
+import org.jboss.pnc.bacon.pig.impl.addons.provenance.InvocationInfo;
+import org.jboss.pnc.bacon.pig.impl.addons.provenance.SlsaProvenanceV1Utils;
 import org.jboss.pnc.bacon.pig.impl.config.Flow;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
@@ -53,6 +58,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.fs.util.ZipUtils;
@@ -66,6 +76,14 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
     private static final String MOCK_REPO_URL = "https://mock.indy.org/maven";
     static final String CACHI2_LOCKFILE_NAME = "bom-strategy-generated-lockfile.yaml";
+
+    private static final String MAVEN_REPO_ZIP_NAME = "rh-sample-maven-repository.zip";
+
+    private static final ObjectMapper JSON = new ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerModule(new JavaTimeModule())
+            .findAndRegisterModules();
 
     private Path workDir;
     private File testMavenSettings;
@@ -132,9 +150,36 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         prepareFakeExtensionArtifactList(repoManagerSpy);
 
         RepositoryData repoData = repoManagerSpy.prepare();
+        // Get the PigContext
+        PigContext pigCtx = PigContext.get();
+
+        /* Added for provenance */
+        DeliverableRegistry registry = Mockito.mock(DeliverableRegistry.class);
+        doReturn(registry).when(pigCtx).getDeliverableRegistry();
+
+        InvocationInfo invocationInfo = Mockito.mock(InvocationInfo.class);
+        doReturn(invocationInfo).when(pigCtx).getInvocationInfo();
+        doReturn("generated-invocation-info-UUID").when(invocationInfo).invocationId();
+        doReturn("./bacon.jar pig run --serviceSecretValue=supersecret --password=abc123 ").when(invocationInfo)
+                .commandLine();
+        doReturn(workDir.resolve("target").toString()).when(pigCtx).getTargetPath();
+        doReturn(workDir.resolve("target/extras").toString()).when(pigCtx).getExtrasPath();
+        doReturn(workDir.resolve("target/release").toString()).when(pigCtx).getReleasePath();
+
+        // Register the maven repository zip deliverable
+        List<DeliverableRecord> deliverableRecords = new ArrayList<>();
+        deliverableRecords.add(
+                DeliverableRecord.create(
+                        DeliverableType.MAVEN_REPO_ZIP,
+                        repoData.getRepositoryPath().toAbsolutePath(),
+                        "repo-generation",
+                        Map.of()));
+        doReturn(deliverableRecords).when(registry).list();
+        String provenanceFilePath = Path.of(pigCtx.getExtrasPath())
+                .resolve("provenance/" + repoData.getRepositoryPath().getFileName() + ".provenance.json")
+                .toString();
 
         // run the addons
-        PigContext pigCtx = PigContext.get();
         doReturn(repoData).when(pigCtx).getRepositoryData();
         for (var addon : AddOnFactory.listAddOns(
                 pigConfiguration,
@@ -152,6 +197,8 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         assertRepoZipContent(repoData);
         assertCachi2LockFile("extras/artifacts.lock.yaml");
         assertOutcome();
+        // Verify that the provenance file has been generated
+        assertProvenanceV1File(provenanceFilePath);
     }
 
     protected void assertCachi2LockFile(String lockFilePath) {
@@ -185,6 +232,50 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         assertThat(zipArtifactChecksums).isEmpty();
     }
 
+    protected void assertProvenanceV1File(String provenanceFileDir) throws IOException {
+        Path resolvedProvenanceFilePath = getOutcomeResource(provenanceFileDir);
+        assertThat(resolvedProvenanceFilePath).exists();
+
+        JsonNode root = JSON.readTree(Files.readString(resolvedProvenanceFilePath));
+        JsonNode startedOn = root.at("/predicate/runDetails/metadata/startedOn");
+        JsonNode finishedOn = root.at("/predicate/runDetails/metadata/finishedOn");
+        String invocationId = root.at("/predicate/runDetails/metadata/invocationId").asText();
+        assertThat(startedOn.isTextual()).isTrue();
+        assertThat(finishedOn.isTextual()).isTrue();
+        assertThat(invocationId).isNotBlank();
+        assertThat(invocationId).isEqualTo("generated-invocation-info-UUID");
+
+        /* Predicate.BuildDefinition.ExternalParameters */
+        // Assert: commandLine got sanitized (no raw secrets)
+        String emittedCommandLine = root.at("/predicate/buildDefinition/externalParameters/commandLine").asText();
+        assertThat(emittedCommandLine).doesNotContain("supersecret");
+        assertThat(emittedCommandLine).doesNotContain("abc123");
+        assertThat(emittedCommandLine).contains("[REDACTED]"); // at least one replacement happened
+
+        /* Predicate.BuildDefinition.InternalParameters */
+        String deliverableType = root.at("/predicate/buildDefinition/internalParameters/deliverableType").asText();
+        assertThat(deliverableType).isNotBlank();
+        assertThat(deliverableType).isEqualTo("MAVEN_REPO_ZIP");
+        String createdBy = root.at("/predicate/buildDefinition/internalParameters/createdBy").asText();
+        assertThat(createdBy).isNotBlank();
+        assertThat(createdBy).isEqualTo("repo-generation");
+
+        /* Predicate.BuildDefinition.ResolvedDependencies */
+        String dep0Name = root.at("/predicate/buildDefinition/resolvedDependencies/0/name").asText();
+        assertThat(dep0Name).isEqualTo("bacon");
+        String dep0Uri = root.at("/predicate/buildDefinition/resolvedDependencies/0/uri").asText();
+        assertThat(dep0Uri).isEqualTo("https://github.com/project-ncl/bacon");
+
+        // Assert: subject digest exists
+        String name = root.at("/subject/0/name").asText();
+        assertThat(name).isEqualTo(MAVEN_REPO_ZIP_NAME);
+
+        // Assert: builder id
+        String builderId = root.at("/predicate/runDetails/builder/id").asText();
+        assertThat(builderId).isNotBlank();
+        assertThat(builderId).isEqualTo(SlsaProvenanceV1Utils.BUILDER_ID_PREFIX + invocationId);
+    }
+
     private Map<String, String> getZipArtifactChecksums() {
         try (FileSystem zipFs = ZipUtils.newZip(getGeneratedMavenRepoZip())) {
             final VisitableArtifactRepository visitableRepo = VisitableArtifactRepository.of(zipFs.getPath(""));
@@ -206,7 +297,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
      * @return path to the generated Maven repository ZIP
      */
     protected Path getGeneratedMavenRepoZip() {
-        return getOutcomeResource("rh-sample-maven-repository.zip");
+        return getOutcomeResource(MAVEN_REPO_ZIP_NAME);
     }
 
     /**
@@ -513,7 +604,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
 
     private Deliverables mockDeliverables(PigConfiguration pigConfiguration) {
         Deliverables deliverables = Mockito.mock(Deliverables.class);
-        doReturn("rh-sample-maven-repository.zip").when(deliverables).getRepositoryZipName();
+        doReturn(MAVEN_REPO_ZIP_NAME).when(deliverables).getRepositoryZipName();
         doReturn("rh-sample-").when(pigConfiguration).getTopLevelDirectoryPrefix();
         return deliverables;
     }
