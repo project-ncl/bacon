@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,6 +82,8 @@ public class OfflineManifestGenerator extends AddOn {
 
     public void trigger() {
         log.info("Generating the Offliner manifest");
+        clearProducedFiles();
+
         if (buildInfoCollector == null) {
             buildInfoCollector = new BuildInfoCollector();
         }
@@ -98,8 +101,9 @@ public class OfflineManifestGenerator extends AddOn {
             }
         }
 
+        String offlinerFileName = releasePath + offlinerManifestFileName();
         try (PrintWriter file = new PrintWriter(
-                releasePath + offlinerManifestFileName(),
+                offlinerFileName,
                 StandardCharsets.UTF_8.name())) {
             artifacts.forEach(file::println);
             pigConfiguration.getFlow()
@@ -109,6 +113,8 @@ public class OfflineManifestGenerator extends AddOn {
                     .map(GAV::fromColonSeparatedGAPV)
                     .map(extraGav -> String.format("%s/%s", extraGav.toVersionPath(), extraGav.toFileName()))
                     .forEach(file::println);
+
+            recordProducedFile(Path.of(offlinerFileName));
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             throw new FatalException("Failed to generate the Offliner manifest", e);
         }

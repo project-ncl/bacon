@@ -114,6 +114,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
     @Override
     public void trigger() {
         log.info("releasePath: {}, extrasPath: {}, deliverables: {}", releasePath, extrasPath, deliverables);
+        clearProducedFiles();
 
         if (PigContext.get().getRepositoryData() == null) {
             throw new RuntimeException(
@@ -173,6 +174,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
 
             Path targetPath = Paths.get(extrasPath, "community-dependencies.csv");
             depAnalyzer.generateAnalysis(targetPath.toAbsolutePath().toString());
+            recordProducedFile(targetPath);
 
             Set<String> problematicDeps = gatherProblematicDeps();
             Path problematicDepsOut = Paths.get(extrasPath, "nonexistent-redhat-deps.txt");
@@ -182,6 +184,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write problematic dependencies to the output file", e);
             }
+            recordProducedFile(problematicDepsOut);
         } catch (BootstrapMavenException | DependencyResolutionException e) {
             throw new RuntimeException("Failed to analyze community dependencies of Quarkus", e);
         }

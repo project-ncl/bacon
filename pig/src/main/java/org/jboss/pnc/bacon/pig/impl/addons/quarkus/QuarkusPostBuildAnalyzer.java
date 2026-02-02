@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
         super(pigConfiguration, builds, releasePath, extrasPath);
     }
 
-    private static void postBuildCheck(String stagingPath, String productName) {
+    private void postBuildCheck(String stagingPath, String productName) {
         String stagingPathToProduct = stagingPath + productName + "/";
         List<String> fileContent = new ArrayList<>();
         try {
@@ -68,6 +69,8 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
                             "nonexistent-redhat-deps"));
             fileContent.add(diffLicenseXml(latest_build_path, old_build_path));
             Files.write(Paths.get("post-build-info.txt"), fileContent, StandardCharsets.UTF_8);
+
+            recordProducedFile(Path.of("post-build-info.txt"));
         } catch (IOException | URISyntaxException e) {
             log.error("Error during post build check", e);
         }
@@ -81,6 +84,8 @@ public class QuarkusPostBuildAnalyzer extends AddOn {
     @Override
     public void trigger() {
         log.info("releasePath: {}, extrasPath: {}, config: {}", releasePath, extrasPath, pigConfiguration);
+        clearProducedFiles();
+
         String stagingPath = (String) getAddOnConfiguration().get("stagingPath");
         String productName = (String) getAddOnConfiguration().get("productName");
         postBuildCheck(stagingPath, productName);

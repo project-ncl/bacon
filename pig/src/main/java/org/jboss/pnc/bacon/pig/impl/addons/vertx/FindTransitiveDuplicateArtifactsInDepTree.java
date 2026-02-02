@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -145,6 +146,7 @@ public class FindTransitiveDuplicateArtifactsInDepTree extends AddOn {
     public void trigger() {
         String filename = extrasPath + "DuplicateArtifactLocations.txt";
         log.info("Running FindTransitiveDuplicateArtifactsInDepTree - report is {}", filename);
+        clearProducedFiles();
 
         String duplicatesPath = extrasPath + deliverables.getDuplicateArtifactListName();
         try (BufferedReader br = new BufferedReader(new FileReader(duplicatesPath))) {
@@ -181,6 +183,8 @@ public class FindTransitiveDuplicateArtifactsInDepTree extends AddOn {
                 outputFile.println();
             }
             outputFile.close();
+
+            recordProducedFile(Path.of(filename));
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Creating FindTransitiveDuplicateArtifactsInDepTree report {}", e);
         }

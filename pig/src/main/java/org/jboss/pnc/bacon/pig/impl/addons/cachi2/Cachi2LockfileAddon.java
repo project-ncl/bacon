@@ -44,6 +44,8 @@ public class Cachi2LockfileAddon extends AddOn {
 
     @Override
     public void trigger() {
+        clearProducedFiles();
+
         var repoPath = PigContext.get().getRepositoryData().getRepositoryPath();
         if (!Files.exists(repoPath)) {
             throw new IllegalArgumentException(repoPath + " does not exist");
@@ -76,6 +78,7 @@ public class Cachi2LockfileAddon extends AddOn {
         var value = params.get(PARAM_FILENAME);
         if (value != null) {
             cachi2Lockfile.setOutputFileName(value.toString());
+            recordProducedFile(Path.of(value.toString()));
         }
     }
 

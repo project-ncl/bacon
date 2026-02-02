@@ -57,6 +57,8 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
     @Override
     public void trigger() {
         log.info("Running RuntimeDependenciesAnalyzer");
+        clearProducedFiles();
+
         File workDir = FileUtils.mkTempDir("runtimeDepAnalyzer");
 
         String buildName = (String) getAddOnConfiguration().get("downloadFrom");
@@ -87,6 +89,8 @@ public class RuntimeDependenciesAnalyzer extends AddOn {
                 new ThorntailDepAnalyzer(buildLog));
         analyzer.skipDa(false);
         analyzer.generateAnalysis(targetPath.toAbsolutePath().toString());
+
+        recordProducedFile(targetPath);
         log.info("Done");
     }
 }

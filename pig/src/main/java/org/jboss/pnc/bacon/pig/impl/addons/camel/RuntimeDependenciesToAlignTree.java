@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,8 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
 
     @Override
     public void trigger() {
+        clearProducedFiles();
+
         String filename = extrasPath + "DependenciesToAlignTree.txt";
         String buildFromSourceStatsFileName = extrasPath + "BuildFromSourceStats.txt";
         log.info("Running DependenciesToAlignTree - report is {}", filename);
@@ -104,14 +107,16 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
                 if ((getAddOnConfiguration() != null)
                         && (Boolean.TRUE.equals(getAddOnConfiguration().get("printProjectLogs")))) {
 
+                    String buildFilename = new String(extrasPath + build.getName() + "-projectDependencies.txt");
                     PrintWriter buildFile = new PrintWriter(
-                            new String(extrasPath + build.getName() + "-projectDependencies.txt"),
+                            buildFilename,
                             StandardCharsets.UTF_8.name());
                     for (String dep : distinctDeps) {
                         buildFile.println(dep);
                     }
                     buildFile.flush();
                     buildFile.close();
+                    recordProducedFile(Path.of(buildFilename));
                 }
 
                 // Get the productized dependency count
@@ -191,6 +196,8 @@ public class RuntimeDependenciesToAlignTree extends AddOn {
 
             file.flush();
             buildFromSourceStatsFile.flush();
+            recordProducedFile(Path.of(filename));
+            recordProducedFile(Path.of(buildFromSourceStatsFileName));
 
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Error while creating RuntimeDependenciesToAlignTree report", e);
