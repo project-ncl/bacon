@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -42,6 +43,29 @@ public class HashUtils {
             throw new RuntimeException("Failed to walk through " + directory, e);
         }
         return Hex.encodeHex(sha.digest());
+    }
+
+    /**
+     * Computes the SHA-256 cryptographic hash of the given byte array and
+     * returns the result encoded as a lowercase hexadecimal string.
+     * <p>
+     * The returned string is always 64 hexadecimal characters long
+     * (32 bytes × 2 hex characters per byte), as defined by the SHA-256
+     * specification.
+     * <p>
+     * This method is deterministic: the same input bytes will always
+     * produce the same output hash.
+     *
+     * @param bytes the input data to hash; must not be {@code null}
+     * @return the SHA-256 digest of the input data, encoded as a lowercase
+     *         hexadecimal string
+     * @throws NoSuchAlgorithmException if the SHA-256 algorithm is not
+     *         available in the current Java runtime
+     */
+    public static String sha256Hex(byte[] bytes) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] digest = md.digest(bytes);
+        return Hex.encodeHex(digest);
     }
 
 }

@@ -17,12 +17,15 @@
  */
 package org.jboss.pnc.bacon.pig;
 
+import static org.jboss.pnc.bacon.pig.impl.utils.HashUtils.sha256Hex;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +34,13 @@ import java.util.concurrent.Callable;
 
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableRegistry;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.addons.provenance.InvocationInfo;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.out.PigBuildOutput;
@@ -47,6 +52,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
+import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -177,10 +183,41 @@ public class Pig {
                     artifactCacheDownload,
                     List.of(pig.getIndyUrl()));
 
-            PigContext.init(clean || isStartingPoint(), Paths.get(configDir), targetPath, releaseStorageUrl, overrides);
-            PigContext.get().setTempBuild(tempBuild);
-            ObjectHelper.print(getJsonOutput(), doExecute());
-            return 0;
+            // Best-effort command line capture.
+            String commandLine = System.getProperty("sun.java.command", "unknown");
+
+            // Compute digest of final pre-processed YAML (with the variables injected).
+            // This is the most important "build definition" input for provenance.
+            Map<String, String> configDigests = computeConfigDigests(Paths.get(configDir), overrides);
+
+            // Initialize context and attach deliverables registry + invocation info.
+            InvocationInfo invocationInfo = InvocationInfo.capture(
+                    ManifestUtils.getManifestInformation(Pig.class),
+                    commandLine,
+                    Instant.now(),
+                    configDigests);
+
+            PigContext.init(
+                    clean || isStartingPoint(),
+                    Paths.get(configDir),
+                    targetPath,
+                    releaseStorageUrl,
+                    overrides,
+                    new DeliverableRegistry(),
+                    invocationInfo);
+
+            try {
+                PigContext.get().setTempBuild(tempBuild);
+                ObjectHelper.print(getJsonOutput(), doExecute());
+                return 0;
+            } finally {
+                // finalize invocationInfo at the end of this command execution
+                PigContext ctx = PigContext.get();
+                InvocationInfo current = ctx.getInvocationInfo();
+                if (current != null && current.finishedOn() == null) {
+                    ctx.setInvocationInfo(current.withFinishedOn(Instant.now()));
+                }
+            }
         }
 
         boolean isStartingPoint() {
@@ -188,6 +225,22 @@ public class Pig {
         }
 
         abstract T doExecute();
+    }
+
+    private static Map<String, String> computeConfigDigests(Path configDir, Map<String, String> overrides) {
+        try {
+            File configFile = configDir.resolve("build-config.yaml").toFile();
+            try (InputStream in = PigConfiguration.preProcess(new FileInputStream(configFile), overrides)) {
+                // read all bytes of preprocessed YAML and sha256
+                byte[] bytes = in.readAllBytes();
+                String sha256 = sha256Hex(bytes);
+                return Map.of("build-config.preprocessed.sha256", sha256);
+            }
+        } catch (Exception e) {
+            // Don’t fail the run; just record error marker for provenance.
+            return Map
+                    .of("build-config.preprocessed.sha256_error", e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     /* System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "10"); */
