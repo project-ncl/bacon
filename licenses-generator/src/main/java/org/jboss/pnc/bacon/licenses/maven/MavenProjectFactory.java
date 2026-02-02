@@ -55,6 +55,8 @@ public class MavenProjectFactory {
 
         try {
             ProjectBuildingResult result = projectBuilder.build(artifact, request);
+            System.out.println("Building for artifact: " +artifact.getArtifactId());
+            System.out.println(result.getProject());
             return Optional.ofNullable(result.getProject());
         } catch (ProjectBuildingException e) {
             logger.warn("Failed to get maven project for " + artifact, e);
