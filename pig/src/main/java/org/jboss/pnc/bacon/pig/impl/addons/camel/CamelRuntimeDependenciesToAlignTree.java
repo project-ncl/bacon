@@ -16,6 +16,7 @@ package org.jboss.pnc.bacon.pig.impl.addons.camel;
 
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +74,8 @@ public class CamelRuntimeDependenciesToAlignTree extends AddOn {
 
     @Override
     public void trigger() {
+        clearProducedFiles();
+
         String filename = extrasPath + "DependenciesToAlignTree.txt";
         String buildFromSourceStatsFileName = extrasPath + "CamelBuildFromSourceStats.txt";
         log.info("Running CamelDependenciesToAlignTree - report is {}", filename);
@@ -90,8 +93,9 @@ public class CamelRuntimeDependenciesToAlignTree extends AddOn {
                 buildFromSourceStatsFile.print("-------- [" + build.getId() + "] " + build.getName() + " --------\n");
 
                 List<String> runtimeDeps = new ArrayList<String>();
+                String camelBuildFilename = new String(extrasPath + build.getName() + "-camelProjectDependencies.txt");
                 PrintWriter camelBuildFile = new PrintWriter(
-                        new String(extrasPath + build.getName() + "-camelProjectDependencies.txt"),
+                        camelBuildFilename,
                         StandardCharsets.UTF_8.name());
 
                 TreeParser treeparser = new TreeParser();
@@ -113,6 +117,7 @@ public class CamelRuntimeDependenciesToAlignTree extends AddOn {
                 }
                 camelBuildFile.flush();
                 camelBuildFile.close();
+                recordProducedFile(Path.of(camelBuildFilename));
 
                 buildFromSourceStatsFile.println("Number of unique dependencies: " + filterForScope.size());
 
@@ -136,6 +141,8 @@ public class CamelRuntimeDependenciesToAlignTree extends AddOn {
 
             file.flush();
             buildFromSourceStatsFile.flush();
+            recordProducedFile(Path.of(filename));
+            recordProducedFile(Path.of(buildFromSourceStatsFileName));
         } catch (Exception e) {
             log.error("Error while creating RuntimeDependenciesToAlignTree report", e);
         }

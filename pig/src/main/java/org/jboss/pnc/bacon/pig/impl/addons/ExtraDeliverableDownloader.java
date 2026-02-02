@@ -49,6 +49,8 @@ public class ExtraDeliverableDownloader extends AddOn {
     @SuppressWarnings("unchecked")
     @Override
     public void trigger() {
+        clearProducedFiles();
+
         getAddOnConfiguration()
                 .forEach((key, artifacts) -> downloadArtifacts(key, (List<Map<String, String>>) artifacts));
     }
@@ -63,6 +65,8 @@ public class ExtraDeliverableDownloader extends AddOn {
         Path releaseDir = Paths.get(releasePath);
         Path targetFile = releaseDir.resolve(constructFileName(suffix));
         artifact.downloadTo(targetFile.toFile());
+
+        recordProducedFile(targetFile);
     }
 
     private String constructFileName(String suffix) {

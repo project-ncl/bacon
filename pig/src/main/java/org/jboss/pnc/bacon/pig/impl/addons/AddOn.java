@@ -17,6 +17,9 @@
  */
 package org.jboss.pnc.bacon.pig.impl.addons;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -31,6 +34,7 @@ public abstract class AddOn {
     protected final Map<String, PncBuild> builds;
     protected final String releasePath;
     protected final String extrasPath;
+    private final List<Path> producedFiles = new ArrayList<>();
 
     protected AddOn(
             PigConfiguration pigConfiguration,
@@ -49,6 +53,23 @@ public abstract class AddOn {
 
     public Map<String, ?> getAddOnConfiguration() {
         return pigConfiguration.getAddons().get(getName());
+    }
+
+    /** Call this from add-ons whenever you write a file */
+    protected final void recordProducedFile(Path path) {
+        if (path != null) {
+            producedFiles.add(path);
+        }
+    }
+
+    /** Clears previous produced files (call at start of trigger wrapper) */
+    protected final void clearProducedFiles() {
+        producedFiles.clear();
+    }
+
+    /** Default: empty unless add-on recorded files */
+    public List<Path> getProducedFiles() {
+        return List.copyOf(producedFiles);
     }
 
     public abstract String getName();

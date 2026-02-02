@@ -91,6 +91,8 @@ public class VertxArtifactFinder extends AddOn {
     @Override
     public void trigger() {
 
+        clearProducedFiles();
+
         if (repoPath == null) {
             if (PigContext.get().getRepositoryData() == null) {
                 throw new RuntimeException(
@@ -110,6 +112,7 @@ public class VertxArtifactFinder extends AddOn {
             throw new RuntimeException("Failed to write vertx artifacts to the output file", e);
         }
 
+        recordProducedFile(vertexArtifactListFile);
     }
 
     @Override

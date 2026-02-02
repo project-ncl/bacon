@@ -42,6 +42,7 @@ public class MicroProfileSmallRyeCommunityDepAnalyzer extends AddOn {
     @Override
     public void trigger() {
         log.info("Running MicroProfileSmallRyeCommunityDepAnalyzer");
+        clearProducedFiles();
 
         Set<GAV> allGavs = new HashSet<>();
         for (PncBuild build : builds.values()) {
@@ -59,5 +60,6 @@ public class MicroProfileSmallRyeCommunityDepAnalyzer extends AddOn {
 
         Path targetPath = Paths.get(extrasPath, "community-dependencies.csv");
         new CommunityDepAnalyzer(allGavs).generateAnalysis(targetPath.toAbsolutePath().toString());
+        recordProducedFile(targetPath);
     }
 }

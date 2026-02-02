@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,6 +56,8 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
 
     @Override
     public void trigger() {
+        clearProducedFiles();
+
         String filename = extrasPath + "DependencyTreeMissingAlignment.txt";
         log.info("Running NotYetAlignedFromDependencyTree - report is {}", filename);
         try (PrintWriter file = new PrintWriter(filename, StandardCharsets.UTF_8.name())) {
@@ -70,6 +73,7 @@ public class NotYetAlignedFromDependencyTree extends AddOn {
                 }
                 file.print("\n");
             }
+            recordProducedFile(Path.of(filename));
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             log.error("Error while creating NotYetAlignedFromDependencyTree report", e);
         }

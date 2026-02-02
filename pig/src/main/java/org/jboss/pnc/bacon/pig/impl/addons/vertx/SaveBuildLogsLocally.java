@@ -17,6 +17,7 @@ package org.jboss.pnc.bacon.pig.impl.addons.vertx;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,8 @@ public class SaveBuildLogsLocally extends AddOn {
 
     @Override
     public void trigger() {
+        clearProducedFiles();
+
         File logDir = new File(extrasPath + "build-logs");
         String fileName = "";
         log.info("Running SaveBuildLogsLocally - logs are in {}", logDir);
@@ -68,6 +71,8 @@ public class SaveBuildLogsLocally extends AddOn {
                     writer.write(str + System.lineSeparator());
                 }
                 writer.close();
+
+                recordProducedFile(Path.of(fileName));
             }
         } catch (java.io.IOException e) {
             log.error("Writing build log {}", fileName, e);
