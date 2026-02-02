@@ -32,6 +32,8 @@ import javax.ws.rs.NotFoundException;
 
 import org.jboss.pnc.api.enums.OperationResult;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableRecord;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableType;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.AddOn;
@@ -399,6 +401,16 @@ public final class PigFacade {
                 pigConfiguration.getTopLevelDirectoryPrefix() + "src",
                 context.getReleasePath() + context.getDeliverables().getSourceZipName());
         sourcesGenerator.generateSources(builds, repo);
+
+        Path out = Paths.get(context.getReleasePath())
+                .resolve(context.getDeliverables().getSourceZipName())
+                .toAbsolutePath();
+        registerDeliverable(
+                DeliverableType.SOURCES_ZIP,
+                out,
+                "sources-generation",
+                Map.of("oldBCNaming", String.valueOf(oldBCNaming)));
+
     }
 
     private static PigContext context() {
@@ -469,7 +481,17 @@ public final class PigFacade {
                 .stream()
                 .filter(addOn -> !skippedAddonsList.contains(addOn.getName()))
                 .filter(AddOn::shouldRun)
-                .forEach(AddOn::trigger);
+                .forEach(addOn -> {
+                    addOn.trigger();
+
+                    for (Path p : addOn.getProducedFiles()) {
+                        registerDeliverable(
+                                org.jboss.pnc.bacon.common.deliverables.DeliverableType.ADDON_OUTPUT,
+                                p,
+                                "addon:" + addOn.getName(),
+                                Map.of("addonName", addOn.getName()));
+                    }
+                });
     }
 
     /**
@@ -536,8 +558,22 @@ public final class PigFacade {
             RepositoryData repositoryData = repoManager.prepare();
 
             if (repositoryData != null) {
-                File repoZip = repositoryData.getRepositoryPath().toAbsolutePath().toFile();
+                Path repoZipPath = repositoryData.getRepositoryPath().toAbsolutePath();
+                registerDeliverable(
+                        DeliverableType.MAVEN_REPO_ZIP,
+                        repoZipPath,
+                        "repo-generation",
+                        Map.of(
+                                "removeGeneratedM2Dups",
+                                String.valueOf(removeGeneratedM2Dups),
+                                "strictLicenseCheck",
+                                String.valueOf(strictLicenseCheck),
+                                "strictSourceDownload",
+                                String.valueOf(strictSourceDownload),
+                                "useLocalM2Cache",
+                                String.valueOf(useLocalM2Cache)));
 
+                File repoZip = repoZipPath.toFile();
                 context.setChecksums(BuildFinderUtils.findChecksums(repoZip));
                 context.storeContext();
             }
@@ -580,6 +616,22 @@ public final class PigFacade {
         Map<String, PncBuild> builds = context.getBuilds();
         new LicenseManager(pigConfiguration, context.getReleasePath(), strict, context.getDeliverables(), builds, repo)
                 .prepare();
+
+        Path out = Paths.get(context.getReleasePath())
+                .resolve(context.getDeliverables().getLicenseZipName())
+                .toAbsolutePath();
+        registerDeliverable(
+                DeliverableType.LICENSES_ZIP,
+                out,
+                "licenses-generation",
+                Map.of(
+                        "strict",
+                        String.valueOf(strict),
+                        "licenseExceptionsPath",
+                        licenseExceptionsPath,
+                        "licenseNamesPath",
+                        licenseNamesPath));
+
     }
 
     public static void generateJavadoc() {
@@ -590,6 +642,16 @@ public final class PigFacade {
         PigConfiguration pigConfiguration = context.getPigConfiguration();
         Map<String, PncBuild> builds = context.getBuilds();
         new JavadocManager(pigConfiguration, context.getReleasePath(), context.getDeliverables(), builds).prepare();
+
+        Path out = Paths.get(context.getReleasePath())
+                .resolve(context.getDeliverables().getJavadocZipName())
+                .toAbsolutePath();
+        registerDeliverable(
+                DeliverableType.JAVADOCS_ZIP,
+                out,
+                "javadocs-generation",
+                Map.of());
+
     }
 
     /**
@@ -630,4 +692,25 @@ public final class PigFacade {
         }
         return true;
     }
+
+    private static void registerDeliverable(
+            DeliverableType type,
+            Path path,
+            String createdBy,
+            Map<String, Object> attrs) {
+        PigContext ctx = context();
+        if (ctx.getDeliverableRegistry() == null) {
+            // Should not happen, but don't break runs.
+            log.debug("Deliverable registry not initialized; skipping registration for {}", path);
+            return;
+        }
+        ctx.getDeliverableRegistry()
+                .register(
+                        DeliverableRecord.create(
+                                type,
+                                path,
+                                createdBy,
+                                attrs == null ? Map.of() : attrs));
+    }
+
 }

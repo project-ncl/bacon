@@ -33,6 +33,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 
+import org.jboss.pnc.bacon.common.deliverables.DeliverableRegistry;
+import org.jboss.pnc.bacon.pig.impl.addons.provenance.InvocationInfo;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.documents.Deliverables;
 import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
@@ -90,6 +92,10 @@ public class PigContext {
     private String fullVersion; // version like 1.3.2.DR7
 
     private Map<String, Collection<String>> checksums;
+
+    // Not persisted to pig-context.json. It is per-execution.
+    private transient DeliverableRegistry deliverableRegistry;
+    private transient InvocationInfo invocationInfo;
 
     public void initConfig(Path configDir, String targetPath, String releaseStorageUrl, Map<String, String> overrides) {
         File configFile = configDir.resolve("build-config.yaml").toFile();
@@ -207,10 +213,16 @@ public class PigContext {
             Path configDir,
             String targetPath,
             String releaseStorageUrl,
-            Map<String, String> overrides) {
+            Map<String, String> overrides,
+            DeliverableRegistry deliverableRegistry,
+            InvocationInfo invocationInfo) {
         instance = readContext(clean, configDir);
         instance.initConfig(configDir, targetPath, releaseStorageUrl, overrides);
+        instance.setDeliverableRegistry(deliverableRegistry);
+        instance.setInvocationInfo(invocationInfo);
+
         return instance;
+
     }
 
     private static PigContext readContext(boolean clean, Path configDir) {
