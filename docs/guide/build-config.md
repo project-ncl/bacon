@@ -11,6 +11,12 @@ title: "Build Config Files"
 
 The build-config.yaml is broken down into 2 big categories: the PNC part and the generation part. The PNC part consists of the configuration on how your builds are performed. Once the builds are done, that information is then fed into the generation part to produce maven repository, javadoc, sources, license zips.
 
+> **Provenance generation (default behavior)**  
+> For each generated deliverable (Maven repository, licenses, javadocs, and sources), PiG will **by default also generate a SLSA provenance attestation** in JSON format.  
+> These provenance files describe *how* and *with what inputs and environment* each deliverable was produced and are written alongside other extras under the target directory.  
+> See the PiG documentation for details on the `provenance` add-on and how to skip it if required.
+
+
 build-config.yaml example file with comments: [build-config.yaml](https://github.com/project-ncl/bacon/blob/main/example-pig-config.yaml)
 
 The basic structure of a build-config.yaml looks as follows:
@@ -626,6 +632,55 @@ All `GENERATE*` strategies require that the repository generation is **not** ign
     excludeSourceBuilds:
        - 'org.kie.kogito-kogito-images-1.40.0.Final'
   ```
+
+## Generation and Provenance
+
+### Automatic provenance for generated deliverables
+
+Unless explicitly disabled via the command line, **every deliverable produced by the generation phase** will have a corresponding provenance attestation generated:
+
+- Maven repository ZIPs
+- License ZIPs
+- Javadoc ZIPs
+- Sources ZIPs
+
+For each output file, PiG creates an additional file with the suffix:
+
+```
+<deliverable-name>.provenance.json
+```
+
+These files are written to:
+
+```
+{targetPath}/extras/provenance/
+```
+
+Each provenance file is an [in-toto Statement](https://in-toto.io/Statement/v1) with a
+[SLSA provenance v1](https://slsa.dev/provenance/v1) predicate and includes:
+
+- The deliverable name and cryptographic digests
+- The PiG invocation metadata (command line, invocation ID, timestamps)
+- Environment details (OS, Java runtime, selected CI variables)
+- Inputs such as the preprocessed `build-config.yaml` digest and PiG configuration context
+
+### Disabling provenance generation
+
+Provenance generation is implemented as a PiG add-on named `provenance`.
+
+To disable provenance generation for a run, use:
+
+```bash
+bacon pig run ... --skipAddon=provenance
+```
+
+Or, when running add-ons directly:
+
+```bash
+bacon pig addons ... --skipAddon=provenance
+```
+
+No changes to `build-config.yaml` are required to enable provenance generation; it is active by default.
 
 ## Usage of YAML variables
 You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:

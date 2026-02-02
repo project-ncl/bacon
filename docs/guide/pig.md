@@ -187,6 +187,64 @@ addons:
           suffix: 'nodejs-adapter-dist.zip'
 ```
 
+### Provenance
+
+The `provenance` add-on emits a SLSA provenance attestation (JSON) **for each registered deliverable** produced by PiG.
+This helps consumers (and downstream automation) understand **what inputs and environment** were used to produce a given deliverable.
+
+**When it runs**
+- The add-on runs by default during the `addons` phase (including `bacon pig run`).
+- To disable it, use the CLI skip flag:
+
+```bash
+bacon pig run ... --skipAddon=provenance
+# or, if you only run addons:
+bacon pig addons ... --skipAddon=provenance
+```
+
+**What it generates**
+- Output directory: `{{targetPath}}/extras/provenance/`
+- For each deliverable, a file named:
+
+```
+<deliverable-filename>.provenance.json
+```
+
+Example:
+
+```
+rh-quarkus-platform-3.15.2.CR1-maven-repository.zip.provenance.json
+```
+
+**What’s inside**
+The produced JSON is an in-toto Statement (`https://in-toto.io/Statement/v1`) with a SLSA provenance v1 predicate
+(`https://slsa.dev/provenance/v1`). Key information includes:
+
+- **Subject**: the deliverable filename plus its digests (PiG ensures SHA-256 is computed for deliverables before generating provenance).
+- **Build definition**:
+  - External parameters such as the captured PiG command line, version, prefix, target paths, and the resolved PiG configuration.
+  - Resolved dependencies/materials, including:
+    - Bacon Git repository URI (`https://github.com/project-ncl/bacon`)
+    - Digest of the **preprocessed** `build-config.yaml` (after variable substitution), when available
+    - Digest of the PiG configuration directory (when available)
+- **Run details**:
+  - Builder identity: `urn:uuid:<invocationId>`
+  - Metadata including `invocationId`, `startedOn`, and `finishedOn`
+  - Environment details (host, OS, Java runtime) and allowlisted CI variables (for example Jenkins job/build identifiers)
+
+**Sensitive-data handling**
+Before writing the file, the add-on sanitizes the JSON output to avoid leaking secrets:
+- It redacts values of common sensitive keys (e.g., token/secret/password/apiKey-like fields).
+- It also scrubs credentials embedded in URLs (e.g., `https://user:pass@host/...`).
+- A small allowlist is used to avoid redacting non-secret values that may look token-like (such as hashes and version/revision).
+
+> Tip: If you pass sensitive configuration using `-e/--env` variables, prefer environment variables in the shell
+> (as documented for other add-ons) to keep secrets out of SCM and CLI history.
+
+**Configuration**
+No YAML configuration is required for `provenance`. If you do add it to `addons`, it is ignored today; use `--skipAddon=provenance`
+to disable generation.
+
 ### Post Build Product Security Scanning as a Service (PSSaaS)
 {% raw %}
 
