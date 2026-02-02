@@ -1,15 +1,19 @@
 package org.jboss.pnc.bacon.test.pig;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.pnc.bacon.common.Constant;
+import org.jboss.pnc.bacon.common.deliverables.DeliverableRegistry;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.PigConfig;
 import org.jboss.pnc.bacon.config.Validate;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
+import org.jboss.pnc.bacon.pig.impl.addons.provenance.InvocationInfo;
 import org.jboss.pnc.bacon.test.CLIExecutor;
 import org.jboss.pnc.bacon.test.TestType;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,7 +47,13 @@ public abstract class PigFunctionalTest {
                 configDir,
                 targetDirectory.toAbsolutePath().toString(),
                 releaseStorageUrl,
-                Collections.emptyMap());
+                Collections.emptyMap(),
+                new DeliverableRegistry(),
+                InvocationInfo.capture(
+                        "0.1.0-test",
+                        "command line",
+                        Instant.now(),
+                        Map.of()));
         return suffix;
     }
 
