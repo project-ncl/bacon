@@ -18,4 +18,4 @@ jobs:
       with:
         fetch_all_commits: true
         java_version: 17
-        build_command: mvn license:download-licenses && mvn -U -B -V clean install
+        build_command: mvn -U -B -V clean install
