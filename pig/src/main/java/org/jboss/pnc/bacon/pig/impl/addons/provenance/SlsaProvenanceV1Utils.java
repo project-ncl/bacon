@@ -124,6 +124,7 @@ public final class SlsaProvenanceV1Utils {
                 ResourceDescriptor.builder()
                         .name("bacon")
                         .uri("https://github.com/project-ncl/bacon")
+                        .annotations(Map.of("version", ManifestUtils.getManifestInformation(Pig.class)))
                         .build());
 
         // 1) Preprocessed YAML digest
