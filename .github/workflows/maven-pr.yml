@@ -1,0 +1,24 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+    call-maven-ci:
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@v0.0.12
+      with:
+        # The junit:junit:4.12 is used in one of our tests to get the license.
+        # Weirdly it needs to be present in our .m2/repository folder for the
+        # test to pass. I thought it would be downloaded by the Maven resolver
+        # directly.
+        build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V clean install
+        java_version: 17
