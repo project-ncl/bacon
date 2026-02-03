@@ -98,7 +98,7 @@ public class ExternalLicensesTest {
 
     @Test
     public void shouldGetFromMavenIfNotAvailableInFileOrService() throws MavenProjectFactoryException {
-        Set<LicenseElement> licenses = getLicensesForGav("org.junit.jupiter:junit-jupiter-api:6.0.2");
+        Set<LicenseElement> licenses = getLicensesForGav("junit:junit:4.12");
         assertThat(licenses).containsExactlyInAnyOrder(
                 new LicenseElement(ECLIPSE_LICENSE_NAME, ECLIPSE_LICENSE_LINK, ECLIPSE_LICENSE_LINK));
     }
