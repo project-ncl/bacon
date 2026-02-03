@@ -1,0 +1,24 @@
+name: "0 Central Release Job" # Adding the 0 so that it's on top of the list of github actions
+on:
+  workflow_dispatch: # Manual trigger so you don't release on every push
+    inputs:
+      ref_to_release:
+        description: '[Optional] Branch or commit to release. Default: Github default branch'
+        required: false
+        type: string
+        # default has to be a static string, no variables allowed
+        default: ''
+
+jobs:
+    call-release-job:
+      permissions:
+        contents: write # needed to push commit and tag back to the repository
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-release.yml@v0.0.12
+      with:
+        ref_to_release: ${{ inputs.ref_to_release }}
+        # The junit:junit:4.12 is used in one of our tests to get the license.
+        # Weirdly it needs to be present in our .m2/repository folder for the
+        # test to pass. I thought it would be downloaded by the Maven resolver
+        # directly.
+        release_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V release:prepare release:perform -DlocalCheckout=true -DpushChanges=false
+        java_version: 17
