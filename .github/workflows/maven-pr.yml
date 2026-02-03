@@ -17,3 +17,4 @@ jobs:
       uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@v0.0.10
       with:
         fetch_all_commits: true
+        java_version: 17
