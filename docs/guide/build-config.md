@@ -11,11 +11,13 @@ title: "Build Config Files"
 
 The build-config.yaml is broken down into 2 big categories: the PNC part and the generation part. The PNC part consists of the configuration on how your builds are performed. Once the builds are done, that information is then fed into the generation part to produce maven repository, javadoc, sources, license zips.
 
-> **Provenance generation (default behavior)**  
-> For each generated deliverable (Maven repository, licenses, javadocs, and sources), PiG will **by default also generate a SLSA provenance attestation** in JSON format.  
-> These provenance files describe *how* and *with what inputs and environment* each deliverable was produced and are written alongside other extras under the target directory.  
+> **Provenance generation (default behavior)**
+>
+> For each generated deliverable (Maven repository, licenses, javadocs, and sources), PiG will **by default also generate a SLSA provenance attestation** in JSON format.
+>
+> These provenance files describe *how* and *with what inputs and environment* each deliverable was produced and are written alongside other extras under the target directory.
+>
 > See the PiG documentation for details on the `provenance` add-on and how to skip it if required.
-
 
 build-config.yaml example file with comments: [build-config.yaml](https://github.com/project-ncl/bacon/blob/main/example-pig-config.yaml)
 
