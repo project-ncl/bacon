@@ -10,8 +10,8 @@ updates:
     schedule:
       interval: "weekly"
 
-- package-ecosystem: "github-actions" # Also update Github actions
-  directory: "/"
-  schedule:
-    # Check for updates to GitHub Actions every week
-    interval: "weekly"
+  - package-ecosystem: "github-actions" # Also update Github actions
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
