@@ -18,4 +18,4 @@ jobs:
       with:
         fetch_all_commits: true
         java_version: 17
-        build_command: mvn -U -B -V clean install
+        build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V clean install
