@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -620,17 +621,17 @@ public final class PigFacade {
         Path out = Paths.get(context.getReleasePath())
                 .resolve(context.getDeliverables().getLicenseZipName())
                 .toAbsolutePath();
+
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put("strict", Boolean.toString(strict));
+        putIfNotNull(attrs, "licenseExceptionsPath", licenseExceptionsPath);
+        putIfNotNull(attrs, "licenseNamesPath", licenseNamesPath);
+
         registerDeliverable(
                 DeliverableType.LICENSES_ZIP,
                 out,
                 "licenses-generation",
-                Map.of(
-                        "strict",
-                        String.valueOf(strict),
-                        "licenseExceptionsPath",
-                        licenseExceptionsPath,
-                        "licenseNamesPath",
-                        licenseNamesPath));
+                attrs);
 
     }
 
@@ -713,4 +714,9 @@ public final class PigFacade {
                                 attrs == null ? Map.of() : attrs));
     }
 
+    private static <K, V> void putIfNotNull(Map<K, V> map, K key, V value) {
+        if (value != null) {
+            map.put(key, value);
+        }
+    }
 }
