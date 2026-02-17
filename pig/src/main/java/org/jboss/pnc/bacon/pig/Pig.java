@@ -68,6 +68,7 @@ import picocli.CommandLine.Parameters;
         description = "PiG tool",
         subcommands = {
                 Cachi2Lockfile.class,
+                CycloneDxSbom.class,
                 Pig.Configure.class,
                 Pig.Cancel.class,
                 Pig.Build.class,

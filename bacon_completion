@@ -173,6 +173,7 @@ function _complete_bacon() {
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} da reports built" ];    then _picocli_bacon_da_reports; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} da reports lookup-versions-npm" ];    then _picocli_bacon_da_reports; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pig cachi2lockfile" ];    then _picocli_bacon_pig; return $?; fi
+  if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pig cdx-sbom" ];    then _picocli_bacon_pig; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pig configure" ];    then _picocli_bacon_pig; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pig cancel" ];    then _picocli_bacon_pig; return $?; fi
   if [ "${COMP_LINE}" = "${COMP_WORDS[0]} pig build" ];    then _picocli_bacon_pig; return $?; fi
@@ -323,265 +324,267 @@ function _complete_bacon() {
   local cmds16=(da reports built)
   local cmds17=(da reports lookup-versions-npm)
   local cmds18=(pig cachi2lockfile)
-  local cmds19=(pig configure)
-  local cmds20=(pig cancel)
-  local cmds21=(pig build)
-  local cmds22=(pig run)
-  local cmds23=(pig repo)
-  local cmds24=(pig licenses)
-  local cmds25=(pig javadocs)
-  local cmds26=(pig sources)
-  local cmds27=(pig shared-content)
-  local cmds28=(pig docs)
-  local cmds29=(pig release)
-  local cmds30=(pig pre-process-yaml)
-  local cmds31=(pig addons)
-  local cmds32=(pig export)
-  local cmds33=(pig export build-config)
-  local cmds34=(pnc admin)
-  local cmds35=(pnc artifact)
-  local cmds36=(pnc brew-push)
-  local cmds37=(pnc build)
-  local cmds38=(pnc build-config)
-  local cmds39=(pnc environment)
-  local cmds40=(pnc deliverable-analysis)
-  local cmds41=(pnc group-build)
-  local cmds42=(pnc group-config)
-  local cmds43=(pnc product)
-  local cmds44=(pnc product-milestone)
-  local cmds45=(pnc product-release)
-  local cmds46=(pnc product-version)
-  local cmds47=(pnc project)
-  local cmds48=(pnc scm-repository)
-  local cmds49=(pnc whoami)
-  local cmds50=(pnc admin pnc-status)
-  local cmds51=(pnc admin rex)
-  local cmds52=(pnc admin token)
-  local cmds53=(pnc admin environment)
-  local cmds54=(pnc admin pnc-status set)
-  local cmds55=(pnc admin pnc-status get)
-  local cmds56=(pnc admin rex clear-all)
-  local cmds57=(pnc admin rex get)
-  local cmds58=(pnc admin token get)
-  local cmds59=(pnc admin environment create)
-  local cmds60=(pnc admin environment deprecate)
-  local cmds61=(pnc artifact get)
-  local cmds62=(pnc artifact get-gav)
-  local cmds63=(pnc artifact list-from-hash)
-  local cmds64=(pnc artifact usage)
-  local cmds65=(pnc artifact usage-gav)
-  local cmds66=(pnc brew-push build)
-  local cmds67=(pnc brew-push group-build)
-  local cmds68=(pnc brew-push status)
-  local cmds69=(pnc build start)
-  local cmds70=(pnc build cancel)
-  local cmds71=(pnc build list)
-  local cmds72=(pnc build list-built-artifacts)
-  local cmds73=(pnc build list-dependencies)
-  local cmds74=(pnc build get)
-  local cmds75=(pnc build get-revision)
-  local cmds76=(pnc build get-log)
-  local cmds77=(pnc build get-align-log)
-  local cmds78=(pnc build download-sources)
-  local cmds79=(pnc build-config create)
-  local cmds80=(pnc build-config create-with-scm)
-  local cmds81=(pnc build-config get)
-  local cmds82=(pnc build-config get-revision)
-  local cmds83=(pnc build-config list)
-  local cmds84=(pnc build-config list-revisions)
-  local cmds85=(pnc build-config list-builds)
-  local cmds86=(pnc build-config update)
-  local cmds87=(pnc build-config clone)
-  local cmds88=(pnc build-config create-revision)
-  local cmds89=(pnc build-config add-dependency)
-  local cmds90=(pnc build-config remove-dependency)
-  local cmds91=(pnc environment get)
-  local cmds92=(pnc environment list)
-  local cmds93=(pnc deliverable-analysis add-label)
-  local cmds94=(pnc deliverable-analysis get)
-  local cmds95=(pnc deliverable-analysis get-analyzed)
-  local cmds96=(pnc deliverable-analysis get-label-history)
-  local cmds97=(pnc deliverable-analysis list)
-  local cmds98=(pnc deliverable-analysis remove-label)
-  local cmds99=(pnc group-build start)
-  local cmds100=(pnc group-build cancel)
-  local cmds101=(pnc group-build list)
-  local cmds102=(pnc group-build list-builds)
-  local cmds103=(pnc group-build get)
-  local cmds104=(pnc group-config create)
-  local cmds105=(pnc group-config update)
-  local cmds106=(pnc group-config list)
-  local cmds107=(pnc group-config list-build-configs)
-  local cmds108=(pnc group-config get)
-  local cmds109=(pnc group-config add-build-config)
-  local cmds110=(pnc group-config remove-build-config)
-  local cmds111=(pnc group-config show-latest-build)
-  local cmds112=(pnc product create)
-  local cmds113=(pnc product get)
-  local cmds114=(pnc product list)
-  local cmds115=(pnc product list-versions)
-  local cmds116=(pnc product update)
-  local cmds117=(pnc product-milestone create)
-  local cmds118=(pnc product-milestone update)
-  local cmds119=(pnc product-milestone cancel-milestone-close)
-  local cmds120=(pnc product-milestone get)
-  local cmds121=(pnc product-milestone list-performed-builds)
-  local cmds122=(pnc product-milestone close)
-  local cmds123=(pnc product-milestone analyze-deliverables)
-  local cmds124=(pnc product-milestone list-delivered-artifacts)
-  local cmds125=(pnc product-milestone get-deliverables-analysis)
-  local cmds126=(pnc product-release create)
-  local cmds127=(pnc product-release update)
-  local cmds128=(pnc product-release --get)
-  local cmds129=(pnc product-release list-support-levels)
-  local cmds130=(pnc product-version create)
-  local cmds131=(pnc product-version get)
-  local cmds132=(pnc product-version update)
-  local cmds133=(pnc product-version list-build-configs)
-  local cmds134=(pnc product-version list-group-configs)
-  local cmds135=(pnc product-version list-milestones)
-  local cmds136=(pnc product-version list-releases)
-  local cmds137=(pnc project create)
-  local cmds138=(pnc project get)
-  local cmds139=(pnc project list)
-  local cmds140=(pnc project list-build-configs)
-  local cmds141=(pnc project list-builds)
-  local cmds142=(pnc project update)
-  local cmds143=(pnc scm-repository create-and-sync)
-  local cmds144=(pnc scm-repository get)
-  local cmds145=(pnc scm-repository list)
-  local cmds146=(pnc scm-repository update)
-  local cmds147=(pnc scm-repository list-build-configs)
+  local cmds19=(pig cdx-sbom)
+  local cmds20=(pig configure)
+  local cmds21=(pig cancel)
+  local cmds22=(pig build)
+  local cmds23=(pig run)
+  local cmds24=(pig repo)
+  local cmds25=(pig licenses)
+  local cmds26=(pig javadocs)
+  local cmds27=(pig sources)
+  local cmds28=(pig shared-content)
+  local cmds29=(pig docs)
+  local cmds30=(pig release)
+  local cmds31=(pig pre-process-yaml)
+  local cmds32=(pig addons)
+  local cmds33=(pig export)
+  local cmds34=(pig export build-config)
+  local cmds35=(pnc admin)
+  local cmds36=(pnc artifact)
+  local cmds37=(pnc brew-push)
+  local cmds38=(pnc build)
+  local cmds39=(pnc build-config)
+  local cmds40=(pnc environment)
+  local cmds41=(pnc deliverable-analysis)
+  local cmds42=(pnc group-build)
+  local cmds43=(pnc group-config)
+  local cmds44=(pnc product)
+  local cmds45=(pnc product-milestone)
+  local cmds46=(pnc product-release)
+  local cmds47=(pnc product-version)
+  local cmds48=(pnc project)
+  local cmds49=(pnc scm-repository)
+  local cmds50=(pnc whoami)
+  local cmds51=(pnc admin pnc-status)
+  local cmds52=(pnc admin rex)
+  local cmds53=(pnc admin token)
+  local cmds54=(pnc admin environment)
+  local cmds55=(pnc admin pnc-status set)
+  local cmds56=(pnc admin pnc-status get)
+  local cmds57=(pnc admin rex clear-all)
+  local cmds58=(pnc admin rex get)
+  local cmds59=(pnc admin token get)
+  local cmds60=(pnc admin environment create)
+  local cmds61=(pnc admin environment deprecate)
+  local cmds62=(pnc artifact get)
+  local cmds63=(pnc artifact get-gav)
+  local cmds64=(pnc artifact list-from-hash)
+  local cmds65=(pnc artifact usage)
+  local cmds66=(pnc artifact usage-gav)
+  local cmds67=(pnc brew-push build)
+  local cmds68=(pnc brew-push group-build)
+  local cmds69=(pnc brew-push status)
+  local cmds70=(pnc build start)
+  local cmds71=(pnc build cancel)
+  local cmds72=(pnc build list)
+  local cmds73=(pnc build list-built-artifacts)
+  local cmds74=(pnc build list-dependencies)
+  local cmds75=(pnc build get)
+  local cmds76=(pnc build get-revision)
+  local cmds77=(pnc build get-log)
+  local cmds78=(pnc build get-align-log)
+  local cmds79=(pnc build download-sources)
+  local cmds80=(pnc build-config create)
+  local cmds81=(pnc build-config create-with-scm)
+  local cmds82=(pnc build-config get)
+  local cmds83=(pnc build-config get-revision)
+  local cmds84=(pnc build-config list)
+  local cmds85=(pnc build-config list-revisions)
+  local cmds86=(pnc build-config list-builds)
+  local cmds87=(pnc build-config update)
+  local cmds88=(pnc build-config clone)
+  local cmds89=(pnc build-config create-revision)
+  local cmds90=(pnc build-config add-dependency)
+  local cmds91=(pnc build-config remove-dependency)
+  local cmds92=(pnc environment get)
+  local cmds93=(pnc environment list)
+  local cmds94=(pnc deliverable-analysis add-label)
+  local cmds95=(pnc deliverable-analysis get)
+  local cmds96=(pnc deliverable-analysis get-analyzed)
+  local cmds97=(pnc deliverable-analysis get-label-history)
+  local cmds98=(pnc deliverable-analysis list)
+  local cmds99=(pnc deliverable-analysis remove-label)
+  local cmds100=(pnc group-build start)
+  local cmds101=(pnc group-build cancel)
+  local cmds102=(pnc group-build list)
+  local cmds103=(pnc group-build list-builds)
+  local cmds104=(pnc group-build get)
+  local cmds105=(pnc group-config create)
+  local cmds106=(pnc group-config update)
+  local cmds107=(pnc group-config list)
+  local cmds108=(pnc group-config list-build-configs)
+  local cmds109=(pnc group-config get)
+  local cmds110=(pnc group-config add-build-config)
+  local cmds111=(pnc group-config remove-build-config)
+  local cmds112=(pnc group-config show-latest-build)
+  local cmds113=(pnc product create)
+  local cmds114=(pnc product get)
+  local cmds115=(pnc product list)
+  local cmds116=(pnc product list-versions)
+  local cmds117=(pnc product update)
+  local cmds118=(pnc product-milestone create)
+  local cmds119=(pnc product-milestone update)
+  local cmds120=(pnc product-milestone cancel-milestone-close)
+  local cmds121=(pnc product-milestone get)
+  local cmds122=(pnc product-milestone list-performed-builds)
+  local cmds123=(pnc product-milestone close)
+  local cmds124=(pnc product-milestone analyze-deliverables)
+  local cmds125=(pnc product-milestone list-delivered-artifacts)
+  local cmds126=(pnc product-milestone get-deliverables-analysis)
+  local cmds127=(pnc product-release create)
+  local cmds128=(pnc product-release update)
+  local cmds129=(pnc product-release --get)
+  local cmds130=(pnc product-release list-support-levels)
+  local cmds131=(pnc product-version create)
+  local cmds132=(pnc product-version get)
+  local cmds133=(pnc product-version update)
+  local cmds134=(pnc product-version list-build-configs)
+  local cmds135=(pnc product-version list-group-configs)
+  local cmds136=(pnc product-version list-milestones)
+  local cmds137=(pnc product-version list-releases)
+  local cmds138=(pnc project create)
+  local cmds139=(pnc project get)
+  local cmds140=(pnc project list)
+  local cmds141=(pnc project list-build-configs)
+  local cmds142=(pnc project list-builds)
+  local cmds143=(pnc project update)
+  local cmds144=(pnc scm-repository create-and-sync)
+  local cmds145=(pnc scm-repository get)
+  local cmds146=(pnc scm-repository list)
+  local cmds147=(pnc scm-repository update)
+  local cmds148=(pnc scm-repository list-build-configs)
 
-  if CompWordsContainsArray "${cmds147[@]}"; then _picocli_bacon_pnc_scmrepository_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds146[@]}"; then _picocli_bacon_pnc_scmrepository_update; return $?; fi
-  if CompWordsContainsArray "${cmds145[@]}"; then _picocli_bacon_pnc_scmrepository_list; return $?; fi
-  if CompWordsContainsArray "${cmds144[@]}"; then _picocli_bacon_pnc_scmrepository_get; return $?; fi
-  if CompWordsContainsArray "${cmds143[@]}"; then _picocli_bacon_pnc_scmrepository_createandsync; return $?; fi
-  if CompWordsContainsArray "${cmds142[@]}"; then _picocli_bacon_pnc_project_update; return $?; fi
-  if CompWordsContainsArray "${cmds141[@]}"; then _picocli_bacon_pnc_project_listbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds140[@]}"; then _picocli_bacon_pnc_project_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds139[@]}"; then _picocli_bacon_pnc_project_list; return $?; fi
-  if CompWordsContainsArray "${cmds138[@]}"; then _picocli_bacon_pnc_project_get; return $?; fi
-  if CompWordsContainsArray "${cmds137[@]}"; then _picocli_bacon_pnc_project_create; return $?; fi
-  if CompWordsContainsArray "${cmds136[@]}"; then _picocli_bacon_pnc_productversion_listreleases; return $?; fi
-  if CompWordsContainsArray "${cmds135[@]}"; then _picocli_bacon_pnc_productversion_listmilestones; return $?; fi
-  if CompWordsContainsArray "${cmds134[@]}"; then _picocli_bacon_pnc_productversion_listgroupconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds133[@]}"; then _picocli_bacon_pnc_productversion_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds132[@]}"; then _picocli_bacon_pnc_productversion_update; return $?; fi
-  if CompWordsContainsArray "${cmds131[@]}"; then _picocli_bacon_pnc_productversion_get; return $?; fi
-  if CompWordsContainsArray "${cmds130[@]}"; then _picocli_bacon_pnc_productversion_create; return $?; fi
-  if CompWordsContainsArray "${cmds129[@]}"; then _picocli_bacon_pnc_productrelease_listsupportlevels; return $?; fi
-  if CompWordsContainsArray "${cmds128[@]}"; then _picocli_bacon_pnc_productrelease_get; return $?; fi
-  if CompWordsContainsArray "${cmds127[@]}"; then _picocli_bacon_pnc_productrelease_update; return $?; fi
-  if CompWordsContainsArray "${cmds126[@]}"; then _picocli_bacon_pnc_productrelease_create; return $?; fi
-  if CompWordsContainsArray "${cmds125[@]}"; then _picocli_bacon_pnc_productmilestone_getdeliverablesanalysis; return $?; fi
-  if CompWordsContainsArray "${cmds124[@]}"; then _picocli_bacon_pnc_productmilestone_listdeliveredartifacts; return $?; fi
-  if CompWordsContainsArray "${cmds123[@]}"; then _picocli_bacon_pnc_productmilestone_analyzedeliverables; return $?; fi
-  if CompWordsContainsArray "${cmds122[@]}"; then _picocli_bacon_pnc_productmilestone_close; return $?; fi
-  if CompWordsContainsArray "${cmds121[@]}"; then _picocli_bacon_pnc_productmilestone_listperformedbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds120[@]}"; then _picocli_bacon_pnc_productmilestone_get; return $?; fi
-  if CompWordsContainsArray "${cmds119[@]}"; then _picocli_bacon_pnc_productmilestone_cancelmilestoneclose; return $?; fi
-  if CompWordsContainsArray "${cmds118[@]}"; then _picocli_bacon_pnc_productmilestone_update; return $?; fi
-  if CompWordsContainsArray "${cmds117[@]}"; then _picocli_bacon_pnc_productmilestone_create; return $?; fi
-  if CompWordsContainsArray "${cmds116[@]}"; then _picocli_bacon_pnc_product_update; return $?; fi
-  if CompWordsContainsArray "${cmds115[@]}"; then _picocli_bacon_pnc_product_listversions; return $?; fi
-  if CompWordsContainsArray "${cmds114[@]}"; then _picocli_bacon_pnc_product_list; return $?; fi
-  if CompWordsContainsArray "${cmds113[@]}"; then _picocli_bacon_pnc_product_get; return $?; fi
-  if CompWordsContainsArray "${cmds112[@]}"; then _picocli_bacon_pnc_product_create; return $?; fi
-  if CompWordsContainsArray "${cmds111[@]}"; then _picocli_bacon_pnc_groupconfig_showlatestbuild; return $?; fi
-  if CompWordsContainsArray "${cmds110[@]}"; then _picocli_bacon_pnc_groupconfig_removebuildconfig; return $?; fi
-  if CompWordsContainsArray "${cmds109[@]}"; then _picocli_bacon_pnc_groupconfig_addbuildconfig; return $?; fi
-  if CompWordsContainsArray "${cmds108[@]}"; then _picocli_bacon_pnc_groupconfig_get; return $?; fi
-  if CompWordsContainsArray "${cmds107[@]}"; then _picocli_bacon_pnc_groupconfig_listbuildconfigs; return $?; fi
-  if CompWordsContainsArray "${cmds106[@]}"; then _picocli_bacon_pnc_groupconfig_list; return $?; fi
-  if CompWordsContainsArray "${cmds105[@]}"; then _picocli_bacon_pnc_groupconfig_update; return $?; fi
-  if CompWordsContainsArray "${cmds104[@]}"; then _picocli_bacon_pnc_groupconfig_create; return $?; fi
-  if CompWordsContainsArray "${cmds103[@]}"; then _picocli_bacon_pnc_groupbuild_get; return $?; fi
-  if CompWordsContainsArray "${cmds102[@]}"; then _picocli_bacon_pnc_groupbuild_listbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds101[@]}"; then _picocli_bacon_pnc_groupbuild_list; return $?; fi
-  if CompWordsContainsArray "${cmds100[@]}"; then _picocli_bacon_pnc_groupbuild_cancel; return $?; fi
-  if CompWordsContainsArray "${cmds99[@]}"; then _picocli_bacon_pnc_groupbuild_start; return $?; fi
-  if CompWordsContainsArray "${cmds98[@]}"; then _picocli_bacon_pnc_deliverableanalysis_removelabel; return $?; fi
-  if CompWordsContainsArray "${cmds97[@]}"; then _picocli_bacon_pnc_deliverableanalysis_list; return $?; fi
-  if CompWordsContainsArray "${cmds96[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getlabelhistory; return $?; fi
-  if CompWordsContainsArray "${cmds95[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getanalyzed; return $?; fi
-  if CompWordsContainsArray "${cmds94[@]}"; then _picocli_bacon_pnc_deliverableanalysis_get; return $?; fi
-  if CompWordsContainsArray "${cmds93[@]}"; then _picocli_bacon_pnc_deliverableanalysis_addlabel; return $?; fi
-  if CompWordsContainsArray "${cmds92[@]}"; then _picocli_bacon_pnc_environment_list; return $?; fi
-  if CompWordsContainsArray "${cmds91[@]}"; then _picocli_bacon_pnc_environment_get; return $?; fi
-  if CompWordsContainsArray "${cmds90[@]}"; then _picocli_bacon_pnc_buildconfig_removedependency; return $?; fi
-  if CompWordsContainsArray "${cmds89[@]}"; then _picocli_bacon_pnc_buildconfig_adddependency; return $?; fi
-  if CompWordsContainsArray "${cmds88[@]}"; then _picocli_bacon_pnc_buildconfig_createrevision; return $?; fi
-  if CompWordsContainsArray "${cmds87[@]}"; then _picocli_bacon_pnc_buildconfig_clone; return $?; fi
-  if CompWordsContainsArray "${cmds86[@]}"; then _picocli_bacon_pnc_buildconfig_update; return $?; fi
-  if CompWordsContainsArray "${cmds85[@]}"; then _picocli_bacon_pnc_buildconfig_listbuilds; return $?; fi
-  if CompWordsContainsArray "${cmds84[@]}"; then _picocli_bacon_pnc_buildconfig_listrevisions; return $?; fi
-  if CompWordsContainsArray "${cmds83[@]}"; then _picocli_bacon_pnc_buildconfig_list; return $?; fi
-  if CompWordsContainsArray "${cmds82[@]}"; then _picocli_bacon_pnc_buildconfig_getrevision; return $?; fi
-  if CompWordsContainsArray "${cmds81[@]}"; then _picocli_bacon_pnc_buildconfig_get; return $?; fi
-  if CompWordsContainsArray "${cmds80[@]}"; then _picocli_bacon_pnc_buildconfig_createwithscm; return $?; fi
-  if CompWordsContainsArray "${cmds79[@]}"; then _picocli_bacon_pnc_buildconfig_create; return $?; fi
-  if CompWordsContainsArray "${cmds78[@]}"; then _picocli_bacon_pnc_build_downloadsources; return $?; fi
-  if CompWordsContainsArray "${cmds77[@]}"; then _picocli_bacon_pnc_build_getalignlog; return $?; fi
-  if CompWordsContainsArray "${cmds76[@]}"; then _picocli_bacon_pnc_build_getlog; return $?; fi
-  if CompWordsContainsArray "${cmds75[@]}"; then _picocli_bacon_pnc_build_getrevision; return $?; fi
-  if CompWordsContainsArray "${cmds74[@]}"; then _picocli_bacon_pnc_build_get; return $?; fi
-  if CompWordsContainsArray "${cmds73[@]}"; then _picocli_bacon_pnc_build_listdependencies; return $?; fi
-  if CompWordsContainsArray "${cmds72[@]}"; then _picocli_bacon_pnc_build_listbuiltartifacts; return $?; fi
-  if CompWordsContainsArray "${cmds71[@]}"; then _picocli_bacon_pnc_build_list; return $?; fi
-  if CompWordsContainsArray "${cmds70[@]}"; then _picocli_bacon_pnc_build_cancel; return $?; fi
-  if CompWordsContainsArray "${cmds69[@]}"; then _picocli_bacon_pnc_build_start; return $?; fi
-  if CompWordsContainsArray "${cmds68[@]}"; then _picocli_bacon_pnc_brewpush_status; return $?; fi
-  if CompWordsContainsArray "${cmds67[@]}"; then _picocli_bacon_pnc_brewpush_groupbuild; return $?; fi
-  if CompWordsContainsArray "${cmds66[@]}"; then _picocli_bacon_pnc_brewpush_build; return $?; fi
-  if CompWordsContainsArray "${cmds65[@]}"; then _picocli_bacon_pnc_artifact_usagegav; return $?; fi
-  if CompWordsContainsArray "${cmds64[@]}"; then _picocli_bacon_pnc_artifact_usage; return $?; fi
-  if CompWordsContainsArray "${cmds63[@]}"; then _picocli_bacon_pnc_artifact_listfromhash; return $?; fi
-  if CompWordsContainsArray "${cmds62[@]}"; then _picocli_bacon_pnc_artifact_getgav; return $?; fi
-  if CompWordsContainsArray "${cmds61[@]}"; then _picocli_bacon_pnc_artifact_get; return $?; fi
-  if CompWordsContainsArray "${cmds60[@]}"; then _picocli_bacon_pnc_admin_environment_deprecate; return $?; fi
-  if CompWordsContainsArray "${cmds59[@]}"; then _picocli_bacon_pnc_admin_environment_create; return $?; fi
-  if CompWordsContainsArray "${cmds58[@]}"; then _picocli_bacon_pnc_admin_token_get; return $?; fi
-  if CompWordsContainsArray "${cmds57[@]}"; then _picocli_bacon_pnc_admin_rex_get; return $?; fi
-  if CompWordsContainsArray "${cmds56[@]}"; then _picocli_bacon_pnc_admin_rex_clearall; return $?; fi
-  if CompWordsContainsArray "${cmds55[@]}"; then _picocli_bacon_pnc_admin_pncstatus_get; return $?; fi
-  if CompWordsContainsArray "${cmds54[@]}"; then _picocli_bacon_pnc_admin_pncstatus_set; return $?; fi
-  if CompWordsContainsArray "${cmds53[@]}"; then _picocli_bacon_pnc_admin_environment; return $?; fi
-  if CompWordsContainsArray "${cmds52[@]}"; then _picocli_bacon_pnc_admin_token; return $?; fi
-  if CompWordsContainsArray "${cmds51[@]}"; then _picocli_bacon_pnc_admin_rex; return $?; fi
-  if CompWordsContainsArray "${cmds50[@]}"; then _picocli_bacon_pnc_admin_pncstatus; return $?; fi
-  if CompWordsContainsArray "${cmds49[@]}"; then _picocli_bacon_pnc_whoami; return $?; fi
-  if CompWordsContainsArray "${cmds48[@]}"; then _picocli_bacon_pnc_scmrepository; return $?; fi
-  if CompWordsContainsArray "${cmds47[@]}"; then _picocli_bacon_pnc_project; return $?; fi
-  if CompWordsContainsArray "${cmds46[@]}"; then _picocli_bacon_pnc_productversion; return $?; fi
-  if CompWordsContainsArray "${cmds45[@]}"; then _picocli_bacon_pnc_productrelease; return $?; fi
-  if CompWordsContainsArray "${cmds44[@]}"; then _picocli_bacon_pnc_productmilestone; return $?; fi
-  if CompWordsContainsArray "${cmds43[@]}"; then _picocli_bacon_pnc_product; return $?; fi
-  if CompWordsContainsArray "${cmds42[@]}"; then _picocli_bacon_pnc_groupconfig; return $?; fi
-  if CompWordsContainsArray "${cmds41[@]}"; then _picocli_bacon_pnc_groupbuild; return $?; fi
-  if CompWordsContainsArray "${cmds40[@]}"; then _picocli_bacon_pnc_deliverableanalysis; return $?; fi
-  if CompWordsContainsArray "${cmds39[@]}"; then _picocli_bacon_pnc_environment; return $?; fi
-  if CompWordsContainsArray "${cmds38[@]}"; then _picocli_bacon_pnc_buildconfig; return $?; fi
-  if CompWordsContainsArray "${cmds37[@]}"; then _picocli_bacon_pnc_build; return $?; fi
-  if CompWordsContainsArray "${cmds36[@]}"; then _picocli_bacon_pnc_brewpush; return $?; fi
-  if CompWordsContainsArray "${cmds35[@]}"; then _picocli_bacon_pnc_artifact; return $?; fi
-  if CompWordsContainsArray "${cmds34[@]}"; then _picocli_bacon_pnc_admin; return $?; fi
-  if CompWordsContainsArray "${cmds33[@]}"; then _picocli_bacon_pig_export_buildconfig; return $?; fi
-  if CompWordsContainsArray "${cmds32[@]}"; then _picocli_bacon_pig_export; return $?; fi
-  if CompWordsContainsArray "${cmds31[@]}"; then _picocli_bacon_pig_addons; return $?; fi
-  if CompWordsContainsArray "${cmds30[@]}"; then _picocli_bacon_pig_preprocessyaml; return $?; fi
-  if CompWordsContainsArray "${cmds29[@]}"; then _picocli_bacon_pig_release; return $?; fi
-  if CompWordsContainsArray "${cmds28[@]}"; then _picocli_bacon_pig_docs; return $?; fi
-  if CompWordsContainsArray "${cmds27[@]}"; then _picocli_bacon_pig_sharedcontent; return $?; fi
-  if CompWordsContainsArray "${cmds26[@]}"; then _picocli_bacon_pig_sources; return $?; fi
-  if CompWordsContainsArray "${cmds25[@]}"; then _picocli_bacon_pig_javadocs; return $?; fi
-  if CompWordsContainsArray "${cmds24[@]}"; then _picocli_bacon_pig_licenses; return $?; fi
-  if CompWordsContainsArray "${cmds23[@]}"; then _picocli_bacon_pig_repo; return $?; fi
-  if CompWordsContainsArray "${cmds22[@]}"; then _picocli_bacon_pig_run; return $?; fi
-  if CompWordsContainsArray "${cmds21[@]}"; then _picocli_bacon_pig_build; return $?; fi
-  if CompWordsContainsArray "${cmds20[@]}"; then _picocli_bacon_pig_cancel; return $?; fi
-  if CompWordsContainsArray "${cmds19[@]}"; then _picocli_bacon_pig_configure; return $?; fi
+  if CompWordsContainsArray "${cmds148[@]}"; then _picocli_bacon_pnc_scmrepository_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds147[@]}"; then _picocli_bacon_pnc_scmrepository_update; return $?; fi
+  if CompWordsContainsArray "${cmds146[@]}"; then _picocli_bacon_pnc_scmrepository_list; return $?; fi
+  if CompWordsContainsArray "${cmds145[@]}"; then _picocli_bacon_pnc_scmrepository_get; return $?; fi
+  if CompWordsContainsArray "${cmds144[@]}"; then _picocli_bacon_pnc_scmrepository_createandsync; return $?; fi
+  if CompWordsContainsArray "${cmds143[@]}"; then _picocli_bacon_pnc_project_update; return $?; fi
+  if CompWordsContainsArray "${cmds142[@]}"; then _picocli_bacon_pnc_project_listbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds141[@]}"; then _picocli_bacon_pnc_project_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds140[@]}"; then _picocli_bacon_pnc_project_list; return $?; fi
+  if CompWordsContainsArray "${cmds139[@]}"; then _picocli_bacon_pnc_project_get; return $?; fi
+  if CompWordsContainsArray "${cmds138[@]}"; then _picocli_bacon_pnc_project_create; return $?; fi
+  if CompWordsContainsArray "${cmds137[@]}"; then _picocli_bacon_pnc_productversion_listreleases; return $?; fi
+  if CompWordsContainsArray "${cmds136[@]}"; then _picocli_bacon_pnc_productversion_listmilestones; return $?; fi
+  if CompWordsContainsArray "${cmds135[@]}"; then _picocli_bacon_pnc_productversion_listgroupconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds134[@]}"; then _picocli_bacon_pnc_productversion_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds133[@]}"; then _picocli_bacon_pnc_productversion_update; return $?; fi
+  if CompWordsContainsArray "${cmds132[@]}"; then _picocli_bacon_pnc_productversion_get; return $?; fi
+  if CompWordsContainsArray "${cmds131[@]}"; then _picocli_bacon_pnc_productversion_create; return $?; fi
+  if CompWordsContainsArray "${cmds130[@]}"; then _picocli_bacon_pnc_productrelease_listsupportlevels; return $?; fi
+  if CompWordsContainsArray "${cmds129[@]}"; then _picocli_bacon_pnc_productrelease_get; return $?; fi
+  if CompWordsContainsArray "${cmds128[@]}"; then _picocli_bacon_pnc_productrelease_update; return $?; fi
+  if CompWordsContainsArray "${cmds127[@]}"; then _picocli_bacon_pnc_productrelease_create; return $?; fi
+  if CompWordsContainsArray "${cmds126[@]}"; then _picocli_bacon_pnc_productmilestone_getdeliverablesanalysis; return $?; fi
+  if CompWordsContainsArray "${cmds125[@]}"; then _picocli_bacon_pnc_productmilestone_listdeliveredartifacts; return $?; fi
+  if CompWordsContainsArray "${cmds124[@]}"; then _picocli_bacon_pnc_productmilestone_analyzedeliverables; return $?; fi
+  if CompWordsContainsArray "${cmds123[@]}"; then _picocli_bacon_pnc_productmilestone_close; return $?; fi
+  if CompWordsContainsArray "${cmds122[@]}"; then _picocli_bacon_pnc_productmilestone_listperformedbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds121[@]}"; then _picocli_bacon_pnc_productmilestone_get; return $?; fi
+  if CompWordsContainsArray "${cmds120[@]}"; then _picocli_bacon_pnc_productmilestone_cancelmilestoneclose; return $?; fi
+  if CompWordsContainsArray "${cmds119[@]}"; then _picocli_bacon_pnc_productmilestone_update; return $?; fi
+  if CompWordsContainsArray "${cmds118[@]}"; then _picocli_bacon_pnc_productmilestone_create; return $?; fi
+  if CompWordsContainsArray "${cmds117[@]}"; then _picocli_bacon_pnc_product_update; return $?; fi
+  if CompWordsContainsArray "${cmds116[@]}"; then _picocli_bacon_pnc_product_listversions; return $?; fi
+  if CompWordsContainsArray "${cmds115[@]}"; then _picocli_bacon_pnc_product_list; return $?; fi
+  if CompWordsContainsArray "${cmds114[@]}"; then _picocli_bacon_pnc_product_get; return $?; fi
+  if CompWordsContainsArray "${cmds113[@]}"; then _picocli_bacon_pnc_product_create; return $?; fi
+  if CompWordsContainsArray "${cmds112[@]}"; then _picocli_bacon_pnc_groupconfig_showlatestbuild; return $?; fi
+  if CompWordsContainsArray "${cmds111[@]}"; then _picocli_bacon_pnc_groupconfig_removebuildconfig; return $?; fi
+  if CompWordsContainsArray "${cmds110[@]}"; then _picocli_bacon_pnc_groupconfig_addbuildconfig; return $?; fi
+  if CompWordsContainsArray "${cmds109[@]}"; then _picocli_bacon_pnc_groupconfig_get; return $?; fi
+  if CompWordsContainsArray "${cmds108[@]}"; then _picocli_bacon_pnc_groupconfig_listbuildconfigs; return $?; fi
+  if CompWordsContainsArray "${cmds107[@]}"; then _picocli_bacon_pnc_groupconfig_list; return $?; fi
+  if CompWordsContainsArray "${cmds106[@]}"; then _picocli_bacon_pnc_groupconfig_update; return $?; fi
+  if CompWordsContainsArray "${cmds105[@]}"; then _picocli_bacon_pnc_groupconfig_create; return $?; fi
+  if CompWordsContainsArray "${cmds104[@]}"; then _picocli_bacon_pnc_groupbuild_get; return $?; fi
+  if CompWordsContainsArray "${cmds103[@]}"; then _picocli_bacon_pnc_groupbuild_listbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds102[@]}"; then _picocli_bacon_pnc_groupbuild_list; return $?; fi
+  if CompWordsContainsArray "${cmds101[@]}"; then _picocli_bacon_pnc_groupbuild_cancel; return $?; fi
+  if CompWordsContainsArray "${cmds100[@]}"; then _picocli_bacon_pnc_groupbuild_start; return $?; fi
+  if CompWordsContainsArray "${cmds99[@]}"; then _picocli_bacon_pnc_deliverableanalysis_removelabel; return $?; fi
+  if CompWordsContainsArray "${cmds98[@]}"; then _picocli_bacon_pnc_deliverableanalysis_list; return $?; fi
+  if CompWordsContainsArray "${cmds97[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getlabelhistory; return $?; fi
+  if CompWordsContainsArray "${cmds96[@]}"; then _picocli_bacon_pnc_deliverableanalysis_getanalyzed; return $?; fi
+  if CompWordsContainsArray "${cmds95[@]}"; then _picocli_bacon_pnc_deliverableanalysis_get; return $?; fi
+  if CompWordsContainsArray "${cmds94[@]}"; then _picocli_bacon_pnc_deliverableanalysis_addlabel; return $?; fi
+  if CompWordsContainsArray "${cmds93[@]}"; then _picocli_bacon_pnc_environment_list; return $?; fi
+  if CompWordsContainsArray "${cmds92[@]}"; then _picocli_bacon_pnc_environment_get; return $?; fi
+  if CompWordsContainsArray "${cmds91[@]}"; then _picocli_bacon_pnc_buildconfig_removedependency; return $?; fi
+  if CompWordsContainsArray "${cmds90[@]}"; then _picocli_bacon_pnc_buildconfig_adddependency; return $?; fi
+  if CompWordsContainsArray "${cmds89[@]}"; then _picocli_bacon_pnc_buildconfig_createrevision; return $?; fi
+  if CompWordsContainsArray "${cmds88[@]}"; then _picocli_bacon_pnc_buildconfig_clone; return $?; fi
+  if CompWordsContainsArray "${cmds87[@]}"; then _picocli_bacon_pnc_buildconfig_update; return $?; fi
+  if CompWordsContainsArray "${cmds86[@]}"; then _picocli_bacon_pnc_buildconfig_listbuilds; return $?; fi
+  if CompWordsContainsArray "${cmds85[@]}"; then _picocli_bacon_pnc_buildconfig_listrevisions; return $?; fi
+  if CompWordsContainsArray "${cmds84[@]}"; then _picocli_bacon_pnc_buildconfig_list; return $?; fi
+  if CompWordsContainsArray "${cmds83[@]}"; then _picocli_bacon_pnc_buildconfig_getrevision; return $?; fi
+  if CompWordsContainsArray "${cmds82[@]}"; then _picocli_bacon_pnc_buildconfig_get; return $?; fi
+  if CompWordsContainsArray "${cmds81[@]}"; then _picocli_bacon_pnc_buildconfig_createwithscm; return $?; fi
+  if CompWordsContainsArray "${cmds80[@]}"; then _picocli_bacon_pnc_buildconfig_create; return $?; fi
+  if CompWordsContainsArray "${cmds79[@]}"; then _picocli_bacon_pnc_build_downloadsources; return $?; fi
+  if CompWordsContainsArray "${cmds78[@]}"; then _picocli_bacon_pnc_build_getalignlog; return $?; fi
+  if CompWordsContainsArray "${cmds77[@]}"; then _picocli_bacon_pnc_build_getlog; return $?; fi
+  if CompWordsContainsArray "${cmds76[@]}"; then _picocli_bacon_pnc_build_getrevision; return $?; fi
+  if CompWordsContainsArray "${cmds75[@]}"; then _picocli_bacon_pnc_build_get; return $?; fi
+  if CompWordsContainsArray "${cmds74[@]}"; then _picocli_bacon_pnc_build_listdependencies; return $?; fi
+  if CompWordsContainsArray "${cmds73[@]}"; then _picocli_bacon_pnc_build_listbuiltartifacts; return $?; fi
+  if CompWordsContainsArray "${cmds72[@]}"; then _picocli_bacon_pnc_build_list; return $?; fi
+  if CompWordsContainsArray "${cmds71[@]}"; then _picocli_bacon_pnc_build_cancel; return $?; fi
+  if CompWordsContainsArray "${cmds70[@]}"; then _picocli_bacon_pnc_build_start; return $?; fi
+  if CompWordsContainsArray "${cmds69[@]}"; then _picocli_bacon_pnc_brewpush_status; return $?; fi
+  if CompWordsContainsArray "${cmds68[@]}"; then _picocli_bacon_pnc_brewpush_groupbuild; return $?; fi
+  if CompWordsContainsArray "${cmds67[@]}"; then _picocli_bacon_pnc_brewpush_build; return $?; fi
+  if CompWordsContainsArray "${cmds66[@]}"; then _picocli_bacon_pnc_artifact_usagegav; return $?; fi
+  if CompWordsContainsArray "${cmds65[@]}"; then _picocli_bacon_pnc_artifact_usage; return $?; fi
+  if CompWordsContainsArray "${cmds64[@]}"; then _picocli_bacon_pnc_artifact_listfromhash; return $?; fi
+  if CompWordsContainsArray "${cmds63[@]}"; then _picocli_bacon_pnc_artifact_getgav; return $?; fi
+  if CompWordsContainsArray "${cmds62[@]}"; then _picocli_bacon_pnc_artifact_get; return $?; fi
+  if CompWordsContainsArray "${cmds61[@]}"; then _picocli_bacon_pnc_admin_environment_deprecate; return $?; fi
+  if CompWordsContainsArray "${cmds60[@]}"; then _picocli_bacon_pnc_admin_environment_create; return $?; fi
+  if CompWordsContainsArray "${cmds59[@]}"; then _picocli_bacon_pnc_admin_token_get; return $?; fi
+  if CompWordsContainsArray "${cmds58[@]}"; then _picocli_bacon_pnc_admin_rex_get; return $?; fi
+  if CompWordsContainsArray "${cmds57[@]}"; then _picocli_bacon_pnc_admin_rex_clearall; return $?; fi
+  if CompWordsContainsArray "${cmds56[@]}"; then _picocli_bacon_pnc_admin_pncstatus_get; return $?; fi
+  if CompWordsContainsArray "${cmds55[@]}"; then _picocli_bacon_pnc_admin_pncstatus_set; return $?; fi
+  if CompWordsContainsArray "${cmds54[@]}"; then _picocli_bacon_pnc_admin_environment; return $?; fi
+  if CompWordsContainsArray "${cmds53[@]}"; then _picocli_bacon_pnc_admin_token; return $?; fi
+  if CompWordsContainsArray "${cmds52[@]}"; then _picocli_bacon_pnc_admin_rex; return $?; fi
+  if CompWordsContainsArray "${cmds51[@]}"; then _picocli_bacon_pnc_admin_pncstatus; return $?; fi
+  if CompWordsContainsArray "${cmds50[@]}"; then _picocli_bacon_pnc_whoami; return $?; fi
+  if CompWordsContainsArray "${cmds49[@]}"; then _picocli_bacon_pnc_scmrepository; return $?; fi
+  if CompWordsContainsArray "${cmds48[@]}"; then _picocli_bacon_pnc_project; return $?; fi
+  if CompWordsContainsArray "${cmds47[@]}"; then _picocli_bacon_pnc_productversion; return $?; fi
+  if CompWordsContainsArray "${cmds46[@]}"; then _picocli_bacon_pnc_productrelease; return $?; fi
+  if CompWordsContainsArray "${cmds45[@]}"; then _picocli_bacon_pnc_productmilestone; return $?; fi
+  if CompWordsContainsArray "${cmds44[@]}"; then _picocli_bacon_pnc_product; return $?; fi
+  if CompWordsContainsArray "${cmds43[@]}"; then _picocli_bacon_pnc_groupconfig; return $?; fi
+  if CompWordsContainsArray "${cmds42[@]}"; then _picocli_bacon_pnc_groupbuild; return $?; fi
+  if CompWordsContainsArray "${cmds41[@]}"; then _picocli_bacon_pnc_deliverableanalysis; return $?; fi
+  if CompWordsContainsArray "${cmds40[@]}"; then _picocli_bacon_pnc_environment; return $?; fi
+  if CompWordsContainsArray "${cmds39[@]}"; then _picocli_bacon_pnc_buildconfig; return $?; fi
+  if CompWordsContainsArray "${cmds38[@]}"; then _picocli_bacon_pnc_build; return $?; fi
+  if CompWordsContainsArray "${cmds37[@]}"; then _picocli_bacon_pnc_brewpush; return $?; fi
+  if CompWordsContainsArray "${cmds36[@]}"; then _picocli_bacon_pnc_artifact; return $?; fi
+  if CompWordsContainsArray "${cmds35[@]}"; then _picocli_bacon_pnc_admin; return $?; fi
+  if CompWordsContainsArray "${cmds34[@]}"; then _picocli_bacon_pig_export_buildconfig; return $?; fi
+  if CompWordsContainsArray "${cmds33[@]}"; then _picocli_bacon_pig_export; return $?; fi
+  if CompWordsContainsArray "${cmds32[@]}"; then _picocli_bacon_pig_addons; return $?; fi
+  if CompWordsContainsArray "${cmds31[@]}"; then _picocli_bacon_pig_preprocessyaml; return $?; fi
+  if CompWordsContainsArray "${cmds30[@]}"; then _picocli_bacon_pig_release; return $?; fi
+  if CompWordsContainsArray "${cmds29[@]}"; then _picocli_bacon_pig_docs; return $?; fi
+  if CompWordsContainsArray "${cmds28[@]}"; then _picocli_bacon_pig_sharedcontent; return $?; fi
+  if CompWordsContainsArray "${cmds27[@]}"; then _picocli_bacon_pig_sources; return $?; fi
+  if CompWordsContainsArray "${cmds26[@]}"; then _picocli_bacon_pig_javadocs; return $?; fi
+  if CompWordsContainsArray "${cmds25[@]}"; then _picocli_bacon_pig_licenses; return $?; fi
+  if CompWordsContainsArray "${cmds24[@]}"; then _picocli_bacon_pig_repo; return $?; fi
+  if CompWordsContainsArray "${cmds23[@]}"; then _picocli_bacon_pig_run; return $?; fi
+  if CompWordsContainsArray "${cmds22[@]}"; then _picocli_bacon_pig_build; return $?; fi
+  if CompWordsContainsArray "${cmds21[@]}"; then _picocli_bacon_pig_cancel; return $?; fi
+  if CompWordsContainsArray "${cmds20[@]}"; then _picocli_bacon_pig_configure; return $?; fi
+  if CompWordsContainsArray "${cmds19[@]}"; then _picocli_bacon_pig_cdxsbom; return $?; fi
   if CompWordsContainsArray "${cmds18[@]}"; then _picocli_bacon_pig_cachi2lockfile; return $?; fi
   if CompWordsContainsArray "${cmds17[@]}"; then _picocli_bacon_da_reports_lookupversionsnpm; return $?; fi
   if CompWordsContainsArray "${cmds16[@]}"; then _picocli_bacon_da_reports_built; return $?; fi
@@ -672,7 +675,7 @@ function _picocli_bacon_pig() {
   local curr_word=${COMP_WORDS[COMP_CWORD]}
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
-  local commands="cachi2lockfile configure cancel build run repo licenses javadocs sources shared-content docs release pre-process-yaml addons export"
+  local commands="cachi2lockfile cdx-sbom configure cancel build run repo licenses javadocs sources shared-content docs release pre-process-yaml addons export"
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
   local arg_opts="'-p' '--configPath' '--profile'"
 
@@ -1266,6 +1269,52 @@ function _picocli_bacon_pig_cachi2lockfile() {
     local positionals=""
     local currIndex
     currIndex=$(currentPositionalIndex "cachi2lockfile" "${arg_opts}" "${flag_opts}")
+    if (( currIndex >= 0 && currIndex <= 2147483647 )); then
+      local IFS=$'\n'
+      type compopt &>/dev/null && compopt -o filenames
+      positionals=$( compgen -f -- "${curr_word}" ) # files
+    fi
+    local IFS=$'\n'
+    COMPREPLY=( $(compgen -W "${commands// /$'\n'}${IFS}${positionals}" -- "${curr_word}") )
+  fi
+}
+
+# Generates completions for the options and subcommands of the `cdx-sbom` subcommand.
+function _picocli_bacon_pig_cdxsbom() {
+  # Get completion data
+  local curr_word=${COMP_WORDS[COMP_CWORD]}
+  local prev_word=${COMP_WORDS[COMP_CWORD-1]}
+
+  local commands=""
+  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local arg_opts="'--output' '--schema' '-p' '--configPath' '--profile'"
+
+  type compopt &>/dev/null && compopt +o default
+
+  case ${prev_word} in
+    '--output')
+      local IFS=$'\n'
+      type compopt &>/dev/null && compopt -o filenames
+      COMPREPLY=( $( compgen -f -- "${curr_word}" ) ) # files
+      return $?
+      ;;
+    '--schema')
+      return
+      ;;
+    '-p'|'--configPath')
+      return
+      ;;
+    '--profile')
+      return
+      ;;
+  esac
+
+  if [[ "${curr_word}" == -* ]]; then
+    COMPREPLY=( $(compgen -W "${flag_opts} ${arg_opts}" -- "${curr_word}") )
+  else
+    local positionals=""
+    local currIndex
+    currIndex=$(currentPositionalIndex "cdx-sbom" "${arg_opts}" "${flag_opts}")
     if (( currIndex >= 0 && currIndex <= 2147483647 )); then
       local IFS=$'\n'
       type compopt &>/dev/null && compopt -o filenames

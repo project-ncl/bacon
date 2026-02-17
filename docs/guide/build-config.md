@@ -529,6 +529,31 @@ With the configuration above, the Cachi2 Lock File will be saved in the `{RELEAS
 java -jar bacon.jar pig run --clean --skipBuilds --skipBranchCheck --skipPncUpdate --skipLicenses --skipSources --releaseStorageUrl https://download.eng.bos.redhat.com/rcm-guest/staging/quarkus config-dir/ --targetPath deliverables
 ```
 
+###### SBOM Generation
+
+The `BOM` strategy offers an option to capture the resolved artifacts with the `redhat` version qualifier and generate a CycloneDX SBOM file that can later be provided to the consumers of the generated Maven repository, including the release publishing process.
+
+> [!NOTE]
+> It's also possible to configure the `cycloneDxSbom` addon as an alternative. The difference between these options is that the addon will be deriving artifact coordinates (groupId, artifactId, classifier, extension and version) from the file names found in the ZIP (which in certain edge cases might not be reliable), while the BOM strategy will capture all the artifact coordinates during the resolution process.
+
+To enable CycloneDX SBOM generation at least one of `cycloneDxFile` (the output target file) or `cycloneDxVersion` (CycloneDX schema version) parameters has to be set. For example
+
+```yaml
+flow:
+  licensesGeneration:
+    strategy: GENERATE
+  repositoryGeneration:
+    strategy: BOM
+    parameters:
+      bomGavs: >-
+        com.redhat.quarkus.platform:quarkus-bom:{{quarkusPlatformVersion}}
+      cycloneDxFile: extras/maven-repository-cyclonedx.json
+```
+
+With the configuration above, the CycloneDX SBOM will be saved in the `{RELEASE_DIR}/extras/maven-repository-cyclonedx.json`.
+
+If the schema version was not configured, the latest schema version supported by the generator will be used.
+
 ##### Parameters available in all strategies
 
 - `additionalArtifacts` - artifacts to be specifically added to the repository from specific builds. Should use regular expressions to match any incremental suffixes.

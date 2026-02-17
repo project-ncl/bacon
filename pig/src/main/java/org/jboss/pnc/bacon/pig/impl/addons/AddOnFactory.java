@@ -31,6 +31,7 @@ import org.jboss.pnc.bacon.pig.impl.addons.quarkus.QuarkusPostBuildAnalyzer;
 import org.jboss.pnc.bacon.pig.impl.addons.quarkus.VertxArtifactFinder;
 import org.jboss.pnc.bacon.pig.impl.addons.rhba.OfflineManifestGenerator;
 import org.jboss.pnc.bacon.pig.impl.addons.runtime.RuntimeDependenciesAnalyzer;
+import org.jboss.pnc.bacon.pig.impl.addons.sbom.CycloneDxSbomAddOn;
 import org.jboss.pnc.bacon.pig.impl.addons.scanservice.PostBuildScanService;
 import org.jboss.pnc.bacon.pig.impl.addons.spring.BomVerifierAddon;
 import org.jboss.pnc.bacon.pig.impl.addons.vertx.FindTransitiveDuplicateArtifactsInDepTree;
@@ -76,6 +77,7 @@ public class AddOnFactory {
                         extrasPath,
                         deliverables));
         resultList.add(new Cachi2LockfileAddon(pigConfiguration, builds, releasePath, extrasPath));
+        resultList.add(new CycloneDxSbomAddOn(pigConfiguration, builds, releasePath, extrasPath));
         resultList.add(new ProvenanceAddOn(pigConfiguration, builds, releasePath, extrasPath));
 
         return resultList;
