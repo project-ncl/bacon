@@ -68,6 +68,7 @@ import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.addons.cachi2.Cachi2LockfileGenerator;
+import org.jboss.pnc.bacon.pig.impl.addons.sbom.MavenRepoCdxSbomGenerator;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.AdditionalArtifactsFromBuild;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
@@ -109,6 +110,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     private static final Logger log = LoggerFactory.getLogger(RepoManager.class);
     private static final Pattern SPLIT_PATTERN = Pattern.compile("[, \t\n\r\f]+");
     private static final String CACHI_2_LOCK_FILE = "cachi2LockFile";
+    private static final String CYCLONEDX_SBOM_FILE = "cycloneDxFile";
+    private static final String CYCLONEDX_SBOM_VERSION = "cycloneDxVersion";
 
     private final BuildInfoCollector buildInfoCollector;
     @Getter
@@ -700,6 +703,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         zip(targetTopLevelDirectory, targetZipPath);
 
         cachi2LockfileForBom(artifactCollector);
+        cycloneDxSbom(artifactCollector);
         return result(targetTopLevelDirectory, targetZipPath);
     }
 
@@ -710,6 +714,22 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                     .setOutputFile(Path.of(releasePath).resolve(cachi2LockFile))
                     .setMavenRepository(artifactCollector.toVisitableRepository())
                     .generate();
+        }
+    }
+
+    private void cycloneDxSbom(ResolvedArtifactCollector artifactCollector) {
+        final String cdxSbomFile = generationData.getParameters().get(CYCLONEDX_SBOM_FILE);
+        final String cdxVersion = generationData.getParameters().get(CYCLONEDX_SBOM_VERSION);
+        if (cdxSbomFile != null || cdxVersion != null) {
+            MavenRepoCdxSbomGenerator generator = new MavenRepoCdxSbomGenerator()
+                    .setMavenRepository(artifactCollector.toVisitableRepository());
+            if (cdxSbomFile != null) {
+                generator.setOutputFile(Path.of(releasePath).resolve(cdxSbomFile));
+            }
+            if (cdxVersion != null) {
+                generator.setSchemaVersion(cdxVersion);
+            }
+            generator.generate();
         }
     }
 

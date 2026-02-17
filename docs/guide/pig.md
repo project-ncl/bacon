@@ -38,6 +38,7 @@ bacon pig <phase> ...
 The following `pig` subcommands are available but not tied to any specific phase:
 
 - cachi2lockfile
+- cdx-sbom
 
 # Configuration
 
@@ -371,6 +372,22 @@ addons:
 
 The `filename` parameter is optional and defaults to `cachi2lockfile.yaml` if not configured. The file will be stored under the `extras` directory.
 
+### CycloneDX SBOM Generator
+
+This add-on generates a CycloneDX SBOM for the produced Maven repository ZIP (regardless which strategy was used to generate it).
+
+The add-on can be configured in the following way:
+
+```
+addons:
+  cycloneDxSbom:
+    outputFile: maven-repository-cyclonedx.json
+    schemaVersion: 1.6
+```
+
+The `outputFile` parameter is optional and defaults to `extras/maven-repository-cyclonedx.json` if not configured.
+The `schemaVersion` parameter is optional and defaults to the latest schema version supported by the generator.
+
 {% endraw %}
 
 ## cachi2lockfile command
@@ -391,6 +408,24 @@ Other command options include:
 
 * `--maven-repository-url` - the desired value of the Maven repository URL to record for each artifact. The default value will match the one configured in the local Bacon config;
 * `--preferred-checksum-alg` - the lock file format expects a single checksum. By default, the tool will use the highest version of the `SHA` checksum available in the Maven repository. This option allows to specify an alternative checksum algorithm (assuming it's available in the repository), if the default is not good enough.
+
+## cdx-sbom command
+
+This `pig cdx-sbom` CLI command allows generating a CycloneDX SBOM for a given Maven repository. The command will not perform any Maven artifact resolution, it will simply manifest the content of a Maven repository.
+
+The command accepts ZIP files and/or directories that include Maven repository content under `maven-repository` subdirectory (to be compliant with the way Bacon generates Maven repository ZIPs). For example:
+
+```
+bacon pig cdx-sbom rh-quarkus-platform-3.15.2.CR1-maven-repository.zip
+```
+
+Multiple repository paths (including a mix of directories and ZIPs) can be provided using comma as a separator.
+
+By default, the generated SBOM file will be named `maven-repository-cyclonedx.json`. A different file name can be specified by adding the `--output` argument with the desired value.
+
+Other command options include:
+
+* `--schema` - the desired CycloneDX schema version. The default schema version will be the latest one supported by the generator.
 
 ## PiG Export Feature
 
