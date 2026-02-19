@@ -11,19 +11,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * A more general class compared to KeycloakCredential
+ */
 @Data
 @Builder(toBuilder = true, builderClassName = "Builder")
-@JsonDeserialize(builder = Credential.Builder.class)
+@JsonDeserialize(builder = OidcCredential.Builder.class)
 @Slf4j
-public class Credential {
+public class OidcCredential {
 
-    private String keycloakBaseUrl;
-
-    private String realm;
+    /** contains the OIDC url */
+    private String authServerUrl;
 
     private String client;
-
-    private String username;
 
     private String accessToken;
     private String refreshToken;
