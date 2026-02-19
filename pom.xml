@@ -113,6 +113,7 @@
         <tagSuffix />
         <undertow.version>2.3.22.Final</undertow.version>
         <unirestVersion>3.14.5</unirestVersion>
+        <version.lombok>1.18.42</version.lombok>
         <version.rex>1.2.2</version.rex>
     </properties>
 
@@ -737,7 +738,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.42</version>
+                <version>${version.lombok}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -844,6 +845,13 @@
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                         </compilerArgs>
+                        <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <plugin>
