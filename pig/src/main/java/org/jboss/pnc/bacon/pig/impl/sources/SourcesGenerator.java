@@ -195,10 +195,23 @@ public class SourcesGenerator {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(uri)
                         .header("Authorization", "Bearer " + Config.instance().getActiveProfile().getGithubToken())
+                        // specify that we only want a tar.gz reply, otherwise it returns an html file if there is a
+                        // login failure with http status 200, which makes the http client wrongly believe the download
+                        // was successful
+                        .header("Accept", "application/x-tar, application/gzip")
                         .GET()
                         .build();
                 var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-                if (response.statusCode() != HttpResponseCodes.SC_OK) {
+
+                if (response.statusCode() == HttpResponseCodes.SC_NOT_ACCEPTABLE) {
+                    // Github throws this error when the Github Token is not specified, or wrong
+                    StringBuilder errorMessage = new StringBuilder();
+                    errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
+                    errorMessage.append("URL: ").append(uri).append("\n");
+                    errorMessage.append("Please specify a valid 'githubToken' in your 'config.yaml'").append("\n");
+                    throw new RuntimeException(errorMessage.toString());
+
+                } else if (response.statusCode() != HttpResponseCodes.SC_OK) {
                     StringBuilder errorMessage = new StringBuilder();
                     errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
                     errorMessage.append("HTTP Status: ").append(response.statusCode()).append("\n");
