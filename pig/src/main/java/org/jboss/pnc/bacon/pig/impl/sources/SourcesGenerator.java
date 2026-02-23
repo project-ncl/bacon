@@ -51,7 +51,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 public class SourcesGenerator {
     private static final Logger log = LoggerFactory.getLogger(SourcesGenerator.class);
 
-    private static final String KOJI_TOP_URL = "http://download.eng.bos.redhat.com/brewroot";
+    private static final String KOJI_TOP_URL = "https://download.devel.redhat.com/brewroot";
 
     private static final ClientCreator<BuildClient> CREATOR = new ClientCreator<>(BuildClient::new);
 
