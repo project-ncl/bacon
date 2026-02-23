@@ -528,7 +528,7 @@ flow:
 With the configuration above, the Cachi2 Lock File will be saved in the `{RELEASE_DIR}/extras/quarkus-platform-{QUARKUS_PLATFORM_VERSION}-cachi2-lockfile.yaml`.
 
 ```
-java -jar bacon.jar pig run --clean --skipBuilds --skipBranchCheck --skipPncUpdate --skipLicenses --skipSources --releaseStorageUrl https://download.eng.bos.redhat.com/rcm-guest/staging/quarkus config-dir/ --targetPath deliverables
+java -jar bacon.jar pig run --clean --skipBuilds --skipBranchCheck --skipPncUpdate --skipLicenses --skipSources --releaseStorageUrl https://download.devel.redhat.com/rcm-guest/staging/quarkus config-dir/ --targetPath deliverables
 ```
 
 ###### SBOM Generation
