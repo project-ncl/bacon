@@ -46,6 +46,28 @@ The application is configured via the `build-config.yaml` file.
 
 A PiG `build-config.yaml` looks like [this](https://github.com/project-ncl/bacon/blob/main/example-pig-config.yaml). See [this](build-config.html) for a detailed guide of `build-config.yaml`
 
+To use the `bacon pig sources` or `bacon pig run` command with a Github server used as the internal server, we need to
+specify the `githubToken` in our bacon `configuration` also:
+
+```yaml
+- name: "default"
+  pnc:
+      url: "<url>"
+  da:
+      url: "<url>"
+  pig:
+      indyUrl: value
+  githubToken: "github-token"
+```
+
+The github token can be obtained by:
+- On the Github web-ui, go to: `https:<github url>/settings/tokens`
+- Click on 'Generate new token' -> 'Generate new token (classic)'
+- Choose a name ('Bacon token')
+- On the scopes, select 'repo'
+- Click on 'Generate token'
+- Copy the displayed token and input it in the 'githubToken' field
+
 # Operation
 
 In all of the operations above, you can override the variables in your `build-config.yaml` by specifying the `-e` or `--env` flag. More details [here](build-config.html#usage-of-yaml-variables)
