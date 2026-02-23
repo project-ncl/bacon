@@ -11,7 +11,7 @@ title: "Build Config Files"
 
 The build-config.yaml is broken down into 2 big categories: the PNC part and the generation part. The PNC part consists of the configuration on how your builds are performed. Once the builds are done, that information is then fed into the generation part to produce maven repository, javadoc, sources, license zips.
 
-> **Provenance generation (default behavior)**
+> **SLSA Provenance generation (default behavior)**
 >
 > For each generated deliverable (Maven repository, licenses, javadocs, and sources), PiG will **by default also generate a SLSA provenance attestation** in JSON format.
 >
@@ -326,6 +326,8 @@ Strategy options are:
 ##### `IGNORE`
 
 The `IGNORE` strategy won't produce any repository. This is particularly useful to temporarily disable generation as you can leave the rest of your configuration in place.
+
+##### `GENERATE`
 
 The `GENERATE` strategy generates repository based on build. You need to specify `sourceArtifact` and `sourceBuild`. `sourceArtifact` is a regular expression pattern for the file name of a BOM that is used for repository generation, `sourceBuild` is name of build configuration with build for BOM.
 
@@ -660,7 +662,7 @@ All `GENERATE*` strategies require that the repository generation is **not** ign
        - 'org.kie.kogito-kogito-images-1.40.0.Final'
   ```
 
-## Generation and Provenance
+## SLSA Provenance Generation
 
 ### Automatic provenance for generated deliverables
 
@@ -708,6 +710,24 @@ bacon pig addons ... --skipAddon=provenance
 ```
 
 No changes to `build-config.yaml` are required to enable provenance generation; it is active by default.
+
+## CycloneDX SBOM Generator
+
+The `BOM` strategy offers an option to capture the resolved artifacts with the `redhat` version qualifier and generate a CycloneDX SBOM file, see [BOM strategy - SBOM Generation](#sbom-generation).
+
+It's also possible to configure the `cycloneDxSbom` addon as an alternative. The difference between these options is that the addon will be deriving artifact coordinates (groupId, artifactId, classifier, extension and version) from the file names found in the ZIP (which in certain edge cases might not be reliable), and regardless which strategy was used to generate it, while the BOM strategy will capture all the artifact coordinates during the resolution process.
+
+The add-on can be configured in the following way:
+
+```
+addons:
+  cycloneDxSbom:
+    outputFile: maven-repository-cyclonedx.json
+    schemaVersion: 1.6
+```
+
+The `outputFile` parameter is optional and defaults to `extras/maven-repository-cyclonedx.json` if not configured.
+The `schemaVersion` parameter is optional and defaults to the latest schema version supported by the generator.
 
 ## Usage of YAML variables
 You can define variables in your YAML file for injection at various points. This is useful when there are few changes between version releases (e.g tags). To define a variable, use this format:
