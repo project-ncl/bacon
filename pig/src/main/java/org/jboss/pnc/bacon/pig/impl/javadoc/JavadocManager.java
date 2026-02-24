@@ -37,8 +37,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
@@ -173,13 +176,35 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private boolean cloneProject() {
         log.debug("Cloning {} into {}", generationProject, topLevelDirectory);
-        try (Git git = Git.cloneRepository().setURI(generationProject).setDirectory(topLevelDirectory).call()) {
-            if (scmRevision != null && !scmRevision.isEmpty()) {
-                log.debug("Checkout version {}", scmRevision);
-                git.checkout().setName(scmRevision).call();
+
+        try {
+            CloneCommand cloneCommand = Git.cloneRepository()
+                    .setURI(generationProject)
+                    .setDirectory(topLevelDirectory);
+
+            // Configure token if present
+            String token = Config.instance().getActiveProfile().getGithubToken();
+            if (token != null && !token.isBlank()) {
+                log.debug("Using GitHub token authentication for clone");
+                cloneCommand.setCredentialsProvider(
+                        new UsernamePasswordCredentialsProvider("x-access-token", token));
+            }
+
+            try (Git git = cloneCommand.call()) {
+                if (scmRevision != null && !scmRevision.isBlank()) {
+                    log.debug("Checkout version {}", scmRevision);
+                    git.checkout().setName(scmRevision).call();
+                }
             }
         } catch (GitAPIException e) {
-            log.error("Exception occurred while cloning repo - {}", e.getMessage());
+            log.error("Exception occurred while cloning repo", e);
+
+            Throwable t = e;
+            while (t.getCause() != null) {
+                t = t.getCause();
+            }
+
+            log.error("Root cause: {}: {}", t.getClass().getName(), t.getMessage());
             return false;
         }
         return true;
