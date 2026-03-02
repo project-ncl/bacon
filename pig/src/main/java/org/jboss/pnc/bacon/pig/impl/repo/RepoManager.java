@@ -854,7 +854,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             dependencyInspector = DependencyTreeInspector.configure()
                     .setArtifactResolver(resolver)
                     .setResolveDependencies(true)
-                    .setParallelProcessing(true)
+                    .setParallelProcessing(false)
                     .setTreeVisitor(new DependencyTreeVisitor<>() {
                         @Override
                         public void visit(DependencyTreeVisit<Object> visit) {
