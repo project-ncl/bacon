@@ -37,3 +37,10 @@ keycloak:
     # if service account
     # clientSecret: ""
 ```
+
+We also support LDAP authentication as an alternative to keycloak if the PNC
+servers are configured to accept LDAP requests:
+
+```yaml
+ldapUsernamePassword: username:password
+```
