@@ -22,3 +22,4 @@ jobs:
         # directly.
         release_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V release:prepare release:perform -DlocalCheckout=true -DpushChanges=false
         java_version: 17
+      secrets: inherit
