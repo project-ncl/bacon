@@ -155,7 +155,8 @@ public class ArtifactCli {
         @Override
         public Collection<Build> getAll(String sort, String query) throws RemoteResourceException {
             try (ArtifactClient client = CREATOR.newClient()) {
-                return client.getDependantBuilds(id, Optional.ofNullable(sort), Optional.ofNullable(query)).getAll();
+                return client.getDependantBuilds(id, null, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
@@ -179,7 +180,7 @@ public class ArtifactCli {
                         .getAll(null, null, null, Optional.empty(), Optional.ofNullable("identifier==" + identifier))
                         .iterator()
                         .next();
-                return client.getDependantBuilds(a.getId(), Optional.ofNullable(sort), Optional.ofNullable(query))
+                return client.getDependantBuilds(a.getId(), null, Optional.ofNullable(sort), Optional.ofNullable(query))
                         .getAll();
             }
         }
