@@ -30,7 +30,7 @@
 
     <groupId>org.jboss.pnc.bacon</groupId>
     <artifactId>parent</artifactId>
-    <version>3.3.2-SNAPSHOT</version>
+    <version>3.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bacon</name>
@@ -103,8 +103,8 @@
         <picocli.version>4.7.7</picocli.version>
         <pme.version>5.1</pme.version>
         <pnc-api.version>3.4.3</pnc-api.version>
-        <pnc-common.version>3.3.4</pnc-common.version>
-        <pnc.version>3.3.1</pnc.version>
+        <pnc-common.version>3.4.0</pnc-common.version>
+        <pnc.version>3.4.3</pnc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.resolver.version>${quarkus.version}</quarkus.resolver.version>
         <quarkus.version>3.31.1</quarkus.version>
