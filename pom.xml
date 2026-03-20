@@ -101,7 +101,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <picocli.version>4.7.7</picocli.version>
-        <pme.version>5.1</pme.version>
+        <pme.version>5.2-SNAPSHOT</pme.version>
         <pnc-api.version>3.4.3</pnc-api.version>
         <pnc-common.version>3.4.0</pnc-common.version>
         <pnc.version>3.4.4</pnc.version>
@@ -492,7 +492,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.maven-manipulator</groupId>
-                <artifactId>pom-manipulation-common</artifactId>
+                <artifactId>pom-manipulation-common-lite</artifactId>
                 <version>${pme.version}</version>
                 <exclusions>
                     <exclusion>
@@ -815,6 +815,17 @@
     </dependencyManagement>
 
     <repositories>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>central-portal-snapshots</id>
+            <name>Central Portal Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </repository>
         <repository>
             <!--TODO: remove once PNC 2.0 hits central -->
             <releases>
