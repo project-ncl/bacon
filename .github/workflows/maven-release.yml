@@ -13,7 +13,7 @@ jobs:
     call-release-job:
       permissions:
         contents: write # needed to push commit and tag back to the repository
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-release.yml@v0.0.12
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-release.yml@v0.0.13
       with:
         ref_to_release: ${{ inputs.ref_to_release }}
         # The junit:junit:4.12 is used in one of our tests to get the license.
