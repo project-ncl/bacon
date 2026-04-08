@@ -1,12 +1,14 @@
 name: Build snapshot version and upload to Maven Central
 
+permissions: {}
+
 on:
   push:
     branches: [ "main" ]
 
 jobs:
     call-snapshot-job:
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-snapshot.yml@v0.0.12
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-snapshot.yml@f7041589cc1ce5e75564bda958cc6e5182c240cd # v0.0.15
       with:
         project_name: 'project-ncl/bacon'
         # The junit:junit:4.12 is used in one of our tests to get the license.
@@ -15,4 +17,8 @@ jobs:
         # directly.
         snapshot_deploy_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy
         java_version: 17
-      secrets: inherit
+      secrets:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        QUAY_DEVEL_USERNAME: ${{ secrets.QUAY_DEVEL_USERNAME }}
+        QUAY_DEVEL_PASSWORD: ${{ secrets.QUAY_DEVEL_PASSWORD }}

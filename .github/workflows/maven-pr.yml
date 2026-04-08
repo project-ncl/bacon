@@ -8,17 +8,19 @@
 
 name: Java CI with Maven
 
+permissions: {}
+
 on:
   pull_request:
     branches: [ "*" ]
 
 jobs:
     call-maven-ci:
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@v0.0.12
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@f7041589cc1ce5e75564bda958cc6e5182c240cd # v0.0.15
       with:
         # The junit:junit:4.12 is used in one of our tests to get the license.
         # Weirdly it needs to be present in our .m2/repository folder for the
         # test to pass. I thought it would be downloaded by the Maven resolver
         # directly.
-        build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V -DargLine="${argLine} -Xms256m -Xmx3g" clean install
+        build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V -DextraSurefireJvmArgs="-Xms256m -Xmx3g" clean install
         java_version: 17
