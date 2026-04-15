@@ -6,7 +6,7 @@ on:
 
 jobs:
     call-snapshot-job:
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-snapshot.yml@v0.0.12
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-snapshot.yml@v0.0.14
       with:
         project_name: 'project-ncl/bacon'
         # The junit:junit:4.12 is used in one of our tests to get the license.
