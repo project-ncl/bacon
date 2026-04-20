@@ -16,7 +16,6 @@ updates:
       exclude:
         - "org.jboss.da:*"
         - "org.jboss.pnc*:*"
-        - "org.commonjava*:*"
   - package-ecosystem: "github-actions" # Also update Github actions
     directory: "/"
     schedule:
