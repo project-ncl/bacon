@@ -11,7 +11,12 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
-
+      # Exclude our own repos from cooldown
+      # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#cooldown-
+      exclude:
+        - "org.jboss.da:*"
+        - "org.jboss.pnc*:*"
+        - "org.commonjava*:*"
   - package-ecosystem: "github-actions" # Also update Github actions
     directory: "/"
     schedule:
