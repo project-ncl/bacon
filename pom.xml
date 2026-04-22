@@ -114,7 +114,7 @@
         <tagSuffix />
         <undertow.version>2.3.22.Final</undertow.version>
         <unirestVersion>3.14.5</unirestVersion>
-        <version.lombok>1.18.42</version.lombok>
+        <version.lombok>1.18.46</version.lombok>
         <version.rex>1.2.2</version.rex>
     </properties>
 
