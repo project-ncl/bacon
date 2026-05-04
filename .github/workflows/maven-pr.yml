@@ -8,7 +8,8 @@
 
 name: Java CI with Maven
 
-permissions: {}
+permissions:
+  contents: read
 
 on:
   pull_request:
@@ -16,7 +17,7 @@ on:
 
 jobs:
     call-maven-ci:
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@ef31e53140344cac0421b7211cc0940182409106 # v0.0.16
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@153b97777335953545bc8a907eb5f062af66b7f2 # v0.0.18
       with:
         # The junit:junit:4.12 is used in one of our tests to get the license.
         # Weirdly it needs to be present in our .m2/repository folder for the
@@ -24,3 +25,4 @@ jobs:
         # directly.
         build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V -DextraSurefireJvmArgs="-Xms256m -Xmx3g" clean install
         java_version: 17
+        upload_artifacts: true
