@@ -15,6 +15,7 @@ import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.RexConfig;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.otel.OTelCLIHelper;
 import org.jboss.pnc.rex.api.MaintenanceEndpoint;
 import org.jboss.pnc.rex.api.TaskEndpoint;
 import org.jboss.pnc.rex.dto.TaskDTO;
@@ -27,7 +28,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.resilience.otel.OTelCLIHelper;
 
 import io.opentelemetry.api.trace.Span;
 import picocli.CommandLine;

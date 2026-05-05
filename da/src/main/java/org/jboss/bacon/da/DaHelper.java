@@ -38,13 +38,12 @@ import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.otel.OTelCLIHelper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
-
-import com.redhat.resilience.otel.OTelCLIHelper;
 
 import io.opentelemetry.api.trace.Span;
 
