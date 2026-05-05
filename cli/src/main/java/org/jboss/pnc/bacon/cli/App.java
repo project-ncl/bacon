@@ -34,6 +34,7 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
 import org.jboss.pnc.common.log.MDCUtils;
+import org.jboss.pnc.otel.OTelCLIHelper;
 import org.jline.console.SystemRegistry;
 import org.jline.console.impl.Builtins;
 import org.jline.console.impl.SystemRegistryImpl;
@@ -51,8 +52,6 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.widget.TailTipWidgets;
 import org.slf4j.LoggerFactory;
-
-import com.redhat.resilience.otel.OTelCLIHelper;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;

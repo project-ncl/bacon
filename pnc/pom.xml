@@ -32,6 +32,10 @@
             <artifactId>pnc-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jboss.pnc.otel</groupId>
+            <artifactId>opentelemetry-ext-cli-java</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
