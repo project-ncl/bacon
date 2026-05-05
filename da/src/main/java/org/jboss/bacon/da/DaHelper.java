@@ -52,7 +52,7 @@ import io.opentelemetry.api.trace.Span;
  * Helper methods for DA stuff
  */
 public class DaHelper {
-    private final static String DA_PATH = "/da/rest/v-1";
+    private final static String DA_PATH = "/rest/v-1";
 
     private static ResteasyClientBuilder builder;
     private static String daUrl;

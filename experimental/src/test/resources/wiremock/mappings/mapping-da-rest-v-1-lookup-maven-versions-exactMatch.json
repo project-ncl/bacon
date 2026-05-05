@@ -1,7 +1,7 @@
 {
   "id" : "54b9e1c8-fad9-488a-b2ad-8bab1274c4be",
   "request" : {
-    "url" : "/da/rest/v-1/lookup/maven/versions",
+    "url" : "/rest/v-1/lookup/maven/versions",
     "method" : "POST",
     "bodyPatterns" : [ {
       "equalToJson" : "{\"filter\":\"ALL\",\"distanceRule\":\"CLOSEST_BY_PARTS\",\"mode\":\"PERSISTENT\",\"artifacts\":[{\"groupId\":\"com.sun.xml.bind\",\"artifactId\":\"jaxb-bom-ext\",\"version\":\"2.3.3-b02\"}],\"includeBad\":false,\"brewPullActive\":false}",
