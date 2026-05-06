@@ -18,7 +18,7 @@ jobs:
     call-maven-set-version-job:
       permissions:
         contents: write # needed to push commit and tag back to the repository
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-set-version.yml@ef31e53140344cac0421b7211cc0940182409106 # v0.0.16
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-set-version.yml@2d927763b5bcdd30dead156c32649470cc2b2aa3 # v0.0.17
       with:
         new_version: ${{ inputs.new_version }}
         ref_for_version: ${{ inputs.ref_for_version }}
