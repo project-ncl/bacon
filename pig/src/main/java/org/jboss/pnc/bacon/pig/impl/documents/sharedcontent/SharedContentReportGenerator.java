@@ -49,7 +49,6 @@ public class SharedContentReportGenerator {
             "maven-metadata.xml" };
 
     private final Collection<File> repositoryFiles;
-    private final DASearcher daSearcher = new DASearcher();
     private final Set<GAV> projectsArtifacts;
     private Integer limit;
     private AtomicInteger analyzed = new AtomicInteger(0);
@@ -86,7 +85,7 @@ public class SharedContentReportGenerator {
         }
         rows = rows.subList(0, limit);
         log.info("Gathering data for shared content report");
-        rows.parallelStream().forEach(this::fillDaData);
+        rows.parallelStream().forEach(this::fillData);
         List<SharedContentReportRow> toFillBrewData = rows.stream()
                 .filter(row -> row.getProductName() == null || row.getProductVersion() == null)
                 .collect(Collectors.toList());
@@ -97,9 +96,8 @@ public class SharedContentReportGenerator {
         return output;
     }
 
-    private void fillDaData(SharedContentReportRow row) {
+    private void fillData(SharedContentReportRow row) {
         log.debug("Will fill {}", row.toGapv());
-        daSearcher.fillDAData(row);
         MRRCSearcher.getInstance().fillMRRCData(row);
         if (log.isDebugEnabled()) {
             log.debug("Analyzed {}/{}", analyzed.incrementAndGet(), limit);
