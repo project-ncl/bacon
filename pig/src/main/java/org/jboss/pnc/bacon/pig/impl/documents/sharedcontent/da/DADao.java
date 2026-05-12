@@ -17,16 +17,12 @@
  */
 package org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.da;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.bacon.da.DaHelper;
-import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.ReportsApi;
-import org.jboss.da.listings.model.rest.RestProductGAV;
 import org.jboss.da.reports.model.request.LookupGAVsRequest;
 import org.jboss.da.reports.model.response.LookupReport;
 import org.jboss.pnc.bacon.config.Config;
@@ -44,11 +40,9 @@ public class DADao {
     private static final Logger log = LoggerFactory.getLogger(DADao.class);
 
     private final ReportsApi reportsClient;
-    private final ListingsApi listingsClient;
 
     public DADao(DaConfig daConfig) {
         reportsClient = DaHelper.createReportsApi();
-        listingsClient = DaHelper.createListingsApi();
     }
 
     public void fillDaData(CommunityDependency dependency) {
@@ -77,12 +71,6 @@ public class DADao {
             throw new RuntimeException("Expected exactly one report, got: " + lookupReports.size());
         }
         return lookupReports.get(0);
-    }
-
-    public List<DAListArtifact> getWhitelist() {
-        Collection<RestProductGAV> allWhiteArtifacts = listingsClient.getAllWhiteArtifacts();
-
-        return allWhiteArtifacts.stream().map(DAListArtifact::new).collect(Collectors.toList());
     }
 
     private static DADao instance;
