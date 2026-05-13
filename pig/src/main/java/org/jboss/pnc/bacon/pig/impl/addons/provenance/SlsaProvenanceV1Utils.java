@@ -118,6 +118,7 @@ public final class SlsaProvenanceV1Utils {
         // - bacon github URI
         // - preprocessed build-config.yaml digest (after substitution of variables)
         // - Pig config dir hash (context hash)
+        // - configuration repository git information (if available)
         // - any DeliverableInput materials registered
         List<ResourceDescriptor> deps = new ArrayList<>();
         deps.add(
@@ -147,6 +148,18 @@ public final class SlsaProvenanceV1Utils {
                             .digest(Map.of("sha512", ctx.getConfigSha()))
                             .build());
         }
+
+        // 3) Git repository information from the current working directory
+        //    This captures the configuration repository context when the CLI is executed
+        GitInfo.fromCurrentDirectory().ifPresent(gitInfo -> {
+            log.debug("Adding git repository information to provenance: {}", gitInfo);
+            deps.add(
+                    ResourceDescriptor.builder()
+                            .name("repository")
+                            .uri(gitInfo.getRepositoryUrl())
+                            .digest(Map.of("gitCommit", gitInfo.getCommitHash()))
+                            .build());
+        });
 
         return BuildDefinition.builder()
                 .buildType(BUILD_TYPE)
