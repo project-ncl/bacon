@@ -23,6 +23,6 @@ jobs:
         # Weirdly it needs to be present in our .m2/repository folder for the
         # test to pass. I thought it would be downloaded by the Maven resolver
         # directly.
-        build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V -DextraSurefireJvmArgs="-Xms256m -Xmx3g" clean install
+        build_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V -DextraSurefireJvmArgs="-Xms256m -Xmx4g" clean install
         java_version: 17
         upload_artifacts: true
