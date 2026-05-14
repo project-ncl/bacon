@@ -9,9 +9,7 @@ changelog:
           - dependencies
     - title: 👒 Project Dependencies
       labels:
-        - dependencies
         - java
     - title: 👒 CI Dependencies
       labels:
-        - dependencies
         - github_actions
