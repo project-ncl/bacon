@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>38</version>
+        <version>53</version>
         <relativePath />
     </parent>
 
@@ -91,6 +91,7 @@
         <jboss.snapshots.repo.id>central-publisher</jboss.snapshots.repo.id>
         <jboss.snapshots.repo.url>https://central.sonatype.com/repository/maven-snapshots</jboss.snapshots.repo.url>
         <jdk.max.version>17</jdk.max.version>
+        <jdk.min.version>17</jdk.min.version>
         <jenkins-maven-embedder.version>3.15</jenkins-maven-embedder.version>
         <jline.version>3.30.6</jline.version>
         <json.version>1.1.4</json.version>
@@ -854,6 +855,8 @@
                         <target>${maven.compiler.target}</target>
                         <testSource>${maven.compiler.source}</testSource>
                         <testTarget>${maven.compiler.target}</testTarget>
+                        <release>17</release>
+                        <testRelease>17</testRelease>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                         </compilerArgs>
