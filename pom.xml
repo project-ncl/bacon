@@ -78,7 +78,7 @@
         <assertj.version>3.27.7</assertj.version>
         <build.finder>2.6.7</build.finder>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <commons-configuration2.version>2.13.0</commons-configuration2.version>
+        <commons-configuration2.version>2.15.0</commons-configuration2.version>
         <commons-io.version>2.22.0</commons-io.version>
         <compiler.plugin.version>3.15.0</compiler.plugin.version>
         <domino.version>0.0.130</domino.version>
@@ -86,7 +86,7 @@
         <extraSurefireJvmArgs />
         <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
-        <jackson.version>2.19.2</jackson.version>
+        <jackson.version>2.21.1</jackson.version>
         <jaxb.version>4.0.7</jaxb.version>
         <jboss.snapshots.repo.id>central-publisher</jboss.snapshots.repo.id>
         <jboss.snapshots.repo.url>https://central.sonatype.com/repository/maven-snapshots</jboss.snapshots.repo.url>
