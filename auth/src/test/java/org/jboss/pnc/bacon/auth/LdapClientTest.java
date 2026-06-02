@@ -15,27 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.bacon.config;
+package org.jboss.pnc.bacon.auth;
 
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.*;
 
-import lombok.Data;
+import org.junit.jupiter.api.Test;
 
-@Data
-public class ConfigProfile {
-
-    private String name;
-    private PncConfig pnc;
-    private DaConfig da;
-    private IndyConfig indy;
-    private PigConfig pig;
-    private KeycloakConfig keycloak;
-    private String ldapUsernamePassword;
-    private AutobuildConfig autobuild;
-    private String githubToken;
-    private RexConfig rex;
-    private ReqourConfig reqour;
-    private boolean enableExperimental;
-
-    private Map<String, Map<String, ?>> addOns;
+class LdapClientTest {
+    @Test
+    public void testGetBasicAuthHeaderValue() {
+        LdapClient ldapClient = new LdapClient("username:password\n");
+        assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", ldapClient.getBasicAuthHeaderValue());
+    }
 }

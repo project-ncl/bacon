@@ -69,14 +69,18 @@ public class PncClientHelper {
     public static Configuration setup(boolean authenticationNeeded) {
         Config config = Config.instance();
 
+        String ldapUsernamePassword = config.getActiveProfile().getLdapUsernamePassword();
         KeycloakConfig keycloakConfig = config.getActiveProfile().getKeycloak();
 
         if (authenticationNeeded) {
-            if (keycloakConfig == null) {
-                throw new FatalException("Keycloak section is needed in the configuration file!");
+            if (ldapUsernamePassword == null && keycloakConfig == null) {
+                throw new FatalException(
+                        "ldapUsernamePassword or Keycloak section is needed in the configuration file!");
             }
 
-            keycloakConfig.validate();
+            if (keycloakConfig != null) {
+                keycloakConfig.validate();
+            }
         }
 
         config.getActiveProfile().getPnc().validate();
@@ -98,10 +102,15 @@ public class PncClientHelper {
                     .addDefaultMdcToHeadersMappings();
 
             if (authenticationNeeded) {
-                if (pncClientTokenHolder == null) {
-                    pncClientTokenHolder = new PncClientTokenHolder(() -> getCredential(keycloakConfig));
+                if (ldapUsernamePassword != null) {
+                    String[] userPwdSplit = ldapUsernamePassword.split(":");
+                    builder = builder.basicAuth(new Configuration.BasicAuth(userPwdSplit[0], userPwdSplit[1]));
+                } else {
+                    if (pncClientTokenHolder == null) {
+                        pncClientTokenHolder = new PncClientTokenHolder(() -> getCredential(keycloakConfig));
+                    }
+                    builder = builder.bearerTokenSupplier(() -> pncClientTokenHolder.getAccessToken());
                 }
-                builder = builder.bearerTokenSupplier(() -> pncClientTokenHolder.getAccessToken());
             }
             Configuration configuration = builder.build();
 
