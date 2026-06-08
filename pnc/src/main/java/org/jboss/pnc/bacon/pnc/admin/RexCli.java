@@ -104,7 +104,7 @@ public class RexCli {
             RexConfig rexConfig = Config.instance().getActiveProfile().getRex();
             rexUrl = rexConfig.getUrl();
         }
-        ResteasyClient resteasyClient = builder.register(new CustomJacksonConfigurator()).build();
+        ResteasyClient resteasyClient = (ResteasyClient) builder.register(new CustomJacksonConfigurator()).build();
         if (OTelCLIHelper.otelEnabled()) {
             resteasyClient.register(new CustomRestHeaderFilter(Span.current().getSpanContext()));
         }
