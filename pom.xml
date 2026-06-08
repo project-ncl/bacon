@@ -100,6 +100,7 @@
         <maven-core.version>3.9.15</maven-core.version>
         <maven-resolver.version>1.9.25</maven-resolver.version>
         <maven-wagon.version>3.5.3</maven-wagon.version>
+        <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <picocli.version>4.7.7</picocli.version>
