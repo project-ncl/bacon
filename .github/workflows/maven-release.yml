@@ -20,7 +20,7 @@ jobs:
         # Weirdly it needs to be present in our .m2/repository folder for the
         # test to pass. I thought it would be downloaded by the Maven resolver
         # directly.
-        release_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V release:prepare release:perform -DlocalCheckout=true -DpushChanges=false
+        release_command: mvn dependency:get -Dartifact=junit:junit:4.12 && mvn -B -V -Prelease release:prepare release:perform -DlocalCheckout=true -DpushChanges=false
         java_version: 17
       secrets:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
