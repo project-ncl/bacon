@@ -19,7 +19,11 @@ package org.jboss.pnc.bacon.pnc;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -30,6 +34,7 @@ import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractListCommand;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
@@ -47,6 +52,8 @@ import org.jboss.pnc.enums.BuildType;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -58,6 +65,7 @@ import picocli.CommandLine.Parameters;
         description = "Build Config",
         subcommands = {
                 BuildConfigCli.Create.class,
+                BuildConfigCli.CreateFromRevision.class,
                 BuildConfigCli.CreateWithSCM.class,
                 BuildConfigCli.Get.class,
                 BuildConfigCli.GetRevision.class,
@@ -68,7 +76,8 @@ import picocli.CommandLine.Parameters;
                 BuildConfigCli.Clone.class,
                 BuildConfigCli.CreateRevision.class,
                 BuildConfigCli.AddDependency.class,
-                BuildConfigCli.RemoveDependency.class })
+                BuildConfigCli.RemoveDependency.class
+        })
 @Slf4j
 public class BuildConfigCli {
 
@@ -359,6 +368,143 @@ public class BuildConfigCli {
                 }
 
                 ObjectHelper.print(getJsonOutput(), newBuildConfiguration);
+                return 0;
+            }
+        }
+    }
+
+    @Command(
+            name = "create-from-revision",
+            description = "Create a new build config from an existing build config revision",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc build-config create-from-revision 8826 \\%n"
+                    + "\t--revisionId 2725586 \\%n"
+                    + "\t--buildConfigName FasterXML-woodstox-6.4.0-copy \\%n"
+                    + "\t--product-version-id 123 \\%n"
+                    + "\t-PALIGNMENT_PARAMETERS=\"-DdependencyOverride.*:*@*=\" \\%n"
+                    + "\t--description \"New copy\" \\%n"
+                    + "$ bacon pnc build-config create-from-revision --revision-file /tmp/source-bcr.json \\%n"
+                    + "\t--buildConfigName FasterXML-woodstox-6.4.0-lightwell")
+    public static class CreateFromRevision extends JSONCommandHandler implements Callable<Integer> {
+
+        @Parameters(
+                arity = "0..1",
+                description = "Build config ID containing the revision to copy. Not required when --revision-file is used")
+        private String buildConfigId;
+
+        @Option(
+                names = "--revisionId",
+                description = "Revision ID of the build config to copy. Required unless --revision-file is used")
+        private Integer revisionId;
+
+        @Option(
+                names = "--revision-file",
+                description = "JSON file containing a BuildConfigurationRevision, for cross-environment copy workflows")
+        private Path revisionFile;
+
+        @Option(
+                names = "--buildConfigName",
+                required = true,
+                description = "Name of the new build config")
+        private String buildConfigName;
+
+        @Option(
+                names = "--description",
+                description = "Optional description for the new build config")
+        private String description;
+
+        @Option(names = "--environment-id", description = "Override target environment ID for the new build config")
+        private String environmentId;
+
+        @Option(names = "--project-id", description = "Override project ID for the new build config")
+        private String projectId;
+
+        @Option(names = "--scm-repository-id", description = "Override SCM repository ID for the new build config")
+        private String scmRepositoryId;
+
+        @Option(names = "--scm-revision", description = "Override SCM revision for the new build config")
+        private String scmRevision;
+
+        @Option(names = "--build-script", description = "Override build script for the new build config")
+        private String buildScript;
+
+        @Option(names = "--build-type", description = "Override build type. Options are: MVN,GRADLE,NPM,SBT")
+        private String buildType;
+
+        @Option(names = "--product-version-id", description = "Product Version ID for the new build config")
+        private String productVersionId;
+
+        @Option(names = { "-P", "--parameter" }, description = "Parameter override. Format: -PKEY=VALUE")
+        private Map<String, String> parameters;
+
+        @Option(names = "--default-alignment-params", description = "Override default alignment parameters")
+        private String defaultAlignmentParams;
+
+        @Option(
+                names = "--brew-pull-active",
+                description = "Enable to look for dependencies also in brew not just in pnc. (Slows down build)")
+        private Boolean brewPullActive;
+
+        private BuildConfigurationRevision loadRevision(BuildConfigurationClient client) throws Exception {
+            if (revisionFile != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
+                return objectMapper.readValue(Files.readString(revisionFile), BuildConfigurationRevision.class);
+            }
+
+            if (isNotEmpty(buildConfigId) && revisionId != null) {
+                return client.getRevision(buildConfigId, revisionId);
+            }
+
+            throw new FatalException(
+                    "Specify either --revision-file or both buildConfigId and --revisionId for create-from-revision");
+        }
+
+        @Override
+        public Integer call() throws Exception {
+            try (BuildConfigurationClient client = CREATOR.newClientAuthenticated()) {
+                BuildConfigurationRevision revision = loadRevision(client);
+
+                Map<String, String> mergedParameters = new LinkedHashMap<>();
+                if (revision.getParameters() != null) {
+                    mergedParameters.putAll(revision.getParameters());
+                }
+                if (parameters != null) {
+                    mergedParameters.putAll(parameters);
+                }
+
+                BuildConfiguration.Builder newBuildConfiguration = BuildConfiguration.builder()
+                        .name(buildConfigName)
+                        .description(description)
+                        .scmRepository(
+                                isNotEmpty(scmRepositoryId)
+                                        ? SCMRepository.builder().id(scmRepositoryId).build()
+                                        : revision.getScmRepository())
+                        .project(
+                                isNotEmpty(projectId)
+                                        ? ProjectRef.refBuilder().id(projectId).build()
+                                        : revision.getProject())
+                        .environment(
+                                isNotEmpty(environmentId)
+                                        ? Environment.builder().id(environmentId).build()
+                                        : revision.getEnvironment())
+                        .dependencies(Collections.emptyMap())
+                        .groupConfigs(Collections.emptyMap())
+                        .parameters(mergedParameters)
+                        .buildScript(isNotEmpty(buildScript) ? buildScript : revision.getBuildScript())
+                        .scmRevision(isNotEmpty(scmRevision) ? scmRevision : revision.getScmRevision())
+                        .buildType(isNotEmpty(buildType) ? BuildType.valueOf(buildType) : revision.getBuildType())
+                        .defaultAlignmentParams(
+                                isNotEmpty(defaultAlignmentParams)
+                                        ? defaultAlignmentParams
+                                        : revision.getDefaultAlignmentParams())
+                        .brewPullActive(brewPullActive != null ? brewPullActive : revision.isBrewPullActive());
+
+                if (isNotEmpty(productVersionId)) {
+                    newBuildConfiguration.productVersion(ProductVersionRef.refBuilder().id(productVersionId).build());
+                }
+
+                ObjectHelper.print(getJsonOutput(), client.createNew(newBuildConfiguration.build()));
                 return 0;
             }
         }
