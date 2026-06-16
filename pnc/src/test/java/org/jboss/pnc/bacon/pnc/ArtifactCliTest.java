@@ -1,8 +1,11 @@
 package org.jboss.pnc.bacon.pnc;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import picocli.CommandLine;
 
 class ArtifactCliTest {
 
@@ -18,5 +21,12 @@ class ArtifactCliTest {
         assertEquals(ArtifactCli.transformIdentifierIfGAV(gav1), identifier1);
         assertEquals(ArtifactCli.transformIdentifierIfGAV(identifier2), identifier2);
         assertEquals(ArtifactCli.transformIdentifierIfGAV(identifier3), identifier3);
+    }
+
+    @Test
+    void artifactRootDoesNotRegisterAdminOnlyBlacklistSubcommand() {
+        CommandLine commandLine = new CommandLine(new ArtifactCli());
+
+        assertThat(commandLine.getSubcommands()).doesNotContainKey("blacklist");
     }
 }
