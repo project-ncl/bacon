@@ -74,7 +74,10 @@ import picocli.CommandLine.Parameters;
                 BuildCli.GetRevision.class,
                 BuildCli.GetLog.class,
                 BuildCli.GetAlignLog.class,
-                BuildCli.DownloadSources.class })
+                BuildCli.GetProvenance.class,
+                BuildCli.DownloadSources.class,
+                BuildCli.DownloadBuiltArtifacts.class,
+                BuildCli.DownloadAllOutput.class })
 @Slf4j
 public class BuildCli {
 
@@ -354,4 +357,62 @@ public class BuildCli {
             }
         }
     }
+
+    @Command(
+            name = "download-built-artifacts",
+            description = "Download all built artifacts of a build into a ZIP")
+    public static class DownloadBuiltArtifacts implements Callable<Integer> {
+
+        @Parameters(description = "Build ID")
+        private String buildId;
+
+        @Option(names = "--output-dir", description = "Directory where the ZIP should be written")
+        private Path outputDir = Paths.get(".");
+
+        @Override
+        public Integer call() {
+            Path zipFile = new BuildOutputDownloader().downloadBuiltArtifacts(buildId, outputDir);
+            log.info("Downloaded built artifacts to {}", zipFile);
+            return 0;
+        }
+    }
+
+    @Command(
+            name = "get-provenance",
+            description = "Download SLSA provenance JSON for a built artifact SHA-256")
+    public static class GetProvenance implements Callable<Integer> {
+
+        @Parameters(description = "Built artifact SHA-256")
+        private String sha256;
+
+        @Option(names = "--output", description = "Output JSON file")
+        private Path output = Paths.get("provenance.json");
+
+        @Override
+        public Integer call() {
+            Path provenanceFile = new BuildOutputDownloader().getProvenance(sha256, output);
+            log.info("Downloaded provenance to {}", provenanceFile);
+            return 0;
+        }
+    }
+
+    @Command(
+            name = "download-build-outputs",
+            description = "Download built artifacts, logs, alignment log, sources, and provenance into a single ZIP")
+    public static class DownloadAllOutput implements Callable<Integer> {
+
+        @Parameters(description = "Build ID")
+        private String buildId;
+
+        @Option(names = "--output-dir", description = "Directory where the ZIP should be written")
+        private Path outputDir = Paths.get(".");
+
+        @Override
+        public Integer call() {
+            Path zipFile = new BuildOutputDownloader().downloadAllOutput(buildId, outputDir);
+            log.info("Downloaded all build output to {}", zipFile);
+            return 0;
+        }
+    }
+
 }
