@@ -2920,11 +2920,17 @@ function _picocli_bacon_pnc_artifact_getgav() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'-p' '--configPath' '--profile'"
+  local arg_opts="'--buildCategory' '-p' '--configPath' '--profile'"
+  local buildCategory_option_args=("STANDARD" "SERVICE" "LIGHTWELL" "LIGHTWELL_UPSTREAM") # --buildCategory values
 
   type compopt &>/dev/null && compopt +o default
 
   case ${prev_word} in
+    '--buildCategory')
+      local IFS=$'\n'
+      COMPREPLY=( $( compReplyArray "${buildCategory_option_args[@]}" ) )
+      return $?
+      ;;
     '-p'|'--configPath')
       return
       ;;

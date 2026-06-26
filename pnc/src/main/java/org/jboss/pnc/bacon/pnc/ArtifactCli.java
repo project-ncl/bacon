@@ -17,6 +17,7 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.enums.BuildCategory;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
@@ -92,13 +93,20 @@ public class ArtifactCli {
         @CommandLine.Parameters(description = "Identifier/GAV of artifact")
         private String identifier;
 
+        @Option(names = "--buildCategory")
+        private BuildCategory buildCategory;
+
         @Override
         public Integer call() throws Exception {
             identifier = transformIdentifierIfGAV(identifier);
 
             try (ArtifactClient client = CREATOR.newClient()) {
+                String query = "identifier==" + identifier;
+                if (buildCategory != null) {
+                    query += ";buildCategory==" + buildCategory;
+                }
                 RemoteCollection<Artifact> result = client
-                        .getAll(null, null, null, Optional.empty(), Optional.ofNullable("identifier==" + identifier));
+                        .getAll(null, null, null, Optional.empty(), Optional.of(query));
                 if (result.size() == 0) {
                     ObjectHelper.print(getJsonOutput(), Collections.emptySet());
                 } else {
