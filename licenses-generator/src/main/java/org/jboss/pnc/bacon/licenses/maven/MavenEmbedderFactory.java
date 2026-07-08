@@ -16,11 +16,6 @@
 
 package org.jboss.pnc.bacon.licenses.maven;
 
-import org.apache.maven.model.building.ModelBuildingRequest;
-
-import hudson.maven.MavenEmbedderException;
-import hudson.maven.MavenRequest;
-
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
@@ -28,19 +23,10 @@ public class MavenEmbedderFactory {
 
     public SnowdropMavenEmbedder getSnowdropMavenEmbedder() {
         try {
-            return new SnowdropMavenEmbedder(getMavenRequest());
-        } catch (MavenEmbedderException e) {
+            return new SnowdropMavenEmbedder();
+        } catch (Exception e) {
             throw new RuntimeException("Failed to create Maven embedder", e);
         }
-    }
-
-    private MavenRequest getMavenRequest() {
-        MavenRequest mavenRequest = new MavenRequest();
-        mavenRequest.setSystemProperties(System.getProperties());
-        mavenRequest.setProcessPlugins(false);
-        mavenRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
-
-        return mavenRequest;
     }
 
 }
