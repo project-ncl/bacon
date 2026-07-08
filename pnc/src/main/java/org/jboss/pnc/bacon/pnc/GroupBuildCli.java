@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.pnc.api.enums.AlignmentPreference;
+import org.jboss.pnc.api.enums.RebuildMode;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
@@ -36,7 +37,6 @@ import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.GroupBuild;
-import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.restclient.AdvancedGroupConfigurationClient;

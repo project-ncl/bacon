@@ -3546,7 +3546,7 @@ function _picocli_bacon_pnc_build_getprovenance() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--redacted' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
   local arg_opts="'--output' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
@@ -3648,7 +3648,7 @@ function _picocli_bacon_pnc_build_downloadbuildoutputs() {
   local prev_word=${COMP_WORDS[COMP_CWORD-1]}
 
   local commands=""
-  local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
+  local flag_opts="'--redacted' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
   local arg_opts="'--output-dir' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
