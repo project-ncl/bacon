@@ -107,7 +107,7 @@ public class PncBuilder implements Closeable {
             log.warn(
                     "Temporary builds with timestamp alignment are not supported, running temporary builds instead...");
         GroupBuildParameters buildParams = new GroupBuildParameters();
-        buildParams.setRebuildMode(rebuildMode);
+        buildParams.setRebuildMode(org.jboss.pnc.api.enums.RebuildMode.valueOf(rebuildMode.toString()));
         buildParams.setTemporaryBuild(tempBuild);
         if (dryRun) {
             buildParams.setTemporaryBuild(true);

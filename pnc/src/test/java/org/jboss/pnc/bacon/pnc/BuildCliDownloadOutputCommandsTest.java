@@ -50,7 +50,7 @@ class BuildCliDownloadOutputCommandsTest {
 
         Object command = parseResult.subcommand().commandSpec().userObject();
         assertInstanceOf(BuildCli.GetProvenance.class, command);
-        assertEquals("abc123", getField(command, "sha256"));
+        assertEquals("abc123", getField(command, "buildId"));
         assertEquals(Path.of("/tmp/provenance.json"), getField(command, "output"));
     }
 

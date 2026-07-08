@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.Response;
 
 import org.jboss.pnc.api.enums.AlignmentPreference;
+import org.jboss.pnc.api.enums.RebuildMode;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
@@ -51,7 +52,6 @@ import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
-import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.restclient.AdvancedBuildConfigurationClient;
@@ -317,9 +317,9 @@ public class BuildCli {
             try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
                 Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
                 if (streamLogs.isPresent()) {
-                    for (String line : new BufferedReader(
-                            new InputStreamReader(streamLogs.get(), StandardCharsets.UTF_8)).lines().toList()) {
-                        log.info(line);
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(streamLogs.get(), StandardCharsets.UTF_8))) {
+                        reader.lines().forEach(log::info);
                     }
                 }
             }
@@ -379,18 +379,23 @@ public class BuildCli {
 
     @Command(
             name = "get-provenance",
-            description = "Download SLSA provenance JSON for a built artifact SHA-256")
+            description = "Download SLSA provenance attestation of the build")
     public static class GetProvenance implements Callable<Integer> {
 
-        @Parameters(description = "Built artifact SHA-256")
-        private String sha256;
+        @Parameters(description = "Build id.")
+        private String buildId;
+
+        @Option(
+                names = "--redacted",
+                description = "Download the redacted version of the provenance, with no sensitive information.")
+        private boolean redacted = false;
 
         @Option(names = "--output", description = "Output JSON file")
         private Path output = Paths.get("provenance.json");
 
         @Override
         public Integer call() {
-            Path provenanceFile = new BuildOutputDownloader().getProvenance(sha256, output);
+            Path provenanceFile = new BuildOutputDownloader().getProvenanceOfBuild(buildId, redacted, output);
             log.info("Downloaded provenance to {}", provenanceFile);
             return 0;
         }
@@ -404,12 +409,17 @@ public class BuildCli {
         @Parameters(description = "Build ID")
         private String buildId;
 
+        @Option(
+                names = "--redacted",
+                description = "Download the redacted version of the provenance, with no sensitive information.")
+        private boolean redacted = false;
+
         @Option(names = "--output-dir", description = "Directory where the ZIP should be written")
         private Path outputDir = Paths.get(".");
 
         @Override
         public Integer call() {
-            Path zipFile = new BuildOutputDownloader().downloadAllOutput(buildId, outputDir);
+            Path zipFile = new BuildOutputDownloader().downloadAllOutput(buildId, redacted, outputDir);
             log.info("Downloaded all build output to {}", zipFile);
             return 0;
         }

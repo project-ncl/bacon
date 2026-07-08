@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -52,7 +49,7 @@ import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.client.BuildClient;
-import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.client.SlsaProvenanceV1Client;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 
@@ -100,17 +97,24 @@ public class BuildOutputDownloader {
         return zipFile;
     }
 
-    public Path getProvenance(String sha256, Path outputFile) {
-        if (sha256 == null || sha256.isBlank()) {
-            throw new IllegalArgumentException("sha256 must not be blank");
+    public Path getProvenanceOfBuild(String buildId, boolean redacted, Path outputFile) {
+        if (buildId == null || buildId.isBlank()) {
+            throw new IllegalArgumentException("buildId must not be blank");
         }
         createDirectories(outputFile.getParent());
-        Object provenance = fetchProvenanceViaGeneratedClient(sha256).orElseGet(() -> fetchProvenanceViaHttp(sha256));
-        writeJson(outputFile, provenance);
-        return outputFile;
+
+        try (SlsaProvenanceV1Client slsaProvenanceV1Client = new SlsaProvenanceV1Client(
+                PncClientHelper.getPncConfiguration(false))) {
+            Object provenance = redacted ? slsaProvenanceV1Client.getFromBuildIdRedacted(buildId)
+                    : slsaProvenanceV1Client.getFromBuildId(buildId);
+            writeJson(outputFile, provenance);
+            return outputFile;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get provenance for build with buildId " + buildId, e);
+        }
     }
 
-    public Path downloadAllOutput(String buildId, Path outputDir) {
+    public Path downloadAllOutput(String buildId, boolean redacted, Path outputDir) {
         Path workDir = outputDir.resolve(buildId + "-build-output");
         recreateDirectory(workDir);
 
@@ -134,7 +138,7 @@ public class BuildOutputDownloader {
         if (sha256 == null || sha256.isBlank()) {
             throw new RuntimeException("Unable to determine sha256 from built artifacts for build " + buildId);
         }
-        getProvenance(sha256, workDir.resolve("provenance.json"));
+        getProvenanceOfBuild(buildId, redacted, workDir.resolve("provenance.json"));
 
         downloadBuildLog(buildId, logsDir.resolve("build.log"));
         downloadAlignmentLog(buildId, logsDir.resolve("alignment.log"));
@@ -234,68 +238,6 @@ public class BuildOutputDownloader {
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to download alignment log for build " + buildId, e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Optional<Object> fetchProvenanceViaGeneratedClient(String sha256) {
-        try {
-            Class<?> clientClass = Class.forName("org.jboss.pnc.client.SlsaProvenanceV1Client");
-            Constructor<?> constructor = clientClass.getConstructor(Configuration.class);
-            Object client = constructor.newInstance(PncClientHelper.getPncConfiguration(false));
-            try {
-                for (Method method : clientClass.getMethods()) {
-                    if (!method.getName().equals("getFromArtifactDigest") || method.getParameterCount() < 1) {
-                        continue;
-                    }
-                    Object[] args = new Object[method.getParameterCount()];
-                    Class<?>[] parameterTypes = method.getParameterTypes();
-                    args[0] = sha256;
-                    for (int i = 1; i < parameterTypes.length; i++) {
-                        if (Optional.class.isAssignableFrom(parameterTypes[i])) {
-                            args[i] = Optional.empty();
-                        } else {
-                            args[i] = null;
-                        }
-                    }
-                    return Optional.ofNullable(method.invoke(client, args));
-                }
-            } finally {
-                if (client instanceof AutoCloseable autoCloseable) {
-                    autoCloseable.close();
-                }
-            }
-            return Optional.empty();
-        } catch (ClassNotFoundException e) {
-            log.debug("SlsaProvenanceV1Client is not available; falling back to direct HTTP provenance lookup");
-            return Optional.empty();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve provenance for sha256 " + sha256, e);
-        }
-    }
-
-    private Object fetchProvenanceViaHttp(String sha256) {
-        String baseUrl = Config.instance().getActiveProfile().getPnc().getUrl();
-        String separator = baseUrl.endsWith("/") ? "" : "/";
-        String encodedSha = URLEncoder.encode(sha256, StandardCharsets.UTF_8);
-        URI uri = URI.create(baseUrl + separator + "slsa/build-provenance/v1/artifacts?sha256=" + encodedSha);
-        HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Accept", "application/json").GET().build();
-        try {
-            HttpResponse<String> response = httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (response.statusCode() < 200 || response.statusCode() > 299) {
-                throw new RuntimeException(
-                        "Failed to retrieve provenance for sha256 " + sha256 + ". HTTP status: "
-                                + response.statusCode() + ", body: " + response.body());
-            }
-            return JSON.readTree(response.body());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to retrieve provenance for sha256 " + sha256, e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interrupted while retrieving provenance for sha256 " + sha256, e);
         }
     }
 
