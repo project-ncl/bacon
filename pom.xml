@@ -92,7 +92,6 @@
         <jboss.snapshots.repo.url>https://central.sonatype.com/repository/maven-snapshots</jboss.snapshots.repo.url>
         <jdk.max.version>17</jdk.max.version>
         <jdk.min.version>17</jdk.min.version>
-        <jenkins-maven-embedder.version>3.15</jenkins-maven-embedder.version>
         <jline.version>3.30.6</jline.version>
         <json.version>1.1.4</json.version>
         <junit.version>6.1.0</junit.version>
@@ -305,21 +304,6 @@
                 <groupId>io.quarkus.qute</groupId>
                 <artifactId>qute-core</artifactId>
                 <version>${qute.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.lib</groupId>
-                <artifactId>lib-jenkins-maven-embedder</artifactId>
-                <version>${jenkins-maven-embedder.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.annotation</groupId>
-                        <artifactId>jsr250-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.maven</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>

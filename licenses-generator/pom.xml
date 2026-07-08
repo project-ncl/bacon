@@ -42,10 +42,6 @@
 
         <!-- Maven Embedder -->
         <dependency>
-            <groupId>org.jenkins-ci.lib</groupId>
-            <artifactId>lib-jenkins-maven-embedder</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
         </dependency>
@@ -200,13 +196,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>jenkins-ci-releases</id>
-            <url>https://repo.jenkins-ci.org/releases/</url>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
