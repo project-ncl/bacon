@@ -3002,7 +3002,7 @@ function _picocli_bacon_pnc_artifact_getgav() {
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
   local arg_opts="'--buildCategory' '-p' '--configPath' '--profile'"
-  local buildCategory_option_args=("STANDARD" "SERVICE" "LIGHTWELL" "LIGHTWELL_UPSTREAM") # --buildCategory values
+  local buildCategory_option_args=("STANDARD" "SERVICE" "LIGHTWELL" "LIGHTWELL_UPSTREAM" "LIGHTWELL_NOVEL") # --buildCategory values
 
   type compopt &>/dev/null && compopt +o default
 
