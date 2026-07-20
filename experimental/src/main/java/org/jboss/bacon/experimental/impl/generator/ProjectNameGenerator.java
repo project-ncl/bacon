@@ -33,9 +33,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProjectNameGenerator {
     private final VersionParser versionParser = new VersionParser("redhat", "temporary-redhat");
+    private final String buildNameSuffix;
 
     private Set<Project> allProjects;
     private Map<GA, Set<Project>> projectsByGA;
+
+    public ProjectNameGenerator() {
+        this("-AUTOBUILD");
+    }
+
+    public ProjectNameGenerator(String buildNameSuffix) {
+        this.buildNameSuffix = buildNameSuffix;
+    }
 
     public void nameProjects(Set<Project> projects) {
         allProjects = new HashSet<>();
@@ -58,7 +67,7 @@ public class ProjectNameGenerator {
     private void nameProject(Project project) {
         GAV gav = project.getFirstGAV();
         String version = resolveVersionForName(project, gav);
-        String name = gav.getGroupId() + "-" + gav.getArtifactId() + "-" + version + "-AUTOBUILD";
+        String name = gav.getGroupId() + "-" + gav.getArtifactId() + "-" + version + buildNameSuffix;
 
         project.setName(name);
     }

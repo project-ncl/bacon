@@ -103,7 +103,8 @@ public class DependencyGenerator {
             GeneratorConfig config = loadConfig();
             // Initialize working classes
             DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
-            ProjectNameGenerator projectNameGenerator = new ProjectNameGenerator();
+            ProjectNameGenerator projectNameGenerator = new ProjectNameGenerator(
+                    config.getBuildConfigGeneratorConfig().getBuildNameSuffix());
             ProjectFinder projectFinder = new ProjectFinder(config.getBuildConfigGeneratorConfig());
             BuildConfigGenerator buildConfigGenerator = new BuildConfigGenerator(
                     config.getBuildConfigGeneratorConfig());

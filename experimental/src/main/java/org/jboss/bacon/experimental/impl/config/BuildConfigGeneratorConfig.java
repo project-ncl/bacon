@@ -62,4 +62,10 @@ public class BuildConfigGeneratorConfig {
      * defined by environmentName would not be found because it was deprecated.
      */
     private boolean allowDeprecatedEnvironments = false;
+
+    /**
+     * Suffix appended to generated build config names. Set to empty string to disable.
+     */
+    @NotNull
+    private String buildNameSuffix = "-AUTOBUILD";
 }

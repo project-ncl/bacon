@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 public class ProjectNameGeneratorTest {
 
     private ProjectNameGenerator png = new ProjectNameGenerator();
+    private ProjectNameGenerator pngNoSuffix = new ProjectNameGenerator("");
 
     @Test
     public void shouldGenerateName() {
@@ -102,5 +103,26 @@ public class ProjectNameGeneratorTest {
         assertThat(nonRedhat.getName()).isEqualTo("org.slf4j-slf4j-api-1.7.25-AUTOBUILD");
         assertThat(temporaryRedhat.isConflictingName()).isTrue();
         assertThat(temporaryRedhat.getName()).isEqualTo("org.slf4j-slf4j-api-1.7.25.temporary-redhat-00001-AUTOBUILD");
+    }
+
+    @Test
+    public void shouldGenerateNameWithEmptySuffix() {
+        Project nonRedhat = new Project();
+        nonRedhat.setGavs(Collections.singleton(new GAV("org.slf4j", "slf4j-api", "1.7.25")));
+        nonRedhat.setDependencies(Set.of());
+        pngNoSuffix.nameProjects(Set.of(nonRedhat));
+
+        assertThat(nonRedhat.getName()).isEqualTo("org.slf4j-slf4j-api-1.7.25");
+    }
+
+    @Test
+    public void shouldGenerateNameWithCustomSuffix() {
+        ProjectNameGenerator pngCustom = new ProjectNameGenerator("-CUSTOM");
+        Project nonRedhat = new Project();
+        nonRedhat.setGavs(Collections.singleton(new GAV("org.slf4j", "slf4j-api", "1.7.25")));
+        nonRedhat.setDependencies(Set.of());
+        pngCustom.nameProjects(Set.of(nonRedhat));
+
+        assertThat(nonRedhat.getName()).isEqualTo("org.slf4j-slf4j-api-1.7.25-CUSTOM");
     }
 }
