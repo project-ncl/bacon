@@ -68,4 +68,9 @@ public class BuildConfigGeneratorConfig {
      */
     @NotNull
     private String buildNameSuffix = "-AUTOBUILD";
+
+    /**
+     * If true, dependencies are omitted from the generated build configuration output.
+     */
+    private boolean skipDependencies = false;
 }

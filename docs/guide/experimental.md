@@ -82,6 +82,7 @@ buildConfigGeneratorConfig: # Configuration for how the new build configs should
     scmMapping: # SCM URLs containing the listed key are wholy replaced by the value
         "svn.example.com/foo-bar": "https://git.example.com/foo/bar.git" # "https://svn.example.com/foo-bar/branch" -> "https://git.example.com/foo/bar.git"
     buildNameSuffix: "-AUTOBUILD" # Suffix appended to generated build config names. Defaults to "-AUTOBUILD". Set to "" to disable.
+    skipDependencies: false # If true, dependencies are omitted from the generated build configuration output. Defaults to false.
     failGeneratedBuildScript: true # When generating new or copying and changing existing build config, will part to build script to make sure the build fails
     # This can be helpful to make sure the configs are manually reviewed
     allowDeprecatedEnvironments: false # If true, uses systemImageId to specify environment (to force use of specific environment) when the enviornment defined by environmentName would not be found because it was deprecated.
