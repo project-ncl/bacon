@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -33,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
@@ -53,6 +55,8 @@ public class BuildSourcesDownloader {
     private static final int PREVIEW_BYTES = 300;
     private static final int MAX_REDIRECTS = 10;
 
+    private static final Pattern COMMIT_SHA = Pattern.compile("[0-9a-fA-F]{40}");
+
     private static final String ACCEPT_ARCHIVE = "application/x-gzip, application/gzip, application/x-tar, application/octet-stream";
     private static final String ACCEPT_GITHUB_API = "application/json";
 
@@ -72,16 +76,16 @@ public class BuildSourcesDownloader {
             }
 
             String scmUrl = selectScmUrl(build);
-            String scmRevision = selectScmRevision(build);
+            List<String> scmRevisions = selectScmRevisions(build);
 
             if (scmUrl == null || scmUrl.isBlank()) {
                 throw new RuntimeException("Build " + build.getId() + " has no SCM URL.");
             }
-            if (scmRevision == null || scmRevision.isBlank()) {
+            if (scmRevisions.isEmpty()) {
                 throw new RuntimeException("Build " + build.getId() + " has no SCM revision.");
             }
 
-            List<SourceArchiveCandidate> candidates = sourceArchiveCandidates(scmUrl, scmRevision);
+            List<SourceArchiveCandidate> candidates = sourceArchiveCandidates(scmUrl, scmRevisions);
             if (candidates.isEmpty()) {
                 throw new RuntimeException(
                         "Could not derive any source archive URL for build " + build.getId()
@@ -228,6 +232,10 @@ public class BuildSourcesDownloader {
     }
 
     static List<SourceArchiveCandidate> sourceArchiveCandidates(String scmUrl, String scmRevision) {
+        return sourceArchiveCandidates(scmUrl, List.of(scmRevision));
+    }
+
+    static List<SourceArchiveCandidate> sourceArchiveCandidates(String scmUrl, List<String> scmRevisions) {
         NormalizedGithubRepository repository = normalizeGithubRepository(scmUrl);
         if (repository == null) {
             return List.of();
@@ -235,30 +243,77 @@ public class BuildSourcesDownloader {
 
         Set<SourceArchiveCandidate> candidates = new LinkedHashSet<>();
 
-        candidates.add(
-                new SourceArchiveCandidate(
-                        URI.create(
-                                repository.webBaseUrl + "/" + repository.owner + "/" + repository.repository
-                                        + "/archive/" + scmRevision + ".tar.gz"),
-                        ACCEPT_ARCHIVE));
+        // Prefer the authenticated REST endpoint. Browser archive URLs on GitHub Enterprise commonly redirect to
+        // SAML/login pages and return HTML or 406 instead of an archive.
+        for (String scmRevision : scmRevisions) {
+            for (String revisionCandidate : revisionCandidates(scmRevision)) {
+                candidates.add(
+                        new SourceArchiveCandidate(
+                                apiTarballUri(repository, revisionCandidate),
+                                ACCEPT_GITHUB_API));
+            }
+        }
 
-        if ("github.com".equals(repository.host)) {
-            candidates.add(
-                    new SourceArchiveCandidate(
-                            URI.create(
-                                    "https://api.github.com/repos/" + repository.owner + "/" + repository.repository
-                                            + "/tarball/" + scmRevision),
-                            ACCEPT_GITHUB_API));
-        } else {
-            candidates.add(
-                    new SourceArchiveCandidate(
-                            URI.create(
-                                    repository.webBaseUrl + "/api/v3/repos/" + repository.owner + "/"
-                                            + repository.repository + "/tarball/" + scmRevision),
-                            ACCEPT_GITHUB_API));
+        // Keep the browser archive endpoint as a fallback for installations where the REST endpoint is unavailable.
+        for (String scmRevision : scmRevisions) {
+            for (String revisionCandidate : revisionCandidates(scmRevision)) {
+                candidates.add(
+                        new SourceArchiveCandidate(
+                                webArchiveUri(repository, revisionCandidate),
+                                ACCEPT_ARCHIVE));
+            }
         }
 
         return List.copyOf(candidates);
+    }
+
+    private static List<String> revisionCandidates(String scmRevision) {
+        if (scmRevision == null || scmRevision.isBlank()) {
+            return List.of();
+        }
+
+        String revision = scmRevision.trim();
+        Set<String> candidates = new LinkedHashSet<>();
+        candidates.add(revision);
+
+        // GitHub returns HTTP 300 when an unqualified name exists as both a branch and a tag. Explicitly retry both
+        // namespaces. Commit SHAs and already-qualified refs do not need these alternatives.
+        if (!revision.startsWith("refs/") && !COMMIT_SHA.matcher(revision).matches()) {
+            candidates.add("refs/tags/" + revision);
+            candidates.add("refs/heads/" + revision);
+        }
+
+        return List.copyOf(candidates);
+    }
+
+    private static URI apiTarballUri(NormalizedGithubRepository repository, String revision) {
+        String apiBaseUrl = "github.com".equalsIgnoreCase(repository.host)
+                ? "https://api.github.com"
+                : repository.webBaseUrl + "/api/v3";
+
+        return URI.create(
+                apiBaseUrl + "/repos/" + encodePath(repository.owner) + "/" + encodePath(repository.repository)
+                        + "/tarball/" + encodePath(revision));
+    }
+
+    private static URI webArchiveUri(NormalizedGithubRepository repository, String revision) {
+        return URI.create(
+                repository.webBaseUrl + "/" + encodePath(repository.owner) + "/"
+                        + encodePath(repository.repository) + "/archive/" + encodePath(revision) + ".tar.gz");
+    }
+
+    private static String encodePath(String value) {
+        String[] segments = value.split("/", -1);
+        StringBuilder encoded = new StringBuilder();
+
+        for (int i = 0; i < segments.length; i++) {
+            if (i > 0) {
+                encoded.append('/');
+            }
+            encoded.append(URLEncoder.encode(segments[i], StandardCharsets.UTF_8).replace("+", "%20"));
+        }
+
+        return encoded.toString();
     }
 
     static NormalizedGithubRepository normalizeGithubRepository(String scmUrl) {
@@ -332,6 +387,23 @@ public class BuildSourcesDownloader {
         }
 
         return build.getScmRevision();
+    }
+
+    static List<String> selectScmRevisions(Build build) {
+        Set<String> revisions = new LinkedHashSet<>();
+
+        // The build-level revision is normally the immutable revision actually used for the build, so prefer it over
+        // the configured branch/tag when both are present.
+        if (build.getScmRevision() != null && !build.getScmRevision().isBlank()) {
+            revisions.add(build.getScmRevision());
+        }
+
+        BuildConfigurationRevisionRef revision = build.getBuildConfigRevision();
+        if (revision != null && revision.getScmRevision() != null && !revision.getScmRevision().isBlank()) {
+            revisions.add(revision.getScmRevision());
+        }
+
+        return List.copyOf(revisions);
     }
 
     static void assertGzipArchive(Path file, URI sourceArchiveUri) throws IOException {
@@ -428,6 +500,10 @@ public class BuildSourcesDownloader {
         private SourceArchiveCandidate(URI uri, String initialAcceptHeader) {
             this.uri = uri;
             this.initialAcceptHeader = initialAcceptHeader;
+        }
+
+        URI uri() {
+            return uri;
         }
 
         @Override
