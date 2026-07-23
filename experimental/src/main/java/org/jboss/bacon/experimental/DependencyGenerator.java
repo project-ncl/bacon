@@ -92,15 +92,18 @@ public class DependencyGenerator {
         @Override
         public void run() {
             try {
-                ObjectHelper.print(getJsonOutput(), generatePigConfig());
+                GeneratorConfig config = loadConfig();
+                PigConfiguration pigConfig = generatePigConfig(config);
+                if (config.getBuildConfigGeneratorConfig().isSkipDependencies()) {
+                    pigConfig.getBuilds().forEach(bc -> bc.getDependencies().clear());
+                }
+                ObjectHelper.print(getJsonOutput(), pigConfig);
             } catch (JsonProcessingException e) {
                 throw new FatalException("Caught exception " + e.getMessage(), e);
             }
         }
 
-        private PigConfiguration generatePigConfig() {
-            // Load config file
-            GeneratorConfig config = loadConfig();
+        private PigConfiguration generatePigConfig(GeneratorConfig config) {
             // Initialize working classes
             DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
             ProjectNameGenerator projectNameGenerator = new ProjectNameGenerator(
