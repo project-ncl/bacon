@@ -49,6 +49,7 @@ public class DependencyResolver {
     private final DependencyResolutionConfig config;
     private final VersionParser versionParser = new VersionParser("redhat");
     private final LookupApi lookupApi;
+    private final MavenCentralSearcher mavenCentralSearcher = new MavenCentralSearcher();
 
     public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig) {
         this.config = dependencyResolutionConfig;
@@ -69,10 +70,7 @@ public class DependencyResolver {
         log.info("There are {} dependencies to be excluded", excludedGavs.length);
         Arrays.stream(excludedGavs).map(GACTVParser::parse).forEach(dominoConfig::addExcludePattern);
         config.getIncludeArtifacts().stream().map(GACTVParser::parse).forEach(dominoConfig::addIncludePattern);
-        Set<ArtifactCoords> artifacts = config.getAnalyzeArtifacts()
-                .stream()
-                .map(ArtifactCoords::fromString)
-                .collect(Collectors.toSet());
+        Set<ArtifactCoords> artifacts = expandAnalyzeArtifacts(config.getAnalyzeArtifacts());
 
         if (config.getAnalyzeBOM() != null) {
             dominoConfig.setProjectBom(ArtifactCoords.fromString(config.getAnalyzeBOM()));
@@ -87,6 +85,36 @@ public class DependencyResolver {
                 .setRecipeRepos(config.getRecipeRepos())
                 .setProjectArtifacts(artifacts)
                 .setIncludeAlreadyBuilt(true); // TODO
+    }
+
+    private Set<ArtifactCoords> expandAnalyzeArtifacts(Set<String> analyzeArtifacts) {
+        Set<ArtifactCoords> result = new HashSet<>();
+        for (String entry : analyzeArtifacts) {
+            String[] parts = entry.split(":");
+            if (parts.length < 2) {
+                throw new FatalException(
+                        "Invalid artifact entry '" + entry
+                                + "': must contain at least groupId:artifactId");
+            }
+            String groupId = parts[0];
+            String artifactId = parts[1];
+            if ("*".equals(artifactId)) {
+                String version = parts.length >= 3 ? parts[2] : null;
+                if (version == null || version.isEmpty()) {
+                    throw new FatalException(
+                            "Wildcard artifact entry '" + entry
+                                    + "' must specify a version (format: groupId:*:version)");
+                }
+                Set<String> expandedArtifactIds = mavenCentralSearcher.findArtifacts(groupId, version);
+                log.info("Expanded {}:*:{} to {} artifacts: {}", groupId, version, expandedArtifactIds.size(), expandedArtifactIds);
+                for (String expandedArtifactId : expandedArtifactIds) {
+                    result.add(ArtifactCoords.fromString(groupId + ":" + expandedArtifactId + ":" + version));
+                }
+            } else {
+                result.add(ArtifactCoords.fromString(entry));
+            }
+        }
+        return result;
     }
 
     public DependencyResult resolve(Path projectDir, Path dominoConfigFile) {
