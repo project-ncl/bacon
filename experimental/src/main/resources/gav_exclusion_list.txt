@@ -1,0 +1,3 @@
+org.lz4:lz4-java:*:*:*
+at.yawk.lz4:lz4-java:*:*:*
+io.netty:*:*:*:*
