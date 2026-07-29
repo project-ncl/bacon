@@ -106,7 +106,12 @@ public class DependencyResolver {
                                     + "' must specify a version (format: groupId:*:version)");
                 }
                 Set<String> expandedArtifactIds = mavenCentralSearcher.findArtifacts(groupId, version);
-                log.info("Expanded {}:*:{} to {} artifacts: {}", groupId, version, expandedArtifactIds.size(), expandedArtifactIds);
+                log.info(
+                        "Expanded {}:*:{} to {} artifacts: {}",
+                        groupId,
+                        version,
+                        expandedArtifactIds.size(),
+                        expandedArtifactIds);
                 for (String expandedArtifactId : expandedArtifactIds) {
                     result.add(ArtifactCoords.fromString(groupId + ":" + expandedArtifactId + ":" + version));
                 }
