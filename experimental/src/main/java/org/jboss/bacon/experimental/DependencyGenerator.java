@@ -55,7 +55,9 @@ public class DependencyGenerator {
         @Override
         public void run() {
             GeneratorConfig config = loadConfig();
-            DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
+            DependencyResolver dependencyResolver = new DependencyResolver(
+                    config.getDependencyResolutionConfig(),
+                    config.getDependencyResolutionConfig().getDaMaxRetries());
             DependencyResult dependencies;
             dependencies = dependencyResolver.resolve(projectDir, dominoConfig);
             print(dependencies);
@@ -105,10 +107,14 @@ public class DependencyGenerator {
 
         private PigConfiguration generatePigConfig(GeneratorConfig config) {
             // Initialize working classes
-            DependencyResolver dependencyResolver = new DependencyResolver(config.getDependencyResolutionConfig());
+            DependencyResolver dependencyResolver = new DependencyResolver(
+                    config.getDependencyResolutionConfig(),
+                    config.getDependencyResolutionConfig().getDaMaxRetries());
             ProjectNameGenerator projectNameGenerator = new ProjectNameGenerator(
                     config.getBuildConfigGeneratorConfig().getBuildNameSuffix());
-            ProjectFinder projectFinder = new ProjectFinder(config.getBuildConfigGeneratorConfig());
+            ProjectFinder projectFinder = new ProjectFinder(
+                    config.getBuildConfigGeneratorConfig(),
+                    config.getDependencyResolutionConfig().getDaMaxRetries());
             BuildConfigGenerator buildConfigGenerator = new BuildConfigGenerator(
                     config.getBuildConfigGeneratorConfig());
             // Analyze dependencies

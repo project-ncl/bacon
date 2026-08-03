@@ -50,9 +50,11 @@ public class DependencyResolver {
     private final VersionParser versionParser = new VersionParser("redhat");
     private final LookupApi lookupApi;
     private final MavenCentralSearcher mavenCentralSearcher = new MavenCentralSearcher();
+    private final int daMaxRetries;
 
-    public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig) {
+    public DependencyResolver(DependencyResolutionConfig dependencyResolutionConfig, int daMaxRetries) {
         this.config = dependencyResolutionConfig;
+        this.daMaxRetries = daMaxRetries;
         // Remove System.out print that is caused because of listeners defined in BootstramMavenContext
         System.setProperty("quarkus-internal.maven-cmd-line-args", "-ntp");
 
@@ -238,7 +240,10 @@ public class DependencyResolver {
                     .brewPullActive(false)
                     .artifacts(releaseRepo.getGavs())
                     .build();
-            Set<MavenLookupResult> mavenLookupResults = lookupApi.lookupMaven(request);
+            Set<MavenLookupResult> mavenLookupResults = DaHelper.executeWithRetry(
+                    () -> lookupApi.lookupMaven(request),
+                    "lookupMaven for " + releaseRepo.getFirstGAV(),
+                    daMaxRetries);
             Set<String> versionsFound = mavenLookupResults.stream()
                     .map(MavenLookupResult::getBestMatchVersion)
                     .collect(Collectors.toSet());

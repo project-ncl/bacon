@@ -19,8 +19,16 @@ package org.jboss.bacon.da;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.SSLHandshakeException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.junit.jupiter.api.Test;
 
 class DaHelperTest {
@@ -79,5 +87,105 @@ class DaHelperTest {
         assertThrows(RuntimeException.class, () -> {
             DaHelper.toNPMPackage(npmPackageWrong);
         });
+    }
+
+    @Test
+    void executeWithRetrySucceedsFirstAttempt() {
+        AtomicInteger calls = new AtomicInteger();
+        String result = DaHelper.executeWithRetry(() -> {
+            calls.incrementAndGet();
+            return "ok";
+        }, "test");
+        assertEquals("ok", result);
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    void executeWithRetrySucceedsAfterTransientFailures() {
+        AtomicInteger calls = new AtomicInteger();
+        String result = DaHelper.executeWithRetry(() -> {
+            if (calls.incrementAndGet() <= 2) {
+                throw new ProcessingException("connection reset");
+            }
+            return "ok";
+        }, "test");
+        assertEquals("ok", result);
+        assertEquals(3, calls.get());
+    }
+
+    @Test
+    void executeWithRetrySucceedsAfter5xxFailure() {
+        AtomicInteger calls = new AtomicInteger();
+        String result = DaHelper.executeWithRetry(() -> {
+            if (calls.incrementAndGet() <= 1) {
+                throw new WebApplicationException(Response.status(503).build());
+            }
+            return "ok";
+        }, "test");
+        assertEquals("ok", result);
+        assertEquals(2, calls.get());
+    }
+
+    @Test
+    void executeWithRetryFailsImmediatelyOnSSLHandshake() {
+        AtomicInteger calls = new AtomicInteger();
+        assertThrows(FatalException.class, () -> {
+            DaHelper.executeWithRetry(() -> {
+                calls.incrementAndGet();
+                throw new ProcessingException(new SSLHandshakeException("cert error"));
+            }, "test");
+        });
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    void executeWithRetryFailsImmediatelyOn4xx() {
+        AtomicInteger calls = new AtomicInteger();
+        assertThrows(WebApplicationException.class, () -> {
+            DaHelper.executeWithRetry(() -> {
+                calls.incrementAndGet();
+                throw new WebApplicationException(Response.status(400).build());
+            }, "test");
+        });
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    void executeWithRetryThrowsAfterMaxRetries() {
+        AtomicInteger calls = new AtomicInteger();
+        FatalException ex = assertThrows(FatalException.class, () -> {
+            DaHelper.executeWithRetry(() -> {
+                calls.incrementAndGet();
+                throw new ProcessingException("always fails");
+            }, "testOp");
+        });
+        assertEquals(6, calls.get()); // 1 initial + 5 retries
+        assertTrue(ex.getMessage().contains("testOp"));
+    }
+
+    @Test
+    void executeWithRetryRespectsCustomMaxRetries() {
+        AtomicInteger calls = new AtomicInteger();
+        FatalException ex = assertThrows(FatalException.class, () -> {
+            DaHelper.executeWithRetry(() -> {
+                calls.incrementAndGet();
+                throw new ProcessingException("always fails");
+            }, "testOp", 2);
+        });
+        assertEquals(3, calls.get()); // 1 initial + 2 retries
+        assertTrue(ex.getMessage().contains("2 retries"));
+    }
+
+    @Test
+    void executeWithRetryCustomMaxRetriesSucceedsWithinLimit() {
+        AtomicInteger calls = new AtomicInteger();
+        String result = DaHelper.executeWithRetry(() -> {
+            if (calls.incrementAndGet() <= 3) {
+                throw new ProcessingException("transient failure");
+            }
+            return "ok";
+        }, "test", 5);
+        assertEquals("ok", result);
+        assertEquals(4, calls.get());
     }
 }
