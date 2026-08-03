@@ -53,7 +53,7 @@ public class ProjectFinderTest {
     @BeforeEach
     public void initProjectFinder() {
         config = new BuildConfigGeneratorConfig();
-        finder = new ProjectFinder(config);
+        finder = new ProjectFinder(config, 5);
     }
 
     @Test

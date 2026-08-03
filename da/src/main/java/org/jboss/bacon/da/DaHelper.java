@@ -21,7 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import javax.net.ssl.SSLHandshakeException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 
 import org.jboss.bacon.da.rest.endpoint.ListingsApi;
 import org.jboss.bacon.da.rest.endpoint.LookupApi;
@@ -35,6 +41,7 @@ import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
 import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.common.Utils;
+import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
 import org.jboss.pnc.client.Configuration;
@@ -46,11 +53,17 @@ import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import io.opentelemetry.api.trace.Span;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Helper methods for DA stuff
  */
+@Slf4j
 public class DaHelper {
+
+    private static final int DEFAULT_MAX_RETRIES = 5;
+    private static final long CONNECT_TIMEOUT_SECONDS = 30;
+    private static final long READ_TIMEOUT_SECONDS = 60;
     private final static String DA_PATH = "/rest/v-1";
 
     private static ResteasyClientBuilder builder;
@@ -60,6 +73,8 @@ public class DaHelper {
 
         if (builder == null) {
             builder = new ResteasyClientBuilder();
+            builder.connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            builder.readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
             builder.providerFactory(factory);
             ResteasyProviderFactory.setRegisterBuiltinByDefault(true);
@@ -229,5 +244,75 @@ public class DaHelper {
             ordered.add(gavToNPMResult.get(npmPackage));
         }
         return ordered;
+    }
+
+    public static <T> T executeWithRetry(Supplier<T> supplier, String operationDescription) {
+        return executeWithRetry(supplier, operationDescription, DEFAULT_MAX_RETRIES);
+    }
+
+    public static <T> T executeWithRetry(Supplier<T> supplier, String operationDescription, int maxRetries) {
+        int retries = 0;
+        while (true) {
+            try {
+                return supplier.get();
+            } catch (ProcessingException e) {
+                if (hasCause(e, SSLHandshakeException.class)) {
+                    throw new FatalException(
+                            "Cannot reach the DA server because of missing TLS certificates",
+                            e.getCause());
+                }
+                retries++;
+                if (retries > maxRetries) {
+                    throw new FatalException(
+                            "DA call failed after " + maxRetries + " retries: " + operationDescription,
+                            e);
+                }
+                logRetryAttempt(retries, maxRetries, operationDescription, e);
+                sleepExponentially(retries);
+            } catch (WebApplicationException e) {
+                int statusCode = e.getResponse().getStatus();
+                if (statusCode >= 500) {
+                    retries++;
+                    if (retries > maxRetries) {
+                        throw new FatalException(
+                                "DA call failed after " + maxRetries + " retries: " + operationDescription,
+                                e);
+                    }
+                    logRetryAttempt(retries, maxRetries, operationDescription, e);
+                    sleepExponentially(retries);
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private static boolean hasCause(Throwable e, Class<? extends Throwable> causeType) {
+        Throwable current = e;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private static void logRetryAttempt(int retries, int maxRetries, String operationDescription, Exception e) {
+        if (retries == maxRetries / 2) {
+            log.warn("Having difficulty reaching DA server for {}. Retrying...", operationDescription);
+        }
+        log.debug("DA Retry {}/{} for {}: {}", retries, maxRetries, operationDescription, e.getMessage());
+    }
+
+    private static void sleepExponentially(int retries) {
+        long amountOfSleep = (long) (100 * Math.pow(2, retries));
+        log.debug("Sleeping for {} seconds", String.format("%.1f", amountOfSleep / 1000.0));
+        try {
+            Thread.sleep(amountOfSleep);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 }

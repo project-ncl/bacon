@@ -109,7 +109,9 @@ public class DALookupCli {
 
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
-                Set<MavenLookupResult> result = lookupApi.lookupMaven(request);
+                Set<MavenLookupResult> result = DaHelper.executeWithRetry(
+                        () -> lookupApi.lookupMaven(request),
+                        "lookupMaven");
                 List<MavenLookupResult> orderedResult = DaHelper.orderMavenResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
@@ -188,7 +190,9 @@ public class DALookupCli {
 
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
-                Set<MavenVersionsResult> result = lookupApi.versionsMaven(request);
+                Set<MavenVersionsResult> result = DaHelper.executeWithRetry(
+                        () -> lookupApi.versionsMaven(request),
+                        "versionsMaven");
                 List<MavenVersionsResult> orderedResult = DaHelper.orderMavenResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
@@ -261,7 +265,9 @@ public class DALookupCli {
 
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
-                Set<MavenLatestResult> result = lookupApi.lookupMaven(request);
+                Set<MavenLatestResult> result = DaHelper.executeWithRetry(
+                        () -> lookupApi.lookupMaven(request),
+                        "lookupMavenLatest");
                 List<MavenLatestResult> orderedResult = DaHelper.orderMavenResult(gavSet, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
@@ -321,7 +327,9 @@ public class DALookupCli {
 
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
-                Set<NPMLookupResult> result = lookupApi.lookupNPM(request);
+                Set<NPMLookupResult> result = DaHelper.executeWithRetry(
+                        () -> lookupApi.lookupNPM(request),
+                        "lookupNPM");
                 List<NPMLookupResult> orderedResult = DaHelper.orderNPMResult(pkgs, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {
@@ -391,7 +399,9 @@ public class DALookupCli {
 
             LookupApi lookupApi = DaHelper.createLookupApi();
             try {
-                Set<NPMVersionsResult> result = lookupApi.versionsNPM(request);
+                Set<NPMVersionsResult> result = DaHelper.executeWithRetry(
+                        () -> lookupApi.versionsNPM(request),
+                        "versionsNPM");
                 List<NPMVersionsResult> orderedResult = DaHelper.orderNPMResult(pkgs, result);
                 ObjectHelper.print(getJsonOutput(), orderedResult);
             } catch (IOException e) {

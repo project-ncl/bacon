@@ -17,6 +17,11 @@ import lombok.Data;
 public class DependencyResolutionConfig {
 
     /**
+     * Maximum number of retries for DA server calls during dependency resolution and project finding.
+     */
+    private int daMaxRetries = 5;
+
+    /**
      * List of toplevel artifacts that should be analyzed and built.
      */
     @NotNull

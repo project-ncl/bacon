@@ -49,9 +49,11 @@ public class ProjectFinder {
     private final BuildConfigurationClient buildConfigClient;
     private final VersionParser versionParser = new VersionParser("redhat", "temporary-redhat");
     private final BuildConfigGeneratorConfig config;
+    private final int daMaxRetries;
 
-    public ProjectFinder(BuildConfigGeneratorConfig config) {
+    public ProjectFinder(BuildConfigGeneratorConfig config, int daMaxRetries) {
         this.config = config;
+        this.daMaxRetries = daMaxRetries;
         lookupApi = DaHelper.createLookupApi();
         artifactClient = new ClientCreator<>(ArtifactClient::new).newClient();
         buildClient = new ClientCreator<>(BuildClient::new).newClient();
@@ -60,11 +62,13 @@ public class ProjectFinder {
 
     ProjectFinder(
             BuildConfigGeneratorConfig config,
+            int daMaxRetries,
             LookupApi lookupApi,
             ArtifactClient artifactClient,
             BuildClient buildClient,
             BuildConfigurationClient buildConfigClient) {
         this.config = config;
+        this.daMaxRetries = daMaxRetries;
         this.lookupApi = lookupApi;
         this.artifactClient = artifactClient;
         this.buildClient = buildClient;
@@ -195,7 +199,10 @@ public class ProjectFinder {
                 .artifacts(allGAVs)
                 .distanceRule(VersionDistanceRule.CLOSEST_BY_PARTS)
                 .build();
-        Set<MavenVersionsResult> versionsResults = lookupApi.versionsMaven(request);
+        Set<MavenVersionsResult> versionsResults = DaHelper.executeWithRetry(
+                () -> lookupApi.versionsMaven(request),
+                "versionsMaven",
+                daMaxRetries);
         Map<GAV, List<String>> availableVersions = versionsResults.stream()
                 .collect(Collectors.toMap(MavenVersionsResult::getGav, MavenVersionsResult::getAvailableVersions));
         return availableVersions;

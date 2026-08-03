@@ -37,6 +37,8 @@ The `generate` command will output content that can be used in [PiG](pig.html) `
 ## Config file
 Example of config file:
 ```yaml
+daMaxRetries: 5 # Maximum number of retries for DA (Dependency Analysis) server calls. Applies to all DA lookups during dependency resolution and project finding. Defaults to 5.
+
 dependencyResolutionConfig: # Configuration for the dependency resolution by Domino
     analyzeBOM: "foo:bar-bom:1.0.0" # The BOM that should be analyzed
     analyzeArtifacts: # List of top level artifacts that should be analyzed and built.
