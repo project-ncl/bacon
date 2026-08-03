@@ -18,6 +18,7 @@ import org.jboss.bacon.experimental.impl.dependencies.ProjectDepthComparator;
 import org.jboss.bacon.experimental.impl.projectfinder.EnvironmentResolver;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProject;
 import org.jboss.bacon.experimental.impl.projectfinder.FoundProjects;
+import org.jboss.bacon.experimental.impl.projectfinder.JdkVersion;
 import org.jboss.bacon.experimental.impl.projectfinder.ProjectBuildInfo;
 import org.jboss.bacon.experimental.impl.projectfinder.ProjectBuildInfoDetector;
 import org.jboss.da.model.rest.GAV;
@@ -38,9 +39,19 @@ public class BuildConfigGenerator {
     private final ProjectBuildInfoDetector buildInfoDetector;
 
     public BuildConfigGenerator(BuildConfigGeneratorConfig buildConfigGeneratorConfig) {
+        this(
+                buildConfigGeneratorConfig,
+                new EnvironmentResolver(buildConfigGeneratorConfig),
+                new ProjectBuildInfoDetector());
+    }
+
+    BuildConfigGenerator(
+            BuildConfigGeneratorConfig buildConfigGeneratorConfig,
+            EnvironmentResolver environments,
+            ProjectBuildInfoDetector buildInfoDetector) {
         this.config = buildConfigGeneratorConfig;
-        environments = new EnvironmentResolver(buildConfigGeneratorConfig);
-        buildInfoDetector = new ProjectBuildInfoDetector();
+        this.environments = environments;
+        this.buildInfoDetector = buildInfoDetector;
     }
 
     public List<BuildConfig> generateConfigs(DependencyResult dependencies, FoundProjects foundProjects) {
@@ -83,19 +94,98 @@ public class BuildConfigGenerator {
 
     public BuildConfig processProject(Project project, FoundProject found) {
         String name = project.getName();
+        BuildConfig buildConfig;
+        Environment existingEnvironment;
         // Strategy
         if (found.isManaged()) {
-            BuildConfig buildConfig = copyManaged(found.getBuildConfig(), name);
-            return updateExactMatch(buildConfig, project);
+            existingEnvironment = found.getBuildConfig().getEnvironment();
+            buildConfig = copyManaged(found.getBuildConfig(), name);
+            buildConfig = updateExactMatch(buildConfig, project);
         } else if (found.isExactMatch()) {
-            BuildConfig buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
-            return updateExactMatch(buildConfig, project);
+            existingEnvironment = found.getBuildConfigRevision().getEnvironment();
+            buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
+            buildConfig = updateExactMatch(buildConfig, project);
         } else if (found.isFound()) {
-            BuildConfig buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
-            return updateSimilar(buildConfig, project);
+            existingEnvironment = found.getBuildConfigRevision().getEnvironment();
+            buildConfig = copyExisting(found.getBuildConfig(), found.getBuildConfigRevision(), name);
+            buildConfig = updateSimilar(buildConfig, project);
         } else {
             return generateNewBuildConfig(project, name);
         }
+
+        if (config.isReselectEnvironmentForExistingBuildConfigs()) {
+            reselectEnvironment(buildConfig, project, existingEnvironment);
+        }
+        return buildConfig;
+    }
+
+    void reselectEnvironment(BuildConfig buildConfig, Project project, Environment existingEnvironment) {
+        ProjectBuildInfo detected = buildInfoDetector.detect(project);
+        ProjectBuildInfo effective = buildInfoForExistingBuildConfig(detected, buildConfig, existingEnvironment);
+        Environment selected = environments.selectEnvironment(effective, existingEnvironment);
+        Environment currentEnvironment = existingEnvironment.isDeprecated()
+                ? environments.resolve(existingEnvironment)
+                : existingEnvironment;
+
+        if (selected.getId().equals(currentEnvironment.getId())) {
+            log.info(
+                    "Environment detection kept '{}' for existing Build Config {}",
+                    currentEnvironment.getName(),
+                    buildConfig.getName());
+            return;
+        }
+
+        log.info(
+                "Reselecting environment for existing Build Config {}: '{}' -> '{}'",
+                buildConfig.getName(),
+                currentEnvironment.getName(),
+                selected.getName());
+        buildConfig.setEnvironmentId(null);
+        buildConfig.setSystemImageId(null);
+        buildConfig.setEnvironmentName(selected.getName());
+        buildConfig.setBuildScript(updateBuildScript(buildConfig.getBuildScript(), taintedMessage(project)));
+    }
+
+    private ProjectBuildInfo buildInfoForExistingBuildConfig(
+            ProjectBuildInfo detected,
+            BuildConfig buildConfig,
+            Environment existingEnvironment) {
+        JdkVersion jdkVersion = detected.getJdkVersion();
+        JdkVersion existingJdk = JdkVersion.fromVersionString(existingEnvironment.getAttributes().get("JDK"));
+        if (!hasDetectedJdk(detected) && existingJdk != null) {
+            jdkVersion = existingJdk;
+            log.info(
+                    "Keeping JDK {} from existing environment '{}' for {} because project JDK detection used the default",
+                    existingJdk,
+                    existingEnvironment.getName(),
+                    buildConfig.getName());
+        }
+
+        BuildType buildType = detected.getBuildType();
+        if (buildConfig.getBuildType() != null) {
+            try {
+                buildType = BuildType.valueOf(buildConfig.getBuildType());
+            } catch (IllegalArgumentException e) {
+                log.warn(
+                        "Could not parse existing build type '{}' for {}; using detected build type {}",
+                        buildConfig.getBuildType(),
+                        buildConfig.getName(),
+                        detected.getBuildType());
+            }
+        }
+
+        return ProjectBuildInfo.builder()
+                .jdkVersion(jdkVersion)
+                .buildType(buildType)
+                .buildToolVersion(detected.getBuildToolVersion())
+                .buildToolVersionRange(detected.getBuildToolVersionRange())
+                .detectionSource(detected.getDetectionSource())
+                .build();
+    }
+
+    private static boolean hasDetectedJdk(ProjectBuildInfo buildInfo) {
+        String source = buildInfo.getDetectionSource();
+        return source != null && !source.startsWith("default");
     }
 
     private BuildConfig generateNewBuildConfig(Project project, String name) {
