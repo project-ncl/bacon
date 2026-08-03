@@ -251,9 +251,14 @@ class ProjectBuildInfoDetectorTest {
             ProjectBuildInfoDetector detector = new ProjectBuildInfoDetector(
                     mock(CloseableHttpClient.class),
                     accessor);
-            when(accessor.fetchFile("https://github.com/example/project", "1.0", ".mvn/wrapper/maven-wrapper.properties"))
-                    .thenReturn(Optional.of(
-                            "distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.0/apache-maven-3.6.0-bin.zip"));
+            when(
+                    accessor.fetchFile(
+                            "https://github.com/example/project",
+                            "1.0",
+                            ".mvn/wrapper/maven-wrapper.properties"))
+                    .thenReturn(
+                            Optional.of(
+                                    "distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.0/apache-maven-3.6.0-bin.zip"));
 
             ProjectBuildInfoDetector.ScmDetectionResult result = new ProjectBuildInfoDetector.ScmDetectionResult();
             detector.parsePomXml(

@@ -3,6 +3,7 @@ dependencyResolutionConfig:
         - org.apache.maven:*:*
 
 buildConfigGeneratorConfig:
+    reselectEnvironmentForExistingBuildConfigs: false
     defaultValues:
         environmentName: "OpenJDK 11.0; Mvn 3.5.4"
     scmReplaceWithPlaceholder:

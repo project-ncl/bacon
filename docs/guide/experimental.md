@@ -86,6 +86,7 @@ buildConfigGeneratorConfig: # Configuration for how the new build configs should
     failGeneratedBuildScript: true # When generating new or copying and changing existing build config, will part to build script to make sure the build fails
     # This can be helpful to make sure the configs are manually reviewed
     allowDeprecatedEnvironments: false # If true, uses systemImageId to specify environment (to force use of specific environment) when the enviornment defined by environmentName would not be found because it was deprecated.
+    reselectEnvironmentForExistingBuildConfigs: false # If true, reruns environment detection for managed, exact-match, and similar existing Build Configs. The existing build type is retained, and the existing JDK is retained only when project detection falls back to the default.
     pigTemplate: # Template of the PiG build-config.yaml to use
         product:
             name: Autobuild Example

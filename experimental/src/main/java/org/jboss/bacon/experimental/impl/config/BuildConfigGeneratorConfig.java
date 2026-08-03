@@ -64,6 +64,18 @@ public class BuildConfigGeneratorConfig {
     private boolean allowDeprecatedEnvironments = false;
 
     /**
+     * If true, reruns build environment detection for managed, exact-match and similar existing Build Configs.
+     *
+     * This is useful for correcting Build Configs that were originally created with an unsuitable environment, for
+     * example a Maven version older than the version required by the Maven Wrapper or Maven Enforcer Plugin.
+     *
+     * When project detection falls back to the default JDK, Autobuilder keeps the JDK from the existing environment.
+     * The
+     * existing Build Config build type is also preserved; only the environment is reselected.
+     */
+    private boolean reselectEnvironmentForExistingBuildConfigs = false;
+
+    /**
      * Suffix appended to generated build config names. Set to empty string to disable.
      */
     @NotNull
