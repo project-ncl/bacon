@@ -20,6 +20,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.jboss.bacon.experimental.impl.dependencies.Project;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.pnc.api.enums.BuildType;
@@ -44,6 +47,7 @@ public class ProjectBuildInfoDetector implements Closeable {
     private static final Pattern GRADLE_WRAPPER_VERSION = Pattern.compile("gradle-(\\d+\\.\\d+(?:\\.\\d+)?)-");
     private static final Pattern MAVEN_WRAPPER_VERSION = Pattern
             .compile("apache-maven-(\\d+\\.\\d+(?:\\.\\d+)?)-");
+    private static final Pattern POM_PROPERTY = Pattern.compile("\\$\\{([^}]+)}");
     private static final Pattern DOCKERFILE_JDK = Pattern
             .compile("(?i)FROM.*(?:jdk|openjdk)[:-]?(\\d+)");
     private static final Pattern GITHUB_ACTIONS_JAVA = Pattern
@@ -71,10 +75,11 @@ public class ProjectBuildInfoDetector implements Closeable {
     }
 
     public ProjectBuildInfo detect(Project project) {
-        JdkVersion jdk = null;
+        JdkVersion jdk;
         String source = "default";
         BuildType buildType = BuildType.MVN;
         String buildToolVersion = null;
+        String buildToolVersionRange = null;
 
         jdk = detectFromManifest(project);
         if (jdk != null) {
@@ -89,6 +94,9 @@ public class ProjectBuildInfoDetector implements Closeable {
             if (scmResult.buildToolVersion != null) {
                 buildToolVersion = scmResult.buildToolVersion;
             }
+            if (scmResult.buildToolVersionRange != null) {
+                buildToolVersionRange = scmResult.buildToolVersionRange;
+            }
             if (jdk == null && scmResult.jdkVersion != null) {
                 jdk = scmResult.jdkVersion;
                 source = scmResult.detectionSource;
@@ -102,17 +110,19 @@ public class ProjectBuildInfoDetector implements Closeable {
         }
 
         log.info(
-                "Detected build info for {}: JDK={}, buildType={}, toolVersion={}, source={}",
+                "Detected build info for {}: JDK={}, buildType={}, toolVersion={}, requiredRange={}, source={}",
                 project.getFirstGAV(),
                 jdk,
                 buildType,
                 buildToolVersion,
+                buildToolVersionRange,
                 source);
 
         return ProjectBuildInfo.builder()
                 .jdkVersion(jdk)
                 .buildType(buildType)
                 .buildToolVersion(buildToolVersion)
+                .buildToolVersionRange(buildToolVersionRange)
                 .detectionSource(source)
                 .build();
     }
@@ -333,45 +343,208 @@ public class ProjectBuildInfoDetector implements Closeable {
         }
     }
 
-    private void detectMavenVersion(String scmUrl, String revision, ScmDetectionResult result) {
+    void detectMavenVersion(String scmUrl, String revision, ScmDetectionResult result) {
         Optional<String> wrapperProps = scmFileAccessor
                 .fetchFile(scmUrl, revision, ".mvn/wrapper/maven-wrapper.properties");
         if (wrapperProps.isPresent()) {
-            Matcher m = MAVEN_WRAPPER_VERSION.matcher(wrapperProps.get());
-            if (m.find()) {
-                result.buildToolVersion = m.group(1);
-                return;
+            Matcher matcher = MAVEN_WRAPPER_VERSION.matcher(wrapperProps.get());
+            if (matcher.find()) {
+                result.buildToolVersion = matcher.group(1);
             }
         }
 
         if (result.parsedPomDoc != null) {
-            result.buildToolVersion = parseEnforcerMavenVersion(result.parsedPomDoc);
+            result.buildToolVersionRange = combineMavenRequirements(
+                    parseEnforcerMavenVersion(result.parsedPomDoc),
+                    parseDeclaredMinimumMavenVersion(result.parsedPomDoc),
+                    parseEnforcerPluginMavenPrerequisite(result.parsedPomDoc));
         }
     }
 
-    private String parseEnforcerMavenVersion(Document doc) {
+    String parseEnforcerMavenVersion(Document doc) {
+        String requirement = null;
         NodeList plugins = doc.getElementsByTagName("plugin");
         for (int i = 0; i < plugins.getLength(); i++) {
             Element plugin = (Element) plugins.item(i);
-            NodeList artifactIds = plugin.getElementsByTagName("artifactId");
-            if (artifactIds.getLength() > 0
-                    && "maven-enforcer-plugin".equals(artifactIds.item(0).getTextContent().trim())) {
-                NodeList requireMaven = plugin.getElementsByTagName("requireMavenVersion");
-                if (requireMaven.getLength() > 0) {
-                    Element req = (Element) requireMaven.item(0);
-                    NodeList versions = req.getElementsByTagName("version");
-                    if (versions.getLength() > 0) {
-                        String version = versions.item(0).getTextContent().trim();
-                        version = version.replaceAll("[\\[\\]()\\s,]", "");
-                        Matcher m = Pattern.compile("(\\d+\\.\\d+(?:\\.\\d+)?)").matcher(version);
-                        if (m.find()) {
-                            return m.group(1);
-                        }
-                    }
+            if (!"maven-enforcer-plugin".equals(directChildText(plugin, "artifactId"))) {
+                continue;
+            }
+            NodeList requireMaven = plugin.getElementsByTagName("requireMavenVersion");
+            for (int j = 0; j < requireMaven.getLength(); j++) {
+                Element rule = (Element) requireMaven.item(j);
+                NodeList versions = rule.getElementsByTagName("version");
+                if (versions.getLength() == 0) {
+                    continue;
+                }
+                String version = resolvePomProperties(doc, versions.item(0).getTextContent().trim());
+                requirement = combineMavenRequirements(requirement, normalizeMavenVersionRange(version));
+            }
+        }
+        return requirement;
+    }
+
+    String parseDeclaredMinimumMavenVersion(Document doc) {
+        String requirement = null;
+        NodeList properties = doc.getElementsByTagName("properties");
+        for (int i = 0; i < properties.getLength(); i++) {
+            NodeList children = properties.item(i).getChildNodes();
+            for (int j = 0; j < children.getLength(); j++) {
+                if (!(children.item(j) instanceof Element)) {
+                    continue;
+                }
+                Element property = (Element) children.item(j);
+                String normalizedName = property.getTagName().toLowerCase().replaceAll("[^a-z0-9]", "");
+                boolean minimumMavenProperty = normalizedName.contains("maven")
+                        && normalizedName.contains("version")
+                        && (normalizedName.contains("minimum")
+                                || normalizedName.contains("minimal")
+                                || normalizedName.contains("required"));
+                if (!minimumMavenProperty) {
+                    continue;
+                }
+                String value = resolvePomProperties(doc, property.getTextContent().trim());
+                requirement = combineMavenRequirements(requirement, normalizeMavenVersionRange(value));
+            }
+        }
+        return requirement;
+    }
+
+    String parseEnforcerPluginMavenPrerequisite(Document doc) {
+        String pluginVersion = findPluginVersion(doc, "maven-enforcer-plugin");
+        if (pluginVersion == null) {
+            return null;
+        }
+
+        ComparableVersion version = new ComparableVersion(pluginVersion);
+        if (version.compareTo(new ComparableVersion("3.5.0")) >= 0) {
+            return "[3.6.3,)";
+        }
+        if (isVersionBetween(version, "3.1.0", "3.4.1")) {
+            return "[3.2.5,)";
+        }
+        if (version.compareTo(new ComparableVersion("3.0.0")) == 0) {
+            return "[3.1.1,)";
+        }
+        if (isVersionBetween(version, "3.0.0-M1", "3.0.0-M3")
+                || isVersionBetween(version, "1.4", "1.4.1")) {
+            return "[2.2.1,)";
+        }
+        if (isVersionBetween(version, "1.0", "1.1.1")
+                || isVersionBetween(version, "1.0-alpha-4", "1.0-beta-1")) {
+            return "[2.0.6,)";
+        }
+        return null;
+    }
+
+    private String findPluginVersion(Document doc, String wantedArtifactId) {
+        NodeList plugins = doc.getElementsByTagName("plugin");
+        for (int i = 0; i < plugins.getLength(); i++) {
+            Element plugin = (Element) plugins.item(i);
+            if (!wantedArtifactId.equals(directChildText(plugin, "artifactId"))) {
+                continue;
+            }
+            String version = directChildText(plugin, "version");
+            if (version != null) {
+                String resolved = resolvePomProperties(doc, version);
+                return POM_PROPERTY.matcher(resolved).find() ? null : resolved;
+            }
+        }
+        return null;
+    }
+
+    private String directChildText(Element parent, String tagName) {
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element) {
+                Element child = (Element) children.item(i);
+                if (tagName.equals(child.getTagName())) {
+                    return child.getTextContent().trim();
                 }
             }
         }
         return null;
+    }
+
+    private boolean isVersionBetween(ComparableVersion version, String lowerInclusive, String upperInclusive) {
+        return version.compareTo(new ComparableVersion(lowerInclusive)) >= 0
+                && version.compareTo(new ComparableVersion(upperInclusive)) <= 0;
+    }
+
+    String combineMavenRequirements(String... requirements) {
+        VersionRange combined = null;
+        for (String requirement : requirements) {
+            String normalized = normalizeMavenVersionRange(requirement);
+            if (normalized == null) {
+                continue;
+            }
+            try {
+                VersionRange candidate = VersionRange.createFromVersionSpec(normalized);
+                if (combined == null) {
+                    combined = candidate;
+                    continue;
+                }
+                VersionRange intersection = combined.restrict(candidate);
+                if (intersection.getRestrictions().isEmpty() && intersection.getRecommendedVersion() == null) {
+                    log.warn(
+                            "Ignoring conflicting inferred Maven requirement {}; keeping {}",
+                            normalized,
+                            combined);
+                    continue;
+                }
+                combined = intersection;
+            } catch (InvalidVersionSpecificationException e) {
+                log.debug("Ignoring invalid Maven version requirement '{}': {}", normalized, e.getMessage());
+            }
+        }
+        return combined == null ? null : combined.toString();
+    }
+
+    private String resolvePomProperties(Document doc, String value) {
+        String resolved = value;
+        for (int pass = 0; pass < 5; pass++) {
+            Matcher matcher = POM_PROPERTY.matcher(resolved);
+            StringBuffer replacement = new StringBuffer();
+            boolean changed = false;
+            while (matcher.find()) {
+                String propertyValue = findPomProperty(doc, matcher.group(1));
+                if (propertyValue == null) {
+                    matcher.appendReplacement(replacement, Matcher.quoteReplacement(matcher.group(0)));
+                } else {
+                    matcher.appendReplacement(replacement, Matcher.quoteReplacement(propertyValue));
+                    changed = true;
+                }
+            }
+            matcher.appendTail(replacement);
+            resolved = replacement.toString();
+            if (!changed) {
+                break;
+            }
+        }
+        return resolved;
+    }
+
+    private String findPomProperty(Document doc, String propertyName) {
+        NodeList properties = doc.getElementsByTagName("properties");
+        for (int i = 0; i < properties.getLength(); i++) {
+            Element propertyContainer = (Element) properties.item(i);
+            NodeList property = propertyContainer.getElementsByTagName(propertyName);
+            if (property.getLength() > 0) {
+                return property.item(0).getTextContent().trim();
+            }
+        }
+        return null;
+    }
+
+    private String normalizeMavenVersionRange(String version) {
+        String trimmed = version == null ? "" : version.trim();
+        if (trimmed.isEmpty() || POM_PROPERTY.matcher(trimmed).find()) {
+            return null;
+        }
+        if (trimmed.startsWith("[") || trimmed.startsWith("(")) {
+            return trimmed;
+        }
+        Matcher matcher = Pattern.compile("^\\d+(?:\\.\\d+){1,2}(?:[-.][A-Za-z0-9]+)*$").matcher(trimmed);
+        return matcher.matches() ? "[" + trimmed + ",)" : null;
     }
 
     private void detectGradleVersion(String scmUrl, String revision, ScmDetectionResult result) {
@@ -459,6 +632,7 @@ public class ProjectBuildInfoDetector implements Closeable {
         JdkVersion jdkVersion;
         BuildType buildType;
         String buildToolVersion;
+        String buildToolVersionRange;
         String detectionSource;
         Document parsedPomDoc;
     }
