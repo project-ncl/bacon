@@ -15,27 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.bacon.config;
+package org.jboss.pnc.bacon.auth;
 
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
-import lombok.Data;
+public class LdapClient {
 
-@Data
-public class ConfigProfile {
+    private final String ldapUsernamePassword;
 
-    private String name;
-    private PncConfig pnc;
-    private DaConfig da;
-    private IndyConfig indy;
-    private PigConfig pig;
-    private KeycloakConfig keycloak;
-    private String ldapUsernamePassword;
-    private AutobuildConfig autobuild;
-    private String githubToken;
-    private RexConfig rex;
-    private ReqourConfig reqour;
-    private boolean enableExperimental;
+    public LdapClient(String ldapUsernamePassword) {
+        this.ldapUsernamePassword = ldapUsernamePassword;
+    }
 
-    private Map<String, Map<String, ?>> addOns;
+    /**
+     * Get the token
+     *
+     * @return access token
+     */
+    public String getBasicAuthHeaderValue() {
+        return "Basic " + Base64.getEncoder().encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8));
+    }
 }
