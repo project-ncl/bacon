@@ -199,7 +199,7 @@ public class BuildConfigGenerator {
         buildConfig.setEnvironmentName(selectedEnv.getName());
 
         if (buildInfo.getBuildType() == BuildType.GRADLE) {
-            buildConfig.setBuildScript(generateBuildScript(taintedMessage(project), "gradle build"));
+            buildConfig.setBuildScript(generateBuildScript(taintedMessage(project), "gradle -x test publish"));
         } else {
             buildConfig.setBuildScript(generateBuildScript(taintedMessage(project)));
         }
