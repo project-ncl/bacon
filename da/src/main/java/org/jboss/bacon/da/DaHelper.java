@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -62,6 +63,9 @@ import lombok.extern.slf4j.Slf4j;
 public class DaHelper {
 
     private static final int DEFAULT_MAX_RETRIES = 5;
+    private static final long INITIAL_BACKOFF_MILLIS = 200;
+    private static final long MAX_BACKOFF_MILLIS = 5_000;
+    private static final Set<Integer> RETRYABLE_STATUS_CODES = Set.of(408, 429, 500, 502, 503, 504);
     private static final long CONNECT_TIMEOUT_SECONDS = 30;
     private static final long READ_TIMEOUT_SECONDS = 60;
     private final static String DA_PATH = "/rest/v-1";
@@ -268,10 +272,11 @@ public class DaHelper {
                             e);
                 }
                 logRetryAttempt(retries, maxRetries, operationDescription, e);
-                sleepExponentially(retries);
+                sleepWithBackoff(retries);
             } catch (WebApplicationException e) {
                 int statusCode = e.getResponse().getStatus();
-                if (statusCode >= 500) {
+                e.getResponse().close();
+                if (RETRYABLE_STATUS_CODES.contains(statusCode)) {
                     retries++;
                     if (retries > maxRetries) {
                         throw new FatalException(
@@ -279,7 +284,7 @@ public class DaHelper {
                                 e);
                     }
                     logRetryAttempt(retries, maxRetries, operationDescription, e);
-                    sleepExponentially(retries);
+                    sleepWithBackoff(retries);
                 } else {
                     throw e;
                 }
@@ -305,8 +310,9 @@ public class DaHelper {
         log.debug("DA Retry {}/{} for {}: {}", retries, maxRetries, operationDescription, e.getMessage());
     }
 
-    private static void sleepExponentially(int retries) {
-        long amountOfSleep = (long) (100 * Math.pow(2, retries));
+    private static void sleepWithBackoff(int retries) {
+        long exponentialDelay = calculateExponentialBackoffMillis(retries);
+        long amountOfSleep = applyJitter(exponentialDelay);
         log.debug("Sleeping for {} seconds", String.format("%.1f", amountOfSleep / 1000.0));
         try {
             Thread.sleep(amountOfSleep);
@@ -314,5 +320,22 @@ public class DaHelper {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
+    }
+
+    private static long calculateExponentialBackoffMillis(int retries) {
+        long delay = INITIAL_BACKOFF_MILLIS;
+        for (int retry = 1; retry < retries; retry++) {
+            if (delay >= MAX_BACKOFF_MILLIS / 2) {
+                return MAX_BACKOFF_MILLIS;
+            }
+            delay *= 2;
+        }
+        return Math.min(delay, MAX_BACKOFF_MILLIS);
+    }
+
+    private static long applyJitter(long delayMillis) {
+        long lowerBound = delayMillis / 2;
+        long upperBoundExclusive = delayMillis + 1;
+        return ThreadLocalRandom.current().nextLong(lowerBound, upperBoundExclusive);
     }
 }
