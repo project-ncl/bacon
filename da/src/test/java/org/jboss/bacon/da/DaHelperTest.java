@@ -151,6 +151,44 @@ class DaHelperTest {
     }
 
     @Test
+    void executeWithRetryRetriesOn408RequestTimeout() {
+        AtomicInteger calls = new AtomicInteger();
+        String result = DaHelper.executeWithRetry(() -> {
+            if (calls.incrementAndGet() <= 1) {
+                throw new WebApplicationException(Response.status(408).build());
+            }
+            return "ok";
+        }, "test");
+        assertEquals("ok", result);
+        assertEquals(2, calls.get());
+    }
+
+    @Test
+    void executeWithRetryRetriesOn429TooManyRequests() {
+        AtomicInteger calls = new AtomicInteger();
+        String result = DaHelper.executeWithRetry(() -> {
+            if (calls.incrementAndGet() <= 1) {
+                throw new WebApplicationException(Response.status(429).build());
+            }
+            return "ok";
+        }, "test");
+        assertEquals("ok", result);
+        assertEquals(2, calls.get());
+    }
+
+    @Test
+    void executeWithRetryFailsImmediatelyOn501NotImplemented() {
+        AtomicInteger calls = new AtomicInteger();
+        assertThrows(WebApplicationException.class, () -> {
+            DaHelper.executeWithRetry(() -> {
+                calls.incrementAndGet();
+                throw new WebApplicationException(Response.status(501).build());
+            }, "test");
+        });
+        assertEquals(1, calls.get());
+    }
+
+    @Test
     void executeWithRetryThrowsAfterMaxRetries() {
         AtomicInteger calls = new AtomicInteger();
         FatalException ex = assertThrows(FatalException.class, () -> {
