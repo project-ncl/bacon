@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
+import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.RexConfig;
@@ -37,7 +39,9 @@ import picocli.CommandLine;
         description = "Rex related tasks",
         subcommands = {
                 RexCli.ClearAll.class,
-                RexCli.Get.class })
+                RexCli.Get.class,
+                RexCli.Cancel.class,
+                RexCli.Task.class })
 public class RexCli {
 
     private static ResteasyClientBuilder builder;
@@ -57,7 +61,7 @@ public class RexCli {
         }
     }
 
-    @CommandLine.Command(name = "get")
+    @CommandLine.Command(name = "get", description = "Get all tasks from Rex")
     public static class Get implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
@@ -88,6 +92,40 @@ public class RexCli {
                             dingroguTask.getName());
                 }
             }
+            return 0;
+        }
+    }
+
+    @CommandLine.Command(name = "cancel", description = "Cancel specific task in Rex")
+    public static class Cancel implements Callable<Integer> {
+
+        @CommandLine.Parameters
+        private String taskId;
+
+        @Override
+        public Integer call() throws Exception {
+
+            TaskEndpoint taskEndpoint = getTaskEndpointClient();
+            try (Response r = taskEndpoint.cancel(taskId)) {
+                System.out.println("Response status: " + r.getStatus());
+            }
+            return 0;
+        }
+    }
+
+    @CommandLine.Command(name = "task", description = "Get more info about specific task in Rex")
+    public static class Task implements Callable<Integer> {
+
+        @CommandLine.Parameters
+        private String taskId;
+
+        @Override
+        public Integer call() throws Exception {
+
+            TaskEndpoint taskEndpoint = getTaskEndpointClient();
+            TaskDTO task = taskEndpoint.getSpecific(taskId);
+
+            ObjectHelper.print(false, task);
             return 0;
         }
     }
