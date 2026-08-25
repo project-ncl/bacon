@@ -99,7 +99,10 @@ public class BuildCli {
                 names = "--rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(names = "--keep-pod-on-failure", description = "Keep the builder pod online after the build fails.")
+        @Option(
+                names = "--keep-pod-on-failure",
+                description = "Keep the builder pod online after the build fails. Admin only.",
+                hidden = true)
         private boolean keepPodOnFailure = false;
         @Option(
                 names = "--timestamp-alignment",
