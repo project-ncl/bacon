@@ -40,6 +40,7 @@ import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.jboss.pnc.bacon.pig.impl.config.ProductConfig;
 import org.jboss.pnc.bacon.pig.impl.utils.CollectionUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.RetryUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
@@ -364,7 +365,10 @@ public class PncEntitiesImporter implements Closeable {
     private BuildConfiguration createBuildConfig(BuildConfig buildConfig) {
         BuildConfiguration config = generatePncBuildConfig(buildConfig);
         try {
-            return buildConfigClient.createNew(config);
+            return RetryUtils
+                    .withRetry(
+                            () -> buildConfigClient.createNew(config),
+                            "create build configuration " + config.getName());
         } catch (ClientException e) {
             throw new RuntimeException("Failed to create build configuration " + config, e);
         }
@@ -440,8 +444,9 @@ public class PncEntitiesImporter implements Closeable {
                 .scmUrl(scmUrl)
                 .build();
         try {
-            CompletableFuture<AdvancedSCMRepositoryClient.SCMCreationResult> response = repoClient
-                    .createNewAndWait(createRepoRequest);
+            CompletableFuture<AdvancedSCMRepositoryClient.SCMCreationResult> response = RetryUtils.withRetry(
+                    () -> repoClient.createNewAndWait(createRepoRequest),
+                    "create repository " + scmUrl);
 
             log.info("Waiting for repository creation of '{}'", scmUrl);
             SleepUtils.waitFor(response::isDone, 10, true);

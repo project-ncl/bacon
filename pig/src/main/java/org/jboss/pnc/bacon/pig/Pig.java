@@ -50,6 +50,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
+import org.jboss.pnc.bacon.pig.impl.utils.RetryUtils;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
 import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
@@ -159,6 +160,21 @@ public class Pig {
                 description = "If set to false, RESOLVE_ONLY Maven Repository generation will only download from Indy instead of relying on local m2 cache")
         boolean useLocalM2Cache;
 
+        @Option(
+                names = "--retryMaxAttempts",
+                defaultValue = "" + RetryUtils.DEFAULT_MAX_ATTEMPTS,
+                description = "How many times to retry a PNC call that fails with a transient error "
+                        + "(e.g. no response, connection reset, 5xx/408/429 status). Set to 0 to disable retries "
+                        + "(default: ${DEFAULT-VALUE})")
+        private int retryMaxAttempts;
+
+        @Option(
+                names = "--retryBackoffMillis",
+                defaultValue = "" + RetryUtils.DEFAULT_INITIAL_BACKOFF_MILLIS,
+                description = "Initial backoff in milliseconds before retrying a failed PNC call. Doubles on each "
+                        + "subsequent retry, capped, with jitter (default: ${DEFAULT-VALUE})")
+        private long retryBackoffMillis;
+
         /**
          * Computes a result, or throws an exception if unable to do so.
          *
@@ -178,6 +194,7 @@ public class Pig {
             pig.validate();
 
             FileDownloadUtils.setAttempts(downloadAttempts);
+            RetryUtils.configure(retryMaxAttempts, retryBackoffMillis);
 
             // Setting up artifact cache: we only want to cache downloads from Indy
             FileDownloadUtils.controlCache(

@@ -26,6 +26,7 @@ import java.util.Collection;
 
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.pig.impl.utils.RetryUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.ClientException;
@@ -121,7 +122,9 @@ public class PncBuilder implements Closeable {
         GroupBuildRequest request = GroupBuildRequest.builder().build();
 
         try {
-            return groupConfigClient.trigger(group.getId(), buildParams, request);
+            return RetryUtils.withRetry(
+                    () -> groupConfigClient.trigger(group.getId(), buildParams, request),
+                    "trigger build group " + group.getId());
         } catch (ClientException e) {
             throw new RuntimeException("Failed to trigger build group " + group.getId(), e);
         }
