@@ -29,4 +29,14 @@ class ArtifactCliTest {
 
         assertThat(commandLine.getSubcommands()).doesNotContainKey("blacklist");
     }
+
+    @Test
+    void artifactRootRegistersSearchSubcommand() {
+        CommandLine commandLine = new CommandLine(new ArtifactCli());
+
+        assertThat(commandLine.getSubcommands()).containsKey("search");
+
+        Object searchCommand = commandLine.getSubcommands().get("search").getCommand();
+        assertThat(searchCommand).isInstanceOf(ArtifactCli.Search.class);
+    }
 }

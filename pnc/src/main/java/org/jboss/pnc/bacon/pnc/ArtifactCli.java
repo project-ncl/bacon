@@ -31,6 +31,7 @@ import picocli.CommandLine.Option;
         subcommands = {
                 ArtifactCli.Get.class,
                 ArtifactCli.GetGav.class,
+                ArtifactCli.Search.class,
                 ArtifactCli.ListFromHash.class,
                 ArtifactCli.Usage.class,
                 ArtifactCli.UsageGav.class })
@@ -113,6 +114,23 @@ public class ArtifactCli {
                     ObjectHelper.print(getJsonOutput(), result.iterator().next());
                 }
                 return 0;
+            }
+        }
+    }
+
+    @Command(
+            name = "search",
+            description = "Search artifacts using the PNC artifact RSQL query endpoint",
+            footer = Constant.EXAMPLE_TEXT
+                    + "$ bacon pnc artifact search --query '(identifier=like=\"%org.apache.kafka:kafka-clients:*:4.2.0%\");(artifactQuality==TEMPORARY)' --sort '=asc=identifier'")
+    public static class Search extends AbstractListCommand<Artifact> {
+
+        @Override
+        public Collection<Artifact> getAll(String sort, String query) throws RemoteResourceException {
+            try (ArtifactClient client = CREATOR.newClient()) {
+                return client
+                        .getAll(null, null, null, Optional.ofNullable(sort), Optional.ofNullable(query))
+                        .getAll();
             }
         }
     }
