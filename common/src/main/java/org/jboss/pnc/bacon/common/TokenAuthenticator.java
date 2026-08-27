@@ -10,13 +10,24 @@ import javax.ws.rs.core.MultivaluedMap;
 public class TokenAuthenticator implements ClientRequestFilter {
 
     private final Supplier<String> tokenSupplier;
+    /**
+     * whether it is 'Bearer', 'Basic'
+     */
+    private final String authScheme;
 
-    public TokenAuthenticator(Supplier<String> tokenSupplier) {
+    /**
+     * Initialization
+     *
+     * @param authScheme whether it is Bearer (OIDC), Basic (LDAP, etc)
+     * @param tokenSupplier method for providing the token
+     */
+    public TokenAuthenticator(String authScheme, Supplier<String> tokenSupplier) {
+        this.authScheme = authScheme;
         this.tokenSupplier = tokenSupplier;
     }
 
     public void filter(ClientRequestContext requestContext) throws IOException {
         MultivaluedMap<String, Object> headers = requestContext.getHeaders();
-        headers.add("Authorization", "Bearer " + this.tokenSupplier.get());
+        headers.add("Authorization", authScheme + " " + this.tokenSupplier.get());
     }
 }

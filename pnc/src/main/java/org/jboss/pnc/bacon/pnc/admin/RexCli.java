@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import org.jboss.pnc.bacon.auth.LdapClient;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
 import org.jboss.pnc.bacon.common.TokenAuthenticator;
@@ -113,9 +114,18 @@ public class RexCli {
 
     private static ResteasyWebTarget getAuthenticatedClient() {
 
+        Config config = Config.instance();
+        String ldapUsernamePassword = config.getActiveProfile().getLdapUsernamePassword();
+
         ResteasyWebTarget target = getClient();
-        Configuration pncConfiguration = PncClientHelper.getPncConfiguration();
-        target.register(new TokenAuthenticator(pncConfiguration.getBearerTokenSupplier()));
+
+        if (ldapUsernamePassword != null) {
+            LdapClient ldapClient = new LdapClient(ldapUsernamePassword);
+            target.register(new TokenAuthenticator("Basic", ldapClient::getBasicAuthHeaderValue));
+        } else {
+            Configuration pncConfiguration = PncClientHelper.getPncConfiguration();
+            target.register(new TokenAuthenticator("Bearer", pncConfiguration.getBearerTokenSupplier()));
+        }
         return target;
     }
 
