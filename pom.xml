@@ -727,6 +727,14 @@
                 <artifactId>mapdb</artifactId>
                 <version>3.1.0</version>
             </dependency>
+            <dependency>
+                <!-- Pin to avoid mapdb's open-ended guava.version range ([15.0,)) resolving
+                     against a broken redhat-ga metadata entry (guava:31.1.0.redhat-00001,
+                     whose guava-parent POM is 404 on maven.repository.redhat.com/ga) -->
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.5.0-jre</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.eclipse.microprofile.rest.client</groupId>
