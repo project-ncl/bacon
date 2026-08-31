@@ -39,7 +39,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.XmlUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -148,10 +148,12 @@ public class LicenseGenerator {
         props.setProperty("licenseServiceUrl", licenseServiceProp);
         if (useTempBuilds) {
             props.setProperty("names", "Indy Temp Builds,Indy Static");
-            props.setProperty("urls", Indy.getIndyTempUrl() + "," + Indy.getIndyUrl());
+            props.setProperty(
+                    "urls",
+                    RepositoryProvider.getTempRepoProviderUrl() + "," + RepositoryProvider.getRepoProviderUrl());
         } else {
             props.setProperty("names", "Indy Static");
-            props.setProperty("urls", Indy.getIndyUrl());
+            props.setProperty("urls", RepositoryProvider.getRepoProviderUrl());
         }
 
         File propertiesFile = ResourceUtils.extractToTmpFileWithFiltering(

@@ -182,7 +182,7 @@ public class Pig {
             // Setting up artifact cache: we only want to cache downloads from Indy
             FileDownloadUtils.controlCache(
                     artifactCacheDownload,
-                    List.of(pig.getIndyUrl()));
+                    List.of(pig.getRepoProviderUrl()));
 
             // Best-effort command line capture.
             String commandLine = System.getProperty("sun.java.command", "unknown");

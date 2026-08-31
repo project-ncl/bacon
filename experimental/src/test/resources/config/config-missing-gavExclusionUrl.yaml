@@ -37,6 +37,6 @@ profile:
         pig:
             kojiHubUrl: "http://koji.url"
             licenseServiceUrl: "http://license.url"
-            indyUrl: "http://indy.url"
+            repositoryProviderUrl: "http://repo.url"
         da:
             url: "http://localhost:45656"

@@ -7,7 +7,7 @@ profile:
       url: "http://da.com"
   pig:
       licenseServiceUrl: "http://license.com"
-      indyUrl: "http://indy.com"
+      repoProviderUrl: "http://repo.com"
       kojiHubUrl: "http://koji.com"
   keycloak:
       url: "http://keycloak.com"

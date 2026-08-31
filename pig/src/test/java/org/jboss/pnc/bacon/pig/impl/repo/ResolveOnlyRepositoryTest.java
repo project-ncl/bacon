@@ -35,7 +35,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +78,7 @@ public class ResolveOnlyRepositoryTest {
     void resolveAndRepackageShouldGenerateRepository() {
 
         mockPigContextAndMethods();
-        mockIndySettingsFile();
+        mockRepoSettingsFile();
 
         PigConfiguration pigConfiguration = mockPigConfigurationAndMethods();
 
@@ -155,14 +155,15 @@ public class ResolveOnlyRepositoryTest {
         pigContextMockedStatic.when(PigContext::get).thenReturn(pigContext);
     }
 
-    private void mockIndySettingsFile() {
-        testMavenSettings = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml");
+    private void mockRepoSettingsFile() {
+        testMavenSettings = ResourceUtils.extractToTmpFile("/repo-settings.xml", "settings", ".xml");
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
-        MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, true))
+        MockedStatic<RepositoryProvider> repoMockedStatic = Mockito.mockStatic(RepositoryProvider.class);
+        repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false))
                 .thenReturn(pathToTestSettingsFile);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, false))
+        repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false, true))
+                .thenReturn(pathToTestSettingsFile);
+        repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false, false))
                 .thenReturn(pathToTestSettingsFile);
     }
 

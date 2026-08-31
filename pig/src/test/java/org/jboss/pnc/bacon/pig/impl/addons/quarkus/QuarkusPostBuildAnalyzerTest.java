@@ -4,13 +4,17 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.config.PigConfiguration;
 import org.junit.jupiter.api.Test;
 
@@ -113,6 +117,14 @@ public class QuarkusPostBuildAnalyzerTest {
     }
 
     private PigConfiguration preConfig() {
+        Config.configure(
+                Paths.get(
+                        Objects.requireNonNull(
+                                getClass().getClassLoader().getResource("config.yaml")).getPath())
+                        .toString()
+                        .replace("/config.yaml", ""),
+                Constant.CONFIG_FILE_NAME,
+                "default");
         PigConfiguration config = new PigConfiguration();
         HashMap<String, Map<String, ?>> addons = new HashMap<>();
         HashMap<String, Object> addOnConfig = new HashMap<>();

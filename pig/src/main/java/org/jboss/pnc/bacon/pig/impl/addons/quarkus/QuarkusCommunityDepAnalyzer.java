@@ -40,7 +40,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.MavenRepositoryUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +122,7 @@ public class QuarkusCommunityDepAnalyzer extends AddOn {
         }
 
         boolean tempBuild = PigContext.get().isTempBuild();
-        String settingsXmlPath = Indy.getConfiguredIndySettingsXmlPath(tempBuild);
+        String settingsXmlPath = RepositoryProvider.getConfiguredRepoSettingsXmlPath(tempBuild);
 
         unpackRepository(PigContext.get().getRepositoryData().getRepositoryPath());
 

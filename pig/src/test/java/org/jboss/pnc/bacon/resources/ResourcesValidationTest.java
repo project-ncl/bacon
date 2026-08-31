@@ -31,8 +31,8 @@ public class ResourcesValidationTest {
 
     @Test
     void resourceXMLFilesShouldBeXMLParsable() {
-        assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("indy-settings.xml")));
-        assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("indy-temp-settings.xml")));
+        assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("repo-settings.xml")));
+        assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("repo-temp-settings.xml")));
         assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("pom-template.xml")));
         assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("repository-example-settings.xml")));
         assertTrue(isXMLValid(getClass().getClassLoader().getResourceAsStream("settings-template.xml")));

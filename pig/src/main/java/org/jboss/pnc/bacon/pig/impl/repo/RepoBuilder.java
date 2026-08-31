@@ -40,7 +40,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.OSCommandExecutor;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.XmlUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -129,8 +129,8 @@ public class RepoBuilder {
                     + "          <url>" + additionalRepo + "</url>\n" + "        </pluginRepository> <!--";
             result.put("ADDITIONAL_PLUGIN_REPOS", pluginRepoDef);
         }
-        result.put("INDY_URL", Indy.getIndyUrl());
-        result.put("INDY_TMP_URL", Indy.getIndyTempUrl());
+        result.put("INDY_URL", RepositoryProvider.getRepoProviderUrl());
+        result.put("INDY_TMP_URL", RepositoryProvider.getTempRepoProviderUrl());
         return result;
     }
 

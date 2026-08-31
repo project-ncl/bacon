@@ -19,26 +19,26 @@
     <localRepository>${user.home}/.m2/repository</localRepository>
     <profiles>
         <profile>
-            <id>indy-repositories</id>
+            <id>pnc-repositories</id>
             <repositories>
                 <repository>
-                    <id>indy</id>
-                    <url>${INDY_URL}</url>
+                    <id>repo</id>
+                    <url>${REPO_URL}</url>
                 </repository>
                 <repository>
-                    <id>indy-temp</id>
-                    <url>${INDY_TMP_URL}/</url>
+                    <id>repo-temp</id>
+                    <url>${REPO_TMP_URL}/</url>
                 </repository>
                 <!--${ADDITIONAL_REPOS}-->
             </repositories>
             <pluginRepositories>
                 <pluginRepository>
-                    <id>indy</id>
-                    <url>${INDY_URL}</url>
+                    <id>repo</id>
+                    <url>${REPO_URL}</url>
                 </pluginRepository>
                 <pluginRepository>
-                    <id>indy-temp</id>
-                    <url>${INDY_TMP_URL}</url>
+                    <id>repo-temp</id>
+                    <url>${REPO_TMP_URL}</url>
                 </pluginRepository>
                 <!--${ADDITIONAL_PLUGIN_REPOS}-->
             </pluginRepositories>
@@ -60,7 +60,7 @@
         </profile>
     </profiles>
     <activeProfiles>
-        <activeProfile>indy-repositories</activeProfile>
+        <activeProfile>pnc-repositories</activeProfile>
         <activeProfile>maven-central</activeProfile>
     </activeProfiles>
 </settings>

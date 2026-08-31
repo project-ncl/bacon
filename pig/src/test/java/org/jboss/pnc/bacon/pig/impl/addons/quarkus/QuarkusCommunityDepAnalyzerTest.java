@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 public class QuarkusCommunityDepAnalyzerTest {
 
     public static final String REPO_ZIP_PATH = null;
-    public static final String INDY_URL = null;
+    public static final String REPO_URL = null;
     public static final String DA_URL = null;
 
     @Test
@@ -60,7 +60,7 @@ public class QuarkusCommunityDepAnalyzerTest {
 
         ConfigProfile configProfile = new ConfigProfile();
         PigConfig pig = new PigConfig();
-        pig.setIndyUrl(INDY_URL);
+        pig.setRepoProviderUrl(REPO_URL);
         configProfile.setPig(pig);
 
         DaConfig da = new DaConfig();
