@@ -29,7 +29,7 @@ profile:
   pig:
       kojiHubUrl: ""
       licenseServerUrl: ""
-      indyUrl: ""
+      repoProviderUrl: ""
   da:
       url: ""
   rex:

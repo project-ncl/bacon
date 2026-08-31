@@ -24,11 +24,11 @@ import lombok.Data;
  *         Date: 12/17/18
  */
 @Data
-public class IndyConfig implements Validate {
+public class RepoConfig implements Validate {
     private String url;
 
     @Override
     public void validate() {
-        Validate.validateUrl(url, "Indy URL");
+        Validate.validateUrl(url, "Repository URL");
     }
 }

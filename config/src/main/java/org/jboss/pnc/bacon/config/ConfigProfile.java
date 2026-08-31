@@ -27,7 +27,7 @@ public class ConfigProfile {
     private String name;
     private PncConfig pnc;
     private DaConfig da;
-    private IndyConfig indy;
+    private RepoConfig repoProvider;
     private PigConfig pig;
     private KeycloakConfig keycloak;
     private String ldapUsernamePassword;

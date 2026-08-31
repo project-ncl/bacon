@@ -53,10 +53,10 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ArtifactWrapper;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Dependency;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Profile;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Project;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.jboss.pnc.mavenmanipulator.cli.Cli;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +148,7 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
 
     private void init() {
         this.temporaryDestination = FileUtils.mkTempDir("javadoc");
-        this.settingsXml = Indy.getConfiguredIndySettingsXmlPath(this.tempBuild);
+        this.settingsXml = RepositoryProvider.getConfiguredRepoSettingsXmlPath(this.tempBuild);
         this.localRepo = new File(temporaryDestination + File.separator + "localRepo");
         this.localRepo.mkdir();
         this.topLevelDirectory = new File(temporaryDestination, getTargetTopLevelDirectoryName());

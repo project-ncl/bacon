@@ -10,13 +10,13 @@ public class PigConfig implements Validate {
 
     private String kojiHubUrl;
     private String licenseServiceUrl;
-    private String indyUrl;
+    private String repoProviderUrl;
 
     @Override
     public void validate() {
         Validate.validateUrl(kojiHubUrl, "KojiHub URL");
         Validate.validateUrl(licenseServiceUrl, "License Service URL");
-        Validate.validateUrl(indyUrl, "Indy URL");
+        Validate.validateUrl(repoProviderUrl, "Repository provider URL");
     }
 
 }

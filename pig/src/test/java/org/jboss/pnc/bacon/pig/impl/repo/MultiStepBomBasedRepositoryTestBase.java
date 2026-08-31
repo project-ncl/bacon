@@ -50,7 +50,7 @@ import org.jboss.pnc.bacon.pig.impl.pnc.BuildInfoCollector;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.repo.visitor.VisitableArtifactRepository;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +74,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     private static final String TEST_PLATFORM_ARTIFACTS = "test-platform-artifacts";
     private static final String EXPECTED_ARTIFACT_LIST_TXT = "resolve-and-repackage-repo-artifact-list.txt";
     private static final String EXTENSIONS_LIST_URL = "http://gitlab.cee.com";
-    private static final String MOCK_REPO_URL = "https://mock.indy.org/maven";
+    private static final String MOCK_REPO_URL = "https://mock.repo.org/maven";
     static final String CACHI2_LOCKFILE_NAME = "bom-strategy-generated-lockfile.yaml";
 
     private static final String MAVEN_REPO_ZIP_NAME = "rh-sample-maven-repository.zip";
@@ -114,7 +114,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     void resolveAndRepackageShouldGenerateRepository() throws Exception {
 
         mockPigContextAndMethods();
-        mockIndySettingsFile();
+        mockRepoSettingsFile();
 
         buildQuarkusPlatform();
 
@@ -449,8 +449,8 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         pigContextMockedStatic.when(PigContext::get).thenReturn(pigContext);
     }
 
-    private void mockIndySettingsFile() {
-        testMavenSettings = ResourceUtils.extractToTmpFile("/indy-settings.xml", "settings", ".xml");
+    private void mockRepoSettingsFile() {
+        testMavenSettings = ResourceUtils.extractToTmpFile("/repo-settings.xml", "settings", ".xml");
 
         Settings settings;
         try {
@@ -480,13 +480,14 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         }
 
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
-        MockedStatic<Indy> indyMockedStatic = Mockito.mockStatic(Indy.class);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false)).thenReturn(pathToTestSettingsFile);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, true))
+        MockedStatic<RepositoryProvider> repoMockedStatic = Mockito.mockStatic(RepositoryProvider.class);
+        repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false))
                 .thenReturn(pathToTestSettingsFile);
-        indyMockedStatic.when(() -> Indy.getConfiguredIndySettingsXmlPath(false, false))
+        repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false, true))
                 .thenReturn(pathToTestSettingsFile);
-        indyMockedStatic.when(() -> Indy.getIndyUrl()).thenReturn("https://mock.indy.org/maven");
+        repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false, false))
+                .thenReturn(pathToTestSettingsFile);
+        repoMockedStatic.when(() -> RepositoryProvider.getRepoProviderUrl()).thenReturn("https://mock.repo.org/maven");
     }
 
     private Repository addLocalRepo(Settings settings, String id, Path localPath) {

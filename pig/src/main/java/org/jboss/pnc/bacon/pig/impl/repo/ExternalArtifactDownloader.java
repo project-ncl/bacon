@@ -23,7 +23,7 @@ import java.nio.file.Path;
 
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +47,10 @@ public class ExternalArtifactDownloader {
     public static File downloadExternalArtifact(GAV gav, File targetPath, boolean sourcesOptional) {
         targetPath.toPath().getParent().toFile().mkdirs();
 
-        String indyUrl = gav.isTemporary() ? Indy.getIndyTempUrl() : Indy.getIndyUrl();
+        String repoUrl = gav.isTemporary() ? RepositoryProvider.getTempRepoProviderUrl()
+                : RepositoryProvider.getRepoProviderUrl();
 
-        URI downloadUrl = URI.create(String.format("%s/%s", indyUrl, gav.toUri()));
+        URI downloadUrl = URI.create(String.format("%s/%s", repoUrl, gav.toUri()));
         try {
             FileDownloadUtils.downloadTo(downloadUrl, targetPath);
         } catch (RuntimeException any) {

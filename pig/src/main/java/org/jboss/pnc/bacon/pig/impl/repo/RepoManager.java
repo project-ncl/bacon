@@ -83,7 +83,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
 import org.jboss.pnc.bacon.pig.impl.utils.GavSet;
 import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1614,8 +1614,8 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private static File getIndyMavenSettings(boolean useLocalM2Cache) {
-        final String settingsXmlPath = Indy
-                .getConfiguredIndySettingsXmlPath(PigContext.get().isTempBuild(), useLocalM2Cache);
+        final String settingsXmlPath = RepositoryProvider
+                .getConfiguredRepoSettingsXmlPath(PigContext.get().isTempBuild(), useLocalM2Cache);
         final File settings = new File(settingsXmlPath);
         if (!settings.exists()) {
             throw new RuntimeException("Failed to locate the Indy Maven settings at " + settings);

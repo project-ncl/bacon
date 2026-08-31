@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.pnc.bacon.pig.impl.repo.visitor.ArtifactVisit;
 import org.jboss.pnc.bacon.pig.impl.repo.visitor.VisitableArtifactRepository;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
-import org.jboss.pnc.bacon.pig.impl.utils.indy.Indy;
+import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class Cachi2LockfileGenerator {
     private static final String CACHI_2_LOCKFILE_SKIPPED_DUPLICATE = "Cachi2 lockfile skipped duplicate ";
     private static final String SHA = "sha";
     public static final String DEFAULT_OUTPUT_FILENAME = "artifacts.lock.yaml";
-    public static final String DEFAULT_REPOSITORY_URL = Indy.getIndyUrl();
+    public static final String DEFAULT_REPOSITORY_URL = RepositoryProvider.getRepoProviderUrl();
 
     public static Cachi2LockfileGenerator newInstance() {
         return new Cachi2LockfileGenerator();
