@@ -88,7 +88,7 @@
         <glassfish-json.version>1.1.4</glassfish-json.version>
         <jackson.annotation.version>2.22</jackson.annotation.version>
         <jackson.version>2.22.1</jackson.version>
-        <jaxb.version>4.0.7</jaxb.version>
+        <jaxb.version>4.0.9</jaxb.version>
         <jboss.snapshots.repo.id>central-publisher</jboss.snapshots.repo.id>
         <jboss.snapshots.repo.url>https://central.sonatype.com/repository/maven-snapshots</jboss.snapshots.repo.url>
         <jdk.max.version>17</jdk.max.version>
