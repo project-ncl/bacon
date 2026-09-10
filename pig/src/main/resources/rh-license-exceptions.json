@@ -1284,7 +1284,7 @@
     {
         "groupId": "org.rocksdb",
         "artifactId": "rocksdbjni",
-        "version-regexp": "[6789]\\..+",
+        "version-regexp": "([6-9]|[1-9]\\d+)\\..+",
         "licenses": [
             {
                 "name": "Apache License 2.0",
@@ -1763,7 +1763,7 @@
         "version-regexp": "1.3\\..+",
         "licenses": [
             {
-                "name": "CDDL + GPLv2 with classpath exception",
+                "name": "Common Development and Distribution License (CDDL) and GNU Public License v.2 w/Classpath Exception",
                 "url": "https://raw.githubusercontent.com/javaee/javax.annotation/refs/heads/master/LICENSE"
             }
         ]
