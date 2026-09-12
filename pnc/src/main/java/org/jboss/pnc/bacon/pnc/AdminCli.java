@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import org.jboss.pnc.bacon.pnc.admin.AdminArtifactCli;
 import org.jboss.pnc.bacon.pnc.admin.AdminEnvironmentCli;
+import org.jboss.pnc.bacon.pnc.admin.LimitedBuildUserCli;
 import org.jboss.pnc.bacon.pnc.admin.PncStatusCli;
 import org.jboss.pnc.bacon.pnc.admin.RexCli;
 import org.jboss.pnc.bacon.pnc.admin.TokenCli;
@@ -30,6 +31,7 @@ import picocli.CommandLine.Command;
         description = "Admin related tasks",
         subcommands = {
                 PncStatusCli.class,
+                LimitedBuildUserCli.class,
                 RexCli.class,
                 TokenCli.class,
                 AdminEnvironmentCli.class,
