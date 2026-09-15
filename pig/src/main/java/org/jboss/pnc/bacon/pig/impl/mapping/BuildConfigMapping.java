@@ -13,7 +13,6 @@ import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -126,7 +125,7 @@ public class BuildConfigMapping {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
+    @lombok.Builder
     public static class GeneratorOptions {
         private boolean useEnvironmentName = false;
         private Optional<String> nameOverride = Optional.empty();
