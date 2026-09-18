@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jboss.pnc.api.enums.RebuildMode;
 import org.jboss.pnc.bacon.pig.PigFacade;
 import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.bacon.pig.impl.pnc.BuildConfigData;
@@ -16,7 +17,6 @@ import org.jboss.pnc.bacon.pig.impl.pnc.ImportResult;
 import org.jboss.pnc.bacon.pig.impl.pnc.PncBuild;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.enums.BuildStatus;
-import org.jboss.pnc.enums.RebuildMode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

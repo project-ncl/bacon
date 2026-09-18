@@ -25,6 +25,7 @@ import java.io.Closeable;
 import java.util.Collection;
 
 import org.jboss.pnc.api.enums.AlignmentPreference;
+import org.jboss.pnc.api.enums.RebuildMode;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.pig.impl.utils.SleepUtils;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
@@ -37,7 +38,6 @@ import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.requests.GroupBuildRequest;
 import org.jboss.pnc.enums.BuildStatus;
-import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildParameters;
 import org.jboss.pnc.rest.api.parameters.GroupBuildsFilterParameters;

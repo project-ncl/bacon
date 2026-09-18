@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.NotFoundException;
 
 import org.jboss.pnc.api.enums.OperationResult;
+import org.jboss.pnc.api.enums.RebuildMode;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.deliverables.DeliverableRecord;
 import org.jboss.pnc.bacon.common.deliverables.DeliverableType;
@@ -74,7 +75,6 @@ import org.jboss.pnc.dto.GroupBuild;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.requests.BuildPushParameters;
-import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.restclient.AdvancedBuildClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
