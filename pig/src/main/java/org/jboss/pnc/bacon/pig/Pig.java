@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 
+import org.jboss.pnc.api.enums.RebuildMode;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.JSONCommandHandler;
 import org.jboss.pnc.bacon.common.deliverables.DeliverableRegistry;
@@ -51,7 +52,6 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.AlignmentType;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pnc.common.ParameterChecker;
-import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
 
 import lombok.extern.slf4j.Slf4j;
