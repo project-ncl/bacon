@@ -44,3 +44,40 @@ servers are configured to accept LDAP requests:
 ```yaml
 ldapUsernamePassword: username:password
 ```
+
+# PNC client HTTP timeouts
+
+The PNC REST client used by `bacon` defaults to a **30 second connect timeout**
+and a **60 second read timeout**. Some operations can take longer than the read
+default to respond — for example generating redacted provenance during
+`bacon pnc build download-build-outputs <id> --redacted` — and will otherwise
+fail with `java.net.SocketTimeoutException: Read timed out`.
+
+Both timeouts can be overridden without changing `config.yaml`. Each accepts a
+value in **milliseconds** and can be set via either a Java system property or an
+environment variable:
+
+| Timeout | System property                     | Environment variable                | Default    |
+|---------|-------------------------------------|-------------------------------------|------------|
+| Read    | `pnc.client.readTimeoutMillis`      | `PNC_CLIENT_READ_TIMEOUT_MILLIS`    | `60000`    |
+| Connect | `pnc.client.connectTimeoutMillis`   | `PNC_CLIENT_CONNECT_TIMEOUT_MILLIS` | `30000`    |
+
+Precedence for each timeout is: system property first, then environment
+variable, then the built-in default. Values that are missing, blank,
+non-numeric, or not strictly positive are ignored (a warning is logged) and the
+default is used.
+
+Set the read timeout to 5 minutes via an environment variable:
+
+```bash
+export PNC_CLIENT_READ_TIMEOUT_MILLIS=300000
+bacon pnc build download-build-outputs <id> --redacted
+```
+
+Or via a system property (system properties reach `bacon` through
+`JAVA_TOOL_OPTIONS`):
+
+```bash
+JAVA_TOOL_OPTIONS="-Dpnc.client.readTimeoutMillis=300000" \
+  bacon pnc build download-build-outputs <id> --redacted
+```
