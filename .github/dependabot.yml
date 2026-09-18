@@ -23,3 +23,11 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
+  - package-ecosystem: "github-actions" # Also update Github actions
+    directory: "/"
+    target-branch: "3.5.x"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
+    cooldown:
+      default-days: 7
