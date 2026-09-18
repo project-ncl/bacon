@@ -101,6 +101,26 @@ public class PncClientHelper {
                     .pageSize(50)
                     .addDefaultMdcToHeadersMappings();
 
+            // Allow overriding the PNC REST client HTTP timeouts, which otherwise default to
+            // 30s connect / 60s read inside org.jboss.pnc.client.Configuration. Slow PNC
+            // responses (e.g. redacted provenance generation) can exceed the read default and
+            // fail with "Read timed out". Precedence: system property, then environment variable,
+            // then the library default (left untouched when neither is set).
+            Long readTimeoutMillis = resolveTimeoutOverride(
+                    "pnc.client.readTimeoutMillis",
+                    "PNC_CLIENT_READ_TIMEOUT_MILLIS");
+            if (readTimeoutMillis != null) {
+                builder = builder.readTimeoutMillis(readTimeoutMillis);
+                log.info("Using PNC client read timeout override: {} ms", readTimeoutMillis);
+            }
+            Long connectTimeoutMillis = resolveTimeoutOverride(
+                    "pnc.client.connectTimeoutMillis",
+                    "PNC_CLIENT_CONNECT_TIMEOUT_MILLIS");
+            if (connectTimeoutMillis != null) {
+                builder = builder.connectTimeoutMillis(connectTimeoutMillis);
+                log.info("Using PNC client connect timeout override: {} ms", connectTimeoutMillis);
+            }
+
             if (authenticationNeeded) {
                 if (ldapUsernamePassword != null) {
                     String[] userPwdSplit = ldapUsernamePassword.split(":");
@@ -120,6 +140,48 @@ public class PncClientHelper {
 
         } catch (URISyntaxException e) {
             throw new FatalException("URI syntax issue", e);
+        }
+    }
+
+    /**
+     * Resolve a PNC client HTTP timeout override in milliseconds. Checks the given system property
+     * first, then the environment variable. Returns {@code null} when neither is set or the value is
+     * not a positive long, so callers can fall back to the library default.
+     *
+     * @param systemProperty the system property name to check first
+     * @param envVar the environment variable name to check as a fallback
+     * @return the override in milliseconds, or {@code null} when unset/invalid
+     */
+    static Long resolveTimeoutOverride(String systemProperty, String envVar) {
+        String value = System.getProperty(systemProperty);
+        if (value == null || value.isBlank()) {
+            value = System.getenv(envVar);
+        }
+        return parseTimeoutMillis(value, systemProperty + "/" + envVar);
+    }
+
+    /**
+     * Parse a timeout value in milliseconds. Returns {@code null} (so the caller falls back to the
+     * library default) when the value is unset, blank, not a valid long, or not strictly positive.
+     *
+     * @param value the raw value to parse, may be {@code null}
+     * @param source human-readable origin of the value, used only for warning messages
+     * @return the parsed positive millisecond value, or {@code null} when unset/invalid
+     */
+    static Long parseTimeoutMillis(String value, String source) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            long millis = Long.parseLong(value.trim());
+            if (millis <= 0) {
+                log.warn("Ignoring non-positive PNC client timeout override {}: {}", source, value);
+                return null;
+            }
+            return millis;
+        } catch (NumberFormatException e) {
+            log.warn("Ignoring invalid PNC client timeout override {}: {}", source, value);
+            return null;
         }
     }
 
