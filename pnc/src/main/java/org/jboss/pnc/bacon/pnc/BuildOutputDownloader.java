@@ -36,6 +36,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HexFormat;
@@ -50,6 +51,7 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.SlsaProvenanceV1Client;
+import org.jboss.pnc.common.util.StringUtils;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 
@@ -244,7 +246,16 @@ public class BuildOutputDownloader {
     private void downloadUri(URI uri, Path target) {
         try {
             HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-            HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+            var requestBuilder = HttpRequest.newBuilder().uri(uri).GET();
+            String ldapUsernamePassword = Config.instance().getActiveProfile().getLdapUsernamePassword();
+            if (!StringUtils.isEmpty(ldapUsernamePassword)) {
+                requestBuilder.header(
+                        "Authorization",
+                        "Basic " +
+                                Base64.getEncoder()
+                                        .encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8)));
+            }
+            HttpRequest request = requestBuilder.build();
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             if (response.statusCode() < 200 || response.statusCode() > 299) {
                 throw new RuntimeException("Failed to download " + uri + ". HTTP status: " + response.statusCode());
