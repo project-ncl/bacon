@@ -1083,6 +1083,17 @@
         ]
     },
     {
+        "groupId": "io.weaviate",
+        "artifactId": "client6",
+        "version-regexp": ".*",
+        "licenses": [
+            {
+                "name": "BSD 3-clause \"New\" or \"Revised\" License",
+                "url": "https://opensource.org/licenses/BSD-3-Clause"
+            }
+        ]
+    },
+    {
         "groupId": "aopalliance",
         "artifactId": "aopalliance",
         "version-regexp": "1.0.0.redhat-.+",
