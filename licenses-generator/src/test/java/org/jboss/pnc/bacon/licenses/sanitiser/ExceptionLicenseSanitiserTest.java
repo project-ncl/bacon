@@ -114,6 +114,42 @@ public class ExceptionLicenseSanitiserTest {
     }
 
     @Test
+    public void shouldFixRocksdbjniWithLegacyVersion() {
+        DependencyElement dependencyElement = new DependencyElement(
+                "org.rocksdb",
+                "rocksdbjni",
+                "7.5.2",
+                Collections.emptySet());
+
+        DependencyElement fixedDependencyElement = exceptionLicenseSanitiser.fix(dependencyElement);
+
+        assertThat(fixedDependencyElement).isEqualTo(dependencyElement);
+        assertThat(fixedDependencyElement.getLicenses()).hasSize(1);
+        assertThat(fixedDependencyElement.getLicenses())
+                .containsOnly(new LicenseElement("Apache License 2.0", "http://www.apache.org/licenses/LICENSE-2.0"));
+
+        verify(mockLicenseSanitiser, times(0)).fix(any());
+    }
+
+    @Test
+    public void shouldFixRocksdbjniWithTwoDigitMajorVersion() {
+        DependencyElement dependencyElement = new DependencyElement(
+                "org.rocksdb",
+                "rocksdbjni",
+                "10.1.3.rhel8-redhat-00001",
+                Collections.emptySet());
+
+        DependencyElement fixedDependencyElement = exceptionLicenseSanitiser.fix(dependencyElement);
+
+        assertThat(fixedDependencyElement).isEqualTo(dependencyElement);
+        assertThat(fixedDependencyElement.getLicenses()).hasSize(1);
+        assertThat(fixedDependencyElement.getLicenses())
+                .containsOnly(new LicenseElement("Apache License 2.0", "http://www.apache.org/licenses/LICENSE-2.0"));
+
+        verify(mockLicenseSanitiser, times(0)).fix(any());
+    }
+
+    @Test
     public void shouldDelegateUnknownLicense() {
         DependencyElement dependencyElement = new DependencyElement("", "", "", Collections.emptySet());
 
