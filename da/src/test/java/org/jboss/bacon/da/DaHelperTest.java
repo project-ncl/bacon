@@ -36,20 +36,12 @@ class DaHelperTest {
     @Test
     void getModeTest() {
 
-        assertEquals("SERVICE", DaHelper.getMode(false, true, null));
-        assertEquals("SERVICE_TEMPORARY", DaHelper.getMode(true, true, null));
-        assertEquals("PERSISTENT", DaHelper.getMode(false, false, null));
-        assertEquals("TEMPORARY", DaHelper.getMode(true, false, null));
-        assertEquals("FOO_BAR", DaHelper.getMode(false, false, "FOO_BAR"));
+        assertEquals("PERSISTENT", DaHelper.getMode(false, null));
+        assertEquals("TEMPORARY", DaHelper.getMode(true, null));
+        assertEquals("FOO_BAR", DaHelper.getMode(false, "FOO_BAR"));
 
         try {
-            DaHelper.getMode(true, false, "foo");
-            fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException ex) {
-            // ok
-        }
-        try {
-            DaHelper.getMode(false, true, "foo");
+            DaHelper.getMode(true, "foo");
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // ok

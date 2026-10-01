@@ -18,7 +18,6 @@ class ValidationTest {
     static {
         benchmarkScanServiceConfigMap.put("productID", null);
         benchmarkScanServiceConfigMap.put("eventId", null);
-        benchmarkScanServiceConfigMap.put("isManagedService", null);
         benchmarkScanServiceConfigMap.put("cpaasVersion", null);
         benchmarkScanServiceConfigMap.put("jobUrl", null);
         benchmarkScanServiceConfigMap.put("serviceUrl", null);
@@ -50,7 +49,6 @@ class ValidationTest {
     @CsvSource({
             "productID, product-id",
             "eventId, eventID",
-            "isManagedService, _isManagedService_",
             "cpaasVersion, CpaasVersion",
             "jobUrl, xyz",
             "serviceUrl, service-url",

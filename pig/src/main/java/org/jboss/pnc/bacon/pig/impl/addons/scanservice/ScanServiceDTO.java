@@ -42,14 +42,12 @@ public class ScanServiceDTO {
     private static final Logger log = LoggerFactory.getLogger(ScanServiceDTO.class);
 
     public static final String EVENT_ID_DFT_VALUE = "dft-event-id";
-    public static final Boolean IS_MANAGED_SERVICE_DFT_VALUE = false;
     public static final String CPAAS_VERSION_DFT_VALUE = "latest";
     public static final String JOB_URL_DFT_VALUE = "dft-job-url";
 
     /* Default Constructor */
     ScanServiceDTO() {
         eventId = EVENT_ID_DFT_VALUE;
-        isManagedService = IS_MANAGED_SERVICE_DFT_VALUE;
         cpaasVersion = CPAAS_VERSION_DFT_VALUE;
         jobUrl = JOB_URL_DFT_VALUE;
     }
@@ -88,8 +86,7 @@ public class ScanServiceDTO {
     @JsonProperty("is-managed-service")
     @JsonPropertyDescription("Indicates whether or not the product is a managed service")
     @Getter
-    @Setter
-    private Boolean isManagedService;
+    private final Boolean isManagedService = false;
 
     /**
      * The version of CPaaS that submitted the scan.
@@ -127,7 +124,6 @@ public class ScanServiceDTO {
      * @param productId (mandatory) The product ID as defined in product pages, this is used for sorting generated scan
      *        reports
      * @param eventId (optional) CPaaS eventId
-     * @param isManagedService (optional) If the build is from a Managed Service build
      * @param cpaasVersion (optional) The version of the scan container image to use, this should normally be "latest"
      * @param jobUrl (optional) The pipeline job submitting the scan request
      * @param brewBuilds (optional) Extra list of brew builds (by Integer)
@@ -142,7 +138,6 @@ public class ScanServiceDTO {
     public ScanServiceDTO(
             String productId,
             String eventId,
-            Boolean isManagedService,
             String cpaasVersion,
             String jobUrl,
             List<Integer> brewBuilds,
@@ -151,7 +146,6 @@ public class ScanServiceDTO {
         super();
         this.productId = productId;
         this.eventId = eventId;
-        this.isManagedService = isManagedService;
         this.cpaasVersion = cpaasVersion;
         this.jobUrl = jobUrl;
         this.componentList = fromPncBuilds(pncBuilds);
@@ -221,15 +215,6 @@ public class ScanServiceDTO {
      */
     public ScanServiceDTO withEventId(String eventId) {
         this.eventId = eventId;
-        return this;
-    }
-
-    /**
-     * Indicates whether or not the product is a managed service
-     *
-     */
-    public ScanServiceDTO withIsManagedService(Boolean isManagedService) {
-        this.isManagedService = isManagedService;
         return this;
     }
 

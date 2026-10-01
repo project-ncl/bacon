@@ -152,7 +152,7 @@ builds:
   extraRepositories: # Optional: use if you want your build to connect to more Maven repositories
   - http://custom.repository
 
-  buildCategory: STANDARD # Optional: used for managed services builds, specify STANDARD or SERVICE, defaults to STANDARD
+  buildCategory: STANDARD # Optional: specify the category of the build, defaults to STANDARD
 
   brewBuildName: <brew build name> # Optional: if you wish to push the build to an alternate brew tag
 

@@ -60,7 +60,7 @@ import picocli.CommandLine;
 @Slf4j
 public class DALookupCli {
 
-    private final static String availableModes = "Available modes: PERSISTENT, TEMPORARY, TEMPORARY_PREFER_PERSISTENT, SERVICE, SERVICE_TEMPORARY, SERVICE_TEMPORARY_PREFER_PERSISTENT";
+    private final static String availableModes = "Available modes: PERSISTENT, TEMPORARY, TEMPORARY_PREFER_PERSISTENT";
 
     @CommandLine.Command(
             name = "maven",
@@ -70,13 +70,6 @@ public class DALookupCli {
         @Deprecated(forRemoval = true)
         @CommandLine.Option(names = "--temporary", description = "Lookup temporary version. Deprecated.", hidden = true)
         private boolean temporary = false;
-
-        @Deprecated(forRemoval = true)
-        @CommandLine.Option(
-                names = "--managed-service",
-                description = "Lookup managed service options. Deprecated.",
-                hidden = true)
-        private boolean managedService = false;
 
         @CommandLine.Option(names = "--brew-pull-active", description = "Check for versions also in Brew")
         private boolean brewPullActive = false;
@@ -102,7 +95,7 @@ public class DALookupCli {
             }
 
             MavenLookupRequest request = MavenLookupRequest.builder()
-                    .mode(DaHelper.getMode(temporary, managedService, lookupMode))
+                    .mode(DaHelper.getMode(temporary, lookupMode))
                     .brewPullActive(brewPullActive)
                     .artifacts(gavSet)
                     .build();
@@ -211,13 +204,6 @@ public class DALookupCli {
         @CommandLine.Option(names = "--temporary", description = "Lookup temporary version. Deprecated.", hidden = true)
         private boolean temporary = false;
 
-        @Deprecated(forRemoval = true)
-        @CommandLine.Option(
-                names = "--managed-service",
-                description = "Lookup managed service options. Deprecated.",
-                hidden = true)
-        private boolean managedService = false;
-
         @CommandLine.Option(
                 names = "--lookup-mode",
                 description = "Explicitly specified lookup mode to use. Default: PERSISTENT " + availableModes)
@@ -259,7 +245,7 @@ public class DALookupCli {
             }
 
             MavenLatestRequest request = MavenLatestRequest.builder()
-                    .mode(DaHelper.getMode(temporary, managedService, lookupMode))
+                    .mode(DaHelper.getMode(temporary, lookupMode))
                     .artifacts(gavSet)
                     .build();
 
@@ -284,13 +270,6 @@ public class DALookupCli {
         @Deprecated(forRemoval = true)
         @CommandLine.Option(names = "--temporary", description = "Lookup temporary version. Deprecated.", hidden = true)
         private boolean temporary = false;
-
-        @Deprecated(forRemoval = true)
-        @CommandLine.Option(
-                names = "--managed-service",
-                description = "Lookup managed service options. Deprecated.",
-                hidden = true)
-        private boolean managedService = false;
 
         @CommandLine.Option(names = "--brew-pull-active", description = "Check for versions also in Brew")
         private boolean brewPullActive = false;
@@ -321,7 +300,7 @@ public class DALookupCli {
             }
 
             NPMLookupRequest request = NPMLookupRequest.builder()
-                    .mode(DaHelper.getMode(temporary, managedService, lookupMode))
+                    .mode(DaHelper.getMode(temporary, lookupMode))
                     .packages(pkgs)
                     .build();
 

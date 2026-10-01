@@ -34,7 +34,6 @@ public class PostBuildScanService extends AddOn implements Validate {
     static {
         masterSet.add("productID");
         masterSet.add("eventId");
-        masterSet.add("isManagedService");
         masterSet.add("cpaasVersion");
         masterSet.add("jobUrl");
         masterSet.add("serviceUrl");
@@ -150,9 +149,6 @@ public class PostBuildScanService extends AddOn implements Validate {
         s = (String) postBuildScanConfigMap.get("jobUrl");
         String jobUrl = (s != null && !s.isEmpty()) ? s : ScanServiceDTO.JOB_URL_DFT_VALUE;
 
-        Boolean b = (Boolean) postBuildScanConfigMap.get("isManagedService");
-        Boolean isManagedService = (b != null) ? b : ScanServiceDTO.IS_MANAGED_SERVICE_DFT_VALUE;
-
         List<Integer> brewBuilds = (List<Integer>) postBuildScanConfigMap.get("brewBuilds");
 
         List<Map<String, String>> extraSCMURLs = (List<Map<String, String>>) postBuildScanConfigMap.get("extraScmUrls");
@@ -160,7 +156,6 @@ public class PostBuildScanService extends AddOn implements Validate {
         return new ScanServiceDTO(
                 productId,
                 eventId,
-                isManagedService,
                 cpaasVersion,
                 jobUrl,
                 brewBuilds,
