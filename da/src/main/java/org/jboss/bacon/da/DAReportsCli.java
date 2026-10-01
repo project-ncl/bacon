@@ -195,7 +195,7 @@ public class DAReportsCli {
 
         @CommandLine.Option(
                 names = "--mode",
-                description = "Available search modes: SERVICE_TEMPORARY, PERSISTENT, TEMPORARY, SERVICE, SERVICE_TEMPORARY_PREFER_PERSISTENT, TEMPORARY_PREFER_PERSISTENT")
+                description = "Available search modes: PERSISTENT, TEMPORARY, TEMPORARY_PREFER_PERSISTENT")
         private String mode = "PERSISTENT";
 
         @CommandLine.Parameters(description = "package:version of the packages to lookup")
@@ -238,7 +238,7 @@ public class DAReportsCli {
 
         @CommandLine.Option(
                 names = "--mode",
-                description = "Available search modes: SERVICE_TEMPORARY, PERSISTENT, TEMPORARY, SERVICE, SERVICE_TEMPORARY_PREFER_PERSISTENT, TEMPORARY_PREFER_PERSISTENT")
+                description = "Available search modes: PERSISTENT, TEMPORARY, TEMPORARY_PREFER_PERSISTENT")
         private String mode = "PERSISTENT";
 
         @Override

@@ -42,7 +42,6 @@ public class ScanServiceDTOTest {
         ScanServiceDTO ss = new ScanServiceDTO();
         ss.setProductId("23");
         ss.setEventId(ScanServiceDTO.EVENT_ID_DFT_VALUE);
-        ss.setIsManagedService(ScanServiceDTO.IS_MANAGED_SERVICE_DFT_VALUE);
         ss.setCpaasVersion(ScanServiceDTO.CPAAS_VERSION_DFT_VALUE);
         ss.setJobUrl(ScanServiceDTO.JOB_URL_DFT_VALUE);
         return ss;
@@ -53,7 +52,6 @@ public class ScanServiceDTOTest {
         ScanServiceDTO ss = new ScanServiceDTO(
                 "productId",
                 "eventId",
-                true,
                 "cpaasVersion",
                 "jobUrl",
                 null,
@@ -83,7 +81,6 @@ public class ScanServiceDTOTest {
         ScanServiceDTO ss = new ScanServiceDTO(
                 "productId",
                 "eventId",
-                true,
                 "cpaasVersion",
                 "jobUrl",
                 brewBuilds,

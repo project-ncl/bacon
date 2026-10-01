@@ -361,7 +361,6 @@ addons:
   postBuildScanService:
     productID: 2151
     eventId: 1
-    isManagedService: True
     cpaasVersion: 99.0.0
     jobUrl: https://somejenkinspipeline.com/run999
     serviceUrl: {{ pssaas_scan_service_url }}

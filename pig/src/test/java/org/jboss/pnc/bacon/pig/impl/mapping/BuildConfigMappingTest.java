@@ -60,11 +60,11 @@ class BuildConfigMappingTest {
     @Test
     void testBuildCategorySet() {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("BUILD_CATEGORY", "SERVICE");
+        parameters.put("BUILD_CATEGORY", "LIGHTWELL");
         BuildConfiguration buildConfiguration = BuildConfiguration.builder().parameters(parameters).build();
 
         BuildConfigMapping.setBuildConfigFieldsBasedOnParameters(buildConfig, buildConfiguration.getParameters());
-        assertEquals("SERVICE", buildConfig.getBuildCategory());
+        assertEquals("LIGHTWELL", buildConfig.getBuildCategory());
 
         // make sure no other parameters are set
         assertTrue(buildConfig.getAlignmentParameters().size() == 0);
