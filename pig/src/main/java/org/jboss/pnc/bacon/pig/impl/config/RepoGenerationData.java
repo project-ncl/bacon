@@ -78,6 +78,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
         result.buildScript = override(defaults.buildScript, overrides.buildScript);
         result.ignored = override(defaults.ignored, overrides.ignored);
         result.additionalRepo = override(defaults.additionalRepo, overrides.additionalRepo);
+        result.versionQualifier = override(defaults.versionQualifier, overrides.versionQualifier);
         result.stages = merge(defaults.stages, overrides.stages);
         result.parameters = merge(defaults.parameters, overrides.parameters);
 
@@ -162,6 +163,7 @@ public class RepoGenerationData extends GenerationData<RepoGenerationStrategy> {
     private String buildScript;
     private Set<String> ignored = new HashSet<>();
     private String additionalRepo;
+    private String versionQualifier = "redhat";
     private List<Map<String, String>> stages = List.of();
     private Map<String, String> parameters = Map.of();
     private List<RepoGenerationData> steps = new ArrayList<>();

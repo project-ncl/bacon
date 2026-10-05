@@ -251,8 +251,12 @@ public class RepositoryUtils {
     }
 
     public static void removeCommunityArtifacts(File element) {
+        removeCommunityArtifacts(element, "redhat");
+    }
+
+    public static void removeCommunityArtifacts(File element, String qualifier) {
         log.debug("Removing community dependencies from the repository");
-        removeMatchingCondition(element, RepositoryUtils::isCommunity);
+        removeMatchingCondition(element, f -> isCommunity(f, qualifier));
     }
 
     /**
@@ -297,6 +301,10 @@ public class RepositoryUtils {
      * @return true, if the file is recognized as a Maven artifact (re)built by Red Hat, otherwise - false
      */
     static boolean isCommunity(File f) {
+        return isCommunity(f, "redhat");
+    }
+
+    static boolean isCommunity(File f, String qualifier) {
         final String absolutePath = f.getAbsolutePath();
         // look for <version>/<artifact-file-name> subpath
         int index = absolutePath.lastIndexOf(File.separatorChar);
@@ -309,12 +317,10 @@ public class RepositoryUtils {
             // this is not a Maven artifact path
             return true;
         }
-        index = absolutePath.indexOf("redhat-", index + 1);
+        index = absolutePath.indexOf(qualifier + "-", index + 1);
         if (index >= 0) {
-            // the version contains redhat-
             return false;
         }
-        // this looks like a hack that should be removed
         return !absolutePath.contains("eap-runtime-artifacts");
     }
 
@@ -330,6 +336,12 @@ public class RepositoryUtils {
     }
 
     public static void keepOnlyLatestRedHatArtifacts(File mavenRepositoryDirectory) throws IOException {
+        keepOnlyLatestProductArtifacts(mavenRepositoryDirectory, "redhat");
+    }
+
+    public static void keepOnlyLatestProductArtifacts(File mavenRepositoryDirectory, String qualifier)
+            throws IOException {
+        final Pattern versionPattern = ProductArtifactVersion.patternFor(qualifier);
         Files.walkFileTree(mavenRepositoryDirectory.toPath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
@@ -339,30 +351,29 @@ public class RepositoryUtils {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
 
-                final List<File> redHatFiles = Stream.of(children)
-                        .filter(f -> !isCommunity(f))
+                final List<File> productFiles = Stream.of(children)
+                        .filter(f -> !isCommunity(f, qualifier))
                         .collect(Collectors.toList());
 
-                if (redHatFiles.isEmpty()) {
-                    // continue since we are at an intermediate directory
+                if (productFiles.isEmpty()) {
                     return FileVisitResult.CONTINUE;
                 }
 
-                redHatFiles.stream()
-                        .map(f -> new AbstractMap.SimpleEntry<>(f, RedHatArtifactVersion.fromVersion(f.getName())))
-                        // split by unique upstream version
+                productFiles.stream()
+                        .map(
+                                f -> new AbstractMap.SimpleEntry<>(
+                                        f,
+                                        ProductArtifactVersion.fromVersion(f.getName(), versionPattern)))
                         .collect(Collectors.groupingBy(e -> e.getValue().getUpstreamVersion()))
-                        // for each unique upstream version, delete the directories corresponding
-                        // to redhat version less than the highest version
-                        .forEach((upstreamVersion, matchingRHArtifactVersions) -> {
-                            matchingRHArtifactVersions.sort(comparingInt(e -> e.getValue().getRedhatBuildNumber()));
-                            Collections.reverse(matchingRHArtifactVersions);
+                        .forEach((upstreamVersion, matchingVersions) -> {
+                            matchingVersions.sort(comparingInt(e -> e.getValue().getBuildNumber()));
+                            Collections.reverse(matchingVersions);
 
-                            matchingRHArtifactVersions.stream().skip(1).forEach(e -> {
+                            matchingVersions.stream().skip(1).forEach(e -> {
                                 final File directoryToBeDeleted = e.getKey();
 
                                 log.info(
-                                        "Deleting redhat artifact {} which is redundant since a newer redhat version exists",
+                                        "Deleting product artifact {} which is redundant since a newer version exists",
                                         directoryToBeDeleted.getAbsolutePath());
 
                                 try {
@@ -426,26 +437,27 @@ public class RepositoryUtils {
         return String.join(":", artifactIdentifier);
     }
 
-    private static class RedHatArtifactVersion {
+    static class ProductArtifactVersion {
         private final String upstreamVersion;
-        private final int redhatBuildNumber;
+        private final int buildNumber;
 
-        private static final String REGEX = "(.*)[\\.|-]redhat-(\\d+)";
-        private static final Pattern PATTERN = Pattern.compile(REGEX);
-
-        private RedHatArtifactVersion(String upstreamVersion, int redhatBuildNumber) {
-            this.upstreamVersion = upstreamVersion;
-            this.redhatBuildNumber = redhatBuildNumber;
+        static Pattern patternFor(String qualifier) {
+            return Pattern.compile("(.*)[\\.|-]" + Pattern.quote(qualifier) + "-(\\d+)");
         }
 
-        public static RedHatArtifactVersion fromVersion(String version) {
-            final Matcher matcher = PATTERN.matcher(version);
+        private ProductArtifactVersion(String upstreamVersion, int buildNumber) {
+            this.upstreamVersion = upstreamVersion;
+            this.buildNumber = buildNumber;
+        }
+
+        public static ProductArtifactVersion fromVersion(String version, Pattern pattern) {
+            final Matcher matcher = pattern.matcher(version);
             if (matcher.matches()) {
-                return new RedHatArtifactVersion(matcher.group(1), Integer.parseInt(matcher.group(2)));
+                return new ProductArtifactVersion(matcher.group(1), Integer.parseInt(matcher.group(2)));
             } else {
                 throw new IllegalStateException(
-                        "Invalid use of '" + RedHatArtifactVersion.class.getName() + "#fromVersion' for " + version
-                                + ". Can only be used on redhat artifact versions");
+                        "Invalid use of ProductArtifactVersion#fromVersion for " + version
+                                + ". Version does not match pattern " + pattern.pattern());
             }
         }
 
@@ -453,8 +465,8 @@ public class RepositoryUtils {
             return upstreamVersion;
         }
 
-        public int getRedhatBuildNumber() {
-            return redhatBuildNumber;
+        public int getBuildNumber() {
+            return buildNumber;
         }
 
         @Override
@@ -465,14 +477,14 @@ public class RepositoryUtils {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            RedHatArtifactVersion that = (RedHatArtifactVersion) o;
+            ProductArtifactVersion that = (ProductArtifactVersion) o;
             return Objects.equals(upstreamVersion, that.upstreamVersion)
-                    && Objects.equals(redhatBuildNumber, that.redhatBuildNumber);
+                    && Objects.equals(buildNumber, that.buildNumber);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(upstreamVersion, redhatBuildNumber);
+            return Objects.hash(upstreamVersion, buildNumber);
         }
     }
 
