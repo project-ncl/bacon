@@ -38,8 +38,8 @@ public class ResolvedGav {
         return gav;
     }
 
-    boolean isRedHatVersion() {
-        return gav.getVersion().contains("redhat");
+    boolean isProductVersion(String qualifier) {
+        return gav.getVersion().contains(qualifier);
     }
 
     Path getArtifactDirectory() {

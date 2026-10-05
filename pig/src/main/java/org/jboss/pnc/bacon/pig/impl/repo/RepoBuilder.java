@@ -89,7 +89,7 @@ public class RepoBuilder {
             createAndBuildProject(bomFile, repoParentDir, artifactSelector);
             RepositoryUtils.removeIrrelevantFiles(repoParentDir);
             if (removeGeneratedM2Dups) {
-                RepositoryUtils.keepOnlyLatestRedHatArtifacts(repoParentDir);
+                RepositoryUtils.keepOnlyLatestProductArtifacts(repoParentDir, repoGeneration.getVersionQualifier());
             }
         } catch (IOException e) {
             throw new RuntimeException("Unable to build pom", e);

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -101,5 +102,66 @@ class RepositoryUtilsTest {
                 RepositoryUtils.isCommunity(
                         new File(
                                 "rhaf-camel-4.8.0.redhat-00008-for-quarkus-3.15.0.CQ2-maven-repository/maven-repository/com/hierynomus/smbj/0.13.0.redhat-00001/_remote.repositories")));
+    }
+
+    @Test
+    void testIsCommunityWithCustomQualifier() {
+        assertTrue(
+                RepositoryUtils.isCommunity(
+                        new File(
+                                "maven-repository/org/hibernate/hibernate-core/6.4.10.Final/hibernate-core-6.4.10.Final.jar"),
+                        "ibm"));
+        assertFalse(
+                RepositoryUtils.isCommunity(
+                        new File(
+                                "maven-repository/org/hibernate/hibernate-core/6.4.10.Final-ibm-00001/hibernate-core-6.4.10.Final-ibm-00001.jar"),
+                        "ibm"));
+        // "redhat" qualifier should not match "ibm" artifacts
+        assertTrue(
+                RepositoryUtils.isCommunity(
+                        new File(
+                                "maven-repository/org/hibernate/hibernate-core/6.4.10.Final-ibm-00001/hibernate-core-6.4.10.Final-ibm-00001.jar"),
+                        "redhat"));
+        // "ibm" qualifier should not match "redhat" artifacts
+        assertTrue(
+                RepositoryUtils.isCommunity(
+                        new File(
+                                "maven-repository/org/hibernate/hibernate-core/6.4.10.Final-redhat-00001/hibernate-core-6.4.10.Final-redhat-00001.jar"),
+                        "ibm"));
+    }
+
+    @Test
+    void testProductArtifactVersionRedhat() {
+        Pattern redhatPattern = RepositoryUtils.ProductArtifactVersion.patternFor("redhat");
+        RepositoryUtils.ProductArtifactVersion v = RepositoryUtils.ProductArtifactVersion
+                .fromVersion("6.4.10.Final-redhat-00001", redhatPattern);
+        assertEquals("6.4.10.Final", v.getUpstreamVersion());
+        assertEquals(1, v.getBuildNumber());
+    }
+
+    @Test
+    void testProductArtifactVersionIbm() {
+        Pattern ibmPattern = RepositoryUtils.ProductArtifactVersion.patternFor("ibm");
+        RepositoryUtils.ProductArtifactVersion v = RepositoryUtils.ProductArtifactVersion
+                .fromVersion("6.4.10.Final-ibm-00003", ibmPattern);
+        assertEquals("6.4.10.Final", v.getUpstreamVersion());
+        assertEquals(3, v.getBuildNumber());
+    }
+
+    @Test
+    void testProductArtifactVersionWithDotSeparator() {
+        Pattern ibmPattern = RepositoryUtils.ProductArtifactVersion.patternFor("ibm");
+        RepositoryUtils.ProductArtifactVersion v = RepositoryUtils.ProductArtifactVersion
+                .fromVersion("1.0.0.ibm-00005", ibmPattern);
+        assertEquals("1.0.0", v.getUpstreamVersion());
+        assertEquals(5, v.getBuildNumber());
+    }
+
+    @Test
+    void testProductArtifactVersionMismatch() {
+        Pattern ibmPattern = RepositoryUtils.ProductArtifactVersion.patternFor("ibm");
+        assertThrows(
+                IllegalStateException.class,
+                () -> RepositoryUtils.ProductArtifactVersion.fromVersion("6.4.10.Final-redhat-00001", ibmPattern));
     }
 }

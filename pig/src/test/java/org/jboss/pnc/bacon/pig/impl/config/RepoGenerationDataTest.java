@@ -40,4 +40,30 @@ class RepoGenerationDataTest {
         assertThat(merged.isIncludeLicenses()).isEqualTo(true);
         assertThat(merged.isIncludeMavenMetadata()).isEqualTo(true);
     }
+
+    @Test
+    void testVersionQualifierDefaultsToRedhat() {
+        RepoGenerationData data = new RepoGenerationData();
+        assertThat(data.getVersionQualifier()).isEqualTo("redhat");
+    }
+
+    @Test
+    void testVersionQualifierMergeOverrideApplied() {
+        RepoGenerationData base = new RepoGenerationData();
+
+        RepoGenerationData override = new RepoGenerationData();
+        override.setVersionQualifier("ibm");
+
+        RepoGenerationData merged = RepoGenerationData.merge(base, override);
+        assertThat(merged.getVersionQualifier()).isEqualTo("ibm");
+    }
+
+    @Test
+    void testVersionQualifierMergeBothDefault() {
+        RepoGenerationData base = new RepoGenerationData();
+        RepoGenerationData override = new RepoGenerationData();
+
+        RepoGenerationData merged = RepoGenerationData.merge(base, override);
+        assertThat(merged.getVersionQualifier()).isEqualTo("redhat");
+    }
 }

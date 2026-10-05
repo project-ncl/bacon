@@ -270,6 +270,10 @@ public class GAV {
         return !version.contains("redhat");
     }
 
+    public boolean isCommunity(String qualifier) {
+        return !version.contains(qualifier);
+    }
+
     public static boolean isTempVersion(String v) {
         return v.contains("temporary-redhat") || v.matches(".*\\.t\\d{8}-\\d+-\\d+-redhat-\\d+");
     }
