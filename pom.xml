@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>53</version>
+        <version>54</version>
         <relativePath />
     </parent>
 
@@ -80,9 +80,7 @@
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <commons-configuration2.version>2.15.1</commons-configuration2.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <compiler.plugin.version>3.16.0</compiler.plugin.version>
         <domino.version>0.0.133</domino.version>
-        <enforcer.plugin.version>3.6.3</enforcer.plugin.version>
         <extraSurefireJvmArgs />
         <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
@@ -108,11 +106,9 @@
         <pnc-api.version>3.5.2</pnc-api.version>
         <pnc-common.version>3.5.4</pnc-common.version>
         <pnc.version>3.6.0-SNAPSHOT</pnc.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.resolver.version>3.35.3</quarkus.resolver.version>
         <quarkus.version>3.37.3</quarkus.version>
         <qute.version>${quarkus.version}</qute.version>
-        <surefire.plugin.version>3.6.0</surefire.plugin.version>
         <tagSuffix />
         <undertow.version>2.3.24.Final</undertow.version>
         <unirestVersion>3.14.5</unirestVersion>
@@ -863,7 +859,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${compiler.plugin.version}</version>
                     <configuration>
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
@@ -885,15 +880,6 @@
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${enforcer.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${surefire.plugin.version}</version>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -903,7 +889,6 @@
                 <version>4.0.0</version>
                 <configuration>
                     <createBackupFile>false</createBackupFile>
-                    <encoding>${project.build.sourceEncoding}</encoding>
                     <expandEmptyElements>false</expandEmptyElements>
                     <keepBlankLines>true</keepBlankLines>
                     <lineSeparator>\n</lineSeparator>
@@ -982,7 +967,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>3.3.1</version>
                 <configuration>
                     <shortRevisionLength>8</shortRevisionLength>
                 </configuration>
@@ -1046,7 +1030,7 @@
                 <configuration>
                     <tagNameFormat>@{project.version}${tagSuffix}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <releaseProfiles>release</releaseProfiles>
+                    <releaseProfiles>central-release</releaseProfiles>
                 </configuration>
             </plugin>
             <plugin>
@@ -1070,66 +1054,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.4.0</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.8</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <phase>verify</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.12.0</version>
-
-                        <configuration>
-                            <source>17</source>
-                            <doclint>none</doclint>
-                            <failOnError>false</failOnError>
-                            <additionalOptions>
-                                <additionalOption>-Xdoclint:none</additionalOption>
-                            </additionalOptions>
-                        </configuration>
-
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>
