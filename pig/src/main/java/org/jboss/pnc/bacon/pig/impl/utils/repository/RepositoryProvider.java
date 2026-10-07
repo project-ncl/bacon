@@ -22,7 +22,7 @@ public class RepositoryProvider {
             if (repoProvider() == PROVIDER_TYPE.INDY) {
                 repoProvUrl = pigUrl() + "api/content/maven/group/static";
             } else {
-                repoProvUrl = pigUrl() + "artifactory/pnc-" + pncInstance() + "mvn-builds-imports-public";
+                repoProvUrl = pigUrl() + "artifactory/pnc-" + pncInstance() + "mvn-builds-imports";
             }
         }
         return repoProvUrl;
