@@ -80,7 +80,7 @@
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <commons-configuration2.version>2.15.1</commons-configuration2.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <domino.version>0.0.133</domino.version>
+        <domino.version>0.0.135</domino.version>
         <extraSurefireJvmArgs />
         <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
