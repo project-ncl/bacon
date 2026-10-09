@@ -1,0 +1,54 @@
+{
+  "aliases": {
+    "bacon": {
+      "script-ref": "org.jboss.pnc.bacon:cli:RELEASE:shaded",
+      "description": "PNC/DA/PiG CLI for ProjectNCL 2.0",
+      "java": "17+"
+    },
+    "pnc": {
+      "script-ref": "org.jboss.pnc.bacon:cli:RELEASE:shaded",
+      "arguments": ["pnc"],
+      "description": "PNC CLI (via bacon)",
+      "java": "17+"
+    },
+    "da": {
+      "script-ref": "org.jboss.pnc.bacon:cli:RELEASE:shaded",
+      "arguments": ["da"],
+      "description": "Dependency Analysis CLI (via bacon)",
+      "java": "17+"
+    },
+    "pig": {
+      "script-ref": "org.jboss.pnc.bacon:cli:RELEASE:shaded",
+      "arguments": ["pig"],
+      "description": "PiG CLI (via bacon)",
+      "java": "17+"
+    },
+    "bacon-snapshot": {
+      "script-ref": "org.jboss.pnc.bacon:cli:LATEST:shaded",
+      "description": "PNC/DA/PiG CLI for ProjectNCL 2.0 (snapshot)",
+      "java": "17+",
+      "repositories": ["mavenlocal", "central", "central-portal-snapshots"]
+    },
+    "pnc-snapshot": {
+      "script-ref": "org.jboss.pnc.bacon:cli:LATEST:shaded",
+      "arguments": ["pnc"],
+      "description": "PNC CLI (via bacon, snapshot)",
+      "java": "17+",
+      "repositories": ["mavenlocal", "central", "central-portal-snapshots"]
+    },
+    "da-snapshot": {
+      "script-ref": "org.jboss.pnc.bacon:cli:LATEST:shaded",
+      "arguments": ["da"],
+      "description": "Dependency Analysis CLI (via bacon, snapshot)",
+      "java": "17+",
+      "repositories": ["mavenlocal", "central", "central-portal-snapshots"]
+    },
+    "pig-snapshot": {
+      "script-ref": "org.jboss.pnc.bacon:cli:LATEST:shaded",
+      "arguments": ["pig"],
+      "description": "PiG CLI (via bacon, snapshot)",
+      "java": "17+",
+      "repositories": ["mavenlocal", "central", "central-portal-snapshots"]
+    }
+  }
+}
