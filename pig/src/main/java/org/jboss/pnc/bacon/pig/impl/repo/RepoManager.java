@@ -202,11 +202,10 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
     }
 
-    void getRedhatArtifacts(List<ArtifactWrapper> artifactsToPack, PncBuild build) {
+    void getProductArtifacts(List<ArtifactWrapper> artifactsToPack, PncBuild build) {
         log.info("Getting all artifacts and dependencies for [{}]", build.getName());
-        // ⚠ this only selects maven-style identifiers where the version has redhat in it
-        // <group-id>:<artifact-id>:<packaging>:<version>
-        buildInfoCollector.addDependencies(build, "identifier=like=%:%:%:%redhat%");
+        String qualifier = generationData.getVersionQualifier();
+        buildInfoCollector.addDependencies(build, "identifier=like=%:%:%:%" + qualifier + "%");
         artifactsToPack.addAll(build.getBuiltArtifacts());
         artifactsToPack.addAll(build.getDependencyArtifacts());
     }
@@ -218,8 +217,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
     }
 
     private void filterAndDownload(List<ArtifactWrapper> artifactsToPack, File sourceDir) {
+        String qualifier = generationData.getVersionQualifier();
         artifactsToPack.removeIf(
-                artifact -> !artifact.getGapv().contains("redhat-")
+                artifact -> !artifact.getGapv().contains(qualifier + "-")
                         && !artifact.getGapv().contains("eap-runtime-artifacts"));
         artifactsToPack.removeIf(artifact -> isArtifactExcluded(artifact.getGapv()));
 
@@ -261,7 +261,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         log.warn("Repo generation strategy 'PACK_ALL' is deprecated please use BUILD_CONFIGS");
         PncBuild build = getBuild(generationData.getSourceBuild());
         List<ArtifactWrapper> artifactsToPack = new ArrayList<>();
-        getRedhatArtifacts(artifactsToPack, build);
+        getProductArtifacts(artifactsToPack, build);
         File sourceDir = createMavenGenerationDir();
         filterAndDownload(artifactsToPack, sourceDir);
         return repackage(sourceDir);
@@ -276,7 +276,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         builds.values()
                 .stream()
                 .filter(b -> !generationData.getExcludeSourceBuilds().contains(b.getName()))
-                .forEach(b -> getRedhatArtifacts(artifactsToPack, b));
+                .forEach(b -> getProductArtifacts(artifactsToPack, b));
         File sourceDir = createMavenGenerationDir();
         filterAndDownload(artifactsToPack, sourceDir);
         return repackage(sourceDir);
@@ -291,7 +291,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
         for (String buildConfigName : generationData.getSourceBuilds()) {
             PncBuild build = getBuild(buildConfigName);
-            getRedhatArtifacts(artifactsToPack, build);
+            getProductArtifacts(artifactsToPack, build);
         }
         File sourceDir = createMavenGenerationDir();
 
@@ -363,7 +363,7 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
 
         // TODO: testMode is need for ResolveOnlyRepositoryTest. These aren't mocked and cause the test to fail.
         if (!isTestMode) {
-            RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir);
+            RepositoryUtils.removeCommunityArtifacts(targetRepoContentsDir, generationData.getVersionQualifier());
             RepositoryUtils.removeIrrelevantFiles(targetRepoContentsDir);
         }
 
@@ -618,7 +618,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             }
             bannedDirs.entrySet()
                     .stream()
-                    .filter(en -> Files.exists(en.getValue()) && hasProdVersionSubdir(en.getValue()))
+                    .filter(
+                            en -> Files.exists(en.getValue())
+                                    && hasProdVersionSubdir(en.getValue(), generationData.getVersionQualifier()))
                     .peek(en -> bannedReport.append("\n " + en.getKey() + " pulled by " + artifact))
                     .forEach(en -> {
                         try {
@@ -986,8 +988,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         var resolvedArtifacts = new ArrayList<>(artifactCollector.getResolvedArtifacts());
         var progressTracker = new ArtifactProgressTracker("Finalized ", resolvedArtifacts.size());
         final List<CompletableFuture<?>> all = new ArrayList<>(resolvedArtifacts.size());
+        String qualifier = generationData.getVersionQualifier();
         for (var resolvedArtifact : resolvedArtifacts) {
-            if (resolvedArtifact.isRedHatVersion()) {
+            if (resolvedArtifact.isProductVersion(qualifier)) {
                 all.add(finalizeRedHatArtifact(resolver, resolvedArtifact, progressTracker, summary));
             } else {
                 all.add(finalizeCommunityArtifact(resolvedArtifact, progressTracker));
@@ -1342,9 +1345,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         return result;
     }
 
-    static boolean hasProdVersionSubdir(Path path) {
+    static boolean hasProdVersionSubdir(Path path, String qualifier) {
         try (Stream<Path> files = Files.list(path)) {
-            return files.anyMatch(p -> p.getFileName().toString().contains("redhat-"));
+            return files.anyMatch(p -> p.getFileName().toString().contains(qualifier + "-"));
         } catch (IOException e) {
             throw new RuntimeException("Could not list " + path, e);
         }
