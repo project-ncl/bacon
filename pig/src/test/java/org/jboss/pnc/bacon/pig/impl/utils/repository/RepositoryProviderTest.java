@@ -23,7 +23,7 @@ class RepositoryProviderTest {
         assertNotNull(RepositoryProvider.getRepoProviderUrl());
         assertTrue(
                 RepositoryProvider.getRepoProviderUrl()
-                        .contains("http://repo.com/artifactory/pnc-mvn-builds-imports-public"));
+                        .contains("http://repo.com/artifactory/pnc-mvn-builds-imports"));
     }
 
     @Test
