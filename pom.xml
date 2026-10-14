@@ -106,7 +106,7 @@
         <pnc-api.version>3.5.2</pnc-api.version>
         <pnc-common.version>3.5.4</pnc-common.version>
         <pnc.version>3.6.0-SNAPSHOT</pnc.version>
-        <quarkus.resolver.version>3.35.3</quarkus.resolver.version>
+        <quarkus.resolver.version>3.40.1</quarkus.resolver.version>
         <quarkus.version>3.37.3</quarkus.version>
         <qute.version>${quarkus.version}</qute.version>
         <tagSuffix />
