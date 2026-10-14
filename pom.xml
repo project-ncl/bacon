@@ -82,7 +82,7 @@
         <commons-io.version>2.22.0</commons-io.version>
         <domino.version>0.0.133</domino.version>
         <extraSurefireJvmArgs />
-        <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
+        <glassfish-jaxb.version>2.3.9</glassfish-jaxb.version>
         <glassfish-json.version>1.1.4</glassfish-json.version>
         <jackson.annotation.version>2.22</jackson.annotation.version>
         <jackson.version>2.22.3</jackson.version>
