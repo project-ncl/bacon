@@ -30,6 +30,7 @@ import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.ConfigProfile;
 import org.jboss.pnc.bacon.config.KeycloakConfig;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.GenericSettingClient;
@@ -64,6 +65,11 @@ public class PncClientHelper {
 
     public static Configuration getPncConfiguration() {
         return getPncConfiguration(true);
+    }
+
+    public static boolean credentialsAvailable() {
+        ConfigProfile profile = Config.instance().getActiveProfile();
+        return profile.getLdapUsernamePassword() != null || profile.getKeycloak() != null;
     }
 
     public static Configuration setup(boolean authenticationNeeded) {
