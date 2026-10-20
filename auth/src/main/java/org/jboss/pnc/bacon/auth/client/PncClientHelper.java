@@ -19,15 +19,19 @@ package org.jboss.pnc.bacon.auth.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jboss.pnc.bacon.auth.KeycloakClientImpl;
 import org.jboss.pnc.bacon.auth.model.Credential;
 import org.jboss.pnc.bacon.auth.spi.KeycloakClient;
+import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.ConfigProfile;
@@ -70,6 +74,34 @@ public class PncClientHelper {
     public static boolean credentialsAvailable() {
         ConfigProfile profile = Config.instance().getActiveProfile();
         return profile.getLdapUsernamePassword() != null || profile.getKeycloak() != null;
+    }
+
+    public static TokenAuthenticator authenticationFilter() {
+        return new TokenAuthenticator(authScheme(), credentialsSupplier());
+    }
+
+    public static Optional<String> authorizationHeader() {
+        if (!credentialsAvailable()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(authScheme() + " " + credentialsSupplier().get());
+    }
+
+    private static String authScheme() {
+        return Config.instance().getActiveProfile().getLdapUsernamePassword() != null ? "Basic" : "Bearer";
+    }
+
+    private static Supplier<String> credentialsSupplier() {
+        String ldapUsernamePassword = Config.instance().getActiveProfile().getLdapUsernamePassword();
+
+        if (ldapUsernamePassword != null) {
+            String encoded = Base64.getEncoder()
+                    .encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8));
+            return () -> encoded;
+        }
+
+        return getPncConfiguration().getBearerTokenSupplier();
     }
 
     public static Configuration setup(boolean authenticationNeeded) {

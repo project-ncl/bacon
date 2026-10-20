@@ -38,15 +38,12 @@ import org.jboss.da.lookup.model.MavenResult;
 import org.jboss.da.lookup.model.NPMResult;
 import org.jboss.da.model.rest.GAV;
 import org.jboss.da.model.rest.NPMPackage;
-import org.jboss.pnc.bacon.auth.LdapClient;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.CustomRestHeaderFilter;
-import org.jboss.pnc.bacon.common.TokenAuthenticator;
 import org.jboss.pnc.bacon.common.Utils;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.config.DaConfig;
-import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.otel.OTelCLIHelper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -96,18 +93,8 @@ public class DaHelper {
     }
 
     private static ResteasyWebTarget getAuthenticatedClient() {
-        Config config = Config.instance();
-
-        String ldapUsernamePassword = config.getActiveProfile().getLdapUsernamePassword();
-
         ResteasyWebTarget target = getClient();
-        if (ldapUsernamePassword != null) {
-            LdapClient ldapClient = new LdapClient(ldapUsernamePassword);
-            target.register(new TokenAuthenticator("Basic", ldapClient::getBasicAuthHeaderValue));
-        } else {
-            Configuration pncConfiguration = PncClientHelper.getPncConfiguration();
-            target.register(new TokenAuthenticator("Bearer", pncConfiguration.getBearerTokenSupplier()));
-        }
+        target.register(PncClientHelper.authenticationFilter());
         return target;
     }
 

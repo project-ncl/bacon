@@ -8,7 +8,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -18,7 +17,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
-import org.jboss.pnc.bacon.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,21 +86,6 @@ public class BifrostClient {
     }
 
     private void addAuthorization(HttpUriRequest request) {
-        if (!PncClientHelper.credentialsAvailable()) {
-            return;
-        }
-
-        String ldapUsernamePassword = Config.instance().getActiveProfile().getLdapUsernamePassword();
-        if (ldapUsernamePassword != null) {
-            request.setHeader(
-                    "Authorization",
-                    "Basic "
-                            + Base64.getEncoder()
-                                    .encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8)));
-        } else {
-            request.setHeader(
-                    "Authorization",
-                    "Bearer " + PncClientHelper.getPncConfiguration().getBearerTokenSupplier().get());
-        }
+        PncClientHelper.authorizationHeader().ifPresent(header -> request.setHeader("Authorization", header));
     }
 }
