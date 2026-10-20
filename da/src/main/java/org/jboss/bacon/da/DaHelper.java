@@ -111,12 +111,20 @@ public class DaHelper {
         return target;
     }
 
+    private static ResteasyWebTarget getClientWithOptionalAuth() {
+        if (!PncClientHelper.credentialsAvailable()) {
+            return getClient();
+        }
+
+        return getAuthenticatedClient();
+    }
+
     public static ReportsApi createReportsApi() {
-        return getClient().proxy(ReportsApi.class);
+        return getClientWithOptionalAuth().proxy(ReportsApi.class);
     }
 
     public static ListingsApi createListingsApi() {
-        return getClient().proxy(ListingsApi.class);
+        return getClientWithOptionalAuth().proxy(ListingsApi.class);
     }
 
     public static ListingsApi createAuthenticatedListingsApi() {
@@ -124,7 +132,7 @@ public class DaHelper {
     }
 
     public static LookupApi createLookupApi() {
-        return getClient().proxy(LookupApi.class);
+        return getClientWithOptionalAuth().proxy(LookupApi.class);
     }
 
     /**
