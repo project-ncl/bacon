@@ -28,11 +28,12 @@ profile:
         # Uncomment this section if you want to create / update / delete
         # ******************************************************************************
 
-        keycloak:
-            url: "${keycloak-url}"
-            realm: "${keycloak-realm}"
-            username: "${keycloak-user}"
-            clientSecret: "${keycloak-secret}"
+        # Commented out: the tests access PNC and DA anonymously
+        #        keycloak:
+        #            url: "${keycloak-url}"
+        #            realm: "${keycloak-realm}"
+        #            username: "${keycloak-user}"
+        #            clientSecret: "${keycloak-secret}"
 
         pig:
             kojiHubUrl: "http://koji.url"
