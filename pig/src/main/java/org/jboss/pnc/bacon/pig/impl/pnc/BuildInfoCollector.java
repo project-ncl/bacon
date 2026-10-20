@@ -36,6 +36,7 @@ import org.jboss.pnc.bacon.pig.impl.config.GroupBuildInfo;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.ClientException;
+import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.GroupBuildClient;
 import org.jboss.pnc.client.GroupConfigurationClient;
 import org.jboss.pnc.client.RemoteCollection;
@@ -57,15 +58,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class BuildInfoCollector implements Closeable {
-    private final BuildClient anonymousBuildClient;
-    private final BuildConfigurationClient anonymousBuildConfigClient;
-    private final GroupBuildClient anonymousGroupBuildClient;
-    private final GroupConfigurationClient anonymousGroupConfigurationClient;
+    private final BuildClient readOnlyBuildClient;
+    private final BuildConfigurationClient readOnlyBuildConfigClient;
+    private final GroupBuildClient readOnlyGroupBuildClient;
+    private final GroupConfigurationClient readOnlyGroupConfigurationClient;
 
     public void addDependencies(PncBuild bd, String filter) {
         try {
             List<Artifact> artifacts = toList(
-                    anonymousBuildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
+                    readOnlyBuildClient.getDependencyArtifacts(bd.getId(), Optional.empty(), Optional.of(filter)));
             bd.addDependencyArtifacts(artifacts);
         } catch (RemoteResourceException e) {
             throw new RuntimeException("Failed to get dependency artifacts for " + bd.getId(), e);
@@ -94,7 +95,7 @@ public class BuildInfoCollector implements Closeable {
             }
 
             // Note: sort by id not allowed
-            Iterator<Build> buildIterator = anonymousBuildConfigClient
+            Iterator<Build> buildIterator = readOnlyBuildConfigClient
                     .getBuilds(configId, filter, of("=desc=submitTime"), queryParam)
                     .iterator();
 
@@ -105,7 +106,7 @@ public class BuildInfoCollector implements Closeable {
             Build build = buildIterator.next();
 
             PncBuild result = new PncBuild(build);
-            result.addBuiltArtifacts(toList(anonymousBuildClient.getBuiltArtifacts(build.getId())));
+            result.addBuiltArtifacts(toList(readOnlyBuildClient.getBuiltArtifacts(build.getId())));
             return result;
         } catch (ClientException e) {
             throw new RuntimeException("Failed to get latest successful build for " + configId, e);
@@ -113,10 +114,11 @@ public class BuildInfoCollector implements Closeable {
     }
 
     public BuildInfoCollector() {
-        anonymousBuildClient = new BuildClient(PncClientHelper.getPncConfiguration(false));
-        anonymousBuildConfigClient = new BuildConfigurationClient(PncClientHelper.getPncConfiguration(false));
-        anonymousGroupBuildClient = new GroupBuildClient(PncClientHelper.getPncConfiguration(false));
-        anonymousGroupConfigurationClient = new GroupConfigurationClient(PncClientHelper.getPncConfiguration(false));
+        Configuration configuration = PncClientHelper.getPncConfiguration(PncClientHelper.credentialsAvailable());
+        readOnlyBuildClient = new BuildClient(configuration);
+        readOnlyBuildConfigClient = new BuildConfigurationClient(configuration);
+        readOnlyGroupBuildClient = new GroupBuildClient(configuration);
+        readOnlyGroupConfigurationClient = new GroupConfigurationClient(configuration);
     }
 
     /**
@@ -129,7 +131,7 @@ public class BuildInfoCollector implements Closeable {
      */
     public GroupBuildInfo getBuildsFromLatestGroupConfiguration(String groupConfigurationId, boolean temporaryBuild) {
         try {
-            RemoteCollection<BuildConfiguration> configs = anonymousGroupConfigurationClient
+            RemoteCollection<BuildConfiguration> configs = readOnlyGroupConfigurationClient
                     .getBuildConfigs(groupConfigurationId);
 
             Map<String, PncBuild> builds = new HashMap<>();
@@ -154,7 +156,7 @@ public class BuildInfoCollector implements Closeable {
         GroupBuildsFilterParameters groupBuildsFilterParameters = new GroupBuildsFilterParameters();
         groupBuildsFilterParameters.setLatest(true);
         // we have to sort by startTime since group builds with 'NO_REBUILD_REQUIRED' don't have the endTime set
-        Collection<GroupBuild> groupBuilds = anonymousGroupConfigurationClient
+        Collection<GroupBuild> groupBuilds = readOnlyGroupConfigurationClient
                 .getAllGroupBuilds(
                         groupConfigurationId,
                         groupBuildsFilterParameters,
@@ -189,20 +191,20 @@ public class BuildInfoCollector implements Closeable {
         filter.setRunning(false);
 
         try {
-            Collection<Build> builds = anonymousGroupBuildClient.getBuilds(groupBuild.getId(), filter).getAll();
+            Collection<Build> builds = readOnlyGroupBuildClient.getBuilds(groupBuild.getId(), filter).getAll();
 
             for (Build build : builds) {
                 PncBuild pncBuild;
 
                 if (build.getStatus() == BuildStatus.NO_REBUILD_REQUIRED) {
                     BuildRef buildRef = build.getNoRebuildCause();
-                    Build realBuild = anonymousBuildClient.getSpecific(buildRef.getId());
+                    Build realBuild = readOnlyBuildClient.getSpecific(buildRef.getId());
                     pncBuild = new PncBuild(realBuild);
                 } else {
                     pncBuild = new PncBuild(build);
                 }
 
-                pncBuild.addBuiltArtifacts(toList(anonymousBuildClient.getBuiltArtifacts(pncBuild.getId())));
+                pncBuild.addBuiltArtifacts(toList(readOnlyBuildClient.getBuiltArtifacts(pncBuild.getId())));
                 result.put(pncBuild.getName(), pncBuild);
             }
             return new GroupBuildInfo(groupBuild, result);
@@ -213,7 +215,7 @@ public class BuildInfoCollector implements Closeable {
 
     public String ConfigNametoId(String buildConfigName) {
         try {
-            return anonymousBuildConfigClient.getAll(Optional.empty(), Optional.of("name==" + buildConfigName))
+            return readOnlyBuildConfigClient.getAll(Optional.empty(), Optional.of("name==" + buildConfigName))
                     .iterator()
                     .next()
                     .getId();
@@ -226,10 +228,10 @@ public class BuildInfoCollector implements Closeable {
 
     @Override
     public void close() {
-        anonymousBuildClient.close();
-        anonymousBuildConfigClient.close();
-        anonymousGroupBuildClient.close();
-        anonymousGroupConfigurationClient.close();
+        readOnlyBuildClient.close();
+        readOnlyBuildConfigClient.close();
+        readOnlyGroupBuildClient.close();
+        readOnlyGroupConfigurationClient.close();
     }
 
     /**
