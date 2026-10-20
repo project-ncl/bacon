@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.pnc.common.UrlGenerator;
 import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
@@ -156,7 +157,8 @@ public class PncBuild {
             return buildLog;
         }
 
-        try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+        Configuration configuration = PncClientHelper.getPncConfiguration(PncClientHelper.credentialsAvailable());
+        try (BuildClient buildClient = new BuildClient(configuration)) {
             Optional<InputStream> streamLogs = buildClient.getBuildLogs(id);
             buildLog = Collections.emptyList();
             streamLogs.ifPresent(

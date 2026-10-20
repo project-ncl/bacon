@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pig.impl.pnc;
 
 import static java.util.Optional.of;
+import static org.jboss.pnc.bacon.auth.client.PncClientHelper.credentialsAvailable;
 import static org.jboss.pnc.bacon.auth.client.PncClientHelper.getPncConfiguration;
 import static org.jboss.pnc.bacon.pig.impl.utils.PncClientUtils.query;
 
@@ -51,15 +52,15 @@ import org.slf4j.LoggerFactory;
 public class PncBuilder implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(PncBuilder.class);
     private final GroupBuildClient groupBuildClient;
-    private final GroupBuildClient anonymousGroupBuildClient;
+    private final GroupBuildClient readOnlyGroupBuildClient;
     private final GroupConfigurationClient groupConfigClient;
-    private final GroupConfigurationClient anonymousGroupConfigClient;
+    private final GroupConfigurationClient readOnlyGroupConfigClient;
 
     public PncBuilder() {
         groupBuildClient = new GroupBuildClient(getPncConfiguration());
-        anonymousGroupBuildClient = new GroupBuildClient(getPncConfiguration(false));
+        readOnlyGroupBuildClient = new GroupBuildClient(getPncConfiguration(credentialsAvailable()));
         groupConfigClient = new GroupConfigurationClient(getPncConfiguration());
-        anonymousGroupConfigClient = new GroupConfigurationClient(getPncConfiguration(false));
+        readOnlyGroupConfigClient = new GroupConfigurationClient(getPncConfiguration(credentialsAvailable()));
     }
 
     /**
@@ -70,13 +71,13 @@ public class PncBuilder implements Closeable {
      */
     PncBuilder(
             GroupBuildClient gb,
-            GroupBuildClient anonymousGroupBuildClient,
+            GroupBuildClient readOnlyGroupBuildClient,
             GroupConfigurationClient gc,
-            GroupConfigurationClient anonymousGroupConfigClient) {
+            GroupConfigurationClient readOnlyGroupConfigClient) {
         groupBuildClient = gb;
-        this.anonymousGroupBuildClient = anonymousGroupBuildClient;
+        this.readOnlyGroupBuildClient = readOnlyGroupBuildClient;
         groupConfigClient = gc;
-        this.anonymousGroupConfigClient = anonymousGroupConfigClient;
+        this.readOnlyGroupConfigClient = readOnlyGroupConfigClient;
     }
 
     public GroupBuild build(
@@ -148,7 +149,7 @@ public class PncBuilder implements Closeable {
 
     public Collection<GroupBuild> getRunningGroupBuilds(String groupConfigurationId) {
         try {
-            Collection<GroupBuild> groupBuilds = anonymousGroupConfigClient
+            Collection<GroupBuild> groupBuilds = readOnlyGroupConfigClient
                     .getAllGroupBuilds(
                             groupConfigurationId,
                             new GroupBuildsFilterParameters(),
@@ -175,7 +176,7 @@ public class PncBuilder implements Closeable {
         // log set to info for CPaaS to detect infinite loop
         log.info("Checking if group build {} is successfully finished", groupBuildId);
         try {
-            GroupBuild groupBuild = anonymousGroupBuildClient.getSpecific(groupBuildId);
+            GroupBuild groupBuild = readOnlyGroupBuildClient.getSpecific(groupBuildId);
             switch (groupBuild.getStatus()) {
                 case BUILDING:
                     return false;
@@ -227,7 +228,7 @@ public class PncBuilder implements Closeable {
         filter.setRunning(false);
 
         try {
-            Collection<Build> builds = anonymousGroupBuildClient.getBuilds(groupBuildId, filter).getAll();
+            Collection<Build> builds = readOnlyGroupBuildClient.getBuilds(groupBuildId, filter).getAll();
             boolean allFinal = builds.stream().allMatch(b -> b.getStatus().isFinal());
             return allFinal && getCountOfBuildConfigsForGroupBuild(groupBuildId) == builds.size();
         } catch (ClientException e) {
@@ -248,9 +249,9 @@ public class PncBuilder implements Closeable {
     int getCountOfBuildConfigsForGroupBuild(String groupBuildId) {
 
         try {
-            GroupBuild gb = anonymousGroupBuildClient.getSpecific(groupBuildId);
+            GroupBuild gb = readOnlyGroupBuildClient.getSpecific(groupBuildId);
             GroupConfigurationRef gc = gb.getGroupConfig();
-            return anonymousGroupConfigClient.getBuildConfigs(gc.getId()).size();
+            return readOnlyGroupConfigClient.getBuildConfigs(gc.getId()).size();
         } catch (ClientException e) {
             log.warn("Failed to get count of build configs in the group build {}", groupBuildId, e);
             return -1;
@@ -260,8 +261,8 @@ public class PncBuilder implements Closeable {
     @Override
     public void close() {
         groupBuildClient.close();
-        anonymousGroupBuildClient.close();
+        readOnlyGroupBuildClient.close();
         groupConfigClient.close();
-        anonymousGroupConfigClient.close();
+        readOnlyGroupConfigClient.close();
     }
 }
