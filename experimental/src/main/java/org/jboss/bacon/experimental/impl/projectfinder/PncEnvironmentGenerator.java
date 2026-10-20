@@ -12,6 +12,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.jboss.pnc.bacon.auth.client.PncClientHelper;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -57,10 +59,9 @@ public class PncEnvironmentGenerator {
 
         while (pageIndex < totalPages) {
             String url = apiBase + "/environments?pageSize=200&pageIndex=" + pageIndex;
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .build();
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(url)).GET();
+            PncClientHelper.authorizationHeader().ifPresent(header -> requestBuilder.header("Authorization", header));
+            HttpRequest request = requestBuilder.build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
