@@ -50,6 +50,7 @@ import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.SlsaProvenanceV1Client;
 import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.dto.Artifact;
@@ -86,7 +87,7 @@ public class BuildOutputDownloader {
         Path repositoryDir = workDir.resolve("repository");
         createDirectories(repositoryDir);
 
-        try (BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+        try (BuildClient client = new BuildClient(pncConfiguration())) {
             Collection<Artifact> artifacts = client.getBuiltArtifacts(buildId, Optional.empty(), Optional.empty())
                     .getAll();
             downloadArtifactsToRepository(artifacts, repositoryDir);
@@ -105,8 +106,7 @@ public class BuildOutputDownloader {
         }
         createDirectories(outputFile.getParent());
 
-        try (SlsaProvenanceV1Client slsaProvenanceV1Client = new SlsaProvenanceV1Client(
-                PncClientHelper.getPncConfiguration(false))) {
+        try (SlsaProvenanceV1Client slsaProvenanceV1Client = new SlsaProvenanceV1Client(pncConfiguration())) {
             Object provenance = redacted ? slsaProvenanceV1Client.getFromBuildIdRedacted(buildId)
                     : slsaProvenanceV1Client.getFromBuildId(buildId);
             writeJson(outputFile, provenance);
@@ -144,7 +144,7 @@ public class BuildOutputDownloader {
         List<Path> downloadedArtifacts;
         Collection<Artifact> artifacts;
         Build build;
-        try (BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+        try (BuildClient client = new BuildClient(pncConfiguration())) {
             build = client.getSpecific(buildId);
             artifacts = client.getBuiltArtifacts(buildId, Optional.empty(), Optional.empty()).getAll();
             downloadedArtifacts = downloadArtifactsToRepository(artifacts, repositoryDir);
@@ -248,7 +248,7 @@ public class BuildOutputDownloader {
 
     private void downloadAlignmentLog(String buildId, Path targetFile) {
         createDirectories(targetFile.getParent());
-        try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+        try (BuildClient buildClient = new BuildClient(pncConfiguration())) {
             Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
             try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
                 if (streamLogs.isPresent()) {
@@ -265,6 +265,10 @@ public class BuildOutputDownloader {
         } catch (Exception e) {
             throw new RuntimeException("Failed to download alignment log for build " + buildId, e);
         }
+    }
+
+    private static Configuration pncConfiguration() {
+        return PncClientHelper.getPncConfiguration(PncClientHelper.credentialsAvailable());
     }
 
     private void downloadUri(URI uri, Path target) {

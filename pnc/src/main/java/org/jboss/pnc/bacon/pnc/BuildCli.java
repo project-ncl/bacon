@@ -318,7 +318,8 @@ public class BuildCli {
          */
         @Override
         public Integer call() throws Exception {
-            try (BuildClient buildClient = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+            try (BuildClient buildClient = new BuildClient(
+                    PncClientHelper.getPncConfiguration(PncClientHelper.credentialsAvailable()))) {
                 Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
                 if (streamLogs.isPresent()) {
                     try (BufferedReader reader = new BufferedReader(

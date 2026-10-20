@@ -9,8 +9,8 @@ import org.jboss.pnc.client.Configuration;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Helper class to create the PNC CLI client to use in the CLI objects. There are two variants, the unauthenticated one
- * and the authenticated one.
+ * Helper class to create the PNC CLI client to use in the CLI objects. There are two variants, one authenticating
+ * only if the active profile defines credentials, and one always requiring them.
  */
 @Slf4j
 public class ClientCreator<T extends ClientBase<?>> {
@@ -26,12 +26,12 @@ public class ClientCreator<T extends ClientBase<?>> {
     }
 
     /**
-     * Get a new unauthenticated PNC Client object.
+     * Get a new PNC Client object.
      *
-     * @return Unauthenticated PNC Client
+     * @return PNC Client, authenticated if the active profile defines credentials
      */
     public T newClient() {
-        return newClientPrivate(false);
+        return newClientPrivate(PncClientHelper.credentialsAvailable());
     }
 
     /**
