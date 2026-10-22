@@ -35,7 +35,7 @@ public class LdapClient {
      * @return access token
      */
     public String getBasicAuthHeaderValue() {
-        return "Basic " + Base64.getEncoder().encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8));
+        return encode(ldapUsernamePassword);
     }
 
     /**
@@ -50,6 +50,10 @@ public class LdapClient {
         if (ldapUsernamePassword == null || ldapUsernamePassword.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(new LdapClient(ldapUsernamePassword).getBasicAuthHeaderValue());
+        return Optional.of(encode(ldapUsernamePassword));
+    }
+
+    private static String encode(String ldapUsernamePassword) {
+        return "Basic " + Base64.getEncoder().encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8));
     }
 }
