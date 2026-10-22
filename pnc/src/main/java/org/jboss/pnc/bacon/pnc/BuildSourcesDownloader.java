@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.SCMRepository;
@@ -59,6 +60,7 @@ public class BuildSourcesDownloader {
 
     private static final String ACCEPT_ARCHIVE = "application/x-gzip, application/gzip, application/x-tar, application/octet-stream";
     private static final String ACCEPT_GITHUB_API = "application/json";
+    private static final String ACCEPT_DIFF = "application/vnd.github.diff";
 
     private static final int HTTP_MOVED_PERMANENTLY = 301;
     private static final int HTTP_FOUND = 302;
@@ -135,6 +137,244 @@ public class BuildSourcesDownloader {
                             + String.join("\n - ", failures));
         } catch (IOException e) {
             throw new RuntimeException("Failed to download sources for build " + build.getId(), e);
+        }
+    }
+
+    /**
+     * Downloads the diff of the changes PNC/Reqour committed on top of the original SCM revision during alignment.
+     *
+     * <p>
+     * Reqour clones the upstream sources into the internal SCM repository and commits the alignment changes on top of
+     * the original revision, pushing and tagging the result. Both the pre-alignment revision and the post-alignment
+     * commit are therefore present in the internal repository, so the alignment changes can be captured as a single
+     * GitHub compare diff ({@code <pre-alignment>...<post-alignment>}). The resulting unified diff applies cleanly on
+     * top of the original upstream sources (for example with {@code git apply} or {@code patch -p1}).
+     *
+     * <p>
+     * The diff is sanitized of leaked credentials ({@link LogSanitizer}) and split ({@link AlignmentDiff}) so that
+     * non-build-affecting metadata ({@value AlignmentDiff#REPOSITORIES_BACKUP},
+     * {@value AlignmentDiff#MANIPULATION_JSON})
+     * is written to a sibling {@code *-metadata.diff} file instead of polluting the main diff.
+     *
+     * @param build the build to compute the alignment diff for
+     * @param mainDiffFile the file to write the build-affecting diff to
+     * @return the files written: the main diff, plus the metadata diff when the build contains such metadata
+     */
+    public List<Path> downloadAlignmentDiff(Build build, Path mainDiffFile) {
+        String githubToken = getGithubTokenFromActiveProfile();
+        if (githubToken == null || githubToken.isBlank()) {
+            throw new RuntimeException(
+                    "Failed to download alignment diff for build " + build.getId()
+                            + ". Please specify a valid 'githubToken' in your Bacon config.yaml active profile.");
+        }
+
+        String internalUrl = selectInternalScmUrl(build);
+        if (internalUrl == null || internalUrl.isBlank()) {
+            throw new RuntimeException(
+                    "Build " + build.getId() + " has no internal SCM URL; cannot compute the alignment diff.");
+        }
+
+        NormalizedGithubRepository repository = normalizeGithubRepository(internalUrl);
+        if (repository == null) {
+            throw new RuntimeException(
+                    "Could not parse the internal SCM URL for build " + build.getId() + ": " + internalUrl);
+        }
+
+        List<String> bases = preAlignmentRevisions(build);
+        if (bases.isEmpty()) {
+            throw new RuntimeException(
+                    "Build " + build.getId()
+                            + " has no pre-alignment SCM revision; cannot compute the alignment diff.");
+        }
+
+        List<String> heads = postAlignmentRevisions(build);
+        if (heads.isEmpty()) {
+            throw new RuntimeException(
+                    "Build " + build.getId()
+                            + " has no post-alignment SCM revision/tag; cannot compute the alignment diff.");
+        }
+
+        String rawDiff = null;
+        List<String> failures = new ArrayList<>();
+        search: for (String base : bases) {
+            for (String head : heads) {
+                URI compareUri = compareDiffUri(repository, base, head);
+                for (String authorizationHeader : authorizationHeaders(githubToken)) {
+                    try {
+                        log.debug(
+                                "Downloading alignment diff for build {} from {} ({}...{})",
+                                build.getId(),
+                                compareUri,
+                                base,
+                                head);
+
+                        rawDiff = fetchDiff(compareUri, authorizationHeader);
+                        break search;
+                    } catch (RuntimeException e) {
+                        failures.add(
+                                compareUri + " using " + authSchemeName(authorizationHeader) + ": " + e.getMessage());
+                        log.debug(
+                                "Alignment diff candidate failed for build {}: {}",
+                                build.getId(),
+                                failures.get(failures.size() - 1));
+                    }
+                }
+            }
+        }
+
+        if (rawDiff == null) {
+            // Compare failed for every base/head. Distinguish "token cannot access the repository" (GitHub Enterprise
+            // masks a missing SSO authorization as 404) from "the two commits have no common ancestor" (the three-dot
+            // compare returns 404 for unrelated histories, which happens with some import/alignment repositories).
+            String firstAuth = authorizationHeaders(githubToken).get(0);
+            URI repoUri = repoApiUri(repository);
+            int repoStatus = probeStatus(repoUri, firstAuth);
+            if (repoStatus == 401 || repoStatus == 403 || repoStatus == 404) {
+                throw new RuntimeException(
+                        "Failed to download alignment diff for build " + build.getId()
+                                + ". The internal repository " + internalUrl
+                                + " is not accessible with the configured githubToken (HTTP " + repoStatus + " for "
+                                + repoUri
+                                + "). On GitHub Enterprise with SAML SSO the token must be authorized for the '"
+                                + repository.owner + "' organization.");
+            }
+
+            // The repository is reachable, so compare most likely failed because the recorded pre-alignment revision is
+            // not an ancestor of the post-alignment commit. Fall back to the diff of the post-alignment commit itself,
+            // which captures the alignment change when Reqour committed it as a single commit on top of the import.
+            for (String head : heads) {
+                URI commitUri = commitDiffUri(repository, head);
+                for (String authorizationHeader : authorizationHeaders(githubToken)) {
+                    try {
+                        log.debug(
+                                "Falling back to the post-alignment commit diff for build {} from {}",
+                                build.getId(),
+                                commitUri);
+
+                        rawDiff = fetchDiff(commitUri, authorizationHeader);
+                        log.warn(
+                                "Alignment compare had no common ancestor for build {}; used the post-alignment commit"
+                                        + " diff ({}) instead. If alignment produced more than one commit this captures"
+                                        + " only the last one.",
+                                build.getId(),
+                                head);
+                        break;
+                    } catch (RuntimeException e) {
+                        failures.add(
+                                commitUri + " using " + authSchemeName(authorizationHeader) + ": " + e.getMessage());
+                        log.debug(
+                                "Post-alignment commit diff candidate failed for build {}: {}",
+                                build.getId(),
+                                failures.get(failures.size() - 1));
+                    }
+                }
+                if (rawDiff != null) {
+                    break;
+                }
+            }
+        }
+
+        if (rawDiff == null) {
+            throw new RuntimeException(
+                    "Failed to download alignment diff for build " + build.getId()
+                            + ". The pre-alignment revision(s) " + bases
+                            + " must be reachable in the internal repository " + internalUrl
+                            + ". Tried candidates:\n - " + String.join("\n - ", failures));
+        }
+
+        return writeAlignmentDiff(build, mainDiffFile, rawDiff);
+    }
+
+    private int probeStatus(URI uri, String authorizationHeader) {
+        try {
+            HttpClient httpClient = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .header("Accept", ACCEPT_GITHUB_API)
+                    .header("User-Agent", "bacon")
+                    .header("Authorization", authorizationHeader)
+                    .GET()
+                    .build();
+
+            return httpClient.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
+        } catch (IOException e) {
+            return -1;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return -1;
+        }
+    }
+
+    private List<Path> writeAlignmentDiff(Build build, Path mainDiffFile, String rawDiff) {
+        AlignmentDiff diff = AlignmentDiff.split(LogSanitizer.maskKnownSecrets(rawDiff));
+        try {
+            if (mainDiffFile.getParent() != null) {
+                Files.createDirectories(mainDiffFile.getParent());
+            }
+
+            List<Path> written = new ArrayList<>();
+            Files.writeString(mainDiffFile, diff.buildAffecting(), StandardCharsets.UTF_8);
+            written.add(mainDiffFile);
+
+            if (diff.hasMetadata()) {
+                Path metadataFile = metadataSibling(mainDiffFile);
+                Files.writeString(metadataFile, diff.metadata(), StandardCharsets.UTF_8);
+                written.add(metadataFile);
+            }
+
+            return written;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write alignment diff for build " + build.getId(), e);
+        }
+    }
+
+    /**
+     * Derives the metadata diff path from the main diff path, e.g. {@code alignment.diff -> alignment-metadata.diff}.
+     */
+    static Path metadataSibling(Path mainDiffFile) {
+        String name = mainDiffFile.getFileName().toString();
+        String baseName = name.endsWith(".diff") ? name.substring(0, name.length() - ".diff".length()) : name;
+        return mainDiffFile.resolveSibling(baseName + "-metadata.diff");
+    }
+
+    private String fetchDiff(URI uri, String authorizationHeader) {
+        try {
+            HttpClient httpClient = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .header("Accept", ACCEPT_DIFF)
+                    .header("User-Agent", "bacon")
+                    .header("Authorization", authorizationHeader)
+                    .GET()
+                    .build();
+
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            int statusCode = response.statusCode();
+            try (InputStream in = response.body()) {
+                byte[] body = in.readAllBytes();
+                if (statusCode != HttpResponseCodes.SC_OK) {
+                    String responsePreview = new String(
+                            body,
+                            0,
+                            Math.min(body.length, PREVIEW_BYTES),
+                            StandardCharsets.UTF_8).replaceAll("\\s+", " ");
+                    throw new RuntimeException(
+                            "HTTP status: " + statusCode
+                                    + (responsePreview.isBlank() ? "" : ". Response preview: " + responsePreview));
+                }
+                return new String(body, StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("I/O error while downloading " + uri, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while downloading " + uri, e);
         }
     }
 
@@ -287,13 +527,46 @@ public class BuildSourcesDownloader {
     }
 
     private static URI apiTarballUri(NormalizedGithubRepository repository, String revision) {
-        String apiBaseUrl = "github.com".equalsIgnoreCase(repository.host)
+        return URI.create(
+                apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
+                        + encodePath(repository.repository) + "/tarball/" + encodePath(revision));
+    }
+
+    /**
+     * Builds the GitHub (Enterprise) compare URL that yields the diff between {@code base} and {@code head} in the
+     * given
+     * repository. Both refs must be resolvable within that single repository.
+     */
+    static URI compareDiffUri(NormalizedGithubRepository repository, String base, String head) {
+        return URI.create(
+                apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
+                        + encodePath(repository.repository) + "/compare/" + encodePath(base) + "..."
+                        + encodePath(head));
+    }
+
+    /**
+     * Builds the GitHub (Enterprise) URL for a single commit. With the diff media type this yields the diff introduced
+     * by that commit relative to its parent.
+     */
+    static URI commitDiffUri(NormalizedGithubRepository repository, String ref) {
+        return URI.create(
+                apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
+                        + encodePath(repository.repository) + "/commits/" + encodePath(ref));
+    }
+
+    /**
+     * Builds the GitHub (Enterprise) URL of the repository itself, used to probe whether the token can access it.
+     */
+    static URI repoApiUri(NormalizedGithubRepository repository) {
+        return URI.create(
+                apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
+                        + encodePath(repository.repository));
+    }
+
+    private static String apiBaseUrl(NormalizedGithubRepository repository) {
+        return "github.com".equalsIgnoreCase(repository.host)
                 ? "https://api.github.com"
                 : repository.webBaseUrl + "/api/v3";
-
-        return URI.create(
-                apiBaseUrl + "/repos/" + encodePath(repository.owner) + "/" + encodePath(repository.repository)
-                        + "/tarball/" + encodePath(revision));
     }
 
     private static URI webArchiveUri(NormalizedGithubRepository repository, String revision) {
@@ -401,6 +674,53 @@ public class BuildSourcesDownloader {
         BuildConfigurationRevisionRef revision = build.getBuildConfigRevision();
         if (revision != null && revision.getScmRevision() != null && !revision.getScmRevision().isBlank()) {
             revisions.add(revision.getScmRevision());
+        }
+
+        return List.copyOf(revisions);
+    }
+
+    static String selectInternalScmUrl(Build build) {
+        SCMRepository repository = build.getScmRepository();
+        return repository == null ? null : repository.getInternalUrl();
+    }
+
+    /**
+     * The pre-alignment revision(s) to use as the {@code base} of the alignment diff, most reliable first.
+     *
+     * <p>
+     * {@code scmBuildConfigRevision} is preferred: it is the resolved commit (the exact pre-alignment revision Reqour
+     * based the alignment on) that Reqour mirrored into the internal repository, so it is reachable there. The
+     * configured {@code buildConfigRevision.scmRevision} is only a fallback because it is frequently a branch/tag name
+     * on the external SCM that does not resolve in the internal repository.
+     */
+    static List<String> preAlignmentRevisions(Build build) {
+        Set<String> revisions = new LinkedHashSet<>();
+
+        if (build.getScmBuildConfigRevision() != null && !build.getScmBuildConfigRevision().isBlank()) {
+            revisions.add(build.getScmBuildConfigRevision());
+        }
+
+        BuildConfigurationRevisionRef revision = build.getBuildConfigRevision();
+        if (revision != null && revision.getScmRevision() != null && !revision.getScmRevision().isBlank()) {
+            revisions.add(revision.getScmRevision());
+        }
+
+        return List.copyOf(revisions);
+    }
+
+    /**
+     * The post-alignment revision(s) pushed by Reqour into the internal repository, preferring the immutable commit
+     * over
+     * the tag. These are the {@code head} candidates of the alignment diff.
+     */
+    static List<String> postAlignmentRevisions(Build build) {
+        Set<String> revisions = new LinkedHashSet<>();
+
+        if (build.getScmRevision() != null && !build.getScmRevision().isBlank()) {
+            revisions.add(build.getScmRevision());
+        }
+        if (build.getScmTag() != null && !build.getScmTag().isBlank()) {
+            revisions.add(build.getScmTag());
         }
 
         return List.copyOf(revisions);

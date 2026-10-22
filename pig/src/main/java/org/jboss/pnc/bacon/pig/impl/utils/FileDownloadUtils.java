@@ -22,9 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Base64;
 import java.util.List;
 
 import javax.ws.rs.NotFoundException;
@@ -36,7 +34,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.codehaus.plexus.util.StringUtils;
+import org.jboss.pnc.bacon.auth.LdapClient;
 import org.jboss.pnc.bacon.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,13 +140,8 @@ public class FileDownloadUtils {
     private static void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath)
             throws NotFoundException, HttpException, IOException {
         HttpGet request = new HttpGet(downloadUrl);
-        String ldapUsernamePassword = Config.instance().getActiveProfile().getLdapUsernamePassword();
-        if (!StringUtils.isEmpty(ldapUsernamePassword)) {
-            request.setHeader(
-                    "Authorization",
-                    "Basic " +
-                            Base64.getEncoder().encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8)));
-        }
+        LdapClient.basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
+                .ifPresent(header -> request.setHeader("Authorization", header));
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == 404) {

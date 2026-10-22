@@ -77,6 +77,7 @@ import picocli.CommandLine.Parameters;
                 BuildCli.GetProvenance.class,
                 BuildCli.DownloadSources.class,
                 BuildCli.DownloadBuiltArtifacts.class,
+                BuildCli.GetAlignmentDiff.class,
                 BuildCli.DownloadAllOutput.class })
 @Slf4j
 public class BuildCli {
@@ -400,6 +401,27 @@ public class BuildCli {
         public Integer call() {
             Path provenanceFile = new BuildOutputDownloader().getProvenanceOfBuild(buildId, redacted, output);
             log.info("Downloaded provenance to {}", provenanceFile);
+            return 0;
+        }
+    }
+
+    @Command(
+            name = "get-alignment-diff",
+            description = "Download the diff of the changes PNC/Reqour committed during alignment, "
+                    + "on top of the original SCM revision. The diff applies on top of the original upstream sources.")
+    public static class GetAlignmentDiff implements Callable<Integer> {
+
+        @Parameters(description = "Build ID")
+        private String buildId;
+
+        @Option(names = "--output", description = "Output diff file")
+        private Path output;
+
+        @Override
+        public Integer call() {
+            Path target = output != null ? output : Paths.get(buildId + "-alignment.diff");
+            java.util.List<Path> diffFiles = new BuildOutputDownloader().downloadAlignmentDiff(buildId, target);
+            diffFiles.forEach(diffFile -> log.info("Downloaded alignment diff to {}", diffFile));
             return 0;
         }
     }

@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.auth;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 
 public class LdapClient {
 
@@ -35,5 +36,20 @@ public class LdapClient {
      */
     public String getBasicAuthHeaderValue() {
         return "Basic " + Base64.getEncoder().encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Build the {@code Basic} HTTP {@code Authorization} header value for the given {@code username:password} pair, if
+     * one is configured.
+     *
+     * @param ldapUsernamePassword the {@code username:password} value from the active profile, may be {@code null} or
+     *        empty
+     * @return the {@code Basic <base64>} header value, or an empty optional when no credentials are configured
+     */
+    public static Optional<String> basicAuthHeaderValue(String ldapUsernamePassword) {
+        if (ldapUsernamePassword == null || ldapUsernamePassword.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new LdapClient(ldapUsernamePassword).getBasicAuthHeaderValue());
     }
 }

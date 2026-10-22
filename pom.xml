@@ -104,7 +104,7 @@
         <picocli.version>4.7.7</picocli.version>
         <pme.version>5.9</pme.version>
         <pnc-api.version>3.5.2</pnc-api.version>
-        <pnc-common.version>3.5.4</pnc-common.version>
+        <pnc-common.version>3.5.5-SNAPSHOT</pnc-common.version>
         <pnc.version>3.6.0-SNAPSHOT</pnc.version>
         <quarkus.resolver.version>3.35.3</quarkus.resolver.version>
         <quarkus.version>3.37.3</quarkus.version>
