@@ -119,7 +119,7 @@ public class ResolveOnlyRepositoryTest {
         Assertions.assertThat(repoData.getRepositoryPath())
                 .isEqualTo(workDir.resolve("rh-sample-maven-repository.zip"));
 
-        final Set<String> expectedFiles = repoZipContentList();
+        final Set<String> expectedFiles = ignoreJBossParentVersion(repoZipContentList());
 
         final Set<String> actualFiles = repoData.getFiles()
                 .stream()
@@ -139,13 +139,29 @@ public class ResolveOnlyRepositoryTest {
             throw new RuntimeException("Could not write to " + actualArtifactList, e);
         }
 
-        if (!actualFiles.equals(expectedFiles)) {
+        final Set<String> normalizedActualFiles = ignoreJBossParentVersion(actualFiles);
+
+        if (!normalizedActualFiles.equals(expectedFiles)) {
             System.out.printf(
                     "\nThe zipped repository has unexpected content. You may want to compare src/test/resources/%s with %s\n\n",
                     EXPECTED_ARTIFACT_LIST_TXT,
                     actualArtifactList);
         }
-        Assertions.assertThat(actualFiles).containsExactlyElementsOf(expectedFiles);
+        Assertions.assertThat(normalizedActualFiles).containsExactlyElementsOf(expectedFiles);
+    }
+
+    /**
+     * The jboss-parent version is inherited from the project's own parent POM and changes whenever it is bumped, so it
+     * is replaced by a placeholder to keep the comparison independent of it.
+     */
+    private static Set<String> ignoreJBossParentVersion(Set<String> files) {
+        return files.stream()
+                .map(
+                        file -> file.replaceAll(
+                                "(org/jboss/jboss-parent/)[^/]+/(jboss-parent-)[^/]+?(\\.pom)",
+                                "$1VERSION/$2VERSION$3")
+                                .replaceAll("(org/jboss/jboss-parent/)[^/]+/(_remote\\.repositories)", "$1VERSION/$2"))
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private void mockPigContextAndMethods() {
