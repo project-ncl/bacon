@@ -36,7 +36,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HexFormat;
@@ -46,12 +45,13 @@ import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.jboss.pnc.bacon.auth.LdapClient;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.SlsaProvenanceV1Client;
-import org.jboss.pnc.common.util.StringUtils;
+import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 
@@ -116,6 +116,22 @@ public class BuildOutputDownloader {
         }
     }
 
+    public List<Path> downloadAlignmentDiff(String buildId, Path outputFile) {
+        if (buildId == null || buildId.isBlank()) {
+            throw new IllegalArgumentException("buildId must not be blank");
+        }
+        createDirectories(outputFile.getParent());
+
+        try (BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+            Build build = client.getSpecific(buildId);
+            return sourcesDownloader.downloadAlignmentDiff(build, outputFile);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to download alignment diff for build " + buildId, e);
+        }
+    }
+
     public Path downloadAllOutput(String buildId, boolean redacted, Path outputDir) {
         Path workDir = outputDir.resolve(buildId + "-build-output");
         recreateDirectory(workDir);
@@ -145,6 +161,14 @@ public class BuildOutputDownloader {
         downloadBuildLog(buildId, logsDir.resolve("build.log"));
         downloadAlignmentLog(buildId, logsDir.resolve("alignment.log"));
         sourcesDownloader.downloadSources(build, sourcesDir.resolve("sources.tar.gz"));
+
+        // Best effort: not every build has alignment changes committed to the internal repository, so a failure here
+        // must not abort the full output download.
+        try {
+            sourcesDownloader.downloadAlignmentDiff(build, sourcesDir.resolve("alignment.diff"));
+        } catch (RuntimeException e) {
+            log.warn("Skipping alignment diff for build {}: {}", buildId, e.getMessage());
+        }
 
         Path zipFile = outputDir.resolve("build-output.zip");
         zipDirectory(workDir, zipFile);
@@ -210,7 +234,7 @@ public class BuildOutputDownloader {
         try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
             Consumer<String> lineWriter = line -> {
                 try {
-                    writer.write(line);
+                    writer.write(LogSanitizer.maskKnownSecrets(line));
                     writer.newLine();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -232,7 +256,7 @@ public class BuildOutputDownloader {
                             new InputStreamReader(streamLogs.get(), StandardCharsets.UTF_8))) {
                         String line;
                         while ((line = reader.readLine()) != null) {
-                            writer.write(line);
+                            writer.write(LogSanitizer.maskKnownSecrets(line));
                             writer.newLine();
                         }
                     }
@@ -247,14 +271,8 @@ public class BuildOutputDownloader {
         try {
             HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
             var requestBuilder = HttpRequest.newBuilder().uri(uri).GET();
-            String ldapUsernamePassword = Config.instance().getActiveProfile().getLdapUsernamePassword();
-            if (!StringUtils.isEmpty(ldapUsernamePassword)) {
-                requestBuilder.header(
-                        "Authorization",
-                        "Basic " +
-                                Base64.getEncoder()
-                                        .encodeToString(ldapUsernamePassword.getBytes(StandardCharsets.UTF_8)));
-            }
+            LdapClient.basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
+                    .ifPresent(header -> requestBuilder.header("Authorization", header));
             HttpRequest request = requestBuilder.build();
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             if (response.statusCode() < 200 || response.statusCode() > 299) {
