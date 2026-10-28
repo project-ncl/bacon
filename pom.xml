@@ -829,6 +829,13 @@
   </dependencyManagement>
 
   <repositories>
+    <!-- Manually defining this so its searched first in preference to the those below -->
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2/</url>
+      <layout>default</layout>
+    </repository>
     <repository>
       <releases>
         <enabled>false</enabled>
@@ -841,15 +848,18 @@
       <url>https://central.sonatype.com/repository/maven-snapshots/</url>
     </repository>
     <repository>
-      <!--TODO: remove once PNC 2.0 hits central -->
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>jboss-nexus</id>
-      <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+      <!-- Needed for org.gradle:gradle-tooling-api (via quarkus-domino-gradle-project-reader).
+           extra-enforcer-rules does not honour repositories declared in transitive dependency poms. -->
+      <id>gradle-dependencies</id>
+      <name>Gradle releases repository</name>
+      <url>https://repo.gradle.org/artifactory/libs-releases</url>
+    </repository>
+    <repository>
+      <!-- Needed for RH artifacts as extra-enforcer-rules does not honour repositories declared in transitive dependency poms. -->
+      <id>mrrc-ga</id>
+      <name>Redhat GA</name>
+      <url>https://maven.repository.redhat.com/ga/</url>
+      <layout>default</layout>
     </repository>
   </repositories>
 
