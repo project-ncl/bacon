@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "hostRules": [
+    {
+      "matchHost": "https://maven.repository.redhat.com/ga/",
+      "enabled": false
+    }
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["*"],
+      "allowedVersions": "!/[-.]redhat/"
+    }
+  ]
+}
