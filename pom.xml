@@ -102,7 +102,7 @@
     <maven.compiler.target>17</maven.compiler.target>
     <picocli.version>4.7.7</picocli.version>
     <pme.version>5.9</pme.version>
-    <pnc-api.version>3.5.2</pnc-api.version>
+    <pnc-api.version>3.99.0</pnc-api.version>
     <pnc-common.version>3.5.5-SNAPSHOT</pnc-common.version>
     <pnc.version>3.6.0-SNAPSHOT</pnc.version>
     <quarkus.resolver.version>3.40.1</quarkus.resolver.version>
