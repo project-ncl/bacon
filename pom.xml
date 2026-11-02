@@ -102,9 +102,9 @@
     <maven.compiler.target>17</maven.compiler.target>
     <picocli.version>4.7.7</picocli.version>
     <pme.version>5.10</pme.version>
-    <pnc-api.version>3.5.2</pnc-api.version>
-    <pnc-common.version>3.5.5-SNAPSHOT</pnc-common.version>
-    <pnc.version>3.6.0-SNAPSHOT</pnc.version>
+    <pnc-api.version>4.0.0</pnc-api.version>
+    <pnc-common.version>4.0.0</pnc-common.version>
+    <pnc.version>4.0.0</pnc.version>
     <quarkus.resolver.version>3.40.1</quarkus.resolver.version>
     <quarkus.version>3.40.1.1</quarkus.version>
     <qute.version>${quarkus.version}</qute.version>
@@ -112,7 +112,7 @@
     <undertow.version>2.3.24.Final</undertow.version>
     <unirestVersion>3.14.5</unirestVersion>
     <version.lombok>1.18.48</version.lombok>
-    <version.rex>1.2.3</version.rex>
+    <version.rex>4.0.0</version.rex>
   </properties>
 
   <dependencyManagement>
