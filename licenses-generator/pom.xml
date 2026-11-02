@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.jboss.pnc.bacon</groupId>
     <artifactId>parent</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>licenses-generator</artifactId>
   <name>licenses-generator</name>
@@ -216,8 +216,8 @@
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>org.jboss.pnc.bacon.licenses.LicensesGeneratorApplication</mainClass>
                 </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                   <resource>META-INF/sisu/javax.inject.Named</resource>
                 </transformer>
