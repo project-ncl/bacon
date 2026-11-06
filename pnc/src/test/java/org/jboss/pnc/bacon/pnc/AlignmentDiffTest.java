@@ -491,6 +491,114 @@ class AlignmentDiffTest {
     }
 
     @Test
+    void shouldReadTheAlignedProjectsAndDependenciesOfPme() {
+        String report = newFile(
+                "target/alignmentReport.json",
+                "+{ \"executionRoot\" : { \"groupId\" : \"org.acme\", \"artifactId\" : \"widget-parent\","
+                        + " \"version\" : \"1.4.0.redhat-00002\", \"originalGAV\" : \"org.acme:widget-parent:1.4.0\" },"
+                        + " \"modules\" : [ { \"gav\" : { \"groupId\" : \"org.acme\", \"artifactId\" : \"widget-parent\","
+                        + " \"version\" : \"1.4.0.redhat-00002\", \"originalGAV\" : \"org.acme:widget-parent:1.4.0\" },"
+                        + " \"managedDependencies\" : { \"dependencies\" : { \"io.vertx:vertx-core:4.5.30\" :"
+                        + " { \"groupId\" : \"io.vertx\", \"artifactId\" : \"vertx-core\", \"version\" : \"4.5.30.redhat-00001\" } } },"
+                        + " \"managedPlugins\" : { \"plugins\" : { } } },"
+                        + " { \"gav\" : { \"groupId\" : \"org.acme\", \"artifactId\" : \"widget-core\","
+                        + " \"version\" : \"1.4.0.redhat-00002\", \"originalGAV\" : \"org.acme:widget-core:1.4.0\" },"
+                        + " \"dependencies\" : { \"junit:junit:4.13.2\" :"
+                        + " { \"groupId\" : \"junit\", \"artifactId\" : \"junit\", \"version\" : \"4.13.2.redhat-00001\" } },"
+                        + " \"profiles\" : [ { \"id\" : \"release\", \"plugins\" : { \"org.acme:sign-plugin:2.0\" :"
+                        + " { \"groupId\" : \"org.acme\", \"artifactId\" : \"sign-plugin\", \"version\" : \"2.0.0.redhat-00003\" } } } ] } ] }");
+        // A dependency rewritten to an aligned version listed in the report is alignment, not the project version.
+        String dependency = lines(
+                "@@ -40,1 +40,1 @@",
+                "-      <version>4.13.2</version>",
+                "+      <version>4.13.2.redhat-00001</version>");
+
+        AlignmentDiff diff = AlignmentDiff.split(POM_HEADER + dependency + report);
+
+        assertEquals(
+                List.of(
+                        new AlignmentDiff.AlignedProject("org.acme", "widget-parent", "1.4.0", "1.4.0.redhat-00002"),
+                        new AlignmentDiff.AlignedProject("org.acme", "widget-core", "1.4.0", "1.4.0.redhat-00002")),
+                diff.alignedProjects());
+        assertEquals(
+                List.of(
+                        new AlignmentDiff.AlignedDependency(
+                                "managed-dependency",
+                                "io.vertx",
+                                "vertx-core",
+                                "4.5.30",
+                                "4.5.30.redhat-00001",
+                                List.of("widget-parent")),
+                        new AlignmentDiff.AlignedDependency(
+                                "dependency",
+                                "junit",
+                                "junit",
+                                "4.13.2",
+                                "4.13.2.redhat-00001",
+                                List.of("widget-core")),
+                        new AlignmentDiff.AlignedDependency(
+                                "plugin",
+                                "org.acme",
+                                "sign-plugin",
+                                "2.0",
+                                "2.0.0.redhat-00003",
+                                List.of("widget-core"))),
+                diff.alignedDependencies());
+        assertEquals(java.util.Set.of("1.4.0.redhat-00002"), diff.alignedVersions());
+        assertEquals(AlignmentDiff.RULE_ALIGNMENT, diff.files().get(0).changes().get(0).rule());
+        assertEquals(List.of(), diff.projectVersions());
+    }
+
+    @Test
+    void shouldReadTheAlignedProjectsAndDependenciesOfGme() {
+        String model = newFile(
+                "manipulation.json",
+                "+{ \"group\" : \"com.squareup.okio\", \"name\" : \"okio-parent\", \"version\" : \"3.18.2.redhat-00001\","
+                        + " \"originalVersion\" : \"3.18.2\", \"children\" : {"
+                        + " \"okio\" : { \"group\" : \"com.squareup.okio\", \"name\" : \"okio-jvm\","
+                        + " \"version\" : \"3.18.2.redhat-00001\", \"originalVersion\" : \"3.18.2\", \"alignedDependencies\" : {"
+                        + " \"junit:junit:4.13.2\" : { \"groupId\" : \"junit\", \"artifactId\" : \"junit\","
+                        + " \"version\" : \"4.13.2.redhat-00001\" } } },"
+                        + " \"okio-testing\" : { \"group\" : \"com.squareup.okio\", \"name\" : \"okio-testing\","
+                        + " \"version\" : \"3.18.2.redhat-00001\", \"originalVersion\" : \"3.18.2\", \"alignedDependencies\" : {"
+                        + " \"junit:junit:4.13.2\" : { \"groupId\" : \"junit\", \"artifactId\" : \"junit\","
+                        + " \"version\" : \"4.13.2.redhat-00001\" } } } } }");
+
+        AlignmentDiff diff = AlignmentDiff.split(model);
+
+        assertEquals(
+                List.of(
+                        new AlignmentDiff.AlignedProject(
+                                "com.squareup.okio",
+                                "okio-parent",
+                                "3.18.2",
+                                "3.18.2.redhat-00001"),
+                        new AlignmentDiff.AlignedProject(
+                                "com.squareup.okio",
+                                "okio-jvm",
+                                "3.18.2",
+                                "3.18.2.redhat-00001"),
+                        new AlignmentDiff.AlignedProject(
+                                "com.squareup.okio",
+                                "okio-testing",
+                                "3.18.2",
+                                "3.18.2.redhat-00001")),
+                diff.alignedProjects());
+        // The same dependency aligned in several modules is listed once.
+        assertEquals(
+                List.of(
+                        new AlignmentDiff.AlignedDependency(
+                                "dependency",
+                                "junit",
+                                "junit",
+                                "4.13.2",
+                                "4.13.2.redhat-00001",
+                                List.of("okio-jvm", "okio-testing"))),
+                diff.alignedDependencies());
+        assertEquals(java.util.Set.of("3.18.2.redhat-00001"), diff.alignedVersions());
+    }
+
+    @Test
     void shouldDescribeTheSplitInTheManifest() {
         // dom4j: the alignment generated a pom.xml for a Maven 1 project, which is needed by the build.
         String generatedPom = newFile("dom4j/pom.xml", "+<project/>");
@@ -506,6 +614,8 @@ class AlignmentDiffTest {
         assertEquals(
                 List.of(
                         "alignedVersions",
+                        "alignedProjects",
+                        "alignedDependencies",
                         "parts",
                         "summary",
                         "files",

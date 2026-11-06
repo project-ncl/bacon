@@ -48,8 +48,14 @@ removed repositories may still be needed to resolve the dependencies.
   after it, e.g. `--output out/widget.diff` writes `out/widget-1-build.diff`, `out/widget-3-reproduce.diff`, ...
 * `--manifest`: also writes `<base name>-manifest.json`, describing the split for review or tooling. It is not
   needed to apply the parts. It contains:
-  * `alignedVersions`: the aligned versions used to recognize the project version rewrites, read from the alignment
-    reports in the diff or from the PNC build;
+  * `alignedVersions`: the aligned versions of the project's own modules, used to recognize the project version
+    rewrites, read from the alignment reports in the diff or from the PNC build;
+  * `alignedProjects`: the modules of the project recorded by the alignment reports, with their `groupId`,
+    `artifactId`, `originalVersion` and `alignedVersion` (SMEG only records the aligned version);
+  * `alignedDependencies`: the dependencies and plugins recorded as aligned by the PME and GME reports, with their
+    `type` (`dependency`, `plugin`, `managed-dependency` or `managed-plugin`), `groupId`, `artifactId`,
+    `originalVersion`, `alignedVersion` and the `modules` where they were aligned. PME writes its report under
+    `target/`, so it is only in the diff, and in this list, when the project does not ignore `target/`;
   * `parts`: per category, the part number and file, whether it is present and required, and the same descriptions
     as the comments;
   * `summary`: the number of files and changes per category;
