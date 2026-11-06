@@ -32,15 +32,21 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.resteasy.util.HttpResponseCodes;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +63,9 @@ public class BuildSourcesDownloader {
     private static final int MAX_REDIRECTS = 10;
 
     private static final Pattern COMMIT_SHA = Pattern.compile("[0-9a-fA-F]{40}");
+    private static final Pattern SCM_TAG_COMMIT_SUFFIX = Pattern.compile("-[0-9a-f]{8}$");
+    private static final int HEADER_WIDTH = 100;
+    private static final ObjectWriter MANIFEST_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
     private static final String ACCEPT_ARCHIVE = "application/x-gzip, application/gzip, application/x-tar, application/octet-stream";
     private static final String ACCEPT_GITHUB_API = "application/json";
@@ -151,16 +160,17 @@ public class BuildSourcesDownloader {
      * top of the original upstream sources (for example with {@code git apply} or {@code patch -p1}).
      *
      * <p>
-     * The diff is sanitized of leaked credentials ({@link LogSanitizer}) and split ({@link AlignmentDiff}) so that
-     * non-build-affecting metadata ({@value AlignmentDiff#REPOSITORIES_BACKUP},
-     * {@value AlignmentDiff#MANIPULATION_JSON})
-     * is written to a sibling {@code *-metadata.diff} file instead of polluting the main diff.
+     * The diff is sanitized of leaked credentials ({@link LogSanitizer}) and split into categories
+     * ({@link AlignmentDiff}), grouped into files written next to {@code diffFile} as {@code <name>-<n>-<part>.diff}
+     * (see {@link #partFile}) when present, each with a comment header saying what can be skipped. Each part applies on
+     * its own; applying all of them reproduces the complete alignment.
      *
      * @param build the build to compute the alignment diff for
-     * @param mainDiffFile the file to write the build-affecting diff to
-     * @return the files written: the main diff, plus the metadata diff when the build contains such metadata
+     * @param diffFile the file name the part names are derived from; not written itself
+     * @param manifest whether to also write {@code <name>-manifest.json}, describing the categorization of every file
+     * @return the files written: one file per category present in the diff, and the manifest when requested
      */
-    public List<Path> downloadAlignmentDiff(Build build, Path mainDiffFile) {
+    public List<Path> downloadAlignmentDiff(Build build, Path diffFile, boolean manifest) {
         String githubToken = getGithubTokenFromActiveProfile();
         if (githubToken == null || githubToken.isBlank()) {
             throw new RuntimeException(
@@ -282,7 +292,7 @@ public class BuildSourcesDownloader {
                             + ". Tried candidates:\n - " + String.join("\n - ", failures));
         }
 
-        return writeAlignmentDiff(build, mainDiffFile, rawDiff);
+        return writeAlignmentDiff(build, diffFile, rawDiff, manifest);
     }
 
     private int probeStatus(URI uri, String authorizationHeader) {
@@ -308,36 +318,186 @@ public class BuildSourcesDownloader {
         }
     }
 
-    private List<Path> writeAlignmentDiff(Build build, Path mainDiffFile, String rawDiff) {
-        AlignmentDiff diff = AlignmentDiff.split(LogSanitizer.maskKnownSecrets(rawDiff));
+    private List<Path> writeAlignmentDiff(Build build, Path diffFile, String rawDiff, boolean manifest) {
+        AlignmentDiff diff = AlignmentDiff
+                .split(LogSanitizer.maskKnownSecrets(rawDiff), alignedVersionsFromTag(build.getScmTag()));
         try {
-            if (mainDiffFile.getParent() != null) {
-                Files.createDirectories(mainDiffFile.getParent());
-            }
-
-            List<Path> written = new ArrayList<>();
-            Files.writeString(mainDiffFile, diff.buildAffecting(), StandardCharsets.UTF_8);
-            written.add(mainDiffFile);
-
-            if (diff.hasMetadata()) {
-                Path metadataFile = metadataSibling(mainDiffFile);
-                Files.writeString(metadataFile, diff.metadata(), StandardCharsets.UTF_8);
-                written.add(metadataFile);
-            }
-
-            return written;
+            return writeAlignmentDiffParts(diff, diffFile, manifest);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write alignment diff for build " + build.getId(), e);
         }
     }
 
     /**
-     * Derives the metadata diff path from the main diff path, e.g. {@code alignment.diff -> alignment-metadata.diff}.
+     * The aligned project version Reqour named the post-alignment tag after: the execution root version, with a
+     * {@code -<8 hex>} commit suffix when a tag with that name already existed. Both forms are returned; the one that
+     * is not a version simply never matches.
      */
-    static Path metadataSibling(Path mainDiffFile) {
-        String name = mainDiffFile.getFileName().toString();
-        String baseName = name.endsWith(".diff") ? name.substring(0, name.length() - ".diff".length()) : name;
-        return mainDiffFile.resolveSibling(baseName + "-metadata.diff");
+    static List<String> alignedVersionsFromTag(String scmTag) {
+        if (scmTag == null || scmTag.isBlank()) {
+            return List.of();
+        }
+        String withoutCommit = SCM_TAG_COMMIT_SUFFIX.matcher(scmTag).replaceFirst("");
+        return withoutCommit.equals(scmTag) ? List.of(scmTag) : List.of(scmTag, withoutCommit);
+    }
+
+    /**
+     * Writes the parts of the diff present, in {@link AlignmentDiff.Category priority order}, to their {@link #partFile
+     * part files}, and the {@link AlignmentDiff#manifest(java.util.function.Function) manifest} to
+     * {@link #manifestFile(Path)} when requested.
+     *
+     * @param diffFile the file name the part names are derived from; not written itself
+     * @param manifest whether to write the manifest
+     * @return the files written, in apply order, followed by the manifest when written
+     */
+    static List<Path> writeAlignmentDiffParts(AlignmentDiff diff, Path diffFile, boolean manifest) throws IOException {
+        if (diffFile.getParent() != null) {
+            Files.createDirectories(diffFile.getParent());
+        }
+
+        List<Path> written = new ArrayList<>();
+        for (AlignmentDiff.Part part : AlignmentDiff.Part.values()) {
+            StringBuilder content = new StringBuilder();
+            for (AlignmentDiff.Category category : part.categories()) {
+                if (diff.has(category)) {
+                    content.append(categoryHeader(category, diff)).append(diff.part(category));
+                }
+            }
+            if (content.length() > 0) {
+                Path partFile = partFile(diffFile, part);
+                Files.writeString(partFile, partHeader(part, diff) + content, StandardCharsets.UTF_8);
+                written.add(partFile);
+            }
+        }
+        if (written.isEmpty()) {
+            log.info("The alignment diff has no changes, no part written");
+        }
+
+        if (manifest) {
+            Path manifestFile = manifestFile(diffFile);
+            MANIFEST_WRITER.writeValue(
+                    manifestFile.toFile(),
+                    diff.manifest(
+                            part -> part.categories().stream().anyMatch(diff::has)
+                                    ? partFile(diffFile, part).getFileName().toString()
+                                    : null));
+            written.add(manifestFile);
+        }
+
+        projectVersionLines(diff).forEach(line -> log.info(line));
+        diff.warnings().forEach(warning -> log.warn("Alignment diff: {}", warning));
+        return written;
+    }
+
+    /**
+     * The comment written at the top of a part file, with the project version change repeated in every part, so that
+     * it is found in the same place whatever the manipulator and whichever parts the alignment produced.
+     */
+    static String partHeader(AlignmentDiff.Part part, AlignmentDiff diff) {
+        StringBuilder header = new StringBuilder();
+        comment(
+                header,
+                "PNC alignment diff, part " + part.number() + " of " + AlignmentDiff.Part.values().length + ": "
+                        + part.id() + " (" + (part.required() ? "required" : "optional") + ", " + part.summary()
+                        + ")");
+        projectVersionLines(diff).forEach(line -> comment(header, line));
+        comment(header, "Apply on top of the upstream sources in numeric order, alone or together.");
+        header.append("#\n");
+        return header.toString();
+    }
+
+    /**
+     * The comment written before the changes of a category in its part file: what they are, what they are needed for
+     * and when they can be skipped, plus the removed repositories for {@link AlignmentDiff.Category#REPOSITORIES} and
+     * the unrecognized added files and warnings for {@link AlignmentDiff.Category#BUILD}. {@code git apply} and
+     * {@code patch} ignore the text before and between the file sections.
+     */
+    static String categoryHeader(AlignmentDiff.Category category, AlignmentDiff diff) {
+        StringBuilder header = new StringBuilder();
+        comment(header, "--- " + category.id() + " ---");
+        comment(header, "Contains:   ", category.contents());
+        comment(header, "Needed for: ", category.neededFor());
+        comment(header, "Skip when:  ", category.skip());
+        if (category == AlignmentDiff.Category.REPOSITORIES) {
+            for (AlignmentDiff.Repository repository : diff.removedRepositories()) {
+                comment(
+                        header,
+                        "Removed:    ",
+                        Stream.of(repository.id(), repository.url())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.joining(" ")) + " (" + repository.file() + ")");
+            }
+        }
+        if (category == AlignmentDiff.Category.BUILD) {
+            for (String file : diff.unrecognizedAddedFiles()) {
+                comment(header, "Unknown:    ", file + " (added file not recognized, kept here)");
+            }
+            for (String warning : diff.warnings()) {
+                comment(header, "Warning:    ", warning);
+            }
+        }
+        header.append("#\n");
+        return header.toString();
+    }
+
+    /**
+     * One line per project version change, e.g. {@code Project version: 1.4.0 -> 1.4.0.redhat-00002 (pom.xml,
+     * core/pom.xml)}, or a single line saying none was found.
+     */
+    static List<String> projectVersionLines(AlignmentDiff diff) {
+        if (diff.projectVersions().isEmpty()) {
+            return List.of("Project version: no change found");
+        }
+        return diff.projectVersions().stream().map(version -> {
+            List<String> files = version.files();
+            String where = files.size() <= 3 ? String.join(", ", files)
+                    : String.join(", ", files.subList(0, 3)) + " and " + (files.size() - 3) + " more";
+            return "Project version: " + (version.original() != null ? version.original() : "?") + " -> "
+                    + version.aligned() + " (" + where + ")";
+        }).collect(Collectors.toList());
+    }
+
+    /** Appends the text as "# " comment lines wrapped at {@value #HEADER_WIDTH} characters. */
+    private static void comment(StringBuilder header, String text) {
+        comment(header, "", text);
+    }
+
+    /**
+     * Appends the label and the text as "# " comment lines wrapped at {@value #HEADER_WIDTH} characters, the wrapped
+     * lines indented under the start of the text.
+     */
+    private static void comment(StringBuilder header, String label, String text) {
+        String indent = "# " + " ".repeat(label.length());
+        StringBuilder line = new StringBuilder("# ").append(label);
+        boolean empty = true;
+        for (String word : text.split(" ")) {
+            if (!empty && line.length() + 1 + word.length() > HEADER_WIDTH) {
+                header.append(line).append('\n');
+                line = new StringBuilder(indent);
+                empty = true;
+            }
+            line.append(empty ? "" : " ").append(word);
+            empty = false;
+        }
+        header.append(line).append('\n');
+    }
+
+    /**
+     * Derives the path of a part from the diff file name, numbered by priority so that sorting the parts by name gives
+     * the apply order, e.g. {@code alignment.diff -> alignment-1-build.diff, alignment-4-noise.diff}.
+     */
+    static Path partFile(Path diffFile, AlignmentDiff.Part part) {
+        return diffFile.resolveSibling(baseName(diffFile) + "-" + part.suffix() + ".diff");
+    }
+
+    /** Derives the manifest path from the diff file name, e.g. {@code alignment.diff -> alignment-manifest.json}. */
+    static Path manifestFile(Path diffFile) {
+        return diffFile.resolveSibling(baseName(diffFile) + "-manifest.json");
+    }
+
+    private static String baseName(Path diffFile) {
+        String name = diffFile.getFileName().toString();
+        return name.endsWith(".diff") ? name.substring(0, name.length() - ".diff".length()) : name;
     }
 
     private String fetchDiff(URI uri, String authorizationHeader) {

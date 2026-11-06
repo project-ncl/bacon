@@ -137,5 +137,6 @@ Below are links to more specific information about configuring sets of features 
 * [Configuration Files](guide/configuration.html)
 * [Build Config Files](guide/build-config.html)
 * [Hints](guide/hints.html)
+* [Alignment Diff](guide/alignment-diff.html)
 * [PiG](guide/pig.html)
 * [Experimental](guide/experimental.html)

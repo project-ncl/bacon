@@ -116,7 +116,7 @@ public class BuildOutputDownloader {
         }
     }
 
-    public List<Path> downloadAlignmentDiff(String buildId, Path outputFile) {
+    public List<Path> downloadAlignmentDiff(String buildId, Path outputFile, boolean manifest) {
         if (buildId == null || buildId.isBlank()) {
             throw new IllegalArgumentException("buildId must not be blank");
         }
@@ -124,7 +124,7 @@ public class BuildOutputDownloader {
 
         try (BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
             Build build = client.getSpecific(buildId);
-            return sourcesDownloader.downloadAlignmentDiff(build, outputFile);
+            return sourcesDownloader.downloadAlignmentDiff(build, outputFile, manifest);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -165,7 +165,7 @@ public class BuildOutputDownloader {
         // Best effort: not every build has alignment changes committed to the internal repository, so a failure here
         // must not abort the full output download.
         try {
-            sourcesDownloader.downloadAlignmentDiff(build, sourcesDir.resolve("alignment.diff"));
+            sourcesDownloader.downloadAlignmentDiff(build, sourcesDir.resolve("alignment.diff"), false);
         } catch (RuntimeException e) {
             log.warn("Skipping alignment diff for build {}: {}", buildId, e.getMessage());
         }

@@ -408,21 +408,26 @@ public class BuildCli {
 
     @Command(
             name = "get-alignment-diff",
-            description = "Download the diff of the changes PNC/Reqour committed during alignment, "
-                    + "on top of the original SCM revision. The diff applies on top of the original upstream sources.")
+            description = "Download the alignment diff of a build, split into parts applying on top of the upstream "
+                    + "sources")
     public static class GetAlignmentDiff implements Callable<Integer> {
 
         @Parameters(description = "Build ID")
         private String buildId;
 
-        @Option(names = "--output", description = "Output diff file")
+        @Option(names = "--output", description = "Base name of the part files, default <build ID>-alignment.diff")
         private Path output;
+
+        @Option(
+                names = "--manifest",
+                description = "Also write *-manifest.json, with the category and rule of every changed file")
+        private boolean manifest;
 
         @Override
         public Integer call() {
             Path target = output != null ? output : Paths.get(buildId + "-alignment.diff");
-            java.util.List<Path> diffFiles = new BuildOutputDownloader().downloadAlignmentDiff(buildId, target);
-            diffFiles.forEach(diffFile -> log.info("Downloaded alignment diff to {}", diffFile));
+            new BuildOutputDownloader().downloadAlignmentDiff(buildId, target, manifest)
+                    .forEach(part -> log.info("Wrote {}", part));
             return 0;
         }
     }

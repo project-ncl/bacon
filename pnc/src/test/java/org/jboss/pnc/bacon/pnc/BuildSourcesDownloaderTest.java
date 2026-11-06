@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class BuildSourcesDownloaderTest {
 
@@ -211,12 +213,112 @@ class BuildSourcesDownloaderTest {
     }
 
     @Test
-    void shouldDeriveMetadataSiblingFromMainDiffFile() {
+    void shouldDerivePartFilesNumberedInApplyOrder() {
         assertEquals(
-                Path.of("/tmp/out/alignment-metadata.diff"),
-                BuildSourcesDownloader.metadataSibling(Path.of("/tmp/out/alignment.diff")));
+                Path.of("/tmp/out/alignment-1-build.diff"),
+                BuildSourcesDownloader.partFile(Path.of("/tmp/out/alignment.diff"), AlignmentDiff.Part.BUILD));
         assertEquals(
-                Path.of("B123-alignment-metadata.diff"),
-                BuildSourcesDownloader.metadataSibling(Path.of("B123-alignment.diff")));
+                Path.of("B123-alignment-4-noise.diff"),
+                BuildSourcesDownloader.partFile(Path.of("B123-alignment.diff"), AlignmentDiff.Part.NOISE));
+        assertEquals(
+                Path.of("B123-alignment-manifest.json"),
+                BuildSourcesDownloader.manifestFile(Path.of("B123-alignment.diff")));
+    }
+
+    private static final String POM_REMOVING_REPOSITORY = String.join(
+            "\n",
+            "diff --git a/pom.xml b/pom.xml",
+            "index 1111111..2222222 100644",
+            "--- a/pom.xml",
+            "+++ b/pom.xml",
+            "@@ -10,6 +10,1 @@",
+            "   </build>",
+            "-  <repositories>",
+            "-    <repository>",
+            "-      <id>jcenter</id>",
+            "-      <url>https://jcenter.bintray.com</url>",
+            "-    </repository>",
+            "-  </repositories>",
+            "diff --git a/extra.txt b/extra.txt",
+            "new file mode 100644",
+            "index 0000000..3333333",
+            "--- /dev/null",
+            "+++ b/extra.txt",
+            "@@ -0,0 +1 @@",
+            "+extra",
+            "");
+
+    @Test
+    void shouldDescribeThePartAndItsCategoriesInComments() {
+        AlignmentDiff diff = AlignmentDiff.split(POM_REMOVING_REPOSITORY);
+
+        assertEquals(
+                "# PNC alignment diff, part 3 of 4: reproduce (optional, makes the build match the PNC one exactly)\n"
+                        + "# Project version: no change found\n"
+                        + "# Apply on top of the upstream sources in numeric order, alone or together.\n#\n",
+                BuildSourcesDownloader.partHeader(AlignmentDiff.Part.REPRODUCE, diff));
+
+        String header = BuildSourcesDownloader.categoryHeader(AlignmentDiff.Category.REPOSITORIES, diff);
+        assertTrue(header.startsWith("# --- repositories ---\n# Contains:   Maven repositories removed"), header);
+        assertTrue(header.contains("\n# Skip when:  when building outside PNC"), header);
+        assertTrue(header.contains("\n# Removed:    jcenter https://jcenter.bintray.com (pom.xml)\n"), header);
+        assertTrue(header.endsWith("\n#\n"), header);
+        for (String line : header.split("\n")) {
+            assertTrue(line.startsWith("#") && line.length() <= 100, line);
+        }
+
+        String buildHeader = BuildSourcesDownloader.categoryHeader(AlignmentDiff.Category.BUILD, diff);
+        assertTrue(buildHeader.contains("\n# Unknown:    extra.txt (added file not recognized"), buildHeader);
+        assertFalse(buildHeader.contains("Removed:"), buildHeader);
+    }
+
+    @Test
+    void shouldListTheProjectVersionChanges() {
+        AlignmentDiff diff = AlignmentDiff.split(
+                String.join(
+                        "\n",
+                        "diff --git a/manipulations.sbt b/manipulations.sbt",
+                        "new file mode 100644",
+                        "index 0000000..3333333",
+                        "--- /dev/null",
+                        "+++ b/manipulations.sbt",
+                        "@@ -0,0 +1 @@",
+                        "+version := \"3.1.0.redhat-00004\"",
+                        ""));
+
+        assertEquals(
+                List.of("Project version: ? -> 3.1.0.redhat-00004 (manipulations.sbt)"),
+                BuildSourcesDownloader.projectVersionLines(diff));
+    }
+
+    @Test
+    void shouldWriteOnlyThePartsWithChangesAndTheManifestWhenRequested(@TempDir Path dir) throws Exception {
+        AlignmentDiff diff = AlignmentDiff.split(POM_REMOVING_REPOSITORY);
+
+        assertEquals(
+                List.of(dir.resolve("a-1-build.diff"), dir.resolve("a-3-reproduce.diff")),
+                BuildSourcesDownloader.writeAlignmentDiffParts(diff, dir.resolve("a.diff"), false));
+        assertFalse(Files.exists(dir.resolve("a-manifest.json")));
+
+        assertEquals(
+                dir.resolve("b-manifest.json"),
+                BuildSourcesDownloader.writeAlignmentDiffParts(diff, dir.resolve("b.diff"), true).get(2));
+        assertTrue(Files.readString(dir.resolve("b-manifest.json")).contains("\"file\" : \"b-3-reproduce.diff\""));
+
+        assertEquals(
+                List.of(),
+                BuildSourcesDownloader.writeAlignmentDiffParts(AlignmentDiff.split(""), dir.resolve("c.diff"), false));
+    }
+
+    @Test
+    void shouldDeriveAlignedVersionsFromScmTag() {
+        assertEquals(
+                List.of("1.0.0.M10-rhlw-00000-n-00012"),
+                BuildSourcesDownloader.alignedVersionsFromTag("1.0.0.M10-rhlw-00000-n-00012"));
+        // Reqour appends the commit when a tag with the version name already exists.
+        assertEquals(
+                List.of("1.70-f1459fdb", "1.70"),
+                BuildSourcesDownloader.alignedVersionsFromTag("1.70-f1459fdb"));
+        assertEquals(List.of(), BuildSourcesDownloader.alignedVersionsFromTag(null));
     }
 }
