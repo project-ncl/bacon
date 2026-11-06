@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com <br>
@@ -39,6 +43,13 @@ public class ExternalLicensesTest {
     public static final String ECLIPSE_LICENSE_NAME = "Eclipse Public License 1.0";
     public static final String ECLIPSE_LICENSE_LINK = "http://www.eclipse.org/legal/epl-v10.html";
 
+    private static final String MAVEN_REPO_LOCAL = "maven.repo.local";
+
+    // The POMs read from the test repository are cached here rather than in the user's local repository.
+    @TempDir
+    static Path localRepository;
+    private static String previousLocalRepository;
+
     private static String licenseServiceUrl;
     private static LicenseServiceMock licenseServiceMock;
 
@@ -46,15 +57,22 @@ public class ExternalLicensesTest {
 
     @BeforeAll
     public static void setUp() {
+        previousLocalRepository = System.getProperty(MAVEN_REPO_LOCAL);
+        System.setProperty(MAVEN_REPO_LOCAL, localRepository.toString());
+
         licenseServiceMock = new LicenseServiceMock();
         licenseServiceMock.addLicenses(artifactWithLicenseInEap, APACHE_SOFTWARE_LICENSE_VERSION_2_0_JSON);
         licenseServiceUrl = licenseServiceMock.start("/licensecheck");
     }
 
     @BeforeEach
-    public void before() throws LicensesGeneratorException {
+    public void before() throws LicensesGeneratorException, URISyntaxException {
         GeneratorProperties properties = mock(GeneratorProperties.class);
 
+        // The Maven repository the POMs are read from, instead of Maven Central, so that the test does not depend on
+        // the content of the local repository nor on the network.
+        String repository = Path.of(getClass().getResource("/maven-repository").toURI()).toUri().toString();
+        when(properties.getRepositories()).thenReturn(Map.of("test-repository", repository));
         when(properties.getLicenseServiceUrl()).thenReturn(Optional.of(licenseServiceUrl));
         when(properties.getAliasesFilePath()).thenReturn("rh-license-names.json");
         when(properties.getExceptionsFilePath()).thenReturn("rh-license-exceptions.json");
@@ -67,6 +85,11 @@ public class ExternalLicensesTest {
     @AfterAll
     public static void tearDown() {
         licenseServiceMock.stop();
+        if (previousLocalRepository == null) {
+            System.clearProperty(MAVEN_REPO_LOCAL);
+        } else {
+            System.setProperty(MAVEN_REPO_LOCAL, previousLocalRepository);
+        }
     }
 
     @Test
