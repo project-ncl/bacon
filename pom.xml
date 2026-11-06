@@ -81,6 +81,10 @@
     <commons-configuration2.version>2.15.1</commons-configuration2.version>
     <commons-io.version>2.22.0</commons-io.version>
     <domino.version>0.0.136</domino.version>
+    <!-- Mockito's inline mock maker attaches its agent at runtime. Without this flag, JDK 21+ prints a warning from
+         the attach thread, which breaks Surefire's output capture when it is the first output of the test JVM.
+         JaCoCo prepends its agent to this property. -->
+    <argLine>-XX:+EnableDynamicAgentLoading</argLine>
     <extraSurefireJvmArgs/>
     <glassfish-jaxb.version>2.3.1</glassfish-jaxb.version>
     <glassfish-json.version>1.1.4</glassfish-json.version>
