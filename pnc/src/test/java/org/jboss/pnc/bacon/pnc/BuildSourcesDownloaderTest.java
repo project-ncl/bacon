@@ -254,6 +254,7 @@ class BuildSourcesDownloaderTest {
 
         assertEquals(
                 "# PNC alignment diff, part 3 of 4: reproduce (optional, makes the build match the PNC one exactly)\n"
+                        + "# Project: unknown\n"
                         + "# Project version: no change found\n"
                         + "# Apply on top of the upstream sources in numeric order, alone or together.\n#\n",
                 BuildSourcesDownloader.partHeader(AlignmentDiff.Part.REPRODUCE, diff));
@@ -261,7 +262,9 @@ class BuildSourcesDownloaderTest {
         String header = BuildSourcesDownloader.categoryHeader(AlignmentDiff.Category.REPOSITORIES, diff);
         assertTrue(header.startsWith("# --- repositories ---\n# Contains:   Maven repositories removed"), header);
         assertTrue(header.contains("\n# Skip when:  when building outside PNC"), header);
-        assertTrue(header.contains("\n# Removed:    jcenter https://jcenter.bintray.com (pom.xml)\n"), header);
+        assertTrue(
+                header.contains("\n# Removed:    jcenter https://jcenter.bintray.com (pom.xml, repository)\n"),
+                header);
         assertTrue(header.endsWith("\n#\n"), header);
         for (String line : header.split("\n")) {
             assertTrue(line.startsWith("#") && line.length() <= 100, line);
@@ -287,8 +290,23 @@ class BuildSourcesDownloaderTest {
                         ""));
 
         assertEquals(
-                List.of("Project version: ? -> 3.1.0.redhat-00004"),
-                BuildSourcesDownloader.projectVersionLines(diff));
+                List.of("Project: unknown", "Project version: ? -> 3.1.0.redhat-00004"),
+                BuildSourcesDownloader.projectLines(diff));
+        // SMEG does not record the project: the one PNC named the build after is used.
+        String diffText = String.join(
+                "\n",
+                "diff --git a/manipulations.sbt b/manipulations.sbt",
+                "new file mode 100644",
+                "index 0000000..3333333",
+                "--- /dev/null",
+                "+++ b/manipulations.sbt",
+                "@@ -0,0 +1 @@",
+                "+version := \"3.1.0.redhat-00004\"",
+                "");
+        assertEquals(
+                List.of("Project: org.acme:widget_2.13", "Project version: ? -> 3.1.0.redhat-00004"),
+                BuildSourcesDownloader
+                        .projectLines(AlignmentDiff.split(diffText, List.of(), "org.acme:widget_2.13")));
     }
 
     @Test

@@ -124,7 +124,9 @@ class AlignmentDiffApplyTest {
         for (Part part : Part.values()) {
             String content = Files.readString(parts.get(part.ordinal()));
             assertTrue(content.startsWith("# PNC alignment diff, part " + part.number() + " of 4: "), content);
-            assertTrue(content.contains("\n# Project version: 1.4.0 -> 1.4.0.redhat-00002\n"), content);
+            assertTrue(
+                    content.contains("\n# Project: unknown\n# Project version: 1.4.0 -> 1.4.0.redhat-00002\n"),
+                    content);
             for (Category category : part.categories()) {
                 assertTrue(content.contains("\n# --- " + category.id() + " ---\n"), content);
             }

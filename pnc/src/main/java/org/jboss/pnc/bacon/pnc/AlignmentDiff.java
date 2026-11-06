@@ -263,8 +263,11 @@ final class AlignmentDiff {
     record FileChange(String path, String status, List<Change> changes) {
     }
 
-    /** A repository removed from a build file. {@code id} or {@code url} may be null when not part of the removal. */
-    record Repository(String id, String url, String file) {
+    /**
+     * A repository removed from a build file. {@code kind} is {@code repository} or {@code pluginRepository};
+     * {@code id} or {@code url} may be null when not part of the removal.
+     */
+    record Repository(String kind, String id, String url, String file) {
     }
 
     /**
@@ -397,6 +400,7 @@ final class AlignmentDiff {
     private final List<FileChange> files;
     private final List<Repository> removedRepositories;
     private final Set<String> alignedVersions;
+    private final String project;
     private final List<AlignedProject> alignedProjects;
     private final List<AlignedDependency> alignedDependencies;
     private final List<ProjectVersion> projectVersions;
@@ -407,6 +411,7 @@ final class AlignmentDiff {
             List<FileChange> files,
             List<Repository> removedRepositories,
             Set<String> alignedVersions,
+            String project,
             List<AlignedProject> alignedProjects,
             List<AlignedDependency> alignedDependencies,
             List<ProjectVersion> projectVersions,
@@ -415,6 +420,7 @@ final class AlignmentDiff {
         this.files = files;
         this.removedRepositories = removedRepositories;
         this.alignedVersions = alignedVersions;
+        this.project = project;
         this.alignedProjects = alignedProjects;
         this.alignedDependencies = alignedDependencies;
         this.projectVersions = projectVersions;
@@ -459,6 +465,14 @@ final class AlignmentDiff {
         return alignedVersions;
     }
 
+    /**
+     * The identifier of the project, {@code groupId:artifactId} of its root module: the PME execution root or the GME
+     * root project recorded by the alignment reports in the diff, else the one given by the caller. Null when unknown.
+     */
+    String project() {
+        return project;
+    }
+
     /** The project modules recorded by the alignment reports in the diff, in diff order. */
     List<AlignedProject> alignedProjects() {
         return alignedProjects;
@@ -497,6 +511,7 @@ final class AlignmentDiff {
      */
     Map<String, Object> manifest(Function<Part, String> fileName) {
         Map<String, Object> manifest = new LinkedHashMap<>();
+        manifest.put("project", project);
         manifest.put("alignedVersions", alignedVersions);
         manifest.put("alignedProjects", alignedProjects.stream().map(project -> {
             Map<String, String> entry = new LinkedHashMap<>();
@@ -562,6 +577,7 @@ final class AlignmentDiff {
 
         manifest.put("removedRepositories", removedRepositories.stream().map(repository -> {
             Map<String, String> entry = new LinkedHashMap<>();
+            entry.put("kind", repository.kind());
             entry.put("id", repository.id());
             entry.put("url", repository.url());
             entry.put("file", repository.file());
@@ -593,6 +609,20 @@ final class AlignmentDiff {
      * @return the split result; every part is an empty string when the input is null or empty
      */
     static AlignmentDiff split(String unifiedDiff, Collection<String> knownAlignedVersions) {
+        return split(unifiedDiff, knownAlignedVersions, null);
+    }
+
+    /**
+     * Routes each file section, or each hunk of a file section, of the given unified diff to its category.
+     *
+     * @param unifiedDiff the unified diff, may be null
+     * @param knownAlignedVersions aligned project versions known by the caller (e.g. from the PNC build), in addition
+     *        to the ones read from the alignment reports in the diff; candidates without a PNC suffix are ignored
+     * @param knownProject the project identifier known by the caller (e.g. from the PNC build), used when the
+     *        alignment reports in the diff do not record it; may be null
+     * @return the split result; every part is an empty string when the input is null or empty
+     */
+    static AlignmentDiff split(String unifiedDiff, Collection<String> knownAlignedVersions, String knownProject) {
         List<Section> sections = parse(unifiedDiff);
 
         Set<AlignedProject> projects = new LinkedHashSet<>();
@@ -636,6 +666,12 @@ final class AlignmentDiff {
                 Collections.unmodifiableList(files),
                 Collections.unmodifiableList(removedRepositories),
                 Collections.unmodifiableSet(alignedVersions),
+                // The PME execution root and the GME root project are recorded first.
+                projects.stream()
+                        .filter(project -> project.groupId() != null && project.artifactId() != null)
+                        .map(project -> project.groupId() + ":" + project.artifactId())
+                        .findFirst()
+                        .orElse(knownProject != null && !knownProject.isBlank() ? knownProject : null),
                 List.copyOf(projects),
                 dependencies.entrySet()
                         .stream()
@@ -935,21 +971,32 @@ final class AlignmentDiff {
      * {@code manipulation.json}.
      */
     private static void keepReferencedGmeStateInBuild(List<Section> sections, List<String> warnings) {
-        List<String> references = new ArrayList<>();
+        // A known GME injection git put in the same hunk as other changes, or a reference not recognized at all.
+        Set<String> mixedInjections = new LinkedHashSet<>();
+        Set<String> references = new LinkedHashSet<>();
         for (Section section : sections) {
             if (section.path == null || !isGradleFile(section.fileName())) {
                 continue;
             }
             for (int i = 0; i < section.hunks.size(); i++) {
                 Change change = section.fileChange != null ? section.fileChange : section.hunkChanges.get(i);
-                if (change.category() == Category.BUILD && section.hunks.get(i)
-                        .stream()
-                        .anyMatch(line -> line.startsWith("+") && GME_SCRIPT_REFERENCE.matcher(line).find())) {
-                    references.add(section.path);
+                if (change.category() != Category.BUILD) {
+                    continue;
                 }
+                List<String> referencing = section.hunks.get(i)
+                        .stream()
+                        .filter(line -> line.startsWith("+") && GME_SCRIPT_REFERENCE.matcher(line).find())
+                        .collect(Collectors.toList());
+                if (referencing.isEmpty()) {
+                    continue;
+                }
+                boolean injections = referencing.stream()
+                        .map(line -> withoutWhitespace(line.substring(1)))
+                        .allMatch(line -> GME_INJECTIONS.stream().anyMatch(line::contains));
+                (injections ? mixedInjections : references).add(section.path);
             }
         }
-        if (references.isEmpty()) {
+        if (mixedInjections.isEmpty() && references.isEmpty()) {
             return;
         }
 
@@ -966,10 +1013,16 @@ final class AlignmentDiff {
                 }
             }
         }
-        if (demoted) {
+        if (demoted && !mixedInjections.isEmpty()) {
+            warnings.add(
+                    "GME state kept in the build part: the GME injection shares a hunk with other changes in "
+                            + String.join(", ", mixedInjections)
+                            + ", so the injection cannot be left out on its own");
+        }
+        if (demoted && !references.isEmpty()) {
             warnings.add(
                     "GME state kept in the build part: unrecognized references to the GME scripts in "
-                            + String.join(", ", new LinkedHashSet<>(references)));
+                            + String.join(", ", references));
         }
     }
 
@@ -1262,6 +1315,7 @@ final class AlignmentDiff {
     private static List<Repository> removedRepositories(String path, List<String> hunk) {
         List<Repository> repositories = new ArrayList<>();
         boolean inRepository = false;
+        String kind = null;
         String id = null;
         String url = null;
         for (String line : hunk.subList(1, hunk.size())) {
@@ -1269,8 +1323,10 @@ final class AlignmentDiff {
                 continue;
             }
             boolean removed = line.startsWith("-");
-            if (REPOSITORY_OPEN.matcher(line).find()) {
+            Matcher open = REPOSITORY_OPEN.matcher(line);
+            if (open.find()) {
                 inRepository = true;
+                kind = open.group(1);
                 id = null;
                 url = null;
             }
@@ -1286,14 +1342,14 @@ final class AlignmentDiff {
             }
             if (inRepository && REPOSITORY_CLOSE.matcher(line).find()) {
                 if (id != null || url != null) {
-                    repositories.add(new Repository(id, url, path));
+                    repositories.add(new Repository(kind, id, url, path));
                 }
                 inRepository = false;
             }
         }
         if (inRepository && (id != null || url != null)) {
             // The hunk ends inside the removed definition.
-            repositories.add(new Repository(id, url, path));
+            repositories.add(new Repository(kind, id, url, path));
         }
         return repositories;
     }

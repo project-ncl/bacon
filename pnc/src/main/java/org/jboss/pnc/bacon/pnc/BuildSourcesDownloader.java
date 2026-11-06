@@ -65,6 +65,8 @@ public class BuildSourcesDownloader {
     private static final Pattern COMMIT_SHA = Pattern.compile("[0-9a-fA-F]{40}");
     private static final Pattern SCM_TAG_COMMIT_SUFFIX = Pattern.compile("-[0-9a-f]{8}$");
     private static final int HEADER_WIDTH = 100;
+    // The build attribute holding the groupId:artifactId PNC names the build after (Attributes.BUILD_BREW_NAME).
+    private static final String BREW_BUILD_NAME = "BREW_BUILD_NAME";
     private static final ObjectWriter MANIFEST_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
     private static final String ACCEPT_ARCHIVE = "application/x-gzip, application/gzip, application/x-tar, application/octet-stream";
@@ -319,8 +321,10 @@ public class BuildSourcesDownloader {
     }
 
     private List<Path> writeAlignmentDiff(Build build, Path diffFile, String rawDiff, boolean manifest) {
-        AlignmentDiff diff = AlignmentDiff
-                .split(LogSanitizer.maskKnownSecrets(rawDiff), alignedVersionsFromTag(build.getScmTag()));
+        AlignmentDiff diff = AlignmentDiff.split(
+                LogSanitizer.maskKnownSecrets(rawDiff),
+                alignedVersionsFromTag(build.getScmTag()),
+                build.getAttributes() != null ? build.getAttributes().get(BREW_BUILD_NAME) : null);
         try {
             return writeAlignmentDiffParts(diff, diffFile, manifest);
         } catch (IOException e) {
@@ -384,7 +388,7 @@ public class BuildSourcesDownloader {
             written.add(manifestFile);
         }
 
-        projectVersionLines(diff).forEach(line -> log.info(line));
+        projectLines(diff).forEach(line -> log.info(line));
         diff.warnings().forEach(warning -> log.warn("Alignment diff: {}", warning));
         return written;
     }
@@ -400,7 +404,7 @@ public class BuildSourcesDownloader {
                 "PNC alignment diff, part " + part.number() + " of " + AlignmentDiff.Part.values().length + ": "
                         + part.id() + " (" + (part.required() ? "required" : "optional") + ", " + part.summary()
                         + ")");
-        projectVersionLines(diff).forEach(line -> comment(header, line));
+        projectLines(diff).forEach(line -> comment(header, line));
         comment(header, "Apply on top of the upstream sources in numeric order, alone or together.");
         header.append("#\n");
         return header.toString();
@@ -425,7 +429,8 @@ public class BuildSourcesDownloader {
                         "Removed:    ",
                         Stream.of(repository.id(), repository.url())
                                 .filter(Objects::nonNull)
-                                .collect(Collectors.joining(" ")) + " (" + repository.file() + ")");
+                                .collect(Collectors.joining(" ")) + " (" + repository.file() + ", " + repository.kind()
+                                + ")");
             }
         }
         if (category == AlignmentDiff.Category.BUILD) {
@@ -441,19 +446,23 @@ public class BuildSourcesDownloader {
     }
 
     /**
-     * One line per project version change, e.g. {@code Project version: 1.4.0 -> 1.4.0.redhat-00002}, or a single
-     * line saying none was found. The files holding the change are listed in the manifest only.
+     * The project identifier, e.g. {@code Project: org.acme:widget}, followed by one line per project version change,
+     * e.g. {@code Project version: 1.4.0 -> 1.4.0.redhat-00002}, or a single line saying none was found. The files
+     * holding the change are listed in the manifest only.
      */
-    static List<String> projectVersionLines(AlignmentDiff diff) {
+    static List<String> projectLines(AlignmentDiff diff) {
+        List<String> lines = new ArrayList<>();
+        lines.add("Project: " + (diff.project() != null ? diff.project() : "unknown"));
         if (diff.projectVersions().isEmpty()) {
-            return List.of("Project version: no change found");
+            lines.add("Project version: no change found");
         }
-        return diff.projectVersions()
+        diff.projectVersions()
                 .stream()
                 .map(
                         version -> "Project version: " + (version.original() != null ? version.original() : "?")
                                 + " -> " + version.aligned())
-                .collect(Collectors.toList());
+                .forEach(lines::add);
+        return lines;
     }
 
     /** Appends the text as "# " comment lines wrapped at {@value #HEADER_WIDTH} characters. */
