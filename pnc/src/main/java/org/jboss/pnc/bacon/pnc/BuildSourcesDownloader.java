@@ -441,20 +441,19 @@ public class BuildSourcesDownloader {
     }
 
     /**
-     * One line per project version change, e.g. {@code Project version: 1.4.0 -> 1.4.0.redhat-00002 (pom.xml,
-     * core/pom.xml)}, or a single line saying none was found.
+     * One line per project version change, e.g. {@code Project version: 1.4.0 -> 1.4.0.redhat-00002}, or a single
+     * line saying none was found. The files holding the change are listed in the manifest only.
      */
     static List<String> projectVersionLines(AlignmentDiff diff) {
         if (diff.projectVersions().isEmpty()) {
             return List.of("Project version: no change found");
         }
-        return diff.projectVersions().stream().map(version -> {
-            List<String> files = version.files();
-            String where = files.size() <= 3 ? String.join(", ", files)
-                    : String.join(", ", files.subList(0, 3)) + " and " + (files.size() - 3) + " more";
-            return "Project version: " + (version.original() != null ? version.original() : "?") + " -> "
-                    + version.aligned() + " (" + where + ")";
-        }).collect(Collectors.toList());
+        return diff.projectVersions()
+                .stream()
+                .map(
+                        version -> "Project version: " + (version.original() != null ? version.original() : "?")
+                                + " -> " + version.aligned())
+                .collect(Collectors.toList());
     }
 
     /** Appends the text as "# " comment lines wrapped at {@value #HEADER_WIDTH} characters. */

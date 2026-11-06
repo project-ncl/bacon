@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p>
  * Whole files are categorized by name first (manipulator state, reports, repository backups). The remaining files are
  * categorized hunk by hunk, because a single {@code pom.xml} or {@code build.gradle} can mix real alignment changes
- * with repository removals, version rewrites, injected GME wiring or pure re-formatting. A file whose hunks fall into
+ * with repository removals, injected GME wiring or pure re-formatting. A file whose hunks fall into
  * several categories is emitted in each of those parts with the same file header and only its own hunks; the new-side
  * line numbers of the hunk headers are recomputed so that every part applies on its own on top of the pre-alignment
  * sources.
@@ -67,20 +67,23 @@ final class AlignmentDiff {
      * which a reproducer applies the parts on top of the pre-alignment sources, from the one always needed to the ones
      * that can always be skipped. Whole files are categorized by name; the hunks of the other files are tried in the
      * order {@link #FORMATTING}, {@link #RERUN_STATE} (GME injections), {@link #METADATA} (PME stamp),
-     * {@link #REPOSITORIES}, {@link #VERSION}, else {@link #BUILD}.
+     * {@link #REPOSITORIES}, else {@link #BUILD}.
      */
     enum Category {
         /**
-         * Changes that influence the build: the alignment itself (dependency, plugin and property changes, files the
-         * alignment generated such as a {@code pom.xml} for a Maven 1 project) and anything not recognized as another
-         * category.
+         * Changes that influence the build: the alignment itself (dependency, plugin and property changes, the
+         * project's own version rewritten to the aligned version, files the alignment generated such as a
+         * {@code pom.xml} for a Maven 1 project) and anything not recognized as another category. The project version
+         * rewrites are kept here, as properties holding the project version (e.g. referencing sibling modules) are
+         * aligned together with the other properties, and the GME/SMEG version is in their state files anyway.
          */
         BUILD(
                 "build",
                 true,
-                "The alignment itself: dependency, plugin and property versions changed by the manipulator, "
-                        + "generated files, and every change no other part recognized.",
-                "Building with the aligned dependencies.",
+                "The alignment itself: dependency, plugin and property versions changed by the manipulator, the "
+                        + "project's own version rewritten to the aligned version, generated files, and every "
+                        + "change no other part recognized.",
+                "Building the aligned project.",
                 "never: this is the alignment"),
         /**
          * State a later run of the manipulator reads back or re-creates: GME's {@code manipulation.json} (reused
@@ -96,17 +99,6 @@ final class AlignmentDiff {
                         + "gme*.gradle scripts and the 'apply from' lines loading them, manipulations.sbt.",
                 "Building an aligned Gradle/sbt project: these files apply the alignment at build time.",
                 "only when running GME/SMEG again yourself, which must start from the upstream state"),
-        /**
-         * The project's own version rewritten to the aligned version (e.g. {@code 1.0M10 ->
-         * 1.0.0.M10-rhlw-00000-n-00012}, including {@code ${project.version}} references resolved to it). Detected
-         * only when the aligned version is known, from the alignment reports in the diff or given explicitly.
-         */
-        VERSION(
-                "version",
-                false,
-                "The project's own version rewritten to the aligned version (e.g. 1.4.0 -> 1.4.0.redhat-00001).",
-                "Producing the artifacts with the same versions as the PNC build.",
-                "when the artifacts may keep the upstream version instead of the aligned one"),
         /**
          * Repositories removed from a {@code pom.xml} ({@code <repository>} / {@code <pluginRepository>}, or their
          * whole container). A build of the modified sources outside PNC may need them back; they are listed in the
@@ -212,7 +204,6 @@ final class AlignmentDiff {
                 "reproduce",
                 false,
                 "makes the build match the PNC one exactly",
-                Category.VERSION,
                 Category.REPOSITORIES),
         NOISE(
                 "noise",
@@ -405,7 +396,8 @@ final class AlignmentDiff {
 
     /**
      * The changes of the project's own version, found the same way whatever the manipulator: PME rewrites of the
-     * version in the build files ({@link Category#VERSION} hunks), the {@code originalVersion}/{@code version} of GME's
+     * version in the build files ({@link #RULE_ALIGNED_VERSION} hunks, in {@link Category#BUILD}), the
+     * {@code originalVersion}/{@code version} of GME's
      * {@code manipulation.json} and the {@code version :=} of SMEG's {@code manipulations.sbt}.
      */
     List<ProjectVersion> projectVersions() {
@@ -431,7 +423,7 @@ final class AlignmentDiff {
         return removedRepositories;
     }
 
-    /** The aligned project versions used to recognize {@link Category#VERSION} changes. */
+    /** The aligned project versions used to recognize the {@link #RULE_ALIGNED_VERSION} changes. */
     Set<String> alignedVersions() {
         return alignedVersions;
     }
@@ -613,12 +605,14 @@ final class AlignmentDiff {
             }
             // PME (and any build file rewritten the same way): the words changed by the version hunks.
             for (int i = 0; i < section.hunkChanges.size(); i++) {
-                if (section.hunkChanges.get(i).category() == Category.VERSION) {
+                if (RULE_ALIGNED_VERSION.equals(section.hunkChanges.get(i).rule())) {
                     List<String> hunk = section.hunks.get(i);
                     List<String> removed = tokens(side(hunk, '-'));
                     List<String> added = tokens(side(hunk, '+'));
                     for (int t = 0; t < added.size() && t < removed.size(); t++) {
-                        if (!removed.get(t).equals(added.get(t)) && alignedVersions.contains(added.get(t))) {
+                        // A ${project.version} reference resolved to the aligned version is not another original.
+                        if (!removed.get(t).equals(added.get(t)) && alignedVersions.contains(added.get(t))
+                                && !removed.get(t).contains("${")) {
                             addVersion(changes, removed.get(t), added.get(t), section.path);
                         }
                     }
@@ -852,7 +846,7 @@ final class AlignmentDiff {
             return new Change(Category.REPOSITORIES, RULE_REMOVED_REPOSITORIES);
         }
         if (isVersionRewrite(removed, added, alignedVersions)) {
-            return new Change(Category.VERSION, RULE_ALIGNED_VERSION);
+            return new Change(Category.BUILD, RULE_ALIGNED_VERSION);
         }
         return new Change(Category.BUILD, RULE_ALIGNMENT);
     }

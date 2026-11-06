@@ -124,14 +124,14 @@ class AlignmentDiffApplyTest {
         for (Part part : Part.values()) {
             String content = Files.readString(parts.get(part.ordinal()));
             assertTrue(content.startsWith("# PNC alignment diff, part " + part.number() + " of 4: "), content);
-            assertTrue(content.contains("\n# Project version: 1.4.0 -> 1.4.0.redhat-00002 (pom.xml)\n"), content);
+            assertTrue(content.contains("\n# Project version: 1.4.0 -> 1.4.0.redhat-00002\n"), content);
             for (Category category : part.categories()) {
                 assertTrue(content.contains("\n# --- " + category.id() + " ---\n"), content);
             }
         }
 
         // git apply ignores the comments, and applies a file present in several sections of a part (pom.xml in the
-        // version and repositories sections) section by section.
+        // metadata and formatting sections) section by section.
         resetToUpstream();
         for (Path part : parts) {
             git("apply", part.toString());
@@ -192,7 +192,6 @@ class AlignmentDiffApplyTest {
                 List.of(
                         "build",
                         "rerun-state",
-                        "version",
                         "repositories",
                         "rerun-blocker",
                         "metadata",
@@ -218,7 +217,7 @@ class AlignmentDiffApplyTest {
                         Category.RERUN_STATE.skip()),
                 parts.get(1));
         assertEquals(
-                List.of(true, true, false, false, false, false, false),
+                List.of(true, true, false, false, false, false),
                 parts.stream().map(part -> part.get("required")).collect(Collectors.toList()));
     }
 

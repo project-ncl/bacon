@@ -21,9 +21,9 @@ The diff is split into up to four files, numbered in apply order. Only the files
 
 | File | Required | Content |
 |------|----------|---------|
-| `*-1-build.diff` | yes | The alignment itself: dependency, plugin and property changes, generated files, anything not recognized |
+| `*-1-build.diff` | yes | The alignment itself: dependency, plugin and property changes, project version rewrites, generated files, anything not recognized |
 | `*-2-rerun-state.diff` | yes for Gradle/sbt | GME/SMEG files that apply the alignment at build time (see below) |
-| `*-3-reproduce.diff` | no | Project version rewrites and removed repositories, to match the PNC build exactly |
+| `*-3-reproduce.diff` | no | Removed repositories, to match the PNC build exactly |
 | `*-4-noise.diff` | no | PME marker, reports and backups, formatting-only changes: never affects the build |
 
 Every part applies on its own on top of the upstream sources; applying all of them, in any order, reproduces the
@@ -42,7 +42,7 @@ The manipulators apply the alignment in two different ways, which is why the rer
 but not PME:
 
 * **PME (Maven) rewrites the `pom.xml` files directly.** The aligned dependency, plugin and property versions are
-  plain edits of the POMs, so they land in the build part; the project version rewrite lands in the reproduce part.
+  plain edits of the POMs, and so is the project version rewrite: they all land in the build part.
   PME leaves nothing behind that the build needs: its leftovers are the marker
   (`target/pom-manip-ext-marker.txt`, which makes a later PME run skip the alignment) and the
   `target/manipulation.json` report, both in the noise part.
@@ -58,14 +58,15 @@ builds. Leave it out only when running GME/SMEG again yourself, as they must sta
 # Project version
 
 The project version change is reported in the same way whatever the manipulator, on a
-`# Project version: <original> -> <aligned> (<files>)` line at the top of every part, and in the command output. It
-is read from:
+`# Project version: <original> -> <aligned>` line at the top of every part, and in the command output. The files
+holding it are listed in the manifest (`--manifest`). It is read from:
 
 | Manipulator | Source | Part holding the change |
 |-------------|--------|-------------------------|
-| PME | the version rewritten in the `pom.xml` files | reproduce |
+| PME | the version rewritten in the `pom.xml` files | build |
 | GME | `originalVersion` and `version` in `manipulation.json` | rerun-state |
 | SMEG | `version :=` in `manipulations.sbt` (the original version is not recorded) | rerun-state |
 
-The GME and SMEG files are kept whole, as the build needs them as a whole, so only the PME version change can be
-skipped on its own.
+The project version change is part of the alignment whatever the manipulator, and is never optional: a project often
+uses its own version elsewhere (e.g. a property referencing its sibling modules), which the manipulator aligns
+together with the other properties, so the build part does not build without the version rewrite.

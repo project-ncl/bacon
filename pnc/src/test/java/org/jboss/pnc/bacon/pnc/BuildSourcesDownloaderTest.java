@@ -287,7 +287,7 @@ class BuildSourcesDownloaderTest {
                         ""));
 
         assertEquals(
-                List.of("Project version: ? -> 3.1.0.redhat-00004 (manipulations.sbt)"),
+                List.of("Project version: ? -> 3.1.0.redhat-00004"),
                 BuildSourcesDownloader.projectVersionLines(diff));
     }
 
