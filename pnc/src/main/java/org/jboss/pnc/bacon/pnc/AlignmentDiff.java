@@ -274,6 +274,27 @@ final class AlignmentDiff {
     record ProjectVersion(String original, String aligned, List<String> files) {
     }
 
+    /**
+     * A module of the project aligned by the manipulator, read from the alignment reports in the diff. The group and
+     * artifact are null when the report does not record them (SMEG), and so is {@code originalVersion}.
+     */
+    record AlignedProject(String groupId, String artifactId, String originalVersion, String alignedVersion) {
+    }
+
+    /**
+     * A dependency or plugin aligned by the manipulator, read from the alignment reports in the diff, with the project
+     * modules where it was aligned. {@code type} is {@code dependency}, {@code plugin}, {@code managed-dependency} or
+     * {@code managed-plugin}.
+     */
+    record AlignedDependency(
+            String type,
+            String groupId,
+            String artifactId,
+            String originalVersion,
+            String alignedVersion,
+            List<String> modules) {
+    }
+
     // Rule names, reported in the manifest.
     static final String RULE_PME_MARKER = "pme-marker";
     static final String RULE_GME_MODEL = "gme-manipulation-model";
@@ -376,6 +397,8 @@ final class AlignmentDiff {
     private final List<FileChange> files;
     private final List<Repository> removedRepositories;
     private final Set<String> alignedVersions;
+    private final List<AlignedProject> alignedProjects;
+    private final List<AlignedDependency> alignedDependencies;
     private final List<ProjectVersion> projectVersions;
     private final List<String> warnings;
 
@@ -384,12 +407,16 @@ final class AlignmentDiff {
             List<FileChange> files,
             List<Repository> removedRepositories,
             Set<String> alignedVersions,
+            List<AlignedProject> alignedProjects,
+            List<AlignedDependency> alignedDependencies,
             List<ProjectVersion> projectVersions,
             List<String> warnings) {
         this.parts = parts;
         this.files = files;
         this.removedRepositories = removedRepositories;
         this.alignedVersions = alignedVersions;
+        this.alignedProjects = alignedProjects;
+        this.alignedDependencies = alignedDependencies;
         this.projectVersions = projectVersions;
         this.warnings = warnings;
     }
@@ -423,9 +450,23 @@ final class AlignmentDiff {
         return removedRepositories;
     }
 
-    /** The aligned project versions used to recognize the {@link #RULE_ALIGNED_VERSION} changes. */
+    /**
+     * The aligned versions of the project's own modules, used to recognize the {@link #RULE_ALIGNED_VERSION} changes:
+     * the ones of {@link #alignedProjects()} and the ones given by the caller. The versions of the aligned dependencies
+     * are not included, so that a dependency rewrite is never taken for the project version.
+     */
     Set<String> alignedVersions() {
         return alignedVersions;
+    }
+
+    /** The project modules recorded by the alignment reports in the diff, in diff order. */
+    List<AlignedProject> alignedProjects() {
+        return alignedProjects;
+    }
+
+    /** The dependencies and plugins recorded as aligned by the alignment reports in the diff, in diff order. */
+    List<AlignedDependency> alignedDependencies() {
+        return alignedDependencies;
     }
 
     /** Files the alignment added that no rule recognized; they stay in {@link Category#BUILD}. */
@@ -457,6 +498,24 @@ final class AlignmentDiff {
     Map<String, Object> manifest(Function<Part, String> fileName) {
         Map<String, Object> manifest = new LinkedHashMap<>();
         manifest.put("alignedVersions", alignedVersions);
+        manifest.put("alignedProjects", alignedProjects.stream().map(project -> {
+            Map<String, String> entry = new LinkedHashMap<>();
+            entry.put("groupId", project.groupId());
+            entry.put("artifactId", project.artifactId());
+            entry.put("originalVersion", project.originalVersion());
+            entry.put("alignedVersion", project.alignedVersion());
+            return entry;
+        }).collect(Collectors.toList()));
+        manifest.put("alignedDependencies", alignedDependencies.stream().map(dependency -> {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("type", dependency.type());
+            entry.put("groupId", dependency.groupId());
+            entry.put("artifactId", dependency.artifactId());
+            entry.put("originalVersion", dependency.originalVersion());
+            entry.put("alignedVersion", dependency.alignedVersion());
+            entry.put("modules", dependency.modules());
+            return entry;
+        }).collect(Collectors.toList()));
 
         // The categories in apply order, with what a reproducer may skip.
         manifest.put("parts", Arrays.stream(Category.values()).map(category -> {
@@ -536,8 +595,14 @@ final class AlignmentDiff {
     static AlignmentDiff split(String unifiedDiff, Collection<String> knownAlignedVersions) {
         List<Section> sections = parse(unifiedDiff);
 
+        Set<AlignedProject> projects = new LinkedHashSet<>();
+        Map<List<String>, Set<String>> dependencies = new LinkedHashMap<>();
+        for (Section section : sections) {
+            collectReport(section, projects, dependencies);
+        }
+
         Set<String> alignedVersions = new TreeSet<>();
-        Stream.concat(knownAlignedVersions.stream(), sections.stream().flatMap(s -> reportedVersions(s).stream()))
+        Stream.concat(knownAlignedVersions.stream(), projects.stream().map(AlignedProject::alignedVersion))
                 .filter(version -> version != null && ALIGNED_VERSION_SUFFIX.matcher(version).find())
                 .forEach(alignedVersions::add);
 
@@ -571,6 +636,18 @@ final class AlignmentDiff {
                 Collections.unmodifiableList(files),
                 Collections.unmodifiableList(removedRepositories),
                 Collections.unmodifiableSet(alignedVersions),
+                List.copyOf(projects),
+                dependencies.entrySet()
+                        .stream()
+                        .map(
+                                entry -> new AlignedDependency(
+                                        entry.getKey().get(0),
+                                        entry.getKey().get(1),
+                                        entry.getKey().get(2),
+                                        entry.getKey().get(3),
+                                        entry.getKey().get(4),
+                                        List.copyOf(entry.getValue())))
+                        .collect(Collectors.toUnmodifiableList()),
                 projectVersions(sections, alignedVersions),
                 Collections.unmodifiableList(warnings));
     }
@@ -937,48 +1014,169 @@ final class AlignmentDiff {
     }
 
     /**
-     * The aligned versions recorded by the alignment reports added by the section: the PME/Ant manipulator
-     * {@code alignmentReport.json} (execution root and modules), the GME {@code manipulation.json} (root and children)
-     * and the SMEG {@code manipulations.sbt} / {@code manipulations.json}.
+     * Collects the project modules and the aligned dependencies recorded by the alignment report added by the section,
+     * recognized by its content: the PME/Ant manipulator format ({@code executionRoot} and {@code modules}, in
+     * {@code alignmentReport.json} or {@code target/manipulation.json}), the GME format ({@code group},
+     * {@code originalVersion}, {@code children} and {@code alignedDependencies}, in {@code manipulation.json}), and the
+     * SMEG {@code manipulations.sbt} / {@code manipulations.json}, recording the aligned version only.
+     *
+     * @param dependencies type, groupId, artifactId, original and aligned version -> modules
      */
-    private static Set<String> reportedVersions(Section section) {
-        Set<String> versions = new LinkedHashSet<>();
+    private static void collectReport(
+            Section section,
+            Set<AlignedProject> projects,
+            Map<List<String>, Set<String>> dependencies) {
         if (section.path == null) {
-            return versions;
+            return;
         }
         String fileName = section.fileName();
         if (MANIPULATIONS_SBT.equals(fileName)) {
             Matcher matcher = SBT_VERSION.matcher(section.addedText());
             while (matcher.find()) {
-                versions.add(matcher.group(1));
+                projects.add(new AlignedProject(null, null, null, matcher.group(1)));
             }
-            return versions;
+            return;
         }
         if (!ALIGNMENT_REPORT_JSON.equals(fileName) && !MANIPULATION_JSON.equals(fileName)
                 && !MANIPULATIONS_JSON.equals(fileName)) {
-            return versions;
+            return;
         }
+        JsonNode report;
         try {
-            JsonNode report = JSON.readTree(section.addedText());
-            if (report != null) {
-                collectVersions(report, versions);
-            }
+            report = JSON.readTree(section.addedText());
         } catch (Exception e) {
             // Not a complete report (e.g. only modified lines in the diff): nothing to learn from it.
+            return;
         }
-        return versions;
+        if (report == null || !report.isObject()) {
+            return;
+        }
+        if (report.has("executionRoot") || report.has("modules")) {
+            collectPmeReport(report, projects, dependencies);
+        } else if (report.has("group") || report.has("children") || report.has("alignedDependencies")) {
+            collectGmeReport(report, projects, dependencies);
+        } else if (report.path("version").isTextual()) {
+            projects.add(new AlignedProject(null, null, null, report.get("version").asText()));
+        }
     }
 
-    private static void collectVersions(JsonNode node, Set<String> versions) {
-        if (node.isObject()) {
-            JsonNode version = node.get("version");
-            if (version != null && version.isTextual()) {
-                versions.add(version.asText());
+    private static void collectPmeReport(
+            JsonNode report,
+            Set<AlignedProject> projects,
+            Map<List<String>, Set<String>> dependencies) {
+        addPmeProject(report.get("executionRoot"), projects);
+        for (JsonNode module : report.path("modules")) {
+            JsonNode gav = module.get("gav");
+            addPmeProject(gav, projects);
+            String name = gav != null ? gav.path("artifactId").asText(null) : null;
+            collectPmeModule(module, name, dependencies);
+            for (JsonNode profile : module.path("profiles")) {
+                collectPmeModule(profile, name, dependencies);
             }
-            node.forEach(child -> collectVersions(child, versions));
-        } else if (node.isArray()) {
-            node.forEach(child -> collectVersions(child, versions));
         }
+    }
+
+    /** The aligned dependencies and plugins of a PME module or profile. */
+    private static void collectPmeModule(JsonNode module, String name, Map<List<String>, Set<String>> dependencies) {
+        addDependencies("dependency", module.get("dependencies"), name, dependencies);
+        addDependencies("plugin", module.get("plugins"), name, dependencies);
+        // A ManagedDependenciesItem / ManagedPluginsItem in a module, a list of them in a profile.
+        for (JsonNode managed : asList(module.get("managedDependencies"))) {
+            addDependencies("managed-dependency", managed.get("dependencies"), name, dependencies);
+        }
+        for (JsonNode managed : asList(module.get("managedPlugins"))) {
+            addDependencies("managed-plugin", managed.get("plugins"), name, dependencies);
+        }
+    }
+
+    private static void addPmeProject(JsonNode gav, Set<AlignedProject> projects) {
+        if (gav == null || !gav.path("version").isTextual()) {
+            return;
+        }
+        String groupId = gav.path("groupId").asText(null);
+        String artifactId = gav.path("artifactId").asText(null);
+        String originalGav = gav.path("originalGAV").asText(null);
+        projects.add(
+                new AlignedProject(
+                        groupId,
+                        artifactId,
+                        originalGav != null ? versionOf(originalGav, groupId, artifactId) : null,
+                        gav.get("version").asText()));
+    }
+
+    private static void collectGmeReport(
+            JsonNode model,
+            Set<AlignedProject> projects,
+            Map<List<String>, Set<String>> dependencies) {
+        String name = model.path("name").asText(null);
+        if (model.path("version").isTextual()) {
+            projects.add(
+                    new AlignedProject(
+                            model.path("group").asText(null),
+                            name,
+                            model.path("originalVersion").asText(null),
+                            model.get("version").asText()));
+        }
+        addDependencies("dependency", model.get("alignedDependencies"), name, dependencies);
+        for (JsonNode child : model.path("children")) {
+            collectGmeReport(child, projects, dependencies);
+        }
+    }
+
+    /**
+     * Adds the entries of a PME/GME map of aligned dependencies, keyed by the original
+     * {@code groupId:artifactId:version}
+     * with the aligned {@code groupId}, {@code artifactId} and {@code version} as value.
+     */
+    private static void addDependencies(
+            String type,
+            JsonNode aligned,
+            String module,
+            Map<List<String>, Set<String>> dependencies) {
+        if (aligned == null || !aligned.isObject()) {
+            return;
+        }
+        aligned.fields().forEachRemaining(entry -> {
+            JsonNode value = entry.getValue();
+            if (!value.path("version").isTextual()) {
+                return;
+            }
+            String groupId = value.path("groupId").asText(null);
+            String artifactId = value.path("artifactId").asText(null);
+            Set<String> modules = dependencies.computeIfAbsent(
+                    Arrays.asList(
+                            type,
+                            groupId,
+                            artifactId,
+                            versionOf(entry.getKey(), groupId, artifactId),
+                            value.get("version").asText()),
+                    key -> new LinkedHashSet<>());
+            if (module != null) {
+                modules.add(module);
+            }
+        });
+    }
+
+    /** The version of a {@code groupId:artifactId:version} reference, the last segment when it is not of that GA. */
+    private static String versionOf(String gav, String groupId, String artifactId) {
+        String prefix = groupId + ":" + artifactId + ":";
+        if (gav.startsWith(prefix)) {
+            return gav.substring(prefix.length());
+        }
+        int colon = gav.lastIndexOf(':');
+        return colon >= 0 ? gav.substring(colon + 1) : gav;
+    }
+
+    private static List<JsonNode> asList(JsonNode node) {
+        if (node == null) {
+            return List.of();
+        }
+        if (node.isArray()) {
+            List<JsonNode> items = new ArrayList<>();
+            node.forEach(items::add);
+            return items;
+        }
+        return List.of(node);
     }
 
     /**
