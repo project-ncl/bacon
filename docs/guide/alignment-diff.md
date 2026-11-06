@@ -33,7 +33,7 @@ complete alignment. Applying them in numeric order is recommended:
 git apply BRJO2LNIL6QAA-alignment-1-build.diff BRJO2LNIL6QAA-alignment-2-rerun-state.diff
 ```
 
-Each file starts with comments describing its content, when it can be skipped and the project version change. A
+Each file starts with comments describing its content, when it can be skipped, the project and its version change. A
 file grouping several categories has one commented section per category. The comments also list the removed
 repositories, the added files no rule recognized (kept in the build part) and any warning; `git apply` and `patch`
 ignore them.
@@ -48,6 +48,7 @@ removed repositories may still be needed to resolve the dependencies.
   after it, e.g. `--output out/widget.diff` writes `out/widget-1-build.diff`, `out/widget-3-reproduce.diff`, ...
 * `--manifest`: also writes `<base name>-manifest.json`, describing the split for review or tooling. It is not
   needed to apply the parts. It contains:
+  * `project`: the project identifier, as on the `# Project:` line (see below);
   * `alignedVersions`: the aligned versions of the project's own modules, used to recognize the project version
     rewrites, read from the alignment reports in the diff or from the PNC build;
   * `alignedProjects`: the modules of the project recorded by the alignment reports, with their `groupId`,
@@ -62,7 +63,8 @@ removed repositories may still be needed to resolve the dependencies.
   * `files`: every changed file with its status and, for the whole file or for each hunk, the category and the rule
     that chose it (e.g. `aligned-version` for a project version rewrite and `alignment` for the other changes, both
     in the build part);
-  * `removedRepositories`: the id, url and file of every removed repository;
+  * `removedRepositories`: the kind (`repository` or `pluginRepository`), id, url and file of every removed
+    repository;
   * `projectVersions`: the project version changes, with the files holding them;
   * `unrecognizedAddedFiles` and `warnings`.
 
@@ -89,7 +91,10 @@ builds. Leave it out only when running GME/SMEG again yourself, as they must sta
 
 The project version change is reported in the same way whatever the manipulator, on a
 `# Project version: <original> -> <aligned>` line at the top of every part, and in the command output. The files
-holding it are listed in the manifest (`--manifest`). It is read from:
+holding it are listed in the manifest (`--manifest`). It is preceded by a `# Project: <groupId>:<artifactId>` line
+identifying the project: the root module recorded by the alignment report in the diff (the PME execution root, the
+GME root project), else the name PNC gave the build (its `BREW_BUILD_NAME` attribute), else `unknown`. The project
+version is read from:
 
 | Manipulator | Source | Part holding the change |
 |-------------|--------|-------------------------|

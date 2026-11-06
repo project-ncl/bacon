@@ -292,11 +292,49 @@ class AlignmentDiffTest {
 
         // Leaving gme.gradle or manipulation.json out would break a build still applying gme.gradle.
         assertEquals(List.of(BUILD), presentCategories(diff));
-        assertEquals(1, diff.warnings().size());
-        assertTrue(diff.warnings().get(0).contains("build.gradle"));
+        // The injection is recognized, but git put it in the same hunk as the alignment of the Kotlin version.
+        assertEquals(
+                List.of(
+                        "GME state kept in the build part: the GME injection shares a hunk with other changes in "
+                                + "build.gradle, so the injection cannot be left out on its own"),
+                diff.warnings());
         assertEquals(
                 List.of(new AlignmentDiff.Change(BUILD, AlignmentDiff.RULE_GME_WIRING)),
                 diff.files().get(1).changes());
+    }
+
+    @Test
+    void shouldTellAnInjectionSharingAHunkFromAnUnrecognizedReference() {
+        // okio: a block added at the end of the file, followed by the GME plugin configuration injection.
+        String buildGradleKts = lines(
+                "diff --git a/build.gradle.kts b/build.gradle.kts",
+                "--- a/build.gradle.kts",
+                "+++ b/build.gradle.kts",
+                "@@ -202,3 +202,6 @@ allprojects {",
+                " configureRootDokka()",
+                "+",
+                "+logger.lifecycle(\"PNC: publishing dependency versions\")",
+                "+project.apply { from(\"gme-pluginconfigs.gradle\") }");
+        String settingsGradle = lines(
+                "diff --git a/settings.gradle b/settings.gradle",
+                "--- a/settings.gradle",
+                "+++ b/settings.gradle",
+                "@@ -1,1 +1,2 @@",
+                " rootProject.name = 'widget'",
+                "+apply(from = \"gme.gradle\")");
+
+        AlignmentDiff diff = AlignmentDiff.split(
+                buildGradleKts + settingsGradle + newFile("gme-pluginconfigs.gradle", "+// gme")
+                        + newFile("manipulation.json", "+{}"));
+
+        assertEquals(List.of(BUILD), presentCategories(diff));
+        assertEquals(
+                List.of(
+                        "GME state kept in the build part: the GME injection shares a hunk with other changes in "
+                                + "build.gradle.kts, so the injection cannot be left out on its own",
+                        "GME state kept in the build part: unrecognized references to the GME scripts in "
+                                + "settings.gradle"),
+                diff.warnings());
     }
 
     @Test
@@ -483,10 +521,15 @@ class AlignmentDiffTest {
         assertEquals(
                 List.of(
                         new AlignmentDiff.Repository(
+                                "repository",
                                 "apache.snapshots",
                                 "http://repository.apache.org/snapshots",
                                 "core/pom.xml"),
-                        new AlignmentDiff.Repository("jcenter", "https://jcenter.bintray.com", "core/pom.xml")),
+                        new AlignmentDiff.Repository(
+                                "repository",
+                                "jcenter",
+                                "https://jcenter.bintray.com",
+                                "core/pom.xml")),
                 diff.removedRepositories());
     }
 
@@ -545,6 +588,11 @@ class AlignmentDiffTest {
                                 List.of("widget-core"))),
                 diff.alignedDependencies());
         assertEquals(java.util.Set.of("1.4.0.redhat-00002"), diff.alignedVersions());
+        // The execution root identifies the project, whatever the caller knows.
+        assertEquals("org.acme:widget-parent", diff.project());
+        assertEquals(
+                "org.acme:widget-parent",
+                AlignmentDiff.split(POM_HEADER + dependency + report, List.of(), "org.acme:other").project());
         assertEquals(AlignmentDiff.RULE_ALIGNMENT, diff.files().get(0).changes().get(0).rule());
         assertEquals(List.of(), diff.projectVersions());
     }
@@ -596,6 +644,7 @@ class AlignmentDiffTest {
                                 List.of("okio-jvm", "okio-testing"))),
                 diff.alignedDependencies());
         assertEquals(java.util.Set.of("3.18.2.redhat-00001"), diff.alignedVersions());
+        assertEquals("com.squareup.okio:okio-parent", diff.project());
     }
 
     @Test
@@ -613,6 +662,7 @@ class AlignmentDiffTest {
         java.util.Map<String, Object> manifest = diff.manifest();
         assertEquals(
                 List.of(
+                        "project",
                         "alignedVersions",
                         "alignedProjects",
                         "alignedDependencies",
