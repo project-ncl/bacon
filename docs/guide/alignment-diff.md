@@ -24,7 +24,7 @@ The diff is split into up to four files, numbered in apply order. Only the files
 | `*-1-build.diff` | yes | The alignment itself: dependency, plugin and property changes, project version rewrites, generated files, anything not recognized |
 | `*-2-rerun-state.diff` | yes for Gradle/sbt | GME/SMEG files that apply the alignment at build time (see below) |
 | `*-3-reproduce.diff` | no | Removed repositories, to match the PNC build exactly |
-| `*-4-noise.diff` | no | PME marker, reports and backups, formatting-only changes: never affects the build |
+| `*-4-noise.diff` | no | PME marker, PME stamp, reports and backups, formatting-only changes: never affects the build |
 
 Every part applies on its own on top of the upstream sources; applying all of them, in any order, reproduces the
 complete alignment. Applying them in numeric order is recommended:
@@ -34,7 +34,31 @@ git apply BRJO2LNIL6QAA-alignment-1-build.diff BRJO2LNIL6QAA-alignment-2-rerun-s
 ```
 
 Each file starts with comments describing its content, when it can be skipped and the project version change. A
-file grouping several categories has one commented section per category.
+file grouping several categories has one commented section per category. The comments also list the removed
+repositories, the added files no rule recognized (kept in the build part) and any warning; `git apply` and `patch`
+ignore them.
+
+The reproduce part only holds the repositories PNC removed from the `pom.xml` files, so that the build resolves from
+the PNC repository only. Apply it to reproduce the PNC build exactly; skip it when building outside PNC, where the
+removed repositories may still be needed to resolve the dependencies.
+
+# Options
+
+* `--output <file>`: the base name of the part files, `<build ID>-alignment.diff` by default. The parts are named
+  after it, e.g. `--output out/widget.diff` writes `out/widget-1-build.diff`, `out/widget-3-reproduce.diff`, ...
+* `--manifest`: also writes `<base name>-manifest.json`, describing the split for review or tooling. It is not
+  needed to apply the parts. It contains:
+  * `alignedVersions`: the aligned versions used to recognize the project version rewrites, read from the alignment
+    reports in the diff or from the PNC build;
+  * `parts`: per category, the part number and file, whether it is present and required, and the same descriptions
+    as the comments;
+  * `summary`: the number of files and changes per category;
+  * `files`: every changed file with its status and, for the whole file or for each hunk, the category and the rule
+    that chose it (e.g. `aligned-version` for a project version rewrite and `alignment` for the other changes, both
+    in the build part);
+  * `removedRepositories`: the id, url and file of every removed repository;
+  * `projectVersions`: the project version changes, with the files holding them;
+  * `unrecognizedAddedFiles` and `warnings`.
 
 # How the manipulators apply the alignment
 
@@ -42,10 +66,10 @@ The manipulators apply the alignment in two different ways, which is why the rer
 but not PME:
 
 * **PME (Maven) rewrites the `pom.xml` files directly.** The aligned dependency, plugin and property versions are
-  plain edits of the POMs, and so is the project version rewrite: they all land in the build part.
-  PME leaves nothing behind that the build needs: its leftovers are the marker
-  (`target/pom-manip-ext-marker.txt`, which makes a later PME run skip the alignment) and the
-  `target/manipulation.json` report, both in the noise part.
+  plain edits of the POMs, and so is the project version rewrite: they all land in the build part. PME leaves
+  nothing behind that the build needs: its leftovers are the marker (`target/pom-manip-ext-marker.txt`, which makes
+  a later PME run skip the alignment), the stamp comment appended to the POMs and the `target/manipulation.json`
+  report, all in the noise part.
 * **GME (Gradle) and SMEG (sbt) mostly do not rewrite the build files.** GME writes `manipulation.json`, copies
   `gme.gradle` (and `gme-pluginconfigs.gradle`, `gradle/gme-repos.gradle`) and injects `apply from` lines into the
   build files to load them; at build time the GME plugin reads the aligned versions from `manipulation.json`. SMEG
