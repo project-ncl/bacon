@@ -23,7 +23,6 @@ import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.METADATA;
 import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.REPOSITORIES;
 import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.RERUN_BLOCKER;
 import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.RERUN_STATE;
-import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -329,7 +328,7 @@ class AlignmentDiffTest {
     }
 
     @Test
-    void shouldRouteProjectVersionRewritesToVersionUsingTheAlignmentReport() {
+    void shouldKeepProjectVersionRewritesInBuildUsingTheAlignmentReport() {
         String aligned = "1.0.0.M10-rhlw-00000-n-00012";
         String rootVersion = lines(
                 "@@ -25,3 +25,3 @@",
@@ -356,22 +355,57 @@ class AlignmentDiffTest {
                 .split(POM_HEADER + rootVersion + moduleReference + dependencyOverride + report);
 
         assertEquals(java.util.Set.of(aligned), diff.alignedVersions());
-        assertEquals(POM_HEADER + rootVersion + moduleReference, diff.part(VERSION));
-        // A dependency override is alignment, not the project version.
-        assertEquals(POM_HEADER + dependencyOverride, diff.part(BUILD));
+        // The project version rewrites are part of the alignment, recognized by their rule only.
+        assertEquals(POM_HEADER + rootVersion + moduleReference + dependencyOverride, diff.part(BUILD));
+        assertEquals(
+                List.of(
+                        AlignmentDiff.RULE_ALIGNED_VERSION,
+                        AlignmentDiff.RULE_ALIGNED_VERSION,
+                        AlignmentDiff.RULE_ALIGNMENT),
+                diff.files().get(0).changes().stream().map(AlignmentDiff.Change::rule).collect(Collectors.toList()));
         assertEquals(report, diff.part(METADATA));
+        assertEquals(
+                List.of(new AlignmentDiff.ProjectVersion("1.0M10", aligned, List.of("core/pom.xml"))),
+                diff.projectVersions());
+    }
+
+    @Test
+    void shouldKeepPropertiesHoldingTheProjectVersionWithTheirVersionRewrites() {
+        // A property referencing the sibling modules is aligned with the other properties: applying the build part
+        // alone must build the modules with the version they reference.
+        String aligned = "7.123.1.redhat-00003";
+        String parentVersion = lines(
+                "@@ -17,3 +17,3 @@",
+                "     <parent>",
+                "-        <version>7.123.1-SNAPSHOT</version>",
+                "+        <version>" + aligned + "</version>",
+                "     </parent>");
+        String properties = lines(
+                "@@ -120,4 +120,4 @@",
+                "-        <io.vertx.version>4.5.30</io.vertx.version>",
+                "-        <che.version>7.123.1-SNAPSHOT</che.version>",
+                "+        <io.vertx.version>4.5.30.redhat-00001</io.vertx.version>",
+                "+        <che.version>" + aligned + "</che.version>");
+
+        AlignmentDiff diff = AlignmentDiff.split(POM_HEADER + parentVersion + properties, List.of(aligned));
+
+        assertEquals(List.of(BUILD), presentCategories(diff));
+        assertEquals(POM_HEADER + parentVersion + properties, diff.part(BUILD));
+        assertEquals(
+                List.of(new AlignmentDiff.ProjectVersion("7.123.1-SNAPSHOT", aligned, List.of("core/pom.xml"))),
+                diff.projectVersions());
     }
 
     @Test
     void shouldUseKnownAlignedVersionsWithPncSuffixOnly() {
         assertEquals(
-                List.of(VERSION),
-                presentCategories(AlignmentDiff.split(POM_HEADER + VERSION_HUNK, List.of("1.4.0.redhat-00002"))));
+                1,
+                AlignmentDiff.split(POM_HEADER + VERSION_HUNK, List.of("1.4.0.redhat-00002")).projectVersions().size());
         // Without a report or a known version the rewrite is not recognized.
-        assertEquals(List.of(BUILD), presentCategories(AlignmentDiff.split(POM_HEADER + VERSION_HUNK)));
+        assertEquals(List.of(), AlignmentDiff.split(POM_HEADER + VERSION_HUNK).projectVersions());
 
         String unsuffixed = lines("@@ -30,1 +30,1 @@", "-  <version>1.4.0</version>", "+  <version>1.4.1</version>");
-        assertEquals(List.of(BUILD), presentCategories(AlignmentDiff.split(POM_HEADER + unsuffixed, List.of("1.4.1"))));
+        assertEquals(List.of(), AlignmentDiff.split(POM_HEADER + unsuffixed, List.of("1.4.1")).projectVersions());
     }
 
     @Test
