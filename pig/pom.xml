@@ -212,7 +212,7 @@
     <profile>
       <id>remote-test</id>
       <properties>
-        <excludeTestTags />
+        <excludeTestTags/>
       </properties>
     </profile>
   </profiles>
