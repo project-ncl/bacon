@@ -109,7 +109,7 @@
     <pnc-api.version>4.0.0</pnc-api.version>
     <pnc-common.version>4.0.0</pnc-common.version>
     <pnc.version>4.0.0</pnc.version>
-    <quarkus.resolver.version>3.40.1</quarkus.resolver.version>
+    <quarkus.resolver.version>3.40.1.1</quarkus.resolver.version>
     <quarkus.version>3.40.1.1</quarkus.version>
     <qute.version>${quarkus.version}</qute.version>
     <tagSuffix/>
