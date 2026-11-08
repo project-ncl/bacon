@@ -33,6 +33,7 @@ public class ConfigProfile {
     private String ldapUsernamePassword;
     private AutobuildConfig autobuild;
     private String githubToken;
+    private String gitlabToken;
     private RexConfig rex;
     private ReqourConfig reqour;
     private boolean enableExperimental;
