@@ -218,6 +218,33 @@ class GitlabSourcesTest {
     }
 
     @Test
+    void leftOutFiles_areReadWithoutTokenWhenTheTokenIsRejected() throws IOException {
+        // like gitlab.cee with a CI job token of another project: compare answers, raw files are refused (401)
+        GitlabSources gitlab = gitlab(exchange -> {
+            String path = exchange.getRequestURI().getRawPath();
+            boolean withToken = exchange.getRequestHeaders().containsKey("JOB-TOKEN");
+            if (path.endsWith("/repository/compare")) {
+                send(
+                        exchange,
+                        200,
+                        "{\"diffs\":[{\"old_path\":\"lib/a.jar\",\"new_path\":\"lib/a.jar\",\"a_mode\":\"0\","
+                                + "\"b_mode\":\"100644\",\"new_file\":true,"
+                                + "\"diff\":\"Binary files /dev/null and b/lib/a.jar differ\\n\"}]}");
+            } else if (path.contains("/repository/files/") && !withToken) {
+                send(exchange, 200, "\u0000jar");
+            } else {
+                send(exchange, 401, "{\"message\":\"401 Unauthorized\"}");
+            }
+        });
+        GitlabSources.Credential jobToken = GitlabSources.credentials(null, "other-project-job-token").get(0);
+
+        GitlabSources.UnifiedDiff diff = gitlab.compare(BASE, HEAD, jobToken);
+
+        assertThat(diff.incompleteFiles).isEmpty();
+        assertThat(diff.content).contains("GIT binary patch");
+    }
+
+    @Test
     void error_hasStatus() throws IOException {
         GitlabSources gitlab = gitlab(exchange -> send(exchange, 401, "{\"message\":\"401 Unauthorized\"}"));
 

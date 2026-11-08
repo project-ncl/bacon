@@ -61,6 +61,8 @@ final class GitlabSources {
         }
     }
 
+    static final Credential NO_TOKEN = new Credential(null, null, "no token");
+
     /** HTTP error from GitLab. */
     static final class GitlabApiException extends RuntimeException {
         final int status;
@@ -116,7 +118,7 @@ final class GitlabSources {
             credentials.add(new Credential("JOB-TOKEN", ciJobToken, "JOB-TOKEN"));
         }
         // internal/public projects can be read without a token
-        credentials.add(new Credential(null, null, "no token"));
+        credentials.add(NO_TOKEN);
         return credentials;
     }
 
@@ -292,11 +294,25 @@ final class GitlabSources {
         return "160000".equals(mode);
     }
 
+    /**
+     * Reads files with the credential the diff was obtained with, and without a token when that fails: GitLab answers
+     * some endpoints (e.g. compare) for a token it rejects on others (e.g. raw files), as happens with the CI job token
+     * of a project that is not allowed to access this one, while the project itself can be read without a token.
+     */
     private ContentFetcher contentFetcher(Credential credential) {
         return (path, ref) -> {
             URI uri = URI.create(projectUrl() + "/repository/files/" + encode(path) + "/raw?ref=" + encode(ref));
             try {
                 return getBytes(uri, credential);
+            } catch (RuntimeException e) {
+                if (credential.header == null) {
+                    log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
+                    return null;
+                }
+                log.debug("Cannot read {} at {} with {}, trying without a token: {}", path, ref, credential.name, e);
+            }
+            try {
+                return getBytes(uri, NO_TOKEN);
             } catch (RuntimeException e) {
                 log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
                 return null;
