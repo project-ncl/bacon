@@ -19,7 +19,6 @@ package org.jboss.pnc.bacon.pnc;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -80,28 +79,34 @@ public class BuildSourcesDownloader {
     private static final int HTTP_PERMANENT_REDIRECT = 308;
 
     public Path downloadSources(Build build, Path targetFile) {
+        return downloadSources(build.getId(), selectScmUrl(build), selectScmRevisions(build), targetFile);
+    }
+
+    /**
+     * Downloads the tar.gz archive of the sources of a build from its SCM repository, on GitHub or GitLab (see
+     * {@link ScmCredentials}).
+     *
+     * @param buildId the build, for messages
+     * @param scmUrl the repository the build was built from
+     * @param scmRevisions the revisions to try, most precise first
+     * @param targetFile where to write the archive
+     * @return {@code targetFile}
+     */
+    public Path downloadSources(String buildId, String scmUrl, List<String> scmRevisions, Path targetFile) {
         try {
-            String githubToken = getGithubTokenFromActiveProfile();
-            if (githubToken == null || githubToken.isBlank()) {
-                throw new RuntimeException(
-                        "Failed to download sources for build " + build.getId()
-                                + ". Please specify a valid 'githubToken' in your Bacon config.yaml active profile.");
-            }
-
-            String scmUrl = selectScmUrl(build);
-            List<String> scmRevisions = selectScmRevisions(build);
-
             if (scmUrl == null || scmUrl.isBlank()) {
-                throw new RuntimeException("Build " + build.getId() + " has no SCM URL.");
+                throw new RuntimeException("Build " + buildId + " has no SCM URL.");
             }
-            if (scmRevisions.isEmpty()) {
-                throw new RuntimeException("Build " + build.getId() + " has no SCM revision.");
+            if (scmRevisions == null || scmRevisions.isEmpty()) {
+                throw new RuntimeException("Build " + buildId + " has no SCM revision.");
             }
+
+            List<GitlabSources.Credential> credentials = credentialsFor(normalizeGithubRepository(scmUrl));
 
             List<SourceArchiveCandidate> candidates = sourceArchiveCandidates(scmUrl, scmRevisions);
             if (candidates.isEmpty()) {
                 throw new RuntimeException(
-                        "Could not derive any source archive URL for build " + build.getId()
+                        "Could not derive any source archive URL for build " + buildId
                                 + " from SCM URL: " + scmUrl);
             }
 
@@ -114,27 +119,25 @@ public class BuildSourcesDownloader {
 
             try {
                 for (SourceArchiveCandidate candidate : candidates) {
-                    for (String authorizationHeader : authorizationHeaders(githubToken)) {
+                    for (GitlabSources.Credential credential : credentials) {
                         try {
                             log.debug(
                                     "Downloading sources for build {} from {} to {}",
-                                    build.getId(),
+                                    buildId,
                                     candidate.uri,
                                     targetFile);
 
-                            downloadWithRedirects(build, candidate, authorizationHeader, temporaryFile);
+                            downloadWithRedirects(buildId, candidate, credential, temporaryFile);
                             assertGzipArchive(temporaryFile, candidate.uri);
 
                             Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
                             return targetFile;
                         } catch (RuntimeException e) {
                             Files.deleteIfExists(temporaryFile);
-                            failures.add(
-                                    candidate.uri + " using " + authSchemeName(authorizationHeader) + ": "
-                                            + e.getMessage());
+                            failures.add(candidate.uri + " using " + credential.name + ": " + e.getMessage());
                             log.debug(
                                     "Source archive candidate failed for build {}: {}",
-                                    build.getId(),
+                                    buildId,
                                     failures.get(failures.size() - 1));
                         }
                     }
@@ -144,10 +147,10 @@ public class BuildSourcesDownloader {
             }
 
             throw new RuntimeException(
-                    "Failed to download sources for build " + build.getId() + ". Tried candidates:\n - "
-                            + String.join("\n - ", failures));
+                    "Failed to download sources for build " + buildId + ". Tried candidates:\n - "
+                            + String.join("\n - ", failures) + tokenHintIfMissing(scmUrl));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to download sources for build " + build.getId(), e);
+            throw new RuntimeException("Failed to download sources for build " + buildId, e);
         }
     }
 
@@ -173,13 +176,6 @@ public class BuildSourcesDownloader {
      * @return the files written: one file per category present in the diff, and the manifest when requested
      */
     public List<Path> downloadAlignmentDiff(Build build, Path diffFile, boolean manifest) {
-        String githubToken = getGithubTokenFromActiveProfile();
-        if (githubToken == null || githubToken.isBlank()) {
-            throw new RuntimeException(
-                    "Failed to download alignment diff for build " + build.getId()
-                            + ". Please specify a valid 'githubToken' in your Bacon config.yaml active profile.");
-        }
-
         String internalUrl = selectInternalScmUrl(build);
         if (internalUrl == null || internalUrl.isBlank()) {
             throw new RuntimeException(
@@ -190,6 +186,17 @@ public class BuildSourcesDownloader {
         if (repository == null) {
             throw new RuntimeException(
                     "Could not parse the internal SCM URL for build " + build.getId() + ": " + internalUrl);
+        }
+
+        if (repository.gitlab) {
+            return downloadGitlabAlignmentDiff(build, repository, internalUrl, diffFile, manifest);
+        }
+
+        String githubToken = getGithubTokenFromActiveProfile();
+        if (githubToken == null || githubToken.isBlank()) {
+            throw new RuntimeException(
+                    "Failed to download alignment diff for build " + build.getId()
+                            + ". Please specify a valid 'githubToken' in your Bacon config.yaml active profile.");
         }
 
         List<String> bases = preAlignmentRevisions(build);
@@ -297,6 +304,124 @@ public class BuildSourcesDownloader {
         return writeAlignmentDiff(build, diffFile, rawDiff, manifest);
     }
 
+    /**
+     * Alignment diff from an internal GitLab repository. Like the GitHub path, it is the diff from the pre-alignment
+     * revision to the post-alignment one when the former is an ancestor of the latter, else the diff of the
+     * post-alignment commit against its parent. GitLab returns per-file JSON diffs, which are rebuilt into a unified
+     * diff; files without text diff (binary, or too large for GitLab) are listed in a warning.
+     */
+    private List<Path> downloadGitlabAlignmentDiff(
+            Build build,
+            NormalizedGithubRepository repository,
+            String internalUrl,
+            Path diffFile,
+            boolean manifest) {
+        List<GitlabSources.Credential> credentials = credentialsFor(repository);
+        List<String> bases = preAlignmentRevisions(build);
+        List<String> heads = postAlignmentRevisions(build);
+        if (heads.isEmpty()) {
+            throw new RuntimeException(
+                    "Build " + build.getId()
+                            + " has no post-alignment SCM revision/tag; cannot compute the alignment diff.");
+        }
+
+        GitlabSources gitlab = gitlabSources(repository);
+        List<String> failures = new ArrayList<>();
+        for (GitlabSources.Credential credential : credentials) {
+            for (String head : heads) {
+                for (String base : bases) {
+                    try {
+                        if (gitlab.isAncestor(base, head, credential)) {
+                            log.debug("Alignment diff of build {} from GitLab: {}..{}", build.getId(), base, head);
+                            return writeGitlabDiff(build, diffFile, gitlab.compare(base, head, credential), manifest);
+                        }
+                        failures.add(base + " is not an ancestor of " + head);
+                    } catch (RuntimeException e) {
+                        failures.add(base + ".." + head + " using " + credential.name + ": " + e.getMessage());
+                    }
+                }
+                try {
+                    GitlabSources.UnifiedDiff diff = gitlab.commitDiff(head, credential);
+                    log.warn(
+                            "No pre-alignment revision {} of build {} is an ancestor of {}; used the post-alignment"
+                                    + " commit diff instead. If alignment produced more than one commit this captures"
+                                    + " only the last one.",
+                            bases,
+                            build.getId(),
+                            head);
+                    return writeGitlabDiff(build, diffFile, diff, manifest);
+                } catch (RuntimeException e) {
+                    failures.add("commit " + head + " using " + credential.name + ": " + e.getMessage());
+                }
+            }
+        }
+        throw new RuntimeException(
+                "Failed to download alignment diff for build " + build.getId() + " from the internal repository "
+                        + internalUrl + ". Tried:\n - " + String.join("\n - ", failures)
+                        + tokenHintIfMissing(internalUrl));
+    }
+
+    private List<Path> writeGitlabDiff(
+            Build build,
+            Path diffFile,
+            GitlabSources.UnifiedDiff diff,
+            boolean manifest) {
+        if (!diff.incompleteFiles.isEmpty()) {
+            log.warn(
+                    "GitLab did not return the content changes of {} file(s) (binary, or too large); they are in the"
+                            + " diff as 'Binary files ... differ' only and cannot be applied from it: {}",
+                    diff.incompleteFiles.size(),
+                    diff.incompleteFiles);
+        }
+        return writeAlignmentDiff(build, diffFile, diff.content, manifest);
+    }
+
+    private static GitlabSources gitlabSources(NormalizedGithubRepository repository) {
+        return new GitlabSources(
+                repository.webBaseUrl,
+                repository.path,
+                HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build());
+    }
+
+    /**
+     * The credentials for the repository's git provider: the {@code githubToken} for GitHub; for GitLab the
+     * {@code gitlabToken} (or the {@code GITLAB_TOKEN} environment variable), then the GitLab CI job token
+     * ({@code CI_JOB_TOKEN}) when running in GitLab CI.
+     */
+    private static List<GitlabSources.Credential> credentialsFor(NormalizedGithubRepository repository) {
+        if (repository != null && repository.gitlab) {
+            return GitlabSources.credentials(ScmCredentials.gitlabToken(), System.getenv("CI_JOB_TOKEN"));
+        }
+        List<GitlabSources.Credential> credentials = new ArrayList<>();
+        String githubToken = getGithubTokenFromActiveProfile();
+        if (githubToken != null && !githubToken.isBlank()) {
+            for (String authorizationHeader : authorizationHeaders(githubToken)) {
+                credentials.add(
+                        new GitlabSources.Credential(
+                                "Authorization",
+                                authorizationHeader,
+                                authSchemeName(authorizationHeader)));
+            }
+        }
+        // public repositories can be read without a token
+        credentials.add(new GitlabSources.Credential(null, null, "no token"));
+        return credentials;
+    }
+
+    /** A hint to configure the token of the repository's git provider, when none is configured. */
+    private static String tokenHintIfMissing(String scmUrl) {
+        if (ScmCredentials.isGitlab(scmUrl)) {
+            return ScmCredentials.gitlabToken() == null
+                    ? "\nIf the repository is not readable without a token, specify a valid 'gitlabToken' (read_api "
+                            + "scope) in your Bacon config.yaml active profile, or set the GITLAB_TOKEN environment "
+                            + "variable."
+                    : "";
+        }
+        return ScmCredentials.githubToken() == null
+                ? "\nPlease specify a valid 'githubToken' in your Bacon config.yaml active profile."
+                : "";
+    }
+
     private int probeStatus(URI uri, String authorizationHeader) {
         try {
             HttpClient httpClient = HttpClient.newBuilder()
@@ -322,7 +447,7 @@ public class BuildSourcesDownloader {
 
     private List<Path> writeAlignmentDiff(Build build, Path diffFile, String rawDiff, boolean manifest) {
         AlignmentDiff diff = AlignmentDiff.split(
-                LogSanitizer.maskKnownSecrets(rawDiff),
+                maskSecrets(rawDiff),
                 alignedVersionsFromTag(build.getScmTag()),
                 build.getAttributes() != null ? build.getAttributes().get(BREW_BUILD_NAME) : null);
         try {
@@ -330,6 +455,15 @@ public class BuildSourcesDownloader {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write alignment diff for build " + build.getId(), e);
         }
+    }
+
+    /**
+     * Masks leaked credentials ({@link LogSanitizer}) in the metadata files of the diff only (reports and backups the
+     * manipulators write); sources and build files are kept byte-exact so that the diff reproduces the aligned sources.
+     * See {@link AlignmentDiff#maskSecretsInMetadata}.
+     */
+    static String maskSecrets(String diff) {
+        return AlignmentDiff.maskSecretsInMetadata(diff, LogSanitizer::maskKnownSecrets);
     }
 
     /**
@@ -547,9 +681,9 @@ public class BuildSourcesDownloader {
     }
 
     private void downloadWithRedirects(
-            Build build,
+            String buildId,
             SourceArchiveCandidate candidate,
-            String authorizationHeader,
+            GitlabSources.Credential credential,
             Path targetFile) {
         try {
             HttpClient httpClient = HttpClient.newBuilder()
@@ -566,7 +700,7 @@ public class BuildSourcesDownloader {
                 HttpRequest request = newSourceArchiveRequest(
                         currentUri,
                         acceptHeader,
-                        authorizationHeader,
+                        credential,
                         shouldSendAuthorization(originalUri, currentUri));
 
                 HttpResponse<InputStream> response = httpClient
@@ -587,7 +721,7 @@ public class BuildSourcesDownloader {
 
                     log.debug(
                             "Following source archive redirect for build {}: {} -> {}",
-                            build.getId(),
+                            buildId,
                             previousUri,
                             currentUri);
                     continue;
@@ -619,7 +753,7 @@ public class BuildSourcesDownloader {
     private HttpRequest newSourceArchiveRequest(
             URI uri,
             String acceptHeader,
-            String authorizationHeader,
+            GitlabSources.Credential credential,
             boolean sendAuthorization) {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(uri)
@@ -627,8 +761,8 @@ public class BuildSourcesDownloader {
                 .header("User-Agent", "bacon")
                 .GET();
 
-        if (sendAuthorization) {
-            builder.header("Authorization", authorizationHeader);
+        if (sendAuthorization && credential.header != null) {
+            builder.header(credential.header, credential.value);
         }
 
         return builder.build();
@@ -650,6 +784,18 @@ public class BuildSourcesDownloader {
         }
 
         Set<SourceArchiveCandidate> candidates = new LinkedHashSet<>();
+
+        if (repository.gitlab) {
+            // GitLab API v4; 'sha' accepts a commit, branch or tag, and the API (unlike the web archive route) accepts
+            // the token
+            GitlabSources gitlab = gitlabSources(repository);
+            for (String scmRevision : scmRevisions) {
+                if (scmRevision != null && !scmRevision.isBlank()) {
+                    candidates.add(new SourceArchiveCandidate(gitlab.archiveUri(scmRevision.trim()), ACCEPT_ARCHIVE));
+                }
+            }
+            return List.copyOf(candidates);
+        }
 
         // Prefer the authenticated REST endpoint. Browser archive URLs on GitHub Enterprise commonly redirect to
         // SAML/login pages and return HTML or 406 instead of an archive.
@@ -801,7 +947,7 @@ public class BuildSourcesDownloader {
             return null;
         }
 
-        return new NormalizedGithubRepository(host, "https://" + host, parts[0], parts[1]);
+        return new NormalizedGithubRepository(host, "https://" + host, parts[0], parts[1], path);
     }
 
     private static String selectScmUrl(Build build) {
@@ -963,21 +1109,7 @@ public class BuildSourcesDownloader {
     }
 
     private static String getGithubTokenFromActiveProfile() {
-        try {
-            Class<?> configClass = Class.forName("org.jboss.pnc.bacon.config.Config");
-            Method instanceMethod = configClass.getMethod("instance");
-            Object config = instanceMethod.invoke(null);
-
-            Method getActiveProfileMethod = config.getClass().getMethod("getActiveProfile");
-            Object activeProfile = getActiveProfileMethod.invoke(config);
-
-            Method getGithubTokenMethod = activeProfile.getClass().getMethod("getGithubToken");
-            Object githubToken = getGithubTokenMethod.invoke(activeProfile);
-
-            return githubToken == null ? null : githubToken.toString();
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Unable to read githubToken from active Bacon profile.", e);
-        }
+        return ScmCredentials.githubToken();
     }
 
     static final class SourceArchiveCandidate {
@@ -1015,12 +1147,26 @@ public class BuildSourcesDownloader {
         private final String webBaseUrl;
         private final String owner;
         private final String repository;
+        /** The whole path of the repository (GitLab projects can be in nested groups). */
+        private final String path;
+        private final boolean gitlab;
 
-        private NormalizedGithubRepository(String host, String webBaseUrl, String owner, String repository) {
+        private NormalizedGithubRepository(
+                String host,
+                String webBaseUrl,
+                String owner,
+                String repository,
+                String path) {
             this.host = host;
             this.webBaseUrl = webBaseUrl;
             this.owner = owner;
             this.repository = repository;
+            this.path = path;
+            this.gitlab = GitlabSources.isGitlabHost(host);
+        }
+
+        boolean isGitlab() {
+            return gitlab;
         }
     }
 }

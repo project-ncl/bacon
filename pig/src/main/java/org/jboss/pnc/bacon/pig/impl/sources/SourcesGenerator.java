@@ -1,16 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
-import static org.jboss.pnc.common.scm.ScmUrlGeneratorProvider.determineScmProvider;
-import static org.jboss.pnc.common.scm.ScmUrlGeneratorProvider.getScmUrlGenerator;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
-import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.MRRCSearcher;
@@ -34,13 +25,12 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pnc.BuildSourcesDownloader;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.common.scm.ScmException;
 import org.jboss.pnc.dto.Artifact;
-import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,45 +175,10 @@ public class SourcesGenerator {
         builds.values().forEach(build -> {
             File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
 
-            try {
-                var provider = determineScmProvider(build.getScmRepository(), build.getInternalScmUrl());
-                URI uri = new URI(
-                        getScmUrlGenerator(provider)
-                                .generateTarballDownloadUrl(build.getScmRepository(), build.getScmRevision()));
-
-                HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(uri)
-                        .header("Authorization", "Bearer " + Config.instance().getActiveProfile().getGithubToken())
-                        // specify that we only want a tar.gz reply, otherwise it returns an html file if there is a
-                        // login failure with http status 200, which makes the http client wrongly believe the download
-                        // was successful
-                        .header("Accept", "application/x-tar, application/gzip")
-                        .GET()
-                        .build();
-                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-
-                if (response.statusCode() == HttpResponseCodes.SC_NOT_ACCEPTABLE) {
-                    // Github throws this error when the Github Token is not specified, or wrong
-                    StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
-                    errorMessage.append("URL: ").append(uri).append("\n");
-                    errorMessage.append("Please specify a valid 'githubToken' in your 'config.yaml'").append("\n");
-                    throw new RuntimeException(errorMessage.toString());
-
-                } else if (response.statusCode() != HttpResponseCodes.SC_OK) {
-                    StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
-                    errorMessage.append("HTTP Status: ").append(response.statusCode()).append("\n");
-                    throw new RuntimeException(errorMessage.toString());
-                }
-                try (InputStream responseStream = response.body()) {
-                    Files.copy(responseStream, targetPath.toPath());
-                }
-
-            } catch (ScmException | URISyntaxException | IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            // works for repositories on GitHub and GitLab, with the token of the provider (see ScmCredentials)
+            String scmUrl = build.getScmRepository() != null ? build.getScmRepository() : build.getInternalScmUrl();
+            new BuildSourcesDownloader()
+                    .downloadSources(build.getId(), scmUrl, List.of(build.getScmRevision()), targetPath.toPath());
 
             Collection<String> untaredFiles = FileUtils.untar(targetPath, contentsDir);
             List<String> topLevelDirectories = untaredFiles.stream()
