@@ -191,6 +191,7 @@ public class SourcesGenerator {
                         getScmUrlGenerator(provider)
                                 .generateTarballDownloadUrl(build.getScmRepository(), build.getScmRevision()));
 
+                log.debug("Downloading sources for build {} from: {}", build.getId(), uri);
                 HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(uri)
@@ -222,6 +223,10 @@ public class SourcesGenerator {
                 }
 
             } catch (ScmException | URISyntaxException | IOException | InterruptedException e) {
+                log.error(
+                        "Failed to download sources for build {} (scmRepository: {})",
+                        build.getId(),
+                        build.getScmRepository());
                 throw new RuntimeException(e);
             }
 
