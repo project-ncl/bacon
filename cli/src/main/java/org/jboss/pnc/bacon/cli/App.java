@@ -35,6 +35,7 @@ import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
 import org.jboss.pnc.common.log.MDCUtils;
 import org.jboss.pnc.otel.OTelCLIHelper;
+import org.jline.builtins.ConfigurationPath;
 import org.jline.console.SystemRegistry;
 import org.jline.console.impl.Builtins;
 import org.jline.console.impl.SystemRegistryImpl;
@@ -155,7 +156,9 @@ public class App {
             // https://github.com/remkop/picocli/tree/master/picocli-shell-jline3
             AnsiConsole.systemInstall();
             // set up JLine built-in commands
-            Builtins builtins = new Builtins(App::workDir, null, null);
+            // JLine >= 3.30 requires a non-null ConfigurationPath here (it is Objects.requireNonNull'd
+            // in the Builtins constructor); passing null causes an NPE before the shell starts.
+            Builtins builtins = new Builtins(App::workDir, new ConfigurationPath((Path) null, null), null);
             builtins.rename(Builtins.Command.TTOP, "top");
             builtins.alias("zle", "widget");
             builtins.alias("bindkey", "keymap");
