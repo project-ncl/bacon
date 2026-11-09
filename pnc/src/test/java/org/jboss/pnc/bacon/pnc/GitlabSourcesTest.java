@@ -78,11 +78,9 @@ class GitlabSourcesTest {
 
     @Test
     void credentials() {
-        assertThat(GitlabSources.credentials("t", null)).extracting(c -> c.header + ": " + c.value)
+        assertThat(GitlabSources.credentials("t")).extracting(c -> c.header + ": " + c.value)
                 .containsExactly("PRIVATE-TOKEN: t", "Authorization: Bearer t", "null: null");
-        assertThat(GitlabSources.credentials(null, "job")).extracting(c -> c.header + ": " + c.value)
-                .containsExactly("JOB-TOKEN: job", "null: null");
-        assertThat(GitlabSources.credentials(" ", null)).extracting(c -> c.name).containsExactly("no token");
+        assertThat(GitlabSources.credentials(" ")).extracting(c -> c.name).containsExactly("no token");
     }
 
     @Test
@@ -164,7 +162,7 @@ class GitlabSourcesTest {
                 send(exchange, 404, "{}");
             }
         });
-        GitlabSources.Credential credential = GitlabSources.credentials("secret", null).get(0);
+        GitlabSources.Credential credential = GitlabSources.credentials("secret").get(0);
 
         assertThat(gitlab.isAncestor(BASE, HEAD, credential)).isTrue();
         assertThat(gitlab.compare(BASE, HEAD, credential).content).contains("+b");
@@ -181,7 +179,7 @@ class GitlabSourcesTest {
     void isAncestor_falseForOtherMergeBase() throws IOException {
         GitlabSources gitlab = gitlab(exchange -> send(exchange, 200, "{\"id\":\"" + HEAD + "\"}"));
 
-        assertThat(gitlab.isAncestor(BASE, HEAD, GitlabSources.credentials("t", null).get(0))).isFalse();
+        assertThat(gitlab.isAncestor(BASE, HEAD, GitlabSources.credentials("t").get(0))).isFalse();
     }
 
     @Test
@@ -211,7 +209,7 @@ class GitlabSourcesTest {
                                     + "\"b_mode\":\"100644\",\"diff\":\"@@ -1 +1 @@\\n-a\\n+b\\n\"}]");
         });
 
-        GitlabSources.UnifiedDiff diff = gitlab.commitDiff(HEAD, GitlabSources.credentials("t", null).get(0));
+        GitlabSources.UnifiedDiff diff = gitlab.commitDiff(HEAD, GitlabSources.credentials("t").get(0));
 
         assertThat(diff.content).contains("diff --git a/f0 b/f0").contains("diff --git a/f99 b/f99").contains("a/last");
         assertThat(requests).hasSize(3);
@@ -219,10 +217,10 @@ class GitlabSourcesTest {
 
     @Test
     void leftOutFiles_areReadWithoutTokenWhenTheTokenIsRejected() throws IOException {
-        // like gitlab.cee with a CI job token of another project: compare answers, raw files are refused (401)
+        // like gitlab.cee with a token of another project: compare answers, raw files are refused (401)
         GitlabSources gitlab = gitlab(exchange -> {
             String path = exchange.getRequestURI().getRawPath();
-            boolean withToken = exchange.getRequestHeaders().containsKey("JOB-TOKEN");
+            boolean withToken = exchange.getRequestHeaders().containsKey("PRIVATE-TOKEN");
             if (path.endsWith("/repository/compare")) {
                 send(
                         exchange,
@@ -236,9 +234,9 @@ class GitlabSourcesTest {
                 send(exchange, 401, "{\"message\":\"401 Unauthorized\"}");
             }
         });
-        GitlabSources.Credential jobToken = GitlabSources.credentials(null, "other-project-job-token").get(0);
+        GitlabSources.Credential token = GitlabSources.credentials("other-project-token").get(0);
 
-        GitlabSources.UnifiedDiff diff = gitlab.compare(BASE, HEAD, jobToken);
+        GitlabSources.UnifiedDiff diff = gitlab.compare(BASE, HEAD, token);
 
         assertThat(diff.incompleteFiles).isEmpty();
         assertThat(diff.content).contains("GIT binary patch");
@@ -248,7 +246,7 @@ class GitlabSourcesTest {
     void error_hasStatus() throws IOException {
         GitlabSources gitlab = gitlab(exchange -> send(exchange, 401, "{\"message\":\"401 Unauthorized\"}"));
 
-        assertThatThrownBy(() -> gitlab.compare(BASE, HEAD, GitlabSources.credentials("bad", null).get(0)))
+        assertThatThrownBy(() -> gitlab.compare(BASE, HEAD, GitlabSources.credentials("bad").get(0)))
                 .isInstanceOfSatisfying(
                         GitlabSources.GitlabApiException.class,
                         e -> assertThat(e.status).isEqualTo(401))

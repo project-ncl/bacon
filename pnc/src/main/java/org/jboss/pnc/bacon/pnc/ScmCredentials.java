@@ -26,9 +26,8 @@ import lombok.extern.slf4j.Slf4j;
  * credentials from the active Bacon profile, so that the same code works whether a repository is on GitHub or GitLab:
  * <ul>
  * <li>GitHub: the {@code githubToken} profile setting,</li>
- * <li>GitLab: the {@code gitlabToken} profile setting, else the {@code GITLAB_TOKEN} environment variable, else the
- * GitLab CI job token ({@code CI_JOB_TOKEN}) when running in GitLab CI; internal/public projects also work without a
- * token.</li>
+ * <li>GitLab: the {@code gitlabToken} profile setting, else the {@code GITLAB_TOKEN} environment variable;
+ * internal/public projects also work without a token.</li>
  * </ul>
  */
 @Slf4j
@@ -53,12 +52,7 @@ public final class ScmCredentials {
      */
     public static Optional<UsernamePassword> forGitClone(String scmUrl) {
         if (isGitlab(scmUrl)) {
-            String token = gitlabToken();
-            if (token != null) {
-                return Optional.of(new UsernamePassword("oauth2", token));
-            }
-            String jobToken = blankToNull(System.getenv("CI_JOB_TOKEN"));
-            return Optional.ofNullable(jobToken).map(t -> new UsernamePassword("gitlab-ci-token", t));
+            return Optional.ofNullable(gitlabToken()).map(t -> new UsernamePassword("oauth2", t));
         }
         return Optional.ofNullable(githubToken()).map(t -> new UsernamePassword("x-access-token", t));
     }

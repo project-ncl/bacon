@@ -45,9 +45,8 @@ final class GitlabSources {
     private static final int PER_PAGE = 100;
 
     /**
-     * A token sent in one header (GitLab accepts PRIVATE-TOKEN, Authorization: Bearer and JOB-TOKEN), or no token at
-     * all
-     * when {@link #header} is null.
+     * A token sent in one header (GitLab accepts PRIVATE-TOKEN and Authorization: Bearer), or no token at all when
+     * {@link #header} is null.
      */
     static final class Credential {
         final String header;
@@ -108,14 +107,11 @@ final class GitlabSources {
     }
 
     /** The credentials to try for a token, most common first. */
-    static List<Credential> credentials(String token, String ciJobToken) {
+    static List<Credential> credentials(String token) {
         List<Credential> credentials = new ArrayList<>();
         if (token != null && !token.isBlank()) {
             credentials.add(new Credential("PRIVATE-TOKEN", token, "PRIVATE-TOKEN"));
             credentials.add(new Credential("Authorization", "Bearer " + token, "Bearer"));
-        }
-        if (ciJobToken != null && !ciJobToken.isBlank()) {
-            credentials.add(new Credential("JOB-TOKEN", ciJobToken, "JOB-TOKEN"));
         }
         // internal/public projects can be read without a token
         credentials.add(NO_TOKEN);
@@ -296,8 +292,8 @@ final class GitlabSources {
 
     /**
      * Reads files with the credential the diff was obtained with, and without a token when that fails: GitLab answers
-     * some endpoints (e.g. compare) for a token it rejects on others (e.g. raw files), as happens with the CI job token
-     * of a project that is not allowed to access this one, while the project itself can be read without a token.
+     * some endpoints (e.g. compare) for a token it rejects on others (e.g. raw files), as happens with a token that is
+     * not allowed to access this project, while the project itself can be read without a token.
      */
     private ContentFetcher contentFetcher(Credential credential) {
         return (path, ref) -> {

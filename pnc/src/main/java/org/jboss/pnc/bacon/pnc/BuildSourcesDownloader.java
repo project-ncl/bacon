@@ -385,12 +385,11 @@ public class BuildSourcesDownloader {
 
     /**
      * The credentials for the repository's git provider: the {@code githubToken} for GitHub; for GitLab the
-     * {@code gitlabToken} (or the {@code GITLAB_TOKEN} environment variable), then the GitLab CI job token
-     * ({@code CI_JOB_TOKEN}) when running in GitLab CI.
+     * {@code gitlabToken} (or the {@code GITLAB_TOKEN} environment variable).
      */
     private static List<GitlabSources.Credential> credentialsFor(NormalizedGithubRepository repository) {
         if (repository != null && repository.gitlab) {
-            return GitlabSources.credentials(ScmCredentials.gitlabToken(), System.getenv("CI_JOB_TOKEN"));
+            return GitlabSources.credentials(ScmCredentials.gitlabToken());
         }
         List<GitlabSources.Credential> credentials = new ArrayList<>();
         String githubToken = getGithubTokenFromActiveProfile();
