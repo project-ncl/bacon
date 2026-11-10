@@ -53,6 +53,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.ResourceUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -87,6 +88,9 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
 
     private Path workDir;
     private File testMavenSettings;
+    private MockedStatic<PigContext> pigContextMockedStatic;
+    private MockedStatic<RepositoryProvider> repoMockedStatic;
+    private MockedStatic<ResourceUtils> resourceUtilsMockedStatic;
 
     @BeforeEach
     void beforeEach() throws Exception {
@@ -102,6 +106,15 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     void afterEach() {
         if (testMavenSettings != null && testMavenSettings.exists()) {
             testMavenSettings.deleteOnExit();
+        }
+        if (pigContextMockedStatic != null) {
+            pigContextMockedStatic.close();
+        }
+        if (repoMockedStatic != null) {
+            repoMockedStatic.close();
+        }
+        if (resourceUtilsMockedStatic != null) {
+            resourceUtilsMockedStatic.close();
         }
     }
 
@@ -199,6 +212,74 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         assertOutcome();
         // Verify that the provenance file has been generated
         assertProvenanceV1File(provenanceFilePath);
+    }
+
+    @Test
+    void javadocIsIncludedWhenRequested() throws Exception {
+        RepositoryData repoData = generateRepository(true);
+
+        Assumptions.assumeTrue(
+                javadocDownloadIsVerifiableOffline(),
+                "javadoc download goes through RepositoryProvider.getRepoProviderUrl() over real HTTP for this "
+                        + "strategy, which this offline fixture can't back - only the no-exception/gating behaviour "
+                        + "is verified here");
+        // RepoDescriptor.listGavs() deliberately ignores classifier/type, so assert against the actual files instead
+        assertThat(repoData.getFiles())
+                .anyMatch(file -> file.getName().equals("quarkus-core-1.1.1.redhat-00001-javadoc.jar"));
+    }
+
+    /**
+     * BOM resolves javadoc via the Aether resolver against the repos in the test settings.xml, so it works offline.
+     * RESOLVE_ONLY resolves it via a raw HTTP GET against {@code RepositoryProvider.getRepoProviderUrl()}, which has
+     * no real backend in this fixture - override to {@code false} for strategies using that path.
+     */
+    protected boolean javadocDownloadIsVerifiableOffline() {
+        return true;
+    }
+
+    @Test
+    void javadocIsExcludedByDefault() throws Exception {
+        RepositoryData repoData = generateRepository(false);
+
+        assertThat(repoData.getFiles()).noneMatch(file -> file.getName().endsWith("-javadoc.jar"));
+    }
+
+    private RepositoryData generateRepository(boolean includeJavadoc) throws Exception {
+        mockPigContextAndMethods();
+        mockRepoSettingsFile();
+
+        buildQuarkusPlatform();
+
+        PigConfiguration pigConfiguration = mockPigConfigurationAndMethods();
+
+        RepoGenerationData generationDataSpy = mockRepoGenerationDataAndMethods(pigConfiguration, includeJavadoc);
+
+        Map<String, PncBuild> buildsSpy = mockBuildsAndMethods(generationDataSpy);
+
+        Path configurationDirectory = Mockito.mock(Path.class);
+
+        mockResourceUtilsMethods(configurationDirectory);
+
+        Deliverables deliverables = mockDeliverables(pigConfiguration);
+
+        BuildInfoCollector buildInfoCollectorMock = Mockito.mock(BuildInfoCollector.class);
+
+        RepoManager repoManager = new RepoManager(
+                pigConfiguration,
+                workDir.toString(),
+                deliverables,
+                buildsSpy,
+                configurationDirectory,
+                false,
+                false,
+                false,
+                buildInfoCollectorMock,
+                false);
+
+        RepoManager repoManagerSpy = Mockito.spy(repoManager);
+        prepareFakeExtensionArtifactList(repoManagerSpy);
+
+        return repoManagerSpy.prepare();
     }
 
     protected void assertCachi2LockFile(String lockFilePath) {
@@ -392,6 +473,8 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
                         "",
                         "properties",
                         "1.1.1.redhat-00001")
+                // javadoc fixture for quarkus-core, only actually fetched when includeJavadoc is requested
+                .installArtifact("io.quarkus", "quarkus-core", "javadoc", "jar", "1.1.1.redhat-00001")
                 .installArtifactWithDependencies("io.quarkus", "quarkus-core", "1.1.1.redhat-00001")
                 // this common-lib productized version is not in the quarkus-bom
                 .addDependency("org.thirdparty", "common-lib", "1.0.0.redhat-00005")
@@ -445,7 +528,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     private void mockPigContextAndMethods() {
         PigContext pigContext = Mockito.mock(PigContext.class);
         doReturn(false).when(pigContext).isTempBuild();
-        MockedStatic<PigContext> pigContextMockedStatic = Mockito.mockStatic(PigContext.class);
+        pigContextMockedStatic = Mockito.mockStatic(PigContext.class);
         pigContextMockedStatic.when(PigContext::get).thenReturn(pigContext);
     }
 
@@ -480,7 +563,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         }
 
         String pathToTestSettingsFile = testMavenSettings.getAbsolutePath();
-        MockedStatic<RepositoryProvider> repoMockedStatic = Mockito.mockStatic(RepositoryProvider.class);
+        repoMockedStatic = Mockito.mockStatic(RepositoryProvider.class);
         repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false))
                 .thenReturn(pathToTestSettingsFile);
         repoMockedStatic.when(() -> RepositoryProvider.getConfiguredRepoSettingsXmlPath(false, true))
@@ -539,7 +622,14 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     protected abstract RepoGenerationStrategy getRepoGenerationStrategy();
 
     private RepoGenerationData mockRepoGenerationDataAndMethods(PigConfiguration pigConfiguration) {
+        return mockRepoGenerationDataAndMethods(pigConfiguration, false);
+    }
+
+    private RepoGenerationData mockRepoGenerationDataAndMethods(
+            PigConfiguration pigConfiguration,
+            boolean includeJavadoc) {
         RepoGenerationData generationData = new RepoGenerationData();
+        generationData.setIncludeJavadoc(includeJavadoc);
         generationData.setParameters(
                 Map.of(
                         "extensionsListUrl",
@@ -593,7 +683,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
     }
 
     private void mockResourceUtilsMethods(Path configurationDirectory) {
-        MockedStatic<ResourceUtils> resourceUtilsMockedStatic = Mockito.mockStatic(ResourceUtils.class);
+        resourceUtilsMockedStatic = Mockito.mockStatic(ResourceUtils.class);
         resourceUtilsMockedStatic.when(
                 () -> ResourceUtils.getOverridableResource("/repository-example-settings.xml", configurationDirectory))
                 .thenReturn("fake-resource-name");

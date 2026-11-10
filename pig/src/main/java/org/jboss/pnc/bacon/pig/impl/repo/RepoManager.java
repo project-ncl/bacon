@@ -377,6 +377,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
         }
 
         RepositoryUtils.addMissingSources(targetRepoContentsDir);
+        if (generationData.isIncludeJavadoc()) {
+            RepositoryUtils.addMissingJavadoc(targetRepoContentsDir);
+        }
         RepositoryUtils.addCheckSums(targetRepoContentsDir);
         if (generationData.isIncludeMavenMetadata()) {
             RepositoryUtils.generateMavenMetadata(targetRepoContentsDir);
@@ -1038,6 +1041,20 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
                 } catch (Exception e) {
                     summary.addMissingSources(
                             ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), "sources", gav.getVersion()));
+                }
+            }
+            if (jarResolved && generationData.isIncludeJavadoc() && !resolved.isFlagSet(ResolvedGav.JAVADOC_RESOLVED)) {
+                try {
+                    resolver.resolve(
+                            new DefaultArtifact(
+                                    gav.getGroupId(),
+                                    gav.getArtifactId(),
+                                    "javadoc",
+                                    ArtifactCoords.TYPE_JAR,
+                                    gav.getVersion()));
+                } catch (Exception e) {
+                    summary.addMissingJavadoc(
+                            ArtifactCoords.jar(gav.getGroupId(), gav.getArtifactId(), "javadoc", gav.getVersion()));
                 }
             }
 

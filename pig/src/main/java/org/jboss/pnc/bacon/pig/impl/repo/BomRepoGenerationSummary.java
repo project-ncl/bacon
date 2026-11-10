@@ -17,6 +17,7 @@ class BomRepoGenerationSummary {
     private static final Logger log = LoggerFactory.getLogger(BomRepoGenerationSummary.class);
 
     private Collection<ArtifactCoords> missingSources = List.of();
+    private Collection<ArtifactCoords> missingJavadoc = List.of();
     private Collection<ResolutionFailure> failedToResolveAdditionalArtifacts = List.of();
     private Collection<ArtifactCoords> jarsAccompanyingOrphanedPoms = List.of();
     private Collection<ResolutionFailure> jarsFailedToResolvedForOrphanedPoms = List.of();
@@ -34,6 +35,13 @@ class BomRepoGenerationSummary {
             missingSources = new ConcurrentLinkedQueue<>();
         }
         missingSources.add(coords);
+    }
+
+    void addMissingJavadoc(ArtifactCoords coords) {
+        if (missingJavadoc.isEmpty()) {
+            missingJavadoc = new ConcurrentLinkedQueue<>();
+        }
+        missingJavadoc.add(coords);
     }
 
     void addFailedToResolveAdditionalArtifact(ArtifactCoords coords, Throwable e) {
@@ -100,6 +108,13 @@ class BomRepoGenerationSummary {
         if (!missingSources.isEmpty()) {
             log.warn("= Sources JARs failed to resolve =");
             for (var a : missingSources) {
+                log.warn(a.toCompactCoords());
+            }
+        }
+
+        if (!missingJavadoc.isEmpty()) {
+            log.warn("= Javadoc JARs failed to resolve =");
+            for (var a : missingJavadoc) {
                 log.warn(a.toCompactCoords());
             }
         }
