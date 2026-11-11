@@ -34,17 +34,17 @@
             </pluginRepositories>
         </profile>
         <profile>
-            <id>indy-repositories</id>
+            <id>pnc-repositories</id>
             <repositories>
                 <repository>
-                    <id>indy</id>
-                    <url>${INDY_URL}</url>
+                    <id>pnc-provider</id>
+                    <url>${REPO_URL}</url>
                 </repository>
             </repositories>
             <pluginRepositories>
                 <pluginRepository>
-                    <id>indy</id>
-                    <url>${INDY_URL}</url>
+                    <id>pnc-provider</id>
+                    <url>${REPO_URL}</url>
                 </pluginRepository>
             </pluginRepositories>
         </profile>
@@ -66,7 +66,7 @@
     </profiles>
     <activeProfiles>
         <activeProfile>local-m2-cache</activeProfile>
-        <activeProfile>indy-repositories</activeProfile>
+        <activeProfile>pnc-repositories</activeProfile>
         <activeProfile>maven-central</activeProfile>
     </activeProfiles>
 </settings>
