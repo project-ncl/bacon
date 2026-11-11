@@ -3,6 +3,7 @@ package org.jboss.pnc.bacon.pnc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
@@ -102,6 +103,27 @@ class BuildCliDownloadOutputCommandsTest {
                     getField(parseResult.subcommand().commandSpec().userObject(), "artifactBaseUrl"),
                     command);
         }
+    }
+
+    @Test
+    void shouldParseLogBaseUrlOnDownloadBuildOutputsOnly() throws Exception {
+        CommandLine.ParseResult defaults = new CommandLine(new BuildCli()).parseArgs("download-build-outputs", "B123");
+        assertNull(getField(defaults.subcommand().commandSpec().userObject(), "logBaseUrl"));
+
+        CommandLine.ParseResult parseResult = new CommandLine(new BuildCli())
+                .parseArgs("download-build-outputs", "B123", "--log-base-url", "https://bifrost.example.com");
+        assertEquals(
+                "https://bifrost.example.com",
+                getField(parseResult.subcommand().commandSpec().userObject(), "logBaseUrl"));
+
+        assertThrows(
+                CommandLine.UnmatchedArgumentException.class,
+                () -> new CommandLine(new BuildCli())
+                        .parseArgs(
+                                "download-built-artifacts",
+                                "B123",
+                                "--log-base-url",
+                                "https://bifrost.example.com"));
     }
 
     private Object getField(Object target, String fieldName) throws Exception {

@@ -465,9 +465,19 @@ public class BuildCli {
                 description = ARTIFACT_BASE_URL_DESCRIPTION)
         private String artifactBaseUrl;
 
+        @Option(
+                names = "--log-base-url",
+                paramLabel = "<url>",
+                description = "Download the build and alignment logs from bifrost at this base URL "
+                        + "(scheme://host[:port]) instead of the profile's bifrostBaseurl for the build log and the "
+                        + "bifrost host PNC redirects to for the alignment log. The profile's credentials are sent "
+                        + "to it, as to bifrost. Example: https://bifrost.example.com")
+        private String logBaseUrl;
+
         @Override
         public Integer call() {
-            Path zipFile = new BuildOutputDownloader(artifactBaseUrl).downloadAllOutput(buildId, redacted, outputDir);
+            Path zipFile = new BuildOutputDownloader(artifactBaseUrl, logBaseUrl)
+                    .downloadAllOutput(buildId, redacted, outputDir);
             log.info("Downloaded all build output to {}", zipFile);
             return 0;
         }

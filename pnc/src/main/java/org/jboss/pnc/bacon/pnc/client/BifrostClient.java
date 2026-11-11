@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -83,6 +84,36 @@ public class BifrostClient {
                 BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             br.lines().forEach(onLine);
         }
+    }
+
+    /**
+     * Writes a final (stored) log of a build, e.g. {@code alignment-log}, from bifrost's
+     * {@code /final-log/<build id>/<log name>} endpoint: the one PNC redirects {@code /builds/<id>/logs/align} to.
+     */
+    public void writeFinalLog(String buildId, String logName, Consumer<String> onLine) throws IOException {
+        URI logUrl = finalLogUri(baseUrl, buildId, logName);
+        log.debug("Reading final log from {}", logUrl);
+
+        HttpUriRequest httpGet = new HttpGet(logUrl);
+        addAuthorization(httpGet);
+        HttpResponse response = client.execute(httpGet);
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200) {
+            throw new IOException("Failed to read " + logUrl + ": HTTP status " + status);
+        }
+
+        try (InputStream is = response.getEntity().getContent();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            br.lines().forEach(onLine);
+        }
+    }
+
+    /** {@code <bifrost>/final-log/<build id>/<log name>}, resolved like the other bifrost endpoints. */
+    static URI finalLogUri(URI baseUrl, String buildId, String logName) {
+        return baseUrl.resolve(
+                URI.create(
+                        "/final-log/" + URLEncoder.encode(buildId, StandardCharsets.UTF_8) + "/"
+                                + URLEncoder.encode(logName, StandardCharsets.UTF_8)));
     }
 
     private void addAuthorization(HttpUriRequest request) {

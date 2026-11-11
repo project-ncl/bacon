@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -80,8 +81,14 @@ public class BuildOutputDownloader {
      */
     private final URI artifactBaseUrl;
 
+    /**
+     * Base URL of bifrost to download the build and alignment logs from, or {@code null} to download the build log from
+     * the profile's {@code bifrostBaseurl} and the alignment log through PNC's redirect.
+     */
+    private final URI logBaseUrl;
+
     public BuildOutputDownloader() {
-        this(new BuildSourcesDownloader(), null);
+        this(new BuildSourcesDownloader(), null, null);
     }
 
     /**
@@ -91,16 +98,27 @@ public class BuildOutputDownloader {
      *        is.
      */
     public BuildOutputDownloader(String artifactBaseUrl) {
-        this(new BuildSourcesDownloader(), parseArtifactBaseUrl(artifactBaseUrl));
+        this(artifactBaseUrl, null);
+    }
+
+    /**
+     * @param artifactBaseUrl see {@link #BuildOutputDownloader(String)}
+     * @param logBaseUrl base URL of bifrost ({@code scheme://host[:port]}) to download the build and alignment logs
+     *        from, instead of the profile's {@code bifrostBaseurl} for the build log and the bifrost host PNC redirects
+     *        to for the alignment log. {@code null} or blank keeps both as they are.
+     */
+    public BuildOutputDownloader(String artifactBaseUrl, String logBaseUrl) {
+        this(new BuildSourcesDownloader(), parseArtifactBaseUrl(artifactBaseUrl), parseLogBaseUrl(logBaseUrl));
     }
 
     BuildOutputDownloader(BuildSourcesDownloader sourcesDownloader) {
-        this(sourcesDownloader, null);
+        this(sourcesDownloader, null, null);
     }
 
-    BuildOutputDownloader(BuildSourcesDownloader sourcesDownloader, URI artifactBaseUrl) {
+    BuildOutputDownloader(BuildSourcesDownloader sourcesDownloader, URI artifactBaseUrl, URI logBaseUrl) {
         this.sourcesDownloader = sourcesDownloader;
         this.artifactBaseUrl = artifactBaseUrl;
+        this.logBaseUrl = logBaseUrl;
     }
 
     public Path downloadBuiltArtifacts(String buildId, Path outputDir) {
@@ -241,6 +259,18 @@ public class BuildOutputDownloader {
      * @return the URL without trailing slashes, or {@code null} when the value is {@code null} or blank
      */
     static URI parseArtifactBaseUrl(String value) {
+        return parseBaseUrl(value, "artifact base URL", true);
+    }
+
+    /**
+     * Parses the {@code --log-base-url} value: like {@link #parseArtifactBaseUrl(String)} but without a path, since
+     * bifrost's endpoints are resolved from the root of its host.
+     */
+    static URI parseLogBaseUrl(String value) {
+        return parseBaseUrl(value, "log base URL", false);
+    }
+
+    private static URI parseBaseUrl(String value, String what, boolean pathAllowed) {
         if (value == null || value.isBlank()) {
             return null;
         }
@@ -248,20 +278,24 @@ public class BuildOutputDownloader {
         try {
             uri = new URI(value.trim());
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid artifact base URL '" + value + "': " + e.getMessage(), e);
+            throw new IllegalArgumentException("Invalid " + what + " '" + value + "': " + e.getMessage(), e);
         }
         String scheme = uri.getScheme();
         if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
                 || uri.getHost() == null) {
             throw new IllegalArgumentException(
-                    "Invalid artifact base URL '" + value + "': expected an absolute http(s) URL such as "
+                    "Invalid " + what + " '" + value + "': expected an absolute http(s) URL such as "
                             + "https://repository.example.com");
         }
         if (uri.getRawUserInfo() != null || uri.getRawQuery() != null || uri.getRawFragment() != null) {
             throw new IllegalArgumentException(
-                    "Invalid artifact base URL '" + value + "': user info, query and fragment are not allowed");
+                    "Invalid " + what + " '" + value + "': user info, query and fragment are not allowed");
         }
         String path = uri.getRawPath() == null ? "" : uri.getRawPath().replaceAll("/+$", "");
+        if (!pathAllowed && !path.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Invalid " + what + " '" + value + "': a path is not allowed, use scheme://host[:port]");
+        }
         return URI.create(scheme + "://" + uri.getRawAuthority() + path);
     }
 
@@ -318,19 +352,11 @@ public class BuildOutputDownloader {
 
     private void downloadBuildLog(String buildId, Path targetFile) {
         createDirectories(targetFile.getParent());
-        String bifrostBase = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
-        URI bifrostUri = URI.create(bifrostBase);
+        URI bifrostUri = logBaseUrl != null ? logBaseUrl
+                : URI.create(Config.instance().getActiveProfile().getPnc().getBifrostBaseurl());
         BifrostClient logProcessor = new BifrostClient(bifrostUri);
         try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
-            Consumer<String> lineWriter = line -> {
-                try {
-                    writer.write(LogSanitizer.maskKnownSecrets(line));
-                    writer.newLine();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            };
-            logProcessor.writeLog(buildId, false, lineWriter, BifrostClient.LogType.BUILD);
+            logProcessor.writeLog(buildId, false, maskingLineWriter(writer), BifrostClient.LogType.BUILD);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write build log for build " + buildId, e);
         }
@@ -338,6 +364,16 @@ public class BuildOutputDownloader {
 
     private void downloadAlignmentLog(String buildId, Path targetFile) {
         createDirectories(targetFile.getParent());
+        if (logBaseUrl != null) {
+            // The same log PNC redirects /builds/<id>/logs/align to, read from bifrost at logBaseUrl.
+            log.info("Downloading the alignment log from {} instead of the bifrost host PNC redirects to", logBaseUrl);
+            try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
+                new BifrostClient(logBaseUrl).writeFinalLog(buildId, "alignment-log", maskingLineWriter(writer));
+            } catch (IOException | RuntimeException e) {
+                throw new RuntimeException("Failed to download alignment log for build " + buildId, e);
+            }
+            return;
+        }
         try (BuildClient buildClient = new BuildClient(pncConfiguration())) {
             Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
             try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
@@ -355,6 +391,18 @@ public class BuildOutputDownloader {
         } catch (Exception e) {
             throw new RuntimeException("Failed to download alignment log for build " + buildId, e);
         }
+    }
+
+    /** Writes each log line with the known secrets masked. */
+    private static Consumer<String> maskingLineWriter(BufferedWriter writer) {
+        return line -> {
+            try {
+                writer.write(LogSanitizer.maskKnownSecrets(line));
+                writer.newLine();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     private static Configuration pncConfiguration() {

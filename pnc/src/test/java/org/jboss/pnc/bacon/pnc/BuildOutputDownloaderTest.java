@@ -77,6 +77,30 @@ class BuildOutputDownloaderTest {
     }
 
     @Test
+    void shouldNotParseALogBaseUrlWhenAbsent() {
+        assertNull(BuildOutputDownloader.parseLogBaseUrl(null));
+        assertNull(BuildOutputDownloader.parseLogBaseUrl(" "));
+    }
+
+    @Test
+    void shouldParseLogBaseUrlWithoutPath() {
+        assertEquals(
+                URI.create("https://bifrost.example.com:8443"),
+                BuildOutputDownloader.parseLogBaseUrl("https://bifrost.example.com:8443/"));
+    }
+
+    @Test
+    void shouldRejectLogBaseUrlWithPathOrInvalidValue() {
+        for (String invalid : List.of(
+                "https://bifrost.example.com/bifrost",
+                "bifrost.example.com",
+                "https://user:secret@bifrost.example.com",
+                "https://bifrost.example.com?x=1")) {
+            assertThrows(IllegalArgumentException.class, () -> BuildOutputDownloader.parseLogBaseUrl(invalid), invalid);
+        }
+    }
+
+    @Test
     void shouldKeepPublicUrlWithoutArtifactBaseUrl() {
         assertSame(PUBLIC_URL, BuildOutputDownloader.rebase(PUBLIC_URL, null));
     }
