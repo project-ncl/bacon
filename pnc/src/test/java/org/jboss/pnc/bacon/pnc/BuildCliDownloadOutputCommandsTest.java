@@ -2,6 +2,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
@@ -79,6 +80,28 @@ class BuildCliDownloadOutputCommandsTest {
         Object command = parseResult.subcommand().commandSpec().userObject();
         assertInstanceOf(BuildCli.DownloadSources.class, command);
         assertEquals("B123", getField(command, "id"));
+    }
+
+    @Test
+    void shouldNotSetArtifactBaseUrlByDefault() throws Exception {
+        for (String command : new String[] { "download-build-outputs", "download-built-artifacts" }) {
+            CommandLine.ParseResult parseResult = new CommandLine(new BuildCli()).parseArgs(command, "B123");
+
+            assertNull(getField(parseResult.subcommand().commandSpec().userObject(), "artifactBaseUrl"), command);
+        }
+    }
+
+    @Test
+    void shouldParseArtifactBaseUrl() throws Exception {
+        for (String command : new String[] { "download-build-outputs", "download-built-artifacts" }) {
+            CommandLine.ParseResult parseResult = new CommandLine(new BuildCli())
+                    .parseArgs(command, "B123", "--artifact-base-url", "https://repo.example.com");
+
+            assertEquals(
+                    "https://repo.example.com",
+                    getField(parseResult.subcommand().commandSpec().userObject(), "artifactBaseUrl"),
+                    command);
+        }
     }
 
     private Object getField(Object target, String fieldName) throws Exception {

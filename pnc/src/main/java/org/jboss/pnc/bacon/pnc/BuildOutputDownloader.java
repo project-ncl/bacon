@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -73,12 +74,33 @@ public class BuildOutputDownloader {
 
     private final BuildSourcesDownloader sourcesDownloader;
 
+    /**
+     * Base URL replacing the scheme and authority of the artifact URLs stored in PNC, or {@code null} to download them
+     * as stored.
+     */
+    private final URI artifactBaseUrl;
+
     public BuildOutputDownloader() {
-        this(new BuildSourcesDownloader());
+        this(new BuildSourcesDownloader(), null);
+    }
+
+    /**
+     * @param artifactBaseUrl base URL to download built artifacts from instead of the scheme and authority of their
+     *        {@code publicUrl} in PNC (for example another route to the same repository manager); the path of the
+     *        {@code publicUrl} is kept. {@code null} or blank downloads the artifacts from their {@code publicUrl} as
+     *        is.
+     */
+    public BuildOutputDownloader(String artifactBaseUrl) {
+        this(new BuildSourcesDownloader(), parseArtifactBaseUrl(artifactBaseUrl));
     }
 
     BuildOutputDownloader(BuildSourcesDownloader sourcesDownloader) {
+        this(sourcesDownloader, null);
+    }
+
+    BuildOutputDownloader(BuildSourcesDownloader sourcesDownloader, URI artifactBaseUrl) {
         this.sourcesDownloader = sourcesDownloader;
+        this.artifactBaseUrl = artifactBaseUrl;
     }
 
     public Path downloadBuiltArtifacts(String buildId, Path outputDir) {
@@ -176,6 +198,9 @@ public class BuildOutputDownloader {
     }
 
     private List<Path> downloadArtifactsToRepository(Collection<Artifact> artifacts, Path repositoryDir) {
+        if (artifactBaseUrl != null && !artifacts.isEmpty()) {
+            log.info("Downloading built artifacts from {} instead of the host stored in PNC", artifactBaseUrl);
+        }
         List<Path> downloaded = new ArrayList<>();
         for (Artifact artifact : artifacts) {
             String publicUrl = stringGetter(artifact, "getPublicUrl");
@@ -187,11 +212,76 @@ public class BuildOutputDownloader {
             Path relativePath = artifactRepositoryPath(artifact);
             Path target = safeResolve(repositoryDir, relativePath);
             createDirectories(target.getParent());
-            downloadUri(URI.create(publicUrl), target);
+            downloadArtifact(URI.create(publicUrl), target);
             writeChecksumSidecars(target, artifact);
             downloaded.add(target);
         }
         return downloaded;
+    }
+
+    /** Downloads an artifact from its PNC {@code publicUrl}, rebased on {@link #artifactBaseUrl} when set. */
+    private void downloadArtifact(URI publicUrl, Path target) {
+        if (artifactBaseUrl == null) {
+            downloadUri(publicUrl, target);
+            return;
+        }
+        URI source = rebase(publicUrl, artifactBaseUrl);
+        log.debug("Downloading {} from {}", publicUrl, source);
+        try {
+            downloadUri(source, target);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e.getMessage() + " (publicUrl in PNC: " + publicUrl + ")", e);
+        }
+    }
+
+    /**
+     * Parses the {@code --artifact-base-url} value: an absolute http(s) URL with a host and optionally a path prefix,
+     * without user info, query or fragment. Credentials come from the Bacon config, not from the URL.
+     *
+     * @return the URL without trailing slashes, or {@code null} when the value is {@code null} or blank
+     */
+    static URI parseArtifactBaseUrl(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        URI uri;
+        try {
+            uri = new URI(value.trim());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid artifact base URL '" + value + "': " + e.getMessage(), e);
+        }
+        String scheme = uri.getScheme();
+        if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
+                || uri.getHost() == null) {
+            throw new IllegalArgumentException(
+                    "Invalid artifact base URL '" + value + "': expected an absolute http(s) URL such as "
+                            + "https://repository.example.com");
+        }
+        if (uri.getRawUserInfo() != null || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+            throw new IllegalArgumentException(
+                    "Invalid artifact base URL '" + value + "': user info, query and fragment are not allowed");
+        }
+        String path = uri.getRawPath() == null ? "" : uri.getRawPath().replaceAll("/+$", "");
+        return URI.create(scheme + "://" + uri.getRawAuthority() + path);
+    }
+
+    /**
+     * Replaces the scheme and authority of {@code url} with those of {@code base}, puts the path of {@code base} (if
+     * any) in front of the path of {@code url}, and keeps the query of {@code url}.
+     * <p>
+     * Example: {@code https://pnc-repo.example.com/artifactory/builds/a.jar} rebased on
+     * {@code https://other-route.example.com} is {@code https://other-route.example.com/artifactory/builds/a.jar}.
+     *
+     * @param base a URL returned by {@link #parseArtifactBaseUrl(String)}; {@code null} returns {@code url} unchanged
+     */
+    static URI rebase(URI url, URI base) {
+        if (base == null) {
+            return url;
+        }
+        String path = url.getRawPath() == null ? "" : url.getRawPath();
+        String query = url.getRawQuery() == null ? "" : "?" + url.getRawQuery();
+        String basePath = base.getRawPath() == null ? "" : base.getRawPath();
+        return URI.create(base.getScheme() + "://" + base.getRawAuthority() + basePath + path + query);
     }
 
     private void writeChecksumSidecars(Path artifactPath, Artifact artifact) {

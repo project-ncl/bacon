@@ -363,6 +363,11 @@ public class BuildCli {
         }
     }
 
+    private static final String ARTIFACT_BASE_URL_DESCRIPTION = "Download the built artifacts from this base URL "
+            + "instead of the scheme and host of their URL in PNC, keeping the path (e.g. another route to the same "
+            + "repository manager). The ldapUsernamePassword of the profile is sent to it, as to the host in PNC. "
+            + "Example: https://repository.example.com";
+
     @Command(
             name = "download-built-artifacts",
             description = "Download all built artifacts of a build into a ZIP")
@@ -374,9 +379,15 @@ public class BuildCli {
         @Option(names = "--output-dir", description = "Directory where the ZIP should be written")
         private Path outputDir = Paths.get(".");
 
+        @Option(
+                names = "--artifact-base-url",
+                paramLabel = "<url>",
+                description = ARTIFACT_BASE_URL_DESCRIPTION)
+        private String artifactBaseUrl;
+
         @Override
         public Integer call() {
-            Path zipFile = new BuildOutputDownloader().downloadBuiltArtifacts(buildId, outputDir);
+            Path zipFile = new BuildOutputDownloader(artifactBaseUrl).downloadBuiltArtifacts(buildId, outputDir);
             log.info("Downloaded built artifacts to {}", zipFile);
             return 0;
         }
@@ -448,9 +459,15 @@ public class BuildCli {
         @Option(names = "--output-dir", description = "Directory where the ZIP should be written")
         private Path outputDir = Paths.get(".");
 
+        @Option(
+                names = "--artifact-base-url",
+                paramLabel = "<url>",
+                description = ARTIFACT_BASE_URL_DESCRIPTION)
+        private String artifactBaseUrl;
+
         @Override
         public Integer call() {
-            Path zipFile = new BuildOutputDownloader().downloadAllOutput(buildId, redacted, outputDir);
+            Path zipFile = new BuildOutputDownloader(artifactBaseUrl).downloadAllOutput(buildId, redacted, outputDir);
             log.info("Downloaded all build output to {}", zipFile);
             return 0;
         }
