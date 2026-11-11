@@ -45,6 +45,39 @@ servers are configured to accept LDAP requests:
 ldapUsernamePassword: username:password
 ```
 
+# Internal SCM repositories (GitHub and GitLab)
+
+The git provider is chosen from the repository URL: GitLab when the host contains `gitlab`, GitHub otherwise.
+
+```yaml
+githubToken: "github-token"   # GitHub / GitHub Enterprise, 'repo' scope
+gitlabToken: "gitlab-token"   # GitLab, 'read_api' scope (or the GITLAB_TOKEN environment variable)
+```
+
+Without a token, public (and on GitLab, internal) repositories are read anonymously. Tokens are only sent to the
+repository's own host, never to a host it redirects to.
+
+# Network timeouts
+
+Connections to SCM hosts, repository managers and bifrost time out after 30 seconds. A host that cannot be reached is
+not retried with other revisions or credentials.
+
+# Downloading build outputs through other hosts
+
+When the artifact or bifrost hosts stored in PNC are not reachable, `download-build-outputs` can use other routes:
+
+```bash
+bacon pnc build download-build-outputs <id> \
+    --artifact-base-url https://repository.example.com \
+    --log-base-url https://bifrost.example.com
+```
+
+* `--artifact-base-url`: replaces the scheme and host of each artifact's `publicUrl`, keeping the path (also on
+  `download-built-artifacts`).
+* `--log-base-url`: reads the build and alignment logs from this bifrost (`scheme://host[:port]`).
+
+The profile's credentials are sent to these hosts, so use https.
+
 # PNC client HTTP timeouts
 
 The PNC REST client used by `bacon` defaults to a **30 second connect timeout**
