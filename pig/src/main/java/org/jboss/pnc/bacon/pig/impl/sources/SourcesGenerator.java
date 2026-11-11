@@ -171,6 +171,17 @@ public class SourcesGenerator {
         return completeBuilds;
     }
 
+    /**
+     * The internal URL the build used, then the repository's current internal URL, like
+     * {@link BuildSourcesDownloader#scmUrlCandidates}.
+     */
+    static List<String> scmUrls(PncBuild build) {
+        return Stream.of(build.getScmRepository(), build.getInternalScmUrl())
+                .filter(url -> url != null && !url.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     /** The build's SCM revision, or none, so that a missing revision gets the "no SCM revision" error. */
     private static List<String> revisions(PncBuild build) {
         return build.getScmRevision() == null || build.getScmRevision().isBlank() ? List.of()
@@ -182,11 +193,11 @@ public class SourcesGenerator {
             File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
 
             // works for repositories on GitHub and GitLab, with the token of the provider (see ScmCredentials)
-            String scmUrl = build.getScmRepository() != null ? build.getScmRepository() : build.getInternalScmUrl();
-            log.debug("Downloading sources for build {} from: {}", build.getId(), scmUrl);
+            List<String> scmUrls = scmUrls(build);
+            log.debug("Downloading sources for build {} from: {}", build.getId(), scmUrls);
             try {
                 new BuildSourcesDownloader()
-                        .downloadSources(build.getId(), scmUrl, revisions(build), targetPath.toPath());
+                        .downloadSources(build.getId(), scmUrls, revisions(build), targetPath.toPath());
             } catch (RuntimeException e) {
                 log.error(
                         "Failed to download sources for build {} (scmRepository: {})",

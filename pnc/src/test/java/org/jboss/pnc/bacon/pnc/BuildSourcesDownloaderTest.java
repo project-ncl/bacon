@@ -153,16 +153,47 @@ class BuildSourcesDownloaderTest {
     }
 
     @Test
-    void shouldSelectInternalScmUrl() {
+    void shouldTryTheBuildUrlThenTheCurrentInternalUrl() {
         Build build = mock(Build.class);
         SCMRepository repository = mock(SCMRepository.class);
 
+        when(build.getScmUrl()).thenReturn("https://github.ibm.com/pnc-prod/example.git");
         when(build.getScmRepository()).thenReturn(repository);
-        when(repository.getInternalUrl()).thenReturn("https://github.ibm.com/pnc-prod/example.git");
+        when(repository.getInternalUrl()).thenReturn("git@gitlab.cee.redhat.com:pnc-workspace/example.git");
+        when(repository.getExternalUrl()).thenReturn("https://github.com/upstream/example.git");
 
+        // the external repository does not have the aligned commits and tags
         assertEquals(
-                "https://github.ibm.com/pnc-prod/example.git",
-                BuildSourcesDownloader.selectInternalScmUrl(build));
+                List.of(
+                        "https://github.ibm.com/pnc-prod/example.git",
+                        "git@gitlab.cee.redhat.com:pnc-workspace/example.git"),
+                BuildSourcesDownloader.scmUrlCandidates(build));
+
+        when(repository.getInternalUrl()).thenReturn("https://github.ibm.com/pnc-prod/example.git");
+        assertEquals(
+                List.of("https://github.ibm.com/pnc-prod/example.git"),
+                BuildSourcesDownloader.scmUrlCandidates(build));
+
+        when(build.getScmUrl()).thenReturn(null);
+        when(repository.getInternalUrl()).thenReturn(" ");
+        assertEquals(List.of(), BuildSourcesDownloader.scmUrlCandidates(build));
+    }
+
+    @Test
+    void shouldReportEveryScmUrlWhenNoneWorks(@TempDir Path tempDir) {
+        // ".invalid" never resolves (RFC 6761)
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> new BuildSourcesDownloader().downloadSources(
+                        "B123",
+                        List.of("https://first.invalid/org/repo.git", "https://second.invalid/org/repo.git"),
+                        List.of("0123456789abcdef0123456789abcdef01234567"),
+                        tempDir.resolve("sources.tar.gz")));
+
+        assertTrue(e.getMessage().contains("from any of its SCM URLs"), e.getMessage());
+        assertTrue(e.getMessage().contains("first.invalid"), e.getMessage());
+        assertTrue(e.getMessage().contains("second.invalid"), e.getMessage());
+        assertFalse(Files.exists(tempDir.resolve("sources.tar.gz")));
     }
 
     @Test
