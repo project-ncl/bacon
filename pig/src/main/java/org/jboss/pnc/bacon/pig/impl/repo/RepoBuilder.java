@@ -129,8 +129,8 @@ public class RepoBuilder {
                     + "          <url>" + additionalRepo + "</url>\n" + "        </pluginRepository> <!--";
             result.put("ADDITIONAL_PLUGIN_REPOS", pluginRepoDef);
         }
-        result.put("INDY_URL", RepositoryProvider.getRepoProviderUrl());
-        result.put("INDY_TMP_URL", RepositoryProvider.getTempRepoProviderUrl());
+        result.put("REPO_URL", RepositoryProvider.getRepoProviderUrl());
+        result.put("REPO_TMP_URL", RepositoryProvider.getTempRepoProviderUrl());
         return result;
     }
 
