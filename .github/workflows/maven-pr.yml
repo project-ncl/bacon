@@ -17,7 +17,7 @@ on:
 
 jobs:
     call-maven-ci:
-      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@461b242bf215856b94e7b40f1ecfa06f7ebb1b45 # v0.0.26
+      uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@e7102dd3bf74f91aaccae7a3539241c03a652d1a # v0.0.27
       with:
         # The junit:junit:4.12 is used in one of our tests to get the license.
         # Weirdly it needs to be present in our .m2/repository folder for the
