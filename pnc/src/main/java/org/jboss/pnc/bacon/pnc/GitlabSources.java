@@ -22,11 +22,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +63,16 @@ final class GitlabSources {
     static final Credential NO_TOKEN = new Credential(null, null, "no token");
 
     /** HTTP error from GitLab. */
+    /** Raw files larger than this are not read into memory; they stay "Binary files ... differ" in the diff. */
+    static final long MAX_RAW_FILE_BYTES = 100L * 1024 * 1024;
+
+    /** A response larger than the limit requested from {@link #getBytes}. */
+    static final class ResponseTooLargeException extends RuntimeException {
+        ResponseTooLargeException(String message) {
+            super(message);
+        }
+    }
+
     static final class GitlabApiException extends RuntimeException {
         final int status;
 
@@ -299,7 +309,10 @@ final class GitlabSources {
         return (path, ref) -> {
             URI uri = URI.create(projectUrl() + "/repository/files/" + encode(path) + "/raw?ref=" + encode(ref));
             try {
-                return getBytes(uri, credential);
+                return getBytes(uri, credential, MAX_RAW_FILE_BYTES);
+            } catch (ResponseTooLargeException e) {
+                log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
+                return null;
             } catch (RuntimeException e) {
                 if (credential.header == null) {
                     log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
@@ -308,7 +321,7 @@ final class GitlabSources {
                 log.debug("Cannot read {} at {} with {}, trying without a token: {}", path, ref, credential.name, e);
             }
             try {
-                return getBytes(uri, NO_TOKEN);
+                return getBytes(uri, NO_TOKEN, MAX_RAW_FILE_BYTES);
             } catch (RuntimeException e) {
                 log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
                 return null;
@@ -318,31 +331,39 @@ final class GitlabSources {
 
     private JsonNode getJson(URI uri, Credential credential) {
         try {
-            return JSON.readTree(getBytes(uri, credential));
+            return JSON.readTree(getBytes(uri, credential, Long.MAX_VALUE));
         } catch (IOException e) {
             throw new RuntimeException("Invalid JSON from " + uri, e);
         }
     }
 
-    private byte[] getBytes(URI uri, Credential credential) {
+    /**
+     * GETs {@code uri}, sending the credential only to the GitLab host (not to hosts it redirects to), and reads at
+     * most {@code maxBytes} of the response.
+     *
+     * @throws ResponseTooLargeException when the response is larger than {@code maxBytes}
+     */
+    private byte[] getBytes(URI uri, Credential credential, long maxBytes) {
         try {
-            HttpRequest.Builder request = HttpRequest.newBuilder(uri)
-                    .header("Accept", "application/json, */*")
-                    .header("User-Agent", "bacon");
-            if (credential.header != null) {
-                request.header(credential.header, credential.value);
-            }
-            HttpResponse<InputStream> response = httpClient
-                    .send(request.GET().build(), HttpResponse.BodyHandlers.ofInputStream());
+            Map<String, String> credentialHeaders = credential.header == null ? Map.of()
+                    : Map.of(credential.header, credential.value);
+            HttpResponse<InputStream> response = SafeHttp.get(
+                    httpClient,
+                    uri,
+                    Map.of("Accept", "application/json, */*", "User-Agent", "bacon"),
+                    credentialHeaders);
             try (InputStream body = response.body()) {
-                byte[] bytes = body.readAllBytes();
                 if (response.statusCode() != 200) {
-                    String preview = new String(bytes, 0, Math.min(bytes.length, PREVIEW_BYTES), StandardCharsets.UTF_8)
-                            .replaceAll("\\s+", " ");
+                    byte[] bytes = body.readNBytes(PREVIEW_BYTES);
+                    String preview = new String(bytes, StandardCharsets.UTF_8).replaceAll("\\s+", " ");
                     throw new GitlabApiException(
                             response.statusCode(),
                             "HTTP status: " + response.statusCode() + " from " + uri
                                     + (preview.isBlank() ? "" : ". Response preview: " + preview));
+                }
+                byte[] bytes = body.readNBytes((int) Math.min(maxBytes, Integer.MAX_VALUE - 8) + 1);
+                if (bytes.length > maxBytes) {
+                    throw new ResponseTooLargeException(uri + " is larger than " + maxBytes + " bytes");
                 }
                 return bytes;
             }

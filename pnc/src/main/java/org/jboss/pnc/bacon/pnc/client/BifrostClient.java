@@ -12,11 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +40,45 @@ public class BifrostClient {
     private final URI baseUrl;
     private final HttpClient client;
 
+    /** Same default as the PNC REST client's connect timeout. No socket timeout: logs can be followed live. */
+    static final int CONNECT_TIMEOUT_MILLIS = 30_000;
+
     public BifrostClient(URI baseUrl) {
         this.baseUrl = baseUrl;
-        client = HttpClients.createDefault();
+        client = HttpClients.custom()
+                .setDefaultRequestConfig(
+                        RequestConfig.custom()
+                                .setConnectTimeout(CONNECT_TIMEOUT_MILLIS)
+                                .setConnectionRequestTimeout(CONNECT_TIMEOUT_MILLIS)
+                                .build())
+                .addInterceptorLast(dropAuthorizationOutside(baseUrl))
+                .build();
+    }
+
+    /**
+     * Removes the {@code Authorization} header from requests to another origin than {@code baseUrl}: on a redirect the
+     * client copies the original request's headers to the new target.
+     */
+    static HttpRequestInterceptor dropAuthorizationOutside(URI baseUrl) {
+        return (request, context) -> {
+            HttpHost target = HttpClientContext.adapt(context).getTargetHost();
+            if (target != null && !sameOrigin(baseUrl, target)) {
+                request.removeHeaders("Authorization");
+            }
+        };
+    }
+
+    static boolean sameOrigin(URI baseUrl, HttpHost target) {
+        return baseUrl.getScheme() != null && baseUrl.getScheme().equalsIgnoreCase(target.getSchemeName())
+                && baseUrl.getHost() != null && baseUrl.getHost().equalsIgnoreCase(target.getHostName())
+                && port(baseUrl.getScheme(), baseUrl.getPort()) == port(target.getSchemeName(), target.getPort());
+    }
+
+    private static int port(String scheme, int port) {
+        if (port != -1) {
+            return port;
+        }
+        return "https".equalsIgnoreCase(scheme) ? 443 : "http".equalsIgnoreCase(scheme) ? 80 : -1;
     }
 
     public List<String> getLog(String buildId, LogType logType) throws IOException {
@@ -99,6 +140,7 @@ public class BifrostClient {
         HttpResponse response = client.execute(httpGet);
         int status = response.getStatusLine().getStatusCode();
         if (status != 200) {
+            EntityUtils.consumeQuietly(response.getEntity());
             throw new IOException("Failed to read " + logUrl + ": HTTP status " + status);
         }
 

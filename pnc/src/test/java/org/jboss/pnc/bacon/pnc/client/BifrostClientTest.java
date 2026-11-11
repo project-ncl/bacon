@@ -1,6 +1,8 @@
 package org.jboss.pnc.bacon.pnc.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,6 +19,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.http.HttpHost;
 import org.jboss.pnc.bacon.config.Config;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -116,5 +119,41 @@ class BifrostClientTest {
                 () -> new BifrostClient(serverUri()).writeFinalLog("missing", "alignment-log", line -> {}));
 
         assertTrue(e.getMessage().contains("HTTP status 404"), e.getMessage());
+    }
+
+    @Test
+    void shouldNotSendCredentialsToAnotherHostItRedirectsTo() throws IOException {
+        // bifrost at "localhost" redirects to the test server at 127.0.0.1: another origin
+        HttpServer redirecting = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        AtomicReference<String> redirectingAuthorization = new AtomicReference<>();
+        redirecting.createContext("/", exchange -> {
+            redirectingAuthorization.set(exchange.getRequestHeaders().getFirst("Authorization"));
+            exchange.getResponseHeaders().add("Location", serverUri() + "/final-log/B123/alignment-log");
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
+        });
+        redirecting.start();
+        try {
+            List<String> lines = new ArrayList<>();
+
+            new BifrostClient(URI.create("http://localhost:" + redirecting.getAddress().getPort()))
+                    .writeFinalLog("B123", "alignment-log", lines::add);
+
+            assertEquals(List.of("line 1", "line 2"), lines);
+            assertTrue(redirectingAuthorization.get().startsWith("Basic "), redirectingAuthorization.get());
+            assertNull(authorization.get());
+        } finally {
+            redirecting.stop(0);
+        }
+    }
+
+    @Test
+    void shouldCompareBifrostOrigins() {
+        URI base = URI.create("https://bifrost.example.com");
+
+        assertTrue(BifrostClient.sameOrigin(base, new HttpHost("bifrost.example.com", 443, "https")));
+        assertTrue(BifrostClient.sameOrigin(base, new HttpHost("BIFROST.example.com", -1, "https")));
+        assertFalse(BifrostClient.sameOrigin(base, new HttpHost("bifrost.example.com", 80, "http")));
+        assertFalse(BifrostClient.sameOrigin(base, new HttpHost("cdn.example.com", 443, "https")));
     }
 }

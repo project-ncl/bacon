@@ -25,8 +25,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -42,6 +40,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
@@ -109,6 +108,15 @@ public class BuildOutputDownloader {
      */
     public BuildOutputDownloader(String artifactBaseUrl, String logBaseUrl) {
         this(new BuildSourcesDownloader(), parseArtifactBaseUrl(artifactBaseUrl), parseLogBaseUrl(logBaseUrl));
+        warnIfPlainHttp(this.artifactBaseUrl, "--artifact-base-url");
+        warnIfPlainHttp(this.logBaseUrl, "--log-base-url");
+    }
+
+    /** The profile's credentials are sent to the override URLs: warn when that happens unencrypted. */
+    private static void warnIfPlainHttp(URI baseUrl, String option) {
+        if (baseUrl != null && "http".equalsIgnoreCase(baseUrl.getScheme())) {
+            log.warn("{} {} uses http: the profile's credentials are sent unencrypted, use https", option, baseUrl);
+        }
     }
 
     BuildOutputDownloader(BuildSourcesDownloader sourcesDownloader) {
@@ -352,9 +360,7 @@ public class BuildOutputDownloader {
 
     private void downloadBuildLog(String buildId, Path targetFile) {
         createDirectories(targetFile.getParent());
-        URI bifrostUri = logBaseUrl != null ? logBaseUrl
-                : URI.create(Config.instance().getActiveProfile().getPnc().getBifrostBaseurl());
-        BifrostClient logProcessor = new BifrostClient(bifrostUri);
+        BifrostClient logProcessor = new BifrostClient(buildLogBifrost());
         try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
             logProcessor.writeLog(buildId, false, maskingLineWriter(writer), BifrostClient.LogType.BUILD);
         } catch (IOException e) {
@@ -393,6 +399,12 @@ public class BuildOutputDownloader {
         }
     }
 
+    /** The bifrost the build log comes from: {@link #logBaseUrl}, else the profile's {@code bifrostBaseurl}. */
+    private URI buildLogBifrost() {
+        return logBaseUrl != null ? logBaseUrl
+                : URI.create(Config.instance().getActiveProfile().getPnc().getBifrostBaseurl());
+    }
+
     /** Writes each log line with the known secrets masked. */
     private static Consumer<String> maskingLineWriter(BufferedWriter writer) {
         return line -> {
@@ -411,16 +423,17 @@ public class BuildOutputDownloader {
 
     private void downloadUri(URI uri, Path target) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-            var requestBuilder = HttpRequest.newBuilder().uri(uri).GET();
-            LdapClient.basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
-                    .ifPresent(header -> requestBuilder.header("Authorization", header));
-            HttpRequest request = requestBuilder.build();
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            if (response.statusCode() < 200 || response.statusCode() > 299) {
-                throw new RuntimeException("Failed to download " + uri + ". HTTP status: " + response.statusCode());
-            }
+            Map<String, String> credentials = LdapClient
+                    .basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
+                    .map(header -> Map.of("Authorization", header))
+                    .orElse(Map.of());
+            // The credentials go to the artifact's host only, not to a host it redirects to.
+            HttpResponse<InputStream> response = SafeHttp.get(SafeHttp.newClient(), uri, Map.of(), credentials);
             try (InputStream in = response.body()) {
+                if (response.statusCode() < 200 || response.statusCode() > 299) {
+                    throw new RuntimeException(
+                            "Failed to download " + uri + ". HTTP status: " + response.statusCode());
+                }
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {

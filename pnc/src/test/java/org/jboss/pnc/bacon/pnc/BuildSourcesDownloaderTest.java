@@ -2,6 +2,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -118,8 +119,8 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCompareDiffUriForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
 
         assertEquals(
                 URI.create(
@@ -130,8 +131,8 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCompareDiffUriForPublicGithub() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("git@github.com:project-ncl/bacon.git");
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository("git@github.com:project-ncl/bacon.git");
 
         assertEquals(
                 URI.create("https://api.github.com/repos/project-ncl/bacon/compare/base...head"),
@@ -140,8 +141,8 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCommitDiffAndRepoUrisForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("git@github.ibm.com:pnc-prod/example.git");
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository("git@github.ibm.com:pnc-prod/example.git");
 
         assertEquals(
                 URI.create("https://github.ibm.com/api/v3/repos/pnc-prod/example/commits/aligned-sha"),
@@ -338,5 +339,20 @@ class BuildSourcesDownloaderTest {
                 List.of("1.70-f1459fdb", "1.70"),
                 BuildSourcesDownloader.alignedVersionsFromTag("1.70-f1459fdb"));
         assertEquals(List.of(), BuildSourcesDownloader.alignedVersionsFromTag(null));
+    }
+
+    @Test
+    void shouldStopTryingASourceHostThatCannotBeReached(@TempDir Path tempDir) {
+        // ".invalid" never resolves (RFC 6761): the first candidate fails, the others are not attempted
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> new BuildSourcesDownloader().downloadSources(
+                        "B123",
+                        "https://bacon-test.invalid/org/repo.git",
+                        List.of("0123456789abcdef0123456789abcdef01234567"),
+                        tempDir.resolve("sources.tar.gz")));
+
+        assertTrue(e.getMessage().contains("skipped, bacon-test.invalid is not reachable"), e.getMessage());
+        assertFalse(Files.exists(tempDir.resolve("sources.tar.gz")));
     }
 }

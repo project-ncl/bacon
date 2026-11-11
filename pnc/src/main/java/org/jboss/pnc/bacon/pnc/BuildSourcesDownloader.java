@@ -31,6 +31,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -101,7 +103,7 @@ public class BuildSourcesDownloader {
                 throw new RuntimeException("Build " + buildId + " has no SCM revision.");
             }
 
-            List<GitlabSources.Credential> credentials = credentialsFor(normalizeGithubRepository(scmUrl));
+            List<GitlabSources.Credential> credentials = credentialsFor(normalizeScmRepository(scmUrl));
 
             List<SourceArchiveCandidate> candidates = sourceArchiveCandidates(scmUrl, scmRevisions);
             if (candidates.isEmpty()) {
@@ -117,9 +119,21 @@ public class BuildSourcesDownloader {
             Path temporaryFile = targetFile.resolveSibling(targetFile.getFileName().toString() + ".tmp");
             List<String> failures = new ArrayList<>();
 
+            // A host that cannot be reached, or a token it rejects, fails the same way for every other candidate:
+            // skip them instead of waiting for each one.
+            Set<String> unreachableHosts = new LinkedHashSet<>();
+            Set<String> rejectedCredentials = new LinkedHashSet<>();
             try {
                 for (SourceArchiveCandidate candidate : candidates) {
+                    String host = String.valueOf(candidate.uri.getHost()).toLowerCase(Locale.ROOT);
+                    if (unreachableHosts.contains(host)) {
+                        failures.add(candidate.uri + ": skipped, " + host + " is not reachable");
+                        continue;
+                    }
                     for (GitlabSources.Credential credential : credentials) {
+                        if (rejectedCredentials.contains(host + " " + credential.name)) {
+                            continue;
+                        }
                         try {
                             log.debug(
                                     "Downloading sources for build {} from {} to {}",
@@ -139,6 +153,14 @@ public class BuildSourcesDownloader {
                                     "Source archive candidate failed for build {}: {}",
                                     buildId,
                                     failures.get(failures.size() - 1));
+                            if (SafeHttp.isConnectFailure(e)) {
+                                unreachableHosts.add(host);
+                                break;
+                            }
+                            if (credential.header != null && e instanceof HttpStatusException
+                                    && isAuthenticationFailure(((HttpStatusException) e).status)) {
+                                rejectedCredentials.add(host + " " + credential.name);
+                            }
                         }
                     }
                 }
@@ -182,7 +204,7 @@ public class BuildSourcesDownloader {
                     "Build " + build.getId() + " has no internal SCM URL; cannot compute the alignment diff.");
         }
 
-        NormalizedGithubRepository repository = normalizeGithubRepository(internalUrl);
+        NormalizedScmRepository repository = normalizeScmRepository(internalUrl);
         if (repository == null) {
             throw new RuntimeException(
                     "Could not parse the internal SCM URL for build " + build.getId() + ": " + internalUrl);
@@ -192,7 +214,7 @@ public class BuildSourcesDownloader {
             return downloadGitlabAlignmentDiff(build, repository, internalUrl, diffFile, manifest);
         }
 
-        String githubToken = getGithubTokenFromActiveProfile();
+        String githubToken = ScmCredentials.githubToken();
         if (githubToken == null || githubToken.isBlank()) {
             throw new RuntimeException(
                     "Failed to download alignment diff for build " + build.getId()
@@ -230,6 +252,7 @@ public class BuildSourcesDownloader {
                         rawDiff = fetchDiff(compareUri, authorizationHeader);
                         break search;
                     } catch (RuntimeException e) {
+                        throwIfUnreachable(build, compareUri, e);
                         failures.add(
                                 compareUri + " using " + authSchemeName(authorizationHeader) + ": " + e.getMessage());
                         log.debug(
@@ -279,6 +302,7 @@ public class BuildSourcesDownloader {
                                 head);
                         break;
                     } catch (RuntimeException e) {
+                        throwIfUnreachable(build, commitUri, e);
                         failures.add(
                                 commitUri + " using " + authSchemeName(authorizationHeader) + ": " + e.getMessage());
                         log.debug(
@@ -312,7 +336,7 @@ public class BuildSourcesDownloader {
      */
     private List<Path> downloadGitlabAlignmentDiff(
             Build build,
-            NormalizedGithubRepository repository,
+            NormalizedScmRepository repository,
             String internalUrl,
             Path diffFile,
             boolean manifest) {
@@ -327,7 +351,7 @@ public class BuildSourcesDownloader {
 
         GitlabSources gitlab = gitlabSources(repository);
         List<String> failures = new ArrayList<>();
-        for (GitlabSources.Credential credential : credentials) {
+        credentials: for (GitlabSources.Credential credential : credentials) {
             for (String head : heads) {
                 for (String base : bases) {
                     try {
@@ -337,7 +361,13 @@ public class BuildSourcesDownloader {
                         }
                         failures.add(base + " is not an ancestor of " + head);
                     } catch (RuntimeException e) {
+                        throwIfUnreachable(build, URI.create(repository.webBaseUrl), e);
                         failures.add(base + ".." + head + " using " + credential.name + ": " + e.getMessage());
+                        if (credential.header != null && e instanceof GitlabSources.GitlabApiException
+                                && isAuthenticationFailure(((GitlabSources.GitlabApiException) e).status)) {
+                            // the token is rejected: every other request with it would be too
+                            continue credentials;
+                        }
                     }
                 }
                 try {
@@ -351,6 +381,7 @@ public class BuildSourcesDownloader {
                             head);
                     return writeGitlabDiff(build, diffFile, diff, manifest);
                 } catch (RuntimeException e) {
+                    throwIfUnreachable(build, URI.create(repository.webBaseUrl), e);
                     failures.add("commit " + head + " using " + credential.name + ": " + e.getMessage());
                 }
             }
@@ -376,23 +407,23 @@ public class BuildSourcesDownloader {
         return writeAlignmentDiff(build, diffFile, diff.content, manifest);
     }
 
-    private static GitlabSources gitlabSources(NormalizedGithubRepository repository) {
+    private static GitlabSources gitlabSources(NormalizedScmRepository repository) {
         return new GitlabSources(
                 repository.webBaseUrl,
                 repository.path,
-                HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build());
+                SafeHttp.newClient());
     }
 
     /**
      * The credentials for the repository's git provider: the {@code githubToken} for GitHub; for GitLab the
      * {@code gitlabToken} (or the {@code GITLAB_TOKEN} environment variable).
      */
-    private static List<GitlabSources.Credential> credentialsFor(NormalizedGithubRepository repository) {
+    private static List<GitlabSources.Credential> credentialsFor(NormalizedScmRepository repository) {
         if (repository != null && repository.gitlab) {
             return GitlabSources.credentials(ScmCredentials.gitlabToken());
         }
         List<GitlabSources.Credential> credentials = new ArrayList<>();
-        String githubToken = getGithubTokenFromActiveProfile();
+        String githubToken = ScmCredentials.githubToken();
         if (githubToken != null && !githubToken.isBlank()) {
             for (String authorizationHeader : authorizationHeaders(githubToken)) {
                 credentials.add(
@@ -423,19 +454,13 @@ public class BuildSourcesDownloader {
 
     private int probeStatus(URI uri, String authorizationHeader) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .header("Accept", ACCEPT_GITHUB_API)
-                    .header("User-Agent", "bacon")
-                    .header("Authorization", authorizationHeader)
-                    .GET()
-                    .build();
-
-            return httpClient.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
+            HttpResponse<InputStream> response = SafeHttp.get(
+                    SafeHttp.newClient(),
+                    uri,
+                    Map.of("Accept", ACCEPT_GITHUB_API, "User-Agent", "bacon"),
+                    Map.of("Authorization", authorizationHeader));
+            closeQuietly(response.body());
+            return response.statusCode();
         } catch (IOException e) {
             return -1;
         } catch (InterruptedException e) {
@@ -643,19 +668,11 @@ public class BuildSourcesDownloader {
 
     private String fetchDiff(URI uri, String authorizationHeader) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .header("Accept", ACCEPT_DIFF)
-                    .header("User-Agent", "bacon")
-                    .header("Authorization", authorizationHeader)
-                    .GET()
-                    .build();
-
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response = SafeHttp.get(
+                    SafeHttp.newClient(),
+                    uri,
+                    Map.of("Accept", ACCEPT_DIFF, "User-Agent", "bacon"),
+                    Map.of("Authorization", authorizationHeader));
             int statusCode = response.statusCode();
             try (InputStream in = response.body()) {
                 byte[] body = in.readAllBytes();
@@ -685,9 +702,7 @@ public class BuildSourcesDownloader {
             GitlabSources.Credential credential,
             Path targetFile) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NEVER)
-                    .build();
+            HttpClient httpClient = SafeHttp.newClient();
 
             URI originalUri = candidate.uri;
             URI currentUri = originalUri;
@@ -728,7 +743,8 @@ public class BuildSourcesDownloader {
 
                 if (statusCode != HttpResponseCodes.SC_OK) {
                     String responsePreview = responsePreview(response.body());
-                    throw new RuntimeException(
+                    throw new HttpStatusException(
+                            statusCode,
                             "HTTP status: " + statusCode + " from " + currentUri
                                     + (responsePreview.isBlank() ? "" : ". Response preview: " + responsePreview));
                 }
@@ -768,8 +784,8 @@ public class BuildSourcesDownloader {
     }
 
     private static boolean shouldSendAuthorization(URI originalUri, URI currentUri) {
-        // Match curl -L behavior: do not forward Authorization to a different host such as codeload.github.ibm.com.
-        return originalUri.getHost() != null && originalUri.getHost().equalsIgnoreCase(currentUri.getHost());
+        // Match curl -L behavior: do not forward credentials to another origin such as codeload.github.ibm.com.
+        return SafeHttp.sameOrigin(originalUri, currentUri);
     }
 
     static List<SourceArchiveCandidate> sourceArchiveCandidates(String scmUrl, String scmRevision) {
@@ -777,7 +793,7 @@ public class BuildSourcesDownloader {
     }
 
     static List<SourceArchiveCandidate> sourceArchiveCandidates(String scmUrl, List<String> scmRevisions) {
-        NormalizedGithubRepository repository = normalizeGithubRepository(scmUrl);
+        NormalizedScmRepository repository = normalizeScmRepository(scmUrl);
         if (repository == null) {
             return List.of();
         }
@@ -839,7 +855,7 @@ public class BuildSourcesDownloader {
         return List.copyOf(candidates);
     }
 
-    private static URI apiTarballUri(NormalizedGithubRepository repository, String revision) {
+    private static URI apiTarballUri(NormalizedScmRepository repository, String revision) {
         return URI.create(
                 apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
                         + encodePath(repository.repository) + "/tarball/" + encodePath(revision));
@@ -850,7 +866,7 @@ public class BuildSourcesDownloader {
      * given
      * repository. Both refs must be resolvable within that single repository.
      */
-    static URI compareDiffUri(NormalizedGithubRepository repository, String base, String head) {
+    static URI compareDiffUri(NormalizedScmRepository repository, String base, String head) {
         return URI.create(
                 apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
                         + encodePath(repository.repository) + "/compare/" + encodePath(base) + "..."
@@ -861,7 +877,7 @@ public class BuildSourcesDownloader {
      * Builds the GitHub (Enterprise) URL for a single commit. With the diff media type this yields the diff introduced
      * by that commit relative to its parent.
      */
-    static URI commitDiffUri(NormalizedGithubRepository repository, String ref) {
+    static URI commitDiffUri(NormalizedScmRepository repository, String ref) {
         return URI.create(
                 apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
                         + encodePath(repository.repository) + "/commits/" + encodePath(ref));
@@ -870,19 +886,19 @@ public class BuildSourcesDownloader {
     /**
      * Builds the GitHub (Enterprise) URL of the repository itself, used to probe whether the token can access it.
      */
-    static URI repoApiUri(NormalizedGithubRepository repository) {
+    static URI repoApiUri(NormalizedScmRepository repository) {
         return URI.create(
                 apiBaseUrl(repository) + "/repos/" + encodePath(repository.owner) + "/"
                         + encodePath(repository.repository));
     }
 
-    private static String apiBaseUrl(NormalizedGithubRepository repository) {
+    private static String apiBaseUrl(NormalizedScmRepository repository) {
         return "github.com".equalsIgnoreCase(repository.host)
                 ? "https://api.github.com"
                 : repository.webBaseUrl + "/api/v3";
     }
 
-    private static URI webArchiveUri(NormalizedGithubRepository repository, String revision) {
+    private static URI webArchiveUri(NormalizedScmRepository repository, String revision) {
         return URI.create(
                 repository.webBaseUrl + "/" + encodePath(repository.owner) + "/"
                         + encodePath(repository.repository) + "/archive/" + encodePath(revision) + ".tar.gz");
@@ -902,7 +918,7 @@ public class BuildSourcesDownloader {
         return encoded.toString();
     }
 
-    static NormalizedGithubRepository normalizeGithubRepository(String scmUrl) {
+    static NormalizedScmRepository normalizeScmRepository(String scmUrl) {
         if (scmUrl == null || scmUrl.isBlank()) {
             return null;
         }
@@ -936,7 +952,7 @@ public class BuildSourcesDownloader {
         return null;
     }
 
-    private static NormalizedGithubRepository fromHostAndPath(String host, String path) {
+    private static NormalizedScmRepository fromHostAndPath(String host, String path) {
         if (host == null || host.isBlank() || path == null || path.isBlank()) {
             return null;
         }
@@ -946,7 +962,7 @@ public class BuildSourcesDownloader {
             return null;
         }
 
-        return new NormalizedGithubRepository(host, "https://" + host, parts[0], parts[1], path);
+        return new NormalizedScmRepository(host, "https://" + host, parts[0], parts[1], path);
     }
 
     private static String selectScmUrl(Build build) {
@@ -1082,6 +1098,30 @@ public class BuildSourcesDownloader {
         return value != null && value.startsWith("/") ? value.substring(1) : value;
     }
 
+    /** Stops trying other revisions or credentials when the host cannot be reached at all. */
+    private static void throwIfUnreachable(Build build, URI uri, RuntimeException e) {
+        if (SafeHttp.isConnectFailure(e)) {
+            throw new RuntimeException(
+                    "Failed to download alignment diff for build " + build.getId() + ": " + uri.getHost()
+                            + " is not reachable (" + e.getMessage() + ")",
+                    e);
+        }
+    }
+
+    /** A non-successful HTTP response. */
+    static final class HttpStatusException extends RuntimeException {
+        final int status;
+
+        HttpStatusException(int status, String message) {
+            super(message);
+            this.status = status;
+        }
+    }
+
+    private static boolean isAuthenticationFailure(int status) {
+        return status == 401 || status == 403;
+    }
+
     private static void closeQuietly(InputStream inputStream) {
         if (inputStream == null) {
             return;
@@ -1105,10 +1145,6 @@ public class BuildSourcesDownloader {
         } catch (IOException e) {
             return "";
         }
-    }
-
-    private static String getGithubTokenFromActiveProfile() {
-        return ScmCredentials.githubToken();
     }
 
     static final class SourceArchiveCandidate {
@@ -1140,7 +1176,7 @@ public class BuildSourcesDownloader {
         }
     }
 
-    static final class NormalizedGithubRepository {
+    static final class NormalizedScmRepository {
 
         private final String host;
         private final String webBaseUrl;
@@ -1150,7 +1186,7 @@ public class BuildSourcesDownloader {
         private final String path;
         private final boolean gitlab;
 
-        private NormalizedGithubRepository(
+        private NormalizedScmRepository(
                 String host,
                 String webBaseUrl,
                 String owner,
