@@ -175,7 +175,7 @@ public final class UrlRewrites {
         }
 
         Optional<URI> apply(URI uri) {
-            if (!SafeHttp.sameOrigin(from, uri)) {
+            if (!Origins.same(from, uri)) {
                 return Optional.empty();
             }
             String path = uri.getRawPath() == null ? "" : uri.getRawPath();

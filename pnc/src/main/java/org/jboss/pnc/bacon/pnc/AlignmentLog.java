@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,13 +45,22 @@ import org.jboss.pnc.client.RemoteResourceException;
  */
 final class AlignmentLog {
 
+    /** How long PNC and bifrost may take to start answering; the log itself is then read without limit. */
+    static final Duration RESPONSE_TIMEOUT = Duration.ofMinutes(2);
+
     private AlignmentLog() {
     }
 
-    /** Passes each line of the alignment log to {@code onLine}; nothing when the build has no alignment log. */
+    /**
+     * Passes each line of the alignment log to {@code onLine}. A 404 means the build has no alignment log (e.g. it
+     * did not get to the alignment), which is not an error: nothing is passed, as with the PNC REST client.
+     */
     static void forEachLine(String buildId, Consumer<String> onLine)
             throws IOException, InterruptedException, RemoteResourceException {
         UrlRewrites rewrites = UrlRewrites.current();
+        // The PNC REST client follows PNC's redirect to bifrost inside its JAX-RS client, with no way to change the
+        // Location, so rules matching bifrost could not apply. With rules the request is made here: same URL and
+        // credentials, but without the REST client's retries on network errors and 401 token refresh.
         if (rewrites.isEmpty()) {
             try (BuildClient buildClient = new BuildClient(
                     PncClientHelper.getPncConfiguration(PncClientHelper.credentialsAvailable()))) {
@@ -74,7 +84,8 @@ final class AlignmentLog {
                 Map.of(),
                 credentials,
                 rewrites,
-                credentialOrigins);
+                credentialOrigins,
+                RESPONSE_TIMEOUT);
         try (InputStream body = response.body()) {
             if (response.statusCode() == 404) {
                 return;
