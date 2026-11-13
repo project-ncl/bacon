@@ -18,18 +18,26 @@
 package org.jboss.pnc.bacon.common.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +50,7 @@ class SafeHttpTest {
     private HttpServer first;
     private HttpServer second;
     private final Map<String, String> authorizations = new ConcurrentHashMap<>();
+    private final AtomicInteger redirects = new AtomicInteger();
     // a host that is not reachable here: only a rewrite makes the redirect work
     private volatile String location = "http://redirected.invalid/end?q=1";
 
@@ -62,6 +71,16 @@ class SafeHttpTest {
             try (OutputStream out = exchange.getResponseBody()) {
                 out.write(body);
             }
+        });
+        first.createContext("/no-location", exchange -> {
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
+        });
+        first.createContext("/loop", exchange -> {
+            redirects.incrementAndGet();
+            exchange.getResponseHeaders().add("Location", "/loop");
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
         });
         first.start();
         second.start();
@@ -246,5 +265,72 @@ class SafeHttpTest {
             return;
         }
         throw new AssertionError("redirect to an unknown host should fail");
+    }
+
+    @Test
+    void returnsARedirectWithoutLocation() throws Exception {
+        HttpResponse<InputStream> response = SafeHttp.get(
+                SafeHttp.newClient(),
+                URI.create(base(first) + "/no-location"),
+                Map.of(),
+                Map.of(),
+                new UrlRewrites(List.of()));
+
+        try (InputStream body = response.body()) {
+            assertEquals(302, response.statusCode());
+        }
+    }
+
+    @Test
+    void failsAfterTooManyRedirects() {
+        IOException e = assertThrows(
+                IOException.class,
+                () -> SafeHttp.get(
+                        SafeHttp.newClient(),
+                        URI.create(base(first) + "/loop"),
+                        Map.of(),
+                        Map.of(),
+                        new UrlRewrites(List.of())));
+
+        assertTrue(e.getMessage().contains("Too many redirects"), e.getMessage());
+        assertEquals(SafeHttp.MAX_REDIRECTS + 1, redirects.get());
+    }
+
+    @Test
+    void createsClientsWithAConnectTimeoutThatDoNotFollowRedirects() {
+        HttpClient client = SafeHttp.newClient();
+
+        assertEquals(SafeHttp.CONNECT_TIMEOUT, client.connectTimeout().orElse(null));
+        assertEquals(HttpClient.Redirect.NEVER, client.followRedirects());
+    }
+
+    @Test
+    void comparesOrigins() {
+        assertTrue(
+                SafeHttp.sameOrigin(
+                        URI.create("https://Repo.example.com/a"),
+                        URI.create("https://repo.example.com:443/b")));
+        assertTrue(
+                SafeHttp.sameOrigin(
+                        URI.create("http://repo.example.com/a"),
+                        URI.create("http://repo.example.com:80/b")));
+        assertFalse(
+                SafeHttp.sameOrigin(URI.create("https://repo.example.com/a"), URI.create("http://repo.example.com/a")));
+        assertFalse(
+                SafeHttp.sameOrigin(
+                        URI.create("https://repo.example.com/a"),
+                        URI.create("https://repo.example.com:8443/a")));
+        assertFalse(
+                SafeHttp.sameOrigin(URI.create("https://repo.example.com/a"), URI.create("https://cdn.example.com/a")));
+    }
+
+    @Test
+    void recognizesConnectFailuresInTheCauseChain() {
+        assertTrue(SafeHttp.isConnectFailure(new RuntimeException(new ConnectException("refused"))));
+        assertTrue(
+                SafeHttp.isConnectFailure(new RuntimeException("io", new IOException(new UnknownHostException("x")))));
+        assertTrue(SafeHttp.isConnectFailure(new HttpConnectTimeoutException("timed out")));
+        assertFalse(SafeHttp.isConnectFailure(new RuntimeException(new IOException("connection reset"))));
+        assertFalse(SafeHttp.isConnectFailure(new RuntimeException("HTTP status: 401")));
     }
 }

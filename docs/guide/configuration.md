@@ -54,7 +54,13 @@ githubToken: "github-token"   # GitHub / GitHub Enterprise, 'repo' scope
 gitlabToken: "gitlab-token"   # GitLab, 'read_api' scope (or the GITLAB_TOKEN environment variable)
 ```
 
-Without a token, public (and on GitLab, internal) repositories are read anonymously.
+Without a token, public (and on GitLab, internal) repositories are read anonymously. Tokens are only sent to the
+repository's own host, never to a host it redirects to.
+
+# Network timeouts
+
+Connections to SCM hosts, repository managers and bifrost time out after 30 seconds. A host that cannot be reached is
+not retried with other revisions or credentials, and a token a host rejects is not tried again on it.
 
 # PNC client HTTP timeouts
 

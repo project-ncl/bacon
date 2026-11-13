@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -272,7 +273,8 @@ class GitlabSourcesTest {
         return new GitlabSources(
                 "http://127.0.0.1:" + server.getAddress().getPort(),
                 "pnc-workspace/airlift/airbase",
-                HttpClient.newHttpClient());
+                HttpClient.newHttpClient(),
+                UrlRewrites.none());
     }
 
     private static void send(HttpExchange exchange, int status, String body) throws IOException {

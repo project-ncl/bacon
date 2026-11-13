@@ -19,6 +19,9 @@ package org.jboss.pnc.bacon.pnc;
 
 import java.util.Optional;
 
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.ConfigProfile;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,8 +45,8 @@ public final class ScmCredentials {
 
     /** Whether the SCM URL (scp-like, ssh or http(s)) is on a GitLab instance. */
     public static boolean isGitlab(String scmUrl) {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository(scmUrl);
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository(scmUrl);
         return repository != null && repository.isGitlab();
     }
 
@@ -59,24 +62,23 @@ public final class ScmCredentials {
 
     /** The {@code githubToken} of the active profile, or null. */
     static String githubToken() {
-        return blankToNull(profileProperty("getGithubToken"));
+        ConfigProfile profile = activeProfile();
+        return profile == null ? null : blankToNull(profile.getGithubToken());
     }
 
     /** The {@code gitlabToken} of the active profile, else the {@code GITLAB_TOKEN} environment variable, or null. */
     static String gitlabToken() {
-        String token = blankToNull(profileProperty("getGitlabToken"));
+        ConfigProfile profile = activeProfile();
+        String token = profile == null ? null : blankToNull(profile.getGitlabToken());
         return token != null ? token : blankToNull(System.getenv("GITLAB_TOKEN"));
     }
 
-    private static String profileProperty(String getter) {
+    /** The active Bacon profile, or null when no configuration is loaded (e.g. outside the CLI). */
+    private static ConfigProfile activeProfile() {
         try {
-            Class<?> configClass = Class.forName("org.jboss.pnc.bacon.config.Config");
-            Object config = configClass.getMethod("instance").invoke(null);
-            Object activeProfile = config.getClass().getMethod("getActiveProfile").invoke(config);
-            Object value = activeProfile.getClass().getMethod(getter).invoke(activeProfile);
-            return value == null ? null : value.toString();
-        } catch (ReflectiveOperationException | RuntimeException e) {
-            log.debug("Cannot read {} from the active Bacon profile", getter, e);
+            return Config.instance().getActiveProfile();
+        } catch (RuntimeException e) {
+            log.debug("Cannot read the active Bacon profile", e);
             return null;
         }
     }

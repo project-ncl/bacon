@@ -2,15 +2,20 @@ package org.jboss.pnc.bacon.pnc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.ServerSocket;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.ConfigProfile;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.SCMRepository;
@@ -118,8 +123,8 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCompareDiffUriForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
 
         assertEquals(
                 URI.create(
@@ -130,8 +135,8 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCompareDiffUriForPublicGithub() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("git@github.com:project-ncl/bacon.git");
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository("git@github.com:project-ncl/bacon.git");
 
         assertEquals(
                 URI.create("https://api.github.com/repos/project-ncl/bacon/compare/base...head"),
@@ -140,8 +145,8 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCommitDiffAndRepoUrisForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("git@github.ibm.com:pnc-prod/example.git");
+        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                .normalizeScmRepository("git@github.ibm.com:pnc-prod/example.git");
 
         assertEquals(
                 URI.create("https://github.ibm.com/api/v3/repos/pnc-prod/example/commits/aligned-sha"),
@@ -354,5 +359,34 @@ class BuildSourcesDownloaderTest {
         assertTrue(masked.startsWith(source), masked);
         assertFalse(masked.contains("hunter2hunter2"), masked);
         assertFalse(masked.contains("abcdefabcdefabcdef"), masked);
+    }
+
+    @Test
+    void shouldStopTryingASourceHostThatCannotBeReached(@TempDir Path tempDir) throws Exception {
+        // a rule sends the host to a closed local port, which refuses the connection: the first candidate fails, the
+        // others are not attempted
+        int port;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            port = socket.getLocalPort();
+        }
+        Config config = new Config();
+        config.setActiveProfile(new ConfigProfile());
+        Config.setInstance(config);
+        UrlRewrites.setCommandLineRules(List.of("https://bacon-test.invalid=http://127.0.0.1:" + port));
+        try {
+            RuntimeException e = assertThrows(
+                    RuntimeException.class,
+                    () -> new BuildSourcesDownloader().downloadSources(
+                            "B123",
+                            "https://bacon-test.invalid/org/repo.git",
+                            List.of("0123456789abcdef0123456789abcdef01234567"),
+                            tempDir.resolve("sources.tar.gz")));
+
+            assertTrue(e.getMessage().contains("skipped, bacon-test.invalid is not reachable"), e.getMessage());
+            assertFalse(Files.exists(tempDir.resolve("sources.tar.gz")));
+        } finally {
+            UrlRewrites.reset();
+            Config.setInstance(null);
+        }
     }
 }

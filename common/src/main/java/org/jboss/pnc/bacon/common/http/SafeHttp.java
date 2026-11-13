@@ -19,8 +19,12 @@ package org.jboss.pnc.bacon.common.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -155,6 +159,21 @@ public final class SafeHttp {
             this.requested = requested;
             this.target = target;
         }
+    }
+
+    /**
+     * Whether {@code failure} (or one of its causes) means the host could not be reached at all: unknown host,
+     * connection refused or unreachable, or {@link #CONNECT_TIMEOUT} exceeded. Further requests to the same host fail
+     * the same way, so callers stop trying it.
+     */
+    public static boolean isConnectFailure(Throwable failure) {
+        for (Throwable t = failure; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            if (t instanceof HttpConnectTimeoutException || t instanceof ConnectException
+                    || t instanceof UnknownHostException || t instanceof NoRouteToHostException) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
