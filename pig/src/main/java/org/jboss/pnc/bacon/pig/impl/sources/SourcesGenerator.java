@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
+import org.jboss.pnc.bacon.common.http.SafeHttp;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
@@ -192,17 +191,16 @@ public class SourcesGenerator {
                                 .generateTarballDownloadUrl(build.getScmRepository(), build.getScmRevision()));
 
                 log.debug("Downloading sources for build {} from: {}", build.getId(), uri);
-                HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(uri)
-                        .header("Authorization", "Bearer " + Config.instance().getActiveProfile().getGithubToken())
+                // the token only goes to the repository's host; redirects (e.g. to codeload) get none
+                var response = SafeHttp.get(
+                        SafeHttp.newClient(),
+                        uri,
                         // specify that we only want a tar.gz reply, otherwise it returns an html file if there is a
                         // login failure with http status 200, which makes the http client wrongly believe the download
                         // was successful
-                        .header("Accept", "application/x-tar, application/gzip")
-                        .GET()
-                        .build();
-                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                        Map.of("Accept", "application/x-tar, application/gzip"),
+                        Map.of("Authorization", "Bearer " + Config.instance().getActiveProfile().getGithubToken()),
+                        UrlRewrites.current());
 
                 if (response.statusCode() == HttpResponseCodes.SC_NOT_ACCEPTABLE) {
                     // Github throws this error when the Github Token is not specified, or wrong

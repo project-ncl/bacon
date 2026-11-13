@@ -32,6 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jboss.pnc.bacon.common.http.Origins;
+import org.jboss.pnc.bacon.common.http.SafeHttp;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
@@ -299,19 +303,14 @@ public class BuildSourcesDownloader {
 
     private int probeStatus(URI uri, String authorizationHeader) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .header("Accept", ACCEPT_GITHUB_API)
-                    .header("User-Agent", "bacon")
-                    .header("Authorization", authorizationHeader)
-                    .GET()
-                    .build();
-
-            return httpClient.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
+            HttpResponse<InputStream> response = SafeHttp.get(
+                    SafeHttp.newClient(),
+                    uri,
+                    Map.of("Accept", ACCEPT_GITHUB_API, "User-Agent", "bacon"),
+                    Map.of("Authorization", authorizationHeader),
+                    UrlRewrites.current());
+            response.body().close();
+            return response.statusCode();
         } catch (IOException e) {
             return -1;
         } catch (InterruptedException e) {
@@ -510,19 +509,12 @@ public class BuildSourcesDownloader {
 
     private String fetchDiff(URI uri, String authorizationHeader) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .header("Accept", ACCEPT_DIFF)
-                    .header("User-Agent", "bacon")
-                    .header("Authorization", authorizationHeader)
-                    .GET()
-                    .build();
-
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response = SafeHttp.get(
+                    SafeHttp.newClient(),
+                    uri,
+                    Map.of("Accept", ACCEPT_DIFF, "User-Agent", "bacon"),
+                    Map.of("Authorization", authorizationHeader),
+                    UrlRewrites.current());
             int statusCode = response.statusCode();
             try (InputStream in = response.body()) {
                 byte[] body = in.readAllBytes();
@@ -552,11 +544,12 @@ public class BuildSourcesDownloader {
             String authorizationHeader,
             Path targetFile) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NEVER)
-                    .build();
+            HttpClient httpClient = SafeHttp.newClient();
+            UrlRewrites rewrites = UrlRewrites.current();
 
-            URI originalUri = candidate.uri;
+            // the Accept header changes after the first request, so redirects are followed here, with SafeHttp's rules
+            URI requestedUri = candidate.uri;
+            URI originalUri = rewrites.apply(candidate.uri);
             URI currentUri = originalUri;
 
             for (int redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount++) {
@@ -583,7 +576,13 @@ public class BuildSourcesDownloader {
                                 "HTTP " + statusCode + " redirect response did not include a Location header.");
                     }
 
-                    currentUri = previousUri.resolve(locationHeader.get());
+                    SafeHttp.Redirect redirect = SafeHttp
+                            .redirect(requestedUri, previousUri, locationHeader.get(), rewrites)
+                            .orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Refused redirect from https to http: " + locationHeader.get()));
+                    requestedUri = redirect.requested;
+                    currentUri = redirect.target;
 
                     log.debug(
                             "Following source archive redirect for build {}: {} -> {}",
@@ -635,8 +634,8 @@ public class BuildSourcesDownloader {
     }
 
     private static boolean shouldSendAuthorization(URI originalUri, URI currentUri) {
-        // Match curl -L behavior: do not forward Authorization to a different host such as codeload.github.ibm.com.
-        return originalUri.getHost() != null && originalUri.getHost().equalsIgnoreCase(currentUri.getHost());
+        // Like curl -L: do not forward Authorization to another origin such as codeload.github.ibm.com.
+        return Origins.same(originalUri, currentUri);
     }
 
     static List<SourceArchiveCandidate> sourceArchiveCandidates(String scmUrl, String scmRevision) {

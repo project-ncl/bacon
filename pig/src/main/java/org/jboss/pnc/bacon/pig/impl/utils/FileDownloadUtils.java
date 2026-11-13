@@ -33,8 +33,9 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.jboss.pnc.bacon.auth.LdapClient;
+import org.jboss.pnc.bacon.common.http.SafeApacheHttp;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.jboss.pnc.bacon.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,11 @@ public class FileDownloadUtils {
 
     private static void doDownload(URI downloadUrl, File targetPath, int attemptsLeft, boolean cache) {
 
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build()) {
+        // credentials only to the download URL's host; redirects are rewritten like the first URL
+        try (CloseableHttpClient httpClient = SafeApacheHttp
+                .builder(UrlRewrites::current, () -> List.of(downloadUrl))
+                .setDefaultRequestConfig(requestConfig)
+                .build()) {
             downloadWithClient(httpClient, downloadUrl, targetPath);
         } catch (NotFoundException nfe) {
             throw new RuntimeException("URL " + downloadUrl + " returns status 404: Not Found", nfe);
@@ -139,10 +144,10 @@ public class FileDownloadUtils {
 
     private static void downloadWithClient(CloseableHttpClient httpClient, URI downloadUrl, File targetPath)
             throws NotFoundException, HttpException, IOException {
-        HttpGet request = new HttpGet(downloadUrl);
+        HttpGet request = new HttpGet(UrlRewrites.current().apply(downloadUrl));
         LdapClient.basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
                 .ifPresent(header -> request.setHeader("Authorization", header));
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
+        try (CloseableHttpResponse response = httpClient.execute(request, SafeApacheHttp.context(downloadUrl))) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == 404) {
                 throw new NotFoundException();

@@ -15,8 +15,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClients;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
+import org.jboss.pnc.bacon.common.http.SafeApacheHttp;
 import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,8 @@ public class BifrostClient {
 
     public BifrostClient(URI baseUrl) {
         this.baseUrl = baseUrl;
-        client = HttpClients.createDefault();
+        // credentials only to bifrost; redirects are rewritten like the first URL
+        client = SafeApacheHttp.builder(UrlRewrites::current, () -> List.of(baseUrl)).build();
     }
 
     public List<String> getLog(String buildId, LogType logType) throws IOException {
@@ -73,12 +74,13 @@ public class BifrostClient {
             query += "&follow=false";
         }
 
-        URI logsUrl = UrlRewrites.current().apply(baseUrl.resolve(URI.create("/text?" + query)));
+        URI originalUrl = baseUrl.resolve(URI.create("/text?" + query));
+        URI logsUrl = UrlRewrites.current().apply(originalUrl);
         log.debug("Reading logs from {}", logsUrl);
 
         HttpUriRequest httpGet = new HttpGet(logsUrl);
         addAuthorization(httpGet);
-        HttpResponse response = client.execute(httpGet);
+        HttpResponse response = client.execute(httpGet, SafeApacheHttp.context(originalUrl));
 
         try (InputStream is = response.getEntity().getContent();
                 BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
