@@ -42,6 +42,14 @@ The reproduce part only holds the repositories PNC removed from the `pom.xml` fi
 the PNC repository only. Apply it to reproduce the PNC build exactly; skip it when building outside PNC, where the
 removed repositories may still be needed to resolve the dependencies.
 
+# Internal repositories
+
+The diff is read from the build's internal repository on GitHub or GitLab (see
+[the configuration guide](configuration.html#internal-scm-repositories-github-and-gitlab) for the tokens). GitLab does
+not return binary files, nor patches over its size limit, in a diff: bacon reads those files through the raw file API
+and writes them as text hunks or `GIT binary patch` blocks, so the parts still apply. Files that cannot be read stay
+as `Binary files ... differ` and are listed in a warning; they cannot be applied from the diff.
+
 # Secrets in the diff
 
 Known credentials are masked only in the metadata files the manipulators write (reports such as

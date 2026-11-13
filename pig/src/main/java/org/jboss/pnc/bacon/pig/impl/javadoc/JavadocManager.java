@@ -41,7 +41,6 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.common.DeliverableManager;
 import org.jboss.pnc.bacon.pig.impl.config.GenerationData;
@@ -57,6 +56,7 @@ import org.jboss.pnc.bacon.pig.impl.utils.pom.Dependency;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Profile;
 import org.jboss.pnc.bacon.pig.impl.utils.pom.Project;
 import org.jboss.pnc.bacon.pig.impl.utils.repository.RepositoryProvider;
+import org.jboss.pnc.bacon.pnc.ScmCredentials;
 import org.jboss.pnc.mavenmanipulator.cli.Cli;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,13 +182,12 @@ public class JavadocManager extends DeliverableManager<GenerationData<?>, Void> 
                     .setURI(generationProject)
                     .setDirectory(topLevelDirectory);
 
-            // Configure token if present
-            String token = Config.instance().getActiveProfile().getGithubToken();
-            if (token != null && !token.isBlank()) {
-                log.debug("Using GitHub token authentication for clone");
+            // Configure the token of the git provider (GitHub or GitLab) if present
+            ScmCredentials.forGitClone(generationProject).ifPresent(credentials -> {
+                log.debug("Using {} token authentication for clone", credentials.username());
                 cloneCommand.setCredentialsProvider(
-                        new UsernamePasswordCredentialsProvider("x-access-token", token));
-            }
+                        new UsernamePasswordCredentialsProvider(credentials.username(), credentials.password()));
+            });
 
             try (Git git = cloneCommand.call()) {
                 if (scmRevision != null && !scmRevision.isBlank()) {

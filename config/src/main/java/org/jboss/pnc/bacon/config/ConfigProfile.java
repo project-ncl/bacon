@@ -33,6 +33,7 @@ public class ConfigProfile {
     private String ldapUsernamePassword;
     private AutobuildConfig autobuild;
     private String githubToken;
+    private String gitlabToken;
     /** URL prefix to replace => replacement, for downloads; see the --url-rewrite option. */
     private Map<String, String> urlRewrites;
     private RexConfig rex;
