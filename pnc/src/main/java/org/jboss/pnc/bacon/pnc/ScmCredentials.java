@@ -46,8 +46,7 @@ public final class ScmCredentials {
     /** Whether the SCM URL (scp-like, ssh or http(s)) is on a GitLab instance. */
     public static boolean isGitlab(String scmUrl) {
         try {
-            BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
-                    .normalizeScmRepository(scmUrl);
+            ScmRepositoryUrl repository = ScmRepositoryUrl.parse(scmUrl);
             return repository != null && repository.isGitlab();
         } catch (IllegalArgumentException e) {
             // not a URL bacon can parse
