@@ -339,4 +339,20 @@ class BuildSourcesDownloaderTest {
                 BuildSourcesDownloader.alignedVersionsFromTag("1.70-f1459fdb"));
         assertEquals(List.of(), BuildSourcesDownloader.alignedVersionsFromTag(null));
     }
+
+    @Test
+    void masksOnlyMetadataFiles() {
+        String source = "diff --git a/src/QuotedId.java b/src/QuotedId.java\n" + "--- a/src/QuotedId.java\n"
+                + "+++ b/src/QuotedId.java\n" + "@@ -1 +1 @@\n" + "-old\n"
+                + "+        public QuotedId(Token t) { token=t;}\n";
+        String diff = source + "diff --git a/target/alignmentReport.json b/target/alignmentReport.json\n"
+                + "new file mode 100644\n" + "--- /dev/null\n" + "+++ b/target/alignmentReport.json\n"
+                + "@@ -0,0 +1 @@\n" + "+{\"args\": \"-Dpassword=hunter2hunter2 --token=abcdefabcdefabcdef\"}\n";
+
+        String masked = BuildSourcesDownloader.maskSecrets(diff);
+
+        assertTrue(masked.startsWith(source), masked);
+        assertFalse(masked.contains("hunter2hunter2"), masked);
+        assertFalse(masked.contains("abcdefabcdefabcdef"), masked);
+    }
 }
