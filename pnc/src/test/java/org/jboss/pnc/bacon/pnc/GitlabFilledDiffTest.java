@@ -65,6 +65,9 @@ class GitlabFilledDiffTest {
                 "@InvocationPoint(invocationPoint = InvocationStage.LAST)\nprintln 'x'");
         write("groovy/allow-insecure-repos-gme.groovy", "println 'é ü – unicode'\r\nprintln 'crlf'\r\n");
         write("target/pom-manip-ext-marker.txt", "");
+        // file names git writes quoted (non-ASCII) or that contain a space
+        write("docs/na\u00efve.txt", "na\u00efve\n");
+        write("docs/with space.txt", "spaced\n");
         write("generated/SqlLexer.java", lines("// generated lexer line ", 12000)); // > 200 KiB, new text file
         write("big-modified.txt", lines("aligned line ", 9000)); // > 200 KiB patch, modified text file
         Files.write(repo.resolve("lib/new.jar"), randomBytes(5000, 3)); // new binary
@@ -127,6 +130,16 @@ class GitlabFilledDiffTest {
     }
 
     @Test
+    void pathsAreQuotedLikeGit() throws Exception {
+        for (String path : git(repo, "-c", "core.quotePath=false", "diff", "--name-only", base, head).split("\n")) {
+            String quotedByGit = git(repo, "diff", "--name-only", base, head, "--", path);
+            assertThat(GitPatchContent.quotePath(path)).as(path).isEqualTo(quotedByGit);
+        }
+        assertThat(GitPatchContent.quotePath("a/docs/na\u00efve.txt")).isEqualTo("\"a/docs/na\\303\\257ve.txt\"");
+        assertThat(GitPatchContent.quotePath("b/docs/with space.txt")).isEqualTo("b/docs/with space.txt");
+    }
+
+    @Test
     void blobIdMatchesGit() throws Exception {
         byte[] content = randomBytes(777, 9);
         Files.write(tmp.resolve("blob"), content);
@@ -153,7 +166,9 @@ class GitlabFilledDiffTest {
      */
     private ArrayNode gitlabLikeDiffs() throws Exception {
         ArrayNode diffs = JSON.createArrayNode();
-        for (String line : git(repo, "diff", "--no-renames", "--name-status", base, head).split("\n")) {
+        // raw names, as in GitLab's JSON
+        for (String line : git(repo, "-c", "core.quotePath=false", "diff", "--no-renames", "--name-status", base, head)
+                .split("\n")) {
             String status = line.substring(0, 1);
             String path = line.substring(line.indexOf('\t') + 1);
             ObjectNode entry = diffs.addObject();
@@ -165,7 +180,8 @@ class GitlabFilledDiffTest {
             entry.put("a_mode", status.equals("A") ? "0" : "100644");
             entry.put("b_mode", status.equals("D") ? "0" : "100644");
 
-            String patch = git(repo, "diff", "--no-renames", base, head, "--", path) + "\n";
+            String patch = git(repo, "-c", "core.quotePath=false", "diff", "--no-renames", base, head, "--", path)
+                    + "\n";
             int hunk = patch.indexOf("\n@@");
             boolean binary = patch.contains("\nBinary files ");
             if (binary) {

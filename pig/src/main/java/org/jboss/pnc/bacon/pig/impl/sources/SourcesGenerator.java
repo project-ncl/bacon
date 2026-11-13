@@ -176,13 +176,14 @@ public class SourcesGenerator {
      * {@link BuildSourcesDownloader#scmUrlCandidates}.
      */
     static List<String> scmUrls(PncBuild build) {
-        return Stream.of(build.getScmRepository(), build.getInternalScmUrl())
-                .filter(url -> url != null && !url.isBlank())
-                .distinct()
-                .collect(Collectors.toList());
+        // PncBuild.scmRepository holds the build's scmUrl
+        return BuildSourcesDownloader.scmUrlCandidates(build.getScmRepository(), build.getInternalScmUrl());
     }
 
-    /** The build's SCM revision, or none, so that a missing revision gets the "no SCM revision" error. */
+    /**
+     * The build's SCM revision, or none, so that a missing revision gets the "no SCM revision" error. Only the build's
+     * own revision, as PiG always used: the configured revision may have moved since.
+     */
     private static List<String> revisions(PncBuild build) {
         return build.getScmRevision() == null || build.getScmRevision().isBlank() ? List.of()
                 : List.of(build.getScmRevision());

@@ -45,9 +45,14 @@ public final class ScmCredentials {
 
     /** Whether the SCM URL (scp-like, ssh or http(s)) is on a GitLab instance. */
     public static boolean isGitlab(String scmUrl) {
-        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
-                .normalizeScmRepository(scmUrl);
-        return repository != null && repository.isGitlab();
+        try {
+            BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
+                    .normalizeScmRepository(scmUrl);
+            return repository != null && repository.isGitlab();
+        } catch (IllegalArgumentException e) {
+            // not a URL bacon can parse
+            return false;
+        }
     }
 
     /**
@@ -70,7 +75,14 @@ public final class ScmCredentials {
     static String gitlabToken() {
         ConfigProfile profile = activeProfile();
         String token = profile == null ? null : blankToNull(profile.getGitlabToken());
-        return token != null ? token : blankToNull(System.getenv("GITLAB_TOKEN"));
+        if (token != null) {
+            return token;
+        }
+        token = blankToNull(System.getenv("GITLAB_TOKEN"));
+        if (token != null) {
+            log.debug("Using the GITLAB_TOKEN environment variable as the GitLab token");
+        }
+        return token;
     }
 
     /** The active Bacon profile, or null when no configuration is loaded (e.g. outside the CLI). */

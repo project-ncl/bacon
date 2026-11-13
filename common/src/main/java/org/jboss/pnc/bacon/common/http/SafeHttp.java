@@ -47,7 +47,13 @@ public final class SafeHttp {
     /** Same default as the PNC REST client's connect timeout. */
     public static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
 
-    static final int MAX_REDIRECTS = 10;
+    public static final int MAX_REDIRECTS = 10;
+
+    /**
+     * A default for {@code responseTimeout}: how long a server may take to start answering (status and headers). The
+     * body is not limited, so large downloads and long logs still work.
+     */
+    public static final Duration RESPONSE_TIMEOUT = Duration.ofMinutes(2);
 
     private SafeHttp() {
     }
@@ -164,7 +170,7 @@ public final class SafeHttp {
     /**
      * Whether {@code failure} (or one of its causes) means the host could not be reached at all: unknown host,
      * connection refused or unreachable, or {@link #CONNECT_TIMEOUT} exceeded. Further requests to the same host fail
-     * the same way, so callers stop trying it.
+     * the same way, so callers stop trying it. A TLS handshake failure is not one: the host is reachable.
      */
     public static boolean isConnectFailure(Throwable failure) {
         for (Throwable t = failure; t != null; t = t.getCause() == t ? null : t.getCause()) {

@@ -26,7 +26,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.jboss.pnc.bacon.common.http.SafeHttp;
 import org.jboss.pnc.bacon.common.http.UrlRewrites;
@@ -44,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 final class GitlabSources {
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Pattern FULL_COMMIT_ID = Pattern.compile("[0-9a-fA-F]{40}");
     private static final int PREVIEW_BYTES = 300;
     private static final int PER_PAGE = 100;
 
@@ -65,7 +68,6 @@ final class GitlabSources {
 
     static final Credential NO_TOKEN = new Credential(null, null, "no token");
 
-    /** HTTP error from GitLab. */
     /** Raw files larger than this are not read into memory; they stay "Binary files ... differ" in the diff. */
     static final long MAX_RAW_FILE_BYTES = 100L * 1024 * 1024;
 
@@ -76,6 +78,7 @@ final class GitlabSources {
         }
     }
 
+    /** HTTP error from GitLab. */
     static final class GitlabApiException extends RuntimeException {
         final int status;
 
@@ -119,7 +122,7 @@ final class GitlabSources {
     }
 
     static boolean isGitlabHost(String host) {
-        return host != null && host.toLowerCase().contains("gitlab");
+        return host != null && host.toLowerCase(Locale.ROOT).contains("gitlab");
     }
 
     /** The credentials to try for a token, most common first. */
@@ -143,7 +146,8 @@ final class GitlabSources {
     }
 
     /**
-     * Whether {@code base} is an ancestor of {@code head} (their merge base is {@code base}).
+     * Whether {@code base} is an ancestor of {@code head}: their merge base is the commit {@code base} names. A
+     * {@code base} that is not a full commit id (a branch, a tag or a short id) is resolved first.
      */
     boolean isAncestor(String base, String head, Credential credential) {
         JsonNode mergeBase = getJson(
@@ -152,7 +156,16 @@ final class GitlabSources {
                                 + encode(head)),
                 credential);
         String mergeBaseId = mergeBase.path("id").asText("");
-        return !mergeBaseId.isEmpty() && (mergeBaseId.equals(base) || mergeBaseId.startsWith(base));
+        return !mergeBaseId.isEmpty() && mergeBaseId.equalsIgnoreCase(commitId(base, credential));
+    }
+
+    /** The full commit id of {@code ref}, asking GitLab unless it already is one. */
+    private String commitId(String ref, Credential credential) {
+        if (FULL_COMMIT_ID.matcher(ref).matches()) {
+            return ref;
+        }
+        return getJson(URI.create(projectUrl() + "/repository/commits/" + encode(ref)), credential).path("id")
+                .asText("");
     }
 
     /**
@@ -165,7 +178,9 @@ final class GitlabSources {
                                 + "&straight=true"),
                 credential);
         if (compare.path("compare_timeout").asBoolean(false)) {
-            log.warn("GitLab timed out computing the comparison {}..{}; the diff may be incomplete", base, head);
+            // GitLab then returns only part of the diffs: a diff written from them would silently miss files
+            throw new RuntimeException(
+                    "GitLab timed out computing the comparison " + base + ".." + head + "; its diff is incomplete");
         }
         return toUnifiedDiff(compare.path("diffs"), contentFetcher(credential), base, head);
     }
@@ -223,7 +238,11 @@ final class GitlabSources {
             boolean renamedFile = entry.path("renamed_file").asBoolean(false);
             String diff = entry.path("diff").asText("");
 
-            out.append("diff --git a/").append(oldPath).append(" b/").append(newPath).append('\n');
+            out.append("diff --git ")
+                    .append(GitPatchContent.quotePath("a/" + oldPath))
+                    .append(' ')
+                    .append(GitPatchContent.quotePath("b/" + newPath))
+                    .append('\n');
             if (newFile) {
                 out.append("new file mode ").append(bMode).append('\n');
             } else if (deletedFile) {
@@ -233,13 +252,17 @@ final class GitlabSources {
                 out.append("new mode ").append(bMode).append('\n');
             }
             if (renamedFile) {
-                out.append("rename from ").append(oldPath).append('\n');
-                out.append("rename to ").append(newPath).append('\n');
+                out.append("rename from ").append(GitPatchContent.quotePath(oldPath)).append('\n');
+                out.append("rename to ").append(GitPatchContent.quotePath(newPath)).append('\n');
             }
 
             if (diff.startsWith("@@")) {
-                out.append("--- ").append(newFile ? "/dev/null" : "a/" + oldPath).append('\n');
-                out.append("+++ ").append(deletedFile ? "/dev/null" : "b/" + newPath).append('\n');
+                out.append("--- ")
+                        .append(newFile ? "/dev/null" : GitPatchContent.quotePath("a/" + oldPath))
+                        .append('\n');
+                out.append("+++ ")
+                        .append(deletedFile ? "/dev/null" : GitPatchContent.quotePath("b/" + newPath))
+                        .append('\n');
                 out.append(diff);
                 if (!diff.endsWith("\n")) {
                     out.append('\n');
@@ -263,9 +286,9 @@ final class GitlabSources {
                 out.append(filled);
             } else {
                 out.append("Binary files ")
-                        .append(newFile ? "/dev/null" : "a/" + oldPath)
+                        .append(newFile ? "/dev/null" : GitPatchContent.quotePath("a/" + oldPath))
                         .append(" and ")
-                        .append(deletedFile ? "/dev/null" : "b/" + newPath)
+                        .append(deletedFile ? "/dev/null" : GitPatchContent.quotePath("b/" + newPath))
                         .append(" differ\n");
                 incomplete.add(newPath);
             }
@@ -358,7 +381,9 @@ final class GitlabSources {
                     uri,
                     Map.of("Accept", "application/json, */*", "User-Agent", "bacon"),
                     credentialHeaders,
-                    rewrites);
+                    rewrites,
+                    List.of(),
+                    SafeHttp.RESPONSE_TIMEOUT);
             try (InputStream body = response.body()) {
                 if (response.statusCode() != 200) {
                     byte[] bytes = body.readNBytes(PREVIEW_BYTES);
