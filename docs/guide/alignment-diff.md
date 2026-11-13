@@ -47,9 +47,9 @@ removed repositories may still be needed to resolve the dependencies.
 The diff is read from the build's internal repository on GitHub or GitLab (see
 [the configuration guide](configuration.html#internal-scm-repositories-github-and-gitlab) for the tokens). GitLab does
 not return binary files, nor patches over its size limit, in a diff: bacon reads those files through the raw file API
-and writes them as text hunks or `GIT binary patch` blocks, so the parts still apply. Files that cannot be read, or
-larger than 100 MiB, stay as `Binary files ... differ` and are listed in a warning; they cannot be applied from the
-diff.
+and writes them as text hunks or `GIT binary patch` blocks, so the parts still apply. Files that cannot be read, larger
+than 100 MiB, or read after 512 MiB of such files for the same diff, stay as `Binary files ... differ` and are listed in
+a warning; they cannot be applied from the diff.
 
 # Secrets in the diff
 
