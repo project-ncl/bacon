@@ -89,6 +89,15 @@ class AppTest {
     }
 
     @Test
+    void testInvalidUrlRewrite() {
+        App app = new App();
+        assertEquals(
+                2,
+                app.run(new String[] { "--url-rewrite", "https://host.example.com", "pnc", "build", "get", "0" }));
+        assertThat(systemErr.getText()).contains("Invalid URL rewrite 'https://host.example.com'");
+    }
+
+    @Test
     void testVerbose() {
         ObjectHelper.setRootLoggingLevel(Level.INFO);
         ObjectHelper.setLoggingLevel("org.jboss.pnc.client", Level.WARN);
@@ -240,7 +249,9 @@ class AppTest {
                 Usage: bacon pnc admin pnc-status set [-hoqvV] [--no-color] [--banner=<banner>]
                                                       [--eta=<eta>]
                                                       [-p=<configurationFileLocation>]
-                                                      [--profile=<profile>] <isMaintenanceMode>
+                                                      [--profile=<profile>]
+                                                      [--url-rewrite=<from>=<to>]...
+                                                      <isMaintenanceMode>
                 This will set the PNC status
                       <isMaintenanceMode>   Is maintenance mode ON or OFF?
                       --banner=<banner>     Banner
@@ -253,6 +264,10 @@ class AppTest {
                                             Path to PNC configuration folder
                       --profile=<profile>   PNC Configuration profile
                   -q, --quiet               Silent output
+                      --url-rewrite=<from>=<to>
+                                            Download from <to> instead of URLs starting with
+                                              <from>. Repeatable; added to the profile's
+                                              urlRewrites.
                   -v, --verbose             Verbose output
                   -V, --version             Print version information and exit.
 

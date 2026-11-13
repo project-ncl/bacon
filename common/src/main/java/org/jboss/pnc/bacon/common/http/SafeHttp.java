@@ -32,8 +32,8 @@ import java.util.Optional;
  * <p>
  * {@link HttpClient.Redirect#NORMAL} forwards explicit headers such as {@code Authorization} to whatever host a
  * redirect points to. {@link #get} follows redirects the same way (never from https to http) but sends the credential
- * headers only to the origin (scheme, host and port) of the first URL. Clients from {@link #newClient()} also bound
- * the time to establish a connection.
+ * headers only to the origin (scheme, host and port) of the first URL, and applies the {@link UrlRewrites} to the
+ * first URL and to every redirect. Clients from {@link #newClient()} also bound the time to establish a connection.
  */
 public final class SafeHttp {
 
@@ -53,12 +53,22 @@ public final class SafeHttp {
                 .build();
     }
 
+    /** {@link #get(HttpClient, URI, Map, Map, UrlRewrites)} with {@link UrlRewrites#current()}. */
+    public static HttpResponse<InputStream> get(
+            HttpClient client,
+            URI uri,
+            Map<String, String> headers,
+            Map<String, String> credentialHeaders) throws IOException, InterruptedException {
+        return get(client, uri, headers, credentialHeaders, UrlRewrites.current());
+    }
+
     /**
      * Sends a GET to {@code uri}, following redirects like {@link HttpClient.Redirect#NORMAL}: a redirect without a
      * {@code Location}, or from https to http, is returned as the response.
      *
      * @param headers headers sent with every request
-     * @param credentialHeaders headers sent only to the origin of {@code uri}
+     * @param credentialHeaders headers sent only to the origin of the (rewritten) {@code uri}
+     * @param rewrites applied to {@code uri} and to every redirect
      * @return the first response that is not a followed redirect; the caller reads and closes its body
      * @throws IOException on I/O errors, including more than {@link #MAX_REDIRECTS} redirects
      */
@@ -66,12 +76,14 @@ public final class SafeHttp {
             HttpClient client,
             URI uri,
             Map<String, String> headers,
-            Map<String, String> credentialHeaders) throws IOException, InterruptedException {
-        URI current = uri;
+            Map<String, String> credentialHeaders,
+            UrlRewrites rewrites) throws IOException, InterruptedException {
+        URI first = rewrites.apply(uri);
+        URI current = first;
         for (int redirects = 0;; redirects++) {
             HttpRequest.Builder request = HttpRequest.newBuilder(current).GET();
             headers.forEach(request::header);
-            if (sameOrigin(uri, current)) {
+            if (sameOrigin(first, current)) {
                 credentialHeaders.forEach(request::header);
             }
 
@@ -84,7 +96,7 @@ public final class SafeHttp {
             if (location.isEmpty()) {
                 return response;
             }
-            URI next = current.resolve(location.get());
+            URI next = rewrites.apply(current.resolve(location.get()));
             if ("https".equalsIgnoreCase(current.getScheme()) && "http".equalsIgnoreCase(next.getScheme())) {
                 return response;
             }

@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.common.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,7 +49,8 @@ class SafeHttpTest {
         second = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         first.createContext("/start", exchange -> {
             record(exchange.getRequestURI().getPath(), exchange.getRequestHeaders().getFirst("Authorization"));
-            exchange.getResponseHeaders().add("Location", base(second) + "/end?q=1");
+            // a host that is not reachable here: only a rewrite makes the redirect work
+            exchange.getResponseHeaders().add("Location", "http://redirected.invalid/end?q=1");
             exchange.sendResponseHeaders(307, -1);
             exchange.close();
         });
@@ -78,12 +81,18 @@ class SafeHttpTest {
     }
 
     @Test
-    void followsRedirectsAndSendsCredentialsOnlyToTheFirstOrigin() throws Exception {
+    void rewritesTheUrlAndRedirectsAndSendsCredentialsOnlyToTheFirstOrigin() throws Exception {
+        UrlRewrites rewrites = new UrlRewrites(
+                List.of(
+                        UrlRewrites.parse("http://unreachable.invalid=" + base(first)),
+                        UrlRewrites.parse("http://redirected.invalid=" + base(second))));
+
         HttpResponse<InputStream> response = SafeHttp.get(
                 SafeHttp.newClient(),
-                URI.create(base(first) + "/start"),
+                URI.create("http://unreachable.invalid/start"),
                 Map.of(),
-                Map.of("Authorization", "Bearer t"));
+                Map.of("Authorization", "Bearer t"),
+                rewrites);
 
         try (InputStream body = response.body()) {
             assertEquals(200, response.statusCode());
@@ -92,5 +101,17 @@ class SafeHttpTest {
         assertEquals(URI.create(base(second) + "/end?q=1"), response.uri());
         assertEquals("Bearer t", authorizations.get("/start"));
         assertEquals("<none>", authorizations.get("/end?q=1"));
+    }
+
+    @Test
+    void withoutRewritesAnUnfollowableRedirectFailsToConnect() {
+        UrlRewrites none = new UrlRewrites(List.of());
+        try {
+            SafeHttp.get(SafeHttp.newClient(), URI.create(base(first) + "/start"), Map.of(), Map.of(), none);
+        } catch (IOException | InterruptedException expected) {
+            assertNull(authorizations.get("/end?q=1"));
+            return;
+        }
+        throw new AssertionError("redirect to an unknown host should fail");
     }
 }

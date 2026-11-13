@@ -17,12 +17,9 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +32,6 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.enums.RebuildMode;
-import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractBuildListCommand;
@@ -318,16 +314,7 @@ public class BuildCli {
          */
         @Override
         public Integer call() throws Exception {
-            try (BuildClient buildClient = new BuildClient(
-                    PncClientHelper.getPncConfiguration(PncClientHelper.credentialsAvailable()))) {
-                Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
-                if (streamLogs.isPresent()) {
-                    try (BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(streamLogs.get(), StandardCharsets.UTF_8))) {
-                        reader.lines().forEach(log::info);
-                    }
-                }
-            }
+            AlignmentLog.forEachLine(buildId, log::info);
             return 0;
         }
     }

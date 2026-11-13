@@ -17,6 +17,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,7 @@ public class BifrostClient {
             query += "&follow=false";
         }
 
-        URI logsUrl = baseUrl.resolve(URI.create("/text?" + query));
+        URI logsUrl = UrlRewrites.current().apply(baseUrl.resolve(URI.create("/text?" + query)));
         log.debug("Reading logs from {}", logsUrl);
 
         HttpUriRequest httpGet = new HttpGet(logsUrl);
