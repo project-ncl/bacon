@@ -1,18 +1,22 @@
 package org.jboss.bacon.experimental.impl.projectfinder;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
+import org.jboss.pnc.bacon.common.http.SafeHttp;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,17 +63,23 @@ public class PncEnvironmentGenerator {
 
         while (pageIndex < totalPages) {
             String url = apiBase + "/environments?pageSize=200&pageIndex=" + pageIndex;
-            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(url)).GET();
-            PncClientHelper.authorizationHeader().ifPresent(header -> requestBuilder.header("Authorization", header));
-            HttpRequest request = requestBuilder.build();
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            // credentials only to PNC's origin, also on redirects
+            Map<String, String> credentials = PncClientHelper.authorizationHeader()
+                    .map(header -> Map.of("Authorization", header))
+                    .orElse(Map.of());
+            HttpResponse<InputStream> response = SafeHttp
+                    .get(httpClient, URI.create(url), Map.of(), credentials, UrlRewrites.current());
+            String body;
+            try (InputStream in = response.body()) {
+                body = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            }
 
             if (response.statusCode() != 200) {
                 System.err.println("HTTP " + response.statusCode() + " from " + url);
                 System.exit(1);
             }
 
-            JsonNode root = mapper.readTree(response.body());
+            JsonNode root = mapper.readTree(body);
             if (root.has("totalPages")) {
                 totalPages = root.get("totalPages").asInt();
             }
@@ -111,7 +121,9 @@ public class PncEnvironmentGenerator {
 
     private static HttpClient buildHttpClient() {
         HttpClient.Builder builder = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.NORMAL);
+                // SafeHttp.get follows the redirects
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .connectTimeout(SafeHttp.CONNECT_TIMEOUT);
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, new TrustManager[] { new X509TrustManager() {

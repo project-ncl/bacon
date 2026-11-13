@@ -110,10 +110,11 @@ bacon pnc build download-build-outputs <id> \
   replaced by `<to>`; the rest of the path and the query are kept.
 - The longest matching `<from>` wins; with the same `<from>`, the command line
   rule wins over the profile's.
-- Rewrites apply to artifact downloads, to the build log read from bifrost and,
-  when rules are configured, to the alignment log: both the request to PNC (a
-  rule matching the PNC host changes where it is asked) and PNC's redirect to
-  bifrost.
+- Rewrites apply to the downloads bacon makes itself, and to their redirects:
+  built artifacts, PiG downloads, source archives and alignment diffs, bifrost
+  logs and, when rules are configured, the alignment log (both the request to
+  PNC, so a rule matching the PNC host changes where it is asked, and PNC's
+  redirect to bifrost). The PNC REST client itself uses the profile's PNC URL.
 - Credentials (e.g. `ldapUsernamePassword`) are sent only to the origin of the
   first, rewritten URL, and for the alignment log to the profile's
   `bifrostBaseurl` (rewritten too), never to another host a redirect points to.
