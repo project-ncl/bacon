@@ -74,6 +74,7 @@ class AlignmentLogTest {
 
         PncConfig pncConfig = new PncConfig();
         pncConfig.setUrl("http://127.0.0.1:" + pnc.getAddress().getPort());
+        pncConfig.setBifrostBaseurl("https://bifrost.unreachable.invalid");
         ConfigProfile profile = new ConfigProfile();
         profile.setName("default");
         profile.setPnc(pncConfig);
@@ -90,16 +91,27 @@ class AlignmentLogTest {
         pnc.stop(0);
         bifrost.stop(0);
         Config.setInstance(null);
-        UrlRewrites.setCommandLineRules(List.of());
+        UrlRewrites.reset();
     }
 
     @Test
-    void followsPncsRedirectToTheRewrittenBifrost() throws Exception {
+    void followsPncsRedirectToTheRewrittenBifrostWithTheCredentials() throws Exception {
         List<String> lines = new ArrayList<>();
         AlignmentLog.forEachLine("B1", lines::add);
 
         assertThat(lines).containsExactly("line 1", "line 2");
         assertThat(authorizations.get("/pnc-rest/v2/builds/B1/logs/align")).startsWith("Basic ");
+        // the profile's bifrost gets the credentials, as for the build log
+        assertThat(authorizations.get("bifrost")).startsWith("Basic ");
+    }
+
+    @Test
+    void aRedirectToAnotherHostGetsNoCredentials() throws Exception {
+        Config.instance().getActiveProfile().getPnc().setBifrostBaseurl("https://other.invalid");
+        List<String> lines = new ArrayList<>();
+        AlignmentLog.forEachLine("B1", lines::add);
+
+        assertThat(lines).containsExactly("line 1", "line 2");
         assertThat(authorizations.get("bifrost")).isEqualTo("null");
     }
 

@@ -44,7 +44,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class UrlRewrites {
 
+    // set once per command, like Config's profile; see reset() for tests
     private static volatile List<String> commandLineRules = List.of();
+
+    private static volatile Cached cached;
 
     private static final Set<URI> WARNED_PLAIN_HTTP = ConcurrentHashMap.newKeySet();
 
@@ -68,15 +71,44 @@ public final class UrlRewrites {
         commandLineRules = copy;
     }
 
-    /** The rules of the command line and the active profile. */
+    /** Clears the command line rules, for tests. */
+    public static void reset() {
+        commandLineRules = List.of();
+        cached = null;
+    }
+
+    /**
+     * The rules of the command line and the active profile, parsed once for as long as both stay the same.
+     *
+     * @throws RuntimeException if the configuration cannot be loaded, like {@link Config#instance()}
+     */
     public static UrlRewrites current() {
-        List<Rule> rules = new ArrayList<>();
-        commandLineRules.forEach(value -> rules.add(parse(value)));
+        List<String> commandLine = commandLineRules;
         Map<String, String> profileRules = Config.instance().getActiveProfile().getUrlRewrites();
+        Cached last = cached;
+        if (last != null && last.commandLine == commandLine && last.profile == profileRules) {
+            return last.rewrites;
+        }
+        List<Rule> rules = new ArrayList<>();
+        commandLine.forEach(value -> rules.add(parse(value)));
         if (profileRules != null) {
             profileRules.forEach((from, to) -> rules.add(rule(from, to, "urlRewrites entry '" + from + "'")));
         }
-        return new UrlRewrites(rules);
+        UrlRewrites rewrites = new UrlRewrites(rules);
+        cached = new Cached(commandLine, profileRules, rewrites);
+        return rewrites;
+    }
+
+    private static final class Cached {
+        final List<String> commandLine;
+        final Map<String, String> profile;
+        final UrlRewrites rewrites;
+
+        Cached(List<String> commandLine, Map<String, String> profile, UrlRewrites rewrites) {
+            this.commandLine = commandLine;
+            this.profile = profile;
+            this.rewrites = rewrites;
+        }
     }
 
     /** {@code uri} with the longest matching prefix replaced, or {@code uri} itself when no rule matches. */

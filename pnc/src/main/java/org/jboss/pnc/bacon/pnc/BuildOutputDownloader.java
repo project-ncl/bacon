@@ -46,6 +46,7 @@ import java.util.zip.ZipOutputStream;
 import org.jboss.pnc.bacon.auth.LdapClient;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
 import org.jboss.pnc.bacon.common.http.SafeHttp;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.client.BuildClient;
@@ -256,6 +257,8 @@ public class BuildOutputDownloader {
                     throw new UncheckedIOException(e);
                 }
             });
+        } catch (UncheckedIOException e) {
+            throw new RuntimeException("Failed to download alignment log for build " + buildId, e.getCause());
         } catch (Exception e) {
             throw new RuntimeException("Failed to download alignment log for build " + buildId, e);
         }
@@ -271,7 +274,8 @@ public class BuildOutputDownloader {
                     .basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
                     .map(header -> Map.of("Authorization", header))
                     .orElse(Map.of());
-            HttpResponse<InputStream> response = SafeHttp.get(SafeHttp.newClient(), uri, Map.of(), credentials);
+            HttpResponse<InputStream> response = SafeHttp
+                    .get(SafeHttp.newClient(), uri, Map.of(), credentials, UrlRewrites.current());
             try (InputStream in = response.body()) {
                 if (response.statusCode() < 200 || response.statusCode() > 299) {
                     throw new RuntimeException(

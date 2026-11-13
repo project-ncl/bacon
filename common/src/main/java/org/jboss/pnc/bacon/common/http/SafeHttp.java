@@ -24,6 +24,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,8 +34,9 @@ import java.util.Optional;
  * <p>
  * {@link HttpClient.Redirect#NORMAL} forwards explicit headers such as {@code Authorization} to whatever host a
  * redirect points to. {@link #get} follows redirects the same way (never from https to http) but sends the credential
- * headers only to the origin (scheme, host and port) of the first URL, and applies the {@link UrlRewrites} to the
- * first URL and to every redirect. Clients from {@link #newClient()} also bound the time to establish a connection.
+ * headers only to the origin (scheme, host and port) of the first URL and of origins the caller trusts, and applies
+ * the {@link UrlRewrites} to the first URL and to every redirect. Clients from {@link #newClient()} also bound the time
+ * to establish a connection.
  */
 public final class SafeHttp {
 
@@ -53,22 +56,27 @@ public final class SafeHttp {
                 .build();
     }
 
-    /** {@link #get(HttpClient, URI, Map, Map, UrlRewrites)} with {@link UrlRewrites#current()}. */
+    /** {@link #get(HttpClient, URI, Map, Map, UrlRewrites, List)} without other credential origins. */
     public static HttpResponse<InputStream> get(
             HttpClient client,
             URI uri,
             Map<String, String> headers,
-            Map<String, String> credentialHeaders) throws IOException, InterruptedException {
-        return get(client, uri, headers, credentialHeaders, UrlRewrites.current());
+            Map<String, String> credentialHeaders,
+            UrlRewrites rewrites) throws IOException, InterruptedException {
+        return get(client, uri, headers, credentialHeaders, rewrites, List.of());
     }
 
     /**
      * Sends a GET to {@code uri}, following redirects like {@link HttpClient.Redirect#NORMAL}: a redirect without a
-     * {@code Location}, or from https to http, is returned as the response.
+     * {@code Location}, or from https to http, is returned as the response. The https to http check is made on the
+     * URLs before rewriting (as the server sent them): a rule may rewrite to plain http on purpose.
      *
      * @param headers headers sent with every request
-     * @param credentialHeaders headers sent only to the origin of the (rewritten) {@code uri}
-     * @param rewrites applied to {@code uri} and to every redirect
+     * @param credentialHeaders headers sent only to the origin of the (rewritten) {@code uri} and to
+     *        {@code credentialOrigins}
+     * @param rewrites applied to {@code uri}, to every redirect and to {@code credentialOrigins}
+     * @param credentialOrigins other URLs whose origin is trusted with the credentials, e.g. a service the first URL
+     *        redirects to and that bacon already sends them to
      * @return the first response that is not a followed redirect; the caller reads and closes its body
      * @throws IOException on I/O errors, including more than {@link #MAX_REDIRECTS} redirects
      */
@@ -77,13 +85,19 @@ public final class SafeHttp {
             URI uri,
             Map<String, String> headers,
             Map<String, String> credentialHeaders,
-            UrlRewrites rewrites) throws IOException, InterruptedException {
-        URI first = rewrites.apply(uri);
-        URI current = first;
+            UrlRewrites rewrites,
+            List<URI> credentialOrigins) throws IOException, InterruptedException {
+        List<URI> trusted = new ArrayList<>();
+        trusted.add(rewrites.apply(uri));
+        credentialOrigins.forEach(origin -> trusted.add(rewrites.apply(origin)));
+
+        URI requested = uri;
+        URI current = trusted.get(0);
         for (int redirects = 0;; redirects++) {
             HttpRequest.Builder request = HttpRequest.newBuilder(current).GET();
             headers.forEach(request::header);
-            if (sameOrigin(first, current)) {
+            URI target = current;
+            if (trusted.stream().anyMatch(origin -> sameOrigin(origin, target))) {
                 credentialHeaders.forEach(request::header);
             }
 
@@ -96,16 +110,30 @@ public final class SafeHttp {
             if (location.isEmpty()) {
                 return response;
             }
-            URI next = rewrites.apply(current.resolve(location.get()));
-            if ("https".equalsIgnoreCase(current.getScheme()) && "http".equalsIgnoreCase(next.getScheme())) {
+            if (isDowngrade(requested, location.get())) {
                 return response;
             }
+            // a relative Location is resolved against the URL requested
+            URI sent = current.resolve(location.get());
+            boolean absolute = URI.create(location.get()).isAbsolute();
             response.body().close();
             if (redirects >= MAX_REDIRECTS) {
                 throw new IOException("Too many redirects from " + uri + " (maximum " + MAX_REDIRECTS + ")");
             }
-            current = next;
+            // a relative Location is already on the (rewritten) host requested
+            requested = absolute ? sent : requested.resolve(location.get());
+            current = absolute ? rewrites.apply(sent) : sent;
         }
+    }
+
+    /**
+     * Whether a server answering {@code requested} (before rewriting) with {@code location} redirects from https to
+     * http. Only an absolute {@code Location} can change the scheme; rewriting it afterwards does not count.
+     */
+    static boolean isDowngrade(URI requested, String location) {
+        URI target = URI.create(location);
+        return target.isAbsolute() && "https".equalsIgnoreCase(requested.getScheme())
+                && "http".equalsIgnoreCase(target.getScheme());
     }
 
     /** Whether both URIs have the same scheme, host and (default or explicit) port. */
