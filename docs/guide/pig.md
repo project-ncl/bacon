@@ -68,6 +68,9 @@ The github token can be obtained by:
 - Click on 'Generate token'
 - Copy the displayed token and input it in the 'githubToken' field
 
+When the internal server is GitLab, use a `gitlabToken` with the `read_api` scope instead (or the `GITLAB_TOKEN`
+environment variable); see [Internal SCM repositories](configuration.html#internal-scm-repositories-github-and-gitlab).
+
 # Operation
 
 In all of the operations above, you can override the variables in your `build-config.yaml` by specifying the `-e` or `--env` flag. More details [here](build-config.html#usage-of-yaml-variables)
