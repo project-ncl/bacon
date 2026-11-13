@@ -89,7 +89,7 @@ final class GitPatchContent {
 
         StringBuilder out = new StringBuilder();
         out.append("--- /dev/null\n");
-        out.append("+++ b/").append(path).append('\n');
+        out.append("+++ ").append(quotePath("b/" + path)).append('\n');
         out.append("@@ -0,0 +1").append(lines.length == 1 ? "" : "," + lines.length).append(" @@\n");
         for (String line : lines) {
             out.append('+').append(line).append('\n');
@@ -153,5 +153,65 @@ final class GitPatchContent {
         } finally {
             deflater.end();
         }
+    }
+
+    /**
+     * A path as git writes it in diff headers ({@code core.quotePath}): unchanged, or in double quotes with C-style
+     * escapes when it contains a double quote, a backslash, a control character or a non-ASCII byte (as octal UTF-8
+     * bytes). Spaces are not quoted.
+     */
+    static String quotePath(String path) {
+        byte[] bytes = path.getBytes(StandardCharsets.UTF_8);
+        boolean quote = false;
+        for (byte b : bytes) {
+            int c = b & 0xff;
+            if (c == '"' || c == '\\' || c < 0x20 || c >= 0x7f) {
+                quote = true;
+                break;
+            }
+        }
+        if (!quote) {
+            return path;
+        }
+        StringBuilder out = new StringBuilder("\"");
+        for (byte b : bytes) {
+            int c = b & 0xff;
+            switch (c) {
+                case '"':
+                    out.append("\\\"");
+                    break;
+                case '\\':
+                    out.append("\\\\");
+                    break;
+                case 7:
+                    out.append("\\a");
+                    break;
+                case '\b':
+                    out.append("\\b");
+                    break;
+                case '\t':
+                    out.append("\\t");
+                    break;
+                case '\n':
+                    out.append("\\n");
+                    break;
+                case 11:
+                    out.append("\\v");
+                    break;
+                case '\f':
+                    out.append("\\f");
+                    break;
+                case '\r':
+                    out.append("\\r");
+                    break;
+                default:
+                    if (c < 0x20 || c >= 0x7f) {
+                        out.append('\\').append(String.format("%03o", c));
+                    } else {
+                        out.append((char) c);
+                    }
+            }
+        }
+        return out.append('"').toString();
     }
 }

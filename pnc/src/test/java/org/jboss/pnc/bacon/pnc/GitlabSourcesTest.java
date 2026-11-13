@@ -184,6 +184,35 @@ class GitlabSourcesTest {
     }
 
     @Test
+    void isAncestor_resolvesATagBeforeComparingWithTheMergeBase() throws IOException {
+        GitlabSources gitlab = gitlab(exchange -> {
+            String path = exchange.getRequestURI().getRawPath();
+            if (path.endsWith("/repository/merge_base")) {
+                send(exchange, 200, "{\"id\":\"" + BASE + "\"}");
+            } else if (path.endsWith("/repository/commits/1.2.3")) {
+                send(exchange, 200, "{\"id\":\"" + BASE + "\"}");
+            } else if (path.endsWith("/repository/commits/other-tag")) {
+                send(exchange, 200, "{\"id\":\"" + HEAD + "\"}");
+            } else {
+                send(exchange, 404, "{}");
+            }
+        });
+        GitlabSources.Credential credential = GitlabSources.credentials("t").get(0);
+
+        assertThat(gitlab.isAncestor("1.2.3", HEAD, credential)).isTrue();
+        assertThat(gitlab.isAncestor("other-tag", HEAD, credential)).isFalse();
+    }
+
+    @Test
+    void compare_failsWhenGitLabTimesOut() throws IOException {
+        GitlabSources gitlab = gitlab(exchange -> send(exchange, 200, "{\"compare_timeout\":true,\"diffs\":[]}"));
+
+        assertThatThrownBy(() -> gitlab.compare(BASE, HEAD, GitlabSources.credentials("t").get(0)))
+                .hasMessageContaining("timed out")
+                .hasMessageContaining("incomplete");
+    }
+
+    @Test
     void commitDiff_followsPages() throws IOException {
         StringBuilder page1 = new StringBuilder("[");
         for (int i = 0; i < 100; i++) {

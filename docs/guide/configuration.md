@@ -55,12 +55,18 @@ gitlabToken: "gitlab-token"   # GitLab, 'read_api' scope (or the GITLAB_TOKEN en
 ```
 
 Without a token, public (and on GitLab, internal) repositories are read anonymously. Tokens are only sent to the
-repository's own host, never to a host it redirects to.
+repository's own host (after the [URL rewrites](#rewriting-download-urls)), never to a host it redirects to. This
+does not cover the git clone PiG makes for javadoc (JGit), which handles its redirects itself.
+
+Sources and alignment diffs are read from the build's internal repository URL, then from the repository's current
+internal URL; the external (upstream) URL is not used, as it does not have the aligned commits and tags. The provider
+APIs are reached at `https://<host>` of the repository URL; use a URL rewrite for another port or scheme.
 
 # Network timeouts
 
-Connections to SCM hosts, repository managers and bifrost time out after 30 seconds. A host that cannot be reached is
-not retried with other revisions or credentials, and a token a host rejects is not tried again on it.
+Connections to SCM hosts, repository managers and bifrost time out after 30 seconds, and SCM hosts must start
+answering (status and headers) within 2 minutes; downloading the body itself is not limited. A host that cannot be
+reached is not retried with other revisions or credentials, and a token a host rejects is not tried again on it.
 
 # PNC client HTTP timeouts
 
@@ -132,7 +138,7 @@ bacon pnc build download-build-outputs <id> \
   logs and, when rules are configured, the alignment log (both the request to
   PNC, so a rule matching the PNC host changes where it is asked, and PNC's
   redirect to bifrost). The PNC REST client itself uses the profile's PNC URL.
-- Credentials (e.g. `ldapUsernamePassword`) are sent only to the origin of the
+- Credentials (`ldapUsernamePassword`, `githubToken`, `gitlabToken`) are sent only to the origin of the
   first, rewritten URL, and for the alignment log to the profile's
   `bifrostBaseurl` (rewritten too), never to another host a redirect points to.
 - A redirect from `https` to `http` sent by a server is not followed; a rule

@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +57,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Downloads the SCM archive for a PNC build.
+ * Downloads the sources and the alignment diff of a PNC build from its internal repository, on GitHub (GitHub
+ * Enterprise) or GitLab, chosen by the repository URL (see {@link GitlabSources#isGitlabHost}).
  *
  * This intentionally does not use /builds/{id}/scm-archive because that endpoint can fail with 406 via the generated
  * REST client, or return browser/SAML HTML instead of a tarball.
@@ -65,7 +67,6 @@ import lombok.extern.slf4j.Slf4j;
 public class BuildSourcesDownloader {
 
     private static final int PREVIEW_BYTES = 300;
-    private static final int MAX_REDIRECTS = 10;
 
     private static final Pattern COMMIT_SHA = Pattern.compile("[0-9a-fA-F]{40}");
     private static final Pattern SCM_TAG_COMMIT_SUFFIX = Pattern.compile("-[0-9a-f]{8}$");
@@ -200,11 +201,12 @@ public class BuildSourcesDownloader {
      * Reqour clones the upstream sources into the internal SCM repository and commits the alignment changes on top of
      * the original revision, pushing and tagging the result. Both the pre-alignment revision and the post-alignment
      * commit are therefore present in the internal repository, so the alignment changes can be captured as a single
-     * GitHub compare diff ({@code <pre-alignment>...<post-alignment>}). The resulting unified diff applies cleanly on
-     * top of the original upstream sources (for example with {@code git apply} or {@code patch -p1}).
+     * compare diff ({@code <pre-alignment>...<post-alignment>}) of GitHub or GitLab. The resulting unified diff applies
+     * cleanly on top of the original upstream sources (for example with {@code git apply} or {@code patch -p1}).
      *
      * <p>
-     * The diff is sanitized of leaked credentials ({@link LogSanitizer}) and split into categories
+     * Leaked credentials are masked in the metadata files only ({@link #maskSecrets}), and the diff is split into
+     * categories
      * ({@link AlignmentDiff}), grouped into files written next to {@code diffFile} as {@code <name>-<n>-<part>.diff}
      * (see {@link #partFile}) when present, each with a comment header saying what can be skipped. Each part applies on
      * its own; applying all of them reproduces the complete alignment.
@@ -449,6 +451,10 @@ public class BuildSourcesDownloader {
                 } catch (RuntimeException e) {
                     throwIfUnreachable(build, URI.create(repository.webBaseUrl), e);
                     failures.add("commit " + head + " using " + credential.name + ": " + e.getMessage());
+                    if (credential.header != null && e instanceof GitlabSources.GitlabApiException
+                            && isAuthenticationFailure(((GitlabSources.GitlabApiException) e).status)) {
+                        continue credentials;
+                    }
                 }
             }
         }
@@ -483,7 +489,10 @@ public class BuildSourcesDownloader {
 
     /**
      * The credentials for the repository's git provider: the {@code githubToken} for GitHub; for GitLab the
-     * {@code gitlabToken} (or the {@code GITLAB_TOKEN} environment variable).
+     * {@code gitlabToken} (or the {@code GITLAB_TOKEN} environment variable). No token is always tried last, on
+     * purpose: public (and on GitLab internal) repositories are readable without one, so sources still download with a
+     * missing or wrong token. The GitHub alignment diff still requires a token: anonymous GitHub API requests are
+     * rate limited too strictly for its compare calls.
      */
     private static List<GitlabSources.Credential> credentialsFor(NormalizedScmRepository repository) {
         if (repository != null && repository.gitlab) {
@@ -501,7 +510,7 @@ public class BuildSourcesDownloader {
             }
         }
         // public repositories can be read without a token
-        credentials.add(new GitlabSources.Credential(null, null, "no token"));
+        credentials.add(GitlabSources.NO_TOKEN);
         return credentials;
     }
 
@@ -555,7 +564,16 @@ public class BuildSourcesDownloader {
      * See {@link AlignmentDiff#maskSecretsInMetadata}.
      */
     static String maskSecrets(String diff) {
-        return AlignmentDiff.maskSecretsInMetadata(diff, LogSanitizer::maskKnownSecrets);
+        List<String> unmasked = new ArrayList<>();
+        String masked = AlignmentDiff.maskSecretsInMetadata(diff, LogSanitizer::maskKnownSecrets, unmasked::add);
+        if (!unmasked.isEmpty()) {
+            log.warn(
+                    "The alignment diff may contain credentials in {} source or build file(s), left unmasked so that"
+                            + " the diff still applies; review it before sharing: {}",
+                    unmasked.size(),
+                    unmasked);
+        }
+        return masked;
     }
 
     /**
@@ -779,7 +797,7 @@ public class BuildSourcesDownloader {
             URI originalUri = rewrites.apply(candidate.uri);
             URI currentUri = originalUri;
 
-            for (int redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount++) {
+            for (int redirectCount = 0; redirectCount <= SafeHttp.MAX_REDIRECTS; redirectCount++) {
                 boolean firstRequest = redirectCount == 0;
                 String acceptHeader = firstRequest ? candidate.initialAcceptHeader : ACCEPT_ARCHIVE;
 
@@ -834,7 +852,7 @@ public class BuildSourcesDownloader {
                 return;
             }
 
-            throw new RuntimeException("Too many redirects; maximum allowed redirects: " + MAX_REDIRECTS);
+            throw new RuntimeException("Too many redirects; maximum allowed redirects: " + SafeHttp.MAX_REDIRECTS);
         } catch (IOException e) {
             throw new RuntimeException("I/O error while downloading " + candidate.uri, e);
         } catch (InterruptedException e) {
@@ -850,6 +868,7 @@ public class BuildSourcesDownloader {
             boolean sendAuthorization) {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(uri)
+                .timeout(SafeHttp.RESPONSE_TIMEOUT)
                 .header("Accept", acceptHeader)
                 .header("User-Agent", "bacon")
                 .GET();
@@ -1049,19 +1068,25 @@ public class BuildSourcesDownloader {
      * provider). The external URL is not used: it does not have the aligned commits and tags.
      */
     public static List<String> scmUrlCandidates(Build build) {
-        Set<String> urls = new LinkedHashSet<>();
-        addIfPresent(urls, build.getScmUrl());
         SCMRepository repository = build.getScmRepository();
-        if (repository != null) {
-            addIfPresent(urls, repository.getInternalUrl());
-        }
-        return List.copyOf(urls);
+        return scmUrlCandidates(build.getScmUrl(), repository == null ? null : repository.getInternalUrl());
     }
 
-    private static void addIfPresent(Set<String> values, String value) {
-        if (value != null && !value.isBlank()) {
-            values.add(value);
+    /**
+     * Like {@link #scmUrlCandidates(Build)} for the build's internal URL and the repository's current one. URLs of the
+     * same repository (e.g. its scp-like and https forms) are tried once.
+     */
+    public static List<String> scmUrlCandidates(String buildUrl, String currentInternalUrl) {
+        Map<String, String> urls = new LinkedHashMap<>();
+        for (String url : new String[] { buildUrl, currentInternalUrl }) {
+            if (url != null && !url.isBlank()) {
+                NormalizedScmRepository repository = normalizeScmRepository(url);
+                String key = repository == null ? url
+                        : repository.host.toLowerCase(Locale.ROOT) + "/" + repository.path.toLowerCase(Locale.ROOT);
+                urls.putIfAbsent(key, url);
+            }
         }
+        return List.copyOf(urls.values());
     }
 
     static String selectScmRevision(Build build) {
@@ -1133,7 +1158,10 @@ public class BuildSourcesDownloader {
     }
 
     static void assertGzipArchive(Path file, URI sourceArchiveUri) throws IOException {
-        byte[] firstBytes = Files.readAllBytes(file);
+        byte[] firstBytes;
+        try (InputStream in = Files.newInputStream(file)) {
+            firstBytes = in.readNBytes(PREVIEW_BYTES);
+        }
         if (!isGzip(firstBytes)) {
             String preview = new String(
                     firstBytes,

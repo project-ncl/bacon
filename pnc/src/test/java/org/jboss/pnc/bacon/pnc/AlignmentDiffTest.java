@@ -25,6 +25,7 @@ import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.RERUN_BLOCKER;
 import static org.jboss.pnc.bacon.pnc.AlignmentDiff.Category.RERUN_STATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -732,5 +733,33 @@ class AlignmentDiffTest {
 
     private static String lines(String... lines) {
         return String.join("\n", lines) + "\n";
+    }
+
+    @Test
+    void readsQuotedPathsInDiffHeaders() {
+        assertEquals("src/A.java", AlignmentDiff.headerPath("diff --git a/src/A.java b/src/A.java"));
+        assertEquals("with space.txt", AlignmentDiff.headerPath("diff --git a/with space.txt b/with space.txt"));
+        assertEquals(
+                "na\u00efve.txt",
+                AlignmentDiff.headerPath("diff --git \"a/na\\303\\257ve.txt\" \"b/na\\303\\257ve.txt\""));
+        assertEquals("q\"t", AlignmentDiff.headerPath("diff --git \"a/q\\\"t\" \"b/q\\\"t\""));
+        assertNull(AlignmentDiff.headerPath("not a header"));
+    }
+
+    @Test
+    void reportsUnmaskedSecretsOutsideMetadataWithoutChangingThem() {
+        String source = "diff --git a/settings.xml b/settings.xml\n--- a/settings.xml\n+++ b/settings.xml\n"
+                + "@@ -1 +1 @@\n-x\n+<password>SECRET</password>\n";
+        String metadata = "diff --git a/target/alignmentReport.json b/target/alignmentReport.json\n"
+                + "new file mode 100644\n--- /dev/null\n+++ b/target/alignmentReport.json\n@@ -0,0 +1 @@\n"
+                + "+SECRET\n";
+        java.util.List<String> unmasked = new java.util.ArrayList<>();
+
+        String masked = AlignmentDiff
+                .maskSecretsInMetadata(source + metadata, text -> text.replace("SECRET", "***"), unmasked::add);
+
+        assertTrue(masked.startsWith(source), masked);
+        assertFalse(masked.substring(source.length()).contains("SECRET"), masked);
+        assertEquals(java.util.List.of("a/settings.xml b/settings.xml"), unmasked);
     }
 }
