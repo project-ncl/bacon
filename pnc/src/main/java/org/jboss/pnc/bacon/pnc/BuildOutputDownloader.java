@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -40,6 +38,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
@@ -47,6 +46,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.jboss.pnc.bacon.auth.LdapClient;
 import org.jboss.pnc.bacon.auth.client.PncClientHelper;
+import org.jboss.pnc.bacon.common.http.SafeHttp;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pnc.client.BifrostClient;
 import org.jboss.pnc.client.BuildClient;
@@ -273,16 +273,16 @@ public class BuildOutputDownloader {
 
     private void downloadUri(URI uri, Path target) {
         try {
-            HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-            var requestBuilder = HttpRequest.newBuilder().uri(uri).GET();
-            LdapClient.basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
-                    .ifPresent(header -> requestBuilder.header("Authorization", header));
-            HttpRequest request = requestBuilder.build();
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            if (response.statusCode() < 200 || response.statusCode() > 299) {
-                throw new RuntimeException("Failed to download " + uri + ". HTTP status: " + response.statusCode());
-            }
+            Map<String, String> credentials = LdapClient
+                    .basicAuthHeaderValue(Config.instance().getActiveProfile().getLdapUsernamePassword())
+                    .map(header -> Map.of("Authorization", header))
+                    .orElse(Map.of());
+            HttpResponse<InputStream> response = SafeHttp.get(SafeHttp.newClient(), uri, Map.of(), credentials);
             try (InputStream in = response.body()) {
+                if (response.statusCode() < 200 || response.statusCode() > 299) {
+                    throw new RuntimeException(
+                            "Failed to download " + response.uri() + ". HTTP status: " + response.statusCode());
+                }
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
