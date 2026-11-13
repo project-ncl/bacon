@@ -18,9 +18,7 @@
 package org.jboss.pnc.bacon.common.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,14 +104,72 @@ class SafeHttpTest {
         assertEquals("<none>", authorizations.get("/end?q=1"));
     }
 
+    private static String target(String requested, String current, String location, String... rules) {
+        UrlRewrites rewrites = new UrlRewrites(java.util.Arrays.stream(rules).map(UrlRewrites::parse).toList());
+        return SafeHttp.redirect(URI.create(requested), URI.create(current), location, rewrites)
+                .map(r -> r.requested + " -> " + r.target)
+                .orElse("refused");
+    }
+
+    @Test
+    void aPathLocationStaysOnTheHostRequested() {
+        // the response came from the rewritten host: a path stays there and is not rewritten again
+        assertEquals(
+                "https://pnc.example.com/final-log/B1 -> http://127.0.0.1:8080/final-log/B1",
+                target(
+                        "https://pnc.example.com/logs/B1",
+                        "http://127.0.0.1:8080/logs/B1",
+                        "/final-log/B1",
+                        "https://pnc.example.com=http://127.0.0.1:8080"));
+        assertEquals(
+                "https://pnc.example.com/logs/x -> http://127.0.0.1:8080/logs/x",
+                target("https://pnc.example.com/logs/B1", "http://127.0.0.1:8080/logs/B1", "x"));
+    }
+
+    @Test
+    void aProtocolRelativeLocationNamesAHostAndIsRewritten() {
+        assertEquals(
+                "https://bifrost.example.com/final-log/B1 -> http://127.0.0.1:9090/final-log/B1",
+                target(
+                        "https://pnc.example.com/logs/B1",
+                        "https://pnc.example.com/logs/B1",
+                        "//bifrost.example.com/final-log/B1",
+                        "https://bifrost.example.com=http://127.0.0.1:9090"));
+    }
+
+    @Test
+    void theFragmentOfALocationIsDropped() {
+        assertEquals(
+                "https://bifrost.example.com/a?q=1 -> https://bifrost.example.com/a?q=1",
+                target(
+                        "https://pnc.example.com/x",
+                        "https://pnc.example.com/x",
+                        "https://bifrost.example.com/a?q=1#f"));
+        assertEquals(
+                "https://pnc.example.com/b -> https://pnc.example.com/b",
+                target("https://pnc.example.com/x", "https://pnc.example.com/x", "/b#f"));
+    }
+
     @Test
     void onlyAnHttpLocationSentForAnHttpsRequestIsADowngrade() {
-        URI https = URI.create("https://pnc.example.com/builds/B1/logs/align");
         // what the server sent decides, even if a rule then rewrites the https target to plain http
-        assertFalse(SafeHttp.isDowngrade(https, "https://bifrost.example.com/final-log/B1/alignment-log"));
-        assertTrue(SafeHttp.isDowngrade(https, "http://bifrost.example.com/final-log/B1/alignment-log"));
-        assertFalse(SafeHttp.isDowngrade(https, "/final-log/B1/alignment-log"));
-        assertFalse(SafeHttp.isDowngrade(URI.create("http://pnc.example.com/x"), "http://bifrost.example.com/y"));
+        assertEquals(
+                "https://bifrost.example.com/a -> http://127.0.0.1:9090/a",
+                target(
+                        "https://pnc.example.com/x",
+                        "https://pnc.example.com/x",
+                        "https://bifrost.example.com/a",
+                        "https://bifrost.example.com=http://127.0.0.1:9090"));
+        assertEquals(
+                "refused",
+                target("https://pnc.example.com/x", "https://pnc.example.com/x", "http://bifrost.example.com/a"));
+        // a path or protocol-relative Location keeps the scheme
+        assertEquals(
+                "https://pnc.example.com/a -> http://127.0.0.1:8080/a",
+                target("https://pnc.example.com/x", "http://127.0.0.1:8080/x", "/a"));
+        assertEquals(
+                "http://bifrost.example.com/a -> http://bifrost.example.com/a",
+                target("http://pnc.example.com/x", "http://pnc.example.com/x", "http://bifrost.example.com/a"));
     }
 
     @Test

@@ -87,6 +87,22 @@ public final class SafeHttp {
             Map<String, String> credentialHeaders,
             UrlRewrites rewrites,
             List<URI> credentialOrigins) throws IOException, InterruptedException {
+        return get(client, uri, headers, credentialHeaders, rewrites, credentialOrigins, null);
+    }
+
+    /**
+     * {@link #get(HttpClient, URI, Map, Map, UrlRewrites, List)} where each request fails with
+     * {@link java.net.http.HttpTimeoutException} when its response (status and headers) does not arrive within
+     * {@code responseTimeout}; {@code null} for no limit. Reading the body is not limited.
+     */
+    public static HttpResponse<InputStream> get(
+            HttpClient client,
+            URI uri,
+            Map<String, String> headers,
+            Map<String, String> credentialHeaders,
+            UrlRewrites rewrites,
+            List<URI> credentialOrigins,
+            Duration responseTimeout) throws IOException, InterruptedException {
         List<URI> trusted = new ArrayList<>();
         trusted.add(rewrites.apply(uri));
         credentialOrigins.forEach(origin -> trusted.add(rewrites.apply(origin)));
@@ -95,61 +111,100 @@ public final class SafeHttp {
         URI current = trusted.get(0);
         for (int redirects = 0;; redirects++) {
             HttpRequest.Builder request = HttpRequest.newBuilder(current).GET();
+            if (responseTimeout != null) {
+                request.timeout(responseTimeout);
+            }
             headers.forEach(request::header);
             URI target = current;
-            if (trusted.stream().anyMatch(origin -> sameOrigin(origin, target))) {
+            if (trusted.stream().anyMatch(origin -> Origins.same(origin, target))) {
                 credentialHeaders.forEach(request::header);
             }
 
             HttpResponse<InputStream> response = client
                     .send(request.build(), HttpResponse.BodyHandlers.ofInputStream());
-            if (!isRedirect(response.statusCode())) {
-                return response;
+            boolean returned = false;
+            try {
+                Optional<String> location = response.headers().firstValue("Location");
+                Optional<Redirect> next = isRedirect(response.statusCode()) && location.isPresent()
+                        ? redirect(requested, current, location.get(), rewrites)
+                        : Optional.empty();
+                if (next.isEmpty()) {
+                    returned = true;
+                    return response;
+                }
+                if (redirects >= MAX_REDIRECTS) {
+                    throw new IOException("Too many redirects from " + uri + " (maximum " + MAX_REDIRECTS + ")");
+                }
+                requested = next.get().requested;
+                current = next.get().target;
+            } finally {
+                // the body of a response that is not returned is closed here, also on errors
+                if (!returned) {
+                    closeQuietly(response.body());
+                }
             }
-            Optional<String> location = response.headers().firstValue("Location");
-            if (location.isEmpty()) {
-                return response;
-            }
-            if (isDowngrade(requested, location.get())) {
-                return response;
-            }
-            // a relative Location is resolved against the URL requested
-            URI sent = current.resolve(location.get());
-            boolean absolute = URI.create(location.get()).isAbsolute();
-            response.body().close();
-            if (redirects >= MAX_REDIRECTS) {
-                throw new IOException("Too many redirects from " + uri + " (maximum " + MAX_REDIRECTS + ")");
-            }
-            // a relative Location is already on the (rewritten) host requested
-            requested = absolute ? sent : requested.resolve(location.get());
-            current = absolute ? rewrites.apply(sent) : sent;
+        }
+    }
+
+    /** A redirect: the URL as the server named it (before rewriting) and the URL to request. */
+    public static final class Redirect {
+        public final URI requested;
+        public final URI target;
+
+        Redirect(URI requested, URI target) {
+            this.requested = requested;
+            this.target = target;
         }
     }
 
     /**
-     * Whether a server answering {@code requested} (before rewriting) with {@code location} redirects from https to
-     * http. Only an absolute {@code Location} can change the scheme; rewriting it afterwards does not count.
+     * Where a redirect goes, or empty when it must not be followed (from https to http).
+     * <ul>
+     * <li>A {@code Location} with a host (absolute, or protocol-relative {@code //host/path}) is resolved against
+     * {@code requested}, the URL as the server knows it, checked for an https to http downgrade there, and then
+     * rewritten: a rule may rewrite to plain http on purpose.</li>
+     * <li>A {@code Location} with a path only stays on the host actually requested ({@code current}, already
+     * rewritten) and is not rewritten again.</li>
+     * <li>The fragment is dropped: it is not sent in requests.</li>
+     * </ul>
+     *
+     * @param requested the URL of the response before rewriting
+     * @param current the URL of the response as requested (after rewriting)
+     * @param location the {@code Location} header
      */
-    static boolean isDowngrade(URI requested, String location) {
-        URI target = URI.create(location);
-        return target.isAbsolute() && "https".equalsIgnoreCase(requested.getScheme())
-                && "http".equalsIgnoreCase(target.getScheme());
+    public static Optional<Redirect> redirect(URI requested, URI current, String location, UrlRewrites rewrites) {
+        URI target = URI.create(location.trim());
+        if (target.getRawAuthority() != null) {
+            URI sent = withoutFragment(requested.resolve(target));
+            if ("https".equalsIgnoreCase(requested.getScheme()) && "http".equalsIgnoreCase(sent.getScheme())) {
+                return Optional.empty();
+            }
+            return Optional.of(new Redirect(sent, rewrites.apply(sent)));
+        }
+        return Optional.of(
+                new Redirect(withoutFragment(requested.resolve(target)), withoutFragment(current.resolve(target))));
     }
 
-    /** Whether both URIs have the same scheme, host and (default or explicit) port. */
+    private static URI withoutFragment(URI uri) {
+        String value = uri.toString();
+        int hash = value.indexOf('#');
+        return hash < 0 ? uri : URI.create(value.substring(0, hash));
+    }
+
+    private static void closeQuietly(InputStream in) {
+        try {
+            in.close();
+        } catch (IOException e) {
+            // nothing to do: the response is discarded
+        }
+    }
+
+    /** Whether both URIs have the same scheme, host and (default or explicit) port; see {@link Origins#same}. */
     public static boolean sameOrigin(URI a, URI b) {
-        return a.getScheme() != null && a.getScheme().equalsIgnoreCase(b.getScheme()) && a.getHost() != null
-                && a.getHost().equalsIgnoreCase(b.getHost()) && port(a) == port(b);
+        return Origins.same(a, b);
     }
 
     static boolean isRedirect(int status) {
         return status == 301 || status == 302 || status == 303 || status == 307 || status == 308;
-    }
-
-    private static int port(URI uri) {
-        if (uri.getPort() != -1) {
-            return uri.getPort();
-        }
-        return "https".equalsIgnoreCase(uri.getScheme()) ? 443 : "http".equalsIgnoreCase(uri.getScheme()) ? 80 : -1;
     }
 }
