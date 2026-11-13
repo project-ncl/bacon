@@ -81,3 +81,37 @@ Or via a system property (system properties reach `bacon` through
 JAVA_TOOL_OPTIONS="-Dpnc.client.readTimeoutMillis=300000" \
   bacon pnc build download-build-outputs <id> --redacted
 ```
+
+# Rewriting download URLs
+
+Some URLs that PNC hands out may not be reachable from where `bacon` runs, while
+the same service is reachable at another address: the `publicUrl` of built
+artifacts, or the bifrost host PNC redirects the alignment log to. URL rewrites
+replace the start of such URLs, like git's `url.<base>.insteadOf`:
+
+```yaml
+urlRewrites:
+  "https://bifrost.example.com": "https://bifrost.internal.example.com:8443"
+  "https://indy.example.com/api/content": "https://mirror.example.com/indy"
+```
+
+or for a single run, with the global `--url-rewrite <from>=<to>` option
+(repeatable, added to the profile's rules):
+
+```bash
+bacon pnc build download-build-outputs <id> \
+  --url-rewrite https://bifrost.example.com=https://bifrost.internal.example.com:8443
+```
+
+- `<from>` and `<to>` are absolute `http(s)` URLs, optionally with a path, and
+  without user info, query or fragment.
+- A URL matches when its scheme, host and port are the same as `<from>`'s and
+  its path starts with `<from>`'s path at a `/` boundary. The matching start is
+  replaced by `<to>`; the rest of the path and the query are kept.
+- The longest matching `<from>` wins; with the same `<from>`, the command line
+  rule wins over the profile's.
+- Rewrites apply to artifact downloads, to the build log read from bifrost and,
+  when rules are configured, to the alignment log and PNC's redirect to bifrost.
+- Credentials (e.g. `ldapUsernamePassword`) are sent only to the origin of the
+  first, rewritten URL, never to the host of a redirect. A warning is logged
+  when a rule rewrites to plain `http`.

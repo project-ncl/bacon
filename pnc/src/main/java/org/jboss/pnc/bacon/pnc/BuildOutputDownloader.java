@@ -17,11 +17,10 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -248,20 +247,15 @@ public class BuildOutputDownloader {
 
     private void downloadAlignmentLog(String buildId, Path targetFile) {
         createDirectories(targetFile.getParent());
-        try (BuildClient buildClient = new BuildClient(pncConfiguration())) {
-            Optional<InputStream> streamLogs = buildClient.getAlignLogs(buildId);
-            try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
-                if (streamLogs.isPresent()) {
-                    try (BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(streamLogs.get(), StandardCharsets.UTF_8))) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            writer.write(LogSanitizer.maskKnownSecrets(line));
-                            writer.newLine();
-                        }
-                    }
+        try (var writer = Files.newBufferedWriter(targetFile, StandardCharsets.UTF_8)) {
+            AlignmentLog.forEachLine(buildId, line -> {
+                try {
+                    writer.write(LogSanitizer.maskKnownSecrets(line));
+                    writer.newLine();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
                 }
-            }
+            });
         } catch (Exception e) {
             throw new RuntimeException("Failed to download alignment log for build " + buildId, e);
         }

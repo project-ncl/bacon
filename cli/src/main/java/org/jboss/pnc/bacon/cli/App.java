@@ -22,6 +22,8 @@ import static picocli.CommandLine.ScopeType.INHERIT;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.fusesource.jansi.AnsiConsole;
 import org.jboss.bacon.da.Da;
@@ -30,6 +32,7 @@ import org.jboss.pnc.bacon.common.Constant;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.VersionProvider;
 import org.jboss.pnc.bacon.common.exception.FatalException;
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
 import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.Pig;
 import org.jboss.pnc.bacon.pnc.Pnc;
@@ -144,6 +147,14 @@ public class App {
             description = "Disable color output. Useful when running in a non-ANSI environment",
             scope = INHERIT)
     private boolean nocolor;
+
+    @Option(
+            names = "--url-rewrite",
+            paramLabel = "<from>=<to>",
+            description = "Download from <to> instead of URLs starting with <from>. Repeatable; added to the "
+                    + "profile's urlRewrites.",
+            scope = INHERIT)
+    private List<String> urlRewrites = new ArrayList<>();
 
     public int run(String[] args) {
 
@@ -287,6 +298,11 @@ public class App {
         String command = null;
         if (parseResult.subcommand() != null) {
             command = parseResult.subcommand().commandSpec().commandLine().getCommandName();
+        }
+        try {
+            UrlRewrites.setCommandLineRules(urlRewrites);
+        } catch (IllegalArgumentException e) {
+            throw new CommandLine.ParameterException(parseResult.commandSpec().commandLine(), e.getMessage(), e);
         }
         init(command); // custom initialization to be done before executing any command or subcommand
         return new CommandLine.RunLast().execute(parseResult); // default execution strategy
