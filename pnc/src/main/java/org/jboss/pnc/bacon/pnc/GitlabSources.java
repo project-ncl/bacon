@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import org.jboss.pnc.bacon.common.http.SafeHttp;
@@ -61,6 +62,12 @@ final class GitlabSources {
 
     /** Raw files larger than this are not read into memory; they stay "Binary files ... differ" in the diff. */
     static final long MAX_RAW_FILE_BYTES = 100L * 1024 * 1024;
+
+    /**
+     * Raw files read to fill one diff, all together; once reached, the other left-out files stay "Binary files ...
+     * differ" too, so that a diff with many large files does not exhaust the memory.
+     */
+    static final long MAX_TOTAL_RAW_BYTES = 512L * 1024 * 1024;
 
     /** A response larger than the limit requested from {@link #getBytes}. */
     static final class ResponseTooLargeException extends RuntimeException {
@@ -99,6 +106,8 @@ final class GitlabSources {
     private final String projectPath;
     private final HttpClient httpClient;
     private final UrlRewrites rewrites;
+    /** {@link #MAX_TOTAL_RAW_BYTES}, lower in tests. */
+    long maxTotalRawBytes = MAX_TOTAL_RAW_BYTES;
 
     /**
      * @param webBaseUrl e.g. {@code https://gitlab.cee.redhat.com}
@@ -325,11 +334,33 @@ final class GitlabSources {
      * some endpoints (e.g. compare) for a token it rejects on others (e.g. raw files), as happens with a token that is
      * not allowed to access this project, while the project itself can be read without a token.
      */
+    /** Reads the files left out of one diff, within {@link #maxTotalRawBytes} for all of them. */
     private ContentFetcher contentFetcher(Credential credential) {
+        AtomicLong remaining = new AtomicLong(maxTotalRawBytes);
+        ContentFetcher fetcher = rawFileFetcher(credential, remaining);
+        return (path, ref) -> {
+            if (remaining.get() <= 0) {
+                log.warn(
+                        "Not reading {} at {} from GitLab: the files read for this diff reached {} bytes",
+                        path,
+                        ref,
+                        maxTotalRawBytes);
+                return null;
+            }
+            byte[] content = fetcher.fetch(path, ref);
+            if (content != null) {
+                remaining.addAndGet(-content.length);
+            }
+            return content;
+        };
+    }
+
+    private ContentFetcher rawFileFetcher(Credential credential, AtomicLong remaining) {
         return (path, ref) -> {
             URI uri = URI.create(projectUrl() + "/repository/files/" + encode(path) + "/raw?ref=" + encode(ref));
+            long maxBytes = Math.min(MAX_RAW_FILE_BYTES, remaining.get());
             try {
-                return getBytes(uri, credential, MAX_RAW_FILE_BYTES);
+                return getBytes(uri, credential, maxBytes);
             } catch (ResponseTooLargeException e) {
                 log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
                 return null;
@@ -341,7 +372,7 @@ final class GitlabSources {
                 log.debug("Cannot read {} at {} with {}, trying without a token: {}", path, ref, credential.name(), e);
             }
             try {
-                return getBytes(uri, NO_TOKEN, MAX_RAW_FILE_BYTES);
+                return getBytes(uri, NO_TOKEN, maxBytes);
             } catch (RuntimeException e) {
                 log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
                 return null;

@@ -246,6 +246,39 @@ class GitlabSourcesTest {
     }
 
     @Test
+    void leftOutFiles_stopBeingReadAtTheTotalLimit() throws IOException {
+        String entry = "{\"old_path\":\"lib/%1$s\",\"new_path\":\"lib/%1$s\",\"a_mode\":\"0\","
+                + "\"b_mode\":\"100644\",\"new_file\":true,"
+                + "\"diff\":\"Binary files /dev/null and b/lib/%1$s differ\\n\"}";
+        GitlabSources gitlab = gitlab(exchange -> {
+            String path = exchange.getRequestURI().getRawPath();
+            if (path.endsWith("/repository/compare")) {
+                send(
+                        exchange,
+                        200,
+                        "{\"diffs\":[" + String.format(entry, "a.jar") + "," + String.format(entry, "b.jar") + ","
+                                + String.format(entry, "c.jar") + "]}");
+            } else {
+                send(exchange, 200, "\u0000" + "x".repeat(9)); // 10 bytes each
+            }
+        });
+        // a.jar fits; b.jar and c.jar are larger than the 5 bytes left, so they are refused while being read
+        gitlab.maxTotalRawBytes = 15;
+
+        GitlabSources.UnifiedDiff diff = gitlab.compare(BASE, HEAD, GitlabSources.NO_TOKEN);
+
+        assertThat(diff.incompleteFiles).containsExactly("lib/b.jar", "lib/c.jar");
+        assertThat(requests).filteredOn(request -> request.contains("/repository/files/")).hasSize(3);
+
+        // once nothing is left, files are not requested at all
+        requests.clear();
+        gitlab.maxTotalRawBytes = 10;
+        assertThat(gitlab.compare(BASE, HEAD, GitlabSources.NO_TOKEN).incompleteFiles)
+                .containsExactly("lib/b.jar", "lib/c.jar");
+        assertThat(requests).filteredOn(request -> request.contains("/repository/files/")).hasSize(1);
+    }
+
+    @Test
     void leftOutFiles_areReadWithoutTokenWhenTheTokenIsRejected() throws IOException {
         // like gitlab.cee with a token of another project: compare answers, raw files are refused (401)
         GitlabSources gitlab = gitlab(exchange -> {
