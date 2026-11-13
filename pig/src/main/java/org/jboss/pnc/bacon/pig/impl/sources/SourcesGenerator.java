@@ -171,6 +171,12 @@ public class SourcesGenerator {
         return completeBuilds;
     }
 
+    /** The build's SCM revision, or none, so that a missing revision gets the "no SCM revision" error. */
+    private static List<String> revisions(PncBuild build) {
+        return build.getScmRevision() == null || build.getScmRevision().isBlank() ? List.of()
+                : List.of(build.getScmRevision());
+    }
+
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
         builds.values().forEach(build -> {
             File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
@@ -180,7 +186,7 @@ public class SourcesGenerator {
             log.debug("Downloading sources for build {} from: {}", build.getId(), scmUrl);
             try {
                 new BuildSourcesDownloader()
-                        .downloadSources(build.getId(), scmUrl, List.of(build.getScmRevision()), targetPath.toPath());
+                        .downloadSources(build.getId(), scmUrl, revisions(build), targetPath.toPath());
             } catch (RuntimeException e) {
                 log.error(
                         "Failed to download sources for build {} (scmRepository: {})",
