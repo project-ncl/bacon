@@ -1,21 +1,34 @@
 package org.jboss.pnc.bacon.pnc;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.net.ServerSocket;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.pnc.bacon.common.http.UrlRewrites;
+import org.jboss.pnc.bacon.config.Config;
+import org.jboss.pnc.bacon.config.ConfigProfile;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InOrder;
 
 class BuildSourcesDownloaderTest {
 
@@ -118,50 +131,141 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCompareDiffUriForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
+        ScmRepositoryUrl repository = ScmRepositoryUrl
+                .parse("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
 
         assertEquals(
                 URI.create(
                         "https://github.ibm.com/api/v3/repos/pnc-prod/apache-xmlgraphics-commons/compare/"
                                 + "upstream-sha...aligned-sha"),
-                BuildSourcesDownloader.compareDiffUri(repository, "upstream-sha", "aligned-sha"));
+                GithubProvider.compareDiffUri(repository, "upstream-sha", "aligned-sha"));
     }
 
     @Test
     void shouldBuildCompareDiffUriForPublicGithub() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("git@github.com:project-ncl/bacon.git");
+        ScmRepositoryUrl repository = ScmRepositoryUrl.parse("git@github.com:project-ncl/bacon.git");
 
         assertEquals(
                 URI.create("https://api.github.com/repos/project-ncl/bacon/compare/base...head"),
-                BuildSourcesDownloader.compareDiffUri(repository, "base", "head"));
+                GithubProvider.compareDiffUri(repository, "base", "head"));
     }
 
     @Test
     void shouldBuildCommitDiffAndRepoUrisForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedGithubRepository repository = BuildSourcesDownloader
-                .normalizeGithubRepository("git@github.ibm.com:pnc-prod/example.git");
+        ScmRepositoryUrl repository = ScmRepositoryUrl.parse("git@github.ibm.com:pnc-prod/example.git");
 
         assertEquals(
                 URI.create("https://github.ibm.com/api/v3/repos/pnc-prod/example/commits/aligned-sha"),
-                BuildSourcesDownloader.commitDiffUri(repository, "aligned-sha"));
+                GithubProvider.commitDiffUri(repository, "aligned-sha"));
         assertEquals(
                 URI.create("https://github.ibm.com/api/v3/repos/pnc-prod/example"),
-                BuildSourcesDownloader.repoApiUri(repository));
+                GithubProvider.repoApiUri(repository));
     }
 
     @Test
-    void shouldSelectInternalScmUrl() {
+    void shouldTryTheBuildUrlThenTheCurrentInternalUrl() {
         Build build = mock(Build.class);
         SCMRepository repository = mock(SCMRepository.class);
 
+        when(build.getScmUrl()).thenReturn("https://github.ibm.com/pnc-prod/example.git");
         when(build.getScmRepository()).thenReturn(repository);
+        when(repository.getInternalUrl()).thenReturn("git@gitlab.cee.redhat.com:pnc-workspace/example.git");
+        when(repository.getExternalUrl()).thenReturn("https://github.com/upstream/example.git");
+
+        // the external repository does not have the aligned commits and tags
+        assertEquals(
+                List.of(
+                        "https://github.ibm.com/pnc-prod/example.git",
+                        "git@gitlab.cee.redhat.com:pnc-workspace/example.git"),
+                BuildSourcesDownloader.scmUrlCandidates(build));
+
         when(repository.getInternalUrl()).thenReturn("https://github.ibm.com/pnc-prod/example.git");
+        assertEquals(
+                List.of("https://github.ibm.com/pnc-prod/example.git"),
+                BuildSourcesDownloader.scmUrlCandidates(build));
+
+        when(build.getScmUrl()).thenReturn(null);
+        when(repository.getInternalUrl()).thenReturn(" ");
+        assertEquals(List.of(), BuildSourcesDownloader.scmUrlCandidates(build));
+    }
+
+    @Test
+    void firstSuccessfulReturnsTheResultOfTheFirstUrlThatWorks() {
+        List<String> tried = new ArrayList<>();
+        String result = BuildSourcesDownloader.firstSuccessful("sources", "B1", List.of("u1", "u2", "u3"), url -> {
+            tried.add(url);
+            if (url.equals("u1")) {
+                throw new RuntimeException("u1 failed");
+            }
+            return "from " + url;
+        }, url -> "");
+
+        assertEquals("from u2", result);
+        assertEquals(List.of("u1", "u2"), tried);
+    }
+
+    @Test
+    void firstSuccessfulRethrowsTheFailureOfASingleUrl() {
+        RuntimeException original = new RuntimeException("only failure\nhint");
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> BuildSourcesDownloader.firstSuccessful("sources", "B1", List.of("u1"), url -> {
+                    throw original;
+                }, url -> "\nhint"));
+
+        assertSame(original, e);
+    }
+
+    @Test
+    void firstSuccessfulReportsEveryUrlWithEachHintOnceAndKeepsTheCauses() {
+        RuntimeException first = new RuntimeException("first failed\nhint");
+        RuntimeException second = new RuntimeException("second failed\nhint");
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> BuildSourcesDownloader.firstSuccessful("sources", "B1", List.of("u1", "u2"), url -> {
+                    throw url.equals("u1") ? first : second;
+                }, url -> "\nhint"));
 
         assertEquals(
-                "https://github.ibm.com/pnc-prod/example.git",
-                BuildSourcesDownloader.selectInternalScmUrl(build));
+                "Failed to download the sources of build B1 from any of its SCM URLs:\n - u1: first failed\n"
+                        + " - u2: second failed\nhint",
+                e.getMessage());
+        assertSame(second, e.getCause());
+        assertArrayEquals(new Throwable[] { first, second }, e.getSuppressed());
+    }
+
+    @Test
+    void firstSuccessfulFailsWithoutUrls() {
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> BuildSourcesDownloader.firstSuccessful("sources", "B1", List.of(), url -> "x", url -> ""));
+
+        assertEquals("Build B1 has no SCM URL; cannot download the sources.", e.getMessage());
+    }
+
+    @Test
+    void alignmentDiffFallsBackToTheCurrentInternalUrl(@TempDir Path tempDir) {
+        Build build = mock(Build.class);
+        SCMRepository repository = mock(SCMRepository.class);
+        when(build.getId()).thenReturn("B1");
+        when(build.getScmUrl()).thenReturn("https://github.example.com/org/repo.git");
+        when(build.getScmRepository()).thenReturn(repository);
+        when(repository.getInternalUrl()).thenReturn("https://gitlab.example.com/group/repo.git");
+        Path diffFile = tempDir.resolve("alignment.diff");
+
+        BuildSourcesDownloader downloader = spy(new BuildSourcesDownloader());
+        doThrow(new RuntimeException("moved"))
+                .when(downloader)
+                .downloadAlignmentDiffFrom(build, "https://github.example.com/org/repo.git", diffFile, false);
+        doReturn(List.of(diffFile)).when(downloader)
+                .downloadAlignmentDiffFrom(build, "https://gitlab.example.com/group/repo.git", diffFile, false);
+
+        assertEquals(List.of(diffFile), downloader.downloadAlignmentDiff(build, diffFile, false));
+        InOrder order = inOrder(downloader);
+        order.verify(downloader)
+                .downloadAlignmentDiffFrom(build, "https://github.example.com/org/repo.git", diffFile, false);
+        order.verify(downloader)
+                .downloadAlignmentDiffFrom(build, "https://gitlab.example.com/group/repo.git", diffFile, false);
     }
 
     @Test
@@ -338,5 +442,50 @@ class BuildSourcesDownloaderTest {
                 List.of("1.70-f1459fdb", "1.70"),
                 BuildSourcesDownloader.alignedVersionsFromTag("1.70-f1459fdb"));
         assertEquals(List.of(), BuildSourcesDownloader.alignedVersionsFromTag(null));
+    }
+
+    @Test
+    void masksOnlyMetadataFiles() {
+        String source = "diff --git a/src/QuotedId.java b/src/QuotedId.java\n" + "--- a/src/QuotedId.java\n"
+                + "+++ b/src/QuotedId.java\n" + "@@ -1 +1 @@\n" + "-old\n"
+                + "+        public QuotedId(Token t) { token=t;}\n";
+        String diff = source + "diff --git a/target/alignmentReport.json b/target/alignmentReport.json\n"
+                + "new file mode 100644\n" + "--- /dev/null\n" + "+++ b/target/alignmentReport.json\n"
+                + "@@ -0,0 +1 @@\n" + "+{\"args\": \"-Dpassword=hunter2hunter2 --token=abcdefabcdefabcdef\"}\n";
+
+        String masked = BuildSourcesDownloader.maskSecrets(diff);
+
+        assertTrue(masked.startsWith(source), masked);
+        assertFalse(masked.contains("hunter2hunter2"), masked);
+        assertFalse(masked.contains("abcdefabcdefabcdef"), masked);
+    }
+
+    @Test
+    void shouldStopTryingASourceHostThatCannotBeReached(@TempDir Path tempDir) throws Exception {
+        // a rule sends the host to a closed local port, which refuses the connection: the first candidate fails, the
+        // others are not attempted
+        int port;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            port = socket.getLocalPort();
+        }
+        Config config = new Config();
+        config.setActiveProfile(new ConfigProfile());
+        Config.setInstance(config);
+        UrlRewrites.setCommandLineRules(List.of("https://bacon-test.invalid=http://127.0.0.1:" + port));
+        try {
+            RuntimeException e = assertThrows(
+                    RuntimeException.class,
+                    () -> new BuildSourcesDownloader().downloadSources(
+                            "B123",
+                            "https://bacon-test.invalid/org/repo.git",
+                            List.of("0123456789abcdef0123456789abcdef01234567"),
+                            tempDir.resolve("sources.tar.gz")));
+
+            assertTrue(e.getMessage().contains("skipped, bacon-test.invalid is not reachable"), e.getMessage());
+            assertFalse(Files.exists(tempDir.resolve("sources.tar.gz")));
+        } finally {
+            UrlRewrites.reset();
+            Config.setInstance(null);
+        }
     }
 }

@@ -71,6 +71,11 @@ public final class UrlRewrites {
         commandLineRules = copy;
     }
 
+    /** No rules: URLs are unchanged. */
+    public static UrlRewrites none() {
+        return new UrlRewrites(List.of());
+    }
+
     /** Clears the command line rules, for tests. */
     public static void reset() {
         commandLineRules = List.of();

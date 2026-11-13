@@ -20,6 +20,7 @@ package org.jboss.pnc.bacon.config;
 import java.util.Map;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 public class ConfigProfile {
@@ -30,9 +31,13 @@ public class ConfigProfile {
     private RepoConfig repoProvider;
     private PigConfig pig;
     private KeycloakConfig keycloak;
+    @ToString.Exclude
     private String ldapUsernamePassword;
     private AutobuildConfig autobuild;
+    @ToString.Exclude
     private String githubToken;
+    @ToString.Exclude
+    private String gitlabToken;
     /** URL prefix to replace => replacement, for downloads; see the --url-rewrite option. */
     private Map<String, String> urlRewrites;
     private RexConfig rex;

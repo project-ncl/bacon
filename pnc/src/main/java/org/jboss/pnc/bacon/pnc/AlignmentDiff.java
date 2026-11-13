@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -371,6 +373,80 @@ final class AlignmentDiff {
 
     // Matches the per-file header that starts every section of a `git diff`, capturing the b/ (new) path in group 2.
     private static final Pattern DIFF_GIT_HEADER = Pattern.compile("^diff --git a/(.*) b/(.*)$");
+
+    /**
+     * The new path of a {@code diff --git} header, or null. Paths git quotes (non-ASCII, control characters, quotes,
+     * backslashes) are unquoted.
+     */
+    static String headerPath(String line) {
+        if (!line.startsWith("diff --git ")) {
+            return null;
+        }
+        String rest = line.substring("diff --git ".length());
+        if (rest.indexOf('"') < 0) {
+            Matcher matcher = DIFF_GIT_HEADER.matcher(line);
+            return matcher.matches() ? matcher.group(2) : null;
+        }
+        // "a/x" "b/y", a/x "b/y" or "a/x" b/y
+        int position = 0;
+        if (rest.charAt(0) == '"') {
+            position = endOfQuoted(rest, 0) + 1;
+        } else {
+            position = rest.indexOf(' ');
+        }
+        if (position < 0 || position >= rest.length()) {
+            return null;
+        }
+        String newPath = rest.substring(position).trim();
+        if (newPath.startsWith("\"")) {
+            newPath = unquote(newPath.substring(0, endOfQuoted(newPath, 0) + 1));
+        }
+        return newPath.startsWith("b/") ? newPath.substring(2) : null;
+    }
+
+    private static int endOfQuoted(String value, int open) {
+        for (int i = open + 1; i < value.length(); i++) {
+            if (value.charAt(i) == '\\') {
+                i++;
+            } else if (value.charAt(i) == '"') {
+                return i;
+            }
+        }
+        return value.length() - 1;
+    }
+
+    /** Undoes git's C-style quoting; octal escapes are UTF-8 bytes. */
+    static String unquote(String quoted) {
+        java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+        for (int i = 1; i < quoted.length() - 1; i++) {
+            char c = quoted.charAt(i);
+            if (c != '\\' || i + 1 >= quoted.length() - 1) {
+                byte[] encoded = String.valueOf(c).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                bytes.write(encoded, 0, encoded.length);
+                continue;
+            }
+            char next = quoted.charAt(++i);
+            switch (next) {
+                case 'a' -> bytes.write(7);
+                case 'b' -> bytes.write('\b');
+                case 't' -> bytes.write('\t');
+                case 'n' -> bytes.write('\n');
+                case 'v' -> bytes.write(11);
+                case 'f' -> bytes.write('\f');
+                case 'r' -> bytes.write('\r');
+                default -> {
+                    if (next >= '0' && next <= '7' && i + 2 < quoted.length() - 1) {
+                        bytes.write(Integer.parseInt(quoted.substring(i, i + 3), 8));
+                        i += 2;
+                    } else {
+                        bytes.write(next);
+                    }
+                }
+            }
+        }
+        return bytes.toString(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
     private static final Pattern HUNK_HEADER = Pattern.compile("^@@ -(\\d+(?:,\\d+)?) \\+(\\d+)(?:,(\\d+))? @@(.*)$");
 
     // An XML start tag with its attributes (group 2), possibly spanning lines, and the attributes in it.
@@ -595,6 +671,55 @@ final class AlignmentDiff {
         return manifest;
     }
 
+    /**
+     * Applies {@code mask} (credential masking) only to the sections of whole metadata files: the reports and backups
+     * the manipulators and Reqour write ({@link Category#METADATA} by file, e.g. {@code alignmentReport.json},
+     * {@code target/manipulation.json}, {@code repositories-backup.xml}), which are not needed to reproduce the build.
+     * Every other section, and the text outside sections, is kept byte for byte, so that the diff still recreates the
+     * aligned sources (a masked line in a source or build file would no longer apply, e.g. Java code like
+     * {@code token=t;}). Sections carrying a {@code GIT binary patch} are never masked: their payload is encoded file
+     * content.
+     */
+    static String maskSecretsInMetadata(String unifiedDiff, UnaryOperator<String> mask) {
+        return maskSecretsInMetadata(unifiedDiff, mask, file -> {});
+    }
+
+    /**
+     * Like {@link #maskSecretsInMetadata(String, UnaryOperator)}, passing to {@code unmasked} the header ({@code a/x
+     * b/x}) of every other section that {@code mask} would have changed: a likely secret left as it is, which the
+     * caller can report.
+     */
+    static String maskSecretsInMetadata(String unifiedDiff, UnaryOperator<String> mask, Consumer<String> unmasked) {
+        StringBuilder out = new StringBuilder(unifiedDiff.length());
+        int start = 0;
+        while (start < unifiedDiff.length()) {
+            int next = unifiedDiff.indexOf("\ndiff --git ", start);
+            int end = next < 0 ? unifiedDiff.length() : next + 1;
+            String chunk = unifiedDiff.substring(start, end);
+            if (isMaskableMetadata(chunk)) {
+                out.append(mask.apply(chunk));
+            } else {
+                if (chunk.startsWith("diff --git ") && !chunk.contains("\nGIT binary patch\n")
+                        && !mask.apply(chunk).equals(chunk)) {
+                    int eol = chunk.indexOf('\n');
+                    unmasked.accept(chunk.substring("diff --git ".length(), eol < 0 ? chunk.length() : eol));
+                }
+                out.append(chunk);
+            }
+            start = end;
+        }
+        return out.toString();
+    }
+
+    private static boolean isMaskableMetadata(String chunk) {
+        if (!chunk.startsWith("diff --git ") || chunk.contains("\nGIT binary patch\n")) {
+            return false;
+        }
+        Section section = new Section(Arrays.asList(chunk.split("\n", -1)));
+        Change change = categorizeFile(section);
+        return change != null && change.category() == Category.METADATA;
+    }
+
     /** Splits the given unified diff, taking the aligned versions from the alignment reports it contains. */
     static AlignmentDiff split(String unifiedDiff) {
         return split(unifiedDiff, Set.of());
@@ -787,8 +912,7 @@ final class AlignmentDiff {
 
         private Section(List<String> lines) {
             this.lines = lines;
-            Matcher matcher = DIFF_GIT_HEADER.matcher(lines.get(0));
-            this.path = matcher.matches() ? matcher.group(2) : null;
+            this.path = headerPath(lines.get(0));
 
             int firstHunk = 0;
             while (firstHunk < lines.size() && !lines.get(firstHunk).startsWith("@@")) {
@@ -858,7 +982,7 @@ final class AlignmentDiff {
 
         List<String> current = new ArrayList<>();
         for (String line : input) {
-            if (DIFF_GIT_HEADER.matcher(line).matches() && !current.isEmpty()) {
+            if (line.startsWith("diff --git ") && !current.isEmpty()) {
                 sections.add(new Section(current));
                 current = new ArrayList<>();
             }

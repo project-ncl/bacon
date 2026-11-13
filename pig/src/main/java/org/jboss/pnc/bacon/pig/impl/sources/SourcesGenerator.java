@@ -1,13 +1,8 @@
 package org.jboss.pnc.bacon.pig.impl.sources;
 
-import static org.jboss.pnc.common.scm.ScmUrlGeneratorProvider.determineScmProvider;
-import static org.jboss.pnc.common.scm.ScmUrlGeneratorProvider.getScmUrlGenerator;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,9 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
-import org.jboss.pnc.bacon.common.http.SafeHttp;
-import org.jboss.pnc.bacon.common.http.UrlRewrites;
-import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.pig.impl.PigContext;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.BrewSearcher;
 import org.jboss.pnc.bacon.pig.impl.documents.sharedcontent.MRRCSearcher;
@@ -33,13 +25,12 @@ import org.jboss.pnc.bacon.pig.impl.repo.RepositoryData;
 import org.jboss.pnc.bacon.pig.impl.utils.FileDownloadUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.FileUtils;
 import org.jboss.pnc.bacon.pig.impl.utils.GAV;
+import org.jboss.pnc.bacon.pnc.BuildSourcesDownloader;
 import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.common.scm.ScmException;
 import org.jboss.pnc.dto.Artifact;
-import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,52 +171,40 @@ public class SourcesGenerator {
         return completeBuilds;
     }
 
+    /**
+     * The internal URL the build used, then the repository's current internal URL, like
+     * {@link BuildSourcesDownloader#scmUrlCandidates}.
+     */
+    static List<String> scmUrls(PncBuild build) {
+        // PncBuild.scmRepository holds the build's scmUrl
+        return BuildSourcesDownloader.scmUrlCandidates(build.getScmRepository(), build.getInternalScmUrl());
+    }
+
+    /**
+     * The build's SCM revision, or none, so that a missing revision gets the "no SCM revision" error. Only the build's
+     * own revision, as PiG always used: the configured revision may have moved since.
+     */
+    private static List<String> revisions(PncBuild build) {
+        return build.getScmRevision() == null || build.getScmRevision().isBlank() ? List.of()
+                : List.of(build.getScmRevision());
+    }
+
     private void downloadSourcesFromBuilds(Map<String, PncBuild> builds, File workDir, File contentsDir) {
         builds.values().forEach(build -> {
             File targetPath = new File(workDir, build.getName() + "-" + build.getId() + ".tar.gz");
 
+            // works for repositories on GitHub and GitLab, with the token of the provider (see ScmCredentials)
+            List<String> scmUrls = scmUrls(build);
+            log.debug("Downloading sources for build {} from: {}", build.getId(), scmUrls);
             try {
-                var provider = determineScmProvider(build.getScmRepository(), build.getInternalScmUrl());
-                URI uri = new URI(
-                        getScmUrlGenerator(provider)
-                                .generateTarballDownloadUrl(build.getScmRepository(), build.getScmRevision()));
-
-                log.debug("Downloading sources for build {} from: {}", build.getId(), uri);
-                // the token only goes to the repository's host; redirects (e.g. to codeload) get none
-                var response = SafeHttp.get(
-                        SafeHttp.newClient(),
-                        uri,
-                        // specify that we only want a tar.gz reply, otherwise it returns an html file if there is a
-                        // login failure with http status 200, which makes the http client wrongly believe the download
-                        // was successful
-                        Map.of("Accept", "application/x-tar, application/gzip"),
-                        Map.of("Authorization", "Bearer " + Config.instance().getActiveProfile().getGithubToken()),
-                        UrlRewrites.current());
-
-                if (response.statusCode() == HttpResponseCodes.SC_NOT_ACCEPTABLE) {
-                    // Github throws this error when the Github Token is not specified, or wrong
-                    StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
-                    errorMessage.append("URL: ").append(uri).append("\n");
-                    errorMessage.append("Please specify a valid 'githubToken' in your 'config.yaml'").append("\n");
-                    throw new RuntimeException(errorMessage.toString());
-
-                } else if (response.statusCode() != HttpResponseCodes.SC_OK) {
-                    StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Failed to download sources for build: ").append(build.getId()).append("\n");
-                    errorMessage.append("HTTP Status: ").append(response.statusCode()).append("\n");
-                    throw new RuntimeException(errorMessage.toString());
-                }
-                try (InputStream responseStream = response.body()) {
-                    Files.copy(responseStream, targetPath.toPath());
-                }
-
-            } catch (ScmException | URISyntaxException | IOException | InterruptedException e) {
+                new BuildSourcesDownloader()
+                        .downloadSources(build.getId(), scmUrls, revisions(build), targetPath.toPath());
+            } catch (RuntimeException e) {
                 log.error(
                         "Failed to download sources for build {} (scmRepository: {})",
                         build.getId(),
                         build.getScmRepository());
-                throw new RuntimeException(e);
+                throw e;
             }
 
             Collection<String> untaredFiles = FileUtils.untar(targetPath, contentsDir);
