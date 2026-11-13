@@ -111,7 +111,11 @@ bacon pnc build download-build-outputs <id> \
 - The longest matching `<from>` wins; with the same `<from>`, the command line
   rule wins over the profile's.
 - Rewrites apply to artifact downloads, to the build log read from bifrost and,
-  when rules are configured, to the alignment log and PNC's redirect to bifrost.
+  when rules are configured, to the alignment log: both the request to PNC (a
+  rule matching the PNC host changes where it is asked) and PNC's redirect to
+  bifrost.
 - Credentials (e.g. `ldapUsernamePassword`) are sent only to the origin of the
-  first, rewritten URL, never to the host of a redirect. A warning is logged
-  when a rule rewrites to plain `http`.
+  first, rewritten URL, and for the alignment log to the profile's
+  `bifrostBaseurl` (rewritten too), never to another host a redirect points to.
+- A redirect from `https` to `http` sent by a server is not followed; a rule
+  may still rewrite to plain `http`, and a warning is logged when it does.

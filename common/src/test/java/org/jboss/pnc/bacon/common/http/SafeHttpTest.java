@@ -18,7 +18,9 @@
 package org.jboss.pnc.bacon.common.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +44,8 @@ class SafeHttpTest {
     private HttpServer first;
     private HttpServer second;
     private final Map<String, String> authorizations = new ConcurrentHashMap<>();
+    // a host that is not reachable here: only a rewrite makes the redirect work
+    private volatile String location = "http://redirected.invalid/end?q=1";
 
     @BeforeEach
     void start() throws IOException {
@@ -49,8 +53,7 @@ class SafeHttpTest {
         second = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         first.createContext("/start", exchange -> {
             record(exchange.getRequestURI().getPath(), exchange.getRequestHeaders().getFirst("Authorization"));
-            // a host that is not reachable here: only a rewrite makes the redirect work
-            exchange.getResponseHeaders().add("Location", "http://redirected.invalid/end?q=1");
+            exchange.getResponseHeaders().add("Location", location);
             exchange.sendResponseHeaders(307, -1);
             exchange.close();
         });
@@ -101,6 +104,80 @@ class SafeHttpTest {
         assertEquals(URI.create(base(second) + "/end?q=1"), response.uri());
         assertEquals("Bearer t", authorizations.get("/start"));
         assertEquals("<none>", authorizations.get("/end?q=1"));
+    }
+
+    @Test
+    void onlyAnHttpLocationSentForAnHttpsRequestIsADowngrade() {
+        URI https = URI.create("https://pnc.example.com/builds/B1/logs/align");
+        // what the server sent decides, even if a rule then rewrites the https target to plain http
+        assertFalse(SafeHttp.isDowngrade(https, "https://bifrost.example.com/final-log/B1/alignment-log"));
+        assertTrue(SafeHttp.isDowngrade(https, "http://bifrost.example.com/final-log/B1/alignment-log"));
+        assertFalse(SafeHttp.isDowngrade(https, "/final-log/B1/alignment-log"));
+        assertFalse(SafeHttp.isDowngrade(URI.create("http://pnc.example.com/x"), "http://bifrost.example.com/y"));
+    }
+
+    @Test
+    void followsAnHttpsRedirectThatARuleRewritesToPlainHttp() throws Exception {
+        location = "https://bifrost.invalid/end?q=1";
+        UrlRewrites rewrites = new UrlRewrites(
+                List.of(
+                        UrlRewrites.parse("https://pnc.invalid=" + base(first)),
+                        UrlRewrites.parse("https://bifrost.invalid=" + base(second))));
+
+        HttpResponse<InputStream> response = SafeHttp.get(
+                SafeHttp.newClient(),
+                URI.create("https://pnc.invalid/start"),
+                Map.of(),
+                Map.of(),
+                rewrites);
+
+        try (InputStream body = response.body()) {
+            assertEquals(200, response.statusCode());
+        }
+        assertEquals(URI.create(base(second) + "/end?q=1"), response.uri());
+    }
+
+    @Test
+    void doesNotFollowARedirectFromHttpsToHttpSentByTheServer() throws Exception {
+        location = "http://bifrost.invalid/end?q=1";
+        UrlRewrites rewrites = new UrlRewrites(
+                List.of(
+                        UrlRewrites.parse("https://pnc.invalid=" + base(first)),
+                        UrlRewrites.parse("http://bifrost.invalid=" + base(second))));
+
+        HttpResponse<InputStream> response = SafeHttp.get(
+                SafeHttp.newClient(),
+                URI.create("https://pnc.invalid/start"),
+                Map.of(),
+                Map.of(),
+                rewrites);
+
+        try (InputStream body = response.body()) {
+            assertEquals(307, response.statusCode());
+        }
+        assertNull(authorizations.get("/end?q=1"));
+    }
+
+    @Test
+    void sendsCredentialsToTrustedOriginsAfterARedirect() throws Exception {
+        UrlRewrites rewrites = new UrlRewrites(
+                List.of(
+                        UrlRewrites.parse("http://unreachable.invalid=" + base(first)),
+                        UrlRewrites.parse("http://redirected.invalid=" + base(second))));
+
+        HttpResponse<InputStream> response = SafeHttp.get(
+                SafeHttp.newClient(),
+                URI.create("http://unreachable.invalid/start"),
+                Map.of(),
+                Map.of("Authorization", "Bearer t"),
+                rewrites,
+                List.of(URI.create("http://redirected.invalid")));
+
+        try (InputStream body = response.body()) {
+            assertEquals(200, response.statusCode());
+        }
+        assertEquals("Bearer t", authorizations.get("/start"));
+        assertEquals("Bearer t", authorizations.get("/end?q=1"));
     }
 
     @Test

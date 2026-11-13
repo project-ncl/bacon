@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -38,7 +39,8 @@ import org.jboss.pnc.client.RemoteResourceException;
 
 /**
  * Reads the alignment log of a build. PNC answers {@code /builds/<id>/logs/align} with a redirect to the log in
- * bifrost; with {@link UrlRewrites} the request and that redirect are made by bacon, so both can be rewritten.
+ * bifrost; with {@link UrlRewrites} the request and that redirect are made by bacon, so both can be rewritten. The
+ * credentials go to PNC and to the profile's bifrost (both possibly rewritten), as with the default path.
  */
 final class AlignmentLog {
 
@@ -63,8 +65,16 @@ final class AlignmentLog {
         Map<String, String> credentials = PncClientHelper.authorizationHeader()
                 .map(header -> Map.of("Authorization", header))
                 .orElse(Map.of());
-        HttpResponse<InputStream> response = SafeHttp
-                .get(SafeHttp.newClient(), alignLogUri(buildId), Map.of(), credentials, rewrites);
+        // PNC redirects to bifrost, which bacon already sends the credentials to for the build log
+        String bifrost = Config.instance().getActiveProfile().getPnc().getBifrostBaseurl();
+        List<URI> credentialOrigins = bifrost == null || bifrost.isBlank() ? List.of() : List.of(URI.create(bifrost));
+        HttpResponse<InputStream> response = SafeHttp.get(
+                SafeHttp.newClient(),
+                alignLogUri(buildId),
+                Map.of(),
+                credentials,
+                rewrites,
+                credentialOrigins);
         try (InputStream body = response.body()) {
             if (response.statusCode() == 404) {
                 return;
