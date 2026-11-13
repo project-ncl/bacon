@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -593,6 +594,37 @@ final class AlignmentDiff {
         manifest.put("unrecognizedAddedFiles", unrecognizedAddedFiles());
         manifest.put("warnings", warnings);
         return manifest;
+    }
+
+    /**
+     * Applies {@code mask} (credential masking) only to the sections of whole metadata files: the reports and backups
+     * the manipulators and Reqour write ({@link Category#METADATA} by file, e.g. {@code alignmentReport.json},
+     * {@code target/manipulation.json}, {@code repositories-backup.xml}), which are not needed to reproduce the build.
+     * Every other section, and the text outside sections, is kept byte for byte, so that the diff still recreates the
+     * aligned sources (a masked line in a source or build file would no longer apply, e.g. Java code like
+     * {@code token=t;}). Sections carrying a {@code GIT binary patch} are never masked: their payload is encoded file
+     * content.
+     */
+    static String maskSecretsInMetadata(String unifiedDiff, UnaryOperator<String> mask) {
+        StringBuilder out = new StringBuilder(unifiedDiff.length());
+        int start = 0;
+        while (start < unifiedDiff.length()) {
+            int next = unifiedDiff.indexOf("\ndiff --git ", start);
+            int end = next < 0 ? unifiedDiff.length() : next + 1;
+            String chunk = unifiedDiff.substring(start, end);
+            out.append(isMaskableMetadata(chunk) ? mask.apply(chunk) : chunk);
+            start = end;
+        }
+        return out.toString();
+    }
+
+    private static boolean isMaskableMetadata(String chunk) {
+        if (!chunk.startsWith("diff --git ") || chunk.contains("\nGIT binary patch\n")) {
+            return false;
+        }
+        Section section = new Section(Arrays.asList(chunk.split("\n", -1)));
+        Change change = categorizeFile(section);
+        return change != null && change.category() == Category.METADATA;
     }
 
     /** Splits the given unified diff, taking the aligned versions from the alignment reports it contains. */

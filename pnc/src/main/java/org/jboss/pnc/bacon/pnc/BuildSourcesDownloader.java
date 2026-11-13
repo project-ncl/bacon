@@ -321,7 +321,7 @@ public class BuildSourcesDownloader {
 
     private List<Path> writeAlignmentDiff(Build build, Path diffFile, String rawDiff, boolean manifest) {
         AlignmentDiff diff = AlignmentDiff.split(
-                LogSanitizer.maskKnownSecrets(rawDiff),
+                maskSecrets(rawDiff),
                 alignedVersionsFromTag(build.getScmTag()),
                 build.getAttributes() != null ? build.getAttributes().get(BREW_BUILD_NAME) : null);
         try {
@@ -329,6 +329,15 @@ public class BuildSourcesDownloader {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write alignment diff for build " + build.getId(), e);
         }
+    }
+
+    /**
+     * Masks leaked credentials ({@link LogSanitizer}) in the metadata files of the diff only (reports and backups the
+     * manipulators write); sources and build files are kept byte-exact so that the diff reproduces the aligned sources.
+     * See {@link AlignmentDiff#maskSecretsInMetadata}.
+     */
+    static String maskSecrets(String diff) {
+        return AlignmentDiff.maskSecretsInMetadata(diff, LogSanitizer::maskKnownSecrets);
     }
 
     /**

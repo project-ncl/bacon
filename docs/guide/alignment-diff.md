@@ -42,6 +42,13 @@ The reproduce part only holds the repositories PNC removed from the `pom.xml` fi
 the PNC repository only. Apply it to reproduce the PNC build exactly; skip it when building outside PNC, where the
 removed repositories may still be needed to resolve the dependencies.
 
+# Secrets in the diff
+
+Known credentials are masked only in the metadata files the manipulators write (reports such as
+`alignmentReport.json` and `manipulation.json`, and their backups), so that the source and build files stay
+byte-exact and the diff applies. **A secret committed in a source or build file of the repository appears in the diff
+as it is.** Review the diff before sharing it outside the people who can read the internal repository.
+
 # Options
 
 * `--output <file>`: the base name of the part files, `<build ID>-alignment.diff` by default. The parts are named
