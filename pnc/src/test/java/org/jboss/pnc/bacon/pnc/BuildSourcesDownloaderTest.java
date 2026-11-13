@@ -131,37 +131,35 @@ class BuildSourcesDownloaderTest {
 
     @Test
     void shouldBuildCompareDiffUriForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
-                .normalizeScmRepository("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
+        ScmRepositoryUrl repository = ScmRepositoryUrl
+                .parse("https://github.ibm.com/pnc-prod/apache-xmlgraphics-commons.git");
 
         assertEquals(
                 URI.create(
                         "https://github.ibm.com/api/v3/repos/pnc-prod/apache-xmlgraphics-commons/compare/"
                                 + "upstream-sha...aligned-sha"),
-                BuildSourcesDownloader.compareDiffUri(repository, "upstream-sha", "aligned-sha"));
+                GithubProvider.compareDiffUri(repository, "upstream-sha", "aligned-sha"));
     }
 
     @Test
     void shouldBuildCompareDiffUriForPublicGithub() {
-        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
-                .normalizeScmRepository("git@github.com:project-ncl/bacon.git");
+        ScmRepositoryUrl repository = ScmRepositoryUrl.parse("git@github.com:project-ncl/bacon.git");
 
         assertEquals(
                 URI.create("https://api.github.com/repos/project-ncl/bacon/compare/base...head"),
-                BuildSourcesDownloader.compareDiffUri(repository, "base", "head"));
+                GithubProvider.compareDiffUri(repository, "base", "head"));
     }
 
     @Test
     void shouldBuildCommitDiffAndRepoUrisForGithubEnterprise() {
-        BuildSourcesDownloader.NormalizedScmRepository repository = BuildSourcesDownloader
-                .normalizeScmRepository("git@github.ibm.com:pnc-prod/example.git");
+        ScmRepositoryUrl repository = ScmRepositoryUrl.parse("git@github.ibm.com:pnc-prod/example.git");
 
         assertEquals(
                 URI.create("https://github.ibm.com/api/v3/repos/pnc-prod/example/commits/aligned-sha"),
-                BuildSourcesDownloader.commitDiffUri(repository, "aligned-sha"));
+                GithubProvider.commitDiffUri(repository, "aligned-sha"));
         assertEquals(
                 URI.create("https://github.ibm.com/api/v3/repos/pnc-prod/example"),
-                BuildSourcesDownloader.repoApiUri(repository));
+                GithubProvider.repoApiUri(repository));
     }
 
     @Test
