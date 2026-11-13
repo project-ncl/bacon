@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,7 +85,20 @@ public class BuildSourcesDownloader {
     private static final int HTTP_PERMANENT_REDIRECT = 308;
 
     public Path downloadSources(Build build, Path targetFile) {
-        return downloadSources(build.getId(), selectScmUrl(build), selectScmRevisions(build), targetFile);
+        return downloadSources(build.getId(), scmUrlCandidates(build), selectScmRevisions(build), targetFile);
+    }
+
+    /**
+     * Like {@link #downloadSources(String, String, List, Path)}, trying the SCM URLs in order (see
+     * {@link #scmUrlCandidates(Build)}).
+     */
+    public Path downloadSources(String buildId, List<String> scmUrls, List<String> scmRevisions, Path targetFile) {
+        return firstSuccessful(
+                "sources",
+                buildId,
+                scmUrls,
+                url -> downloadSources(buildId, url, scmRevisions, targetFile),
+                BuildSourcesDownloader::tokenHintIfMissing);
     }
 
     /**
@@ -201,16 +215,65 @@ public class BuildSourcesDownloader {
      * @return the files written: one file per category present in the diff, and the manifest when requested
      */
     public List<Path> downloadAlignmentDiff(Build build, Path diffFile, boolean manifest) {
-        String internalUrl = selectInternalScmUrl(build);
-        if (internalUrl == null || internalUrl.isBlank()) {
-            throw new RuntimeException(
-                    "Build " + build.getId() + " has no internal SCM URL; cannot compute the alignment diff.");
-        }
+        return firstSuccessful(
+                "alignment diff",
+                build.getId(),
+                scmUrlCandidates(build),
+                url -> downloadAlignmentDiffFrom(build, url, diffFile, manifest),
+                BuildSourcesDownloader::tokenHintIfMissing);
+    }
 
+    /**
+     * The result for the first URL that works. With a single URL its failure is thrown as it is; with several, one
+     * exception lists the failure of each URL, with the token hint of each provider once, the last failure as its cause
+     * and all of them as suppressed exceptions.
+     *
+     * @param hintFor the hint {@code download} appends to its failure messages for a URL, or "" for none
+     */
+    static <T> T firstSuccessful(
+            String what,
+            String buildId,
+            List<String> urls,
+            Function<String, T> download,
+            Function<String, String> hintFor) {
+        if (urls.isEmpty()) {
+            throw new RuntimeException("Build " + buildId + " has no SCM URL; cannot download the " + what + ".");
+        }
+        List<String> failures = new ArrayList<>();
+        List<RuntimeException> exceptions = new ArrayList<>();
+        Set<String> hints = new LinkedHashSet<>();
+        for (String url : urls) {
+            try {
+                return download.apply(url);
+            } catch (RuntimeException e) {
+                if (urls.size() == 1) {
+                    throw e;
+                }
+                log.debug("Cannot download the {} of build {} from {}: {}", what, buildId, url, e.getMessage());
+                String message = String.valueOf(e.getMessage());
+                String hint = hintFor.apply(url);
+                if (!hint.isEmpty() && message.endsWith(hint)) {
+                    message = message.substring(0, message.length() - hint.length());
+                    hints.add(hint);
+                }
+                failures.add(url + ": " + message);
+                exceptions.add(e);
+            }
+        }
+        RuntimeException failure = new RuntimeException(
+                "Failed to download the " + what + " of build " + buildId + " from any of its SCM URLs:\n - "
+                        + String.join("\n - ", failures) + String.join("", hints),
+                exceptions.get(exceptions.size() - 1));
+        exceptions.forEach(failure::addSuppressed);
+        throw failure;
+    }
+
+    /** The alignment diff read from one SCM URL (see {@link #downloadAlignmentDiff(Build, Path, boolean)}). */
+    List<Path> downloadAlignmentDiffFrom(Build build, String internalUrl, Path diffFile, boolean manifest) {
         NormalizedScmRepository repository = normalizeScmRepository(internalUrl);
         if (repository == null) {
             throw new RuntimeException(
-                    "Could not parse the internal SCM URL for build " + build.getId() + ": " + internalUrl);
+                    "Could not parse the SCM URL for build " + build.getId() + ": " + internalUrl);
         }
 
         if (repository.gitlab) {
@@ -277,7 +340,7 @@ public class BuildSourcesDownloader {
             if (repoStatus == 401 || repoStatus == 403 || repoStatus == 404) {
                 throw new RuntimeException(
                         "Failed to download alignment diff for build " + build.getId()
-                                + ". The internal repository " + internalUrl
+                                + ". The repository " + internalUrl
                                 + " is not accessible with the configured githubToken (HTTP " + repoStatus + " for "
                                 + repoUri
                                 + "). On GitHub Enterprise with SAML SSO the token must be authorized for the '"
@@ -324,7 +387,7 @@ public class BuildSourcesDownloader {
             throw new RuntimeException(
                     "Failed to download alignment diff for build " + build.getId()
                             + ". The pre-alignment revision(s) " + bases
-                            + " must be reachable in the internal repository " + internalUrl
+                            + " must be reachable in the repository " + internalUrl
                             + ". Tried candidates:\n - " + String.join("\n - ", failures));
         }
 
@@ -390,7 +453,7 @@ public class BuildSourcesDownloader {
             }
         }
         throw new RuntimeException(
-                "Failed to download alignment diff for build " + build.getId() + " from the internal repository "
+                "Failed to download alignment diff for build " + build.getId() + " from the repository "
                         + internalUrl + ". Tried:\n - " + String.join("\n - ", failures)
                         + tokenHintIfMissing(internalUrl));
     }
@@ -980,21 +1043,25 @@ public class BuildSourcesDownloader {
         return new NormalizedScmRepository(host, "https://" + host, parts[0], parts[1], path);
     }
 
-    private static String selectScmUrl(Build build) {
-        if (build.getScmUrl() != null && !build.getScmUrl().isBlank()) {
-            return build.getScmUrl();
-        }
-
+    /**
+     * The SCM URLs to read a build's sources and alignment diff from, in order: the internal URL the build used
+     * ({@code scmUrl}), then the repository's current internal URL (it may have moved since, e.g. to another git
+     * provider). The external URL is not used: it does not have the aligned commits and tags.
+     */
+    public static List<String> scmUrlCandidates(Build build) {
+        Set<String> urls = new LinkedHashSet<>();
+        addIfPresent(urls, build.getScmUrl());
         SCMRepository repository = build.getScmRepository();
-        if (repository == null) {
-            return null;
+        if (repository != null) {
+            addIfPresent(urls, repository.getInternalUrl());
         }
+        return List.copyOf(urls);
+    }
 
-        if (repository.getExternalUrl() != null && !repository.getExternalUrl().isBlank()) {
-            return repository.getExternalUrl();
+    private static void addIfPresent(Set<String> values, String value) {
+        if (value != null && !value.isBlank()) {
+            values.add(value);
         }
-
-        return repository.getInternalUrl();
     }
 
     static String selectScmRevision(Build build) {
@@ -1021,11 +1088,6 @@ public class BuildSourcesDownloader {
         }
 
         return List.copyOf(revisions);
-    }
-
-    static String selectInternalScmUrl(Build build) {
-        SCMRepository repository = build.getScmRepository();
-        return repository == null ? null : repository.getInternalUrl();
     }
 
     /**
