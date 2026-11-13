@@ -149,7 +149,7 @@ public class BuildSourcesDownloader {
                         continue;
                     }
                     for (GitlabSources.Credential credential : credentials) {
-                        if (rejectedCredentials.contains(host + " " + credential.name)) {
+                        if (rejectedCredentials.contains(host + " " + credential.name())) {
                             continue;
                         }
                         try {
@@ -166,7 +166,7 @@ public class BuildSourcesDownloader {
                             return targetFile;
                         } catch (RuntimeException e) {
                             Files.deleteIfExists(temporaryFile);
-                            failures.add(candidate.uri + " using " + credential.name + ": " + e.getMessage());
+                            failures.add(candidate.uri + " using " + credential.name() + ": " + e.getMessage());
                             log.debug(
                                     "Source archive candidate failed for build {}: {}",
                                     buildId,
@@ -175,9 +175,9 @@ public class BuildSourcesDownloader {
                                 unreachableHosts.add(host);
                                 break;
                             }
-                            if (credential.header != null && e instanceof HttpStatusException
+                            if (credential.header() != null && e instanceof HttpStatusException
                                     && isAuthenticationFailure(((HttpStatusException) e).status)) {
-                                rejectedCredentials.add(host + " " + credential.name);
+                                rejectedCredentials.add(host + " " + credential.name());
                             }
                         }
                     }
@@ -430,8 +430,8 @@ public class BuildSourcesDownloader {
                         failures.add(base + " is not an ancestor of " + head);
                     } catch (RuntimeException e) {
                         throwIfUnreachable(build, URI.create(repository.webBaseUrl), e);
-                        failures.add(base + ".." + head + " using " + credential.name + ": " + e.getMessage());
-                        if (credential.header != null && e instanceof GitlabSources.GitlabApiException
+                        failures.add(base + ".." + head + " using " + credential.name() + ": " + e.getMessage());
+                        if (credential.header() != null && e instanceof GitlabSources.GitlabApiException
                                 && isAuthenticationFailure(((GitlabSources.GitlabApiException) e).status)) {
                             // the token is rejected: every other request with it would be too
                             continue credentials;
@@ -450,8 +450,8 @@ public class BuildSourcesDownloader {
                     return writeGitlabDiff(build, diffFile, diff, manifest);
                 } catch (RuntimeException e) {
                     throwIfUnreachable(build, URI.create(repository.webBaseUrl), e);
-                    failures.add("commit " + head + " using " + credential.name + ": " + e.getMessage());
-                    if (credential.header != null && e instanceof GitlabSources.GitlabApiException
+                    failures.add("commit " + head + " using " + credential.name() + ": " + e.getMessage());
+                    if (credential.header() != null && e instanceof GitlabSources.GitlabApiException
                             && isAuthenticationFailure(((GitlabSources.GitlabApiException) e).status)) {
                         continue credentials;
                     }
@@ -873,8 +873,8 @@ public class BuildSourcesDownloader {
                 .header("User-Agent", "bacon")
                 .GET();
 
-        if (sendAuthorization && credential.header != null) {
-            builder.header(credential.header, credential.value);
+        if (sendAuthorization && credential.header() != null) {
+            builder.header(credential.header(), credential.value());
         }
 
         return builder.build();

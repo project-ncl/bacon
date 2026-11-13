@@ -79,9 +79,9 @@ class GitlabSourcesTest {
 
     @Test
     void credentials() {
-        assertThat(GitlabSources.credentials("t")).extracting(c -> c.header + ": " + c.value)
+        assertThat(GitlabSources.credentials("t")).extracting(c -> c.header() + ": " + c.value())
                 .containsExactly("PRIVATE-TOKEN: t", "Authorization: Bearer t", "null: null");
-        assertThat(GitlabSources.credentials(" ")).extracting(c -> c.name).containsExactly("no token");
+        assertThat(GitlabSources.credentials(" ")).extracting(c -> c.name()).containsExactly("no token");
     }
 
     @Test

@@ -52,18 +52,9 @@ final class GitlabSources {
 
     /**
      * A token sent in one header (GitLab accepts PRIVATE-TOKEN and Authorization: Bearer), or no token at all when
-     * {@link #header} is null.
+     * {@link #header()} is null.
      */
-    static final class Credential {
-        final String header;
-        final String value;
-        final String name;
-
-        Credential(String header, String value, String name) {
-            this.header = header;
-            this.value = value;
-            this.name = name;
-        }
+    record Credential(String header, String value, String name) {
     }
 
     static final Credential NO_TOKEN = new Credential(null, null, "no token");
@@ -343,11 +334,11 @@ final class GitlabSources {
                 log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
                 return null;
             } catch (RuntimeException e) {
-                if (credential.header == null) {
+                if (credential.header() == null) {
                     log.warn("Cannot read {} at {} from GitLab: {}", path, ref, e.getMessage());
                     return null;
                 }
-                log.debug("Cannot read {} at {} with {}, trying without a token: {}", path, ref, credential.name, e);
+                log.debug("Cannot read {} at {} with {}, trying without a token: {}", path, ref, credential.name(), e);
             }
             try {
                 return getBytes(uri, NO_TOKEN, MAX_RAW_FILE_BYTES);
@@ -374,8 +365,8 @@ final class GitlabSources {
      */
     private byte[] getBytes(URI uri, Credential credential, long maxBytes) {
         try {
-            Map<String, String> credentialHeaders = credential.header == null ? Map.of()
-                    : Map.of(credential.header, credential.value);
+            Map<String, String> credentialHeaders = credential.header() == null ? Map.of()
+                    : Map.of(credential.header(), credential.value());
             HttpResponse<InputStream> response = SafeHttp.get(
                     httpClient,
                     uri,
