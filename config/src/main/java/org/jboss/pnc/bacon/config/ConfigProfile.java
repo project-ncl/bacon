@@ -40,6 +40,8 @@ public class ConfigProfile {
     private String gitlabToken;
     /** URL prefix to replace => replacement, for downloads; see the --url-rewrite option. */
     private Map<String, String> urlRewrites;
+    /** Where build sources and alignment diffs come from: auto (default), direct or orch. */
+    private String scmSource;
     private RexConfig rex;
     private ReqourConfig reqour;
     private boolean enableExperimental;

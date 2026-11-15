@@ -122,7 +122,7 @@ public class BuildOutputDownloader {
         }
         createDirectories(outputFile.getParent());
 
-        try (BuildClient client = new BuildClient(PncClientHelper.getPncConfiguration(false))) {
+        try (BuildClient client = new BuildClient(pncConfiguration())) {
             Build build = client.getSpecific(buildId);
             return sourcesDownloader.downloadAlignmentDiff(build, outputFile, manifest);
         } catch (RuntimeException e) {
