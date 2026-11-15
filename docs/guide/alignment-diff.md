@@ -24,7 +24,7 @@ The diff is split into up to four files, numbered in apply order. Only the files
 | `*-1-build.diff` | yes | The alignment itself: dependency, plugin and property changes, project version rewrites, generated files, anything not recognized |
 | `*-2-rerun-state.diff` | yes for Gradle/sbt | GME/SMEG files that apply the alignment at build time (see below) |
 | `*-3-reproduce.diff` | no | Removed repositories, to match the PNC build exactly |
-| `*-4-noise.diff` | no | PME marker, PME stamp, reports and backups, formatting-only changes: never affects the build |
+| `*-4-noise.diff` | no | PME marker, build output the project does not ignore, PME stamp, reports and backups, formatting-only changes: never affects the build |
 
 Every part applies on its own on top of the upstream sources; applying all of them, in any order, reproduces the
 complete alignment. Applying them in numeric order is recommended:
@@ -93,7 +93,9 @@ but not PME:
   plain edits of the POMs, and so is the project version rewrite: they all land in the build part. PME leaves
   nothing behind that the build needs: its leftovers are the marker (`target/pom-manip-ext-marker.txt`, which makes
   a later PME run skip the alignment), the stamp comment appended to the POMs and the `target/manipulation.json`
-  report, all in the noise part.
+  report, all in the noise part. These files reach the alignment commit only when the project does not ignore
+  `target/` (old tags often have no `.gitignore`); any other new file a build left under `target/`, `.gradle/` or a
+  Gradle project's `build/` then goes to the noise part too (category `build-output`).
 * **GME (Gradle) and SMEG (sbt) mostly do not rewrite the build files.** GME writes `manipulation.json`, copies
   `gme.gradle` (and `gme-pluginconfigs.gradle`, `gradle/gme-repos.gradle`) and injects `apply from` lines into the
   build files to load them; at build time the GME plugin reads the aligned versions from `manipulation.json`. SMEG

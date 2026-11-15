@@ -762,4 +762,75 @@ class AlignmentDiffTest {
         assertFalse(masked.substring(source.length()).contains("SECRET"), masked);
         assertEquals(java.util.List.of("a/settings.xml b/settings.xml"), unmasked);
     }
+
+    @Test
+    void newFilesUnderBuildOutputDirectoriesAreBuildOutput() {
+        for (String path : List.of(
+                "target/classes/org/example/Foo.class",
+                "core/target/surefire-reports/TEST-Foo.txt",
+                ".gradle/8.5/checksums/checksums.lock",
+                "project/target/streams/compile/x")) {
+            assertEquals(
+                    List.of(AlignmentDiff.Category.BUILD_OUTPUT),
+                    presentCategories(AlignmentDiff.split(newFile(path, "+x"))),
+                    path);
+        }
+        String binary = lines(
+                "diff --git a/target/app.jar b/target/app.jar",
+                "new file mode 100644",
+                "index 0000000..3333333",
+                "Binary files /dev/null and b/target/app.jar differ");
+        assertEquals(List.of(AlignmentDiff.Category.BUILD_OUTPUT), presentCategories(AlignmentDiff.split(binary)));
+    }
+
+    @Test
+    void buildDirectoryIsBuildOutputOnlyInAGradleProject() {
+        String gradleBuildFile = lines(
+                "diff --git a/build.gradle b/build.gradle",
+                "--- a/build.gradle",
+                "+++ b/build.gradle",
+                "@@ -1 +1 @@",
+                "-version = '1.0'",
+                "+version = '1.0.0.redhat-00001'");
+        String output = newFile("build/libs/app.txt", "+x");
+
+        AlignmentDiff gradle = AlignmentDiff.split(gradleBuildFile + output);
+        assertTrue(gradle.part(AlignmentDiff.Category.BUILD_OUTPUT).contains("build/libs/app.txt"));
+
+        // without a Gradle build file, build/ may hold sources: kept in the build part as an unrecognized file
+        assertEquals(List.of(BUILD), presentCategories(AlignmentDiff.split(output)));
+    }
+
+    @Test
+    void otherFilesStayInTheBuildPart() {
+        // a source package named target, and a tracked file under target/ the alignment deleted
+        assertEquals(
+                List.of(BUILD),
+                presentCategories(AlignmentDiff.split(newFile("src/main/java/org/example/target/Gen.java", "+x"))));
+        String deleted = lines(
+                "diff --git a/target/kept.txt b/target/kept.txt",
+                "deleted file mode 100644",
+                "index 3333333..0000000",
+                "--- a/target/kept.txt",
+                "+++ /dev/null",
+                "@@ -1 +0,0 @@",
+                "-x");
+        assertEquals(List.of(BUILD), presentCategories(AlignmentDiff.split(deleted)));
+        // files with their own rule keep it
+        assertEquals(
+                List.of(RERUN_BLOCKER),
+                presentCategories(AlignmentDiff.split(newFile("target/pom-manip-ext-marker.txt", "+x"))));
+    }
+
+    @Test
+    void recognizesBuildOutputPaths() {
+        assertTrue(AlignmentDiff.isBuildOutput("target/x", false));
+        assertTrue(AlignmentDiff.isBuildOutput("a/b/target/x", false));
+        assertTrue(AlignmentDiff.isBuildOutput(".gradle/x", false));
+        assertTrue(AlignmentDiff.isBuildOutput("build/x", true));
+        assertFalse(AlignmentDiff.isBuildOutput("build/x", false));
+        assertFalse(AlignmentDiff.isBuildOutput("target", false));
+        assertFalse(AlignmentDiff.isBuildOutput("src/main/java/target/X.java", false));
+        assertFalse(AlignmentDiff.isBuildOutput("docs/targets/x", false));
+    }
 }

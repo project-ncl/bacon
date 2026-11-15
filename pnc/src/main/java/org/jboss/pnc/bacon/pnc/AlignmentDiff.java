@@ -124,6 +124,19 @@ final class AlignmentDiff {
                 "Nothing at build time; while present, a new PME run skips the alignment.",
                 "when running PME again: the marker makes PME skip the alignment"),
         /**
+         * Files a build left in the tree and the alignment commit picked up because the project does not ignore its
+         * output directory (e.g. an old tag without a {@code target/} rule in its {@code .gitignore}): new files under
+         * {@code target/}, {@code .gradle/} or a Gradle project's {@code build/}. The manipulators write nothing else
+         * there, so they are never needed to build, and they can carry stale state into the sources.
+         */
+        BUILD_OUTPUT(
+                "build-output",
+                false,
+                "New files under build output directories (target/, .gradle/, a Gradle project's build/) that the "
+                        + "alignment commit picked up because the project does not ignore them.",
+                "Nothing: a build re-creates them or does not read them.",
+                "always: build output committed because the project does not ignore it"),
+        /**
          * Informative files not read by the build: alignment reports, repository backups, the PME provenance stamp,
          * the npm manipulator result written by Reqour.
          */
@@ -212,6 +225,7 @@ final class AlignmentDiff {
                 false,
                 "never affects the build",
                 Category.RERUN_BLOCKER,
+                Category.BUILD_OUTPUT,
                 Category.METADATA,
                 Category.FORMATTING);
 
@@ -319,6 +333,7 @@ final class AlignmentDiff {
     static final String RULE_XML_ATTRIBUTE_ORDER = "xml-attribute-order";
     static final String RULE_ALIGNMENT = "alignment";
     static final String RULE_UNRECOGNIZED_ADDED = "unrecognized-added-file";
+    static final String RULE_BUILD_OUTPUT = "build-output";
 
     // PME: the marker whose presence makes PME skip. Reqour commits with `git add --all`, so it is part of the diff
     // when the project does not ignore target/.
@@ -348,6 +363,15 @@ final class AlignmentDiff {
 
     private static final Set<String> GME_SCRIPTS = Set.of(GME_GRADLE, GME_PLUGINCONFIGS_GRADLE, GME_REPOS_GRADLE);
     private static final Set<String> GME_RULES = Set.of(RULE_GME_MODEL, RULE_GME_WIRING, RULE_GME_INJECTION);
+    // Directories builds write to: Maven/sbt target/, Gradle's cache; build/ only for a Gradle project, as other
+    // projects can keep sources in a build/ directory.
+    private static final Set<String> BUILD_OUTPUT_DIRS = Set.of("target", ".gradle");
+    private static final String GRADLE_BUILD_OUTPUT_DIR = "build";
+    private static final Set<String> GRADLE_BUILD_FILES = Set.of(
+            "build.gradle",
+            "build.gradle.kts",
+            "settings.gradle",
+            "settings.gradle.kts");
 
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     // The statements GME injects into the Gradle build files (AlignmentTask APPLY_GME_REPOS, INJECT_GME_START/END and
@@ -761,8 +785,12 @@ final class AlignmentDiff {
                 .filter(version -> version != null && ALIGNED_VERSION_SUFFIX.matcher(version).find())
                 .forEach(alignedVersions::add);
 
+        boolean gradleProject = sections.stream()
+                .anyMatch(
+                        section -> section.path != null && (GRADLE_BUILD_FILES.contains(section.fileName())
+                                || GME_SCRIPTS.contains(section.fileName())));
         for (Section section : sections) {
-            categorize(section, alignedVersions);
+            categorize(section, alignedVersions, gradleProject);
         }
 
         List<String> warnings = new ArrayList<>();
@@ -994,13 +1022,16 @@ final class AlignmentDiff {
         return sections;
     }
 
-    private static void categorize(Section section, Set<String> alignedVersions) {
+    private static void categorize(Section section, Set<String> alignedVersions, boolean gradleProject) {
         if (section.path == null) {
             // Content before the first header (there usually is none for a GitHub compare diff).
             section.fileChange = new Change(Category.BUILD, RULE_ALIGNMENT);
             return;
         }
         Change fileChange = categorizeFile(section);
+        if (fileChange == null && "added".equals(section.status) && isBuildOutput(section.path, gradleProject)) {
+            fileChange = new Change(Category.BUILD_OUTPUT, RULE_BUILD_OUTPUT);
+        }
         if (fileChange != null) {
             section.fileChange = fileChange;
             return;
@@ -1016,6 +1047,24 @@ final class AlignmentDiff {
         for (List<String> hunk : section.hunks) {
             section.hunkChanges.add(categorizeHunk(section.fileName(), hunk, alignedVersions));
         }
+    }
+
+    /**
+     * Whether {@code path} is under a build output directory ({@link #BUILD_OUTPUT_DIRS}, or {@code build/} in a Gradle
+     * project), not counting directories under {@code src/} (a source package may be named {@code target}).
+     */
+    static boolean isBuildOutput(String path, boolean gradleProject) {
+        String[] segments = path.split("/");
+        for (int i = 0; i < segments.length - 1; i++) {
+            String segment = segments[i];
+            if ("src".equals(segment)) {
+                return false;
+            }
+            if (BUILD_OUTPUT_DIRS.contains(segment) || (gradleProject && GRADLE_BUILD_OUTPUT_DIR.equals(segment))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Change categorizeFile(Section section) {
