@@ -42,6 +42,26 @@ The reproduce part only holds the repositories PNC removed from the `pom.xml` fi
 the PNC repository only. Apply it to reproduce the PNC build exactly; skip it when building outside PNC, where the
 removed repositories may still be needed to resolve the dependencies.
 
+# Where the diff comes from
+
+The diff is read from the internal repository, either directly from the git provider (GitHub, GitHub Enterprise or
+GitLab) or through PNC, chosen with `scmSource` in the active profile (the same setting applies to the build sources):
+
+| `scmSource` | Source |
+|-------------|--------|
+| `auto` (default) | The git provider, then PNC when the git provider fails or cannot be reached |
+| `direct` | The git provider only, with the profile's `githubToken` or `gitlabToken` |
+| `orch` | PNC only (`/builds/<id>/alignment-diff` and `/builds/<id>/scm-archive/content`): PNC reads the repository through Reqour, so no access to the git provider is needed, only to PNC |
+
+```yaml
+- name: "default"
+  scmSource: orch
+```
+
+Through PNC, and directly from GitLab, binary files and files too large for the provider's diff are included as git
+binary patches; directly from GitHub they stay `Binary files ... differ`. When the pre-alignment revision is not an
+ancestor of the aligned commit, the diff of the aligned commit against its parent is used instead, with a warning.
+
 # Internal repositories
 
 The diff is read from the build's internal repository on GitHub or GitLab (see

@@ -54,6 +54,10 @@ githubToken: "github-token"   # GitHub / GitHub Enterprise, 'repo' scope
 gitlabToken: "gitlab-token"   # GitLab, 'read_api' scope (or the GITLAB_TOKEN environment variable)
 ```
 
+`scmSource` chooses where build sources and alignment diffs come from: `auto` (default: the git provider, then PNC
+when it fails), `direct` (the git provider only) or `orch` (PNC only, which reads the repository through Reqour; no
+git provider access or token needed). See [the alignment diff guide](alignment-diff.html#where-the-diff-comes-from).
+
 Without a token, public (and on GitLab, internal) repositories are read anonymously. Tokens are only sent to the
 repository's own host (after the [URL rewrites](#rewriting-download-urls)), never to a host it redirects to. This
 does not cover the git clone PiG makes for javadoc (JGit), which handles its redirects itself.

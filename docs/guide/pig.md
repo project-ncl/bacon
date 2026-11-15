@@ -70,6 +70,8 @@ The github token can be obtained by:
 
 When the internal server is GitLab, use a `gitlabToken` with the `read_api` scope instead (or the `GITLAB_TOKEN`
 environment variable); see [Internal SCM repositories](configuration.html#internal-scm-repositories-github-and-gitlab).
+Where the git provider cannot be reached, set `scmSource: orch` in the profile to download the sources through PNC
+instead (no token needed; see [alignment diff](alignment-diff.html#where-the-diff-comes-from)).
 
 # Operation
 
