@@ -79,6 +79,8 @@ class AlignmentDiffApplyTest {
         write("manipulation.json", lines("{\"version\": \"1.4.0.redhat-00002\"}"));
         write("target/pom-manip-ext-marker.txt", "");
         write("target/alignmentReport.json", lines("{\"executionRoot\": {\"version\": \"1.4.0.redhat-00002\"}}"));
+        // a build left this behind and the project does not ignore target/
+        write("target/classes/build.properties", lines("built=true"));
         // Whitespace only.
         write("README.md", lines("# Widget", padding("readme", 8), "Build with Maven."));
         // A mode change with a formatting hunk and a build hunk: the mode header is repeated in both parts.
@@ -196,6 +198,7 @@ class AlignmentDiffApplyTest {
                         "rerun-state",
                         "repositories",
                         "rerun-blocker",
+                        "build-output",
                         "metadata",
                         "formatting"),
                 parts.stream().map(part -> part.get("category")).collect(Collectors.toList()));
@@ -219,7 +222,7 @@ class AlignmentDiffApplyTest {
                         Category.RERUN_STATE.skip()),
                 parts.get(1));
         assertEquals(
-                List.of(true, true, false, false, false, false),
+                List.of(true, true, false, false, false, false, false),
                 parts.stream().map(part -> part.get("required")).collect(Collectors.toList()));
     }
 
