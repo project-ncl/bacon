@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.pnc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -37,9 +38,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 import org.jboss.pnc.bacon.common.http.Origins;
 import org.jboss.pnc.bacon.common.http.SafeHttp;
@@ -84,6 +87,19 @@ public class BuildSourcesDownloader {
     private static final int HTTP_TEMPORARY_REDIRECT = 307;
     private static final int HTTP_PERMANENT_REDIRECT = 308;
 
+    private final Supplier<ScmSource> scmSource;
+    private final Supplier<OrchScmContent> orch;
+
+    /** Reads {@code scmSource} and the PNC URL from the active profile. */
+    public BuildSourcesDownloader() {
+        this(ScmSource::fromProfile, OrchScmContent::fromProfile);
+    }
+
+    BuildSourcesDownloader(Supplier<ScmSource> scmSource, Supplier<OrchScmContent> orch) {
+        this.scmSource = scmSource;
+        this.orch = orch;
+    }
+
     public Path downloadSources(Build build, Path targetFile) {
         return downloadSources(build.getId(), scmUrlCandidates(build), selectScmRevisions(build), targetFile);
     }
@@ -93,12 +109,16 @@ public class BuildSourcesDownloader {
      * {@link #scmUrlCandidates(Build)}).
      */
     public Path downloadSources(String buildId, List<String> scmUrls, List<String> scmRevisions, Path targetFile) {
-        return firstSuccessful(
+        return fromScmSource(
                 "sources",
                 buildId,
-                scmUrls,
-                url -> downloadSources(buildId, url, scmRevisions, targetFile),
-                BuildSourcesDownloader::tokenHintIfMissing);
+                () -> firstSuccessful(
+                        "sources",
+                        buildId,
+                        scmUrls,
+                        url -> downloadSources(buildId, url, scmRevisions, targetFile),
+                        BuildSourcesDownloader::tokenHintIfMissing),
+                () -> orch.get().downloadArchive(buildId, targetFile));
     }
 
     /**
@@ -216,12 +236,90 @@ public class BuildSourcesDownloader {
      * @return the files written: one file per category present in the diff, and the manifest when requested
      */
     public List<Path> downloadAlignmentDiff(Build build, Path diffFile, boolean manifest) {
-        return firstSuccessful(
+        return fromScmSource(
                 "alignment diff",
                 build.getId(),
-                scmUrlCandidates(build),
-                url -> downloadAlignmentDiffFrom(build, url, diffFile, manifest),
-                BuildSourcesDownloader::tokenHintIfMissing);
+                () -> firstSuccessful(
+                        "alignment diff",
+                        build.getId(),
+                        scmUrlCandidates(build),
+                        url -> downloadAlignmentDiffFrom(build, url, diffFile, manifest),
+                        BuildSourcesDownloader::tokenHintIfMissing),
+                () -> downloadAlignmentDiffFromOrch(build, diffFile, manifest));
+    }
+
+    /**
+     * Runs the download from the source {@code scmSource} chooses: the git provider ({@link ScmSource#DIRECT}), PNC
+     * ({@link ScmSource#ORCH}), or the git provider then PNC when it fails ({@link ScmSource#AUTO}).
+     */
+    private <T> T fromScmSource(String what, String buildId, Supplier<T> direct, Supplier<T> viaOrch) {
+        switch (scmSource.get()) {
+            case DIRECT:
+                return direct.get();
+            case ORCH:
+                return viaOrch.get();
+            default:
+                try {
+                    return direct.get();
+                } catch (RuntimeException directError) {
+                    log.warn(
+                            "Cannot download the {} of build {} from the git provider, trying through PNC: {}",
+                            what,
+                            buildId,
+                            firstLine(directError.getMessage()));
+                    try {
+                        return viaOrch.get();
+                    } catch (RuntimeException orchError) {
+                        RuntimeException failure = new RuntimeException(
+                                "Failed to download the " + what + " of build " + buildId
+                                        + " from the git provider and through PNC.\nGit provider: "
+                                        + directError.getMessage() + "\nPNC: " + orchError.getMessage(),
+                                orchError);
+                        failure.addSuppressed(directError);
+                        throw failure;
+                    }
+                }
+        }
+    }
+
+    /** The alignment diff PNC computes through reqour, masked and split like the one from the git provider. */
+    private List<Path> downloadAlignmentDiffFromOrch(Build build, Path diffFile, boolean manifest) {
+        OrchScmContent.Diff diff = orch.get().alignmentDiff(build.getId());
+        if (OrchScmContent.DIFF_MODE_COMMIT.equals(diff.mode())) {
+            log.warn(
+                    "No pre-alignment revision of build {} is an ancestor of {}; used the post-alignment commit diff"
+                            + " instead. If alignment produced more than one commit this captures only the last one.",
+                    build.getId(),
+                    diff.head());
+        }
+        List<String> binaryOnly = binaryOnlyFiles(diff.content());
+        if (!binaryOnly.isEmpty()) {
+            log.warn(
+                    "The content of {} file(s) is not in the diff (only 'Binary files ... differ'), so it cannot be"
+                            + " applied from it: {}",
+                    binaryOnly.size(),
+                    binaryOnly);
+        }
+        return writeAlignmentDiff(build, diffFile, diff.content(), manifest);
+    }
+
+    /** The files of a diff that are only "Binary files ... differ", without content. */
+    static List<String> binaryOnlyFiles(String diff) {
+        List<String> files = new ArrayList<>();
+        for (String line : diff.split("\n")) {
+            if (line.startsWith("Binary files ") && line.endsWith(" differ")) {
+                files.add(line.substring("Binary files ".length(), line.length() - " differ".length()));
+            }
+        }
+        return files;
+    }
+
+    private static String firstLine(String message) {
+        if (message == null) {
+            return "";
+        }
+        int newline = message.indexOf('\n');
+        return newline < 0 ? message : message.substring(0, newline);
     }
 
     /**
@@ -718,6 +816,15 @@ public class BuildSourcesDownloader {
             throw new RuntimeException(
                     "Downloaded sources from " + sourceArchiveUri
                             + " are not a gzip archive. First bytes/text: " + preview);
+        }
+        // read through to the end (constant memory): a download cut off mid-way fails here, not when extracting
+        try (InputStream in = new GZIPInputStream(Files.newInputStream(file))) {
+            in.transferTo(OutputStream.nullOutputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Downloaded sources from " + sourceArchiveUri + " are an incomplete or corrupted gzip archive: "
+                            + e.getMessage(),
+                    e);
         }
     }
 
