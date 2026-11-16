@@ -472,11 +472,7 @@
         </exclusions>
       </dependency>
       <!-- validation -->
-      <dependency>
-        <groupId>org.hibernate</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>8.0.5.Final</version>
-      </dependency>
+      <!-- hibernate-validator inherited from pnc-common -->
       <dependency>
         <groupId>org.glassfish</groupId>
         <artifactId>javax.el</artifactId>
