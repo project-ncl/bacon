@@ -353,11 +353,6 @@
 
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>4.5.14</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpasyncclient</artifactId>
         <version>4.1.5</version>
       </dependency>
@@ -640,11 +635,6 @@
             <artifactId>*</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.pnc.otel</groupId>
-        <artifactId>opentelemetry-ext-cli-java</artifactId>
-        <version>2.1.0</version>
       </dependency>
       <dependency>
         <groupId>io.undertow</groupId>
