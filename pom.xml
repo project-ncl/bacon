@@ -94,7 +94,6 @@
     <jdk.max.version>17</jdk.max.version>
     <jdk.min.version>17</jdk.min.version>
     <jline.version>3.30.6</jline.version>
-    <json.version>1.1.4</json.version>
     <junit.version>6.1.0</junit.version>
     <logback.version>1.6.6</logback.version>
     <maven-core.version>3.9.16</maven-core.version>
@@ -366,11 +365,6 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpmime</artifactId>
         <version>4.5.14</version>
-      </dependency>
-      <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>20251224</version>
       </dependency>
 
       <!-- jackson -->
@@ -757,20 +751,6 @@
         <groupId>org.mockito</groupId>
         <artifactId>mockito-inline</artifactId>
         <version>5.2.0</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.shrinkwrap</groupId>
-        <artifactId>shrinkwrap-depchain</artifactId>
-        <version>1.2.6</version>
-        <type>pom</type>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.shrinkwrap.resolver</groupId>
-        <artifactId>shrinkwrap-resolver-depchain</artifactId>
-        <version>3.3.7</version>
-        <type>pom</type>
         <scope>test</scope>
       </dependency>
       <dependency>
