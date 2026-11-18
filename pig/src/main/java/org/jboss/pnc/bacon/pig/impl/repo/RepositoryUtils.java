@@ -156,6 +156,23 @@ public class RepositoryUtils {
         }
     }
 
+    static void addMissingJavadoc(File targetRepoContentsDir) {
+        log.debug("Add missing javadoc");
+        Collection<GAV> gavs = RepoDescriptor.listGavs(targetRepoContentsDir);
+
+        for (GAV gav : gavs) {
+            GAV javadocGav = gav.toJavadocJar();
+            GAV jarGav = gav.toJar();
+
+            File jarFile = ExternalArtifactDownloader.targetPath(jarGav, targetRepoContentsDir.toPath());
+            File javadocFile = ExternalArtifactDownloader.targetPath(javadocGav, targetRepoContentsDir.toPath());
+
+            if (jarFile.exists() && !javadocFile.exists()) {
+                ExternalArtifactDownloader.downloadExternalArtifact(javadocGav, javadocFile, true);
+            }
+        }
+    }
+
     public static void addCheckSums(File mavenRepositoryDirectory) {
         log.debug("Generating missing checksums");
         try (Stream<Path> stream = Files.walk(mavenRepositoryDirectory.toPath())) {

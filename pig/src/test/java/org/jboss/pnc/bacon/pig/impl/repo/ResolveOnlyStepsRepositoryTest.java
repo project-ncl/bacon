@@ -8,4 +8,9 @@ public class ResolveOnlyStepsRepositoryTest extends MultiStepBomBasedRepositoryT
     protected RepoGenerationStrategy getRepoGenerationStrategy() {
         return RepoGenerationStrategy.RESOLVE_ONLY;
     }
+
+    @Override
+    protected boolean javadocDownloadIsVerifiableOffline() {
+        return false;
+    }
 }
