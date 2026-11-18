@@ -471,6 +471,9 @@ public class RepoManager extends DeliverableManager<RepoGenerationData, Reposito
             final File sourceDir = createMavenGenerationDir();
 
             MavenArtifactResolver.Builder mvnResolverBuilder = MavenArtifactResolver.builder()
+                    // In test mode do not discover the workspace, otherwise the POMs of the project the tests are
+                    // run from (parents, imported BOMs) leak into the generated repository.
+                    .setWorkspaceDiscovery(!isTestMode)
                     .setUserSettings(getIndyMavenSettings(useLocalM2Cache))
                     .setLocalRepository(sourceDir.getAbsolutePath())
                     .setArtifactTransferLogging(ObjectHelper.isLogDebug());
