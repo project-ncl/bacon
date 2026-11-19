@@ -900,6 +900,9 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.plugin.version}</version>
+                    <configuration>
+                        <argLine>${extraSurefireJvmArgs}</argLine>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
