@@ -12,5 +12,39 @@ Contributions are welcome! Please see the [Developer's guide](https://github.com
 Finally, our [changelog](https://project-ncl.github.io/bacon/changelog.html) lists the changes that happened in releases.
 
 ---
+# Installation via JBang
+
+[JBang](https://www.jbang.dev) lets you run or install bacon directly from Maven Central with no manual download. Requires Java 17+.
+
+## Run directly
+
+```shell
+jbang bacon@project-ncl pnc build list
+jbang pnc@project-ncl build list
+jbang da@project-ncl
+jbang pig@project-ncl
+```
+
+## Install as a local command
+
+```shell
+jbang app install bacon@project-ncl
+jbang app install pnc@project-ncl
+jbang app install da@project-ncl
+jbang app install pig@project-ncl
+```
+
+After installing, `bacon`, `pnc`, `da`, and `pig` are available on your `PATH`.
+
+## Snapshot builds
+
+Append `-snapshot` to use the latest snapshot from Maven Central:
+
+```shell
+jbang bacon-snapshot@project-ncl pnc build list
+jbang app install bacon-snapshot@project-ncl
+```
+
+---
 # Reporting an issue
 To report an issue, please use the NCLSUP/NCL projects in the internal JIRA instance. The Github issues usage is now disabled.
