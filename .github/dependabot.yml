@@ -26,6 +26,12 @@ updates:
         versions: [ "[7,)" ]
       - dependency-name: "org.hibernate:hibernate-validator"
         versions: [ "[7,)" ]
+      # jaxb-runtime 3.0+ switched from javax.xml.bind to jakarta.xml.bind. licenses-generator
+      # and pig still use javax.xml.bind (11 files), so 3.x and 4.x have no provider for them.
+      # The safe ceiling is 2.3.x (latest: 2.3.9).
+      # Remove this exclusion when the code migrates to jakarta.xml.bind.
+      - dependency-name: "org.glassfish.jaxb:jaxb-runtime"
+        versions: [ "[3,)" ]
   - package-ecosystem: "github-actions" # Also update Github actions
     directory: "/"
     schedule:
