@@ -78,7 +78,7 @@ public class TestPlatformBuilder {
     public void build() {
         if (resolver == null) {
             try {
-                resolver = MavenArtifactResolver.builder().build();
+                resolver = MavenArtifactResolver.builder().setWorkspaceDiscovery(false).build();
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to initialize Maven artifact resolver", e);
             }
