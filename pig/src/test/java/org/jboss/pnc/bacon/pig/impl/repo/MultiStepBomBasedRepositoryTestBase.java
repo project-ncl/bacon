@@ -350,6 +350,7 @@ public abstract class MultiStepBomBasedRepositoryTestBase {
         // initialize a Maven artifact resolver with the local Maven repo pointing
         // to a location we want to install the platform related artifacts below
         final MavenArtifactResolver resolver = MavenArtifactResolver.builder()
+                .setWorkspaceDiscovery(false)
                 .setLocalRepository(getPlatformTestArtifacts().toString())
                 .setUserSettings(testMavenSettings)
                 .build();
