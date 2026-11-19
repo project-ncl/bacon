@@ -3388,7 +3388,7 @@ function _picocli_bacon_pnc_artifact_search() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -3396,7 +3396,7 @@ function _picocli_bacon_pnc_artifact_search() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -3469,7 +3469,7 @@ function _picocli_bacon_pnc_artifact_usage() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -3477,7 +3477,7 @@ function _picocli_bacon_pnc_artifact_usage() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -3508,7 +3508,7 @@ function _picocli_bacon_pnc_artifact_usagegav() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -3516,7 +3516,7 @@ function _picocli_bacon_pnc_artifact_usagegav() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -3730,7 +3730,7 @@ function _picocli_bacon_pnc_build_list() {
 
   local commands=""
   local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--attributes' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--attributes' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -3738,7 +3738,7 @@ function _picocli_bacon_pnc_build_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--attributes')
@@ -3772,7 +3772,7 @@ function _picocli_bacon_pnc_build_listbuiltartifacts() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -3780,7 +3780,7 @@ function _picocli_bacon_pnc_build_listbuiltartifacts() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -3811,7 +3811,7 @@ function _picocli_bacon_pnc_build_listdependencies() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -3819,7 +3819,7 @@ function _picocli_bacon_pnc_build_listdependencies() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -4435,7 +4435,7 @@ function _picocli_bacon_pnc_buildconfig_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -4443,7 +4443,7 @@ function _picocli_bacon_pnc_buildconfig_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -4474,7 +4474,7 @@ function _picocli_bacon_pnc_buildconfig_listrevisions() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -4482,7 +4482,7 @@ function _picocli_bacon_pnc_buildconfig_listrevisions() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -4513,7 +4513,7 @@ function _picocli_bacon_pnc_buildconfig_listbuilds() {
 
   local commands=""
   local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -4521,7 +4521,7 @@ function _picocli_bacon_pnc_buildconfig_listbuilds() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -4822,7 +4822,7 @@ function _picocli_bacon_pnc_environment_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -4830,7 +4830,7 @@ function _picocli_bacon_pnc_environment_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -4936,7 +4936,7 @@ function _picocli_bacon_pnc_deliverableanalysis_getanalyzed() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -4944,7 +4944,7 @@ function _picocli_bacon_pnc_deliverableanalysis_getanalyzed() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -4975,7 +4975,7 @@ function _picocli_bacon_pnc_deliverableanalysis_getlabelhistory() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -4983,7 +4983,7 @@ function _picocli_bacon_pnc_deliverableanalysis_getlabelhistory() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5014,7 +5014,7 @@ function _picocli_bacon_pnc_deliverableanalysis_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5022,7 +5022,7 @@ function _picocli_bacon_pnc_deliverableanalysis_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5167,7 +5167,7 @@ function _picocli_bacon_pnc_groupbuild_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5175,7 +5175,7 @@ function _picocli_bacon_pnc_groupbuild_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5206,7 +5206,7 @@ function _picocli_bacon_pnc_groupbuild_listbuilds() {
 
   local commands=""
   local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5214,7 +5214,7 @@ function _picocli_bacon_pnc_groupbuild_listbuilds() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5359,7 +5359,7 @@ function _picocli_bacon_pnc_groupconfig_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5367,7 +5367,7 @@ function _picocli_bacon_pnc_groupconfig_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5398,7 +5398,7 @@ function _picocli_bacon_pnc_groupconfig_listbuildconfigs() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5406,7 +5406,7 @@ function _picocli_bacon_pnc_groupconfig_listbuildconfigs() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5647,7 +5647,7 @@ function _picocli_bacon_pnc_product_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5655,7 +5655,7 @@ function _picocli_bacon_pnc_product_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5686,7 +5686,7 @@ function _picocli_bacon_pnc_product_listversions() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5694,7 +5694,7 @@ function _picocli_bacon_pnc_product_listversions() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -5917,7 +5917,7 @@ function _picocli_bacon_pnc_productmilestone_listperformedbuilds() {
 
   local commands=""
   local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -5925,7 +5925,7 @@ function _picocli_bacon_pnc_productmilestone_listperformedbuilds() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6025,7 +6025,7 @@ function _picocli_bacon_pnc_productmilestone_listdeliveredartifacts() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6033,7 +6033,7 @@ function _picocli_bacon_pnc_productmilestone_listdeliveredartifacts() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6352,7 +6352,7 @@ function _picocli_bacon_pnc_productversion_listbuildconfigs() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6360,7 +6360,7 @@ function _picocli_bacon_pnc_productversion_listbuildconfigs() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6391,7 +6391,7 @@ function _picocli_bacon_pnc_productversion_listgroupconfigs() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6399,7 +6399,7 @@ function _picocli_bacon_pnc_productversion_listgroupconfigs() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6430,7 +6430,7 @@ function _picocli_bacon_pnc_productversion_listmilestones() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6438,7 +6438,7 @@ function _picocli_bacon_pnc_productversion_listmilestones() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6469,7 +6469,7 @@ function _picocli_bacon_pnc_productversion_listreleases() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6477,7 +6477,7 @@ function _picocli_bacon_pnc_productversion_listreleases() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6583,7 +6583,7 @@ function _picocli_bacon_pnc_project_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6591,7 +6591,7 @@ function _picocli_bacon_pnc_project_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6622,7 +6622,7 @@ function _picocli_bacon_pnc_project_listbuildconfigs() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6630,7 +6630,7 @@ function _picocli_bacon_pnc_project_listbuildconfigs() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6661,7 +6661,7 @@ function _picocli_bacon_pnc_project_listbuilds() {
 
   local commands=""
   local flag_opts="'--latest' '--running-only' '-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6669,7 +6669,7 @@ function _picocli_bacon_pnc_project_listbuilds() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')
@@ -6811,7 +6811,7 @@ function _picocli_bacon_pnc_scmrepository_list() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--match-url' '--search-url' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--match-url' '--search-url' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6819,7 +6819,7 @@ function _picocli_bacon_pnc_scmrepository_list() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--match-url')
@@ -6892,7 +6892,7 @@ function _picocli_bacon_pnc_scmrepository_listbuildconfigs() {
 
   local commands=""
   local flag_opts="'-o' '--jsonOutput' '--no-color' '-v' '--verbose' '-q' '--quiet' '-h' '--help' '-V' '--version'"
-  local arg_opts="'--sort' '--query' '--url-rewrite' '-p' '--configPath' '--profile'"
+  local arg_opts="'--sort' '--query' '--search' '--url-rewrite' '-p' '--configPath' '--profile'"
 
   type compopt &>/dev/null && compopt +o default
 
@@ -6900,7 +6900,7 @@ function _picocli_bacon_pnc_scmrepository_listbuildconfigs() {
     '--sort')
       return
       ;;
-    '--query')
+    '--query'|'--search')
       return
       ;;
     '--url-rewrite')

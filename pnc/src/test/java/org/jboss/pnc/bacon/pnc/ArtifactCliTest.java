@@ -39,4 +39,18 @@ class ArtifactCliTest {
         Object searchCommand = commandLine.getSubcommands().get("search").getCommand();
         assertThat(searchCommand).isInstanceOf(ArtifactCli.Search.class);
     }
+
+    @Test
+    void searchCommandSupportsSearchAliasForQueryOption() {
+        CommandLine commandLine = new CommandLine(new ArtifactCli());
+        CommandLine searchCommand = commandLine.getSubcommands().get("search");
+
+        CommandLine.Model.OptionSpec queryOption = searchCommand.getCommandSpec().findOption("--query");
+        CommandLine.Model.OptionSpec searchOption = searchCommand.getCommandSpec().findOption("--search");
+
+        assertThat(queryOption).isNotNull();
+        assertThat(searchOption).isNotNull();
+        // Both names must resolve to the same underlying option
+        assertThat(searchOption).isSameAs(queryOption);
+    }
 }

@@ -43,7 +43,7 @@ public abstract class AbstractListCommand<T> extends JSONCommandHandler implemen
     @Option(names = "--sort", description = "Sort order (using RSQL)")
     private String sort;
 
-    @Option(names = "--query", description = "Query parameter (using RSQL)")
+    @Option(names = { "--query", "--search" }, description = "Query parameter (using RSQL)")
     private String query;
 
     protected boolean print = true;
