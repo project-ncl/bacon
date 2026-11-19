@@ -122,7 +122,8 @@ public class ArtifactCli {
             name = "search",
             description = "Search artifacts using the PNC artifact RSQL query endpoint",
             footer = Constant.EXAMPLE_TEXT
-                    + "$ bacon pnc artifact search --query '(identifier=like=\"%org.apache.kafka:kafka-clients:*:4.2.0%\");(artifactQuality==TEMPORARY)' --sort '=asc=identifier'")
+                    + "$ bacon pnc artifact search --search '(identifier=like=\"%org.apache.kafka:kafka-clients:*:4.2.0%\");(artifactQuality==TEMPORARY)' --sort '=asc=identifier'\n"
+                    + "('--query' is an accepted alias for '--search')")
     public static class Search extends AbstractListCommand<Artifact> {
 
         @Override
