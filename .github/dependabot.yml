@@ -18,6 +18,10 @@ updates:
         - "org.jboss.pnc*:*"        # match org.jboss.pnc:xyz and org.jboss.pnc.group:xyz
         - "org.commonjava*:*"       # match org.commonjava:xyz and org.commonjava.group:xyz
     ignore:
+      # NOTE: for Maven, Dependabot treats "versions" entries as Maven version requirements, so
+      # a pattern like "6.x" is the literal version "6.x" and matches nothing. Use Maven range
+      # syntax instead, e.g. "[7,)" = 7 and above. "update-types" is not affected.
+      #
       # hibernate-validator 7.x+ switched from javax.* (Bean Validation 2.0) to jakarta.*
       # (Jakarta Bean Validation 3.0+), which is binary-incompatible with JBoss EAP 7.4's
       # runtime (providing Hibernate Validator 6.x and Java EE 8 javax.validation-api).
@@ -33,6 +37,17 @@ updates:
       # Remove this exclusion when the code migrates to jakarta.xml.bind.
       - dependency-name: "org.glassfish.jaxb:jaxb-runtime"
         versions: [ "[3,)" ]
+      # RESTEasy 4.x and later (and MicroProfile REST Client 3.x and later) moved from javax.*
+      # to jakarta.*, which is binary-incompatible with Bacon and the PNC REST client
+      # (rest-client, dto), both still built on javax.ws.rs and RESTEasy 3.15.x.
+      # resteasy-client-microprofile and microprofile-rest-client-api are required at runtime
+      # by the PNC rest-api client (org.jboss.pnc.client.ClientBase uses RestClientBuilder).
+      # The safe ceiling is RESTEasy 3.15.x and MicroProfile REST Client 2.x.
+      # Remove these exclusions when Bacon and the PNC client move to jakarta.ws.rs.
+      - dependency-name: "org.jboss.resteasy:*"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "org.eclipse.microprofile.rest.client:microprofile-rest-client-api"
+        update-types: [ "version-update:semver-major" ]
   - package-ecosystem: "github-actions" # Also update Github actions
     directory: "/"
     schedule:
