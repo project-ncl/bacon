@@ -15,7 +15,8 @@ updates:
       # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#cooldown-
       exclude:
         - "org.jboss.da:*"
-        - "org.jboss.pnc*:*"
+        - "org.jboss.pnc*:*"        # match org.jboss.pnc:xyz and org.jboss.pnc.group:xyz
+        - "org.commonjava*:*"       # match org.commonjava:xyz and org.commonjava.group:xyz
     ignore:
       # hibernate-validator 7.x+ switched from javax.* (Bean Validation 2.0) to jakarta.*
       # (Jakarta Bean Validation 3.0+), which is binary-incompatible with JBoss EAP 7.4's
@@ -49,3 +50,5 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
+      exclude:
+        - "project-ncl/shared-github-actions/*"
