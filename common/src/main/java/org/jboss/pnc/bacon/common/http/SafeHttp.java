@@ -45,7 +45,7 @@ import java.util.Optional;
 public final class SafeHttp {
 
     /** Same default as the PNC REST client's connect timeout. */
-    public static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
+    public static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(90);
 
     public static final int MAX_REDIRECTS = 10;
 

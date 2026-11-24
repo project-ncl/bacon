@@ -187,6 +187,7 @@ public class BuildOutputDownloader {
             Path relativePath = artifactRepositoryPath(artifact);
             Path target = safeResolve(repositoryDir, relativePath);
             createDirectories(target.getParent());
+            log.debug("Downloading artifact {} from {} to {}", artifactDescription(artifact), publicUrl, target);
             downloadUri(URI.create(publicUrl), target);
             writeChecksumSidecars(target, artifact);
             downloaded.add(target);
