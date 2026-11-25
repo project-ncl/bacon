@@ -314,6 +314,14 @@ class ScmSourceFallbackTest {
         assertThat(sleeps).isEmpty();
     }
 
+    @Test
+    void binaryOnlyFilesAreListed() {
+        assertThat(
+                BuildSourcesDownloader.binaryOnlyFiles(
+                        "diff --git a/x.bin b/x.bin\nBinary files a/x.bin and b/x.bin differ\n"))
+                .containsExactly("a/x.bin and b/x.bin");
+    }
+
     private static List<Duration> sleeps() {
         return new java.util.concurrent.CopyOnWriteArrayList<>();
     }
@@ -325,14 +333,6 @@ class ScmSourceFallbackTest {
                 HttpClient.newHttpClient(),
                 UrlRewrites.none(),
                 sleeps::add);
-    }
-
-    @Test
-    void binaryOnlyFilesAreListed() {
-        assertThat(
-                BuildSourcesDownloader.binaryOnlyFiles(
-                        "diff --git a/x.bin b/x.bin\nBinary files a/x.bin and b/x.bin differ\n"))
-                .containsExactly("a/x.bin and b/x.bin");
     }
 
     private interface Handler {
