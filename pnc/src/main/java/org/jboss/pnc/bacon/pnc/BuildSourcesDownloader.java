@@ -285,6 +285,12 @@ public class BuildSourcesDownloader {
     /** The alignment diff PNC computes through reqour, masked and split like the one from the git provider. */
     private List<Path> downloadAlignmentDiffFromOrch(Build build, Path diffFile, boolean manifest) {
         OrchScmContent.Diff diff = orch.get().alignmentDiff(build.getId());
+        log.debug(
+                "Alignment diff of build {} from PNC: {}..{} (mode {})",
+                build.getId(),
+                diff.base(),
+                diff.head(),
+                diff.mode());
         if (OrchScmContent.DIFF_MODE_COMMIT.equals(diff.mode())) {
             log.warn(
                     "No pre-alignment revision of build {} is an ancestor of {}; used the post-alignment commit diff"
