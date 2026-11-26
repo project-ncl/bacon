@@ -190,6 +190,7 @@ final class OrchScmContent {
     }
 
     private HttpResponse<InputStream> send(URI uri, String accept, Optional<String> auth) {
+        log.debug("Requesting: GET {} Headers: Accept:[{}].", uri, accept);
         try {
             return SafeHttp.get(
                     httpClient,
