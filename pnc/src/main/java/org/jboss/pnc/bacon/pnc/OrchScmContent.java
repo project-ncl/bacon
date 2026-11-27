@@ -226,8 +226,8 @@ final class OrchScmContent {
                 break;
             case 403:
                 message.append(
-                        ". The account of the Bacon profile is not allowed to read the SCM content of builds: it needs"
-                                + " a role that may read builds in PNC, which PNC checks again in reqour.");
+                        ". The account of the Bacon profile is not allowed to read builds in PNC: it needs one of the"
+                                + " roles pnc-users, pnc-app-orch-build-read or pnc-users-admin.");
                 break;
             case 404:
                 if (body.isBlank()) {
