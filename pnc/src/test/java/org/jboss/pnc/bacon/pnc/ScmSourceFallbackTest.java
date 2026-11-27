@@ -46,7 +46,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -234,16 +233,14 @@ class ScmSourceFallbackTest {
     }
 
     @Test
-    void aForbiddenCallerSeesTheExplanationsOfPncAndReqour() throws Exception {
-        String reqour = "{\"errorType\":\"FORBIDDEN\",\"errorMessage\":\"missing role\",\"details\":null}";
-        String pnc = "{\"errorType\":\"ForbiddenException\",\"errorMessage\":\"Reqour does not allow the caller to"
-                + " read SCM content (HTTP 403).\",\"details\":" + new ObjectMapper().writeValueAsString(reqour) + "}";
+    void aForbiddenCallerIsToldTheRolesItNeeds() throws Exception {
+        String pnc = "{\"errorType\":\"ForbiddenException\",\"errorMessage\":\"HTTP 403 Forbidden\",\"details\":null}";
         orch(exchange -> send(exchange, 403, pnc.getBytes(StandardCharsets.UTF_8), "application/json"));
 
         assertThatThrownBy(() -> content(sleeps()).alignmentDiff("B1"))
                 .hasMessageContaining("HTTP status: 403")
-                .hasMessageContaining("Reqour does not allow the caller to read SCM content (HTTP 403). (missing role)")
-                .hasMessageContaining("needs a role that may read builds");
+                .hasMessageContaining("HTTP 403 Forbidden")
+                .hasMessageContaining("pnc-users, pnc-app-orch-build-read or pnc-users-admin");
     }
 
     @Test
